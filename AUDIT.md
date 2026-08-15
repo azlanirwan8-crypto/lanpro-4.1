@@ -290,22 +290,64 @@ yang sudah ter-merge tetap sehat.
 
 #### F5.1 · Keputusan & desain (tanpa kode)
 
-Lima keputusan yang **tidak bisa diubah murah** setelah ada user memakainya.
+**KONSEP LOGIN LANPRO — ditetapkan pemilik proyek, 15 Agu 2026.**
 
-| #   | Keputusan        | Rekomendasi                                                                                | Kalau salah pilih                               |
-| --- | ---------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------- |
-| 1   | Provider         | **Keduanya** — Google & Microsoft sama-sama OIDC, satu adaptor generik melayani dua-duanya | Pilih satu lalu menambah nanti = rombak adaptor |
-| 2   | Penautan akun    | Tautkan otomatis **HANYA bila `email_verified=true`**                                      | Tanpa syarat itu → **pengambilalihan akun**     |
-| 3   | Batas domain     | Daftar domain diizinkan, dari env                                                          | Tanpa batas, siapa pun bisa mendaftar           |
-| 4   | Status user baru | Tetap `pending` menunggu admin                                                             | `active` langsung = pintu masuk tanpa penjaga   |
-| 5   | Password lama    | Tetap hidup berdampingan                                                                   | Mematikannya mengunci user tanpa akun provider  |
+LanPro punya **tepat dua metode login**:
 
-**Definisi selesai:** kelima keputusan tertulis di dokumen ini sebagai keputusan
-resmi.
+| Metode                           | Cara                                         | Status              |
+| -------------------------------- | -------------------------------------------- | ------------------- |
+| 1. Username + password           | Yang berjalan sekarang                       | Tetap dipertahankan |
+| 2. Login with Google / Microsoft | Ikon di layar Sign In → redirect ke provider | Dibangun di F5      |
+
+**SSO adalah pintu MASUK, bukan pintu DAFTAR.** Bila email dari provider tidak
+terdaftar di LanPro, sistem menampilkan **notifikasi** dan menolak — **tidak**
+membuat akun baru, tidak membuat akun `pending`.
+
+Konsekuensinya: pendaftaran user tetap lewat jalur yang ada sekarang. SSO tidak
+menambah cara baru untuk masuk ke sistem — ia hanya menambah cara baru untuk
+membuktikan identitas user yang **sudah** ada.
+
+##### Keputusan resmi
+
+| #   | Keputusan             | Ketetapan                                                                        | Kalau salah pilih                               |
+| --- | --------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------- |
+| 1   | Provider              | **Google & Microsoft** — keduanya OIDC, satu adaptor generik melayani dua-duanya | Pilih satu lalu menambah nanti = rombak adaptor |
+| 2   | Penautan akun         | Tautkan ke akun yang ada **HANYA bila `email_verified=true`** dari provider      | Tanpa syarat itu → **pengambilalihan akun**     |
+| 3   | Email tidak terdaftar | **Tolak + tampilkan notifikasi.** Jangan buat akun                               | Auto-daftar = pintu masuk tanpa penjaga         |
+| 4   | Batas domain          | **Opsional** — lihat catatan di bawah                                            | —                                               |
+| 5   | Password lama         | Tetap hidup berdampingan                                                         | Mematikannya mengunci user tanpa akun provider  |
+
+##### Catatan atas keputusan #4
+
+Sebelum konsep di atas ditetapkan, daftar domain diizinkan bersifat **wajib** —
+karena tanpa itu siapa pun ber-Gmail bisa mendaftar lewat SSO.
+
+Dengan keputusan #3, kebutuhan itu **hilang**: yang bisa masuk hanyalah email
+yang sudah terdaftar, sehingga **daftar user itu sendiri sudah menjadi
+allowlist**. Batas domain kini hanya lapis pertahanan tambahan, bukan syarat.
+Boleh ditambahkan, boleh tidak.
+
+##### Pesan notifikasi yang dibutuhkan
+
+Layar Sign In harus bisa menampilkan sebab penolakan secara spesifik — pesan
+generik akan membuat user mengira aplikasinya rusak:
+
+| Sebab                                      | Pesan yang ditampilkan                                                     |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| Email tidak terdaftar                      | "Email ini belum terdaftar di LanPro. Hubungi admin untuk dibuatkan akun." |
+| Email provider belum terverifikasi         | "Email Google/Microsoft Anda belum terverifikasi."                         |
+| Akun ada tapi `status` bukan aktif         | "Akun Anda belum aktif. Menunggu persetujuan admin."                       |
+| Identitas provider sudah tertaut user lain | Pesan netral — jangan bocorkan milik siapa                                 |
+| Gagal di sisi provider                     | "Login dibatalkan atau gagal. Silakan coba lagi."                          |
 
 ⚠️ Keputusan #2 adalah **satu-satunya lubang keamanan serius** di rencana ini.
-Tanpa memeriksa `email_verified`, seseorang bisa membuat akun provider memakai
-alamat email orang lain lalu tertaut ke akun LanPro milik korban.
+Penautan dilakukan berdasarkan email; tanpa memeriksa `email_verified`, seseorang
+bisa membuat akun provider memakai alamat email orang lain lalu tertaut ke akun
+LanPro milik korban. Ini **tetap berlaku** walaupun SSO tidak membuat akun baru —
+justru di sinilah risikonya, karena akun korban sudah ada.
+
+**Definisi selesai:** kelima keputusan tertulis di dokumen ini sebagai ketetapan
+resmi.
 
 #### F5.2 · Login dengan email (item #31)
 
@@ -393,13 +435,14 @@ dibuktikan lewat test.
 
 #### F5.5 · Provider + kebijakan akun
 
-| Aturan                        | Perilaku                                  |
-| ----------------------------- | ----------------------------------------- |
-| `email_verified=false`        | **Tolak**, jangan tautkan                 |
-| Email cocok user yang ada     | Tautkan — simpan `provider` + `sub`       |
-| Email belum ada               | Buat user baru, `status='pending'`        |
-| Domain di luar daftar         | Tolak dengan pesan jelas                  |
-| `sub` sudah tertaut user lain | Tolak — jangan pindahkan tautan diam-diam |
+| Aturan                               | Perilaku                                                     |
+| ------------------------------------ | ------------------------------------------------------------ |
+| `email_verified=false`               | **Tolak**, jangan tautkan                                    |
+| Email cocok user yang ada            | Tautkan — simpan `provider` + `sub`                          |
+| **Email belum terdaftar**            | **TOLAK + notifikasi.** Jangan buat akun (ketetapan F5.1 #3) |
+| Akun ada tapi belum aktif            | Tolak, pesan "menunggu persetujuan admin"                    |
+| Domain di luar daftar (bila dipakai) | Tolak dengan pesan jelas                                     |
+| `sub` sudah tertaut user lain        | Tolak — jangan pindahkan tautan diam-diam                    |
 
 **Skema:** tabel `UserIdentities` (`user_id`, `provider`, `sub`, unik pada
 `provider+sub`) — **bukan** kolom baru di `Users`, supaya satu user bisa punya
@@ -425,16 +468,17 @@ kosong.
 
 **Gerbang keluar F5** (selain gerbang dasar):
 
-| Uji                                 | Harus                                  |
-| ----------------------------------- | -------------------------------------- |
-| Login Google akun terdaftar         | Masuk, JWT terbit                      |
-| Login Microsoft akun terdaftar      | Masuk                                  |
-| Email di luar domain                | Ditolak, pesan jelas                   |
-| `email_verified=false`              | Ditolak                                |
-| Akun baru                           | `pending`, belum bisa masuk            |
-| `id_token` palsu/kedaluwarsa        | Ditolak — **uji di salinan luar repo** |
-| **Login password lama masih jalan** | ✅ wajib                               |
-| Force-logout                        | Sesi SSO ikut mati                     |
+| Uji                                 | Harus                                              |
+| ----------------------------------- | -------------------------------------------------- |
+| Login Google akun terdaftar         | Masuk, JWT terbit                                  |
+| Login Microsoft akun terdaftar      | Masuk                                              |
+| Email di luar domain                | Ditolak, pesan jelas                               |
+| `email_verified=false`              | Ditolak                                            |
+| Email belum terdaftar               | Ditolak + notifikasi jelas, **tidak** membuat akun |
+| Ikon Google & Microsoft di Sign In  | Tampil, ≥44px, pakai token warna                   |
+| `id_token` palsu/kedaluwarsa        | Ditolak — **uji di salinan luar repo**             |
+| **Login password lama masih jalan** | ✅ wajib                                           |
+| Force-logout                        | Sesi SSO ikut mati                                 |
 
 ---
 
