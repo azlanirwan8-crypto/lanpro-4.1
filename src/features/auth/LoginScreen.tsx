@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ArrowRight, Eye, EyeOff, AlertCircle, ShieldCheck } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { safeLocalStorage } from "../../lib/safeStorage";
@@ -99,9 +99,6 @@ export const LoginScreen = ({
           >
             {/* Velzon Card Header */}
             <div className="text-center space-y-1.5 mb-6">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-primary text-white shadow-md shadow-primary/25 mb-1">
-                <ShieldCheck className="w-6 h-6 text-amber-400" />
-              </div>
               <h2 className="text-2xl font-bold text-content-strong tracking-tight">Sign In</h2>
               <p className="text-xs font-medium text-content-muted">
                 Sign in to continue to LanPro Workspace
