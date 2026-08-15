@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { Response, NextFunction } from "express";
 import db from "../../src/lib/db";
+import { getJwtSecret } from "../helpers/jwtSecret";
 
 export interface UserSession {
   token: string;
@@ -13,12 +14,9 @@ export interface UserSession {
 
 export const activeUserSessions = new Map<string, UserSession>();
 
-export const getJwtSecret = (): string => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error("[SECURITY] JWT_SECRET tidak ditemukan di environment.");
-  }
-  return process.env.JWT_SECRET;
-};
+// Pindah ke helpers/jwtSecret.ts agar modul yang hanya butuh rahasia JWT tidak
+// ikut menarik adapter database. Di-re-export supaya pemanggil lama tetap jalan.
+export { getJwtSecret };
 
 export const generateToken = (user: any): string => {
   return jwt.sign(
