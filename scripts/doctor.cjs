@@ -293,6 +293,68 @@ section('7. Uji koneksi database');
     }
   }
 
+  // ── 8. Kelengkapan schema ────────────────────────────────────────
+  //
+  // Migrasi otomatis pernah gagal dengan timeout sementara server tetap
+  // menyala seolah sehat, sehingga tabel yang dibutuhkan fitur baru tidak
+  // pernah terbentuk. Kegagalannya baru ketahuan setelah fiturnya dicoba dan
+  // gagal dengan pesan yang sama sekali tidak menyinggung migrasi. Pemeriksaan
+  // ini menyatakan keadaan schema secara langsung, bukan menyimpulkannya dari
+  // log boot yang mungkin sudah tergulung.
+  section('8. Kelengkapan schema database');
+
+  if (!process.env.DATABASE_URL) {
+    fail('Dilewati — DATABASE_URL kosong');
+  } else {
+    const { Pool } = require('pg');
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+      connectionTimeoutMillis: 15000,
+    });
+    try {
+      // Tabel inti yang ketiadaannya pasti merusak fitur, bukan seluruh daftar.
+      const wajib = ['Users', 'Projects', 'Tasks', 'Documents', 'UserIdentities'];
+      const r = await pool.query(
+        `SELECT table_name FROM information_schema.tables
+         WHERE table_schema = 'public' AND table_name = ANY($1)`,
+        [wajib]
+      );
+      const ada = r.rows.map((x) => x.table_name);
+      const hilang = wajib.filter((t) => !ada.includes(t));
+
+      if (hilang.length === 0) {
+        ok('Seluruh tabel inti ada', wajib.join(', '));
+      } else {
+        fail(`Tabel inti HILANG: ${hilang.join(', ')}`,
+          'Migrasi kemungkinan gagal saat boot. Jalankan ulang server dan perhatikan ' +
+          'blok [MIGRASI], atau periksa GET /api/health');
+      }
+
+      // Baris yatim pernah mengunci sebuah email selamanya dari pendaftaran.
+      if (ada.includes('UserIdentities')) {
+        const y = await pool.query(
+          `SELECT COUNT(*)::int AS n FROM "UserIdentities" ui
+           WHERE NOT EXISTS (SELECT 1 FROM "Users" u WHERE u.id = ui."userId")`
+        );
+        if (y.rows[0].n === 0) {
+          ok('Tidak ada identitas SSO yatim');
+        } else {
+          fail(`${y.rows[0].n} identitas SSO yatim`,
+            'Baris ini mengunci email pemiliknya dari pendaftaran ulang. ' +
+            'Jalankan migrasi ulang untuk membersihkannya');
+        }
+      }
+    } catch (e) {
+      warn(
+        `Tidak bisa memeriksa schema: ${e.message}`,
+        'Pemeriksaan ini DILEWATI — jangan diartikan sebagai schema yang benar'
+      );
+    } finally {
+      await pool.end().catch(() => {});
+    }
+  }
+
   // ── Ringkasan ───────────────────────────────────────────────────
   console.log('\n' + '─'.repeat(58));
   if (failed === 0 && warned === 0) {
