@@ -1023,10 +1023,28 @@ function AppContainer() {
   });
 
   useEffect(() => {
+    // #50 — server kini mewajibkan token pada handshake Socket.IO.
+    //
+    // Efek ini DULU berdependensi `[]`, artinya socket dibuat sekali saat
+    // aplikasi mount — yaitu di layar login, saat token belum ada — dan tidak
+    // pernah dibuat ulang setelah login berhasil. Dengan gerbang autentikasi di
+    // server, dependensi kosong itu akan mematikan seluruh realtime bagi
+    // pengguna sah. Karena itu efek ini sekarang bergantung pada token dan
+    // dijalankan ulang begitu token berubah (login, force-logout, keluar).
+    const jwtToken = safeLocalStorage.getItem("lanpro_jwt_token");
+
+    // Tanpa token, jangan menyambung sama sekali. Menyambung lalu ditolak hanya
+    // menghasilkan percobaan ulang dan kebisingan di console layar login.
+    if (!jwtToken) {
+      setSocketConnected(false);
+      return;
+    }
+
     // Vercel friendly socket config
     let socket: any;
     try {
       socket = io({
+        auth: { token: jwtToken },
         reconnectionAttempts: 3,
         timeout: 5000,
         transports: ["polling", "websocket"],
@@ -1225,7 +1243,12 @@ function AppContainer() {
         socket.disconnect();
       }
     };
-  }, []);
+    // Bergantung pada identitas pengguna, bukan pada token mentah: nilai token
+    // tidak disimpan di state React, jadi perubahannya tidak memicu render.
+    // `currentUser?.id` berubah tepat pada dua peristiwa yang penting di sini —
+    // login berhasil dan keluar — dan pada saat itulah socket perlu dibuat ulang
+    // membawa token yang baru.
+  }, [currentUser?.id]);
 
   // Serverless Heartbeat Fallback
   useEffect(() => {
