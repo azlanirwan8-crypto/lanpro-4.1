@@ -52,7 +52,11 @@ kebutuhan mengevaluasi ulang dari nol setiap kali memulai sesi kerja.
 
 ---
 
-## §1 PAPAN PRIORITAS — mulai dari sini
+## §1 PAPAN PRIORITAS — 21 item, semuanya berfase
+
+Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
+diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
+lepas. Catatan lepas selalu terlupakan.
 
 | #   | Temuan                                            |  Fase  | Sev | Biaya  | Blokir modul baru? | Status                | Detail |
 | --- | ------------------------------------------------- | :----: | :-: | ------ | :----------------: | --------------------- | ------ |
@@ -61,60 +65,87 @@ kebutuhan mengevaluasi ulang dari nol setiap kali memulai sesi kerja.
 | 10  | Schema DB tidak terdokumentasi                    | **F0** | 🟠  | Sedang |         Ya         | `TERBUKA`             | §4     |
 | 2   | Driver `s3` belum pernah dieksekusi               | **F1** | 🔴  | Rendah | Blokir production  | `MENUNGGU` kredensial | §6     |
 | 15  | Dua Google API key lama belum dicabut             | **F1** | 🔴  | Rendah |       Tidak        | `MENUNGGU` pemilik    | §6     |
-| 3   | Nol code splitting — 898 KB gzip satu chunk       | **F2** | 🔴  | Rendah |         Ya         | `TERBUKA`             | §5     |
-| 4   | ±100 endpoint tanpa validasi skema                | **F3** | 🔴  | Sedang |   Ya (keamanan)    | `TERBUKA`             | §3     |
-| 9   | Rasio test ±1 : 1.000 baris                       | **F4** | 🟠  | Tinggi |         Ya         | `TERBUKA`             | §7     |
-| 8   | 1.313 `any` melemahkan seluruh jaring tipe        | **F4** | 🟠  | Sedang |         Ya         | `TERBUKA`             | §7     |
-| 11  | `auth` 762 baris tanpa lapisan apa pun            | **F5** | 🟠  | Rendah |       Tidak        | `TERBUKA`             | §2     |
-| 6   | 222 query SQL di lapisan rute, repository tak ada | **F5** | 🟠  | Tinggi |         Ya         | `TERBUKA`             | §3     |
-| 5   | Routing palsu + 47 props di satu persimpangan     | **F6** | 🔴  | Tinggi |         Ya         | `TERBUKA`             | §5     |
-| 7   | 59% baris kode di 37 berkas > 500 baris           | **F6** | 🟠  | Tinggi |         Ya         | `TERBUKA`             | §2     |
-| 13  | 28 berkas `dark:` + 48 hex di luar token          | **F7** | 🟡  | Sedang |       Tidak        | `TERBUKA`             | §8     |
-| 14  | Kontras sidebar & jarak target sentuh             | **F7** | 🟡  | Sedang |       Tidak        | `TERBUKA`             | §8     |
+| 16  | **Logika aplikasi belum pernah diaudit**          | **F2** | 🔴  | Sedang |         Ya         | `TERBUKA`             | §13    |
+| 18  | notebook-lm rusak di dua sisi                     | **F2** | 🟠  | Rendah |       Tidak        | `MENUNGGU` keputusan  | §6.3   |
+| 19  | `POST /api/db-query` tanpa penjaga read-only      | **F2** | 🔴  | Rendah |       Tidak        | `MENUNGGU` keputusan  | §6.3   |
+| 20  | Kode mati DB Explorer                             | **F2** | 🟡  | Rendah |       Tidak        | `MENUNGGU` keputusan  | §6.3   |
+| 17  | **UI belum pernah diaudit di balik login**        | **F3** | 🔴  | Sedang |         Ya         | `MENUNGGU` login      | §14    |
+| 3   | Nol code splitting — 898 KB gzip satu chunk       | **F4** | 🔴  | Rendah |         Ya         | `TERBUKA`             | §5     |
+| 4   | ±100 endpoint tanpa validasi skema                | **F5** | 🔴  | Sedang |   Ya (keamanan)    | `TERBUKA`             | §3     |
+| 9   | Rasio test ±1 : 1.000 baris                       | **F6** | 🟠  | Tinggi |         Ya         | `TERBUKA`             | §7     |
+| 8   | 1.313 `any` melemahkan seluruh jaring tipe        | **F6** | 🟠  | Sedang |         Ya         | `TERBUKA`             | §7     |
+| 11  | `auth` 762 baris tanpa lapisan apa pun            | **F7** | 🟠  | Rendah |       Tidak        | `TERBUKA`             | §2     |
+| 6   | 222 query SQL di lapisan rute, repository tak ada | **F7** | 🟠  | Tinggi |         Ya         | `TERBUKA`             | §3     |
+| 5   | Routing palsu + 47 props di satu persimpangan     | **F8** | 🔴  | Tinggi |         Ya         | `TERBUKA`             | §5     |
+| 7   | 59% baris kode di 37 berkas > 500 baris           | **F8** | 🟠  | Tinggi |         Ya         | `TERBUKA`             | §2     |
+| 21  | `authStore` & `uiStore` menganggur                | **F8** | 🟡  | Rendah |       Tidak        | `DITUNDA` (disengaja) | §5.3   |
+| 14  | Kontras sidebar & jarak target sentuh             | **F9** | 🟠  | Sedang |       Tidak        | `TERBUKA`             | §8     |
+| 13  | 28 berkas `dark:` + 48 hex di luar token          | **F9** | 🟡  | Sedang |       Tidak        | `TERBUKA`             | §8     |
 
 ---
 
-## §1.5 PETA FASE — urutan pengerjaan
+## §1.5 PETA FASE — panggil pekerjaan lewat nomor fase
 
-Fase disusun berdasarkan **ketergantungan**, bukan sekadar severity. Prinsipnya:
+Cukup sebut **"kerjakan F2"** dan seluruh cakupannya sudah terdefinisi di sini:
+item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang keluar.
 
-> Bereskan **kejelasan** dulu (F0), lalu yang **memblokir production** (F1),
-> lalu **kemenangan murah** (F2–F3), lalu **tebalkan jaring pengaman** (F4),
-> **baru** bongkar arsitektur (F5–F6).
+### Indeks cepat
 
-Membongkar arsitektur sebelum F4 berarti melakukan refactor besar dengan 84 test
-dan 1.313 `any` sebagai satu-satunya pengaman. Itu persis resep untuk mengulang
-insiden "28/28 test lolos tapi AppContainer crash".
+|  Fase  | Nama                        | Item               | Sesi\* | Risiko            | Perlu pemilik?                    | Status     |
+| :----: | --------------------------- | ------------------ | ------ | ----------------- | --------------------------------- | ---------- |
+| **F0** | Kejelasan & fondasi dokumen | #1, #12, #10       | 1–2    | Sangat rendah     | —                                 | `TERBUKA`  |
+| **F1** | Buka jalan ke production    | #2, #15            | 1–2    | Rendah            | **Ya** — kredensial & 1 keputusan | `MENUNGGU` |
+| **F2** | Audit & perbaikan LOGIKA    | #16, #18, #19, #20 | 3–5    | Rendah            | **Ya** — 3 keputusan              | `TERBUKA`  |
+| **F3** | Audit UI menyeluruh         | #17                | 2–4    | Sangat rendah     | **Ya** — login                    | `MENUNGGU` |
+| **F4** | Performa muat               | #3                 | 1      | Rendah–sedang     | —                                 | `TERBUKA`  |
+| **F5** | Kontrak & validasi          | #4                 | 3–5    | Sedang            | —                                 | `TERBUKA`  |
+| **F6** | Jaring pengaman             | #9, #8             | 4–6    | Rendah            | —                                 | `TERBUKA`  |
+| **F7** | Lapisan backend             | #11, #6            | 6–10   | Tinggi            | —                                 | `TERBUKA`  |
+| **F8** | Arsitektur frontend         | #5, #7, #21        | 8–15   | **Sangat tinggi** | —                                 | `TERBUKA`  |
+| **F9** | Konsolidasi desain          | #14, #13           | 2–3    | Rendah            | —                                 | `TERBUKA`  |
 
-### Ringkasan fase
+\*Perkiraan kasar dan **belum terverifikasi** — untuk membandingkan bobot antar
+fase, bukan janji jadwal. Perbarui dengan angka nyata setelah fase pertama tutup.
 
-|  Fase  | Nama                        | Item         | Sesi (perkiraan) | Risiko regresi    | Status             |
-| :----: | --------------------------- | ------------ | ---------------- | ----------------- | ------------------ |
-| **F0** | Kejelasan & fondasi dokumen | #1, #12, #10 | 1–2              | Sangat rendah     | `TERBUKA`          |
-| **F1** | Buka jalan ke production    | #2, #15      | 1–2              | Rendah            | `MENUNGGU` pemilik |
-| **F2** | Performa muat               | #3           | 1                | Rendah–sedang     | `TERBUKA`          |
-| **F3** | Kontrak & validasi          | #4           | 3–5              | Sedang            | `TERBUKA`          |
-| **F4** | Jaring pengaman             | #9, #8       | 4–6              | Rendah            | `TERBUKA`          |
-| **F5** | Lapisan backend             | #11, #6      | 6–10             | Tinggi            | `TERBUKA`          |
-| **F6** | Arsitektur frontend         | #5, #7       | 8–15             | **Sangat tinggi** | `TERBUKA`          |
-| **F7** | Konsolidasi desain          | #13, #14     | 2–3              | Rendah            | `TERBUKA`          |
+### Prinsip urutan
 
-> Perkiraan sesi bersifat kasar dan **belum terverifikasi** — ia ada untuk
-> membandingkan bobot antar fase, bukan untuk dijadikan janji jadwal. Perbarui
-> dengan angka nyata setelah fase pertama selesai.
+Fase disusun berdasarkan **ketergantungan**, bukan severity:
+
+> **Tahu dulu** (F0 dokumen, F2 logika, F3 UI) → **buka jalan rilis** (F1) →
+> **kemenangan murah** (F4, F5) → **tebalkan jaring pengaman** (F6) →
+> **baru** bongkar arsitektur (F7, F8) → **rapikan** (F9).
+
+Tiga alasan urutan ini yang perlu dipahami sebelum menggesernya:
+
+1. **F2 & F3 (audit) sengaja di depan.** Keduanya bisa **menambah item baru** ke
+   fase-fase sesudahnya. Mengerjakan F7/F8 lebih dulu berarti merefactor kode
+   yang belum diketahui benar-salahnya — kalau logikanya memang keliru, kita
+   memindahkan bug ke tempat yang lebih rapi.
+2. **F5 (zod) mendahului F7 (repository).** Menulis skema memaksa bentuk data
+   tiap endpoint jadi eksplisit, dan bentuk itulah bahan mentah repository.
+   Dibalik urutannya = merancang repository di atas tipe yang masih `any`.
+3. **F6 (jaring pengaman) wajib sebelum F7–F8.** Refactor besar dengan 84 test
+   dan 1.313 `any` sebagai satu-satunya pengaman adalah judi — persis kondisi
+   yang dulu menghasilkan "28/28 test lolos tapi AppContainer crash".
+
+### Fase yang terblokir boleh dilewati sementara
+
+**F1 dan F3 menunggu pemilik proyek** (kredensial bucket, sesi login). Bila
+keduanya belum siap, **lanjutkan ke fase berikutnya** — jangan berhenti menunggu.
+Yang tidak boleh: menutup F1/F3 tanpa gerbangnya lulus, atau **merilis ke
+production** selama F1 belum tutup.
 
 ### Gerbang antar fase
 
-Sebuah fase **tidak boleh dibuka** sebelum gerbang fase sebelumnya lulus.
-Gerbang dasar yang berlaku di SEMUA fase:
+Gerbang dasar berlaku di **SEMUA** fase:
 
 ```bash
 npm run doctor && npm run lint && npm test && npm run build
 # lalu WAJIB: npm run dev -> buka browser -> pastikan UI benar-benar tampil
 ```
 
-Build hijau bukan bukti aplikasi jalan (§12 aturan 1). Gerbang tidak lulus bila
-langkah browser dilewati.
+Build hijau bukan bukti aplikasi jalan (§12 aturan 1). **Gerbang tidak lulus bila
+langkah browser dilewati.** Tiap fase menambahkan gerbang khususnya sendiri.
 
 ---
 
@@ -144,56 +175,107 @@ kalau ternyata ada kolom yang hanya didefinisikan di sistem yang dibuang.
 ### F1 · Buka jalan ke production
 
 **Kenapa di sini.** Ini satu-satunya fase yang benar-benar **memblokir rilis**.
-Ditempatkan sesudah F0 hanya karena F0 sangat murah — kalau kredensial bucket
-sudah siap, F1 boleh dikerjakan lebih dulu.
 
-| Item | Pekerjaan                      | Definisi selesai                                                    |
-| ---- | ------------------------------ | ------------------------------------------------------------------- |
-| #2   | Jalankan driver `s3` sungguhan | Lihat urutan wajib di §6.1: **(f) dulu → (d)(e) → baru uji bucket** |
-| #15  | Cabut 2 Google API key lama    | Dikonfirmasi tercabut di Google Cloud Console                       |
+| Item | Pekerjaan                      | Definisi selesai                                              |
+| ---- | ------------------------------ | ------------------------------------------------------------- |
+| #2   | Jalankan driver `s3` sungguhan | Urutan wajib di §6.1: **(f) dulu → (d)(e) → baru uji bucket** |
+| #15  | Cabut 2 Google API key lama    | Dikonfirmasi tercabut di Google Cloud Console                 |
 
-**Syarat masuk:** pemilik proyek mengisi 6 variabel `STORAGE_*` di `.env`, DAN
-menjawab pertanyaan otorisasi di §6.1 (dokumen QA & rekaman: lewat penjaga auth
-server, atau langsung dari bucket).
+**Syarat masuk (dari pemilik proyek):**
+
+1. Isi 6 variabel `STORAGE_*` di `.env`.
+2. Jawab: dokumen QA & rekaman rapat tetap lewat penjaga auth server
+   (**rekomendasi: ya**), atau boleh disajikan langsung dari bucket publik?
 
 **Gerbang keluar:** unggah 1 avatar + 1 rekaman → **muncul di bucket** DAN
 **tampil di browser** → objek uji dihapus. `npm run doctor` HIJAU.
 
-⚠️ **Doctor hijau bukan bukti jalur s3 jalan** (§6.1). Gerbang ini hanya lulus
-lewat unggahan nyata yang terlihat di bucket dan di browser.
+⚠️ **Doctor hijau bukan bukti jalur s3 jalan** (§6.1) — pemeriksanya tidak pernah
+menyentuh bucket. Gerbang ini hanya lulus lewat unggahan nyata.
 
 ---
 
-### F2 · Performa muat
+### F2 · Audit & perbaikan LOGIKA
 
-**Kenapa di sini.** Biaya paling rendah dengan dampak paling terasa bagi
-pengguna, dan **tidak bergantung pada fase mana pun**. Menundanya sampai setelah
-F5/F6 berarti setiap modul baru memperburuk bundel lebih dulu.
+**Kenapa fase tersendiri.** Audit 15 Agu 2026 mengukur **struktur** — jumlah
+berkas, baris, query, endpoint. **Tidak satu pun mengukur apakah logikanya
+benar.** Lubang ini tidak terlihat sampai ditanyakan, dan itu persis alasan ia
+sekarang jadi fase bernomor.
 
-| Item | Pekerjaan                                                              | Definisi selesai                                                    |
-| ---- | ---------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| #3   | 19 import statis di `AppRoutes.tsx` → `React.lazy` + satu `<Suspense>` | Bundle utama turun signifikan; tiap fitur besar jadi chunk terpisah |
+Bisa dikerjakan **tanpa login** — telaah lewat pembacaan kode + pengujian
+endpoint yang tidak butuh auth.
+
+| Item | Pekerjaan                                                        | Definisi selesai                                                                              |
+| ---- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| #16  | Audit logika menyeluruh (cakupan di §13)                         | Tiap domain punya catatan temuan; tiap temuan jadi item bernomor di papan                     |
+| #18  | notebook-lm: kunci token salah + endpoint wiki tak ada           | **Menunggu keputusan** — perbaikannya kecil tapi MENGUBAH PERILAKU                            |
+| #19  | `POST /api/db-query` tanpa penjaga read-only                     | **Menunggu keputusan** — mengaktifkan penjaga MEMATIKAN fitur ubah/hapus baris di DB Explorer |
+| #20  | Kode mati DB Explorer (toggle mode + request sia-sia tiap mount) | **Menunggu keputusan** — konfirmasi memang tak terpakai                                       |
+
+**Syarat masuk:** tidak ada untuk #16. Item #18–#20 butuh keputusan pemilik.
+
+**Gerbang keluar:** seluruh cakupan §13 tertelaah + setiap temuan sudah masuk
+papan §1 dengan nomor & fase, bukan mengendap sebagai catatan.
+
+⚠️ **Audit ini tidak boleh mengubah source untuk pembuktian** (§12 aturan 4).
+Bila perlu membuktikan sebuah dugaan, lakukan di salinan di luar repo.
+
+⚠️ Temuan F2 kemungkinan besar **menambah pekerjaan di F5–F8**. Itu memang
+tujuannya — lebih baik ketahuan sekarang daripada saat refactor berjalan.
+
+---
+
+### F3 · Audit UI menyeluruh
+
+**Kenapa fase tersendiri.** Dari 21 fitur, **nol** yang pernah dibuka di browser.
+Satu-satunya layar yang benar-benar terlihat adalah halaman Sign In. Yang selama
+ini disebut "audit UI" sebenarnya hitungan berkas lewat grep — itu mengukur
+kepatuhan token, bukan apakah layarnya tampil benar.
+
+| Item | Pekerjaan                                    | Definisi selesai                                                        |
+| ---- | -------------------------------------------- | ----------------------------------------------------------------------- |
+| #17  | Sisir 21 fitur di browser (checklist di §14) | Tiap fitur punya catatan: tampil/rusak, terang & gelap, 375px & desktop |
+
+**Syarat masuk:** **pemilik proyek login lebih dulu.** Kredensial tidak boleh
+dimasukkan oleh siapa pun selain pemilik (§12).
+
+**Gerbang keluar:** 21 fitur tercatat statusnya + kontras sidebar & jarak target
+sentuh **diukur ulang** (angka saat ini warisan audit lama) + tiap kerusakan jadi
+item bernomor di papan §1.
+
+⚠️ Jangan memperbaiki apa pun selama F3 — F3 **mencatat**, perbaikannya masuk
+fase yang sesuai. Mencampur audit dengan perbaikan membuat cakupannya kabur.
+
+---
+
+### F4 · Performa muat
+
+**Kenapa di sini.** Biaya paling rendah dengan dampak paling terasa bagi pengguna,
+dan **tidak bergantung pada fase mana pun**. Menundanya sampai setelah F7/F8
+berarti setiap modul baru memperburuk bundel lebih dulu.
+
+| Item | Pekerjaan                                                              | Definisi selesai                     |
+| ---- | ---------------------------------------------------------------------- | ------------------------------------ |
+| #3   | 19 import statis di `AppRoutes.tsx` → `React.lazy` + satu `<Suspense>` | Tiap fitur besar jadi chunk terpisah |
 
 **Target terukur:** bundle utama gzip **898 KB → di bawah 400 KB**.
 
 **Gerbang keluar:** gerbang dasar + ukur ulang dengan perintah bundle di §9
 (**setelah `npm run build`, bukan `npm run dev`**) + buka minimal 5 view berbeda
-di browser dan pastikan tidak ada layar kosong saat chunk dimuat.
+di browser, pastikan tidak ada layar kosong saat chunk dimuat.
 
 ---
 
-### F3 · Kontrak & validasi
-
-**Kenapa sebelum F5.** Menulis skema zod memaksa bentuk data tiap endpoint
-menjadi eksplisit. Bentuk itulah bahan mentah untuk repository di F5 — mengerjakan
-F5 lebih dulu berarti merancang repository di atas tipe yang masih `any`.
+### F5 · Kontrak & validasi
 
 | Item | Pekerjaan                     | Definisi selesai                                          |
 | ---- | ----------------------------- | --------------------------------------------------------- |
 | #4   | Skema zod untuk ±100 endpoint | Tiap endpoint memvalidasi body/param sebelum menyentuh DB |
 
-**Kerjakan per domain**, bukan sapuan sekali jadi. Urutan yang disarankan
-mengikuti bobot query di §3.1: `auth` → `task` → `qa` → `project` → sisanya.
+**Syarat masuk:** F2 tutup — temuan logika menentukan bentuk skema yang benar.
+
+**Kerjakan per domain**, bukan sapuan sekali jadi. Urutan mengikuti bobot query
+di §3.1: `auth` → `task` → `qa` → `project` → sisanya.
 
 **Gerbang keluar per domain:** gerbang dasar + himpunan rute sebelum/sesudah
 identik.
@@ -203,22 +285,21 @@ handler 404, jadi rute palsu pun menjawab 401 (§12).
 
 ---
 
-### F4 · Jaring pengaman
+### F6 · Jaring pengaman
 
-**Kenapa wajib sebelum F5–F6.** Ini fase yang menentukan apakah dua fase terakhir
-aman dikerjakan. Refactor besar dengan 84 test dan 1.313 `any` adalah judi.
+**Kenapa wajib sebelum F7–F8.** Fase ini yang menentukan apakah dua fase terakhir
+aman dikerjakan.
 
-| Item | Pekerjaan                                              | Definisi selesai                                                       |
-| ---- | ------------------------------------------------------ | ---------------------------------------------------------------------- |
-| #9   | Tambah test, prioritaskan **test render** jalur kritis | Tiap fitur besar punya minimal 1 test render                           |
-| #8   | Kurangi `any` **di jalur yang akan disentuh F5–F6**    | `AppContainer`, `AppRoutes`, rute ber-query terbanyak tidak lagi `any` |
+| Item | Pekerjaan                                              | Definisi selesai                                                        |
+| ---- | ------------------------------------------------------ | ----------------------------------------------------------------------- |
+| #9   | Tambah test, prioritaskan **test render** jalur kritis | Tiap fitur besar punya minimal 1 test render (saat ini hanya flowchart) |
+| #8   | Kurangi `any` **di jalur yang akan disentuh F7–F8**    | `AppContainer`, `AppRoutes`, rute ber-query terbanyak tidak lagi `any`  |
 
 **Target terukur:** rasio test 1:1.000 → **1:400 atau lebih baik**; `any` 1.313 →
 **di bawah 900**.
 
 ⚠️ **Jangan mengejar angka `any` secara global.** Yang bernilai hanya `any` di
-jalur yang akan di-refactor. Menghapus `any` di berkas yang tidak tersentuh hanya
-menghabiskan sesi.
+jalur yang akan di-refactor.
 
 ⚠️ Setelah menambah test, **periksa jumlahnya benar-benar bertambah** — pernah
 penyisipan gagal diam-diam karena Prettier (§12).
@@ -229,67 +310,74 @@ menangkap crash.
 
 ---
 
-### F5 · Lapisan backend
+### F7 · Lapisan backend
 
-| Item | Pekerjaan                             | Definisi selesai                                                                |
-| ---- | ------------------------------------- | ------------------------------------------------------------------------------- |
-| #11  | Pecah `auth` (762 baris, nol lapisan) | Mengikuti pola acuan; dikerjakan **pertama** karena kecil dan jadi latihan pola |
-| #6   | Bangun lapisan repository             | Query di `server/routes/` **222 → 0**                                           |
+| Item | Pekerjaan                             | Definisi selesai                                       |
+| ---- | ------------------------------------- | ------------------------------------------------------ |
+| #11  | Pecah `auth` (762 baris, nol lapisan) | Dikerjakan **pertama** — kecil, sekaligus latihan pola |
+| #6   | Bangun lapisan repository             | Query di `server/routes/` **222 → 0**                  |
 
-**Syarat masuk:** F4 lulus.
+**Syarat masuk:** F6 lulus.
 
 **Urutan per berkas** mengikuti bobot di §3.1: `task` (46) → `qa` (33) →
 `project` (30) → `meetings` (19) → sisanya.
 
 ⚠️ **Cek DOMAIN NYASAR lebih dulu.** Pelajaran dari dua langkah L4 sebelumnya:
-kalau di berkas itu ada domain yang nyasar, **pecah domainnya dulu** — jauh lebih
-murah dan aman daripada langsung membangun repository di atas berkas campur.
+kalau ada domain nyasar di berkas itu, **pecah domainnya dulu** — jauh lebih
+murah dan aman daripada membangun repository di atas berkas campur.
 
 **Gerbang keluar:** gerbang dasar + perbandingan himpunan rute + `diff` keluaran
-`tsc` baris-per-baris (bukan hitung total — ini sudah 4x menangkap simbol
-terlewat).
+`tsc` baris-per-baris (bukan hitung total — sudah 4x menangkap simbol terlewat).
 
 ---
 
-### F6 · Arsitektur frontend
+### F8 · Arsitektur frontend
 
 **Fase paling berisiko di seluruh peta.** Jangan dimulai di sesi yang ruang
 konteksnya sudah sempit.
 
-| Item | Pekerjaan                                                    | Definisi selesai                                                                                            |
-| ---- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| #5   | Routing sungguhan (react-router sudah terpasang, menganggur) | URL berubah saat pindah view; deep-link & tombol back berfungsi; `AppRoutesProps` 47 props menyusut drastis |
-| #7   | Pecah 37 berkas > 500 baris                                  | Konsentrasi baris **59% → di bawah 35%**                                                                    |
+| Item | Pekerjaan                                              | Definisi selesai                                                                           |
+| ---- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| #5   | Routing sungguhan (react-router terpasang, menganggur) | URL berubah saat pindah view; deep-link & tombol back berfungsi; 47 props menyusut drastis |
+| #7   | Pecah 37 berkas > 500 baris                            | Konsentrasi baris **59% → di bawah 35%**                                                   |
+| #21  | Aktifkan `authStore` & `uiStore`                       | State auth bersumber dari satu tempat                                                      |
 
-**Syarat masuk:** F4 lulus **dan** F5 lulus. Memindahkan routing sementara state
+**Syarat masuk:** F6 lulus **dan** F7 lulus. Memindahkan routing sementara state
 masih terikat `AppContainer` 4.481 baris akan menghasilkan dua sumber kebenaran.
+
+⚠️ #21 `DITUNDA` dengan alasan yang masih berlaku: mengambil setter dari store
+sementara state dibaca dari hook menghasilkan penulisan yang tidak dibaca siapa
+pun — crash berubah jadi bug senyap yang jauh lebih sulit dilacak. Kerjakan hanya
+**setelah** test render tebal (F6).
 
 **Urutan aman memecah berkas** (ARCHITECTURE.md §2, risiko menaik):
 tipe → fungsi murni → konstanta → panggilan API → **baru** komponennya.
-
-⚠️ Setelah **tiap langkah**, `diff` keluaran `tsc` baris-per-baris.
+Setelah **tiap langkah**, `diff` keluaran `tsc` baris-per-baris.
 
 **Gerbang keluar:** gerbang dasar + klik seluruh menu sidebar di browser +
 refresh di tiap view memuat view yang sama (bukti routing sungguhan).
 
 ---
 
-### F7 · Konsolidasi desain
+### F9 · Konsolidasi desain
 
-Dipisah ke akhir bukan karena tidak penting, melainkan karena **tidak memblokir
-apa pun** dan akan tersentuh ulang bila F6 memindahkan komponen.
+Di akhir bukan karena tidak penting, melainkan karena **tidak memblokir apa pun**
+dan akan tersentuh ulang bila F8 memindahkan komponen.
 
 | Item | Pekerjaan                                                        | Definisi selesai                       |
 | ---- | ---------------------------------------------------------------- | -------------------------------------- |
 | #14  | Perbaiki **palet sidebar**, bukan menambal per-node              | 20/20 node lulus WCAG AA di kedua mode |
 | #13  | 28 berkas `dark:` → token; 48 hex di `className`/`style` → token | Keduanya nol                           |
 
-⚠️ Kontras sidebar gagal dengan angka hampir sama di mode terang **maupun** gelap
-(§8) — itu bukti masalahnya di palet, bukan di penanganan mode gelap. Menambal
-per-node akan menghabiskan waktu tanpa menyelesaikan sebabnya.
+**Syarat masuk:** F3 tutup — hasil audit UI menentukan apa yang sebenarnya perlu
+diperbaiki di sini.
 
-⚠️ Angka #14 **diwarisi dari audit lama dan belum diukur ulang** (§11). Ukur ulang
-dulu sebelum mengerjakannya.
+⚠️ Kontras sidebar gagal dengan angka hampir sama di mode terang **maupun** gelap
+(§8) — bukti masalahnya di palet, bukan di penanganan mode gelap. Menambal
+per-node menghabiskan waktu tanpa menyelesaikan sebabnya.
+
+⚠️ Angka #14 **diwarisi dari audit lama dan belum diukur ulang** (§11). F3 yang
+mengukurnya ulang.
 
 ---
 
@@ -749,38 +837,45 @@ npm run doctor && npm run lint && npm test && npm run build
 Tambahkan satu baris **setiap kali** sebuah item berpindah ke `SELESAI`.
 Kolom angka wajib diisi sebelum→sesudah, supaya kemajuannya terukur, bukan terasa.
 
-| Tanggal     | Fase | Item            | Branch / Commit       | Sebelum | Sesudah | Terverifikasi dengan |
-| ----------- | :--: | --------------- | --------------------- | ------- | ------- | -------------------- |
-| 15 Agu 2026 |  —   | Baseline audit  | `docs/audit-baseline` | —       | —       | seluruh perintah §9  |
-| 15 Agu 2026 |  —   | Pemfasean F0–F7 | `docs/audit-fase`     | —       | —       | —                    |
+| Tanggal     | Fase | Item                                          | Branch / Commit           | Sebelum | Sesudah | Terverifikasi dengan |
+| ----------- | :--: | --------------------------------------------- | ------------------------- | ------- | ------- | -------------------- |
+| 15 Agu 2026 |  —   | Baseline audit                                | `docs/audit-baseline`     | —       | —       | seluruh perintah §9  |
+| 15 Agu 2026 |  —   | Pemfasean F0–F7                               | `docs/audit-fase`         | —       | —       | —                    |
+| 15 Agu 2026 |  —   | Audit logika & UI masuk fase (F0–F9, 21 item) | `docs/audit-fase-lengkap` | —       | —       | —                    |
 
 ### Gerbang fase yang sudah lulus
 
-| Fase | Tanggal lulus | Dibuktikan dengan |
-| :--: | ------------- | ----------------- |
-|  F0  | belum         | —                 |
-|  F1  | belum         | —                 |
-|  F2  | belum         | —                 |
-|  F3  | belum         | —                 |
-|  F4  | belum         | —                 |
-|  F5  | belum         | —                 |
-|  F6  | belum         | —                 |
-|  F7  | belum         | —                 |
+| Fase | Nama                        | Tanggal lulus | Dibuktikan dengan |
+| :--: | --------------------------- | ------------- | ----------------- |
+|  F0  | Kejelasan & fondasi dokumen | belum         | —                 |
+|  F1  | Buka jalan ke production    | belum         | —                 |
+|  F2  | Audit & perbaikan LOGIKA    | belum         | —                 |
+|  F3  | Audit UI menyeluruh         | belum         | —                 |
+|  F4  | Performa muat               | belum         | —                 |
+|  F5  | Kontrak & validasi          | belum         | —                 |
+|  F6  | Jaring pengaman             | belum         | —                 |
+|  F7  | Lapisan backend             | belum         | —                 |
+|  F8  | Arsitektur frontend         | belum         | —                 |
+|  F9  | Konsolidasi desain          | belum         | —                 |
 
 ---
 
 ## §11 Batas audit ini — yang BELUM terverifikasi
 
 Ditulis eksplisit supaya tidak ada yang salah menganggapnya sudah dicek.
+Kolom terakhir menunjuk fase yang bertugas menutup lubang itu — tidak ada baris
+di sini yang dibiarkan tanpa pemilik.
 
-| Hal                                       | Alasan                                                                                                                                                                   |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **UI & flow di balik login**              | Sesi login habis. Audit UI terbatas pada halaman Sign In (ter-render benar, console bersih) + analisa statis. Verifikasi lanjutan butuh pemilik proyek login lebih dulu. |
-| **Loading time production**               | Hanya diukur di dev server localhost, yang tidak representatif. Yang sah: 898 KB gzip.                                                                                   |
-| **Layar > 1024px**                        | Panel pengujian terbatas 679px.                                                                                                                                          |
-| **Kontras sidebar & jarak target sentuh** | Angka diwarisi dari audit sebelumnya, **tidak diukur ulang** dalam audit ini.                                                                                            |
-| **Fungsi 104 endpoint**                   | Tidak diuji satu per satu.                                                                                                                                               |
-| **Kelengkapan daftar 10 tabel**           | Hasil pemindaian teks, bukan pembacaan schema hidup dari Neon.                                                                                                           |
+| Hal                                       | Alasan                                                                                                                                                                              | Ditutup oleh |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------: |
+| **21 fitur di balik login**               | Sesi login habis. Hanya halaman Sign In yang benar-benar dibuka di browser. Yang selama ini disebut "audit UI" adalah hitungan berkas lewat grep — kepatuhan token, bukan tampilan. |    **F3**    |
+| **Logika aplikasi**                       | Audit hanya mengukur struktur (222 query, 104 endpoint, 47 props). Tidak satu pun mengukur apakah logikanya benar.                                                                  |    **F2**    |
+| **Fungsi 104 endpoint**                   | Tidak diuji satu per satu.                                                                                                                                                          |    **F2**    |
+| **RBAC, perhitungan, alur state, socket** | Belum ditelaah sama sekali.                                                                                                                                                         |    **F2**    |
+| **Loading time production**               | Hanya diukur di dev server localhost, tidak representatif. Yang sah: 898 KB gzip.                                                                                                   |    **F4**    |
+| **Kontras sidebar & jarak target sentuh** | Angka diwarisi audit sebelumnya, **tidak diukur ulang**.                                                                                                                            |    **F3**    |
+| **Layar > 1024px**                        | Panel pengujian terbatas 679px.                                                                                                                                                     |    **F3**    |
+| **Kelengkapan daftar 10 tabel**           | Hasil pemindaian teks, bukan pembacaan schema hidup dari Neon.                                                                                                                      |    **F0**    |
 
 ---
 
@@ -815,3 +910,127 @@ Diringkas di sini supaya satu dokumen ini cukup sebagai pegangan.
   hapus (pola yang sudah dipakai: flowchart `ZZ-TEST-REFACTOR`).
 - **Jangan pernah memasukkan kredensial sendiri.** Bila verifikasi runtime butuh
   sesi login, minta pemilik proyek login lebih dulu.
+
+## §13 Cakupan audit LOGIKA (isi kerja F2, item #16)
+
+**Kondisi awal: nol.** Audit 15 Agu 2026 tidak menyentuh logika sama sekali.
+Yang diukur adalah 222 query, 104 endpoint, 47 props — semuanya **struktur**.
+
+Tabel ini adalah daftar kerja F2. Isi kolom `Status` sambil jalan.
+
+### 13.1 Yang belum pernah diperiksa
+
+| Area                                          | Kenapa berisiko                                                                                            | Status    |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------- |
+| RBAC / permission per peran                   | `hasPermission` dioper sebagai prop ke seluruh view; satu kekeliruan membocorkan fitur ke peran yang salah | `TERBUKA` |
+| 104 endpoint                                  | Tak satu pun diuji perilakunya                                                                             | `TERBUKA` |
+| Perhitungan (progress, sprint, KPI, timeline) | Salah hitung tidak melempar error — ia hanya menampilkan angka keliru                                      | `TERBUKA` |
+| Alur state antar view                         | 21 `useState` + 21 `useEffect` di `AppContainer`, dioper 47 props                                          | `TERBUKA` |
+| Socket.IO realtime                            | Pemancaran event sebagian di `runAIPipeline()` yang jalan **setelah** response terkirim                    | `TERBUKA` |
+| Race condition / concurrency                  | Ada 1 test, belum ditelaah cakupannya                                                                      | `TERBUKA` |
+| Alur unggah–simpan–tampil berkas              | Baru dibaca kodenya (§6.1), belum dijalankan                                                               | `TERBUKA` |
+| Penanganan error & rollback transaksi         | Belum ditelaah                                                                                             | `TERBUKA` |
+| Kedaluwarsa & refresh JWT                     | Belum ditelaah                                                                                             | `TERBUKA` |
+
+### 13.2 Urutan telaah yang disarankan
+
+Ikuti bobot query di §3.1 — makin banyak query, makin banyak logika tersembunyi:
+
+`auth` (13 query, sekaligus paling sensitif) → `task` (46) → `qa` (33) →
+`project` (30) → `meetings` (19) → `user` (14) → sisanya.
+
+### 13.3 Cara telaah yang sah di repo ini
+
+| Boleh                                       | Tidak boleh                                        |
+| ------------------------------------------- | -------------------------------------------------- |
+| Membaca kode & menelusuri alur              | Mengubah source untuk pembuktian (§12 aturan 4)    |
+| Menguji endpoint yang tidak butuh auth      | Memasukkan kredensial sendiri                      |
+| Membuktikan dugaan di **salinan luar repo** | Menyimpulkan dari nama fungsi tanpa membaca isinya |
+| Menulis test baru yang mengunci perilaku    | Mengklaim "sudah benar" tanpa bukti                |
+
+⚠️ **Verifikasi rute lewat status 401 TIDAK VALID** — middleware auth berjalan
+sebelum handler 404, jadi rute palsu pun menjawab 401. Pakai perbandingan
+**himpunan rute**.
+
+### 13.4 Temuan logika yang SUDAH diketahui
+
+Ketiganya warisan sesi sebelumnya, bukan hasil audit ini. Semua sudah bernomor
+di papan §1.
+
+| #   | Temuan                                                                                                                                                                   | Kenapa menunggu keputusan                                                |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| 18  | notebook-lm membaca kunci token `'token'` (seharusnya `'lanpro_jwt_token'`) → header kosong → 401. Juga memanggil `GET /api/projects/:id/wiki` yang tidak ada di backend | Perbaikannya kecil tapi **mengubah perilaku**                            |
+| 19  | `POST /api/db-query` aktif **tanpa** penjaga read-only; versi bergaris-pengaman ada tapi mati di `server/routes/db-admin.routes.ts`                                      | Mengaktifkan penjaga **mematikan** fitur ubah/hapus baris di DB Explorer |
+| 20  | Kode mati DB Explorer: toggle mode DB + request sia-sia tiap mount                                                                                                       | Perlu konfirmasi memang tak terpakai                                     |
+
+---
+
+## §14 Checklist audit UI (isi kerja F3, item #17)
+
+**Kondisi awal: 1 dari 22 layar.** Hanya halaman Sign In yang benar-benar dibuka
+di browser (ter-render benar, console bersih, 15 Agu 2026). Sisanya belum pernah
+dilihat.
+
+**Syarat menjalankan: pemilik proyek login lebih dulu.**
+
+### 14.1 Per fitur
+
+Isi tiap kolom: `✅` benar · `⚠️` ada masalah (catat & beri nomor item) ·
+`❌` rusak · `—` belum dicek.
+
+| #   | Fitur                  | Tampil | Mode gelap | 375px | Desktop | Console bersih | Catatan                       |
+| --- | ---------------------- | :----: | :--------: | :---: | :-----: | :------------: | ----------------------------- |
+| 0   | Sign In                |   ✅   |     —      |   —   |    —    |       ✅       | satu-satunya yang sudah dicek |
+| 1   | dashboard              |   —    |     —      |   —   |    —    |       —        |                               |
+| 2   | issues                 |   —    |     —      |   —   |    —    |       —        |                               |
+| 3   | planning               |   —    |     —      |   —   |    —    |       —        |                               |
+| 4   | kanban                 |   —    |     —      |   —   |    —    |       —        |                               |
+| 5   | qa                     |   —    |     —      |   —   |    —    |       —        |                               |
+| 6   | wiki                   |   —    |     —      |   —   |    —    |       —        |                               |
+| 7   | meeting-notes          |   —    |     —      |   —   |    —    |       —        |                               |
+| 8   | notebook-lm            |   —    |     —      |   —   |    —    |       —        | diketahui rusak, lihat #18    |
+| 9   | flowchart              |   —    |     —      |   —   |    —    |       —        |                               |
+| 10  | master                 |   —    |     —      |   —   |    —    |       —        |                               |
+| 11  | connect                |   —    |     —      |   —   |    —    |       —        |                               |
+| 12  | enterprise-audit       |   —    |     —      |   —   |    —    |       —        |                               |
+| 13  | activity               |   —    |     —      |   —   |    —    |       —        |                               |
+| 14  | timeline               |   —    |     —      |   —   |    —    |       —        |                               |
+| 15  | team                   |   —    |     —      |   —   |    —    |       —        |                               |
+| 16  | explorer (DB Explorer) |   —    |     —      |   —   |    —    |       —        | lihat #19, #20                |
+| 17  | settings               |   —    |     —      |   —   |    —    |       —        |                               |
+| 18  | users                  |   —    |     —      |   —   |    —    |       —        |                               |
+| 19  | sidebar                |   —    |     —      |   —   |    —    |       —        | kontras gagal, lihat #14      |
+| 20  | backup                 |   —    |     —      |   —   |    —    |       —        |                               |
+| 21  | auth (profil/sesi)     |   —    |     —      |   —   |    —    |       —        |                               |
+
+### 14.2 Alur aplikasi ujung-ke-ujung
+
+Bukan per layar, tapi per **perjalanan pengguna**. Ini yang menangkap kerusakan
+yang tidak terlihat saat membuka layar satu per satu.
+
+| Alur                                               | Status    |
+| -------------------------------------------------- | --------- |
+| Login → dashboard → pilih proyek                   | `TERBUKA` |
+| Buat task → assign → pindah kolom kanban → selesai | `TERBUKA` |
+| Buat sprint → isi task → mulai → selesaikan        | `TERBUKA` |
+| Unggah avatar → tampil di seluruh layar            | `TERBUKA` |
+| Unggah dokumen → unduh kembali                     | `TERBUKA` |
+| Rekam rapat → analisis AI → discussion point       | `TERBUKA` |
+| Buat flowchart → simpan → buka lagi                | `TERBUKA` |
+| Notifikasi & chat realtime (2 sesi berbeda)        | `TERBUKA` |
+| Logout → sesi benar-benar mati                     | `TERBUKA` |
+
+⚠️ **Untuk alur yang menulis data**, pakai objek percobaan terpisah lalu hapus —
+pola yang sudah dipakai: flowchart `ZZ-TEST-REFACTOR` (§12).
+
+### 14.3 Pengukuran ulang yang wajib dilakukan di F3
+
+Angka-angka ini **diwarisi dari audit lama dan belum diverifikasi**:
+
+| Metrik                    | Angka warisan                             | Diukur ulang? |
+| ------------------------- | ----------------------------------------- | ------------- |
+| Kontras sidebar WCAG AA   | 15–16 dari 20 node gagal                  | ❌            |
+| Jarak antar target sentuh | 11 pasang < 8px di 375px                  | ❌            |
+| Layar > 1024px            | belum pernah diuji (panel terbatas 679px) | ❌            |
+
+---
