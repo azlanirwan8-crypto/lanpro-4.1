@@ -273,6 +273,17 @@ async function startServer() {
   });
   app.use("/api/auth/login", loginLimiter);
 
+  // #52 — /api/auth/force-logout adalah pintu KEDUA ke pemeriksa password yang
+  // sama: ia memanggil handleUserAuthentication(username, password) persis
+  // seperti login. Tanpa baris ini, penjaga di atas bisa dilewati cukup dengan
+  // menembak endpoint yang berbeda, dan yang tersisa hanya globalLimiter —
+  // 1000 request / 5 menit, dan itu pun MEMBEBASKAN localhost.
+  //
+  // Sengaja memakai instance loginLimiter yang SAMA, bukan instance baru:
+  // dengan begitu kedua endpoint berbagi satu jatah 10 percobaan gagal per IP,
+  // sehingga menyelang-nyeling keduanya tidak melipatgandakan jatah tebakan.
+  app.use("/api/auth/force-logout", loginLimiter);
+
   // Register memakai pembatas TERPISAH tanpa skipSuccessfulRequests.
   //
   // Pada login, yang perlu dibatasi adalah percobaan GAGAL (tebakan password).
