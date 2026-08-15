@@ -55,45 +55,45 @@ kebutuhan mengevaluasi ulang dari nol setiap kali memulai sesi kerja.
 
 ---
 
-## §1 PAPAN PRIORITAS — 31 item, semuanya berfase
+## §1 PAPAN PRIORITAS — 30 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
 lepas. Catatan lepas selalu terlupakan.
 
-| #   | Temuan                                                                     |  Fase   | Sev | Biaya         | Blokir modul baru? | Status                | Detail |
-| --- | -------------------------------------------------------------------------- | :-----: | :-: | ------------- | :----------------: | --------------------- | ------ |
-| 1   | Tiga sistem migrasi DB hidup berdampingan                                  | **F0**  | 🔴  | Rendah        |         Ya         | `TERBUKA`             | §4     |
-| 12  | ARCHITECTURE.md drift di beberapa angka                                    | **F0**  | 🟡  | Rendah        |  Ya (menyesatkan)  | `TERBUKA`             | §8     |
-| 10  | Schema DB tidak terdokumentasi                                             | **F0**  | 🟠  | Sedang        |         Ya         | `TERBUKA`             | §4     |
-| 2   | Driver `s3` belum pernah dieksekusi                                        | **F1**  | 🔴  | Rendah        | Blokir production  | `MENUNGGU` kredensial | §6     |
-| 15  | Dua Google API key lama belum dicabut                                      | **F1**  | 🔴  | Rendah        |       Tidak        | `MENUNGGU` pemilik    | §6     |
-| 16  | **Logika aplikasi belum pernah diaudit**                                   | **F2**  | 🔴  | Sedang        |         Ya         | `TERBUKA`             | §13    |
-| 18  | notebook-lm rusak di dua sisi                                              | **F2**  | 🟠  | Rendah        |       Tidak        | `MENUNGGU` keputusan  | §6.3   |
-| 19  | `POST /api/db-query` tanpa penjaga read-only                               | **F2**  | 🔴  | Rendah        |       Tidak        | `MENUNGGU` keputusan  | §6.3   |
-| 20  | Kode mati DB Explorer                                                      | **F2**  | 🟡  | Rendah        |       Tidak        | `MENUNGGU` keputusan  | §6.3   |
-| 17  | **UI belum pernah diaudit di balik login**                                 | **F3**  | 🔴  | Sedang        |         Ya         | `MENUNGGU` login      | §14    |
-| 3   | Nol code splitting — 898 KB gzip satu chunk                                | **F4**  | 🔴  | Rendah        |         Ya         | `TERBUKA`             | §5     |
-| 29  | **SSO Google/Microsoft** (poin 1)                                          | **F5**  | 🟢  | Tinggi        |       Tidak        | `TERBUKA`             | §1.5   |
-| 31  | **Login dengan email** — backend siap, frontend memblokir                  | **F5**  | 🟢  | Sangat rendah |       Tidak        | `TERBUKA`             | §1.5   |
-| 22  | `initWhatsAppScheduler` tak pernah dipanggil — digest belum pernah menyala | **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`             | §1.5   |
-| 23  | Fallback token WhatsApp ter-hardcode (langgar §3.2)                        | **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`             | §1.5   |
-| 24  | `EmailConfigForm` 172 baris, nol panggilan API                             | **F6**  | 🟡  | Rendah        |       Tidak        | `TERBUKA`             | §1.5   |
-| 25  | Fondasi `email.service.ts`                                                 | **F6**  | 🟢  | Sedang        |       Tidak        | `TERBUKA`             | §1.5   |
-| 26  | **Email selamat datang** (poin 2)                                          | **F6**  | 🟢  | Rendah        |       Tidak        | `TERBUKA`             | §1.5   |
-| 27  | **Lupa password → password random** (poin 3)                               | **F6**  | 🟢  | Sedang        |       Tidak        | `TERBUKA`             | §1.5   |
-| 28  | **Digest task pending + jumlah** (poin 4)                                  | **F6**  | 🟢  | Rendah        |       Tidak        | `TERBUKA`             | §1.5   |
-| 30  | Drive-per-user (opsional, dinilai ulang setelah F5)                        | **F11** | 🟡  | Tinggi        |       Tidak        | `DITUNDA`             | §1.5   |
-| 4   | ±100 endpoint tanpa validasi skema                                         | **F7**  | 🔴  | Sedang        |   Ya (keamanan)    | `TERBUKA`             | §3     |
-| 9   | Rasio test ±1 : 1.000 baris                                                | **F8**  | 🟠  | Tinggi        |         Ya         | `TERBUKA`             | §7     |
-| 8   | 1.313 `any` melemahkan seluruh jaring tipe                                 | **F8**  | 🟠  | Sedang        |         Ya         | `TERBUKA`             | §7     |
-| 11  | `auth` 762 baris tanpa lapisan apa pun                                     | **F5**  | 🟠  | Rendah        |       Tidak        | `TERBUKA`             | §2     |
-| 6   | 222 query SQL di lapisan rute, repository tak ada                          | **F9**  | 🟠  | Tinggi        |         Ya         | `TERBUKA`             | §3     |
-| 5   | Routing palsu + 47 props di satu persimpangan                              | **F10** | 🔴  | Tinggi        |         Ya         | `TERBUKA`             | §5     |
-| 7   | 59% baris kode di 37 berkas > 500 baris                                    | **F10** | 🟠  | Tinggi        |         Ya         | `TERBUKA`             | §2     |
-| 21  | `authStore` & `uiStore` menganggur                                         | **F10** | 🟡  | Rendah        |       Tidak        | `DITUNDA` (disengaja) | §5.3   |
-| 14  | Kontras sidebar & jarak target sentuh                                      | **F12** | 🟠  | Sedang        |       Tidak        | `TERBUKA`             | §8     |
-| 13  | 28 berkas `dark:` + 48 hex di luar token                                   | **F12** | 🟡  | Sedang        |       Tidak        | `TERBUKA`             | §8     |
+| #   | Temuan                                                                     |  Fase   | Sev | Biaya         | Blokir modul baru? | Status                   | Detail |
+| --- | -------------------------------------------------------------------------- | :-----: | :-: | ------------- | :----------------: | ------------------------ | ------ |
+| 1   | Tiga sistem migrasi DB hidup berdampingan                                  | **F0**  | 🔴  | Rendah        |         Ya         | `TERBUKA`                | §4     |
+| 12  | ARCHITECTURE.md drift di beberapa angka                                    | **F0**  | 🟡  | Rendah        |  Ya (menyesatkan)  | `TERBUKA`                | §8     |
+| 10  | Schema DB tidak terdokumentasi                                             | **F0**  | 🟠  | Sedang        |         Ya         | `TERBUKA`                | §4     |
+| 2   | Driver `s3` belum pernah dieksekusi                                        | **F1**  | 🔴  | Rendah        | Blokir production  | `MENUNGGU` kredensial    | §6     |
+| 15  | Dua Google API key lama belum dicabut                                      | **F1**  | 🔴  | Rendah        |       Tidak        | `MENUNGGU` pemilik       | §6     |
+| 16  | **Logika aplikasi belum pernah diaudit**                                   | **F2**  | 🔴  | Sedang        |         Ya         | `TERBUKA`                | §13    |
+| 18  | notebook-lm rusak di dua sisi                                              | **F2**  | 🟠  | Rendah        |       Tidak        | `MENUNGGU` keputusan     | §6.3   |
+| 19  | `POST /api/db-query` tanpa penjaga read-only                               | **F2**  | 🔴  | Rendah        |       Tidak        | `MENUNGGU` keputusan     | §6.3   |
+| 20  | Kode mati DB Explorer                                                      | **F2**  | 🟡  | Rendah        |       Tidak        | `MENUNGGU` keputusan     | §6.3   |
+| 17  | **UI belum pernah diaudit di balik login**                                 | **F3**  | 🔴  | Sedang        |         Ya         | `MENUNGGU` login         | §14    |
+| 3   | Nol code splitting — 898 KB gzip satu chunk                                | **F4**  | 🔴  | Rendah        |         Ya         | `TERBUKA`                | §5     |
+| 29  | **SSO Google/Microsoft** (poin 1)                                          | **F5**  | 🟢  | Tinggi        |       Tidak        | `TERBUKA`                | §1.5   |
+| 31  | ~~Login dengan email di kolom form~~                                       |  **—**  |  —  | —             |       Tidak        | `DIBATALKAN` 15 Agu 2026 | §1.5   |
+| 22  | `initWhatsAppScheduler` tak pernah dipanggil — digest belum pernah menyala | **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`                | §1.5   |
+| 23  | Fallback token WhatsApp ter-hardcode (langgar §3.2)                        | **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`                | §1.5   |
+| 24  | `EmailConfigForm` 172 baris, nol panggilan API                             | **F6**  | 🟡  | Rendah        |       Tidak        | `TERBUKA`                | §1.5   |
+| 25  | Fondasi `email.service.ts`                                                 | **F6**  | 🟢  | Sedang        |       Tidak        | `TERBUKA`                | §1.5   |
+| 26  | **Email selamat datang** (poin 2)                                          | **F6**  | 🟢  | Rendah        |       Tidak        | `TERBUKA`                | §1.5   |
+| 27  | **Lupa password → password random** (poin 3)                               | **F6**  | 🟢  | Sedang        |       Tidak        | `TERBUKA`                | §1.5   |
+| 28  | **Digest task pending + jumlah** (poin 4)                                  | **F6**  | 🟢  | Rendah        |       Tidak        | `TERBUKA`                | §1.5   |
+| 30  | Drive-per-user (opsional, dinilai ulang setelah F5)                        | **F11** | 🟡  | Tinggi        |       Tidak        | `DITUNDA`                | §1.5   |
+| 4   | ±100 endpoint tanpa validasi skema                                         | **F7**  | 🔴  | Sedang        |   Ya (keamanan)    | `TERBUKA`                | §3     |
+| 9   | Rasio test ±1 : 1.000 baris                                                | **F8**  | 🟠  | Tinggi        |         Ya         | `TERBUKA`                | §7     |
+| 8   | 1.313 `any` melemahkan seluruh jaring tipe                                 | **F8**  | 🟠  | Sedang        |         Ya         | `TERBUKA`                | §7     |
+| 11  | `auth` 762 baris tanpa lapisan apa pun                                     | **F5**  | 🟠  | Rendah        |       Tidak        | `TERBUKA`                | §2     |
+| 6   | 222 query SQL di lapisan rute, repository tak ada                          | **F9**  | 🟠  | Tinggi        |         Ya         | `TERBUKA`                | §3     |
+| 5   | Routing palsu + 47 props di satu persimpangan                              | **F10** | 🔴  | Tinggi        |         Ya         | `TERBUKA`                | §5     |
+| 7   | 59% baris kode di 37 berkas > 500 baris                                    | **F10** | 🟠  | Tinggi        |         Ya         | `TERBUKA`                | §2     |
+| 21  | `authStore` & `uiStore` menganggur                                         | **F10** | 🟡  | Rendah        |       Tidak        | `DITUNDA` (disengaja)    | §5.3   |
+| 14  | Kontras sidebar & jarak target sentuh                                      | **F12** | 🟠  | Sedang        |       Tidak        | `TERBUKA`                | §8     |
+| 13  | 28 berkas `dark:` + 48 hex di luar token                                   | **F12** | 🟡  | Sedang        |       Tidak        | `TERBUKA`                | §8     |
 
 ---
 
@@ -307,6 +307,21 @@ Konsekuensinya: pendaftaran user tetap lewat jalur yang ada sekarang. SSO tidak
 menambah cara baru untuk masuk ke sistem — ia hanya menambah cara baru untuk
 membuktikan identitas user yang **sudah** ada.
 
+##### Alur yang harus dibangun
+
+1. Halaman login menampilkan form username+password **yang ada sekarang**, tanpa
+   perubahan perilaku, **ditambah** dua tombol: "Login with Google" dan
+   "Login with Microsoft".
+2. User mengklik salah satu → diarahkan ke layar pemilihan akun milik provider.
+3. Provider mengembalikan identitas (email + `email_verified`).
+4. LanPro mencocokkan email itu dengan user terdaftar.
+5. **Cocok & memenuhi syarat** → masuk, terbitkan JWT LanPro yang sama seperti
+   login biasa.
+6. **Tidak terdaftar** → tampilkan "Akun Anda belum terdaftar". Berhenti di situ.
+
+⚠️ **Tidak ada metode ketiga.** Mengetik alamat email di kolom username pada form
+biasa **bukan** bagian dari konsep ini — lihat item #31 yang dibatalkan.
+
 ##### Keputusan resmi
 
 | #   | Keputusan             | Ketetapan                                                                        | Kalau salah pilih                               |
@@ -349,51 +364,7 @@ justru di sinilah risikonya, karena akun korban sudah ada.
 **Definisi selesai:** kelima keputusan tertulis di dokumen ini sebagai ketetapan
 resmi.
 
-#### F5.2 · Login dengan email (item #31)
-
-**Backend sudah mendukungnya.** `auth.routes.ts:131` memakai
-`SELECT * FROM Users WHERE username = ? OR email = ?`, jadi email sudah
-diterima sebagai identitas. Yang memblokir ada di frontend:
-
-```
-src/features/auth/AuthScreens.tsx:165
-const filteredVal = rawVal.replace(/[^a-zA-Z]/g, "").slice(0, 10);
-```
-
-Seluruh karakter selain huruf dibuang dan dipotong 10 karakter, sehingga
-`budi@perusahaan.com` berubah menjadi `budiperusa`. Akibatnya login dengan email
-**mustahil dilakukan dari UI walau servernya siap.**
-
-| Pekerjaan                                            | Definisi selesai                                       |
-| ---------------------------------------------------- | ------------------------------------------------------ |
-| Longgarkan validasi input agar menerima email        | Titik, `@`, dan panjang > 10 tidak lagi dibuang        |
-| Ubah label & placeholder                             | "Username atau Email" — user harus tahu keduanya boleh |
-| Pertahankan aturan ketat untuk **pendaftaran**       | Validasi username tetap huruf & maks 10 di form daftar |
-| Pencocokan email **tidak peka huruf besar/kecil**    | `budi@x.com` = `Budi@X.com`                            |
-| Tolak bila query mengembalikan lebih dari satu baris | Lihat peringatan di bawah                              |
-
-⚠️ **Bahaya yang harus ditutup di sini.** `WHERE username = ? OR email = ?`
-bisa mengembalikan **dua baris** bila username seseorang kebetulan sama dengan
-email orang lain. Kode sekarang mengambil `rows[0]` — artinya seseorang berpotensi
-masuk ke akun yang salah. Kondisi ini **belum terverifikasi** apakah mungkin
-terjadi dengan aturan username saat ini (huruf saja, maks 10 karakter, sehingga
-tidak mungkin menyerupai email), tetapi begitu aturan itu dilonggarkan,
-kemungkinannya terbuka.
-
-**Wajib:** bila hasil query lebih dari satu baris, **tolak login** dengan pesan
-netral — jangan pernah menebak baris mana yang dimaksud.
-
-⚠️ Jangan melonggarkan validasi di form **pendaftaran**. Aturan huruf-saja &
-maks 10 karakter di sana justru yang menjaga username tidak pernah menyerupai
-email — itu pengaman untuk peringatan di atas.
-
-**Gerbang:** login dengan username **dan** dengan email sama-sama berhasil di
-browser; beda besar-kecil huruf pada email tetap berhasil; login dengan password
-salah tetap ditolak.
-
----
-
-#### F5.3 · Pecah `auth` jadi berlapis (item #11)
+#### F5.2 · Pecah `auth` jadi berlapis (item #11)
 
 `auth` kini **762 baris, nol lapisan** — satu-satunya fitur berskor 0/4.
 Menempelkan OIDC ke situ menjadikannya ±1.200 baris tanpa struktur, tepat di
@@ -410,7 +381,7 @@ keluaran `tsc` baris-per-baris.
 ⚠️ Verifikasi rute lewat status 401 **tidak valid** — pakai perbandingan
 himpunan rute.
 
-#### F5.4 · Fondasi OIDC generik
+#### F5.3 · Fondasi OIDC generik
 
 Google dan Microsoft sama-sama OpenID Connect → **satu adaptor melayani
 keduanya**; yang berbeda hanya URL discovery dan client id/secret.
@@ -433,7 +404,7 @@ Drive di layar login membuat user menolak consent.
 **Definisi selesai:** `id_token` palsu / kedaluwarsa / salah `aud` **ditolak**,
 dibuktikan lewat test.
 
-#### F5.5 · Provider + kebijakan akun
+#### F5.4 · Provider + kebijakan akun
 
 | Aturan                               | Perilaku                                                     |
 | ------------------------------------ | ------------------------------------------------------------ |
@@ -452,7 +423,7 @@ Google **dan** Microsoft.
 perubahan schema. Tapi **pastikan login password menolak user berpassword
 `NULL`** — jangan sampai string kosong lolos sebagai password sah.
 
-#### F5.6 · Frontend, sesi & pengujian
+#### F5.5 · Frontend, sesi & pengujian
 
 | Pekerjaan                                             | Catatan                                                   |
 | ----------------------------------------------------- | --------------------------------------------------------- |
@@ -639,6 +610,31 @@ Setelah **tiap langkah**, `diff` keluaran `tsc` baris-per-baris.
 
 **Gerbang keluar:** gerbang dasar + klik seluruh menu sidebar di browser +
 refresh di tiap view memuat view yang sama (bukti routing sungguhan).
+
+---
+
+### Item yang dibatalkan
+
+**#31 · Login dengan email di kolom form** — `DIBATALKAN` 15 Agu 2026.
+
+Item ini lahir dari salah tafsir atas permintaan "login dengan email". Yang
+dimaksud pemilik proyek adalah **login lewat akun email Google/Microsoft (SSO)**,
+bukan mengetik alamat email di kolom username. Konsep resmi hanya mengenal dua
+metode login (lihat F5.1).
+
+Barisnya sengaja tidak dihapus dari papan §1 agar alasan pembatalannya tercatat.
+
+Catatan teknis yang tetap berguna: backend sudah menerima email —
+`auth.routes.ts` memakai `WHERE username = ? OR email = ?` — sementara frontend
+membuang semua karakter selain huruf. Keduanya tidak selaras, tetapi **bukan
+celah keamanan**: aturan username saat ini (huruf saja, maks 10 karakter)
+membuat sebuah email tidak mungkin menyamai username siapa pun, dan kolom
+`username` maupun `email` sama-sama `UNIQUE`. Jadi query itu tidak pernah bisa
+mengembalikan dua baris dengan data yang sah.
+
+**Belum terverifikasi** terhadap isi database sungguhan. Bila suatu saat aturan
+username dilonggarkan, tinjau ulang — kode mengambil `rows[0]` tanpa memeriksa
+jumlah baris.
 
 ---
 
