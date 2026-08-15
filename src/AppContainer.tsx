@@ -135,12 +135,7 @@ const chunkArray = <T,>(arr: T[], size: number): T[][] => {
 
 // --- Recharts ---
 import { ensureDate, safeFormat, Button, Input, Textarea } from "./components/ui/CoreUI";
-import {
-  AuthHeroPanel,
-  AuthWatermarkPattern,
-  RegisterScreen,
-  LoginScreen,
-} from "./features/auth/AuthScreens";
+import { AuthHeroPanel, AuthWatermarkPattern, RegisterScreen, LoginScreen } from "./features/auth";
 import { ProfileEditModal } from "./features/users/ProfileEditModal";
 const BROWSER_SESSION_ID = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
 
