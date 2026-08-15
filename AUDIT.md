@@ -217,62 +217,70 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 47 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 55 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
 lepas. Catatan lepas selalu terlupakan.
 
-| #   | Temuan                                                                               |   Fase   | Sev | Biaya         |   Blokir modul baru?    | Status                   | Detail |
-| --- | ------------------------------------------------------------------------------------ | :------: | :-: | ------------- | :---------------------: | ------------------------ | ------ |
-| 1   | ~~Tiga sistem migrasi DB~~ disatukan jadi satu                                       |  **F0**  | 🔴  | Rendah        |           Ya            | `SELESAI` 16 Agu         | §4     |
-| 12  | ~~ARCHITECTURE.md drift~~ angka diukur ulang                                         |  **F0**  | 🟡  | Rendah        |    Ya (menyesatkan)     | `SELESAI` 16 Agu         | §8     |
-| 10  | ~~Schema DB tidak terdokumentasi~~ `docs/DATABASE_SCHEMA.md` dari DB hidup           |  **F0**  | 🟠  | Sedang        |           Ya            | `SELESAI` 16 Agu         | §4     |
-| 2   | Driver `s3` belum pernah dieksekusi                                                  |  **F1**  | 🔴  | Rendah        |    Blokir production    | `MENUNGGU` kredensial    | §6     |
-| 15  | Dua Google API key lama belum dicabut                                                |  **F1**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` pemilik       | §6     |
-| 16  | **Logika aplikasi belum pernah diaudit**                                             |  **F2**  | 🔴  | Sedang        |           Ya            | `TERBUKA`                | §13    |
-| 18  | notebook-lm rusak di dua sisi                                                        |  **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §6.3   |
-| 19  | `POST /api/db-query` tanpa penjaga read-only                                         |  **F2**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §6.3   |
-| 20  | Kode mati DB Explorer                                                                |  **F2**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §6.3   |
-| 17  | **UI belum pernah diaudit di balik login**                                           |  **F3**  | 🔴  | Sedang        |           Ya            | `MENUNGGU` login         | §14    |
-| 3   | ~~Nol code splitting~~ 901 -> 420 KB gzip, 29 chunk                                  |  **F4**  | 🔴  | Rendah        |           Ya            | `SELESAI` 16 Agu         | §5     |
-| 29  | **SSO Google/Microsoft** (poin 1)                                                    |  **F5**  | 🟢  | Tinggi        |          Tidak          | `SELESAI` 15 Agu         | §1.5   |
-| 32  | **Daftar dengan Google/Microsoft** — akun otomatis, status `pending`                 |  **F5**  | 🟢  | Sedang        |          Tidak          | `SELESAI` 15 Agu         | §1.5   |
-| 33  | ~~`getJwtSecret` di `middleware/auth.ts` menarik adapter DB~~ dipindah ke `helpers/` | **F5.3** | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 15 Agu         | §1.5   |
-| 34  | ~~`POST /api/projects` tanpa penjaga peran~~ kini khusus admin                       |  **F5**  | 🔴  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
-| 35  | ~~Tombol "Buat Proyek Baru" di layar kosong tanpa penjaga izin~~                     |  **F5**  | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
-| 36  | ~~Ikon dialog galat memakai tong sampah~~ diganti pengguna-disilang                  |  **F5**  | 🟡  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
-| 37  | ~~`urlFrontend` memercayai `APP_URL` mentah~~ kini divalidasi                        |  **F5**  | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 15 Agu         | §0.3   |
-| 38  | ~~`APP_URL` placeholder~~ diisi + penjaga di doctor                                  |  **F0**  | 🟠  | Sangat rendah |   Ya (CORS produksi)    | `SELESAI` 16 Agu         | §0.6   |
-| 39  | ~~Migrasi gagal senyap~~ kini mengulang + status terbaca                             |  **F0**  | 🔴  | Rendah        |           Ya            | `SELESAI` 16 Agu         | §0.6   |
-| 40  | `tsconfig.json` tanpa `strict` — penyempitan diskriminan boolean tidak bekerja       |  **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`                | §0.6   |
-| 41  | ~~Identitas yatim mengunci email selamanya~~ dibersihkan + FK `ON DELETE CASCADE`    |  **F5**  | 🔴  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
-| 42  | ~~Pembuatan akun SSO menulis 2 tabel tanpa transaksi~~ kini transaksional            |  **F5**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
-| 43  | ~~Callback SSO tak menyetel `currentSessionToken`~~ — login gagal SENYAP             |  **F5**  | 🔴  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
-| 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend         |  **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik       | §0.4   |
-| 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan    |  **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`                | §0.3   |
-| 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — siapa pun ber-Gmail bisa mendaftar                 |  **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik       | §0.4   |
-| 47  | `discussion_point_comments` punya KOLOM KEMBAR camelCase + snake_case                |  **F9**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`                | §0.3   |
-| 48  | ~~5 TABEL KEMBAR huruf kecil~~ dihapus, 35 tabel -> 30                               |  **F0**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
-| 31  | ~~Login dengan email di kolom form~~                                                 |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
-| 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                        | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
-| 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                     | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
-| 24  | ~~`EmailConfigForm` nol panggilan API~~ ditelusuri: TIDAK ada backend email          | **F6.1** | 🟡  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
-| 25  | Fondasi `email.service.ts`                                                           |  **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email  | §1.5   |
-| 26  | **Email selamat datang** (poin 2)                                                    |  **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email  | §1.5   |
-| 27  | **Lupa password → password random** (poin 3)                                         |  **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email  | §1.5   |
-| 28  | **Digest task pending + jumlah** (poin 4)                                            |  **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email  | §1.5   |
-| 30  | Drive-per-user (opsional, dinilai ulang setelah F5)                                  | **F11**  | 🟡  | Tinggi        |          Tidak          | `DITUNDA`                | §1.5   |
-| 4   | ±100 endpoint tanpa validasi skema                                                   |  **F7**  | 🔴  | Sedang        |      Ya (keamanan)      | `TERBUKA`                | §3     |
-| 9   | Rasio test ±1 : 1.000 baris                                                          |  **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`                | §7     |
-| 8   | 1.313 `any` melemahkan seluruh jaring tipe                                           |  **F8**  | 🟠  | Sedang        |           Ya            | `TERBUKA`                | §7     |
-| 11  | ~~`auth` 762 baris tanpa lapisan~~ dipecah                                           | **F5.2** | 🟠  | Rendah        |          Tidak          | `SELESAI` 15 Agu         | §2     |
-| 6   | 222 query SQL di lapisan rute, repository tak ada                                    |  **F9**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`                | §3     |
-| 5   | Routing palsu + 47 props di satu persimpangan                                        | **F10**  | 🔴  | Tinggi        |           Ya            | `TERBUKA`                | §5     |
-| 7   | 59% baris kode di 37 berkas > 500 baris                                              | **F10**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`                | §2     |
-| 21  | `authStore` & `uiStore` menganggur                                                   | **F10**  | 🟡  | Rendah        |          Tidak          | `DITUNDA` (disengaja)    | §5.3   |
-| 14  | Kontras sidebar & jarak target sentuh                                                | **F12**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`                | §8     |
-| 13  | 28 berkas `dark:` + 48 hex di luar token                                             | **F12**  | 🟡  | Sedang        |          Tidak          | `TERBUKA`                | §8     |
+| #   | Temuan                                                                                   |   Fase   | Sev | Biaya         |   Blokir modul baru?    | Status                   | Detail |
+| --- | ---------------------------------------------------------------------------------------- | :------: | :-: | ------------- | :---------------------: | ------------------------ | ------ |
+| 1   | ~~Tiga sistem migrasi DB~~ disatukan jadi satu                                           |  **F0**  | 🔴  | Rendah        |           Ya            | `SELESAI` 16 Agu         | §4     |
+| 12  | ~~ARCHITECTURE.md drift~~ angka diukur ulang                                             |  **F0**  | 🟡  | Rendah        |    Ya (menyesatkan)     | `SELESAI` 16 Agu         | §8     |
+| 10  | ~~Schema DB tidak terdokumentasi~~ `docs/DATABASE_SCHEMA.md` dari DB hidup               |  **F0**  | 🟠  | Sedang        |           Ya            | `SELESAI` 16 Agu         | §4     |
+| 2   | Driver `s3` belum pernah dieksekusi                                                      |  **F1**  | 🔴  | Rendah        |    Blokir production    | `MENUNGGU` kredensial    | §6     |
+| 15  | Dua Google API key lama belum dicabut                                                    |  **F1**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` pemilik       | §6     |
+| 16  | **Logika aplikasi belum pernah diaudit**                                                 |  **F2**  | 🔴  | Sedang        |           Ya            | `TERBUKA`                | §13    |
+| 18  | notebook-lm rusak di dua sisi                                                            |  **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §6.3   |
+| 19  | `POST /api/db-query` tanpa penjaga read-only                                             |  **F2**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §6.3   |
+| 20  | Kode mati DB Explorer                                                                    |  **F2**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §6.3   |
+| 17  | **UI belum pernah diaudit di balik login**                                               |  **F3**  | 🔴  | Sedang        |           Ya            | `MENUNGGU` login         | §14    |
+| 3   | ~~Nol code splitting~~ 901 -> 420 KB gzip, 29 chunk                                      |  **F4**  | 🔴  | Rendah        |           Ya            | `SELESAI` 16 Agu         | §5     |
+| 29  | **SSO Google/Microsoft** (poin 1)                                                        |  **F5**  | 🟢  | Tinggi        |          Tidak          | `SELESAI` 15 Agu         | §1.5   |
+| 32  | **Daftar dengan Google/Microsoft** — akun otomatis, status `pending`                     |  **F5**  | 🟢  | Sedang        |          Tidak          | `SELESAI` 15 Agu         | §1.5   |
+| 33  | ~~`getJwtSecret` di `middleware/auth.ts` menarik adapter DB~~ dipindah ke `helpers/`     | **F5.3** | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 15 Agu         | §1.5   |
+| 34  | ~~`POST /api/projects` tanpa penjaga peran~~ kini khusus admin                           |  **F5**  | 🔴  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
+| 35  | ~~Tombol "Buat Proyek Baru" di layar kosong tanpa penjaga izin~~                         |  **F5**  | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
+| 36  | ~~Ikon dialog galat memakai tong sampah~~ diganti pengguna-disilang                      |  **F5**  | 🟡  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
+| 37  | ~~`urlFrontend` memercayai `APP_URL` mentah~~ kini divalidasi                            |  **F5**  | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 15 Agu         | §0.3   |
+| 38  | ~~`APP_URL` placeholder~~ diisi + penjaga di doctor                                      |  **F0**  | 🟠  | Sangat rendah |   Ya (CORS produksi)    | `SELESAI` 16 Agu         | §0.6   |
+| 39  | ~~Migrasi gagal senyap~~ kini mengulang + status terbaca                                 |  **F0**  | 🔴  | Rendah        |           Ya            | `SELESAI` 16 Agu         | §0.6   |
+| 40  | `tsconfig.json` tanpa `strict` — penyempitan diskriminan boolean tidak bekerja           |  **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`                | §0.6   |
+| 41  | ~~Identitas yatim mengunci email selamanya~~ dibersihkan + FK `ON DELETE CASCADE`        |  **F5**  | 🔴  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
+| 42  | ~~Pembuatan akun SSO menulis 2 tabel tanpa transaksi~~ kini transaksional                |  **F5**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
+| 43  | ~~Callback SSO tak menyetel `currentSessionToken`~~ — login gagal SENYAP                 |  **F5**  | 🔴  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
+| 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend             |  **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik       | §0.4   |
+| 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan        |  **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`                | §0.3   |
+| 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — siapa pun ber-Gmail bisa mendaftar                     |  **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik       | §0.4   |
+| 47  | `discussion_point_comments` punya KOLOM KEMBAR camelCase + snake_case                    |  **F9**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`                | §0.3   |
+| 48  | ~~5 TABEL KEMBAR huruf kecil~~ dihapus, 35 tabel -> 30                                   |  **F0**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
+| 49  | `verifyProjectAccess(['*'])` lolos SEBELUM cek keanggotaan — bocor lintas proyek         |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `TERBUKA`                | §13.5  |
+| 50  | Socket.IO **tanpa autentikasi sama sekali** — tak ada `io.use()` handshake               |  **F2**  | 🔴  | Sedang        | Ya (blokir production)  | `TERBUKA`                | §13.5  |
+| 51  | `FORCE_LOGOUT_EVENT` menyiarkan JWT sah ke SELURUH socket lewat `io.emit`                |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.5  |
+| 52  | `/api/auth/force-logout` memeriksa password TANPA `loginLimiter` — jalur brute force     |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.5  |
+| 53  | `POST /api/auth/logout` tanpa auth, `userId` sembarang → NULL-kan sesi siapa pun         |  **F2**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`                | §13.5  |
+| 54  | `rbac.ts:27` identitas boleh datang dari `x-user-id`/query/body — ranjau impersonasi     |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.5  |
+| 55  | `rbac.ts:50` `!targetProjectId → next()` — RBAC no-op senyap bila nama param berbeda     |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.5  |
+| 56  | Proses Jest mencetak crash `pg` (`isIP` of undefined) saat dibongkar — exit code tetap 0 |  **F8**  | 🟡  | Rendah        |          Tidak          | `TERBUKA`                | §13.5  |
+| 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
+| 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
+| 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
+| 24  | ~~`EmailConfigForm` nol panggilan API~~ ditelusuri: TIDAK ada backend email              | **F6.1** | 🟡  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
+| 25  | Fondasi `email.service.ts`                                                               |  **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email  | §1.5   |
+| 26  | **Email selamat datang** (poin 2)                                                        |  **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email  | §1.5   |
+| 27  | **Lupa password → password random** (poin 3)                                             |  **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email  | §1.5   |
+| 28  | **Digest task pending + jumlah** (poin 4)                                                |  **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email  | §1.5   |
+| 30  | Drive-per-user (opsional, dinilai ulang setelah F5)                                      | **F11**  | 🟡  | Tinggi        |          Tidak          | `DITUNDA`                | §1.5   |
+| 4   | ±100 endpoint tanpa validasi skema                                                       |  **F7**  | 🔴  | Sedang        |      Ya (keamanan)      | `TERBUKA`                | §3     |
+| 9   | Rasio test ±1 : 1.000 baris                                                              |  **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`                | §7     |
+| 8   | 1.313 `any` melemahkan seluruh jaring tipe                                               |  **F8**  | 🟠  | Sedang        |           Ya            | `TERBUKA`                | §7     |
+| 11  | ~~`auth` 762 baris tanpa lapisan~~ dipecah                                               | **F5.2** | 🟠  | Rendah        |          Tidak          | `SELESAI` 15 Agu         | §2     |
+| 6   | 222 query SQL di lapisan rute, repository tak ada                                        |  **F9**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`                | §3     |
+| 5   | Routing palsu + 47 props di satu persimpangan                                            | **F10**  | 🔴  | Tinggi        |           Ya            | `TERBUKA`                | §5     |
+| 7   | 59% baris kode di 37 berkas > 500 baris                                                  | **F10**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`                | §2     |
+| 21  | `authStore` & `uiStore` menganggur                                                       | **F10**  | 🟡  | Rendah        |          Tidak          | `DITUNDA` (disengaja)    | §5.3   |
+| 14  | Kontras sidebar & jarak target sentuh                                                    | **F12**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`                | §8     |
+| 13  | 28 berkas `dark:` + 48 hex di luar token                                                 | **F12**  | 🟡  | Sedang        |          Tidak          | `TERBUKA`                | §8     |
 
 ---
 
@@ -287,7 +295,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 | :-----: | ---------------------------------- | ------------------------------------ | ---- | ----------------- | --------------------------------- | ----------------- |
 | **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10, #38, #39               | 1–2  | Sangat rendah     | —                                 | `SELESAI` 16 Agu  |
 | **F1**  | Storage minimal — buka jalan rilis | #2, #15                              | 1–2  | Rendah            | **Ya** — kredensial & 1 keputusan | `MENUNGGU`        |
-| **F2**  | Audit & perbaikan LOGIKA           | #16, #18, #19, #20                   | 3–5  | Rendah            | **Ya** — 3 keputusan              | `TERBUKA`         |
+| **F2**  | Audit & perbaikan LOGIKA           | #16, #18, #19, #20, #49–#55          | 3–5  | Rendah            | **Ya** — 3 keputusan              | `JALAN` gel. 1    |
 | **F3**  | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | **Ya** — login                    | `MENUNGGU`        |
 | **F4**  | Performa muat                      | #3                                   | 1    | Rendah–sedang     | —                                 | `SELESAI` 16 Agu  |
 | **F5**  | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | **Ya** — 5 keputusan + login uji  | `SELESAI` 16 Agu  |
@@ -1574,17 +1582,17 @@ Tabel ini adalah daftar kerja F2. Isi kolom `Status` sambil jalan.
 
 ### 13.1 Yang belum pernah diperiksa
 
-| Area                                          | Kenapa berisiko                                                                                            | Status    |
-| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------- |
-| RBAC / permission per peran                   | `hasPermission` dioper sebagai prop ke seluruh view; satu kekeliruan membocorkan fitur ke peran yang salah | `TERBUKA` |
-| 104 endpoint                                  | Tak satu pun diuji perilakunya                                                                             | `TERBUKA` |
-| Perhitungan (progress, sprint, KPI, timeline) | Salah hitung tidak melempar error — ia hanya menampilkan angka keliru                                      | `TERBUKA` |
-| Alur state antar view                         | 21 `useState` + 21 `useEffect` di `AppContainer`, dioper 47 props                                          | `TERBUKA` |
-| Socket.IO realtime                            | Pemancaran event sebagian di `runAIPipeline()` yang jalan **setelah** response terkirim                    | `TERBUKA` |
-| Race condition / concurrency                  | Ada 1 test, belum ditelaah cakupannya                                                                      | `TERBUKA` |
-| Alur unggah–simpan–tampil berkas              | Baru dibaca kodenya (§6.1), belum dijalankan                                                               | `TERBUKA` |
-| Penanganan error & rollback transaksi         | Belum ditelaah                                                                                             | `TERBUKA` |
-| Kedaluwarsa & refresh JWT                     | Belum ditelaah                                                                                             | `TERBUKA` |
+| Area                                          | Kenapa berisiko                                                                                            | Status                                                                                              |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| RBAC / permission per peran                   | `hasPermission` dioper sebagai prop ke seluruh view; satu kekeliruan membocorkan fitur ke peran yang salah | `JALAN` — sisi server ditelaah, temuan #49/#54/#55 (§13.5); sisi klien belum                        |
+| 104 endpoint                                  | Tak satu pun diuji perilakunya                                                                             | `TERBUKA`                                                                                           |
+| Perhitungan (progress, sprint, KPI, timeline) | Salah hitung tidak melempar error — ia hanya menampilkan angka keliru                                      | `TERBUKA`                                                                                           |
+| Alur state antar view                         | 21 `useState` + 21 `useEffect` di `AppContainer`, dioper 47 props                                          | `TERBUKA`                                                                                           |
+| Socket.IO realtime                            | Pemancaran event sebagian di `runAIPipeline()` yang jalan **setelah** response terkirim                    | `JALAN` — autentikasi handshake ditelaah, temuan #50/#51 (§13.5); urutan emit `runAIPipeline` belum |
+| Race condition / concurrency                  | Ada 1 test, belum ditelaah cakupannya                                                                      | `TERBUKA`                                                                                           |
+| Alur unggah–simpan–tampil berkas              | Baru dibaca kodenya (§6.1), belum dijalankan                                                               | `TERBUKA`                                                                                           |
+| Penanganan error & rollback transaksi         | Belum ditelaah                                                                                             | `TERBUKA`                                                                                           |
+| Kedaluwarsa & refresh JWT                     | Belum ditelaah                                                                                             | `JALAN` — penegakan sesi tunggal ditelaah, temuan #52/#53 (§13.5); alur refresh belum               |
 
 ### 13.2 Urutan telaah yang disarankan
 
@@ -1616,6 +1624,147 @@ di papan §1.
 | 18  | notebook-lm membaca kunci token `'token'` (seharusnya `'lanpro_jwt_token'`) → header kosong → 401. Juga memanggil `GET /api/projects/:id/wiki` yang tidak ada di backend | Perbaikannya kecil tapi **mengubah perilaku**                            |
 | 19  | `POST /api/db-query` aktif **tanpa** penjaga read-only; versi bergaris-pengaman ada tapi mati di `server/routes/db-admin.routes.ts`                                      | Mengaktifkan penjaga **mematikan** fitur ubah/hapus baris di DB Explorer |
 | 20  | Kode mati DB Explorer: toggle mode DB + request sia-sia tiap mount                                                                                                       | Perlu konfirmasi memang tak terpakai                                     |
+
+---
+
+### 13.5 Temuan audit F2 — gelombang 1 (auth · RBAC · socket), 16 Agu 2026
+
+Baseline diukur ulang lebih dulu dan **cocok persis** dengan §0.1: `tsc` 0 error,
+184 test / 19 suite (exit 0), build sukses, doctor SIAP JALAN (1 peringatan
+`STORAGE_DRIVER=local`). Jadi seluruh temuan di bawah ada pada kondisi "sehat"
+menurut gerbang dasar — persis pola yang §0 peringatkan.
+
+Semua temuan berikut **hasil pembacaan kode**, belum ada yang dieksekusi
+terhadap server hidup. Statusnya: **belum terverifikasi lewat percobaan nyata.**
+Tidak ada satu baris source pun diubah untuk audit ini.
+
+#### #49 🔴 `verifyProjectAccess(['*'])` lolos sebelum cek keanggotaan
+
+`server/middleware/rbac.ts:46`
+
+```ts
+if (req.user && allowedRoles.includes("*")) {
+  return next(); // <- keluar SEBELUM baris 52 (owner) & 57 (member)
+}
+```
+
+Cek pemilik proyek (baris 52) dan keanggotaan `ProjectMembers` (baris 57) berada
+**sesudahnya**, jadi tidak pernah dijalankan untuk rute `['*']`. Akibatnya `['*']`
+berarti "siapa pun yang punya JWT", bukan "anggota proyek dengan peran apa pun".
+
+Bahwa ini menyimpang dari maksud terlihat dari kontras di rute daftar proyek —
+`server/routes/project.routes.ts:29-38` menyaring ketat untuk non-admin:
+
+```sql
+WHERE p.ownerId = ? OR pm.userId = ?
+```
+
+Jadi daftar proyek disaring, tetapi detail dan seluruh isinya tidak. Rute `['*']`
+yang terdampak (dihitung dari definisi rute, bukan perkiraan): `project` 3,
+`task` 6, `qa` 13, `meetings` 5, `documents` 5, `discussion-points` 4,
+`milestones` 1, `sprints` 1. Termasuk `GET /api/projects/:projectId/documents/:id/download`
+dan `GET /api/projects/:projectId/meetings/:id/download`.
+
+Rute dengan daftar peran eksplisit (`['admin','manager','head']`) **tidak**
+terdampak — keduanya benar-benar sampai ke cek keanggotaan. Kecuali
+`project.routes.ts:199`, yang mencantumkan `"*"` di ujung daftar perannya
+sehingga ikut korslet.
+
+#### #50 🔴 Socket.IO tanpa autentikasi sama sekali
+
+`server.ts:580` — `io.on("connection", ...)` dipasang **tanpa** `io.use()`
+handshake di mana pun. Tidak ada verifikasi JWT pada koneksi socket. Akibat yang
+terbaca dari kodenya:
+
+| Baris                                        | Perilaku                                                                                      |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `server.ts:661` `join_project`               | Masuk room proyek mana pun hanya dengan menebak `projectId`; tidak ada cek keanggotaan        |
+| `server.ts:377` `io.emit("data_changed", …)` | Setiap POST/PUT/DELETE menyiarkan path URL ke SELURUH klien, termasuk yang tak terautentikasi |
+| `server.ts:637` `send_message`               | `senderId` diambil apa adanya dari payload — pesan bisa dikirim atas nama siapa pun           |
+| `server.ts:644` `receiverId === "group"`     | Menyiarkan ke seluruh socket                                                                  |
+| `server.ts:606` `join_presence`              | Profil pengguna diambil apa adanya dari payload                                               |
+
+#### #51 🔴 `FORCE_LOGOUT_EVENT` menyiarkan JWT sah ke seluruh socket
+
+`server/routes/auth.routes.ts:250`
+
+```ts
+io.emit("FORCE_LOGOUT_EVENT", { userId, newToken: token, ... });
+```
+
+`io.emit` = **semua** klien yang terhubung, bukan hanya pemilik akun. `token`
+adalah JWT yang baru saja diterbitkan dan sah selama 2 jam. Digabung dengan #50
+(socket tidak terautentikasi), penerimanya tidak perlu login sama sekali.
+
+#### #52 🔴 `/api/auth/force-logout` memeriksa password tanpa pembatas laju
+
+`server/routes/auth.routes.ts:179` memanggil `handleUserAuthentication(username,
+password)` — verifikasi password penuh. Tapi `loginLimiter` hanya dipasang di
+`/api/auth/login` (`server.ts:274`) dan `registerLimiter` di `/api/auth/register`
+(`server.ts:293`). Yang tersisa untuk force-logout hanya `globalLimiter`
+(1000 request / 5 menit) — dan globalLimiter **membebaskan localhost**
+(`server.ts:243-247`), sementara loginLimiter sengaja tidak.
+
+Komentar di `server.ts:252-256` sudah menyatakan alasannya sendiri: 1000
+percobaan per IP "tidak menahan brute force sama sekali". Endpoint ini adalah
+jalur kedua ke pemeriksa password yang sama, tanpa penjaga itu.
+
+#### #53 🟠 `POST /api/auth/logout` tanpa auth menerima `userId` sembarang
+
+`server/routes/auth.routes.ts:267-275`. Tidak ada `authenticateJWT` (dan ia
+berada di bawah prefix publik `/api/auth`, `server.ts:362`). `userId` diambil
+dari body lalu:
+
+```sql
+UPDATE Users SET currentSessionToken = NULL WHERE id = ?
+```
+
+`authenticateJWT` hanya menolak bila `currentToken` **terisi** dan berbeda
+(`server/middleware/auth.ts:82`). Menge-NULL-kannya karena itu **melemahkan**
+penegakan sesi tunggal: token lama yang tadinya sudah tergantikan menjadi
+berlaku kembali sampai kedaluwarsa. Bisa dipanggil siapa saja untuk user mana pun.
+
+#### #54 🟠 `rbac.ts:27` identitas boleh datang dari header/query/body
+
+```ts
+let userId =
+  req.user?.id || req.user?.uid || req.headers["x-user-id"] || req.query.userId || req.body.userId;
+```
+
+Bila `userId` itu ketemu di tabel `Users` dan perannya `admin`, baris 41 langsung
+`return next()`. **Saat ini tertutup** oleh gerbang global `authenticateJWT`
+(`server.ts:360-368`) yang selalu mengisi `req.user.id`, jadi jalur cadangan itu
+tidak tercapai — sudah saya periksa, seluruh rute ber-`verifyProjectAccess`
+berada di bawah `/api/` dan di luar daftar publik. Tetapi ini ranjau: satu rute
+baru di luar gerbang, atau satu perubahan pada daftar prefix publik, dan
+impersonasi admin cukup dengan menambah satu header.
+
+#### #55 🟡 `rbac.ts:50` `!targetProjectId → next()`
+
+`targetProjectId` hanya dibaca dari `req.params.projectId` atau `req.params.id`.
+Bila tak satu pun ada, middleware **meloloskan** permintaan. Saya sudah
+memeriksa seluruh 46 rute ber-`verifyProjectAccess`: semuanya punya `:projectId`
+atau `:id`, jadi **saat ini tidak tereksploitasi**. Yang jadi masalah: rute baru
+dengan nama param lain (`:taskId`, `:qaId`) akan membuat RBAC-nya mati **senyap**
+— tanpa error, tanpa log.
+
+#### #56 🟡 Proses Jest mencetak crash `pg` saat dibongkar
+
+`npm test` mencetak `TypeError: Cannot read properties of undefined (reading
+'isIP')` dari `node_modules/pg/lib/connection.js:116` disertai jejak
+`Connection.upgradeToSSL`. **Exit code tetap 0** dan 184 test tetap lulus, jadi
+ini bukan kegagalan test — tapi polanya sama dengan insiden `getJwtSecret` di
+§0.3: ada suite yang membuka koneksi Postgres sungguhan lalu tersambung setelah
+Jest membongkar lingkungannya. Dibiarkan, ia bisa berubah jadi exit code 1 yang
+membingungkan seperti dulu. Dimasukkan ke **F8** (jaring pengaman), bukan F2.
+
+#### Yang BELUM disentuh gelombang ini
+
+Dari 9 area §13.1, gelombang 1 hanya menutup RBAC (sebagian), Socket.IO
+(sebagian), dan kedaluwarsa/sesi JWT (sebagian). Masih `TERBUKA` penuh:
+104 endpoint, perhitungan (progress/sprint/KPI/timeline), alur state antar view,
+race condition, alur unggah–simpan–tampil, penanganan error & rollback transaksi.
+Urutan berikutnya menurut §13.2: `task` (46 query) → `qa` (33) → `project` (30).
 
 ---
 
