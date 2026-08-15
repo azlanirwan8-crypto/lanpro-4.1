@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { kirimLengkapiPendaftaran } from "./services/sso.service";
+import { usulkanUsername } from "./lib/ssoUsername";
 import type { CompleteRegistrationScreenProps } from "./types";
 
 /**
@@ -26,7 +27,12 @@ export const CompleteRegistrationScreen = ({
   onSelesai,
   onBatal,
 }: CompleteRegistrationScreenProps) => {
-  const [username, setUsername] = useState("");
+  // Kolom sudah terisi usulan dari email, TETAPI tetap bisa diubah. Mengunci
+  // usulan akan membuat pengguna mentok bila nama itu sudah dipakai orang lain
+  // — dan itu tidak jarang, karena pemotongan 10 karakter membuat nama yang
+  // mirip bertabrakan.
+  const [username, setUsername] = useState(() => usulkanUsername(email));
+  const [adaUsulan] = useState(() => usulkanUsername(email) !== "");
   const [galat, setGalat] = useState<string | null>(null);
   const [mengirim, setMengirim] = useState(false);
   const [berhasil, setBerhasil] = useState<string | null>(null);
@@ -140,6 +146,13 @@ export const CompleteRegistrationScreen = ({
                        text-sm text-content transition-colors duration-150
                        focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
+          {/* Keterangan hanya muncul bila memang ada usulan. Menampilkan
+              "kami sarankan" pada kolom kosong justru membingungkan. */}
+          {adaUsulan && (
+            <p className="mt-1 text-xs text-content-muted">
+              Kami sarankan dari email Anda. Silakan ubah bila ingin nama lain.
+            </p>
+          )}
         </div>
 
         {galat && (
