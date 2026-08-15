@@ -84,28 +84,34 @@ const KEMBAR = {
     L.push("");
     L.push("---");
     L.push("");
-    L.push("## 🔴 Tabel kembar — jangan dipakai");
+    L.push("## Tabel kembar — pelajaran yang tetap berlaku");
     L.push("");
     L.push("PostgreSQL memperlakukan `\"MasterData\"` dan `masterdata` sebagai **dua tabel");
     L.push("berbeda**: identifier tanpa kutip otomatis diubah menjadi huruf kecil.");
     L.push("");
     L.push("Repo ini pernah punya dua sistem migrasi. `pg-migrate.ts` menulis nama tabel");
     L.push("**dengan** kutip, sementara `server/migrations/runner.ts` menulisnya **tanpa**");
-    L.push("kutip. Keduanya berjalan pada database yang sama, sehingga tiap tabel");
-    L.push("terbentuk dua kali dalam dua ejaan.");
+    L.push("kutip. Keduanya berjalan pada database yang sama, sehingga lima tabel");
+    L.push("terbentuk dua kali dalam dua ejaan — dan varian huruf kecilnya selalu kosong,");
+    L.push("karena seluruh kueri aplikasi lewat adapter yang mengutip nama tabel.");
     L.push("");
-    L.push("`runner.ts` sudah dihapus 16 Agu 2026, jadi tabel kembar tidak akan lahir");
-    L.push("lagi. Yang sudah terlanjur ada masih tertinggal:");
-    L.push("");
-    L.push("| Kembar (kosong) | Yang dipakai | Baris di yang dipakai |");
-    L.push("|---|---|---:|");
-    for (const k of kembarAda) {
-      L.push(`| \`${k}\` | \`"${KEMBAR[k]}"\` | ${baris[KEMBAR[k]] ?? "?"} |`);
+    if (kembarAda.length === 0) {
+      L.push("**Keadaan sekarang: bersih.** `runner.ts` dihapus 16 Agu 2026 sehingga");
+      L.push("kembaran tidak akan lahir lagi, dan lima tabel yang terlanjur ada sudah");
+      L.push("dihapus pada hari yang sama (item #48). Strukturnya tercatat di");
+      L.push("`docs/legacy/tabel-kembar-dihapus-2026-08-16.md`.");
+    } else {
+      L.push("**Masih tertinggal:**");
+      L.push("");
+      L.push("| Kembar (kosong) | Yang dipakai | Baris di yang dipakai |");
+      L.push("|---|---|---:|");
+      for (const k of kembarAda) {
+        L.push(`| \`${k}\` | \`"${KEMBAR[k]}"\` | ${baris[KEMBAR[k]] ?? "?"} |`);
+      }
+      L.push("");
+      L.push("Seluruhnya kosong, tetapi `DROP TABLE` bersifat permanen sehingga menunggu");
+      L.push("persetujuan pemilik proyek (item #48).");
     }
-    L.push("");
-    L.push("Seluruhnya **kosong** — tidak ada data yang akan hilang bila dibuang. Tetapi");
-    L.push("`DROP TABLE` bersifat permanen, jadi menunggu persetujuan pemilik proyek");
-    L.push("(item #48).");
     L.push("");
     L.push("---");
     L.push("");
