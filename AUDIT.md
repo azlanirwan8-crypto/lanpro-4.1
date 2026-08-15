@@ -55,7 +55,7 @@ kebutuhan mengevaluasi ulang dari nol setiap kali memulai sesi kerja.
 
 ---
 
-## §1 PAPAN PRIORITAS — 30 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 31 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -75,6 +75,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 17  | **UI belum pernah diaudit di balik login**                                 | **F3**  | 🔴  | Sedang        |         Ya         | `MENUNGGU` login         | §14    |
 | 3   | Nol code splitting — 898 KB gzip satu chunk                                | **F4**  | 🔴  | Rendah        |         Ya         | `TERBUKA`                | §5     |
 | 29  | **SSO Google/Microsoft** (poin 1)                                          | **F5**  | 🟢  | Tinggi        |       Tidak        | `TERBUKA`                | §1.5   |
+| 32  | **Daftar dengan Google/Microsoft** — akun otomatis, status `pending`       | **F5**  | 🟢  | Sedang        |       Tidak        | `TERBUKA`                | §1.5   |
 | 31  | ~~Login dengan email di kolom form~~                                       |  **—**  |  —  | —             |       Tidak        | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | `initWhatsAppScheduler` tak pernah dipanggil — digest belum pernah menyala | **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`                | §1.5   |
 | 23  | Fallback token WhatsApp ter-hardcode (langgar §3.2)                        | **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`                | §1.5   |
@@ -322,25 +323,117 @@ membuktikan identitas user yang **sudah** ada.
 ⚠️ **Tidak ada metode ketiga.** Mengetik alamat email di kolom username pada form
 biasa **bukan** bagian dari konsep ini — lihat item #31 yang dibatalkan.
 
+##### Konsep PENDAFTARAN — ditetapkan 15 Agu 2026
+
+Selain login, **pendaftaran** juga punya dua jalur:
+
+| Jalur                                 | Cara                     | Hasil                                        |
+| ------------------------------------- | ------------------------ | -------------------------------------------- |
+| 1. Form pendaftaran                   | Yang berjalan sekarang   | Akun dibuat                                  |
+| 2. "Daftar dengan Google / Microsoft" | Klik tombol → pilih akun | Akun dibuat **otomatis**, `status = pending` |
+
+Akun hasil jalur 2 **belum bisa dipakai** sampai admin memvalidasinya — sama
+seperti jalur 1 yang juga berstatus `pending`.
+
+**Perbedaan tombol LOGIN dan tombol DAFTAR — jangan tertukar:**
+
+| Tombol                             | Email belum terdaftar                                                |
+| ---------------------------------- | -------------------------------------------------------------------- |
+| **Login** with Google/Microsoft    | **Tolak** + pesan "Akun Anda belum terdaftar". Tidak membuat apa pun |
+| **Daftar** dengan Google/Microsoft | **Buat akun** berstatus `pending`                                    |
+
+⚠️ **Konsekuensi keamanan: batas domain kembali WAJIB.**
+
+Selama SSO hanya untuk login, daftar user sudah berfungsi sebagai allowlist
+sehingga batas domain cukup bersifat opsional. Dengan adanya daftar-via-SSO,
+alasan itu gugur: siapa pun ber-Gmail bisa membuat akun. Walau berstatus
+`pending`, dampaknya nyata — tabel `Users` bisa dibanjiri, admin menerima
+antrean persetujuan tak berujung, dan ini menjadi endpoint tulis yang dapat
+dipanggil tanpa autentikasi.
+
+Wajib menyertainya:
+
+| Pengaman                    | Catatan                                                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Daftar domain diizinkan** | Dari env. Di luar daftar → tolak                                                                                                     |
+| **Rate limit**              | Pakai `registerLimiter` yang ada — 5/jam, `skipSuccessfulRequests` **mati**, karena pada register justru keberhasilan yang berbahaya |
+| **`email_verified=true`**   | Tanpa ini, orang bisa mendaftar memakai alamat email orang lain                                                                      |
+| **Email sudah terdaftar**   | Tolak dengan pesan jelas, jangan buat duplikat                                                                                       |
+
+##### Username untuk akun SSO — DITETAPKAN: opsi C
+
+Pendaftaran sekarang mewajibkan `username`: `UNIQUE NOT NULL`, **huruf saja,
+maksimal 10 karakter** (skema zod di `auth.routes.ts`). Google dan Microsoft
+hanya memberi **email dan nama** — tidak ada username.
+
+| Opsi                                          | Contoh untuk `budi.santoso@perusahaan.com` | Masalah                                   |
+| --------------------------------------------- | ------------------------------------------ | ----------------------------------------- |
+| A · Otomatis dari nama                        | `budisantos`                               | Tabrakan bila sudah dipakai               |
+| B · Otomatis + angka bila bentrok             | `budisanto2`                               | Username jadi tidak enak dibaca           |
+| **C · Tanya user setelah SSO** ✅ **DIPILIH** | user memilih sendiri                       | Satu layar tambahan, tapi paling bersih   |
+| D · Longgarkan aturan, pakai email            | `budi.santoso@…`                           | **Membatalkan pengaman** — jangan dipakai |
+
+⚠️ **Opsi D jangan dipilih.** Aturan huruf-saja maks 10 karakter itulah yang
+membuat sebuah email tidak mungkin menyamai username siapa pun. Melonggarkannya
+membuka kemungkinan query pencocokan identitas mengembalikan lebih dari satu
+baris, sementara kode mengambil `rows[0]`.
+
+**Ketetapan pemilik proyek: opsi C.** Setelah provider mengembalikan identitas,
+user diarahkan ke satu layar "Lengkapi Pendaftaran" untuk memilih username
+sendiri. Aturan lama tetap utuh: huruf saja, maksimal 10 karakter, unik.
+
+Yang harus dibangun karena pilihan ini:
+
+| Komponen                                | Catatan                                                                           |
+| --------------------------------------- | --------------------------------------------------------------------------------- |
+| Layar "Lengkapi Pendaftaran"            | Menampilkan email & nama dari provider (tidak bisa diubah), user mengisi username |
+| Validasi username **langsung di layar** | Huruf saja, maks 10, dan **cek ketersediaan** sebelum kirim                       |
+| State sementara antar langkah           | Identitas provider harus bertahan sampai username dipilih, **berbatas waktu**     |
+| Penanganan user membatalkan             | Jangan tinggalkan akun setengah jadi di database                                  |
+
+⚠️ **Akun baru dibuat setelah username dipilih, bukan sebelumnya.** Bila akun
+dibuat lebih dulu lalu user menutup layar, tabel `Users` akan terisi baris tanpa
+username yang melanggar `NOT NULL` — atau lebih buruk, terisi username
+sementara yang tidak pernah diperbaiki.
+
+⚠️ State sementara itu **jangan** disimpan di localStorage tanpa tanda tangan —
+isinya menentukan identitas akun yang akan dibuat.
+
+##### Password untuk akun SSO
+
+Akun hasil daftar-SSO tidak punya password. `Users.passwordHash` sudah nullable
+sehingga tidak perlu perubahan schema — **tetapi endpoint login password wajib
+menolak user berpassword `NULL`.** Jangan sampai string kosong lolos sebagai
+password yang sah.
+
+##### Email selamat datang
+
+Akun yang lahir lewat jalur SSO juga harus menerima email selamat datang
+(item #26, fase F6). Isinya harus jujur menyebut status `pending` —
+"berhasil daftar, menunggu persetujuan admin", bukan "akun aktif".
+
 ##### Keputusan resmi
 
-| #   | Keputusan             | Ketetapan                                                                        | Kalau salah pilih                               |
-| --- | --------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------- |
-| 1   | Provider              | **Google & Microsoft** — keduanya OIDC, satu adaptor generik melayani dua-duanya | Pilih satu lalu menambah nanti = rombak adaptor |
-| 2   | Penautan akun         | Tautkan ke akun yang ada **HANYA bila `email_verified=true`** dari provider      | Tanpa syarat itu → **pengambilalihan akun**     |
-| 3   | Email tidak terdaftar | **Tolak + tampilkan notifikasi.** Jangan buat akun                               | Auto-daftar = pintu masuk tanpa penjaga         |
-| 4   | Batas domain          | **Opsional** — lihat catatan di bawah                                            | —                                               |
-| 5   | Password lama         | Tetap hidup berdampingan                                                         | Mematikannya mengunci user tanpa akun provider  |
+| #   | Keputusan             | Ketetapan                                                                                                                                        | Kalau salah pilih                                  |
+| --- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| 1   | Provider              | **Google & Microsoft** — keduanya OIDC, satu adaptor generik melayani dua-duanya                                                                 | Pilih satu lalu menambah nanti = rombak adaptor    |
+| 2   | Penautan akun         | Tautkan ke akun yang ada **HANYA bila `email_verified=true`** dari provider                                                                      | Tanpa syarat itu → **pengambilalihan akun**        |
+| 3   | Email tidak terdaftar | **Tolak + tampilkan notifikasi.** Jangan buat akun                                                                                               | Auto-daftar = pintu masuk tanpa penjaga            |
+| 4   | Batas domain          | **WAJIB** — daftar domain diizinkan, dari env. (Sempat diturunkan jadi opsional saat SSO hanya untuk login; naik lagi karena ada daftar-via-SSO) | Tanpa batas, siapa pun ber-Gmail bisa membuat akun |
+| 5   | Password lama         | Tetap hidup berdampingan                                                                                                                         | Mematikannya mengunci user tanpa akun provider     |
 
-##### Catatan atas keputusan #4
+##### Riwayat keputusan #4 — kenapa sempat berubah dua kali
 
-Sebelum konsep di atas ditetapkan, daftar domain diizinkan bersifat **wajib** —
-karena tanpa itu siapa pun ber-Gmail bisa mendaftar lewat SSO.
+Dicatat supaya alasannya tidak hilang, dan supaya tidak ada yang menurunkannya
+lagi tanpa menyadari akibatnya.
 
-Dengan keputusan #3, kebutuhan itu **hilang**: yang bisa masuk hanyalah email
-yang sudah terdaftar, sehingga **daftar user itu sendiri sudah menjadi
-allowlist**. Batas domain kini hanya lapis pertahanan tambahan, bukan syarat.
-Boleh ditambahkan, boleh tidak.
+| Tahap                                 | Status         | Alasan                                                                                   |
+| ------------------------------------- | -------------- | ---------------------------------------------------------------------------------------- |
+| Awal                                  | **Wajib**      | Tanpa batas, siapa pun ber-Gmail bisa mendaftar lewat SSO                                |
+| Saat SSO ditetapkan hanya untuk login | Opsional       | Yang bisa masuk hanya email terdaftar, sehingga daftar user sendiri sudah jadi allowlist |
+| **Setelah daftar-via-SSO ditetapkan** | **Wajib lagi** | Alasan di atas gugur — pendaftaran otomatis membuka kembali pintu bagi email mana pun    |
+
+Yang berubah adalah konsepnya, bukan analisanya.
 
 ##### Pesan notifikasi yang dibutuhkan
 
@@ -406,14 +499,16 @@ dibuktikan lewat test.
 
 #### F5.4 · Provider + kebijakan akun
 
-| Aturan                               | Perilaku                                                     |
-| ------------------------------------ | ------------------------------------------------------------ |
-| `email_verified=false`               | **Tolak**, jangan tautkan                                    |
-| Email cocok user yang ada            | Tautkan — simpan `provider` + `sub`                          |
-| **Email belum terdaftar**            | **TOLAK + notifikasi.** Jangan buat akun (ketetapan F5.1 #3) |
-| Akun ada tapi belum aktif            | Tolak, pesan "menunggu persetujuan admin"                    |
-| Domain di luar daftar (bila dipakai) | Tolak dengan pesan jelas                                     |
-| `sub` sudah tertaut user lain        | Tolak — jangan pindahkan tautan diam-diam                    |
+| Aturan                                    | Perilaku                                                                                   |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `email_verified=false`                    | **Tolak**, jangan tautkan                                                                  |
+| Email cocok user yang ada                 | Tautkan — simpan `provider` + `sub`                                                        |
+| **Email belum terdaftar — tombol LOGIN**  | **TOLAK + notifikasi.** Jangan buat akun                                                   |
+| **Email belum terdaftar — tombol DAFTAR** | Lanjut ke layar "Lengkapi Pendaftaran"; akun dibuat `pending` **setelah** username dipilih |
+| Domain di luar daftar yang diizinkan      | **TOLAK** — berlaku untuk kedua tombol                                                     |
+| Akun ada tapi belum aktif                 | Tolak, pesan "menunggu persetujuan admin"                                                  |
+| Domain di luar daftar (bila dipakai)      | Tolak dengan pesan jelas                                                                   |
+| `sub` sudah tertaut user lain             | Tolak — jangan pindahkan tautan diam-diam                                                  |
 
 **Skema:** tabel `UserIdentities` (`user_id`, `provider`, `sub`, unik pada
 `provider+sub`) — **bukan** kolom baru di `Users`, supaya satu user bisa punya
@@ -439,17 +534,21 @@ kosong.
 
 **Gerbang keluar F5** (selain gerbang dasar):
 
-| Uji                                 | Harus                                              |
-| ----------------------------------- | -------------------------------------------------- |
-| Login Google akun terdaftar         | Masuk, JWT terbit                                  |
-| Login Microsoft akun terdaftar      | Masuk                                              |
-| Email di luar domain                | Ditolak, pesan jelas                               |
-| `email_verified=false`              | Ditolak                                            |
-| Email belum terdaftar               | Ditolak + notifikasi jelas, **tidak** membuat akun |
-| Ikon Google & Microsoft di Sign In  | Tampil, ≥44px, pakai token warna                   |
-| `id_token` palsu/kedaluwarsa        | Ditolak — **uji di salinan luar repo**             |
-| **Login password lama masih jalan** | ✅ wajib                                           |
-| Force-logout                        | Sesi SSO ikut mati                                 |
+| Uji                                              | Harus                                                                             |
+| ------------------------------------------------ | --------------------------------------------------------------------------------- |
+| Login Google akun terdaftar                      | Masuk, JWT terbit                                                                 |
+| Login Microsoft akun terdaftar                   | Masuk                                                                             |
+| Email di luar domain                             | Ditolak, pesan jelas                                                              |
+| `email_verified=false`                           | Ditolak                                                                           |
+| Email belum terdaftar → tombol LOGIN             | Ditolak + notifikasi jelas, **tidak** membuat akun                                |
+| Email belum terdaftar → tombol DAFTAR            | Layar "Lengkapi Pendaftaran" muncul; akun jadi `pending` setelah username dipilih |
+| User membatalkan di layar "Lengkapi Pendaftaran" | **Tidak ada baris tersisa** di tabel `Users`                                      |
+| Email di luar domain → tombol DAFTAR             | Ditolak, tidak membuat akun                                                       |
+| Daftar berulang dengan email sama                | Ditolak, tidak membuat duplikat                                                   |
+| Ikon Google & Microsoft di Sign In               | Tampil, ≥44px, pakai token warna                                                  |
+| `id_token` palsu/kedaluwarsa                     | Ditolak — **uji di salinan luar repo**                                            |
+| **Login password lama masih jalan**              | ✅ wajib                                                                          |
+| Force-logout                                     | Sesi SSO ikut mati                                                                |
 
 ---
 
