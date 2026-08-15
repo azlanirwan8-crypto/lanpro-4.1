@@ -112,7 +112,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 | **F2**  | Audit & perbaikan LOGIKA           | #16, #18, #19, #20                   | 3–5  | Rendah            | **Ya** — 3 keputusan              | `TERBUKA`  |
 | **F3**  | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | **Ya** — login                    | `MENUNGGU` |
 | **F4**  | Performa muat                      | #3                                   | 1    | Rendah–sedang     | —                                 | `TERBUKA`  |
-| **F5**  | **SSO Google/Microsoft** (poin 1)  | #11 → #29                            | 4–6  | Tinggi            | **Ya** — 5 keputusan + login uji  | `TERBUKA`  |
+| **F5**  | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | **Ya** — 5 keputusan + login uji  | `TERBUKA`  |
 | **F6**  | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28 | 3–4  | Rendah–sedang     | **Ya** — 2 keputusan              | `TERBUKA`  |
 | **F7**  | Kontrak & validasi                 | #4                                   | 3–5  | Sedang            | —                                 | `TERBUKA`  |
 | **F8**  | Jaring pengaman                    | #9, #8                               | 4–6  | Rendah            | —                                 | `TERBUKA`  |
