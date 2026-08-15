@@ -217,7 +217,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 55 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 57 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -254,14 +254,16 @@ lepas. Catatan lepas selalu terlupakan.
 | 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — siapa pun ber-Gmail bisa mendaftar                     |  **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik       | §0.4   |
 | 47  | `discussion_point_comments` punya KOLOM KEMBAR camelCase + snake_case                    |  **F9**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`                | §0.3   |
 | 48  | ~~5 TABEL KEMBAR huruf kecil~~ dihapus, 35 tabel -> 30                                   |  **F0**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
-| 49  | `verifyProjectAccess(['*'])` lolos SEBELUM cek keanggotaan — bocor lintas proyek         |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `TERBUKA`                | §13.5  |
+| 49  | `verifyProjectAccess(['*'])` lolos SEBELUM cek keanggotaan — bocor lintas proyek         |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `JALAN` `fix/F2-49-rbac-wildcard` | §13.5  |
 | 50  | Socket.IO **tanpa autentikasi sama sekali** — tak ada `io.use()` handshake               |  **F2**  | 🔴  | Sedang        | Ya (blokir production)  | `TERBUKA`                | §13.5  |
 | 51  | `FORCE_LOGOUT_EVENT` menyiarkan JWT sah ke SELURUH socket lewat `io.emit`                |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.5  |
-| 52  | `/api/auth/force-logout` memeriksa password TANPA `loginLimiter` — jalur brute force     |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.5  |
+| 52  | `/api/auth/force-logout` memeriksa password TANPA `loginLimiter` — jalur brute force     |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `JALAN` `fix/F2-52-force-logout-limiter` | §13.5  |
 | 53  | `POST /api/auth/logout` tanpa auth, `userId` sembarang → NULL-kan sesi siapa pun         |  **F2**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`                | §13.5  |
 | 54  | `rbac.ts:27` identitas boleh datang dari `x-user-id`/query/body — ranjau impersonasi     |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.5  |
 | 55  | `rbac.ts:50` `!targetProjectId → next()` — RBAC no-op senyap bila nama param berbeda     |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.5  |
 | 56  | Proses Jest mencetak crash `pg` (`isIP` of undefined) saat dibongkar — exit code tetap 0 |  **F8**  | 🟡  | Rendah        |          Tidak          | `TERBUKA`                | §13.5  |
+| 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401      |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.6  |
+| 58  | `GET /metrics` terbuka TANPA autentikasi — di luar `/api/`, lolos gerbang global         |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.6  |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -1765,6 +1767,43 @@ Dari 9 area §13.1, gelombang 1 hanya menutup RBAC (sebagian), Socket.IO
 104 endpoint, perhitungan (progress/sprint/KPI/timeline), alur state antar view,
 race condition, alur unggah–simpan–tampil, penanganan error & rollback transaksi.
 Urutan berikutnya menurut §13.2: `task` (46 query) → `qa` (33) → `project` (30).
+
+### 13.6 Temuan tambahan saat verifikasi #49 — 16 Agu 2026
+
+Keduanya muncul di luar rencana, saat memeriksa apa yang sedang menempati port
+3000. Berbeda dari §13.5, dua temuan ini **sudah dibuktikan dengan permintaan
+nyata** ke instance yang sedang berjalan.
+
+#### #57 🟡 Dua endpoint health; yang terdokumentasi justru terkunci auth
+
+| Endpoint | Terdaftar di | Hasil `curl` tanpa token |
+| -------- | ------------ | ------------------------ |
+| `/api/health` | `server/routes/health.routes.ts:24` | **401** — bukan di daftar prefix publik |
+| `/api/health-check` | `server.ts:505` | **200** `{"status":"ok","migrasi":"berhasil"}` |
+
+Daftar prefix publik di `server.ts:362` hanya memuat `/api/auth` dan
+`/api/health-check`, jadi `/api/health` tertutup gerbang global. Probe uptime
+eksternal (termasuk pemeriksa platform) yang menembak `/api/health` akan selalu
+mendapat 401 dan menyimpulkan aplikasi mati.
+
+§0.6 menyebut status migrasi "terbaca di `/api/health`" — **itu keliru**, yang
+benar `/api/health-check`. Perlu keputusan: buka `/api/health` sebagai publik,
+atau hapus salah satunya supaya tidak ada dua sumber kebenaran.
+
+#### #58 🟠 `GET /metrics` terbuka tanpa autentikasi
+
+`server/routes/health.routes.ts:7`. Karena path-nya **tidak** diawali `/api/`,
+gerbang global di `server.ts:360-368` tidak pernah menyentuhnya. Dibuktikan:
+
+```
+$ curl -o /dev/null -w "%{http_code}" http://localhost:3000/metrics
+200
+```
+
+Isinya metrik Prometheus: waktu CPU proses, dan `httpRequestsTotal` yang
+berlabel **method, route, dan status** — artinya peta rute internal beserta pola
+lalu lintas dan tingkat errornya terbaca siapa pun. Bukan kebocoran data
+pengguna, tapi bahan pengintaian yang bagus, dan gratis untuk ditutup.
 
 ---
 
