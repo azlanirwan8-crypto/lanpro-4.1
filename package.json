@@ -14,7 +14,6 @@
     "test": "jest",
     "test:reporter": "tsx scripts/test/test-reporter-assignment.ts",
     "validate:permissions": "tsx scripts/validate/validate-permissions.ts",
-    "db:migrate": "tsx server/migrations/runner.ts",
     "prepare": "husky",
     "lint:eslint": "eslint src server",
     "lint:strict": "eslint src server --max-warnings 0",
