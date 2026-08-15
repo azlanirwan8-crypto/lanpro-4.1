@@ -293,6 +293,32 @@ yang sudah ter-merge tetap sehat.
 
 **KONSEP LOGIN LANPRO — ditetapkan pemilik proyek, 15 Agu 2026.**
 
+> ## ⛔ BATASAN MUTLAK F5
+>
+> **F5 hanya MENAMBAH. Tidak ada satu pun perilaku lama yang boleh berubah.**
+>
+> Dua jalur berikut **wajib tetap berfungsi persis seperti sekarang**:
+>
+> | Jalur lama | Isi                             | Status                  |
+> | ---------- | ------------------------------- | ----------------------- |
+> | **Login**  | Username + password             | **TIDAK BOLEH BERUBAH** |
+> | **Daftar** | Nama, username, email, password | **TIDAK BOLEH BERUBAH** |
+>
+> Yang ditambahkan hanyalah **tombol**: Google & Microsoft di halaman login,
+> dan Google & Microsoft di halaman daftar. Penambahan, bukan penggantian.
+>
+> Termasuk yang tidak boleh berubah:
+>
+> - Aturan validasi username (huruf saja, maks 10 karakter, unik)
+> - Aturan kekuatan password (min 8, huruf besar, huruf kecil, angka, simbol)
+> - Status awal pendaftaran manual
+> - Perilaku `currentSessionToken` & force-logout
+> - Pesan galat yang sudah ada
+>
+> **Ini diuji di SETIAP sub-fase F5, bukan hanya di akhir** (§16 syarat 4).
+> Bila salah satu jalur lama berubah perilakunya, sub-fase itu tidak lulus
+> gerbang — walaupun fitur barunya sudah berfungsi.
+
 LanPro punya **tepat dua metode login**:
 
 | Metode                           | Cara                                         | Status              |
@@ -534,21 +560,23 @@ kosong.
 
 **Gerbang keluar F5** (selain gerbang dasar):
 
-| Uji                                              | Harus                                                                             |
-| ------------------------------------------------ | --------------------------------------------------------------------------------- |
-| Login Google akun terdaftar                      | Masuk, JWT terbit                                                                 |
-| Login Microsoft akun terdaftar                   | Masuk                                                                             |
-| Email di luar domain                             | Ditolak, pesan jelas                                                              |
-| `email_verified=false`                           | Ditolak                                                                           |
-| Email belum terdaftar → tombol LOGIN             | Ditolak + notifikasi jelas, **tidak** membuat akun                                |
-| Email belum terdaftar → tombol DAFTAR            | Layar "Lengkapi Pendaftaran" muncul; akun jadi `pending` setelah username dipilih |
-| User membatalkan di layar "Lengkapi Pendaftaran" | **Tidak ada baris tersisa** di tabel `Users`                                      |
-| Email di luar domain → tombol DAFTAR             | Ditolak, tidak membuat akun                                                       |
-| Daftar berulang dengan email sama                | Ditolak, tidak membuat duplikat                                                   |
-| Ikon Google & Microsoft di Sign In               | Tampil, ≥44px, pakai token warna                                                  |
-| `id_token` palsu/kedaluwarsa                     | Ditolak — **uji di salinan luar repo**                                            |
-| **Login password lama masih jalan**              | ✅ wajib                                                                          |
-| Force-logout                                     | Sesi SSO ikut mati                                                                |
+| Uji                                                 | Harus                                                                             |
+| --------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Login Google akun terdaftar                         | Masuk, JWT terbit                                                                 |
+| Login Microsoft akun terdaftar                      | Masuk                                                                             |
+| Email di luar domain                                | Ditolak, pesan jelas                                                              |
+| `email_verified=false`                              | Ditolak                                                                           |
+| Email belum terdaftar → tombol LOGIN                | Ditolak + notifikasi jelas, **tidak** membuat akun                                |
+| Email belum terdaftar → tombol DAFTAR               | Layar "Lengkapi Pendaftaran" muncul; akun jadi `pending` setelah username dipilih |
+| User membatalkan di layar "Lengkapi Pendaftaran"    | **Tidak ada baris tersisa** di tabel `Users`                                      |
+| Email di luar domain → tombol DAFTAR                | Ditolak, tidak membuat akun                                                       |
+| Daftar berulang dengan email sama                   | Ditolak, tidak membuat duplikat                                                   |
+| Ikon Google & Microsoft di Sign In                  | Tampil, ≥44px, pakai token warna                                                  |
+| `id_token` palsu/kedaluwarsa                        | Ditolak — **uji di salinan luar repo**                                            |
+| **Login username + password lama**                  | ✅ wajib — persis seperti sebelum F5                                              |
+| **Daftar manual (nama, username, email, password)** | ✅ wajib — persis seperti sebelum F5                                              |
+| Aturan validasi username & password                 | ✅ wajib — tidak berubah                                                          |
+| Force-logout                                        | Sesi SSO ikut mati                                                                |
 
 ---
 
