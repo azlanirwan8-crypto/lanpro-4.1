@@ -243,6 +243,33 @@ try {
   warn('server.ts tidak terbaca, pemeriksaan konfigurasi dilewati');
 }
 
+// 5d. APP_URL harus URL absolut yang sungguhan.
+//
+//     Repo ini menyimpan nilai placeholder harfiah "MY_APP_URL" selama entah
+//     berapa lama. Ia lolos setiap pemeriksaan "kosong atau tidak" karena
+//     memang tidak kosong, tetapi tidak berguna: res.redirect
+//     memperlakukan nilai non-absolut sebagai jalur RELATIF, sehingga pengguna
+//     yang kembali dari Google sempat dilempar ke alamat yang tidak ada.
+//     Di production nilai ini juga menentukan daftar origin Socket.IO.
+{
+  const appUrl = process.env.APP_URL || '';
+  const absolut = /^https?:\/\/.+/i.test(appUrl);
+
+  if (!appUrl) {
+    warn('APP_URL kosong',
+      'Diperlukan di production untuk daftar origin Socket.IO dan alamat kembali SSO');
+  } else if (!absolut) {
+    fail(`APP_URL bukan URL absolut: "${appUrl}"`,
+      'Isi dengan alamat lengkap, contoh http://localhost:3000 atau https://lanpro.example.com. ' +
+      'Nilai non-absolut diperlakukan sebagai jalur relatif saat redirect');
+  } else if (process.env.NODE_ENV === 'production' && appUrl.includes('localhost')) {
+    fail('APP_URL masih menunjuk localhost di production',
+      'Ganti dengan domain production yang sebenarnya');
+  } else {
+    ok('APP_URL berbentuk URL absolut', appUrl);
+  }
+}
+
 // ── 6. Penyimpanan berkas ────────────────────────────────────────────────────
 section('6. Penyimpanan berkas unggahan');
 
