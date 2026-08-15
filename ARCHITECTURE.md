@@ -13,7 +13,17 @@ dan utang teknis yang masih terbuka.
 > untuk kode baru** dari **utang yang masih ada di kode lama**, lengkap dengan
 > angkanya. Bila Anda memperbaiki salah satu utang itu, perbarui angkanya.
 
-Terakhir diverifikasi: **15 Agustus 2026** — 303 file, 71.669 baris.
+Terakhir diverifikasi: **16 Agustus 2026** — 300 file, 78.446 baris
+(`src/` + `server/` + `server.ts`).
+
+> **Angka di dokumen ini pernah drift jauh dari kenyataan.** Versi sebelumnya
+> menyebut "303 file, 71.669 baris" dan "empat berkas memakai `dark:`" padahal
+> yang sebenarnya 28. Dokumen yang salah angka lebih berbahaya daripada tidak
+> ada dokumen, karena ia dipakai sebagai alat kontrol.
+>
+> Seluruh angka di bawah kini diambil dari pengukuran nyata. Perintah
+> pengukurannya ada di `AUDIT.md` §9 — jalankan ulang saat memperbaruinya,
+> jangan menaksir.
 
 ---
 
@@ -35,11 +45,18 @@ lanpro-3.1/
 │   ├── middleware/             auth, rbac, errorHandler.
 │   ├── config/                 socket, metrics, uploads.
 │   ├── services/               Query DB dan operasi berat.
-│   └── migrations/             Migrasi schema.
+│   └── helpers/                Utilitas kecil tanpa ketergantungan berat.
 ├── scripts/
-│   └── doctor.cjs              Pemeriksa kesehatan environment & keamanan.
+│   ├── doctor.cjs              Pemeriksa kesehatan environment & keamanan.
+│   └── dump-schema.cjs         Menulis docs/DATABASE_SCHEMA.md dari DB hidup.
 └── .claude/launch.json         Konfigurasi peluncuran aplikasi.
 ```
+
+**Migrasi schema ada di `src/lib/pg-migrate.ts`, dan hanya di situ.** Repo ini
+sempat punya tiga tempat berbeda — `server/migrations/runner.ts` dan
+`database/migrations/*` — yang membuat developer baru punya dua tempat salah
+untuk menaruh perubahan schema. Keduanya dihapus 16 Agu 2026 setelah isinya
+dipastikan tercakup. Jangan menambahkan sistem migrasi kedua.
 
 ### Frontend dan backend sudah terpisah secara logis
 
@@ -78,13 +95,13 @@ src/features/flowchart/
 
 ### Aturan lapisan
 
-| Lapisan | Boleh | Dilarang |
-|---|---|---|
-| `types.ts` | tipe, interface | apa pun yang punya runtime |
-| `lib/` | fungsi murni | state, `fetch`, akses DOM global |
-| `services/` | `apiRequest`, pemetaan data | JSX, hook React |
-| `components/` | JSX, hook UI | `apiRequest` langsung |
-| Container | menyusun semuanya | logika yang bisa diturunkan ke lapisan lain |
+| Lapisan       | Boleh                       | Dilarang                                    |
+| ------------- | --------------------------- | ------------------------------------------- |
+| `types.ts`    | tipe, interface             | apa pun yang punya runtime                  |
+| `lib/`        | fungsi murni                | state, `fetch`, akses DOM global            |
+| `services/`   | `apiRequest`, pemetaan data | JSX, hook React                             |
+| `components/` | JSX, hook UI                | `apiRequest` langsung                       |
+| Container     | menyusun semuanya           | logika yang bisa diturunkan ke lapisan lain |
 
 **Komponen tidak boleh memanggil `apiRequest` langsung.** Semua panggilan
 backend lewat `services/`. Ini menjaga detail penyandian tetap terkurung —
@@ -111,7 +128,7 @@ npx tsc --noEmit 2>&1 | grep "^src/features/<fitur>" | sort > after.txt
 diff before.txt after.txt
 ```
 
-Menghitung *jumlah total* error tidak cukup: satu error bisa hilang sementara
+Menghitung _jumlah total_ error tidak cukup: satu error bisa hilang sementara
 error baru muncul, dan totalnya tetap sama. Cara ini pernah menangkap bug
 nyata — import service bernama `updateFlowchart` terbayang oleh binding dengan
 nama sama dari `useFlowchartList()`, sehingga panggilan mengenai fungsi yang
@@ -212,25 +229,30 @@ Bagian ini sengaja jujur. Perbarui angkanya bila Anda memperbaikinya.
 
 ### 5.1 File yang melebihi batas 500 baris
 
-**15 file di atas 1.000 baris, 18 file di rentang 500–1.000.** Terbesar:
+**18 file di atas 1.000 baris, 16 file di rentang 500–1.000.** Terbesar:
 
-| Baris | File |
-|---:|---|
-| 4.903 | `src/AppContainer.tsx` |
-| 3.420 | `src/features/flowchart/FlowchartContainer.tsx` |
-| 1.779 | `server/routes/task.routes.ts` |
-| 1.693 | `src/features/meeting-notes/AiMeetingCompanion.tsx` |
-| 1.591 | `src/features/timeline/TimelinePanel.tsx` |
-| 1.436 | `server/routes/qa.routes.ts` |
+| Baris | File                                                |
+| ----: | --------------------------------------------------- |
+| 4.533 | `src/AppContainer.tsx`                              |
+| 3.880 | `src/features/flowchart/FlowchartContainer.tsx`     |
+| 2.074 | `src/features/flowchart/lib/shapes.tsx`             |
+| 2.053 | `src/features/issues/IssueListView.tsx`             |
+| 1.864 | `src/features/meeting-notes/AiMeetingCompanion.tsx` |
+| 1.813 | `src/features/timeline/TimelinePanel.tsx`           |
 
-`FlowchartContainer` turun dari 6.795 ke 3.420 baris lewat tujuh komponen di
-`components/` dan empat modul di `lib/`. Sisanya adalah state dan handler yang
-saling terkait; menurunkannya lebih jauh berarti memindahkan handler ke hook,
-yang risikonya berbeda dari memindahkan JSX.
+`FlowchartContainer` pernah turun dari 6.795 baris lewat tujuh komponen di
+`components/` dan empat modul di `lib/`, tetapi kini **naik lagi ke 3.880**.
+Sisanya adalah state dan handler yang saling terkait; menurunkannya lebih jauh
+berarti memindahkan handler ke hook, yang risikonya berbeda dari memindahkan
+JSX.
 
-`AppContainer` turun dari 5.168 ke 4.903 baris. Angkanya masih besar karena
+`AppContainer` turun dari 5.168 ke 4.533 baris. Angkanya masih besar karena
 isinya didominasi handler yang menyentuh state bersama, bukan blok tampilan
 yang bisa dipotong.
+
+> Kenaikan `FlowchartContainer` adalah alasan konkret kenapa angka di dokumen
+> ini harus diukur ulang, bukan disalin dari versi sebelumnya. Utang teknis bisa
+> tumbuh diam-diam di antara dua pembacaan.
 
 ### 5.1b ~~`index.tsx` dipakai sebagai God Object~~ SELESAI 15 Agu 2026
 
@@ -369,13 +391,13 @@ menghasilkan temuan palsu, karena class itu memang tidak akan pernah ada.
 **Dilarang menulis nilai warna langsung di JSX.** Seluruh warna berasal dari
 token semantik di `@theme` pada `src/index.css`:
 
-| Peran | Token | Terang | Gelap |
-|---|---|---|---|
-| Merek | `primary`, `primary-hover`, `primary-active` | `#405189` | `#7183bd` |
-| Status | `success`, `warning`, `danger`, `info` | — | dinaikkan terangnya |
-| Permukaan | `surface`, `surface-muted`, `surface-sunken` | `#ffffff` | `#121a2a` |
-| Garis | `border-subtle`, `border-faint` | `#e2e8f0` | `#24314a` |
-| Teks | `content`, `content-strong`, `content-body`, `content-secondary`, `content-muted`, `content-subtle` | `#0f172a`…`#94a3b8` | dibalik |
+| Peran     | Token                                                                                               | Terang              | Gelap               |
+| --------- | --------------------------------------------------------------------------------------------------- | ------------------- | ------------------- |
+| Merek     | `primary`, `primary-hover`, `primary-active`                                                        | `#405189`           | `#7183bd`           |
+| Status    | `success`, `warning`, `danger`, `info`                                                              | —                   | dinaikkan terangnya |
+| Permukaan | `surface`, `surface-muted`, `surface-sunken`                                                        | `#ffffff`           | `#121a2a`           |
+| Garis     | `border-subtle`, `border-faint`                                                                     | `#e2e8f0`           | `#24314a`           |
+| Teks      | `content`, `content-strong`, `content-body`, `content-secondary`, `content-muted`, `content-subtle` | `#0f172a`…`#94a3b8` | dibalik             |
 
 Aturan ini bukan soal kerapian. Sebelum token ada, `#405189` tertulis 426 kali
 dan tujuh layar sama sekali tidak punya penanganan mode gelap — kartu putih
@@ -444,10 +466,17 @@ dan `customClass`. Jangan memanggil `Swal.fire` langsung, dan jangan memakai
   masalah palet sidebar itu sendiri, bukan mode gelap.
 - **Jarak antar target sentuh.** 11 pasang target berjarak kurang dari 8px di
   viewport 375px. Ini persoalan tata letak, bukan ukuran, dan belum tergarap.
-- **46 nilai hex** masih tertulis di atribut SVG `fill`/`stroke` dan prop
-  `lord-icon`, yang bukan class CSS sehingga tidak bisa memakai utility
-  Tailwind. Bisa dialihkan ke `var(--color-*)` bila diperlukan.
-- **Empat berkas** (`DashboardView`, `NotebookLM`, `UserDetailView`, `kanban`)
-  masih memakai prefix `dark:` alih-alih token. Keduanya berfungsi; menyatukan
-  ke token adalah konsolidasi, bukan perbaikan kerusakan.
+- **45 nilai hex melanggar aturan token**: 35 di `className` dan 10 di
+  `style={{}}`. Keduanya SEHARUSNYA memakai token semantik. Terpisah dari itu,
+  ±146 hex tertulis di atribut SVG `fill`/`stroke` dan prop `lord-icon` — yang
+  bukan class CSS sehingga tidak bisa memakai utility Tailwind, dan boleh
+  dibiarkan. Angka lama "46 nilai hex" mencampur keduanya.
+- **28 berkas** masih memakai prefix `dark:` alih-alih token. Angka lama
+  menyebut "empat berkas" — selisihnya terlalu jauh untuk sekadar pertumbuhan,
+  jadi hitungan lamanya kemungkinan besar memang keliru sejak awal. Keduanya
+  berfungsi; menyatukan ke token adalah konsolidasi, bukan perbaikan kerusakan.
 - **Layar di atas 1024px belum diuji.** Panel pengujian terbatas 679px.
+
+Daftar lengkap utang beserta nomor itemnya ada di `AUDIT.md` §1, yang menjadi
+papan kerja resmi. Dokumen ini menjelaskan ATURAN; AUDIT.md melacak
+PELANGGARANNYA.
