@@ -20,12 +20,15 @@ kebutuhan mengevaluasi ulang dari nol setiap kali memulai sesi kerja.
    - kolom `Aktual` di tabel terkait,
    - kolom `Status` di §1 dan di ringkasan fase §1.5,
    - baris di **§10 Riwayat Perbaikan** (tanggal, commit, angka sebelum→sesudah).
-4. Sebuah fase baru boleh ditutup bila **seluruh itemnya `SELESAI`** DAN
+4. **Isi kartu verifikasi §16 untuk SETIAP item.** Item tidak boleh berstatus
+   `SELESAI` sebelum aplikasi terbukti berjalan di browser.
+5. Sebelum merge, periksa **standar develop §17**.
+6. Sebuah fase baru boleh ditutup bila **seluruh itemnya `SELESAI`** DAN
    **gerbang keluarnya lulus**. Gerbang tidak boleh dilewati karena "sudah
    terlihat jalan".
-5. **Jangan menghapus baris temuan yang sudah selesai.** Ubah statusnya menjadi
+7. **Jangan menghapus baris temuan yang sudah selesai.** Ubah statusnya menjadi
    `SELESAI` beserta tanggalnya. Riwayat itu yang membuat dokumen ini berguna.
-6. Bila sebuah angka memburuk, itu bukan kegagalan dokumen — itu justru fungsinya.
+8. Bila sebuah angka memburuk, itu bukan kegagalan dokumen — itu justru fungsinya.
    Catat apa adanya.
 
 > Satu branch per item (bukan per fase), merge ke `main`, lapor sebelum lanjut
@@ -1093,11 +1096,14 @@ npm run doctor && npm run lint && npm test && npm run build
 Tambahkan satu baris **setiap kali** sebuah item berpindah ke `SELESAI`.
 Kolom angka wajib diisi sebelum→sesudah, supaya kemajuannya terukur, bukan terasa.
 
-| Tanggal     | Fase | Item                                          | Branch / Commit           | Sebelum | Sesudah | Terverifikasi dengan |
-| ----------- | :--: | --------------------------------------------- | ------------------------- | ------- | ------- | -------------------- |
-| 15 Agu 2026 |  —   | Baseline audit                                | `docs/audit-baseline`     | —       | —       | seluruh perintah §9  |
-| 15 Agu 2026 |  —   | Pemfasean F0–F7                               | `docs/audit-fase`         | —       | —       | —                    |
-| 15 Agu 2026 |  —   | Audit logika & UI masuk fase (F0–F9, 21 item) | `docs/audit-fase-lengkap` | —       | —       | —                    |
+| Tanggal     | Fase | Item                                           | Branch / Commit           | Sebelum | Sesudah | Aplikasi jalan? | Terverifikasi dengan |
+| ----------- | :--: | ---------------------------------------------- | ------------------------- | ------- | ------- | :-------------: | -------------------- |
+| 15 Agu 2026 |  —   | Baseline audit                                 | `docs/audit-baseline`     | —       | —       |        —        | seluruh perintah §9  |
+| 15 Agu 2026 |  —   | Pemfasean F0–F7                                | `docs/audit-fase`         | —       | —       |        —        | —                    |
+| 15 Agu 2026 |  —   | Audit logika & UI masuk fase (F0–F9, 21 item)  | `docs/audit-fase-lengkap` | —       | —       |        —        | —                    |
+| 15 Agu 2026 |  —   | Fase SSO (F5) & Email (F6) masuk peta, 30 item | `docs/fase-sso-email`     | —       | —       |       ✅        | baseline §15.1       |
+| 15 Agu 2026 |  —   | Login dengan email masuk F5.2 (31 item)        | `docs/fase-login-email`   | —       | —       |        —        | —                    |
+| 15 Agu 2026 |  —   | Kartu verifikasi §16 & standar develop §17     | `docs/verifikasi-standar` | —       | —       |        —        | —                    |
 
 ### Gerbang fase yang sudah lulus
 
@@ -1388,5 +1394,142 @@ lulus bila hanya bersandar pada build.
 | 2       | Bandingkan dengan baseline §15.1 — cek mana yang berubah                    |
 | 3       | Bila sudah ter-merge: `git revert` merge commit-nya (jangan `reset --hard`) |
 | 4       | Catat sebagai item bernomor di §1, bukan diperbaiki diam-diam               |
+
+---
+
+## §16 KARTU VERIFIKASI WAJIB — setiap perbaikan harus terbukti tidak merusak
+
+Aturan tunggal bagian ini:
+
+> **Tidak ada satu pun item yang boleh berstatus `SELESAI` sebelum kartu di bawah
+> terisi lengkap dan aplikasi terbukti berjalan di browser.**
+
+Ini berlaku untuk **setiap** item — sekecil apa pun perubahannya, termasuk
+perubahan satu baris. Alasannya ada di §15.3: repo ini pernah mengalami 28/28
+test lolos & build sukses sementara seluruh UI diganti error boundary.
+
+### 16.1 Kartu yang wajib diisi per item
+
+Salin kartu ini ke §10 Riwayat (atau ke laporan sesi) untuk **tiap** item:
+
+```text
+ITEM      : #__  (nama)
+FASE      : F__
+BRANCH    : ______
+
+SEBELUM (ambil dari baseline §15.1 atau pengukuran terakhir)
+  lint            : ____
+  test            : ____ lulus / ____ suite
+  build           : ____
+  aplikasi jalan  : ____  (URL yang dibuka: ____________)
+
+SESUDAH
+  lint            : ____   <- WAJIB 0 error
+  test            : ____ lulus / ____ suite   <- WAJIB >= sebelum
+  build           : ____   <- WAJIB sukses
+  APLIKASI JALAN  : ____   <- WAJIB ya
+    - halaman dibuka   : ____________
+    - UI benar tampil  : ya / tidak
+    - error console    : ____ (WAJIB 0)
+    - alur diuji       : ____________
+
+VERIFIKASI KHUSUS (sesuai jenis perubahan, lihat §15.2 lapis 4)
+  ______________________________________
+
+BELUM TERVERIFIKASI (tulis jujur, jangan dikosongkan)
+  ______________________________________
+```
+
+### 16.2 Empat syarat yang tidak bisa ditawar
+
+| Syarat                    | Cara membuktikan                   | Bila gagal   |
+| ------------------------- | ---------------------------------- | ------------ |
+| **Aplikasi menyala**      | `npm run dev` tanpa keluar sendiri | Jangan merge |
+| **UI benar-benar tampil** | Buka di browser, lihat layarnya    | Jangan merge |
+| **Console bersih**        | 0 error                            | Jangan merge |
+| **Yang lama masih jalan** | Uji fitur yang bersinggungan       | Jangan merge |
+
+Syarat keempat yang paling sering terlewat. Untuk F5 artinya konkret:
+**setiap kali menyentuh auth, login dengan password lama wajib diuji ulang** —
+bukan hanya di akhir fase, tapi di **tiap** sub-fase.
+
+### 16.3 Bila aplikasi crash setelah sebuah perubahan
+
+| Langkah | Tindakan                                                                |
+| ------- | ----------------------------------------------------------------------- |
+| 1       | **Berhenti.** Jangan lanjut ke item berikutnya                          |
+| 2       | Bandingkan dengan baseline §15.1 — cari yang berubah                    |
+| 3       | Belum ter-merge → perbaiki di branch, atau buang branch-nya             |
+| 4       | Sudah ter-merge → `git revert` merge commit (**jangan** `reset --hard`) |
+| 5       | Catat sebagai item bernomor di §1 — jangan diperbaiki diam-diam         |
+| 6       | Laporkan apa adanya, termasuk bila penyebabnya belum ketahuan           |
+
+---
+
+## §17 STANDAR DEVELOP — daftar periksa sebelum merge
+
+Diringkas dari ARCHITECTURE.md supaya satu dokumen ini cukup sebagai pegangan.
+Periksa yang relevan sebelum tiap merge.
+
+### 17.1 Struktur & lapisan
+
+| Aturan               | Batas                                                                |
+| -------------------- | -------------------------------------------------------------------- |
+| Berkas baru maksimal | **500 baris**                                                        |
+| `types.ts`           | tipe saja, tanpa runtime                                             |
+| `lib/`               | fungsi murni — tanpa state, `fetch`, atau DOM global                 |
+| `services/`          | `apiRequest` & pemetaan data — **tanpa** JSX / hook React            |
+| `components/`        | JSX & hook UI — **dilarang** memanggil `apiRequest` langsung         |
+| Container            | hanya menyusun; logika turun ke lapisan lain                         |
+| Backend              | pola resmi `routes/` + `services/`. **Jangan** tambah lapisan ketiga |
+
+Aturan lapisan berstatus **`error`** di ESLint, bukan `warn` — pelanggaran akan
+menahan commit.
+
+### 17.2 Keamanan
+
+| Aturan                                  | Catatan                                                                                               |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Kredensial **hanya** dari `process.env` | **Tidak boleh ada fallback ter-hardcode** — konfigurasi hilang harus gagal terbuka (ini isi item #23) |
+| `.gitleaks.toml`                        | Jangan daftar-putihkan **nilai** rahasia; kecualikan **commit**-nya                                   |
+| Endpoint baru                           | **Wajib zod sejak lahir**, jangan menunggu F7                                                         |
+| Rate limit                              | Endpoint sensitif punya limiter sendiri (contoh: `loginLimiter`)                                      |
+| XSS                                     | Jangan menambah `rehype-raw` tanpa sanitasi                                                           |
+| CSP                                     | Menambah sumber eksternal = perbarui direktif **dan** uji dengan build produksi                       |
+
+### 17.3 Sistem desain
+
+| Aturan      | Catatan                                                                                                  |
+| ----------- | -------------------------------------------------------------------------------------------------------- |
+| Warna       | **Hanya lewat token semantik**. Dilarang menulis hex di JSX                                              |
+| Mode gelap  | **Tanpa prefix `dark:`** — token sudah berganti sendiri di `html.dark`                                   |
+| Area sentuh | Minimal **44px** (`min-h-11`)                                                                            |
+| Tipografi   | Mobile-first: `text-xs sm:text-[10px]`, bukan `text-[10px]`                                              |
+| Komponen    | Pakai `CoreUI` (`Button`, `Input`, `Card`, `Badge`) — jangan menyusun ulang utility                      |
+| Tabel       | **Wajib** dibungkus `<ResponsiveTable>`                                                                  |
+| Notifikasi  | **Wajib** lewat `src/lib/sweetalert.ts`. Dilarang `Swal.fire` langsung atau `alert()`/`confirm()` bawaan |
+
+### 17.4 Alur kerja
+
+| Aturan                                   | Catatan                                                                         |
+| ---------------------------------------- | ------------------------------------------------------------------------------- |
+| Satu branch per **item**                 | Bukan per fase                                                                  |
+| Merge ke `main` hanya bila gerbang lulus | §15.2 lapis 3                                                                   |
+| Lapor sebelum lanjut ke tahap berikutnya |                                                                                 |
+| Review-first                             | Untuk permintaan perbaikan: analisa & laporkan (format A–F), tunggu persetujuan |
+| Dilarang                                 | Menyentuh `src/lib/db.ts`                                                       |
+| Dilarang                                 | Sabotase source untuk pembuktian — pakai salinan **di luar repo**               |
+| Dilarang                                 | Memasukkan kredensial sendiri                                                   |
+| Data uji                                 | Objek terpisah lalu dihapus (pola `ZZ-TEST-REFACTOR`)                           |
+
+### 17.5 Jebakan verifikasi khas repo ini
+
+| Jebakan                          | Cara benar                                                                                                             |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Cek rute lewat status **401**    | **TIDAK VALID** — auth berjalan sebelum handler 404, rute palsu pun menjawab 401. Pakai perbandingan **himpunan rute** |
+| Menghitung **total** error `tsc` | Pakai `diff` **baris-per-baris** — sudah 4x menangkap simbol terlewat                                                  |
+| Menambah test                    | **Periksa jumlahnya bertambah** — pernah gagal diam-diam karena Prettier                                               |
+| Berhenti di build hijau          | Build & test **bukan** bukti aplikasi jalan (§15.3)                                                                    |
+| Kunci token localStorage         | **`lanpro_jwt_token`**, bukan `'token'` (kesalahan notebook-lm, item #18)                                              |
 
 ---
