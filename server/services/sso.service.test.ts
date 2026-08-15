@@ -10,12 +10,36 @@
  */
 const kueriPalsu = jest.fn();
 
+/** Melacak apakah transaksi benar-benar dipakai saat membuat akun. */
+const jejakTransaksi = { begin: 0, commit: 0, rollback: 0, release: 0 };
+
 jest.mock("../../src/lib/db", () => ({
   __esModule: true,
-  default: { query: (...a: any[]) => kueriPalsu(...a) },
+  default: {
+    query: (...a: any[]) => kueriPalsu(...a),
+    // Koneksi transaksional memakai fungsi kueri yang sama, sehingga assertion
+    // yang memeriksa SQL tetap berlaku baik lewat db.query maupun lewat
+    // connection.query.
+    getConnection: async () => ({
+      query: (...a: any[]) => kueriPalsu(...a),
+      beginTransaction: async () => {
+        jejakTransaksi.begin++;
+      },
+      commit: async () => {
+        jejakTransaksi.commit++;
+      },
+      rollback: async () => {
+        jejakTransaksi.rollback++;
+      },
+      release: () => {
+        jejakTransaksi.release++;
+      },
+    }),
+  },
 }));
 
-import { putuskanKebijakan, buatAkunDariSso, usernameSah } from "./sso.service";
+import { putuskanKebijakan, buatAkunDariSso, usernameSah, daftarkanSesi } from "./sso.service";
+import { activeUserSessions } from "../middleware/auth";
 import type { IdentitasOidc } from "./oidc.service";
 
 const IDENTITAS: IdentitasOidc = {
@@ -52,6 +76,10 @@ function pasangDb(opsi: {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jejakTransaksi.begin = 0;
+  jejakTransaksi.commit = 0;
+  jejakTransaksi.rollback = 0;
+  jejakTransaksi.release = 0;
   process.env.SSO_ALLOWED_DOMAINS = "perusahaan.com";
 });
 
@@ -152,6 +180,60 @@ describe("putuskanKebijakan — identitas yang sudah tertaut", () => {
   });
 });
 
+/**
+ * IDENTITAS YATIM — baris tautan ada, tetapi user yang ditunjuknya tidak.
+ *
+ * Terjadi saat akun dihapus admin sementara identitasnya tertinggal. Versi
+ * pertama kode ini menolak dengan "belum_terdaftar" tanpa memandang mode,
+ * sehingga email tersebut TERKUNCI SELAMANYA — tombol Daftar pun ikut tertolak.
+ * Ditemukan pemilik proyek 16 Agu 2026 saat mencoba mendaftar.
+ */
+describe("putuskanKebijakan — identitas yatim", () => {
+  it("mode DAFTAR: membersihkan tautan basi lalu meneruskan pendaftaran", async () => {
+    // identitas ada, tetapi cariUserById tidak mengembalikan siapa pun
+    pasangDb({ identitas: { userId: "sudah-dihapus" } });
+    const hasil: any = await putuskanKebijakan(IDENTITAS, "daftar");
+
+    expect(hasil.aksi).toBe("lengkapi_pendaftaran");
+
+    const adaDelete = kueriPalsu.mock.calls.some(
+      (c) => String(c[0]).includes("DELETE") && String(c[0]).includes("UserIdentities")
+    );
+    expect(adaDelete).toBe(true);
+  });
+
+  it("mode DAFTAR: TIDAK lagi menolak dengan belum_terdaftar", async () => {
+    pasangDb({ identitas: { userId: "sudah-dihapus" } });
+    const hasil: any = await putuskanKebijakan(IDENTITAS, "daftar");
+    expect(hasil.aksi).not.toBe("tolak");
+  });
+
+  it("mode LOGIN: tetap menolak, tetapi setelah tautan basi dibersihkan", async () => {
+    pasangDb({ identitas: { userId: "sudah-dihapus" } });
+    const hasil: any = await putuskanKebijakan(IDENTITAS, "login");
+
+    // Menolak memang benar untuk mode login — yang salah sebelumnya adalah
+    // tautan basi dibiarkan sehingga pendaftaran ulang ikut terkunci.
+    expect(hasil.aksi).toBe("tolak");
+    expect(hasil.alasan).toBe("belum_terdaftar");
+
+    const adaDelete = kueriPalsu.mock.calls.some(
+      (c) => String(c[0]).includes("DELETE") && String(c[0]).includes("UserIdentities")
+    );
+    expect(adaDelete).toBe(true);
+  });
+
+  it("identitas SEHAT tidak ikut terhapus", async () => {
+    pasangDb({ identitas: { userId: "u9" }, userById: { id: "u9", status: "active" } });
+    await putuskanKebijakan(IDENTITAS, "login");
+
+    const adaDelete = kueriPalsu.mock.calls.some(
+      (c) => String(c[0]).includes("DELETE") && String(c[0]).includes("UserIdentities")
+    );
+    expect(adaDelete).toBe(false);
+  });
+});
+
 describe("usernameSah — aturan lama TIDAK berubah", () => {
   it("menerima huruf saja maksimal 10 karakter", () => {
     expect(usernameSah("budi")).toBe(true);
@@ -179,6 +261,42 @@ describe("buatAkunDariSso", () => {
     expect(insert).toBeTruthy();
     expect(String(insert![0])).toContain("NULL");
     expect(insert![1]).toContain("pending");
+  });
+
+  it("menulis KEDUA tabel dalam SATU transaksi yang di-commit", async () => {
+    pasangDb({});
+    await buatAkunDariSso(IDENTITAS, "budi");
+
+    expect(jejakTransaksi.begin).toBe(1);
+    expect(jejakTransaksi.commit).toBe(1);
+    expect(jejakTransaksi.rollback).toBe(0);
+    expect(jejakTransaksi.release).toBe(1);
+
+    const insertUsers = kueriPalsu.mock.calls.filter(
+      (c) => String(c[0]).includes("INSERT") && String(c[0]).includes("Users")
+    );
+    const insertIdentitas = kueriPalsu.mock.calls.filter(
+      (c) => String(c[0]).includes("INSERT") && String(c[0]).includes("UserIdentities")
+    );
+    expect(insertUsers.length).toBe(1);
+    expect(insertIdentitas.length).toBe(1);
+  });
+
+  it("ROLLBACK bila penulisan gagal — tidak meninggalkan tautan yatim", async () => {
+    // Kegagalan pada INSERT kedua adalah cara tautan yatim lahir di produksi.
+    kueriPalsu.mockImplementation(async (sql: string) => {
+      if (String(sql).includes("INSERT") && String(sql).includes("UserIdentities")) {
+        throw new Error("kegagalan buatan di dalam test");
+      }
+      return [[]];
+    });
+
+    const hasil: any = await buatAkunDariSso(IDENTITAS, "budi");
+
+    expect(hasil.hasil).toBe("gagal");
+    expect(jejakTransaksi.rollback).toBe(1);
+    expect(jejakTransaksi.commit).toBe(0);
+    expect(jejakTransaksi.release).toBe(1);
   });
 
   it("MENOLAK username yang tidak sah", async () => {
@@ -220,5 +338,51 @@ describe("buatAkunDariSso", () => {
     const hasil: any = await buatAkunDariSso(IDENTITAS, "budi");
     expect(hasil.hasil).toBe("gagal");
     expect(hasil.alasan).toBe("identitas_milik_akun_lain");
+  });
+});
+
+/**
+ * SESI TUNGGAL — penyebab kegagalan login SSO yang paling sulit dilacak.
+ *
+ * `authenticateJWT` menolak setiap permintaan bila `Users.currentSessionToken`
+ * terisi dan BERBEDA dari token yang dibawa. Callback SSO versi pertama hanya
+ * menerbitkan JWT tanpa memperbarui kolom itu, sehingga pengguna yang pernah
+ * login memakai password tidak bisa masuk lewat Google — dan gagalnya SENYAP,
+ * karena callback-nya sendiri sukses dan penolakan baru muncul pada permintaan
+ * API berikutnya. Ditemukan pemilik proyek 16 Agu 2026.
+ */
+describe("daftarkanSesi", () => {
+  it("memperbarui currentSessionToken di database", async () => {
+    kueriPalsu.mockImplementation(async () => [[]]);
+    await daftarkanSesi("u1", "token-baru");
+
+    const update = kueriPalsu.mock.calls.find(
+      (c) => String(c[0]).includes("UPDATE Users") && String(c[0]).includes("currentSessionToken")
+    );
+    expect(update).toBeTruthy();
+    expect(update![1][0]).toBe("token-baru");
+    expect(update![1][2]).toBe("u1");
+  });
+
+  it("ikut memperbarui lastSeen", async () => {
+    kueriPalsu.mockImplementation(async () => [[]]);
+    await daftarkanSesi("u1", "token-baru");
+
+    const update = kueriPalsu.mock.calls.find((c) => String(c[0]).includes("currentSessionToken"));
+    expect(Number(update![1][1])).toBeGreaterThan(0);
+  });
+
+  it("mendaftarkan sesi ke activeUserSessions sebagai jalur cadangan", async () => {
+    kueriPalsu.mockImplementation(async () => [[]]);
+    activeUserSessions.delete("u2");
+
+    await daftarkanSesi("u2", "token-xyz", { ip: "1.2.3.4", browser: "Chrome" });
+
+    const sesi = activeUserSessions.get("u2");
+    expect(sesi).toBeTruthy();
+    expect(sesi!.token).toBe("token-xyz");
+    expect(sesi!.ip).toBe("1.2.3.4");
+
+    activeUserSessions.delete("u2");
   });
 });

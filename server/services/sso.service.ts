@@ -21,6 +21,7 @@
  */
 import crypto from "crypto";
 import db from "../../src/lib/db";
+import { activeUserSessions } from "../middleware/auth";
 import type { IdentitasOidc } from "./oidc.service";
 import { domainDiizinkan } from "./oidc.service";
 
@@ -64,6 +65,16 @@ function akunAktif(user: any): boolean {
   return s !== "pending" && s !== "rejected";
 }
 
+/**
+ * Membuang tautan identitas yang sudah tidak menunjuk user mana pun.
+ *
+ * Dipakai untuk memulihkan diri dari baris yatim. Tanpa ini, email yang
+ * akunnya pernah dihapus tidak akan pernah bisa mendaftar lagi.
+ */
+async function hapusIdentitas(provider: string, sub: string) {
+  await db.query('DELETE FROM "UserIdentities" WHERE provider = ? AND sub = ?', [provider, sub]);
+}
+
 async function tautkanIdentitas(userId: string, identitas: IdentitasOidc) {
   await db.query(
     'INSERT INTO "UserIdentities" (id, "userId", provider, sub, email) VALUES (?, ?, ?, ?, ?)',
@@ -94,9 +105,29 @@ export async function putuskanKebijakan(
   const identitasTersimpan = await cariIdentitas(identitas.provider, identitas.sub);
   if (identitasTersimpan) {
     const user = await cariUserById(identitasTersimpan.userId);
-    if (!user) return { aksi: "tolak", alasan: "belum_terdaftar" };
-    if (!akunAktif(user)) return { aksi: "tolak", alasan: "akun_belum_aktif" };
-    return { aksi: "masuk", user };
+
+    if (user) {
+      if (!akunAktif(user)) return { aksi: "tolak", alasan: "akun_belum_aktif" };
+      return { aksi: "masuk", user };
+    }
+
+    // IDENTITAS YATIM: barisnya ada, tetapi user yang ditunjuknya sudah tidak
+    // ada — biasanya karena akunnya dihapus admin sementara identitasnya
+    // tertinggal.
+    //
+    // Versi pertama kode ini menolak dengan "belum_terdaftar" tanpa memandang
+    // mode, sehingga email tersebut TERKUNCI SELAMANYA: tombol Daftar pun ikut
+    // tertolak karena pemeriksaan ini terjadi sebelum cabang login/daftar.
+    // Ditemukan pemilik proyek saat mencoba mendaftar dan justru diberi tahu
+    // "belum terdaftar".
+    //
+    // Baris basi itu kini dibersihkan, lalu alurnya diteruskan seolah identitas
+    // ini belum pernah ada — sehingga mode `daftar` bisa membuat akun baru dan
+    // mode `login` memberi pesan yang benar di bawah.
+    console.warn(
+      `[SSO] Identitas yatim dibersihkan: ${identitas.provider}/${identitas.sub} menunjuk user ${identitasTersimpan.userId} yang tidak ada.`
+    );
+    await hapusIdentitas(identitas.provider, identitas.sub);
   }
 
   // 3. Email terverifikasi. Diperiksa SEBELUM penautan berdasarkan email,
@@ -179,16 +210,82 @@ export async function buatAkunDariSso(
   }
 
   const id = crypto.randomUUID();
-  await db.query(
-    `INSERT INTO Users (id, uid, username, nama_lengkap, email, "displayName", role, status, "passwordHash")
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
-    [id, id, username, identitas.nama, identitas.email, identitas.nama, "user", "pending"]
-  );
 
-  await tautkanIdentitas(id, identitas);
+  // DUA TABEL, SATU TRANSAKSI. Versi pertama menulis Users lalu UserIdentities
+  // sebagai dua operasi lepas. Bila yang kedua gagal, akun tercipta tanpa
+  // tautan; bila urutannya terbalik, tautan tercipta tanpa akun — dan tautan
+  // yatim itulah yang mengunci email pengguna selamanya. Transaksi membuat
+  // keduanya jadi lahir bersama atau tidak sama sekali.
+  let connection;
+  try {
+    connection = await db.getConnection();
+    await connection.beginTransaction();
+
+    await connection.query(
+      `INSERT INTO Users (id, uid, username, nama_lengkap, email, "displayName", role, status, "passwordHash")
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
+      [id, id, username, identitas.nama, identitas.email, identitas.nama, "user", "pending"]
+    );
+
+    await connection.query(
+      'INSERT INTO "UserIdentities" (id, "userId", provider, sub, email) VALUES (?, ?, ?, ?, ?)',
+      [crypto.randomUUID(), id, identitas.provider, identitas.sub, identitas.email]
+    );
+
+    await connection.commit();
+  } catch (err: any) {
+    if (connection) {
+      try {
+        await connection.rollback();
+      } catch {
+        // Rollback yang gagal tidak boleh menutupi galat aslinya.
+      }
+    }
+    console.error("[SSO] Gagal membuat akun:", err?.message);
+    return { hasil: "gagal", alasan: "username_tidak_sah" };
+  } finally {
+    if (connection) connection.release();
+  }
 
   const user = await cariUserById(id);
   return { hasil: "berhasil", user };
+}
+
+/**
+ * Mendaftarkan sesi SSO yang baru terbit.
+ *
+ * WAJIB dipanggil setiap kali SSO menerbitkan JWT. LanPro menegakkan sesi
+ * tunggal di `authenticateJWT`: bila `Users.currentSessionToken` terisi dan
+ * BERBEDA dari token yang dibawa, seluruh permintaan API dibalas 401.
+ *
+ * Versi pertama callback SSO hanya menerbitkan token tanpa memperbarui kolom
+ * itu. Akibatnya pengguna yang pernah login memakai password tidak bisa masuk
+ * lewat Google sama sekali — dan gagalnya SENYAP, tanpa pesan apa pun, karena
+ * callback-nya sendiri sukses dan kegagalan baru muncul pada permintaan API
+ * berikutnya. Ditemukan pemilik proyek 16 Agu 2026.
+ *
+ * `activeUserSessions` ikut diisi karena middleware memakainya sebagai jalur
+ * cadangan bila kueri database gagal.
+ */
+export async function daftarkanSesi(
+  userId: string,
+  token: string,
+  info: { ip?: string; browser?: string; device?: string } = {}
+): Promise<void> {
+  await db.query("UPDATE Users SET currentSessionToken = ?, lastSeen = ? WHERE id = ?", [
+    token,
+    String(Date.now()),
+    String(userId),
+  ]);
+
+  activeUserSessions.set(String(userId), {
+    token,
+    ip: info.ip || "SSO",
+    browser: info.browser || "SSO",
+    device: info.device || "SSO",
+    lastActiveAt: Date.now(),
+    browserSessionId: "",
+  });
 }
 
 /** Pesan yang ditampilkan ke pengguna. Spesifik, supaya tidak terkesan aplikasi rusak. */
