@@ -5,14 +5,14 @@
  * Uses CREATE TABLE IF NOT EXISTS — safe to run multiple times (idempotent).
  */
 
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 export async function runMigrations(pool: Pool): Promise<void> {
   const client = await pool.connect();
-  console.log('🚀 [PG-MIGRATE] Memulai migrasi schema ke Neon PostgreSQL...');
+  console.log("🚀 [PG-MIGRATE] Memulai migrasi schema ke Neon PostgreSQL...");
 
   try {
-    await client.query('BEGIN');
+    await client.query("BEGIN");
 
     // ── Users ───────────────────────────────────────────────────────────────
     await client.query(`
@@ -56,7 +56,11 @@ export async function runMigrations(pool: Pool): Promise<void> {
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "displayName" VARCHAR(255)',
     ];
     for (const stmt of userAlters) {
-      try { await client.query(stmt); } catch (e: any) { console.warn('[PG-MIGRATE] Alter warning:', e.message); }
+      try {
+        await client.query(stmt);
+      } catch (e: any) {
+        console.warn("[PG-MIGRATE] Alter warning:", e.message);
+      }
     }
 
     // ── MasterData ──────────────────────────────────────────────────────────
@@ -434,7 +438,9 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "assignedTo" VARCHAR(255)
       );
     `);
-    await client.query(`ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "assignedTo" VARCHAR(255);`);
+    await client.query(
+      `ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "assignedTo" VARCHAR(255);`
+    );
 
     // ── QATestCases ──────────────────────────────────────────────────────────
     await client.query(`
@@ -467,7 +473,9 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "assignedTo"      VARCHAR(255)
       );
     `);
-    await client.query(`ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "assignedTo" VARCHAR(255);`);
+    await client.query(
+      `ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "assignedTo" VARCHAR(255);`
+    );
 
     // ── QATestCaseExecutionLogs ───────────────────────────────────────────────
     await client.query(`
@@ -537,6 +545,29 @@ export async function runMigrations(pool: Pool): Promise<void> {
       );
     `);
 
+    // ── UserIdentities (SSO Google/Microsoft, F5.4) ───────────────────────────
+    // Tabel terpisah, BUKAN kolom baru di "Users", supaya satu pengguna bisa
+    // menautkan Google DAN Microsoft sekaligus. Menaruhnya sebagai kolom akan
+    // memaksa memilih salah satu, dan menambah provider ketiga berarti menambah
+    // kolom lagi.
+    //
+    // Unik pada (provider, sub): satu identitas provider hanya boleh menunjuk
+    // satu akun LanPro. Tanpa batasan ini, identitas yang sama bisa diam-diam
+    // berpindah pemilik.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "UserIdentities" (
+        id          VARCHAR(36) PRIMARY KEY,
+        "userId"    VARCHAR(36) NOT NULL,
+        provider    VARCHAR(20) NOT NULL,
+        sub         VARCHAR(255) NOT NULL,
+        email       VARCHAR(255),
+        "createdAt" TIMESTAMP DEFAULT NOW(),
+        CONSTRAINT "UserIdentities_provider_sub_key" UNIQUE (provider, sub)
+      );
+      CREATE INDEX IF NOT EXISTS "UserIdentities_userId_idx"
+        ON "UserIdentities" ("userId");
+    `);
+
     // ── TokenBlacklist ────────────────────────────────────────────────────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS "TokenBlacklist" (
@@ -565,14 +596,16 @@ export async function runMigrations(pool: Pool): Promise<void> {
       `CREATE INDEX IF NOT EXISTS idx_token_expiry ON "TokenBlacklist" ("expiresAt")`,
     ];
     for (const idx of indexes) {
-      try { await client.query(idx); } catch {}
+      try {
+        await client.query(idx);
+      } catch {}
     }
 
-    await client.query('COMMIT');
-    console.log('✅ [PG-MIGRATE] Semua tabel berhasil dibuat/diverifikasi di Neon PostgreSQL!');
+    await client.query("COMMIT");
+    console.log("✅ [PG-MIGRATE] Semua tabel berhasil dibuat/diverifikasi di Neon PostgreSQL!");
   } catch (err: any) {
-    await client.query('ROLLBACK');
-    console.error('❌ [PG-MIGRATE] Migrasi gagal:', err.message);
+    await client.query("ROLLBACK");
+    console.error("❌ [PG-MIGRATE] Migrasi gagal:", err.message);
     throw err;
   } finally {
     client.release();
