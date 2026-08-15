@@ -193,7 +193,13 @@ export async function buatAkunDariSso(
 
 /** Pesan yang ditampilkan ke pengguna. Spesifik, supaya tidak terkesan aplikasi rusak. */
 export const PESAN_TOLAK: Record<AlasanTolak | "username_tidak_sah", string> = {
-  belum_terdaftar: "Akun Anda belum terdaftar di LanPro. Hubungi admin untuk dibuatkan akun.",
+  // Pesan ini muncul saat pengguna menekan tombol MASUK dengan email yang belum
+  // punya akun. Versi sebelumnya menyuruh menghubungi admin — itu menyesatkan,
+  // karena pengguna sebenarnya bisa mendaftar sendiri lewat tombol di layar
+  // pendaftaran. Pemilik proyek menemukannya saat mengira sedang mendaftar
+  // padahal menekan tombol masuk.
+  belum_terdaftar:
+    'Email ini belum terdaftar di LanPro. Silakan buka halaman Sign Up, lalu gunakan tombol "Daftar dengan Google".',
   email_belum_terverifikasi:
     "Email Google/Microsoft Anda belum terverifikasi, sehingga tidak dapat dipakai untuk masuk.",
   akun_belum_aktif: "Akun Anda belum aktif. Menunggu persetujuan admin.",

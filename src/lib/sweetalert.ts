@@ -35,41 +35,18 @@ function buildVelzonHtml(
 }
 
 /**
- * Ikon "pengguna disilang" untuk galat, menggantikan ikon tong sampah.
+ * Susunan dialog galat — TANPA ikon.
  *
- * Tong sampah menyiratkan sesuatu terhapus, sementara sebagian besar galat di
- * LanPro justru soal akses yang ditolak atau operasi yang gagal — tidak ada
- * yang dihapus. Ikon yang keliru membuat pengguna mengira datanya hilang.
- *
- * SVG DITULIS INLINE, bukan memakai lordicon seperti dua ikon lain. Alasannya:
- * lordicon menarik aset dari CDN eksternal, sehingga dialog galat justru gagal
- * menampilkan ikonnya persis ketika jaringan bermasalah — padahal itu keadaan
- * yang paling sering memunculkan galat. Versi inline selalu tampil.
- *
- * Animasinya digambar lewat CSS di sweetalert.css: lingkaran mengembang,
- * lalu dua garis silang tergores berurutan.
+ * Sebelumnya memakai ikon tong sampah, yang keliru karena menyiratkan ada data
+ * terhapus padahal kebanyakan galat menyangkut akses ditolak atau operasi
+ * gagal. Ikon itu sempat diganti "pengguna disilang", lalu pemilik proyek
+ * memutuskan menghilangkannya sama sekali: judul dan pesannya sudah cukup
+ * menjelaskan, dan tanpa ikon dialognya terasa lebih tenang.
  */
-function buildIkonUserSilang(size: number): string {
-  return `
-    <svg class="velzon-swal-usericon" width="${size}" height="${size}" viewBox="0 0 100 100"
-         fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Akses ditolak">
-      <circle class="vsu-ring" cx="50" cy="50" r="44" stroke="currentColor" stroke-width="4" opacity="0.25"/>
-      <circle class="vsu-head" cx="42" cy="40" r="13" stroke="currentColor" stroke-width="5"
-              stroke-linecap="round"/>
-      <path class="vsu-body" d="M20 74c0-12 10-20 22-20s22 8 22 20" stroke="currentColor"
-            stroke-width="5" stroke-linecap="round"/>
-      <path class="vsu-x1" d="M68 36l18 18" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-      <path class="vsu-x2" d="M86 36l-18 18" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-    </svg>
-  `;
-}
-
-/** Susunan dialog galat. Sama seperti buildVelzonHtml, tetapi memakai ikon inline. */
-function buildVelzonHtmlGalat(iconSize: number, title: string, text: string): string {
+function buildVelzonHtmlGalat(_iconSize: number, title: string, text: string): string {
   return `
     <div class="velzon-swal-content mt-3">
-      ${buildIkonUserSilang(iconSize)}
-      <div class="mt-4 pt-2 mx-5">
+      <div class="mt-2 pt-2 mx-5">
         <h4>${title}</h4>
         <p class="velzon-swal-text mx-4 mb-0">${text}</p>
       </div>
