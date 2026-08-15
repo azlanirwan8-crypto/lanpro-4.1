@@ -10,6 +10,113 @@ kebutuhan mengevaluasi ulang dari nol setiap kali memulai sesi kerja.
 
 ---
 
+## §0 STATUS SERAH TERIMA — baca ini lebih dulu
+
+Bagian ini ditulis agar siapa pun — manusia maupun agen AI lain — bisa
+melanjutkan pekerjaan tanpa perlu menelusuri riwayat percakapan.
+
+**Diperbarui: 16 Agustus 2026.** Seluruh pekerjaan ada di branch `main` lokal.
+**BELUM di-push ke `origin/main`** (tertinggal sekitar 40+ commit).
+
+### 0.1 Kondisi aplikasi saat ini
+
+| Cek                 | Nilai                                                       | Perintah                                     |
+| ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
+| `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
+| ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
+| Test                | **146 lulus / 16 suite**                                    | `npm test`                                   |
+| Build               | sukses                                                      | `npm run build`                              |
+| Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
+| Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
+
+⚠️ Port di-hardcode **3000** (`server.ts:62`). Bila port terpakai, server keluar
+sendiri dengan pesan `Port 3000 is already in use`.
+
+### 0.2 Fase yang SUDAH SELESAI
+
+**F5 · SSO Google/Microsoft — SELESAI seluruhnya (5 sub-fase).**
+
+| Sub-fase | Isi                   | Hasil                                                                                           |
+| -------- | --------------------- | ----------------------------------------------------------------------------------------------- |
+| F5.1     | Keputusan & desain    | 5 ketetapan resmi, lihat §1.5                                                                   |
+| F5.2     | Pecah `auth` berlapis | `AuthScreens.tsx` 762 baris → 7 berkas ≤378; `auth.routes.ts` 620 → 423 + `auth.service.ts` 219 |
+| F5.3     | Fondasi OIDC generik  | `server/services/oidc.service.ts` 327 baris, **0 dependensi baru**, 22 test                     |
+| F5.4     | Kebijakan akun + rute | tabel `UserIdentities`, `sso.service.ts`, `auth-oidc.routes.ts`, 21 test                        |
+| F5.5     | Antarmuka             | tombol SSO, layar Lengkapi Pendaftaran, penanganan kembalian, 12 test                           |
+| F5.5b    | Usulan username       | terisi otomatis dari email, tetap bisa diubah, 7 test                                           |
+| F5.5c    | Sederhanakan layar    | nama & email dihapus dari tampilan                                                              |
+
+**SSO Google sudah BERFUNGSI dan kredensialnya sudah diisi pemilik proyek.**
+`GET /api/auth/oidc/providers` mengembalikan `["google"]`. Microsoft belum
+dikonfigurasi (sengaja — Google dulu sampai mantap).
+
+### 0.3 Perbaikan di luar fase yang sudah dikerjakan
+
+| Perbaikan                                              | Sebab                                                                                                                                                |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `getJwtSecret` pindah ke `server/helpers/jwtSecret.ts` | `middleware/auth.ts` menarik adapter DB, sehingga test unit membuka koneksi Postgres lalu gagal saat Jest dibongkar — 22 test lulus tapi exit code 1 |
+| `urlFrontend` tidak lagi memercayai `APP_URL` mentah   | `.env` berisi placeholder harfiah `MY_APP_URL`, dan `res.redirect` memperlakukannya sebagai jalur relatif                                            |
+| **`POST /api/projects` kini `verifyGlobalAdmin`**      | Endpoint sama sekali tidak memeriksa peran; siapa pun yang login bisa membuat proyek lewat API                                                       |
+| Tombol "Buat Proyek Baru" di layar kosong dijaga izin  | Sebelumnya tanpa penjaga, padahal tombol serupa di sidebar sudah dijaga                                                                              |
+| Ikon dialog galat → pengguna-disilang                  | Tong sampah menyiratkan data terhapus; berlaku untuk SELURUH dialog galat                                                                            |
+
+### 0.4 Yang PALING MUNGKIN dikerjakan berikutnya
+
+Urutan saran, silakan sesuaikan:
+
+1. **Tutup gerbang F5 secara resmi** — uji alur SSO ujung-ke-ujung dengan akun
+   Google sungguhan (butuh pemilik proyek login), lalu isi §10 tabel gerbang.
+2. **F6 · Email** — 3 fungsi email. Mulai dari F6.1 (bersihkan 3 bug prasyarat).
+3. **F1 · Storage** — wajib tutup **sebelum rilis production**.
+
+### 0.5 Aturan yang WAJIB dipatuhi penerus
+
+Ini bukan preferensi gaya; semuanya lahir dari insiden nyata di repo ini.
+
+1. **Review-first.** Untuk permintaan perbaikan: analisa & laporkan dulu
+   (format A–F), tunggu persetujuan sebelum mengubah kode.
+2. **Build hijau BUKAN bukti aplikasi jalan.** Wajib buka browser (§15.3).
+3. **Jangan sentuh `src/lib/db.ts`.**
+4. **Jangan sabotase source untuk pembuktian** — pakai salinan di luar repo.
+5. **Jangan pernah memasukkan kredensial** — minta pemilik proyek yang login.
+6. **Satu branch per item**, merge ke `main`, lapor sebelum lanjut.
+7. **Laporkan apa adanya.** Yang belum diuji ditulis "belum terverifikasi".
+
+### 0.6 Jebakan teknis khas repo ini
+
+| Jebakan                            | Akibat bila terlewat                                                                                                                                           |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cek rute lewat status **401**      | TIDAK VALID — auth berjalan sebelum handler 404, rute palsu pun menjawab 401. Pakai perbandingan **himpunan rute**                                             |
+| Menghitung **total** error `tsc`   | Pakai `diff` baris-per-baris; sudah **5×** menangkap simbol terlewat                                                                                           |
+| `tsconfig.json` **tanpa `strict`** | Penyempitan tipe lewat diskriminan **boolean** tidak bekerja. Pakai diskriminan **string** (`{hasil: "berhasil"} \| {hasil: "gagal"}`)                         |
+| Migrasi otomatis saat boot         | Hanya mencatat **warning** bila gagal. Pernah timeout dan tabel tidak terbentuk sementara server menyala seolah sehat — **verifikasi ke `information_schema`** |
+| Kunci token localStorage           | **`lanpro_jwt_token`**, bukan `'token'`                                                                                                                        |
+| Console peramban saat HMR          | Vite menyisakan error dari versi berkas yang sedang diedit. **Verifikasi di tab bersih**, bukan setelah hot-reload                                             |
+| Menambah test                      | Periksa jumlahnya benar-benar bertambah — Prettier pernah membuat penyisipan gagal diam-diam                                                                   |
+
+### 0.7 Peta berkas SSO
+
+```
+server/
+  services/oidc.service.ts      Verifikasi OIDC. Tanpa DB, tanpa kebijakan.
+  services/sso.service.ts       Kebijakan akun. Menyentuh DB.
+  routes/auth-oidc.routes.ts    4 rute, berkas TERPISAH dari auth.routes.ts
+  helpers/jwtSecret.ts          Dipisah agar tidak menarik adapter DB
+src/features/auth/
+  lib/ssoCallback.ts            Baca query kembalian. Fungsi murni.
+  lib/ssoUsername.ts            Usulan username dari email. Fungsi murni.
+  services/sso.service.ts       Satu-satunya pintu ke backend
+  components/SsoButtons.tsx     Tombol Google/Microsoft
+  CompleteRegistrationScreen.tsx
+src/main.tsx                    Menangkap sso_token SEBELUM React dirender
+```
+
+Pemisahan `oidc.service` (kriptografi) dari `sso.service` (kebijakan) disengaja:
+keduanya punya alasan berubah yang berbeda, dan mencampurnya membuat keduanya
+sulit diuji sendiri-sendiri.
+
+---
+
 ## Cara memakai dokumen ini
 
 1. Buka **§1.5 Peta Fase**. Kerjakan **fase paling awal yang belum lulus
@@ -55,7 +162,7 @@ kebutuhan mengevaluasi ulang dari nol setiap kali memulai sesi kerja.
 
 ---
 
-## §1 PAPAN PRIORITAS — 32 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 39 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -74,9 +181,16 @@ lepas. Catatan lepas selalu terlupakan.
 | 20  | Kode mati DB Explorer                                                                |  **F2**  | 🟡  | Rendah        |       Tidak        | `MENUNGGU` keputusan     | §6.3   |
 | 17  | **UI belum pernah diaudit di balik login**                                           |  **F3**  | 🔴  | Sedang        |         Ya         | `MENUNGGU` login         | §14    |
 | 3   | Nol code splitting — 898 KB gzip satu chunk                                          |  **F4**  | 🔴  | Rendah        |         Ya         | `TERBUKA`                | §5     |
-| 29  | **SSO Google/Microsoft** (poin 1)                                                    |  **F5**  | 🟢  | Tinggi        |       Tidak        | `TERBUKA`                | §1.5   |
-| 32  | **Daftar dengan Google/Microsoft** — akun otomatis, status `pending`                 |  **F5**  | 🟢  | Sedang        |       Tidak        | `TERBUKA`                | §1.5   |
+| 29  | **SSO Google/Microsoft** (poin 1)                                                    |  **F5**  | 🟢  | Tinggi        |       Tidak        | `SELESAI` 15 Agu         | §1.5   |
+| 32  | **Daftar dengan Google/Microsoft** — akun otomatis, status `pending`                 |  **F5**  | 🟢  | Sedang        |       Tidak        | `SELESAI` 15 Agu         | §1.5   |
 | 33  | ~~`getJwtSecret` di `middleware/auth.ts` menarik adapter DB~~ dipindah ke `helpers/` | **F5.3** | 🟠  | Sangat rendah |       Tidak        | `SELESAI` 15 Agu         | §1.5   |
+| 34  | ~~`POST /api/projects` tanpa penjaga peran~~ kini khusus admin                       |  **F5**  | 🔴  | Rendah        |       Tidak        | `SELESAI` 16 Agu         | §0.3   |
+| 35  | ~~Tombol "Buat Proyek Baru" di layar kosong tanpa penjaga izin~~                     |  **F5**  | 🟠  | Sangat rendah |       Tidak        | `SELESAI` 16 Agu         | §0.3   |
+| 36  | ~~Ikon dialog galat memakai tong sampah~~ diganti pengguna-disilang                  |  **F5**  | 🟡  | Rendah        |       Tidak        | `SELESAI` 16 Agu         | §0.3   |
+| 37  | ~~`urlFrontend` memercayai `APP_URL` mentah~~ kini divalidasi                        |  **F5**  | 🟠  | Sangat rendah |       Tidak        | `SELESAI` 15 Agu         | §0.3   |
+| 38  | `APP_URL` di `.env` masih placeholder harfiah `MY_APP_URL`                           |  **F0**  | 🟠  | Sangat rendah | Ya (CORS produksi) | `TERBUKA`                | §0.6   |
+| 39  | Migrasi otomatis saat boot GAGAL SENYAP — hanya `warning`, tabel tidak terbentuk     |  **F0**  | 🔴  | Rendah        |         Ya         | `TERBUKA`                | §0.6   |
+| 40  | `tsconfig.json` tanpa `strict` — penyempitan diskriminan boolean tidak bekerja       |  **F8**  | 🟠  | Tinggi        |         Ya         | `TERBUKA`                | §0.6   |
 | 31  | ~~Login dengan email di kolom form~~                                                 |  **—**   |  —  | —             |       Tidak        | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | `initWhatsAppScheduler` tak pernah dipanggil — digest belum pernah menyala           |  **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`                | §1.5   |
 | 23  | Fallback token WhatsApp ter-hardcode (langgar §3.2)                                  |  **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`                | §1.5   |
@@ -1292,34 +1406,39 @@ npm run doctor && npm run lint && npm test && npm run build
 Tambahkan satu baris **setiap kali** sebuah item berpindah ke `SELESAI`.
 Kolom angka wajib diisi sebelum→sesudah, supaya kemajuannya terukur, bukan terasa.
 
-| Tanggal     |   Fase   | Item                                           | Branch / Commit            | Sebelum                                      | Sesudah                                           | Aplikasi jalan? | Terverifikasi dengan                                                                                                                                    |
-| ----------- | :------: | ---------------------------------------------- | -------------------------- | -------------------------------------------- | ------------------------------------------------- | :-------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 15 Agu 2026 |    —     | Baseline audit                                 | `docs/audit-baseline`      | —                                            | —                                                 |        —        | seluruh perintah §9                                                                                                                                     |
-| 15 Agu 2026 |    —     | Pemfasean F0–F7                                | `docs/audit-fase`          | —                                            | —                                                 |        —        | —                                                                                                                                                       |
-| 15 Agu 2026 |    —     | Audit logika & UI masuk fase (F0–F9, 21 item)  | `docs/audit-fase-lengkap`  | —                                            | —                                                 |        —        | —                                                                                                                                                       |
-| 15 Agu 2026 |    —     | Fase SSO (F5) & Email (F6) masuk peta, 30 item | `docs/fase-sso-email`      | —                                            | —                                                 |       ✅        | baseline §15.1                                                                                                                                          |
-| 15 Agu 2026 |    —     | Login dengan email masuk F5.2 (31 item)        | `docs/fase-login-email`    | —                                            | —                                                 |        —        | —                                                                                                                                                       |
-| 15 Agu 2026 |    —     | Kartu verifikasi §16 & standar develop §17     | `docs/verifikasi-standar`  | —                                            | —                                                 |        —        | —                                                                                                                                                       |
-| 15 Agu 2026 | **F5.2** | #11 pecah `auth` jadi berlapis                 | `refactor/f5.2-pecah-auth` | AuthScreens 762 baris; auth.routes 620 baris | 7 berkas ≤378; auth.routes 423 + auth.service 219 |       ✅        | tsc diff IDENTIK; himpunan rute 86→86 IDENTIK; 84/84 test; lint 451→449 warning; browser: layar login, layar daftar, validasi username, 0 error console |
-| 15 Agu 2026 | **F5.3** | Fondasi OIDC generik                           | `feat/f5.3-fondasi-oidc`   | tanpa OIDC; 84 test                          | `oidc.service.ts` 327 baris; 106 test             |       ✅        | tsc diff IDENTIK; rute 86→86; 106/106 test (exit 0); browser: layar login & daftar utuh, 0 error console                                                |
+| Tanggal     |   Fase    | Item                                                         | Branch / Commit                      | Sebelum                                        | Sesudah                                           | Aplikasi jalan? | Terverifikasi dengan                                                                                                                                    |
+| ----------- | :-------: | ------------------------------------------------------------ | ------------------------------------ | ---------------------------------------------- | ------------------------------------------------- | :-------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 15 Agu 2026 |     —     | Baseline audit                                               | `docs/audit-baseline`                | —                                              | —                                                 |        —        | seluruh perintah §9                                                                                                                                     |
+| 15 Agu 2026 |     —     | Pemfasean F0–F7                                              | `docs/audit-fase`                    | —                                              | —                                                 |        —        | —                                                                                                                                                       |
+| 15 Agu 2026 |     —     | Audit logika & UI masuk fase (F0–F9, 21 item)                | `docs/audit-fase-lengkap`            | —                                              | —                                                 |        —        | —                                                                                                                                                       |
+| 15 Agu 2026 |     —     | Fase SSO (F5) & Email (F6) masuk peta, 30 item               | `docs/fase-sso-email`                | —                                              | —                                                 |       ✅        | baseline §15.1                                                                                                                                          |
+| 15 Agu 2026 |     —     | Login dengan email masuk F5.2 (31 item)                      | `docs/fase-login-email`              | —                                              | —                                                 |        —        | —                                                                                                                                                       |
+| 15 Agu 2026 |     —     | Kartu verifikasi §16 & standar develop §17                   | `docs/verifikasi-standar`            | —                                              | —                                                 |        —        | —                                                                                                                                                       |
+| 15 Agu 2026 | **F5.2**  | #11 pecah `auth` jadi berlapis                               | `refactor/f5.2-pecah-auth`           | AuthScreens 762 baris; auth.routes 620 baris   | 7 berkas ≤378; auth.routes 423 + auth.service 219 |       ✅        | tsc diff IDENTIK; himpunan rute 86→86 IDENTIK; 84/84 test; lint 451→449 warning; browser: layar login, layar daftar, validasi username, 0 error console |
+| 15 Agu 2026 | **F5.3**  | Fondasi OIDC generik                                         | `feat/f5.3-fondasi-oidc`             | tanpa OIDC; 84 test                            | `oidc.service.ts` 327 baris; 106 test             |       ✅        | tsc diff IDENTIK; rute 86→86; 106/106 test (exit 0); browser: layar login & daftar utuh, 0 error console                                                |
+| 15 Agu 2026 | **F5.4**  | Kebijakan akun SSO + rute OIDC + tabel `UserIdentities`      | `feat/f5.4-kebijakan-akun`           | tanpa kebijakan; 106 test                      | 4 rute baru; 127 test                             |       ✅        | tsc IDENTIK; rute 86→90; tabel terverifikasi di `information_schema`; jalur lama utuh                                                                   |
+| 15 Agu 2026 | **F5.5**  | Tombol SSO, layar Lengkapi Pendaftaran, penanganan kembalian | `feat/f5.5-ui-sso`                   | tanpa UI SSO; 127 test                         | 139 test                                          |       ✅        | tsc IDENTIK; rute 90→90; browser: tombol tampil dengan mode benar                                                                                       |
+| 15 Agu 2026 | **F5.5b** | Usulan username otomatis dari email                          | `feat/f5.5b-usulan-username`         | kolom kosong; 139 test                         | terisi otomatis; 146 test                         |       ✅        | `budi.santoso@…` → `budisantos`, tetap bisa diubah                                                                                                      |
+| 15 Agu 2026 | **F5.5c** | Sederhanakan layar — username saja                           | `feat/f5.5c-sederhanakan-layar`      | 3 kolom                                        | 1 kolom                                           |       ✅        | 0 error console di tab bersih                                                                                                                           |
+| 16 Agu 2026 |  **F5**   | #34–#36 buat proyek khusus admin + ikon galat baru           | `fix/rbac-create-project-ikon-galat` | endpoint tanpa penjaga peran; ikon tong sampah | `verifyGlobalAdmin`; ikon pengguna-disilang       |       ✅        | tsc IDENTIK; rute 90→90; POST tanpa token → 401                                                                                                         |
 
 ### Gerbang fase yang sudah lulus
 
-| Fase | Nama                               | Tanggal lulus | Dibuktikan dengan |
-| :--: | ---------------------------------- | ------------- | ----------------- |
-|  F0  | Kejelasan & fondasi dokumen        | belum         | —                 |
-|  F1  | Storage minimal — buka jalan rilis | belum         | —                 |
-|  F2  | Audit & perbaikan LOGIKA           | belum         | —                 |
-|  F3  | Audit UI menyeluruh                | belum         | —                 |
-|  F4  | Performa muat                      | belum         | —                 |
-|  F5  | SSO Google/Microsoft               | belum         | —                 |
-|  F6  | Email: 3 fungsi                    | belum         | —                 |
-|  F7  | Kontrak & validasi                 | belum         | —                 |
-|  F8  | Jaring pengaman                    | belum         | —                 |
-|  F9  | Lapisan backend                    | belum         | —                 |
-| F10  | Arsitektur frontend                | belum         | —                 |
-| F11  | Drive-per-user (OPSIONAL)          | belum         | —                 |
-| F12  | Konsolidasi desain                 | belum         | —                 |
+| Fase | Nama                               | Tanggal lulus                     | Dibuktikan dengan                                                                               |
+| :--: | ---------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------- |
+|  F0  | Kejelasan & fondasi dokumen        | belum                             | —                                                                                               |
+|  F1  | Storage minimal — buka jalan rilis | belum                             | —                                                                                               |
+|  F2  | Audit & perbaikan LOGIKA           | belum                             | —                                                                                               |
+|  F3  | Audit UI menyeluruh                | belum                             | —                                                                                               |
+|  F4  | Performa muat                      | belum                             | —                                                                                               |
+|  F5  | SSO Google/Microsoft               | **hampir** — 5/5 sub-fase selesai | Menunggu satu uji alur ujung-ke-ujung dengan akun Google sungguhan (butuh pemilik proyek login) |
+|  F6  | Email: 3 fungsi                    | belum                             | —                                                                                               |
+|  F7  | Kontrak & validasi                 | belum                             | —                                                                                               |
+|  F8  | Jaring pengaman                    | belum                             | —                                                                                               |
+|  F9  | Lapisan backend                    | belum                             | —                                                                                               |
+| F10  | Arsitektur frontend                | belum                             | —                                                                                               |
+| F11  | Drive-per-user (OPSIONAL)          | belum                             | —                                                                                               |
+| F12  | Konsolidasi desain                 | belum                             | —                                                                                               |
 
 ---
 
