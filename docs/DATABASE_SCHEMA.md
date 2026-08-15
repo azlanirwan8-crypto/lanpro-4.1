@@ -16,36 +16,27 @@ daripada tidak ada dokumen.
 
 |                                   | Jumlah |
 | --------------------------------- | -----: |
-| Tabel seluruhnya                  |     35 |
+| Tabel seluruhnya                  |     30 |
 | Tabel aktif                       |     30 |
-| 🔴 Tabel kembar (kosong, warisan) |      5 |
+| 🔴 Tabel kembar (kosong, warisan) |      0 |
 
 ---
 
-## 🔴 Tabel kembar — jangan dipakai
+## Tabel kembar — pelajaran yang tetap berlaku
 
 PostgreSQL memperlakukan `"MasterData"` dan `masterdata` sebagai **dua tabel
 berbeda**: identifier tanpa kutip otomatis diubah menjadi huruf kecil.
 
 Repo ini pernah punya dua sistem migrasi. `pg-migrate.ts` menulis nama tabel
 **dengan** kutip, sementara `server/migrations/runner.ts` menulisnya **tanpa**
-kutip. Keduanya berjalan pada database yang sama, sehingga tiap tabel
-terbentuk dua kali dalam dua ejaan.
+kutip. Keduanya berjalan pada database yang sama, sehingga lima tabel
+terbentuk dua kali dalam dua ejaan — dan varian huruf kecilnya selalu kosong,
+karena seluruh kueri aplikasi lewat adapter yang mengutip nama tabel.
 
-`runner.ts` sudah dihapus 16 Agu 2026, jadi tabel kembar tidak akan lahir
-lagi. Yang sudah terlanjur ada masih tertinggal:
-
-| Kembar (kosong)           | Yang dipakai                | Baris di yang dipakai |
-| ------------------------- | --------------------------- | --------------------: |
-| `masterdata`              | `"MasterData"`              |                    76 |
-| `projectmodules`          | `"ProjectModules"`          |                     2 |
-| `qatestcaseexecutionlogs` | `"QATestCaseExecutionLogs"` |                     0 |
-| `qatestcases`             | `"QATestCases"`             |                     1 |
-| `qatestsuites`            | `"QATestSuites"`            |                     2 |
-
-Seluruhnya **kosong** — tidak ada data yang akan hilang bila dibuang. Tetapi
-`DROP TABLE` bersifat permanen, jadi menunggu persetujuan pemilik proyek
-(item #48).
+**Keadaan sekarang: bersih.** `runner.ts` dihapus 16 Agu 2026 sehingga
+kembaran tidak akan lahir lagi, dan lima tabel yang terlanjur ada sudah
+dihapus pada hari yang sama (item #48). Strukturnya tercatat di
+`docs/legacy/tabel-kembar-dihapus-2026-08-16.md`.
 
 ---
 
