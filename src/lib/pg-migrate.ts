@@ -545,6 +545,39 @@ export async function runMigrations(pool: Pool): Promise<void> {
       );
     `);
 
+    // ── discussion_point_comments ─────────────────────────────────────────────
+    //
+    // DIPINDAHKAN dari server/migrations/runner.ts pada 16 Agu 2026 (item #1).
+    //
+    // Tabel ini sebelumnya HANYA dibuat oleh runner.ts, sistem migrasi kedua
+    // yang tidak pernah dipanggil saat boot. Akibatnya: pada database baru,
+    // migrasi otomatis tidak membuatnya, dan fitur komentar discussion point
+    // langsung rusak — padahal `discussion-points.routes.ts` membaca dan
+    // menulis ke sini. Di database yang sedang berjalan tabelnya sudah ada
+    // dengan data nyata, sehingga cacatnya tidak terlihat.
+    //
+    // Definisinya disalin PERSIS APA ADANYA, termasuk kolom kembarnya
+    // (`pointId` dan `point_id`, `userId` dan `user_id`, dan seterusnya).
+    // Kolom kembar itu memang keliru — kodenya menulis ke keduanya setiap kali
+    // menyimpan komentar — tetapi merapikannya menyentuh data hidup dan
+    // dikerjakan terpisah (item #47). Menyatukan sistem migrasi dulu, baru
+    // membersihkan bentuknya.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS discussion_point_comments (
+        id VARCHAR(36) PRIMARY KEY,
+        pointId VARCHAR(36) NOT NULL,
+        point_id VARCHAR(36),
+        userId VARCHAR(50),
+        user_id VARCHAR(50),
+        userName VARCHAR(255),
+        user_name VARCHAR(255),
+        commentText TEXT NOT NULL,
+        comment_text TEXT,
+        createdAt VARCHAR(50) NOT NULL,
+        created_at VARCHAR(50)
+      );
+    `);
+
     // ── UserIdentities (SSO Google/Microsoft, F5.4) ───────────────────────────
     // Tabel terpisah, BUKAN kolom baru di "Users", supaya satu pengguna bisa
     // menautkan Google DAN Microsoft sekaligus. Menaruhnya sebagai kolom akan
