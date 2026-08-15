@@ -125,7 +125,18 @@ router.get("/api/projects/:id", verifyProjectAccess(["*"]), async (req, res) => 
   }
 });
 
-router.post("/api/projects", async (req, res) => {
+/**
+ * Membuat proyek. HANYA administrator.
+ *
+ * Sebelumnya endpoint ini tidak memeriksa peran sama sekali — cukup punya JWT
+ * yang sah, dan siapa pun bisa membuat proyek lewat panggilan API langsung.
+ * Menyembunyikan tombol di antarmuka tidak menutup lubang itu; penjaganya
+ * harus ada di sini.
+ *
+ * Ketetapan pemilik proyek: pembuatan proyek dibatasi ke administrator demi
+ * menjaga kestabilan data.
+ */
+router.post("/api/projects", authenticateJWT, verifyGlobalAdmin, async (req, res) => {
   let connection;
   try {
     const { name, description, ownerId, status, projectKey, category } = req.body;

@@ -3682,16 +3682,35 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                 Pilih atau Buat Proyek Baru
               </h3>
               <p className="text-sm text-content-muted max-w-md mb-6">
-                Silakan pilih salah satu proyek dari sidebar di sebelah kiri, atau buat proyek baru
-                untuk mulai mengelola tugas & sprint tim Anda.
+                {hasPermission(
+                  effectiveRole,
+                  "configuration",
+                  "create",
+                  false,
+                  currentUserProfile?.permissions
+                )
+                  ? "Silakan pilih salah satu proyek dari sidebar di sebelah kiri, atau buat proyek baru untuk mulai mengelola tugas & sprint tim Anda."
+                  : "Silakan pilih salah satu proyek dari sidebar di sebelah kiri. Pembuatan proyek baru hanya dapat dilakukan oleh administrator."}
               </p>
-              <button
-                onClick={() => setIsNewProjectModalOpen(true)}
-                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm shadow-md shadow-indigo-200 transition-all flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Buat Proyek Baru</span>
-              </button>
+              {/* Penjaga izin memakai pemeriksaan yang SAMA dengan tombol di
+                  sidebar. Sebelumnya tombol ini tidak dijaga sama sekali,
+                  sehingga pengguna biasa melihat ajakan membuat proyek yang
+                  pasti ditolak backend. */}
+              {hasPermission(
+                effectiveRole,
+                "configuration",
+                "create",
+                false,
+                currentUserProfile?.permissions
+              ) && (
+                <button
+                  onClick={() => setIsNewProjectModalOpen(true)}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm shadow-md shadow-indigo-200 transition-all flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Buat Proyek Baru</span>
+                </button>
+              )}
             </div>
           )}
 
