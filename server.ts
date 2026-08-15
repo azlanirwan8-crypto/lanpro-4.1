@@ -36,6 +36,7 @@ import healthRoutes from "./server/routes/health.routes";
 import systemRoutes from "./server/routes/system.routes";
 import auditRoutes from "./server/routes/audit.routes";
 import authRoutes from "./server/routes/auth.routes";
+import authOidcRoutes from "./server/routes/auth-oidc.routes";
 import setupQARoutes from "./server/routes/qa.routes";
 import setupSprintsRoutes from "./server/routes/sprints.routes";
 
@@ -786,6 +787,7 @@ async function startServer() {
 
 
   app.use(authRoutes);
+  app.use(authOidcRoutes);
 
   const { default: userRoutes } = await import('./server/routes/user.routes.ts');
   app.use(userRoutes);
