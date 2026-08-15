@@ -1,22 +1,92 @@
-import React from "react";
-import { DashboardView } from "../features/dashboard";
-import { IssueListView } from "../features/issues";
-import { PlanningView } from "../features/planning";
-import { BoardView } from "../features/kanban/index";
-import { TestQAPanel } from "../features/qa/TestQAPanel";
-import { WikiView } from "../features/wiki";
-import { MeetingNotes } from "../features/meeting-notes/MeetingNotes";
-import { NotebookLM } from "../features/notebook-lm";
-import { FlowchartView } from "../features/flowchart";
-import { MasterDataPanel } from "../features/master/MasterDataPanel";
-import { ConnectPanel } from "../features/connect/ConnectPanel";
-import { EnterpriseAuditDashboard } from "../features/enterprise-audit/EnterpriseAuditDashboard";
-import { ActivityLogPanel } from "../features/activity/ActivityLogPanel";
-import { TimelinePanel } from "../features/timeline/index";
-import { TeamManagementPanel } from "../features/team/TeamManagementPanel";
-import { DbExplorerPanel } from "../features/explorer/DbExplorerPanel";
-import { SettingsPage } from "../features/settings/SettingsPage";
+import React, { Suspense } from "react";
 import { ShieldAlert, FolderKanban } from "lucide-react";
+
+/**
+ * Tiap tampilan dimuat SAAT DIBUTUHKAN, bukan sekaligus di awal.
+ *
+ * MASALAH YANG DIPECAHKAN. Ketujuh belas modul di bawah dulu di-import statis,
+ * sehingga seluruh fitur — flowchart, QA, notebook-lm, docx — ikut terkirim
+ * pada permintaan pertama walaupun pengguna hanya membuka Dashboard. Bundel
+ * utamanya mencapai 901 KB gzip dalam satu potongan, dan setiap fitur baru
+ * memperburuknya.
+ *
+ * KENAPA AMAN. `switch (currentView)` di bawah hanya merender SATU tampilan
+ * pada satu waktu. Tidak ada tampilan yang perlu hadir bersamaan, sehingga
+ * memuatnya sesuai permintaan tidak mengubah perilaku apa pun.
+ *
+ * KENAPA ADA `.then(...)`. `React.lazy` hanya menerima modul dengan default
+ * export, sementara repo ini memakai named export. Pembungkus itu menerjemahkan
+ * keduanya. Nama di dalamnya HARUS sama persis dengan yang diekspor modulnya —
+ * salah satu huruf saja membuat tampilan itu gagal dimuat, dan gagalnya baru
+ * terlihat saat tampilan dibuka, bukan saat build.
+ */
+const DashboardView = React.lazy(() =>
+  import("../features/dashboard").then((m) => ({ default: m.DashboardView }))
+);
+const IssueListView = React.lazy(() =>
+  import("../features/issues").then((m) => ({ default: m.IssueListView }))
+);
+const PlanningView = React.lazy(() =>
+  import("../features/planning").then((m) => ({ default: m.PlanningView }))
+);
+const BoardView = React.lazy(() =>
+  import("../features/kanban/index").then((m) => ({ default: m.BoardView }))
+);
+const TestQAPanel = React.lazy(() =>
+  import("../features/qa/TestQAPanel").then((m) => ({ default: m.TestQAPanel }))
+);
+const WikiView = React.lazy(() =>
+  import("../features/wiki").then((m) => ({ default: m.WikiView }))
+);
+const MeetingNotes = React.lazy(() =>
+  import("../features/meeting-notes/MeetingNotes").then((m) => ({ default: m.MeetingNotes }))
+);
+const NotebookLM = React.lazy(() =>
+  import("../features/notebook-lm").then((m) => ({ default: m.NotebookLM }))
+);
+const FlowchartView = React.lazy(() =>
+  import("../features/flowchart").then((m) => ({ default: m.FlowchartView }))
+);
+const MasterDataPanel = React.lazy(() =>
+  import("../features/master/MasterDataPanel").then((m) => ({ default: m.MasterDataPanel }))
+);
+const ConnectPanel = React.lazy(() =>
+  import("../features/connect/ConnectPanel").then((m) => ({ default: m.ConnectPanel }))
+);
+const EnterpriseAuditDashboard = React.lazy(() =>
+  import("../features/enterprise-audit/EnterpriseAuditDashboard").then((m) => ({
+    default: m.EnterpriseAuditDashboard,
+  }))
+);
+const ActivityLogPanel = React.lazy(() =>
+  import("../features/activity/ActivityLogPanel").then((m) => ({ default: m.ActivityLogPanel }))
+);
+const TimelinePanel = React.lazy(() =>
+  import("../features/timeline/index").then((m) => ({ default: m.TimelinePanel }))
+);
+const TeamManagementPanel = React.lazy(() =>
+  import("../features/team/TeamManagementPanel").then((m) => ({ default: m.TeamManagementPanel }))
+);
+const DbExplorerPanel = React.lazy(() =>
+  import("../features/explorer/DbExplorerPanel").then((m) => ({ default: m.DbExplorerPanel }))
+);
+const SettingsPage = React.lazy(() =>
+  import("../features/settings/SettingsPage").then((m) => ({ default: m.SettingsPage }))
+);
+
+/**
+ * Tampilan sementara selagi potongan kode diunduh.
+ *
+ * WAJIB ADA. Tanpa fallback, React melempar saat menemui komponen lazy yang
+ * belum siap. Bentuknya sengaja tenang — indikator yang berisik justru terasa
+ * seperti kerusakan pada pemuatan yang biasanya hanya sepersekian detik.
+ */
+const MemuatTampilan = () => (
+  <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
+    <p className="mt-3 text-sm text-content-muted">Memuat...</p>
+  </div>
+);
 
 export interface AppRoutesProps {
   currentView: string;
@@ -69,7 +139,12 @@ export interface AppRoutesProps {
   removeProjectMember?: (memberId: string) => any;
 }
 
-export const AppRoutes: React.FC<AppRoutesProps> = (props) => {
+/**
+ * Implementasi pemilihan tampilan. Tidak diekspor — pembungkusnya di bawah
+ * yang menyediakan Suspense, sehingga tidak ada jalur yang bisa merender
+ * komponen lazy tanpa fallback.
+ */
+const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
   const {
     currentView,
     setCurrentView,
@@ -425,3 +500,14 @@ export const AppRoutes: React.FC<AppRoutesProps> = (props) => {
       return null;
   }
 };
+
+/**
+ * Pembungkus resmi. Seluruh tampilan dimuat malas, jadi Suspense dipasang di
+ * satu tempat saja alih-alih di tiap cabang `switch` — satu fallback yang
+ * mustahil terlewat lebih aman daripada tujuh belas yang harus diingat.
+ */
+export const AppRoutes: React.FC<AppRoutesProps> = (props) => (
+  <Suspense fallback={<MemuatTampilan />}>
+    <TampilanTerpilih {...props} />
+  </Suspense>
+);
