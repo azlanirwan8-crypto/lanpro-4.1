@@ -1,7 +1,7 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App';
-import './index.css';
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+import "./index.css";
 
 interface Props {
   children?: ReactNode;
@@ -17,7 +17,7 @@ class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
     error: null,
-    errorInfo: null
+    errorInfo: null,
   };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -32,15 +32,51 @@ class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: "24px", color: "#ef4444", background: "#fef2f2", border: "1px solid #fee2e2", borderRadius: "8px", fontFamily: "monospace", margin: "20px", textAlign: "left" }}>
-          <h1 style={{ color: "#dc2626", marginTop: 0, fontSize: "20px" }}>🚨 React Render Crash detected</h1>
+        <div
+          style={{
+            padding: "24px",
+            color: "#ef4444",
+            background: "#fef2f2",
+            border: "1px solid #fee2e2",
+            borderRadius: "8px",
+            fontFamily: "monospace",
+            margin: "20px",
+            textAlign: "left",
+          }}
+        >
+          <h1 style={{ color: "#dc2626", marginTop: 0, fontSize: "20px" }}>
+            🚨 React Render Crash detected
+          </h1>
           <p style={{ fontWeight: "bold" }}>{this.state.error?.toString()}</p>
-          <pre style={{ whiteSpace: "pre-wrap", fontSize: "12px", background: "#f3f4f6", padding: "12px", borderRadius: "6px", maxHeight: "300px", overflow: "auto" }}>
+          <pre
+            style={{
+              whiteSpace: "pre-wrap",
+              fontSize: "12px",
+              background: "#f3f4f6",
+              padding: "12px",
+              borderRadius: "6px",
+              maxHeight: "300px",
+              overflow: "auto",
+            }}
+          >
             {this.state.errorInfo?.componentStack || this.state.error?.stack}
           </pre>
-          <button 
-            onClick={() => { localStorage.clear(); sessionStorage.clear(); window.location.reload(); }}
-            style={{ marginTop: "16px", padding: "10px 18px", background: "#dc2626", color: "white", border: "none", borderRadius: "8px", fontWeight: "bold", cursor: "pointer" }}
+          <button
+            onClick={() => {
+              localStorage.clear();
+              sessionStorage.clear();
+              window.location.reload();
+            }}
+            style={{
+              marginTop: "16px",
+              padding: "10px 18px",
+              background: "#dc2626",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
           >
             Reset Cache & Reload
           </button>
@@ -52,24 +88,50 @@ class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-import { AuthNotificationProvider } from './components/AuthToastContainer';
+import { AuthNotificationProvider } from "./components/AuthToastContainer";
 
 // Global Event Listener for unhandledrejection to suppress benign WebSocket/Vite issues before rendering
-window.addEventListener('unhandledrejection', (event) => {
+window.addEventListener("unhandledrejection", (event) => {
   const reason = event.reason;
-  const message = reason instanceof Error ? reason.message : String(reason || '');
-  
+  const message = reason instanceof Error ? reason.message : String(reason || "");
+
   if (
-    message.toLowerCase().includes('websocket') || 
-    message.toLowerCase().includes('closed without opened') || 
-    message.toLowerCase().includes('vite')
+    message.toLowerCase().includes("websocket") ||
+    message.toLowerCase().includes("closed without opened") ||
+    message.toLowerCase().includes("vite")
   ) {
     event.preventDefault();
-    console.warn("[SUPPRESSED REJECTION] Suppressed benign WebSocket/Vite unhandled promise rejection:", reason);
+    console.warn(
+      "[SUPPRESSED REJECTION] Suppressed benign WebSocket/Vite unhandled promise rejection:",
+      reason
+    );
   }
 });
 
-createRoot(document.getElementById('root')!).render(
+import { bacaHasilSso, bersihkanQuerySso } from "./features/auth/lib/ssoCallback";
+import { setAuthToken } from "./lib/api";
+
+// Menerima kembalian SSO SEBELUM React dirender.
+//
+// Token disimpan lebih dulu supaya jalur pemulihan sesi yang sudah ada
+// menemukannya saat mount — tanpa perlu menambahkan cabang login kedua di
+// AppContainer. Alurnya jadi sama persis dengan pengguna yang membuka aplikasi
+// dalam keadaan sudah punya token.
+//
+// URL dibersihkan segera: token tidak boleh tertinggal di address bar karena
+// ikut tersalin saat tautan dibagikan dan tercatat di riwayat peramban.
+try {
+  const hasilSso = bacaHasilSso(window.location.search);
+  if (hasilSso.jenis === "token") {
+    setAuthToken(hasilSso.token);
+    const sisa = bersihkanQuerySso(window.location.search);
+    window.history.replaceState({}, "", window.location.pathname + sisa);
+  }
+} catch (e) {
+  console.error("[SSO] Gagal memproses kembalian SSO:", e);
+}
+
+createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>
     <AuthNotificationProvider>
       <App />

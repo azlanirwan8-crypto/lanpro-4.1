@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { cn } from "../../components/ui/CoreUI";
 import { registrationSchema, evaluatePasswordStrength } from "../../lib/registrationSchema";
 import { VelzonSuccessIcon } from "../../components/AuthToastContainer";
+import { SsoButtons } from "./components/SsoButtons";
 import type { RegisterScreenProps } from "./types";
 
 export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProps) => {
@@ -321,6 +322,10 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
           )}
         </button>
       </form>
+
+      {/* Alternatif daftar. Berbeda dari tombol di layar masuk: yang ini BOLEH
+          membuat akun baru bila emailnya belum terdaftar (ketetapan F5.1 #3). */}
+      <SsoButtons mode="daftar" />
 
       <p className="text-center text-xs font-medium text-content-muted pt-5 mt-4 border-t border-border-faint">
         Already have an account?{" "}

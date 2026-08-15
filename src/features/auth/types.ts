@@ -15,3 +15,11 @@ export interface RegisterScreenProps {
 export interface LoginSkeletonStateProps {
   loadingText?: string;
 }
+
+export interface CompleteRegistrationScreenProps {
+  /** Berasal dari identitas terverifikasi provider — tidak dapat diubah pengguna. */
+  email: string;
+  nama: string;
+  onSelesai: () => void;
+  onBatal: () => void;
+}

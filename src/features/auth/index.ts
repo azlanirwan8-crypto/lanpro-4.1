@@ -2,6 +2,8 @@
 
 export { LoginScreen } from "./LoginScreen";
 export { RegisterScreen } from "./RegisterScreen";
+export { CompleteRegistrationScreen } from "./CompleteRegistrationScreen";
+export { SsoButtons } from "./components/SsoButtons";
 export { AuthHeroPanel } from "./components/AuthHeroPanel";
 export { AuthWatermarkPattern } from "./components/AuthWatermarkPattern";
 export { LoginSkeletonState } from "./components/LoginSkeletonState";

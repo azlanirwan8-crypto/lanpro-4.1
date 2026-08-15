@@ -17,7 +17,7 @@ import {
 } from "./types";
 import { hasPermission } from "./lib/permissions";
 import { validateFileClient } from "./lib/fileSecurity";
-import { confirmDeleteAlert, showSuccessAlert } from "./lib/sweetalert";
+import { confirmDeleteAlert, showSuccessAlert, showErrorAlert } from "./lib/sweetalert";
 import { useAppStore } from "./store/useAppStore";
 import { CacheManager } from "./lib/cache";
 import { useMasterData } from "./hooks/useMasterData";
@@ -135,7 +135,14 @@ const chunkArray = <T,>(arr: T[], size: number): T[][] => {
 
 // --- Recharts ---
 import { ensureDate, safeFormat, Button, Input, Textarea } from "./components/ui/CoreUI";
-import { AuthHeroPanel, AuthWatermarkPattern, RegisterScreen, LoginScreen } from "./features/auth";
+import {
+  AuthHeroPanel,
+  AuthWatermarkPattern,
+  RegisterScreen,
+  LoginScreen,
+  CompleteRegistrationScreen,
+} from "./features/auth";
+import { bacaHasilSso, bersihkanQuerySso, type HasilSso } from "./features/auth/lib/ssoCallback";
 import { ProfileEditModal } from "./features/users/ProfileEditModal";
 const BROWSER_SESSION_ID = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
 
@@ -237,6 +244,30 @@ function AppContainer() {
   // Alias currentUser. Harus tepat setelah useAuthHook karena useAppNotifications
   // di bawah membacanya saat render.
   const user: any = currentUser;
+
+  // Kembalian SSO. Dibaca sekali saat mount; token sudah ditangani lebih awal di
+  // main.tsx, jadi yang tersisa di sini hanya dua keadaan yang butuh tampilan:
+  // pesan penolakan, dan layar pemilihan username.
+  const [hasilSso, setHasilSso] = useState<HasilSso>(() =>
+    bacaHasilSso(typeof window !== "undefined" ? window.location.search : "")
+  );
+
+  const bersihkanSso = () => {
+    if (typeof window !== "undefined") {
+      const sisa = bersihkanQuerySso(window.location.search);
+      window.history.replaceState({}, "", window.location.pathname + sisa);
+    }
+    setHasilSso({ jenis: "tidak_ada" });
+  };
+
+  // Penolakan SSO ditampilkan sebagai notifikasi, bukan layar tersendiri:
+  // pengguna tetap berada di layar masuk sehingga bisa langsung mencoba
+  // username+password tanpa berpindah halaman.
+  useEffect(() => {
+    if (hasilSso.jenis !== "galat") return;
+    showErrorAlert("Tidak Dapat Masuk", hasilSso.pesan);
+    bersihkanSso();
+  }, [hasilSso]);
 
   // Modal & Detail Panel Management
   const {
@@ -3168,7 +3199,15 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           <AuthWatermarkPattern />
 
           <AnimatePresence mode="wait">
-            {authView === "login" ? (
+            {hasilSso.jenis === "lengkapi" ? (
+              <CompleteRegistrationScreen
+                key="sso-lengkapi-view"
+                email={hasilSso.email}
+                nama={hasilSso.nama}
+                onSelesai={bersihkanSso}
+                onBatal={bersihkanSso}
+              />
+            ) : authView === "login" ? (
               <LoginScreen
                 key="login-screen-view"
                 onLogin={handleManualLogin}
