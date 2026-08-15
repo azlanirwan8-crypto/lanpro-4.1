@@ -568,6 +568,36 @@ export async function runMigrations(pool: Pool): Promise<void> {
         ON "UserIdentities" ("userId");
     `);
 
+    // Foreign key dengan ON DELETE CASCADE.
+    //
+    // Tanpa ini, menghapus seorang user meninggalkan baris identitasnya. Baris
+    // yatim itu bukan sekadar sampah: ia MENGUNCI email tersebut selamanya,
+    // karena pemeriksaan identitas berjalan sebelum cabang login/daftar
+    // sehingga pendaftaran ulang pun ikut tertolak. Kejadian nyata pada
+    // 16 Agu 2026.
+    //
+    // Baris yatim yang sudah terlanjur ada dibersihkan lebih dulu — ALTER TABLE
+    // akan menolak bila masih ada baris yang melanggar.
+    await client.query(`
+      DELETE FROM "UserIdentities" ui
+      WHERE NOT EXISTS (SELECT 1 FROM "Users" u WHERE u.id = ui."userId");
+    `);
+
+    // Idempoten: PostgreSQL tidak punya ADD CONSTRAINT IF NOT EXISTS, jadi
+    // keberadaannya diperiksa lebih dulu.
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'UserIdentities_userId_fkey'
+        ) THEN
+          ALTER TABLE "UserIdentities"
+            ADD CONSTRAINT "UserIdentities_userId_fkey"
+            FOREIGN KEY ("userId") REFERENCES "Users" (id) ON DELETE CASCADE;
+        END IF;
+      END $$;
+    `);
+
     // ── TokenBlacklist ────────────────────────────────────────────────────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS "TokenBlacklist" (

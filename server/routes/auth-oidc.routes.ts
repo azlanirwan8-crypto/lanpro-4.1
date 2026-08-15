@@ -23,7 +23,12 @@ import {
   type ProviderOidc,
   type IdentitasOidc,
 } from "../services/oidc.service";
-import { putuskanKebijakan, buatAkunDariSso, PESAN_TOLAK } from "../services/sso.service";
+import {
+  putuskanKebijakan,
+  buatAkunDariSso,
+  daftarkanSesi,
+  PESAN_TOLAK,
+} from "../services/sso.service";
 
 const router = express.Router();
 
@@ -162,6 +167,16 @@ router.get("/api/auth/oidc/callback", async (req: any, res) => {
     }
 
     const token = generateToken(keputusan.user);
+
+    // Tanpa langkah ini, penegakan sesi tunggal di authenticateJWT akan
+    // membalas 401 untuk setiap permintaan berikutnya — dan gagalnya senyap,
+    // karena callback ini sendiri sukses. Lihat daftarkanSesi().
+    const userId = keputusan.user.id || keputusan.user.uid;
+    await daftarkanSesi(String(userId), token, {
+      ip: String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "SSO"),
+      browser: String(req.headers["user-agent"] || "SSO").slice(0, 120),
+    });
+
     return res.redirect(`${urlFrontend(req)}/?sso_token=${encodeURIComponent(token)}`);
   } catch (err: any) {
     console.error("[OIDC] Callback gagal:", err.message);
@@ -174,12 +189,10 @@ router.post("/api/auth/oidc/lengkapi-pendaftaran", async (req: any, res) => {
   try {
     const titipan = bacaCookie(req, NAMA_COOKIE_PENDAFTARAN);
     if (!titipan) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          message: "Sesi pendaftaran sudah kedaluwarsa. Ulangi dari awal.",
-        });
+      return res.status(400).json({
+        status: "error",
+        message: "Sesi pendaftaran sudah kedaluwarsa. Ulangi dari awal.",
+      });
     }
 
     const state = bacaState(titipan);
