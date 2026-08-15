@@ -988,6 +988,15 @@ app.use(errorHandler);
 
   httpServer.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
+
+    // Penjadwal digest harian. Fungsinya sudah di-import sejak lama tetapi
+    // TIDAK PERNAH DIPANGGIL, sehingga digest 07:00 belum pernah menyala
+    // sekali pun — hanya pemicu manual yang berfungsi.
+    //
+    // Dipanggil setelah server benar-benar mendengarkan, supaya kegagalan
+    // penjadwal tidak menghalangi server menerima permintaan. Bila token
+    // belum dikonfigurasi, fungsinya melewat dengan pesan yang jelas.
+    initWhatsAppScheduler();
   });
 }
 
