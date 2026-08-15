@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { safeLocalStorage } from "../../lib/safeStorage";
 import { cn } from "../../components/ui/CoreUI";
 import { LoginSkeletonState } from "./components/LoginSkeletonState";
+import { SsoButtons } from "./components/SsoButtons";
 import type { LoginScreenProps } from "./types";
 
 export const LoginScreen = ({
@@ -191,6 +192,9 @@ export const LoginScreen = ({
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
+
+            {/* Alternatif masuk. Tidak menampilkan apa pun bila SSO belum dikonfigurasi. */}
+            <SsoButtons mode="login" />
 
             <p className="text-center text-xs font-medium text-content-muted pt-5 mt-4 border-t border-border-faint">
               Don't have an account?{" "}
