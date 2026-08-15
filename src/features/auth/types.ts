@@ -17,9 +17,12 @@ export interface LoginSkeletonStateProps {
 }
 
 export interface CompleteRegistrationScreenProps {
-  /** Berasal dari identitas terverifikasi provider — tidak dapat diubah pengguna. */
+  /**
+   * Dipakai untuk menyusun usulan username. TIDAK ditampilkan di layar.
+   * Identitas yang benar-benar dipakai membuat akun berasal dari cookie
+   * bertanda tangan di backend, bukan dari nilai ini.
+   */
   email: string;
-  nama: string;
   onSelesai: () => void;
   onBatal: () => void;
 }

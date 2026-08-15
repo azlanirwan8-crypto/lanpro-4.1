@@ -3203,7 +3203,6 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               <CompleteRegistrationScreen
                 key="sso-lengkapi-view"
                 email={hasilSso.email}
-                nama={hasilSso.nama}
                 onSelesai={bersihkanSso}
                 onBatal={bersihkanSso}
               />
