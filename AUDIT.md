@@ -52,7 +52,7 @@ kebutuhan mengevaluasi ulang dari nol setiap kali memulai sesi kerja.
 
 ---
 
-## §1 PAPAN PRIORITAS — 30 item, semuanya berfase
+## §1 PAPAN PRIORITAS — 31 item, semuanya berfase
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -72,6 +72,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 17  | **UI belum pernah diaudit di balik login**                                 | **F3**  | 🔴  | Sedang        |         Ya         | `MENUNGGU` login      | §14    |
 | 3   | Nol code splitting — 898 KB gzip satu chunk                                | **F4**  | 🔴  | Rendah        |         Ya         | `TERBUKA`             | §5     |
 | 29  | **SSO Google/Microsoft** (poin 1)                                          | **F5**  | 🟢  | Tinggi        |       Tidak        | `TERBUKA`             | §1.5   |
+| 31  | **Login dengan email** — backend siap, frontend memblokir                  | **F5**  | 🟢  | Sangat rendah |       Tidak        | `TERBUKA`             | §1.5   |
 | 22  | `initWhatsAppScheduler` tak pernah dipanggil — digest belum pernah menyala | **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`             | §1.5   |
 | 23  | Fallback token WhatsApp ter-hardcode (langgar §3.2)                        | **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`             | §1.5   |
 | 24  | `EmailConfigForm` 172 baris, nol panggilan API                             | **F6**  | 🟡  | Rendah        |       Tidak        | `TERBUKA`             | §1.5   |
@@ -303,7 +304,51 @@ resmi.
 Tanpa memeriksa `email_verified`, seseorang bisa membuat akun provider memakai
 alamat email orang lain lalu tertaut ke akun LanPro milik korban.
 
-#### F5.2 · Pecah `auth` jadi berlapis (item #11)
+#### F5.2 · Login dengan email (item #31)
+
+**Backend sudah mendukungnya.** `auth.routes.ts:131` memakai
+`SELECT * FROM Users WHERE username = ? OR email = ?`, jadi email sudah
+diterima sebagai identitas. Yang memblokir ada di frontend:
+
+```
+src/features/auth/AuthScreens.tsx:165
+const filteredVal = rawVal.replace(/[^a-zA-Z]/g, "").slice(0, 10);
+```
+
+Seluruh karakter selain huruf dibuang dan dipotong 10 karakter, sehingga
+`budi@perusahaan.com` berubah menjadi `budiperusa`. Akibatnya login dengan email
+**mustahil dilakukan dari UI walau servernya siap.**
+
+| Pekerjaan                                            | Definisi selesai                                       |
+| ---------------------------------------------------- | ------------------------------------------------------ |
+| Longgarkan validasi input agar menerima email        | Titik, `@`, dan panjang > 10 tidak lagi dibuang        |
+| Ubah label & placeholder                             | "Username atau Email" — user harus tahu keduanya boleh |
+| Pertahankan aturan ketat untuk **pendaftaran**       | Validasi username tetap huruf & maks 10 di form daftar |
+| Pencocokan email **tidak peka huruf besar/kecil**    | `budi@x.com` = `Budi@X.com`                            |
+| Tolak bila query mengembalikan lebih dari satu baris | Lihat peringatan di bawah                              |
+
+⚠️ **Bahaya yang harus ditutup di sini.** `WHERE username = ? OR email = ?`
+bisa mengembalikan **dua baris** bila username seseorang kebetulan sama dengan
+email orang lain. Kode sekarang mengambil `rows[0]` — artinya seseorang berpotensi
+masuk ke akun yang salah. Kondisi ini **belum terverifikasi** apakah mungkin
+terjadi dengan aturan username saat ini (huruf saja, maks 10 karakter, sehingga
+tidak mungkin menyerupai email), tetapi begitu aturan itu dilonggarkan,
+kemungkinannya terbuka.
+
+**Wajib:** bila hasil query lebih dari satu baris, **tolak login** dengan pesan
+netral — jangan pernah menebak baris mana yang dimaksud.
+
+⚠️ Jangan melonggarkan validasi di form **pendaftaran**. Aturan huruf-saja &
+maks 10 karakter di sana justru yang menjaga username tidak pernah menyerupai
+email — itu pengaman untuk peringatan di atas.
+
+**Gerbang:** login dengan username **dan** dengan email sama-sama berhasil di
+browser; beda besar-kecil huruf pada email tetap berhasil; login dengan password
+salah tetap ditolak.
+
+---
+
+#### F5.3 · Pecah `auth` jadi berlapis (item #11)
 
 `auth` kini **762 baris, nol lapisan** — satu-satunya fitur berskor 0/4.
 Menempelkan OIDC ke situ menjadikannya ±1.200 baris tanpa struktur, tepat di
@@ -320,7 +365,7 @@ keluaran `tsc` baris-per-baris.
 ⚠️ Verifikasi rute lewat status 401 **tidak valid** — pakai perbandingan
 himpunan rute.
 
-#### F5.3 · Fondasi OIDC generik
+#### F5.4 · Fondasi OIDC generik
 
 Google dan Microsoft sama-sama OpenID Connect → **satu adaptor melayani
 keduanya**; yang berbeda hanya URL discovery dan client id/secret.
@@ -343,7 +388,7 @@ Drive di layar login membuat user menolak consent.
 **Definisi selesai:** `id_token` palsu / kedaluwarsa / salah `aud` **ditolak**,
 dibuktikan lewat test.
 
-#### F5.4 · Provider + kebijakan akun
+#### F5.5 · Provider + kebijakan akun
 
 | Aturan                        | Perilaku                                  |
 | ----------------------------- | ----------------------------------------- |
@@ -361,7 +406,7 @@ Google **dan** Microsoft.
 perubahan schema. Tapi **pastikan login password menolak user berpassword
 `NULL`** — jangan sampai string kosong lolos sebagai password sah.
 
-#### F5.5 · Frontend, sesi & pengujian
+#### F5.6 · Frontend, sesi & pengujian
 
 | Pekerjaan                                             | Catatan                                                   |
 | ----------------------------------------------------- | --------------------------------------------------------- |
