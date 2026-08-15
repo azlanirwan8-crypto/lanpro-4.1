@@ -24,7 +24,7 @@ melanjutkan pekerjaan tanpa perlu menelusuri riwayat percakapan.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **159 lulus / 17 suite**                                    | `npm test`                                   |
+| Test                | **184 lulus / 19 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -235,7 +235,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 19  | `POST /api/db-query` tanpa penjaga read-only                                         |  **F2**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §6.3   |
 | 20  | Kode mati DB Explorer                                                                |  **F2**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §6.3   |
 | 17  | **UI belum pernah diaudit di balik login**                                           |  **F3**  | 🔴  | Sedang        |           Ya            | `MENUNGGU` login         | §14    |
-| 3   | Nol code splitting — 898 KB gzip satu chunk                                          |  **F4**  | 🔴  | Rendah        |           Ya            | `TERBUKA`                | §5     |
+| 3   | ~~Nol code splitting~~ 901 -> 420 KB gzip, 29 chunk                                  |  **F4**  | 🔴  | Rendah        |           Ya            | `SELESAI` 16 Agu         | §5     |
 | 29  | **SSO Google/Microsoft** (poin 1)                                                    |  **F5**  | 🟢  | Tinggi        |          Tidak          | `SELESAI` 15 Agu         | §1.5   |
 | 32  | **Daftar dengan Google/Microsoft** — akun otomatis, status `pending`                 |  **F5**  | 🟢  | Sedang        |          Tidak          | `SELESAI` 15 Agu         | §1.5   |
 | 33  | ~~`getJwtSecret` di `middleware/auth.ts` menarik adapter DB~~ dipindah ke `helpers/` | **F5.3** | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 15 Agu         | §1.5   |
@@ -289,7 +289,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 | **F1**  | Storage minimal — buka jalan rilis | #2, #15                              | 1–2  | Rendah            | **Ya** — kredensial & 1 keputusan | `MENUNGGU`        |
 | **F2**  | Audit & perbaikan LOGIKA           | #16, #18, #19, #20                   | 3–5  | Rendah            | **Ya** — 3 keputusan              | `TERBUKA`         |
 | **F3**  | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | **Ya** — login                    | `MENUNGGU`        |
-| **F4**  | Performa muat                      | #3                                   | 1    | Rendah–sedang     | —                                 | `TERBUKA`         |
+| **F4**  | Performa muat                      | #3                                   | 1    | Rendah–sedang     | —                                 | `SELESAI` 16 Agu  |
 | **F5**  | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | **Ya** — 5 keputusan + login uji  | `SELESAI` 16 Agu  |
 | **F6**  | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28 | 3–4  | Rendah–sedang     | **Ya** — 2 keputusan              | `MENUNGGU` domain |
 | **F7**  | Kontrak & validasi                 | #4                                   | 3–5  | Sedang            | —                                 | `TERBUKA`         |
@@ -1492,6 +1492,7 @@ Kolom angka wajib diisi sebelum→sesudah, supaya kemajuannya terukur, bukan ter
 | 16 Agu 2026 |  **F0**   | #10 schema DB + #12 angka drift                              | `docs/f0-schema-db`                  | tak ada dok schema; 6 angka drift                                 | `docs/DATABASE_SCHEMA.md` + `npm run db:schema`                       |       ✅        | dijalankan 2x, hasil sama: 35 tabel / 30 aktif                                                                                                          |
 | 16 Agu 2026 |  **F0**   | #38 `APP_URL` placeholder                                    | `fix/f0-app-url`                     | `MY_APP_URL`                                                      | `http://localhost:3000` + penjaga doctor 5d                           |       ✅        | doctor hijau; redirect SSO benar                                                                                                                        |
 | 16 Agu 2026 |  **F0**   | #48 hapus 5 tabel kembar                                     | `chore/f0-hapus-tabel-kembar`        | 35 tabel, 5 kembar kosong                                         | 30 tabel, 0 kembar                                                    |       ✅        | data tabel asli utuh (MasterData 76, ProjectModules 2, QATestCases 1, QATestSuites 2); kembaran TIDAK lahir lagi setelah migrasi                        |
+| 16 Agu 2026 |  **F4**   | #3 code splitting                                            | `feat/f4-code-splitting`             | 901 KB gzip, 6 chunk, 0 lazy                                      | 420 KB gzip, 29 chunk, 17 lazy                                        |       ✅        | 7 tampilan dibuka di peramban dengan data nyata; 184 test                                                                                               |
 
 ### Gerbang fase yang sudah lulus
 
@@ -1501,7 +1502,7 @@ Kolom angka wajib diisi sebelum→sesudah, supaya kemajuannya terukur, bukan ter
 |  F1  | Storage minimal — buka jalan rilis | belum           | —                                                                                                                                                                                                                       |
 |  F2  | Audit & perbaikan LOGIKA           | belum           | —                                                                                                                                                                                                                       |
 |  F3  | Audit UI menyeluruh                | belum           | —                                                                                                                                                                                                                       |
-|  F4  | Performa muat                      | belum           | —                                                                                                                                                                                                                       |
+|  F4  | Performa muat                      | **16 Agu 2026** | Bundel awal 901 -> 420 KB gzip. Tujuh tampilan dibuka satu per satu di peramban dengan data sungguhan, 0 error console. Target 400 KB belum tercapai — sisanya di AppContainer (F10).                                   |
 |  F5  | SSO Google/Microsoft               | **16 Agu 2026** | Alur ujung-ke-ujung dijalankan pemilik proyek dengan akun Google sungguhan: pendaftaran membuat akun `pending`, login masuk ke dashboard. Jalur username+password & daftar manual tetap utuh.                           |
 |  F6  | Email: 3 fungsi                    | belum           | —                                                                                                                                                                                                                       |
 |  F7  | Kontrak & validasi                 | belum           | —                                                                                                                                                                                                                       |
