@@ -14,16 +14,17 @@ import type { CompleteRegistrationScreenProps } from "./types";
  * menghasilkan nama yang aneh dan mudah bertabrakan, jadi pengguna memilih
  * sendiri (ketetapan F5.1, opsi C).
  *
- * Email dan nama sengaja ditampilkan TIDAK BISA DIUBAH: keduanya berasal dari
- * identitas yang sudah diverifikasi provider, dan membiarkannya diedit akan
- * membatalkan seluruh gunanya verifikasi itu.
+ * Email dan nama TIDAK ditampilkan di layar ini. Keduanya dulu berupa kolom
+ * input mati yang membuat tampilan terasa kaku tanpa menambah manfaat. Yang
+ * penting: identitas yang dipakai membuat akun diambil dari cookie bertanda
+ * tangan di backend, bukan dari apa pun yang terlihat di layar — sehingga
+ * menghapusnya dari tampilan tidak mengurangi keamanan sedikit pun.
  *
  * Akun baru dibuat SETELAH tombol ini ditekan, bukan sebelumnya. Bila pengguna
  * menutup layar sekarang, tidak ada baris setengah jadi yang tertinggal.
  */
 export const CompleteRegistrationScreen = ({
   email,
-  nama,
   onSelesai,
   onBatal,
 }: CompleteRegistrationScreenProps) => {
@@ -103,34 +104,13 @@ export const CompleteRegistrationScreen = ({
         Satu langkah lagi. Pilih username untuk akun LanPro Anda.
       </p>
 
+      {/* Nama dan email sengaja TIDAK ditampilkan. Keduanya dulu berupa kolom
+          input mati yang tidak bisa disentuh, dan itu membuat layar terasa
+          kaku tanpa menambah manfaat. Email tetap dipakai di balik layar untuk
+          menyusun usulan username, dan identitas yang dipakai membuat akun
+          diambil dari cookie bertanda tangan di backend — bukan dari apa yang
+          ditampilkan di sini. */}
       <form onSubmit={kirim} className="mt-6 space-y-4">
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-content-body">Nama</label>
-          <input
-            type="text"
-            value={nama}
-            readOnly
-            disabled
-            className="min-h-11 w-full rounded-lg border border-border-subtle bg-surface-muted px-3.5
-                       text-sm text-content-muted"
-          />
-        </div>
-
-        <div>
-          <label className="mb-1.5 block text-sm font-medium text-content-body">Email</label>
-          <input
-            type="email"
-            value={email}
-            readOnly
-            disabled
-            className="min-h-11 w-full rounded-lg border border-border-subtle bg-surface-muted px-3.5
-                       text-sm text-content-muted"
-          />
-          <p className="mt-1 text-xs text-content-muted">
-            Diambil dari akun Google/Microsoft Anda dan tidak dapat diubah.
-          </p>
-        </div>
-
         <div>
           <label className="mb-1.5 block text-sm font-medium text-content-body">
             Username <span className="text-danger">*</span>{" "}
