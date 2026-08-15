@@ -43,11 +43,21 @@ export const verifyProjectAccess = (allowedRoles: string[]) => {
         }
       }
 
-      if (req.user && allowedRoles.includes('*')) {
-        return next();
-      }
-      
-      if (!targetProjectId) return next(); 
+      // #49 — DULU di sini ada jalan pintas:
+      //
+      //   if (req.user && allowedRoles.includes('*')) return next();
+      //
+      // Ia keluar SEBELUM cek pemilik (di bawah) dan cek keanggotaan
+      // ProjectMembers, sehingga '*' berarti "siapa pun yang punya JWT" alih-alih
+      // "anggota proyek dengan peran apa pun". Akibatnya 38 rute — termasuk
+      // unduh dokumen dan unduh notulen rapat — terbuka lintas proyek.
+      //
+      // Bahwa itu menyimpang dari maksud terlihat dari GET /api/projects, yang
+      // menyaring non-admin dengan `WHERE p.ownerId = ? OR pm.userId = ?`:
+      // daftar proyeknya disaring, tapi isinya tidak. '*' kini ditangani di cek
+      // keanggotaan di bawah, tempat ia memang sudah didaftarkan.
+
+      if (!targetProjectId) return next();
       
       const [proj]: any = await connection.query("SELECT ownerId FROM Projects WHERE id = ?", [targetProjectId]);
       if (proj.length > 0 && proj[0].ownerId === userId) {
