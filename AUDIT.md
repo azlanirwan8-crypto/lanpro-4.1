@@ -289,7 +289,20 @@ Dipecah 5 sub-fase. **Tiap sub-fase satu branch, merge ke `main` hanya bila
 gerbangnya lulus.** Sub-fase adalah titik berhenti yang aman — bila satu gagal,
 yang sudah ter-merge tetap sehat.
 
-#### F5.1 · Keputusan & desain (tanpa kode)
+#### F5.1 · Keputusan & desain — ✅ SELESAI 15 Agu 2026
+
+> **Seluruh 5 keputusan sudah ditetapkan pemilik proyek.** Tidak ada lagi yang
+> menggantung; F5.3 dan seterusnya boleh berjalan tanpa menunggu jawaban.
+>
+> | #   | Ketetapan                                                                          |
+> | --- | ---------------------------------------------------------------------------------- |
+> | 1   | Google **dan** Microsoft, satu adaptor OIDC                                        |
+> | 2   | Penautan **hanya** bila `email_verified=true`                                      |
+> | 3   | Email tidak terdaftar → tombol LOGIN menolak; tombol DAFTAR membuat akun `pending` |
+> | 4   | Batas domain **wajib**, dari env                                                   |
+> | 5   | Login username+password & form daftar manual **tidak berubah**                     |
+>
+> Username akun SSO: **opsi C** — layar "Lengkapi Pendaftaran" setelah SSO.
 
 **KONSEP LOGIN LANPRO — ditetapkan pemilik proyek, 15 Agu 2026.**
 
@@ -443,7 +456,7 @@ Akun yang lahir lewat jalur SSO juga harus menerima email selamat datang
 | #   | Keputusan             | Ketetapan                                                                                                                                        | Kalau salah pilih                                  |
 | --- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
 | 1   | Provider              | **Google & Microsoft** — keduanya OIDC, satu adaptor generik melayani dua-duanya                                                                 | Pilih satu lalu menambah nanti = rombak adaptor    |
-| 2   | Penautan akun         | Tautkan ke akun yang ada **HANYA bila `email_verified=true`** dari provider                                                                      | Tanpa syarat itu → **pengambilalihan akun**        |
+| 2   | Penautan akun         | ✅ **DISETUJUI 15 Agu 2026** — tautkan ke akun yang ada **HANYA bila `email_verified=true`** dari provider                                       | Tanpa syarat itu → **pengambilalihan akun**        |
 | 3   | Email tidak terdaftar | **Tolak + tampilkan notifikasi.** Jangan buat akun                                                                                               | Auto-daftar = pintu masuk tanpa penjaga            |
 | 4   | Batas domain          | **WAJIB** — daftar domain diizinkan, dari env. (Sempat diturunkan jadi opsional saat SSO hanya untuk login; naik lagi karena ada daftar-via-SSO) | Tanpa batas, siapa pun ber-Gmail bisa membuat akun |
 | 5   | Password lama         | Tetap hidup berdampingan                                                                                                                         | Mematikannya mengunci user tanpa akun provider     |
