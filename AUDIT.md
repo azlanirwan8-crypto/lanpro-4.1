@@ -162,7 +162,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 39 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 42 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -191,6 +191,9 @@ lepas. Catatan lepas selalu terlupakan.
 | 38  | `APP_URL` di `.env` masih placeholder harfiah `MY_APP_URL`                           |  **F0**  | 🟠  | Sangat rendah | Ya (CORS produksi) | `TERBUKA`                | §0.6   |
 | 39  | Migrasi otomatis saat boot GAGAL SENYAP — hanya `warning`, tabel tidak terbentuk     |  **F0**  | 🔴  | Rendah        |         Ya         | `TERBUKA`                | §0.6   |
 | 40  | `tsconfig.json` tanpa `strict` — penyempitan diskriminan boolean tidak bekerja       |  **F8**  | 🟠  | Tinggi        |         Ya         | `TERBUKA`                | §0.6   |
+| 41  | ~~Identitas yatim mengunci email selamanya~~ dibersihkan + FK `ON DELETE CASCADE`    |  **F5**  | 🔴  | Rendah        |       Tidak        | `SELESAI` 16 Agu         | §0.3   |
+| 42  | ~~Pembuatan akun SSO menulis 2 tabel tanpa transaksi~~ kini transaksional            |  **F5**  | 🟠  | Rendah        |       Tidak        | `SELESAI` 16 Agu         | §0.3   |
+| 43  | ~~Callback SSO tak menyetel `currentSessionToken`~~ — login gagal SENYAP             |  **F5**  | 🔴  | Rendah        |       Tidak        | `SELESAI` 16 Agu         | §0.3   |
 | 31  | ~~Login dengan email di kolom form~~                                                 |  **—**   |  —  | —             |       Tidak        | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | `initWhatsAppScheduler` tak pernah dipanggil — digest belum pernah menyala           |  **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`                | §1.5   |
 | 23  | Fallback token WhatsApp ter-hardcode (langgar §3.2)                                  |  **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`                | §1.5   |
@@ -220,21 +223,21 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 
 ### Indeks cepat
 
-|  Fase   | Nama                               | Item                                 | Sesi | Risiko            | Perlu pemilik?                    | Status     |
-| :-----: | ---------------------------------- | ------------------------------------ | ---- | ----------------- | --------------------------------- | ---------- |
-| **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10                         | 1–2  | Sangat rendah     | —                                 | `TERBUKA`  |
-| **F1**  | Storage minimal — buka jalan rilis | #2, #15                              | 1–2  | Rendah            | **Ya** — kredensial & 1 keputusan | `MENUNGGU` |
-| **F2**  | Audit & perbaikan LOGIKA           | #16, #18, #19, #20                   | 3–5  | Rendah            | **Ya** — 3 keputusan              | `TERBUKA`  |
-| **F3**  | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | **Ya** — login                    | `MENUNGGU` |
-| **F4**  | Performa muat                      | #3                                   | 1    | Rendah–sedang     | —                                 | `TERBUKA`  |
-| **F5**  | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | **Ya** — 5 keputusan + login uji  | `TERBUKA`  |
-| **F6**  | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28 | 3–4  | Rendah–sedang     | **Ya** — 2 keputusan              | `TERBUKA`  |
-| **F7**  | Kontrak & validasi                 | #4                                   | 3–5  | Sedang            | —                                 | `TERBUKA`  |
-| **F8**  | Jaring pengaman                    | #9, #8                               | 4–6  | Rendah            | —                                 | `TERBUKA`  |
-| **F9**  | Lapisan backend                    | #6                                   | 6–10 | Tinggi            | —                                 | `TERBUKA`  |
-| **F10** | Arsitektur frontend                | #5, #7, #21                          | 8–15 | **Sangat tinggi** | —                                 | `TERBUKA`  |
-| **F11** | Drive-per-user (OPSIONAL)          | #30                                  | 6–10 | Tinggi            | **Ya** — keputusan ulang          | `DITUNDA`  |
-| **F12** | Konsolidasi desain                 | #14, #13                             | 2–3  | Rendah            | —                                 | `TERBUKA`  |
+|  Fase   | Nama                               | Item                                 | Sesi | Risiko            | Perlu pemilik?                    | Status           |
+| :-----: | ---------------------------------- | ------------------------------------ | ---- | ----------------- | --------------------------------- | ---------------- |
+| **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10                         | 1–2  | Sangat rendah     | —                                 | `TERBUKA`        |
+| **F1**  | Storage minimal — buka jalan rilis | #2, #15                              | 1–2  | Rendah            | **Ya** — kredensial & 1 keputusan | `MENUNGGU`       |
+| **F2**  | Audit & perbaikan LOGIKA           | #16, #18, #19, #20                   | 3–5  | Rendah            | **Ya** — 3 keputusan              | `TERBUKA`        |
+| **F3**  | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | **Ya** — login                    | `MENUNGGU`       |
+| **F4**  | Performa muat                      | #3                                   | 1    | Rendah–sedang     | —                                 | `TERBUKA`        |
+| **F5**  | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | **Ya** — 5 keputusan + login uji  | `SELESAI` 16 Agu |
+| **F6**  | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28 | 3–4  | Rendah–sedang     | **Ya** — 2 keputusan              | `TERBUKA`        |
+| **F7**  | Kontrak & validasi                 | #4                                   | 3–5  | Sedang            | —                                 | `TERBUKA`        |
+| **F8**  | Jaring pengaman                    | #9, #8                               | 4–6  | Rendah            | —                                 | `TERBUKA`        |
+| **F9**  | Lapisan backend                    | #6                                   | 6–10 | Tinggi            | —                                 | `TERBUKA`        |
+| **F10** | Arsitektur frontend                | #5, #7, #21                          | 8–15 | **Sangat tinggi** | —                                 | `TERBUKA`        |
+| **F11** | Drive-per-user (OPSIONAL)          | #30                                  | 6–10 | Tinggi            | **Ya** — keputusan ulang          | `DITUNDA`        |
+| **F12** | Konsolidasi desain                 | #14, #13                             | 2–3  | Rendah            | —                                 | `TERBUKA`        |
 
 \*Perkiraan kasar dan **belum terverifikasi** — untuk membandingkan bobot antar
 fase, bukan janji jadwal. Perbarui dengan angka nyata setelah fase pertama tutup.
@@ -1421,24 +1424,26 @@ Kolom angka wajib diisi sebelum→sesudah, supaya kemajuannya terukur, bukan ter
 | 15 Agu 2026 | **F5.5b** | Usulan username otomatis dari email                          | `feat/f5.5b-usulan-username`         | kolom kosong; 139 test                         | terisi otomatis; 146 test                         |       ✅        | `budi.santoso@…` → `budisantos`, tetap bisa diubah                                                                                                      |
 | 15 Agu 2026 | **F5.5c** | Sederhanakan layar — username saja                           | `feat/f5.5c-sederhanakan-layar`      | 3 kolom                                        | 1 kolom                                           |       ✅        | 0 error console di tab bersih                                                                                                                           |
 | 16 Agu 2026 |  **F5**   | #34–#36 buat proyek khusus admin + ikon galat baru           | `fix/rbac-create-project-ikon-galat` | endpoint tanpa penjaga peran; ikon tong sampah | `verifyGlobalAdmin`; ikon pengguna-disilang       |       ✅        | tsc IDENTIK; rute 90→90; POST tanpa token → 401                                                                                                         |
+| 16 Agu 2026 |  **F5**   | #41 identitas yatim + FK cascade                             | `fix/identitas-yatim`                | email terkunci selamanya; 146 test             | 0 yatim, FK aktif; 152 test                       |       ✅        | kueri langsung ke `information_schema` + isi tabel                                                                                                      |
+| 16 Agu 2026 |  **F5**   | #43 sesi SSO tidak terdaftar                                 | `fix/sso-sesi-tunggal`               | login SSO gagal senyap; 152 test               | `daftarkanSesi()`; 155 test                       |       ✅        | diuji pemilik proyek dengan akun Google sungguhan                                                                                                       |
 
 ### Gerbang fase yang sudah lulus
 
-| Fase | Nama                               | Tanggal lulus                     | Dibuktikan dengan                                                                               |
-| :--: | ---------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------- |
-|  F0  | Kejelasan & fondasi dokumen        | belum                             | —                                                                                               |
-|  F1  | Storage minimal — buka jalan rilis | belum                             | —                                                                                               |
-|  F2  | Audit & perbaikan LOGIKA           | belum                             | —                                                                                               |
-|  F3  | Audit UI menyeluruh                | belum                             | —                                                                                               |
-|  F4  | Performa muat                      | belum                             | —                                                                                               |
-|  F5  | SSO Google/Microsoft               | **hampir** — 5/5 sub-fase selesai | Menunggu satu uji alur ujung-ke-ujung dengan akun Google sungguhan (butuh pemilik proyek login) |
-|  F6  | Email: 3 fungsi                    | belum                             | —                                                                                               |
-|  F7  | Kontrak & validasi                 | belum                             | —                                                                                               |
-|  F8  | Jaring pengaman                    | belum                             | —                                                                                               |
-|  F9  | Lapisan backend                    | belum                             | —                                                                                               |
-| F10  | Arsitektur frontend                | belum                             | —                                                                                               |
-| F11  | Drive-per-user (OPSIONAL)          | belum                             | —                                                                                               |
-| F12  | Konsolidasi desain                 | belum                             | —                                                                                               |
+| Fase | Nama                               | Tanggal lulus   | Dibuktikan dengan                                                                                                                                                                             |
+| :--: | ---------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|  F0  | Kejelasan & fondasi dokumen        | belum           | —                                                                                                                                                                                             |
+|  F1  | Storage minimal — buka jalan rilis | belum           | —                                                                                                                                                                                             |
+|  F2  | Audit & perbaikan LOGIKA           | belum           | —                                                                                                                                                                                             |
+|  F3  | Audit UI menyeluruh                | belum           | —                                                                                                                                                                                             |
+|  F4  | Performa muat                      | belum           | —                                                                                                                                                                                             |
+|  F5  | SSO Google/Microsoft               | **16 Agu 2026** | Alur ujung-ke-ujung dijalankan pemilik proyek dengan akun Google sungguhan: pendaftaran membuat akun `pending`, login masuk ke dashboard. Jalur username+password & daftar manual tetap utuh. |
+|  F6  | Email: 3 fungsi                    | belum           | —                                                                                                                                                                                             |
+|  F7  | Kontrak & validasi                 | belum           | —                                                                                                                                                                                             |
+|  F8  | Jaring pengaman                    | belum           | —                                                                                                                                                                                             |
+|  F9  | Lapisan backend                    | belum           | —                                                                                                                                                                                             |
+| F10  | Arsitektur frontend                | belum           | —                                                                                                                                                                                             |
+| F11  | Drive-per-user (OPSIONAL)          | belum           | —                                                                                                                                                                                             |
+| F12  | Konsolidasi desain                 | belum           | —                                                                                                                                                                                             |
 
 ---
 
