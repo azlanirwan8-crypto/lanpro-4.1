@@ -56,6 +56,7 @@ import { setSocketServer } from "./server/config/socket";
 
 import { getSecret } from "./server/config/secrets";
 import { initWhatsAppScheduler, sendDailyTaskDigest } from "./server/services/whatsapp.service";
+import { jalankanMigrasiDenganUlangan, statusMigrasi } from "./server/services/migrasi-status";
 
 export const app = express();
 
@@ -176,16 +177,17 @@ async function startServer() {
   }
 
   // --- AUTO MIGRATION ON STARTUP (Non-blocking background execution) ---
+  //
+  // Dulu blok ini hanya memanggil console.warn saat gagal, lalu server menyala
+  // seolah sehat. Kegagalan yang terjadi — Neon kehabisan waktu saat bangun —
+  // membuat tabel tidak terbentuk tanpa satu pun tanda di aplikasi. Kini
+  // percobaannya diulang, dan bila tetap gagal statusnya tercatat serta bisa
+  // dibaca lewat /api/health dan npm run doctor. Lihat migrasi-status.ts.
   (async () => {
-    try {
-      const { runMigrations } = await import('./src/lib/pg-migrate');
-      const { getPgPool } = await import('./src/lib/db');
-      console.log("[SERVER] Memulai auto-migrasi schema PostgreSQL...");
-      await runMigrations(getPgPool());
-      console.log("[SERVER] Auto-migrasi schema PostgreSQL selesai.");
-    } catch (migErr: any) {
-      console.warn("[SERVER] Warning auto-migrasi schema:", migErr.message);
-    }
+    const { runMigrations } = await import('./src/lib/pg-migrate');
+    const { getPgPool } = await import('./src/lib/db');
+    console.log("[SERVER] Memulai auto-migrasi schema PostgreSQL...");
+    await jalankanMigrasiDenganUlangan(() => runMigrations(getPgPool()));
   })();
   // ==========================================
 // WILAYAH II: Keamanan (Middleware Global, authenticateJWT, verifyProjectAccess)
@@ -496,8 +498,17 @@ async function startServer() {
     }
   });
 
+  // Endpoint publik. Sengaja hanya memuat STATUS migrasi, tanpa pesan
+  // galatnya — pesan galat database bisa memuat detail koneksi, dan endpoint
+  // ini bisa diakses tanpa autentikasi. Rinciannya ada di /api/health yang
+  // terlindungi.
   app.get("/api/health-check", (req, res) => {
-    res.json({ status: "ok", timestamp: new Date().toISOString() });
+    const migrasi = statusMigrasi();
+    res.json({
+      status: migrasi.status === "gagal" ? "degraded" : "ok",
+      timestamp: new Date().toISOString(),
+      migrasi: migrasi.status,
+    });
   });
 
   const { default: fileRoutes } = await import('./server/routes/file.routes.ts');
