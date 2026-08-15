@@ -55,6 +55,20 @@ username+password dan pendaftaran manual tetap utuh.
 #41 identitas yatim mengunci email selamanya · #42 pembuatan akun tanpa
 transaksi · #43 sesi SSO tak terdaftar sehingga login gagal SENYAP.
 
+**F0 · Kejelasan & fondasi dokumen — SELESAI, gerbang LULUS 16 Agu 2026.**
+
+| #   | Hasil                                                                                                                                                                                                             |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Tiga sistem migrasi jadi SATU. `runner.ts` ternyata BUKAN mati — ia satu-satunya pembuat `discussion_point_comments` yang punya 4 baris data dan dipakai kode aktif. Dipindahkan dulu, diverifikasi, baru dihapus |
+| 39  | Migrasi tidak lagi gagal senyap: 3x ulangan, status terbaca di `/api/health`, `console.error` bukan `warn`                                                                                                        |
+| 10  | `docs/DATABASE_SCHEMA.md` dibuat dari DB hidup + skrip `npm run db:schema`                                                                                                                                        |
+| 12  | 6 angka ARCHITECTURE.md diukur ulang — termasuk `FlowchartContainer` yang ternyata NAIK 3.420 → 3.880                                                                                                             |
+| 38  | `APP_URL` diisi nilai sungguhan + penjaga baru di doctor                                                                                                                                                          |
+
+**Dua temuan baru muncul dari pekerjaan ini:** #47 kolom kembar di
+`discussion_point_comments`, dan #48 lima pasang TABEL kembar akibat satu
+sistem migrasi menulis nama tabel tanpa kutip.
+
 **F6.1 · Bersihkan pondasi email — SELESAI 16 Agu 2026.**
 
 | #   | Hasil                                                                                                  |
@@ -203,7 +217,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 45 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 47 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -211,9 +225,9 @@ lepas. Catatan lepas selalu terlupakan.
 
 | #   | Temuan                                                                               |   Fase   | Sev | Biaya         |   Blokir modul baru?    | Status                   | Detail |
 | --- | ------------------------------------------------------------------------------------ | :------: | :-: | ------------- | :---------------------: | ------------------------ | ------ |
-| 1   | Tiga sistem migrasi DB hidup berdampingan                                            |  **F0**  | 🔴  | Rendah        |           Ya            | `TERBUKA`                | §4     |
-| 12  | ARCHITECTURE.md drift di beberapa angka                                              |  **F0**  | 🟡  | Rendah        |    Ya (menyesatkan)     | `TERBUKA`                | §8     |
-| 10  | Schema DB tidak terdokumentasi                                                       |  **F0**  | 🟠  | Sedang        |           Ya            | `TERBUKA`                | §4     |
+| 1   | ~~Tiga sistem migrasi DB~~ disatukan jadi satu                                       |  **F0**  | 🔴  | Rendah        |           Ya            | `SELESAI` 16 Agu         | §4     |
+| 12  | ~~ARCHITECTURE.md drift~~ angka diukur ulang                                         |  **F0**  | 🟡  | Rendah        |    Ya (menyesatkan)     | `SELESAI` 16 Agu         | §8     |
+| 10  | ~~Schema DB tidak terdokumentasi~~ `docs/DATABASE_SCHEMA.md` dari DB hidup           |  **F0**  | 🟠  | Sedang        |           Ya            | `SELESAI` 16 Agu         | §4     |
 | 2   | Driver `s3` belum pernah dieksekusi                                                  |  **F1**  | 🔴  | Rendah        |    Blokir production    | `MENUNGGU` kredensial    | §6     |
 | 15  | Dua Google API key lama belum dicabut                                                |  **F1**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` pemilik       | §6     |
 | 16  | **Logika aplikasi belum pernah diaudit**                                             |  **F2**  | 🔴  | Sedang        |           Ya            | `TERBUKA`                | §13    |
@@ -229,8 +243,8 @@ lepas. Catatan lepas selalu terlupakan.
 | 35  | ~~Tombol "Buat Proyek Baru" di layar kosong tanpa penjaga izin~~                     |  **F5**  | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
 | 36  | ~~Ikon dialog galat memakai tong sampah~~ diganti pengguna-disilang                  |  **F5**  | 🟡  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
 | 37  | ~~`urlFrontend` memercayai `APP_URL` mentah~~ kini divalidasi                        |  **F5**  | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 15 Agu         | §0.3   |
-| 38  | `APP_URL` di `.env` masih placeholder harfiah `MY_APP_URL`                           |  **F0**  | 🟠  | Sangat rendah |   Ya (CORS produksi)    | `TERBUKA`                | §0.6   |
-| 39  | Migrasi otomatis saat boot GAGAL SENYAP — hanya `warning`, tabel tidak terbentuk     |  **F0**  | 🔴  | Rendah        |           Ya            | `TERBUKA`                | §0.6   |
+| 38  | ~~`APP_URL` placeholder~~ diisi + penjaga di doctor                                  |  **F0**  | 🟠  | Sangat rendah |   Ya (CORS produksi)    | `SELESAI` 16 Agu         | §0.6   |
+| 39  | ~~Migrasi gagal senyap~~ kini mengulang + status terbaca                             |  **F0**  | 🔴  | Rendah        |           Ya            | `SELESAI` 16 Agu         | §0.6   |
 | 40  | `tsconfig.json` tanpa `strict` — penyempitan diskriminan boolean tidak bekerja       |  **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`                | §0.6   |
 | 41  | ~~Identitas yatim mengunci email selamanya~~ dibersihkan + FK `ON DELETE CASCADE`    |  **F5**  | 🔴  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
 | 42  | ~~Pembuatan akun SSO menulis 2 tabel tanpa transaksi~~ kini transaksional            |  **F5**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
@@ -238,6 +252,8 @@ lepas. Catatan lepas selalu terlupakan.
 | 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend         |  **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik       | §0.4   |
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan    |  **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`                | §0.3   |
 | 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — siapa pun ber-Gmail bisa mendaftar                 |  **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik       | §0.4   |
+| 47  | `discussion_point_comments` punya KOLOM KEMBAR camelCase + snake_case                |  **F9**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`                | §0.3   |
+| 48  | 5 TABEL KEMBAR huruf kecil (kosong) warisan dua sistem migrasi                       |  **F0**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` pemilik       | §0.3   |
 | 31  | ~~Login dengan email di kolom form~~                                                 |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                        | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                     | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -269,7 +285,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 
 |  Fase   | Nama                               | Item                                 | Sesi | Risiko            | Perlu pemilik?                    | Status            |
 | :-----: | ---------------------------------- | ------------------------------------ | ---- | ----------------- | --------------------------------- | ----------------- |
-| **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10                         | 1–2  | Sangat rendah     | —                                 | `TERBUKA`         |
+| **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10, #38, #39               | 1–2  | Sangat rendah     | —                                 | `SELESAI` 16 Agu  |
 | **F1**  | Storage minimal — buka jalan rilis | #2, #15                              | 1–2  | Rendah            | **Ya** — kredensial & 1 keputusan | `MENUNGGU`        |
 | **F2**  | Audit & perbaikan LOGIKA           | #16, #18, #19, #20                   | 3–5  | Rendah            | **Ya** — 3 keputusan              | `TERBUKA`         |
 | **F3**  | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | **Ya** — login                    | `MENUNGGU`        |
@@ -1471,24 +1487,28 @@ Kolom angka wajib diisi sebelum→sesudah, supaya kemajuannya terukur, bukan ter
 | 16 Agu 2026 |  **F5**   | #41 identitas yatim + FK cascade                             | `fix/identitas-yatim`                | email terkunci selamanya; 146 test                                | 0 yatim, FK aktif; 152 test                                           |       ✅        | kueri langsung ke `information_schema` + isi tabel                                                                                                      |
 | 16 Agu 2026 |  **F5**   | #43 sesi SSO tidak terdaftar                                 | `fix/sso-sesi-tunggal`               | login SSO gagal senyap; 152 test                                  | `daftarkanSesi()`; 155 test                                           |       ✅        | diuji pemilik proyek dengan akun Google sungguhan                                                                                                       |
 | 16 Agu 2026 | **F6.1**  | #22, #23, #24 bersihkan pondasi email                        | `fix/f6.1-bersihkan-pondasi`         | penjadwal mati; token ber-fallback; backend email belum diketahui | penjadwal menyala; fallback dibuang; terbukti TIDAK ada backend email |       ✅        | log boot menampilkan pesan penjadwal; 159 test                                                                                                          |
+| 16 Agu 2026 |  **F0**   | #39 migrasi gagal senyap                                     | `fix/f0-migrasi-senyap`              | hanya `warning`, tak terlihat                                     | 3x ulangan + status di `/api/health` + doctor bagian 8                |       ✅        | log `[MIGRASI] Berhasil pada percobaan ke-1`; 166 test                                                                                                  |
+| 16 Agu 2026 |  **F0**   | #1 satukan tiga sistem migrasi                               | `fix/f0-satukan-migrasi`             | 3 sistem, 1 tabel hanya ada di sistem non-aktif                   | 1 sistem                                                              |       ✅        | data `discussion_point_comments` sebelum/sesudah IDENTIK (11 kolom, 4 baris)                                                                            |
+| 16 Agu 2026 |  **F0**   | #10 schema DB + #12 angka drift                              | `docs/f0-schema-db`                  | tak ada dok schema; 6 angka drift                                 | `docs/DATABASE_SCHEMA.md` + `npm run db:schema`                       |       ✅        | dijalankan 2x, hasil sama: 35 tabel / 30 aktif                                                                                                          |
+| 16 Agu 2026 |  **F0**   | #38 `APP_URL` placeholder                                    | `fix/f0-app-url`                     | `MY_APP_URL`                                                      | `http://localhost:3000` + penjaga doctor 5d                           |       ✅        | doctor hijau; redirect SSO benar                                                                                                                        |
 
 ### Gerbang fase yang sudah lulus
 
-| Fase | Nama                               | Tanggal lulus   | Dibuktikan dengan                                                                                                                                                                             |
-| :--: | ---------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|  F0  | Kejelasan & fondasi dokumen        | belum           | —                                                                                                                                                                                             |
-|  F1  | Storage minimal — buka jalan rilis | belum           | —                                                                                                                                                                                             |
-|  F2  | Audit & perbaikan LOGIKA           | belum           | —                                                                                                                                                                                             |
-|  F3  | Audit UI menyeluruh                | belum           | —                                                                                                                                                                                             |
-|  F4  | Performa muat                      | belum           | —                                                                                                                                                                                             |
-|  F5  | SSO Google/Microsoft               | **16 Agu 2026** | Alur ujung-ke-ujung dijalankan pemilik proyek dengan akun Google sungguhan: pendaftaran membuat akun `pending`, login masuk ke dashboard. Jalur username+password & daftar manual tetap utuh. |
-|  F6  | Email: 3 fungsi                    | belum           | —                                                                                                                                                                                             |
-|  F7  | Kontrak & validasi                 | belum           | —                                                                                                                                                                                             |
-|  F8  | Jaring pengaman                    | belum           | —                                                                                                                                                                                             |
-|  F9  | Lapisan backend                    | belum           | —                                                                                                                                                                                             |
-| F10  | Arsitektur frontend                | belum           | —                                                                                                                                                                                             |
-| F11  | Drive-per-user (OPSIONAL)          | belum           | —                                                                                                                                                                                             |
-| F12  | Konsolidasi desain                 | belum           | —                                                                                                                                                                                             |
+| Fase | Nama                               | Tanggal lulus   | Dibuktikan dengan                                                                                                                                                                                                       |
+| :--: | ---------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|  F0  | Kejelasan & fondasi dokumen        | **16 Agu 2026** | Satu sistem migrasi tersisa; `docs/DATABASE_SCHEMA.md` dibuat dari DB hidup; angka ARCHITECTURE.md diukur ulang; `APP_URL` diisi. Migrasi diverifikasi jalan, data `discussion_point_comments` utuh 11 kolom / 4 baris. |
+|  F1  | Storage minimal — buka jalan rilis | belum           | —                                                                                                                                                                                                                       |
+|  F2  | Audit & perbaikan LOGIKA           | belum           | —                                                                                                                                                                                                                       |
+|  F3  | Audit UI menyeluruh                | belum           | —                                                                                                                                                                                                                       |
+|  F4  | Performa muat                      | belum           | —                                                                                                                                                                                                                       |
+|  F5  | SSO Google/Microsoft               | **16 Agu 2026** | Alur ujung-ke-ujung dijalankan pemilik proyek dengan akun Google sungguhan: pendaftaran membuat akun `pending`, login masuk ke dashboard. Jalur username+password & daftar manual tetap utuh.                           |
+|  F6  | Email: 3 fungsi                    | belum           | —                                                                                                                                                                                                                       |
+|  F7  | Kontrak & validasi                 | belum           | —                                                                                                                                                                                                                       |
+|  F8  | Jaring pengaman                    | belum           | —                                                                                                                                                                                                                       |
+|  F9  | Lapisan backend                    | belum           | —                                                                                                                                                                                                                       |
+| F10  | Arsitektur frontend                | belum           | —                                                                                                                                                                                                                       |
+| F11  | Drive-per-user (OPSIONAL)          | belum           | —                                                                                                                                                                                                                       |
+| F12  | Konsolidasi desain                 | belum           | —                                                                                                                                                                                                                       |
 
 ---
 
