@@ -55,46 +55,47 @@ kebutuhan mengevaluasi ulang dari nol setiap kali memulai sesi kerja.
 
 ---
 
-## §1 PAPAN PRIORITAS — 31 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 32 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
 lepas. Catatan lepas selalu terlupakan.
 
-| #   | Temuan                                                                     |   Fase   | Sev | Biaya         | Blokir modul baru? | Status                   | Detail |
-| --- | -------------------------------------------------------------------------- | :------: | :-: | ------------- | :----------------: | ------------------------ | ------ |
-| 1   | Tiga sistem migrasi DB hidup berdampingan                                  |  **F0**  | 🔴  | Rendah        |         Ya         | `TERBUKA`                | §4     |
-| 12  | ARCHITECTURE.md drift di beberapa angka                                    |  **F0**  | 🟡  | Rendah        |  Ya (menyesatkan)  | `TERBUKA`                | §8     |
-| 10  | Schema DB tidak terdokumentasi                                             |  **F0**  | 🟠  | Sedang        |         Ya         | `TERBUKA`                | §4     |
-| 2   | Driver `s3` belum pernah dieksekusi                                        |  **F1**  | 🔴  | Rendah        | Blokir production  | `MENUNGGU` kredensial    | §6     |
-| 15  | Dua Google API key lama belum dicabut                                      |  **F1**  | 🔴  | Rendah        |       Tidak        | `MENUNGGU` pemilik       | §6     |
-| 16  | **Logika aplikasi belum pernah diaudit**                                   |  **F2**  | 🔴  | Sedang        |         Ya         | `TERBUKA`                | §13    |
-| 18  | notebook-lm rusak di dua sisi                                              |  **F2**  | 🟠  | Rendah        |       Tidak        | `MENUNGGU` keputusan     | §6.3   |
-| 19  | `POST /api/db-query` tanpa penjaga read-only                               |  **F2**  | 🔴  | Rendah        |       Tidak        | `MENUNGGU` keputusan     | §6.3   |
-| 20  | Kode mati DB Explorer                                                      |  **F2**  | 🟡  | Rendah        |       Tidak        | `MENUNGGU` keputusan     | §6.3   |
-| 17  | **UI belum pernah diaudit di balik login**                                 |  **F3**  | 🔴  | Sedang        |         Ya         | `MENUNGGU` login         | §14    |
-| 3   | Nol code splitting — 898 KB gzip satu chunk                                |  **F4**  | 🔴  | Rendah        |         Ya         | `TERBUKA`                | §5     |
-| 29  | **SSO Google/Microsoft** (poin 1)                                          |  **F5**  | 🟢  | Tinggi        |       Tidak        | `TERBUKA`                | §1.5   |
-| 32  | **Daftar dengan Google/Microsoft** — akun otomatis, status `pending`       |  **F5**  | 🟢  | Sedang        |       Tidak        | `TERBUKA`                | §1.5   |
-| 31  | ~~Login dengan email di kolom form~~                                       |  **—**   |  —  | —             |       Tidak        | `DIBATALKAN` 15 Agu 2026 | §1.5   |
-| 22  | `initWhatsAppScheduler` tak pernah dipanggil — digest belum pernah menyala |  **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`                | §1.5   |
-| 23  | Fallback token WhatsApp ter-hardcode (langgar §3.2)                        |  **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`                | §1.5   |
-| 24  | `EmailConfigForm` 172 baris, nol panggilan API                             |  **F6**  | 🟡  | Rendah        |       Tidak        | `TERBUKA`                | §1.5   |
-| 25  | Fondasi `email.service.ts`                                                 |  **F6**  | 🟢  | Sedang        |       Tidak        | `TERBUKA`                | §1.5   |
-| 26  | **Email selamat datang** (poin 2)                                          |  **F6**  | 🟢  | Rendah        |       Tidak        | `TERBUKA`                | §1.5   |
-| 27  | **Lupa password → password random** (poin 3)                               |  **F6**  | 🟢  | Sedang        |       Tidak        | `TERBUKA`                | §1.5   |
-| 28  | **Digest task pending + jumlah** (poin 4)                                  |  **F6**  | 🟢  | Rendah        |       Tidak        | `TERBUKA`                | §1.5   |
-| 30  | Drive-per-user (opsional, dinilai ulang setelah F5)                        | **F11**  | 🟡  | Tinggi        |       Tidak        | `DITUNDA`                | §1.5   |
-| 4   | ±100 endpoint tanpa validasi skema                                         |  **F7**  | 🔴  | Sedang        |   Ya (keamanan)    | `TERBUKA`                | §3     |
-| 9   | Rasio test ±1 : 1.000 baris                                                |  **F8**  | 🟠  | Tinggi        |         Ya         | `TERBUKA`                | §7     |
-| 8   | 1.313 `any` melemahkan seluruh jaring tipe                                 |  **F8**  | 🟠  | Sedang        |         Ya         | `TERBUKA`                | §7     |
-| 11  | ~~`auth` 762 baris tanpa lapisan~~ dipecah                                 | **F5.2** | 🟠  | Rendah        |       Tidak        | `SELESAI` 15 Agu         | §2     |
-| 6   | 222 query SQL di lapisan rute, repository tak ada                          |  **F9**  | 🟠  | Tinggi        |         Ya         | `TERBUKA`                | §3     |
-| 5   | Routing palsu + 47 props di satu persimpangan                              | **F10**  | 🔴  | Tinggi        |         Ya         | `TERBUKA`                | §5     |
-| 7   | 59% baris kode di 37 berkas > 500 baris                                    | **F10**  | 🟠  | Tinggi        |         Ya         | `TERBUKA`                | §2     |
-| 21  | `authStore` & `uiStore` menganggur                                         | **F10**  | 🟡  | Rendah        |       Tidak        | `DITUNDA` (disengaja)    | §5.3   |
-| 14  | Kontras sidebar & jarak target sentuh                                      | **F12**  | 🟠  | Sedang        |       Tidak        | `TERBUKA`                | §8     |
-| 13  | 28 berkas `dark:` + 48 hex di luar token                                   | **F12**  | 🟡  | Sedang        |       Tidak        | `TERBUKA`                | §8     |
+| #   | Temuan                                                                               |   Fase   | Sev | Biaya         | Blokir modul baru? | Status                   | Detail |
+| --- | ------------------------------------------------------------------------------------ | :------: | :-: | ------------- | :----------------: | ------------------------ | ------ |
+| 1   | Tiga sistem migrasi DB hidup berdampingan                                            |  **F0**  | 🔴  | Rendah        |         Ya         | `TERBUKA`                | §4     |
+| 12  | ARCHITECTURE.md drift di beberapa angka                                              |  **F0**  | 🟡  | Rendah        |  Ya (menyesatkan)  | `TERBUKA`                | §8     |
+| 10  | Schema DB tidak terdokumentasi                                                       |  **F0**  | 🟠  | Sedang        |         Ya         | `TERBUKA`                | §4     |
+| 2   | Driver `s3` belum pernah dieksekusi                                                  |  **F1**  | 🔴  | Rendah        | Blokir production  | `MENUNGGU` kredensial    | §6     |
+| 15  | Dua Google API key lama belum dicabut                                                |  **F1**  | 🔴  | Rendah        |       Tidak        | `MENUNGGU` pemilik       | §6     |
+| 16  | **Logika aplikasi belum pernah diaudit**                                             |  **F2**  | 🔴  | Sedang        |         Ya         | `TERBUKA`                | §13    |
+| 18  | notebook-lm rusak di dua sisi                                                        |  **F2**  | 🟠  | Rendah        |       Tidak        | `MENUNGGU` keputusan     | §6.3   |
+| 19  | `POST /api/db-query` tanpa penjaga read-only                                         |  **F2**  | 🔴  | Rendah        |       Tidak        | `MENUNGGU` keputusan     | §6.3   |
+| 20  | Kode mati DB Explorer                                                                |  **F2**  | 🟡  | Rendah        |       Tidak        | `MENUNGGU` keputusan     | §6.3   |
+| 17  | **UI belum pernah diaudit di balik login**                                           |  **F3**  | 🔴  | Sedang        |         Ya         | `MENUNGGU` login         | §14    |
+| 3   | Nol code splitting — 898 KB gzip satu chunk                                          |  **F4**  | 🔴  | Rendah        |         Ya         | `TERBUKA`                | §5     |
+| 29  | **SSO Google/Microsoft** (poin 1)                                                    |  **F5**  | 🟢  | Tinggi        |       Tidak        | `TERBUKA`                | §1.5   |
+| 32  | **Daftar dengan Google/Microsoft** — akun otomatis, status `pending`                 |  **F5**  | 🟢  | Sedang        |       Tidak        | `TERBUKA`                | §1.5   |
+| 33  | ~~`getJwtSecret` di `middleware/auth.ts` menarik adapter DB~~ dipindah ke `helpers/` | **F5.3** | 🟠  | Sangat rendah |       Tidak        | `SELESAI` 15 Agu         | §1.5   |
+| 31  | ~~Login dengan email di kolom form~~                                                 |  **—**   |  —  | —             |       Tidak        | `DIBATALKAN` 15 Agu 2026 | §1.5   |
+| 22  | `initWhatsAppScheduler` tak pernah dipanggil — digest belum pernah menyala           |  **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`                | §1.5   |
+| 23  | Fallback token WhatsApp ter-hardcode (langgar §3.2)                                  |  **F6**  | 🔴  | Sangat rendah |       Tidak        | `TERBUKA`                | §1.5   |
+| 24  | `EmailConfigForm` 172 baris, nol panggilan API                                       |  **F6**  | 🟡  | Rendah        |       Tidak        | `TERBUKA`                | §1.5   |
+| 25  | Fondasi `email.service.ts`                                                           |  **F6**  | 🟢  | Sedang        |       Tidak        | `TERBUKA`                | §1.5   |
+| 26  | **Email selamat datang** (poin 2)                                                    |  **F6**  | 🟢  | Rendah        |       Tidak        | `TERBUKA`                | §1.5   |
+| 27  | **Lupa password → password random** (poin 3)                                         |  **F6**  | 🟢  | Sedang        |       Tidak        | `TERBUKA`                | §1.5   |
+| 28  | **Digest task pending + jumlah** (poin 4)                                            |  **F6**  | 🟢  | Rendah        |       Tidak        | `TERBUKA`                | §1.5   |
+| 30  | Drive-per-user (opsional, dinilai ulang setelah F5)                                  | **F11**  | 🟡  | Tinggi        |       Tidak        | `DITUNDA`                | §1.5   |
+| 4   | ±100 endpoint tanpa validasi skema                                                   |  **F7**  | 🔴  | Sedang        |   Ya (keamanan)    | `TERBUKA`                | §3     |
+| 9   | Rasio test ±1 : 1.000 baris                                                          |  **F8**  | 🟠  | Tinggi        |         Ya         | `TERBUKA`                | §7     |
+| 8   | 1.313 `any` melemahkan seluruh jaring tipe                                           |  **F8**  | 🟠  | Sedang        |         Ya         | `TERBUKA`                | §7     |
+| 11  | ~~`auth` 762 baris tanpa lapisan~~ dipecah                                           | **F5.2** | 🟠  | Rendah        |       Tidak        | `SELESAI` 15 Agu         | §2     |
+| 6   | 222 query SQL di lapisan rute, repository tak ada                                    |  **F9**  | 🟠  | Tinggi        |         Ya         | `TERBUKA`                | §3     |
+| 5   | Routing palsu + 47 props di satu persimpangan                                        | **F10**  | 🔴  | Tinggi        |         Ya         | `TERBUKA`                | §5     |
+| 7   | 59% baris kode di 37 berkas > 500 baris                                              | **F10**  | 🟠  | Tinggi        |         Ya         | `TERBUKA`                | §2     |
+| 21  | `authStore` & `uiStore` menganggur                                                   | **F10**  | 🟡  | Rendah        |       Tidak        | `DITUNDA` (disengaja)    | §5.3   |
+| 14  | Kontras sidebar & jarak target sentuh                                                | **F12**  | 🟠  | Sedang        |       Tidak        | `TERBUKA`                | §8     |
+| 13  | 28 berkas `dark:` + 48 hex di luar token                                             | **F12**  | 🟡  | Sedang        |       Tidak        | `TERBUKA`                | §8     |
 
 ---
 
@@ -513,7 +514,22 @@ keluaran `tsc` baris-per-baris.
 ⚠️ Verifikasi rute lewat status 401 **tidak valid** — pakai perbandingan
 himpunan rute.
 
-#### F5.3 · Fondasi OIDC generik
+#### F5.3 · Fondasi OIDC generik — ✅ SELESAI 15 Agu 2026
+
+> **Hasil:** `server/services/oidc.service.ts` (327 baris) + 22 test.
+> **Nol dependensi baru** — verifikasi JWKS memakai `crypto.createPublicKey`
+> format JWK yang sudah ada di Node 24, sehingga `jwks-rsa`/`jose` tidak perlu.
+>
+> State disimpan sebagai **token bertanda tangan**, bukan di memori proses.
+> Memori tidak bisa diandalkan di serverless: tiap instance punya memorinya
+> sendiri, sehingga pengguna yang kembali dari provider bisa mendarat di
+> instance lain dan login gagal secara acak.
+>
+> Dua kebijakan memilih sisi aman: `email_verified` yang tidak ada dianggap
+> **belum** terverifikasi (Microsoft tidak selalu mengirimnya), dan
+> `SSO_ALLOWED_DOMAINS` kosong berarti **menolak semua**.
+>
+> ⚠️ Belum menyentuh rute maupun UI — itu F5.4 dan F5.5.
 
 Google dan Microsoft sama-sama OpenID Connect → **satu adaptor melayani
 keduanya**; yang berbeda hanya URL discovery dan client id/secret.
@@ -1285,6 +1301,7 @@ Kolom angka wajib diisi sebelum→sesudah, supaya kemajuannya terukur, bukan ter
 | 15 Agu 2026 |    —     | Login dengan email masuk F5.2 (31 item)        | `docs/fase-login-email`    | —                                            | —                                                 |        —        | —                                                                                                                                                       |
 | 15 Agu 2026 |    —     | Kartu verifikasi §16 & standar develop §17     | `docs/verifikasi-standar`  | —                                            | —                                                 |        —        | —                                                                                                                                                       |
 | 15 Agu 2026 | **F5.2** | #11 pecah `auth` jadi berlapis                 | `refactor/f5.2-pecah-auth` | AuthScreens 762 baris; auth.routes 620 baris | 7 berkas ≤378; auth.routes 423 + auth.service 219 |       ✅        | tsc diff IDENTIK; himpunan rute 86→86 IDENTIK; 84/84 test; lint 451→449 warning; browser: layar login, layar daftar, validasi username, 0 error console |
+| 15 Agu 2026 | **F5.3** | Fondasi OIDC generik                           | `feat/f5.3-fondasi-oidc`   | tanpa OIDC; 84 test                          | `oidc.service.ts` 327 baris; 106 test             |       ✅        | tsc diff IDENTIK; rute 86→86; 106/106 test (exit 0); browser: layar login & daftar utuh, 0 error console                                                |
 
 ### Gerbang fase yang sudah lulus
 
