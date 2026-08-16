@@ -954,9 +954,23 @@ router.put(
           values.push(version);
         }
 
-        const [updateResult]: any = await connection.query(sql, values);
+        // #65 — `RETURNING id` supaya jumlah baris yang benar-benar tersentuh
+        // bisa dibaca.
+        //
+        // Sebelumnya pemeriksaannya `updateResult.affectedRows === 0`.
+        // `affectedRows` adalah properti MySQL; adapter mengembalikan
+        // `[result.rows, result.fields]` dan MEMBUANG `result.rowCount`, jadi
+        // ekspresi itu berbunyi `undefined === 0` — selalu false.
+        //
+        // Akibatnya optimistic locking mati SENYAP: `AND version = ?` membuat
+        // UPDATE tidak menulis apa pun saat terjadi konflik, tetapi API tetap
+        // menjawab 200 dan memancarkan `task_updated`. Suntingan yang kalah
+        // hilang tanpa pesan apa pun.
+        sql += " RETURNING id";
 
-        if (updateResult.affectedRows === 0) {
+        const [barisTersentuh]: any = await connection.query(sql, values);
+
+        if (!Array.isArray(barisTersentuh) || barisTersentuh.length === 0) {
           optimisticLockingConflicts.inc();
           return res.status(409).json({
             status: "error",

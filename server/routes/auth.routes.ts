@@ -138,12 +138,15 @@ router.post("/api/auth/login", async (req, res) => {
     }
 
     // Update database session
-    const [updateResult]: any = await db.query(
-      "UPDATE Users SET currentSessionToken = ?, lastSeen = ? WHERE id = ?",
+    // #65 — `RETURNING id`, bukan `affectedRows`. Properti itu milik MySQL dan
+    // selalu `undefined` di sini, sehingga penjaga di bawah tidak pernah aktif
+    // dan sesi tetap dianggap tersimpan walau barisnya tidak ada.
+    const [barisTersentuh]: any = await db.query(
+      "UPDATE Users SET currentSessionToken = ?, lastSeen = ? WHERE id = ? RETURNING id",
       [token, String(Date.now()), userId.toString()]
     );
 
-    if (updateResult.affectedRows === 0) {
+    if (!Array.isArray(barisTersentuh) || barisTersentuh.length === 0) {
       return res.status(404).json({ status: "error", message: "User tidak ditemukan." });
     }
 
@@ -234,12 +237,15 @@ router.post("/api/auth/force-logout", async (req, res) => {
     const device = `${osInfo.name || "Unknown"} ${osInfo.version || ""}`.trim();
 
     // Update database session
-    const [updateResult]: any = await db.query(
-      "UPDATE Users SET currentSessionToken = ?, lastSeen = ? WHERE id = ?",
+    // #65 — `RETURNING id`, bukan `affectedRows`. Properti itu milik MySQL dan
+    // selalu `undefined` di sini, sehingga penjaga di bawah tidak pernah aktif
+    // dan sesi tetap dianggap tersimpan walau barisnya tidak ada.
+    const [barisTersentuh]: any = await db.query(
+      "UPDATE Users SET currentSessionToken = ?, lastSeen = ? WHERE id = ? RETURNING id",
       [token, String(Date.now()), userId.toString()]
     );
 
-    if (updateResult.affectedRows === 0) {
+    if (!Array.isArray(barisTersentuh) || barisTersentuh.length === 0) {
       return res.status(404).json({ status: "error", message: "User tidak ditemukan." });
     }
 

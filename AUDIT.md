@@ -270,7 +270,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 62  | Hapus proyek memakai kode galat MySQL; di Postgres `continue` dalam transaksi mustahil   |  **F2**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu | §13.8  |
 | 63  | Register menelan `ER_DUP_ENTRY` (MySQL) — di Postgres jadi 500, bukan pesan yang benar   |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu | §13.8  |
 | 64  | `tasks/reorder` melepas koneksi dua kali bila galat terjadi setelah `commit`             |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu | §13.8  |
-| 65  | `affectedRows` selalu `undefined` — 3 pemeriksaan mati; optimistic locking gagal SENYAP  |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `TERBUKA`                | §13.9  |
+| 65  | `affectedRows` selalu `undefined` — 3 pemeriksaan mati; penjaga jendela balapan mati    |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.9  |
 | 66  | 5 rute DELETE dijaga hanya `['*']` — anggota berperan `viewer` bisa menghapus data        |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.9  |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -2031,13 +2031,29 @@ Tiga tempat terdampak, dan yang pertama jauh lebih berat dari dua lainnya:
 
 | Lokasi | Akibat |
 | ------ | ------ |
-| `server/routes/task.routes.ts:959` | **Optimistic locking mati.** SQL-nya memakai `AND version = ?`, jadi saat terjadi konflik UPDATE tidak menulis apa pun — tetapi API tetap menjawab 200 dan memancarkan `task_updated`. Suntingan pengguna **hilang tanpa pesan apa pun**; 409 yang dirancang untuk ini tidak pernah terkirim |
+| `server/routes/task.routes.ts:959` | **Penjaga jendela balapan mati.** SQL-nya memakai `AND version = ?`, jadi saat kalah balapan UPDATE tidak menulis apa pun — tetapi API tetap menjawab 200 dan memancarkan `task_updated`. Suntingan pengguna **hilang tanpa pesan apa pun** |
 | `server/routes/auth.routes.ts:146` | Login: 404 "User tidak ditemukan" tidak pernah terkirim |
 | `server/routes/auth.routes.ts:242` | force-logout: sama |
 
-Ini menjawab satu area §13.1 yang selama ini kosong — **race condition**.
-Bukan sekadar teori: dua orang menyunting task yang sama, yang kalah menerima
-"berhasil disimpan" padahal perubahannya tidak pernah masuk.
+**KOREKSI atas catatan pertama temuan ini.** Versi awal §13.9 menulis
+"optimistic locking mati" dan "409 tidak pernah terkirim". Itu **berlebihan**,
+dan yang menunjukkannya adalah test yang ditulis untuk menguncinya — test 409
+pertama justru LULUS terhadap kode lama. Rute ini punya **dua** pemeriksaan
+konflik, dan hanya satu yang rusak:
+
+| Pemeriksaan | Keadaan |
+| ----------- | ------- |
+| `oldTask.version !== version` (`task.routes.ts:773`), dibandingkan di memori | **Sehat sejak dulu.** Menangkap kasus terlumrah: klien membawa versi usang, dijawab 409 "Konflik versi tugas" |
+| Hasil `AND version = ?` pada UPDATE (`:959`) | **Mati.** Menjaga jendela balapan sesungguhnya |
+
+Jadi yang hilang adalah penjaga **jendela balapan**: penulis lain menyelesaikan
+UPDATE-nya di antara `SELECT` dan `UPDATE` permintaan ini. Versi yang dibawa
+klien masih cocok dengan yang dibaca, sehingga penjaga pertama meloloskannya,
+tetapi barisnya sudah bergeser. Di situlah 200 palsu terjadi.
+
+Lebih sempit dari dugaan pertama, tetapi tetap 🔴: jendela itulah satu-satunya
+yang tidak bisa ditangkap klien, dan kegagalannya berupa kehilangan data yang
+senyap. Ini juga mengisi area §13.1 **race condition** yang selama ini kosong.
 
 ⚠️ Perbaikannya **tidak boleh** lewat `src/lib/db.ts` (§0.5 aturan 3). Jalur yang
 benar adalah `RETURNING` di sisi pemanggil, sebagaimana terbukti di atas.
