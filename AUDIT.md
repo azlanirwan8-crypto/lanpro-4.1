@@ -359,7 +359,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401        | **F2**  | ⚪  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.6  |
 | 71  | `project-modules` POST/PUT/DELETE tanpa penjaga — CRUD modul lintas proyek                 | **F2**  | 🟠  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan    | §13.11 |
 | 74  | 7 pengambil data tanpa penjaga respons basi — data proyek lama menimpa proyek baru         | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §13.12 |
-| 77  | 4 kerentanan `moderate` di dependensi — hanya tertutup lewat kenaikan versi mayor          | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
+| 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
 | 81  | `ProjectMembers.parentAdminId` ditulis tapi TIDAK PERNAH dibaca — 6 baris, nol `SELECT`    | **F7**  | 🟡  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan    | §19.2  |
 | 83  | `Users.department` & `Users.position` TIDAK fungsional — rancangan §19.4 belum bisa jalan  | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.13 |
 | 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)       | **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
@@ -495,11 +495,12 @@ mendesak — 🔴 dan tanpa penghalang.
 
 ### 1.4.3 Sedang — 12 item
 
-Didahului yang tidak menunggu pemilik: **#77** (4 kerentanan `moderate`), **#8**
+Didahului yang tidak menunggu pemilik: **#8**
 (1.290 `any`), **#47** (kolom kembar `discussion_point_comments`), **#87**
 (frontend abai peran proyek), **#13**/**#14** (F12 desain).
 
-Menunggu pemilik: #4, #16, #17, #25, #27, #45.
+Menunggu pemilik: #4, #16, #17, #25, #27, #45, **#77** (sisa exceljs — §1.4 sempat salah
+menempatkannya di kelompok tanpa keputusan; papan §1 yang benar).
 
 ### 1.4.4 Tinggi — 6 item, TUNDA
 
@@ -5414,3 +5415,49 @@ crash-nya masih ada.
 
 Ini pasangan dari aturan §19.32 (item yang tampak gugur wajib divalidasi di kode
 baru). Keduanya soal yang sama: **ketiadaan bukti bukan bukti ketiadaan.**
+
+### 19.36 #77 — separuhnya ternyata tidak butuh keputusan
+
+Item ini tercatat _"hanya tertutup lewat kenaikan versi mayor"_, sehingga
+statusnya `MENUNGGU keputusan`. Diukur ulang sebelum ditindaklanjuti — dan
+separuhnya tidak butuh keputusan sama sekali.
+
+| Paket              | Severity | Langsung? | "Perbaikan" yang ditawarkan npm   |
+| ------------------ | -------- | --------- | --------------------------------- |
+| `react-router-dom` | moderate | ya        | `react-router-dom@7.18.2` (mayor) |
+| `react-router`     | moderate | tidak     | ikut di atas                      |
+| `exceljs`          | moderate | ya        | `exceljs@3.4.0` (mayor)           |
+| `uuid`             | moderate | tidak     | ikut `exceljs`                    |
+| `esbuild`          | low      | tidak     | tersedia                          |
+
+#### react-router-dom terpasang, dipakai NOL berkas
+
+Dicari di `src`, `server`, berkas akar, `index.html`, dan `vite.config.ts` —
+**tidak ada satu pun import**. Aplikasi ini memakai routing sendiri lewat
+`AppRoutes.tsx` dan `currentView` di store.
+
+Mencabutnya menutup **dua** dari empat moderate dengan **nol perubahan
+perilaku**: 1.226 → 1.223 dependensi, tsc 0, 400 test hijau, build sukses,
+login tampil di tab bersih.
+
+Pelajarannya sama seperti #69 dan #87: **rumusan item adalah hipotesis.** "Hanya
+tertutup lewat kenaikan versi mayor" benar untuk exceljs, dan sama sekali tidak
+berlaku untuk react-router — yang jalan keluarnya justru menghapus, bukan
+menaikkan.
+
+#### Yang tersisa memang butuh keputusan Anda
+
+`exceljs` dan `uuid` berasal dari satu akar. npm menawarkan `exceljs@3.4.0` —
+perhatikan bahwa itu **PENURUNAN** versi mayor dari `^4.4.0` yang terpasang,
+bukan kenaikan. `exceljs` dipakai di **1 berkas**.
+
+Tiga pilihan, dan ketiganya milik pemilik proyek:
+
+1. **Turunkan** ke `exceljs@3.x` — menutup temuan, berisiko merusak ekspor Excel
+   yang dipakai di berkas itu.
+2. **Ganti pustakanya** — biaya lebih besar, sekaligus melepas `uuid` bawaannya.
+3. **Terima risikonya** dan catat sebagai pengecualian resmi di §18.
+
+Ambang blokir gerbang tetap `high`, jadi `npm run audit:deps` tetap LULUS pada
+pilihan mana pun. Yang diputuskan di sini adalah sikap terhadap risiko, bukan
+kelulusan gerbang.
