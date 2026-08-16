@@ -38,7 +38,7 @@ export function setupSprintsRoutes(
   // POST: Create Sprint
   app.post(
     "/api/projects/:projectId/sprints",
-    verifyProjectAccess(["admin", "manager", "head"]),
+    jagaProyek("sprints", "C"),
     async (req: any, res) => {
       let connection;
       try {
@@ -105,51 +105,41 @@ export function setupSprintsRoutes(
   );
 
   // PUT: Update Sprint
-  app.put(
-    "/api/projects/:projectId/sprints/:id",
-    verifyProjectAccess(["admin", "manager", "head"]),
-    async (req, res) => {
-      let connection;
-      try {
-        const { id } = req.params;
-        connection = await db.getConnection();
+  app.put("/api/projects/:projectId/sprints/:id", jagaProyek("sprints", "U"), async (req, res) => {
+    let connection;
+    try {
+      const { id } = req.params;
+      connection = await db.getConnection();
 
-        const [existingSprints]: any = await connection.query(
-          "SELECT * FROM Sprints WHERE id = ?",
-          [id]
-        );
-        if (existingSprints.length === 0) {
-          return res.status(404).json({ status: "error", message: "Sprint tidak ditemukan" });
-        }
-
-        const existing = existingSprints[0];
-        const finalName = req.body.hasOwnProperty("name") ? req.body.name : existing.name;
-        const finalGoal = req.body.hasOwnProperty("goal") ? req.body.goal : existing.goal;
-        const finalStartDate = req.body.hasOwnProperty("startDate")
-          ? req.body.startDate
-          : existing.startDate;
-        const finalEndDate = req.body.hasOwnProperty("endDate")
-          ? req.body.endDate
-          : existing.endDate;
-        const finalStatus = req.body.hasOwnProperty("status") ? req.body.status : existing.status;
-
-        await connection.query(
-          "UPDATE Sprints SET name=?, goal=?, startDate=?, endDate=?, status=? WHERE id=?",
-          [finalName, finalGoal, finalStartDate || null, finalEndDate || null, finalStatus, id]
-        );
-
-        res.json({ status: "success", message: "Sprint updated" });
-      } catch (error: any) {
-        console.error(
-          "LOG ANOMALI CRITICAL: PUT /api/projects/:projectId/sprints/:id error:",
-          error
-        );
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-      } finally {
-        if (connection) connection.release();
+      const [existingSprints]: any = await connection.query("SELECT * FROM Sprints WHERE id = ?", [
+        id,
+      ]);
+      if (existingSprints.length === 0) {
+        return res.status(404).json({ status: "error", message: "Sprint tidak ditemukan" });
       }
+
+      const existing = existingSprints[0];
+      const finalName = req.body.hasOwnProperty("name") ? req.body.name : existing.name;
+      const finalGoal = req.body.hasOwnProperty("goal") ? req.body.goal : existing.goal;
+      const finalStartDate = req.body.hasOwnProperty("startDate")
+        ? req.body.startDate
+        : existing.startDate;
+      const finalEndDate = req.body.hasOwnProperty("endDate") ? req.body.endDate : existing.endDate;
+      const finalStatus = req.body.hasOwnProperty("status") ? req.body.status : existing.status;
+
+      await connection.query(
+        "UPDATE Sprints SET name=?, goal=?, startDate=?, endDate=?, status=? WHERE id=?",
+        [finalName, finalGoal, finalStartDate || null, finalEndDate || null, finalStatus, id]
+      );
+
+      res.json({ status: "success", message: "Sprint updated" });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: PUT /api/projects/:projectId/sprints/:id error:", error);
+      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    } finally {
+      if (connection) connection.release();
     }
-  );
+  });
 
   // DELETE: Remove Sprint
   app.delete(

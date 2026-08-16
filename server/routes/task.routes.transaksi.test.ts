@@ -48,6 +48,16 @@ jest.mock("../middleware/rbac", () => ({
   verifyProjectAccess: () => (_req: any, _res: any, next: any) => next(),
 }));
 
+// Rute-rute ini kini dijaga `jagaProyek` (§19.8 tahap 4), bukan lagi
+// `verifyProjectAccess`. Tanpa mock ini penjaga sungguhan ikut jalan dan
+// seluruh test menjawab 403 — kegagalan yang menunjuk ke logika rute, padahal
+// sebabnya penjaga yang tidak dipalsukan.
+jest.mock("../middleware/jagaProyek", () => ({
+  __esModule: true,
+  jagaProyek: () => (_req: any, _res: any, next: any) => next(),
+  jagaHapusProyek: () => (_req: any, _res: any, next: any) => next(),
+}));
+
 import express from "express";
 import request from "supertest";
 import taskRoutes from "./task.routes";
