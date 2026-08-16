@@ -221,7 +221,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 80 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 81 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -291,6 +291,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 79  | **Migrasi ≠ database hidup**: 13 tabel drift, 54 kolom tak akan dibuat migrasi           |  **F0**  | 🔴  | Sedang        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.14 |
 | 80  | `POST /api/projects/generate-bni-demo` membuat proyek TANPA penjaga admin — pintu kedua  |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.15 |
 | 81  | `ProjectMembers.parentAdminId` ditulis tapi TIDAK PERNAH dibaca — 6 baris, nol `SELECT`  |  **F7**  | 🟡  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §19.2  |
+| 82  | Dropdown peran HARDCODED, tidak membaca katalog `MasterData` — duplikat & nilai bentrok |  **F7**  | 🔴  | Rendah        | Ya (blokir production)  | `TERBUKA`                | §19.12 |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -3767,5 +3768,77 @@ Sengaja **masih ditahan**:
   `member`/`manager`/`developer` — nilai yang tidak ada lagi di katalog. Ini
   Tahap 3, dan mengubahnya berarti mengubah hak akses orang yang sedang bekerja.
 - **K4 (`parentAdminId`) belum diputuskan** — item #81.
+
+---
+
+### 19.12 Temuan #82 — dropdown peran tidak membaca katalog
+
+Ditemukan pemilik proyek 16 Agu 2026, tepat setelah katalog dirapikan:
+*"di dropdown detail user yang project role dan system role tidak sama nih
+datanya dengan data master"*.
+
+Benar. Katalog `MasterData` sudah rapi, tetapi **antarmuka tidak membacanya**.
+
+#### 19.12.1 Dropdown SYSTEM ROLE — hardcoded + duplikat
+
+`src/features/users/UserDetailView.tsx:685`. Lima opsi ditulis langsung di JSX,
+lalu Master Data ditambahkan dengan penyaring yang tidak lengkap.
+
+| Yang tampil | Nilai tersimpan | Asal |
+| ----------- | --------------- | ---- |
+| Administrator (Full Access) | `admin` | hardcoded |
+| Department Head (Head) | `head` | hardcoded |
+| **Project Manager (Manager)** | `manager` | hardcoded — **bukan system role** |
+| Standard User (User) | `user` | hardcoded |
+| Observer (Viewer - Read Only) | `viewer` | hardcoded |
+| **Department Head** | `Department Head` | MasterData — **duplikat** |
+| **Standard User** | `Standard User` | MasterData — **duplikat** |
+| **Observer** | `Observer` | MasterData — **duplikat** |
+
+Penyaringnya hanya membuang label yang persis `admin`/`head`/`manager`/`user`/
+`viewer`/`administrator`. Label `"Department Head"` tidak cocok, jadi lolos.
+
+⚠️ **Yang membuatnya 🔴:** dua baris kembar itu menyimpan **nilai berbeda** —
+`head` versus `Department Head`. Memilih yang salah menulis nilai peran yang
+tidak dikenal seluruh penjaga rute, dan pengguna itu kehilangan akses tanpa
+pesan apa pun. Ini juga sumber ke-18 kosakata peran (§19.2).
+
+Ditambah: `Project Manager` muncul sebagai **system role**, padahal ketetapan
+16 Agu menempatkannya khusus di project role.
+
+#### 19.12.2 Dropdown PROJECT ROLE — sepenuhnya hardcoded
+
+`src/features/users/UserDetailView.tsx:1056`. Tidak membaca katalog sama sekali.
+
+| Dropdown | Ada di katalog? |
+| -------- | :-------------: |
+| Project Admin · Project Manager · Viewer · Owner | ✅ |
+| **Project Lead** · **Member** | ❌ tidak ada |
+| System Analyst · Business Analyst · Developer · QA | ❌ **tidak bisa dipilih** |
+
+Akibatnya **empat peran yang baru ditetapkan tidak terjangkau dari antarmuka**,
+dan dua peran yang tidak ada di katalog masih bisa ditetapkan ke pengguna.
+
+Ini juga menjelaskan kenapa `ProjectMembers` berisi `member` — nilai itu memang
+disediakan dropdown, meski tidak pernah ada di katalog mana pun.
+
+#### 19.12.3 Cakupan sesungguhnya
+
+Hanya **3 berkas** yang membaca `project_role` dari `MasterData`:
+`MasterDataPanel.tsx`, `AdminUserPanel.tsx`, `UserDetailView.tsx` — dan dua
+terakhir hanya sebagian. **Tidak satu pun** komponen penetap peran anggota
+proyek membaca katalog.
+
+#### 19.12.4 Perbaikannya
+
+Bagian dari Tahap 5 (§19.8), tetapi **harus dikerjakan lebih dulu** — selama
+dropdown masih hardcoded, memperbaiki backend tidak ada gunanya karena pengguna
+tetap hanya bisa memilih peran lama.
+
+1. Hapus SELURUH `<option>` peran yang ditulis langsung
+2. Ambil dari `MasterData`: `type='project_role'`, disaring `role_type`
+3. Nilai yang disimpan = **kode peran baku**, bukan label — supaya penggantian
+   nama label di Master Data tidak merusak otorisasi
+4. Tahap 2 (penjaga saat boot) ikut memvalidasi bahwa katalog dan enum sepadan
 
 ---
