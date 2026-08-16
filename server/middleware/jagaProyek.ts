@@ -135,13 +135,24 @@ const tolak = (res: any) => res.status(403).json({ status: "error", message: "Ak
  * ada, permintaannya ditolak 403 — bukan 404 — supaya tidak bisa dipakai
  * menebak id rapat milik proyek lain.
  */
-export type LewatEntitas = "meeting" | "projectModule";
+export type LewatEntitas = "meeting" | "projectModule" | "discussionPoint";
 
 const proyekDariEntitas = async (
   connection: any,
   lewat: LewatEntitas,
   entitasId: string
 ): Promise<string | null> => {
+  if (lewat === "discussionPoint") {
+    // Dua lompatan: poin -> rapat -> proyek. Ditulis sebagai satu kueri supaya
+    // tidak ada celah antara keduanya.
+    const [rows]: any = await connection.query(
+      `SELECT m.projectId FROM Meetings m
+         JOIN DiscussionPoints dp ON dp.meetingId = m.id
+        WHERE dp.id = ?`,
+      [entitasId]
+    );
+    return rows.length > 0 ? rows[0].projectId : null;
+  }
   if (lewat === "projectModule") {
     const [rows]: any = await connection.query(
       "SELECT projectId FROM ProjectModules WHERE id = ?",
@@ -188,7 +199,14 @@ export const jagaProyek = (modul: ModulProyek, aksi: Aksi, lewat?: LewatEntitas)
       const userId = uRows[0].id;
 
       if (lewat) {
-        const entitasId = req.params?.id || req.params?.meetingId;
+        // Nama parameternya berbeda per jenis entitas. Memakai satu daftar
+        // cadangan untuk semuanya pernah nyaris menghasilkan bug diam: rute
+        // komentar memakai `:pointId`, yang tidak ada di daftar lama sehingga
+        // penemuan proyeknya selalu gagal dan MENOLAK semua orang.
+        const entitasId =
+          lewat === "discussionPoint"
+            ? req.params?.pointId
+            : req.params?.id || req.params?.meetingId;
         targetProjectId = entitasId
           ? await proyekDariEntitas(connection, lewat, String(entitasId))
           : null;

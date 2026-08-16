@@ -304,9 +304,15 @@ router.post(
   }
 );
 
-router.post("/api/projects/:projectId/meetings/:id/upload-recording", (req, res) => {
-  res.redirect(307, `/api/v1/meetings/${req.params.id}/upload-recording`);
-});
+router.post(
+  "/api/projects/:projectId/meetings/:id/upload-recording",
+  // #94 — meneruskan ke rute v1 yang sudah dijaga; dijaga juga di sini supaya
+  // himpunan rute berlingkup proyek tidak punya anggota telanjang.
+  jagaProyek("meetingNotes", "U"),
+  (req, res) => {
+    res.redirect(307, `/api/v1/meetings/${req.params.id}/upload-recording`);
+  }
+);
 
 // GET: Retrieve meeting status/details (polling fallback)
 router.get("/api/v1/meetings/:id", jagaProyek("meetingNotes", "R", "meeting"), async (req, res) => {
@@ -441,45 +447,51 @@ router.post(
 );
 
 // POST: Trigger asynchronous background AI pipeline analysis
-router.post("/api/v1/meetings/:meetingId/analyze", async (req, res) => {
-  try {
-    const { meetingId } = req.params;
+router.post(
+  "/api/v1/meetings/:meetingId/analyze",
+  jagaProyek("meetingNotes", "U", "meeting"),
+  async (req, res) => {
+    try {
+      const { meetingId } = req.params;
 
-    const connection = await db.getConnection();
-    const [rows]: any = await connection.query("SELECT * FROM Meetings WHERE id = ?", [meetingId]);
-    connection.release();
-
-    if (!rows || rows.length === 0) {
-      return res.status(404).json({ status: "error", message: "Meeting tidak ditemukan." });
-    }
-
-    const meeting = rows[0];
-    const recordingUrl = meeting.recording_url;
-
-    if (!recordingUrl) {
-      return res.status(400).json({ status: "error", message: "File rekaman belum diunggah." });
-    }
-
-    // Trigger the background worker process asynchronously
-    runAIPipeline(meetingId).catch((err) =>
-      console.error("Error in async background worker execution:", err)
-    );
-
-    return res.status(202).json({
-      status: "success",
-      message: "Proses pemrosesan AI (STT & LLM) berhasil dimulai di latar belakang.",
-      data: {
+      const connection = await db.getConnection();
+      const [rows]: any = await connection.query("SELECT * FROM Meetings WHERE id = ?", [
         meetingId,
-        upload_status: "PROCESSING_AI",
-      },
-    });
-  } catch (error: any) {
-    console.error("POST /api/v1/meetings/:meetingId/analyze error:", error);
-    return res
-      .status(500)
-      .json({ status: "error", message: error.message || "Gagal memulai analisis AI." });
+      ]);
+      connection.release();
+
+      if (!rows || rows.length === 0) {
+        return res.status(404).json({ status: "error", message: "Meeting tidak ditemukan." });
+      }
+
+      const meeting = rows[0];
+      const recordingUrl = meeting.recording_url;
+
+      if (!recordingUrl) {
+        return res.status(400).json({ status: "error", message: "File rekaman belum diunggah." });
+      }
+
+      // Trigger the background worker process asynchronously
+      runAIPipeline(meetingId).catch((err) =>
+        console.error("Error in async background worker execution:", err)
+      );
+
+      return res.status(202).json({
+        status: "success",
+        message: "Proses pemrosesan AI (STT & LLM) berhasil dimulai di latar belakang.",
+        data: {
+          meetingId,
+          upload_status: "PROCESSING_AI",
+        },
+      });
+    } catch (error: any) {
+      console.error("POST /api/v1/meetings/:meetingId/analyze error:", error);
+      return res
+        .status(500)
+        .json({ status: "error", message: error.message || "Gagal memulai analisis AI." });
+    }
   }
-});
+);
 
 // POST: Multimodal Video/Audio analysis using Gemini API with exact JSON Schema & saves to meeting_details
 router.post(["/analyze-video", "/api/v1/meetings/:meetingId/analyze-video"], async (req, res) => {
@@ -782,32 +794,35 @@ ${learningSection}`;
   }
 });
 
-router.post("/api/projects/:projectId/meetings/:id/analyze-transcript", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { transcript, meetingLink } = req.body;
+router.post(
+  "/api/projects/:projectId/meetings/:id/analyze-transcript",
+  jagaProyek("meetingNotes", "U"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { transcript, meetingLink } = req.body;
 
-    if (!transcript || !transcript.trim()) {
-      return res.status(400).json({ status: "error", message: "Transkrip tidak boleh kosong." });
-    }
+      if (!transcript || !transcript.trim()) {
+        return res.status(400).json({ status: "error", message: "Transkrip tidak boleh kosong." });
+      }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "Kunci API Gemini tidak dikonfigurasi pada server." });
-    }
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return res
+          .status(400)
+          .json({ status: "error", message: "Kunci API Gemini tidak dikonfigurasi pada server." });
+      }
 
-    const ai = new GoogleGenAI({
-      apiKey: apiKey,
-      httpOptions: {
-        headers: {
-          "User-Agent": "aistudio-build",
+      const ai = new GoogleGenAI({
+        apiKey: apiKey,
+        httpOptions: {
+          headers: {
+            "User-Agent": "aistudio-build",
+          },
         },
-      },
-    });
+      });
 
-    const systemInstruction = `Bertindaklah sebagai Senior Business Analyst dan PMO Lead kelas enterprise yang sangat detail dan perfeksionis. Tugas Anda adalah menyusun Notulen Rapat Resmi yang sangat komprehensif, mendalam, detail secara UTUH dari Teks Transkrip Mentah (Raw Transcript) hasil rekaman rapat, dan TANPA meringkas/memotong poin penting.
+      const systemInstruction = `Bertindaklah sebagai Senior Business Analyst dan PMO Lead kelas enterprise yang sangat detail dan perfeksionis. Tugas Anda adalah menyusun Notulen Rapat Resmi yang sangat komprehensif, mendalam, detail secara UTUH dari Teks Transkrip Mentah (Raw Transcript) hasil rekaman rapat, dan TANPA meringkas/memotong poin penting.
 
 Input yang kamu terima adalah transkrip hasil Speech-to-Text${meetingLink ? ` dan link rapat: ${meetingLink}` : ""}.
 
@@ -854,198 +869,200 @@ ATURAN KETAT (ANTI-HALUSINASI):
 - Gunakan Bahasa Indonesia yang formal, profesional, mudah dipahami, dan ringkas namun padat informasi.
 - Berikan output HANYA dalam format JSON valid sesuai skema yang diminta.`;
 
-    const response = await generateContentWithFallback(ai, {
-      model: "gemini-flash-latest",
-      contents: `[TRANSKRIP SELESAI]:\n${transcript}${meetingLink ? `\n[LINK RAPAT]: ${meetingLink}` : ""}`,
-      config: {
-        systemInstruction: systemInstruction,
-        temperature: 0.2,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            ringkasan_eksekutif: {
-              type: Type.STRING,
-              description:
-                "Notulen Rapat dari transkrip secara UTUH, mendalam, dan TANPA meringkas/memotong poin penting menggunakan struktur formatting Markdown berikut secara ketat:\n\n## NOTULEN RAPAT: [Nama Topik/Agenda Rapat Utama]\n**Tanggal:** [Isi Tanggal/Bulan/Tahun jika disebutkan]\n**Topik Utama:** [Tujuan besar rapat ini diadakan]\n\n---\n\n### **A. DAFTAR HADIR & IDENTIFIKASI PERAN**\n(Daftar semua pembicara beserta peran, divisi, atau latar belakang mereka berdasarkan isi percakapan).\n\n---\n\n### **B. KRONOLOGI DISKUSI MENDALAM & DETAIL TEKNIS**\n(Kupas habis setiap topik yang didebatkan. Bagi menjadi sub-heading (###) berdasarkan topik masalah. Masukkan detail arsitektur sistem, skema database/API/flow data, alasan bisnis di balik sebuah request, serta perbandingan sistem eksisting vs sistem baru yang dibahas).\n\n---\n\n### **C. BREAKDOWN RENCANA TINDAK LANJUT (ACTION ITEMS)**\n(Buat daftar tugas konkret yang sifatnya operasional dan siap dieksekusi, sebutkan:\n- Pihak/Tim Penanggung Jawab.\n- Detail Tugas (Langkah 1, Langkah 2, dst).\n- Dampak Teknis/Bisnis jika tugas ini dijalankan).",
-            },
-            notulen_rapat: {
-              type: Type.ARRAY,
-              items: {
+      const response = await generateContentWithFallback(ai, {
+        model: "gemini-flash-latest",
+        contents: `[TRANSKRIP SELESAI]:\n${transcript}${meetingLink ? `\n[LINK RAPAT]: ${meetingLink}` : ""}`,
+        config: {
+          systemInstruction: systemInstruction,
+          temperature: 0.2,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              ringkasan_eksekutif: {
+                type: Type.STRING,
+                description:
+                  "Notulen Rapat dari transkrip secara UTUH, mendalam, dan TANPA meringkas/memotong poin penting menggunakan struktur formatting Markdown berikut secara ketat:\n\n## NOTULEN RAPAT: [Nama Topik/Agenda Rapat Utama]\n**Tanggal:** [Isi Tanggal/Bulan/Tahun jika disebutkan]\n**Topik Utama:** [Tujuan besar rapat ini diadakan]\n\n---\n\n### **A. DAFTAR HADIR & IDENTIFIKASI PERAN**\n(Daftar semua pembicara beserta peran, divisi, atau latar belakang mereka berdasarkan isi percakapan).\n\n---\n\n### **B. KRONOLOGI DISKUSI MENDALAM & DETAIL TEKNIS**\n(Kupas habis setiap topik yang didebatkan. Bagi menjadi sub-heading (###) berdasarkan topik masalah. Masukkan detail arsitektur sistem, skema database/API/flow data, alasan bisnis di balik sebuah request, serta perbandingan sistem eksisting vs sistem baru yang dibahas).\n\n---\n\n### **C. BREAKDOWN RENCANA TINDAK LANJUT (ACTION ITEMS)**\n(Buat daftar tugas konkret yang sifatnya operasional dan siap dieksekusi, sebutkan:\n- Pihak/Tim Penanggung Jawab.\n- Detail Tugas (Langkah 1, Langkah 2, dst).\n- Dampak Teknis/Bisnis jika tugas ini dijalankan).",
+              },
+              notulen_rapat: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    topik: {
+                      type: Type.STRING,
+                      description: "Topik bahasan utama yang dibicarakan peserta rapat.",
+                    },
+                    pembahasan: {
+                      type: Type.STRING,
+                      description:
+                        "Alur argumen dan jalannya rapat mengenai topik ini (dalam Bahasa Indonesia).",
+                    },
+                  },
+                  required: ["topik", "pembahasan"],
+                },
+                description:
+                  "Kronologi jalannya rapat terstruktur dikelompokkan berdasarkan topik bahasan utama.",
+              },
+              kesimpulan: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING },
+                description: "Poin-poin keputusan akhir yang disepakati (Bahasa Indonesia).",
+              },
+              saran: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING },
+                description:
+                  "Rekomendasi, ide, atau masukan dari peserta rapat (Bahasa Indonesia).",
+              },
+              meeting_metadata: {
                 type: Type.OBJECT,
                 properties: {
-                  topik: {
+                  topik_utama: {
                     type: Type.STRING,
-                    description: "Topik bahasan utama yang dibicarakan peserta rapat.",
+                    description: "Deteksi otomatis topik utama rapat.",
                   },
-                  pembahasan: {
+                  tanggal_waktu: {
                     type: Type.STRING,
-                    description:
-                      "Alur argumen dan jalannya rapat mengenai topik ini (dalam Bahasa Indonesia).",
+                    description: "Perkiraan tanggal/waktu jika disebutkan, kosongkan jika tidak.",
+                  },
+                  peserta_aktif: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Daftar nama peserta yang aktif berbicara.",
                   },
                 },
-                required: ["topik", "pembahasan"],
+                required: ["topik_utama", "peserta_aktif"],
               },
-              description:
-                "Kronologi jalannya rapat terstruktur dikelompokkan berdasarkan topik bahasan utama.",
-            },
-            kesimpulan: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-              description: "Poin-poin keputusan akhir yang disepakati (Bahasa Indonesia).",
-            },
-            saran: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING },
-              description: "Rekomendasi, ide, atau masukan dari peserta rapat (Bahasa Indonesia).",
-            },
-            meeting_metadata: {
-              type: Type.OBJECT,
-              properties: {
-                topik_utama: {
-                  type: Type.STRING,
-                  description: "Deteksi otomatis topik utama rapat.",
+              poin_diskusi_tambahan: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    concern: {
+                      type: Type.STRING,
+                      description: "Isu / poin diskusi penting pemicu tindak lanjut.",
+                    },
+                    fitur: {
+                      type: Type.STRING,
+                      description: "Nama fitur terkait (kosongkan jika tidak ada).",
+                    },
+                    system: {
+                      type: Type.STRING,
+                      description: "Sistem / subsistem terkait (kosongkan jika tidak ada).",
+                    },
+                    surrounding: {
+                      type: Type.STRING,
+                      description: "Konteks/pihak lain sekeliling yang terdampak.",
+                    },
+                    keterangan: { type: Type.STRING, description: "Penjelasan/deskripsi singkat." },
+                    tindakanLanjut: {
+                      type: Type.STRING,
+                      description: "Rencana tindak lanjut / action item konkret.",
+                    },
+                    PIC: { type: Type.STRING, description: "Nama Person In Charge jika ada." },
+                    targetDate: {
+                      type: Type.STRING,
+                      description:
+                        "Tenggat waktu pengerjaan (format YYYY-MM-DD jika ada, atau teks singkat).",
+                    },
+                  },
+                  required: ["concern", "tindakanLanjut"],
                 },
-                tanggal_waktu: {
-                  type: Type.STRING,
-                  description: "Perkiraan tanggal/waktu jika disebutkan, kosongkan jika tidak.",
-                },
-                peserta_aktif: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING },
-                  description: "Daftar nama peserta yang aktif berbicara.",
-                },
+                description: "Daftar poin diskusi tambahan / action items.",
               },
-              required: ["topik_utama", "peserta_aktif"],
-            },
-            poin_diskusi_tambahan: {
-              type: Type.ARRAY,
-              items: {
+              next_plan: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    tahapan: {
+                      type: Type.STRING,
+                      description: "Nama tahapan atau fase rencana aksi selanjutnya.",
+                    },
+                    deskripsi: {
+                      type: Type.STRING,
+                      description:
+                        "Penjelasan detail mengenai rencana aksi tersebut berdasarkan transkrip.",
+                    },
+                    estimasi_waktu: {
+                      type: Type.STRING,
+                      description: "Estimasi waktu pelaksanaan jika dibahas, jika tidak kosongi.",
+                    },
+                  },
+                  required: ["tahapan", "deskripsi"],
+                },
+                description:
+                  "Rencana jangka pendek dan menengah (Next Plan) riil hasil pembahasan rapat.",
+              },
+              to_be_scenario: {
                 type: Type.OBJECT,
                 properties: {
-                  concern: {
-                    type: Type.STRING,
-                    description: "Isu / poin diskusi penting pemicu tindak lanjut.",
-                  },
-                  fitur: {
-                    type: Type.STRING,
-                    description: "Nama fitur terkait (kosongkan jika tidak ada).",
-                  },
-                  system: {
-                    type: Type.STRING,
-                    description: "Sistem / subsistem terkait (kosongkan jika tidak ada).",
-                  },
-                  surrounding: {
-                    type: Type.STRING,
-                    description: "Konteks/pihak lain sekeliling yang terdampak.",
-                  },
-                  keterangan: { type: Type.STRING, description: "Penjelasan/deskripsi singkat." },
-                  tindakanLanjut: {
-                    type: Type.STRING,
-                    description: "Rencana tindak lanjut / action item konkret.",
-                  },
-                  PIC: { type: Type.STRING, description: "Nama Person In Charge jika ada." },
-                  targetDate: {
+                  kondisi_sekarang: {
                     type: Type.STRING,
                     description:
-                      "Tenggat waktu pengerjaan (format YYYY-MM-DD jika ada, atau teks singkat).",
+                      "Kondisi sistem/proses saat ini (As-Is) yang dibahas atau dikeluhkan.",
                   },
-                },
-                required: ["concern", "tindakanLanjut"],
-              },
-              description: "Daftar poin diskusi tambahan / action items.",
-            },
-            next_plan: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  tahapan: {
-                    type: Type.STRING,
-                    description: "Nama tahapan atau fase rencana aksi selanjutnya.",
-                  },
-                  deskripsi: {
+                  target_ke_depan: {
                     type: Type.STRING,
                     description:
-                      "Penjelasan detail mengenai rencana aksi tersebut berdasarkan transkrip.",
+                      "Gambaran detail sistem/proses ke depan (To-Be) yang disepakati atau diusulkan.",
                   },
-                  estimasi_waktu: {
-                    type: Type.STRING,
-                    description: "Estimasi waktu pelaksanaan jika dibahas, jika tidak kosongi.",
+                  langkah_transisi: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Langkah transisi atau proses migrasi menuju kondisi To-Be.",
                   },
                 },
-                required: ["tahapan", "deskripsi"],
+                required: ["kondisi_sekarang", "target_ke_depan", "langkah_transisi"],
+                description:
+                  "Analisis kondisi sistem/proses masa depan (To-Be Scenario) riil hasil rapat.",
               },
-              description:
-                "Rencana jangka pendek dan menengah (Next Plan) riil hasil pembahasan rapat.",
             },
-            to_be_scenario: {
-              type: Type.OBJECT,
-              properties: {
-                kondisi_sekarang: {
-                  type: Type.STRING,
-                  description:
-                    "Kondisi sistem/proses saat ini (As-Is) yang dibahas atau dikeluhkan.",
-                },
-                target_ke_depan: {
-                  type: Type.STRING,
-                  description:
-                    "Gambaran detail sistem/proses ke depan (To-Be) yang disepakati atau diusulkan.",
-                },
-                langkah_transisi: {
-                  type: Type.ARRAY,
-                  items: { type: Type.STRING },
-                  description: "Langkah transisi atau proses migrasi menuju kondisi To-Be.",
-                },
-              },
-              required: ["kondisi_sekarang", "target_ke_depan", "langkah_transisi"],
-              description:
-                "Analisis kondisi sistem/proses masa depan (To-Be Scenario) riil hasil rapat.",
-            },
+            required: [
+              "ringkasan_eksekutif",
+              "notulen_rapat",
+              "kesimpulan",
+              "saran",
+              "meeting_metadata",
+              "poin_diskusi_tambahan",
+              "next_plan",
+              "to_be_scenario",
+            ],
           },
-          required: [
-            "ringkasan_eksekutif",
-            "notulen_rapat",
-            "kesimpulan",
-            "saran",
-            "meeting_metadata",
-            "poin_diskusi_tambahan",
-            "next_plan",
-            "to_be_scenario",
-          ],
         },
-      },
-    });
+      });
 
-    const jsonStr = response.text ? response.text.trim() : "{}";
-    let parsedData;
-    try {
-      parsedData = JSON.parse(jsonStr);
-    } catch (parseErr) {
-      console.error("Failed to parse transcript analysis JSON:", parseErr);
-      parsedData = {};
+      const jsonStr = response.text ? response.text.trim() : "{}";
+      let parsedData;
+      try {
+        parsedData = JSON.parse(jsonStr);
+      } catch (parseErr) {
+        console.error("Failed to parse transcript analysis JSON:", parseErr);
+        parsedData = {};
+      }
+
+      // Simpan langsung ke kolom Meetings jika inginkan persistence
+      const connection = await db.getConnection();
+      await connection.query("UPDATE Meetings SET transcript = ?, aiSummary = ? WHERE id = ?", [
+        transcript,
+        jsonStr,
+        id,
+      ]);
+      connection.release();
+
+      res.json({
+        status: "success",
+        data: parsedData,
+      });
+    } catch (error: any) {
+      console.error("POST /api/projects/:projectId/meetings/:id/analyze-transcript error:", error);
+      res
+        .status(500)
+        .json({ status: "error", message: error.message || "Gagal menganalisis transkrip." });
     }
-
-    // Simpan langsung ke kolom Meetings jika inginkan persistence
-    const connection = await db.getConnection();
-    await connection.query("UPDATE Meetings SET transcript = ?, aiSummary = ? WHERE id = ?", [
-      transcript,
-      jsonStr,
-      id,
-    ]);
-    connection.release();
-
-    res.json({
-      status: "success",
-      data: parsedData,
-    });
-  } catch (error: any) {
-    console.error("POST /api/projects/:projectId/meetings/:id/analyze-transcript error:", error);
-    res
-      .status(500)
-      .json({ status: "error", message: error.message || "Gagal menganalisis transkrip." });
   }
-});
+);
 
 // Meetings API
 router.get(

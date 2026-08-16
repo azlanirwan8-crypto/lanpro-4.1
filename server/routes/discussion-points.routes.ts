@@ -266,14 +266,35 @@ const postCommentHandler = async (req: any, res: any) => {
   }
 };
 
-router.get("/api/discussion-points/:pointId/comments", getCommentsHandler);
+// #94 — keempat rute di bawah dulu TANPA penjaga sama sekali, sehingga komentar
+// bisa dibaca dan ditulis LINTAS PROYEK oleh siapa pun yang punya akun.
+//
+// Ia luput dari sapuan 54 penjaga (§19.20-§19.22) karena seluruh test himpunan
+// di sana berangkat dari DAFTAR PENJAGA: `penjaga-lama.test.ts` mengunci
+// pemakai `verifyProjectAccess` di nol, `tanpa-wildcard.test.ts` mengunci
+// ketiadaan `["*"]`. Rute yang tidak punya penjaga sama sekali tidak muncul di
+// himpunan mana pun.
+//
+// Dua rute pertama tidak menyebut proyek di jalurnya, jadi proyeknya ditemukan
+// lewat poin diskusinya (poin -> rapat -> proyek).
 router.get(
-  "/api/projects/:projectId/meetings/:meetingId/discussionPoints/:pointId/comments",
+  "/api/discussion-points/:pointId/comments",
+  jagaProyek("meetingNotes", "R", "discussionPoint"),
   getCommentsHandler
 );
-router.post("/api/discussion-points/:pointId/comments", postCommentHandler);
+router.get(
+  "/api/projects/:projectId/meetings/:meetingId/discussionPoints/:pointId/comments",
+  jagaProyek("meetingNotes", "R"),
+  getCommentsHandler
+);
+router.post(
+  "/api/discussion-points/:pointId/comments",
+  jagaProyek("meetingNotes", "C", "discussionPoint"),
+  postCommentHandler
+);
 router.post(
   "/api/projects/:projectId/meetings/:meetingId/discussionPoints/:pointId/comments",
+  jagaProyek("meetingNotes", "C"),
   postCommentHandler
 );
 
