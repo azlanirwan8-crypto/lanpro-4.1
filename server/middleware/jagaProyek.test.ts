@@ -324,3 +324,28 @@ describe("#70 rute yang beralamat ke ENTITAS, bukan ke proyek", () => {
     expect(res.kode).toBe(403);
   });
 });
+
+describe("#54 identitas hanya dari token", () => {
+  it("header `x-user-id` TIDAK dipakai sebagai identitas", async () => {
+    // Header ini bisa ditulis klien mana pun. Penjaga lama menerimanya sebagai
+    // cadangan, dan cadangan itu sempat tersalin ke penjaga baru.
+    siapkanDb({ user: { id: "U1", role: "admin" } });
+    const { res, next } = await jalankan(jagaProyek("list", "R"), {
+      user: undefined,
+      headers: { "x-user-id": "U1" },
+      query: {},
+    });
+    expect(res.kode).toBe(403);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it("query `?userId=` TIDAK dipakai sebagai identitas", async () => {
+    siapkanDb({ user: { id: "U1", role: "admin" } });
+    const { res } = await jalankan(jagaProyek("list", "R"), {
+      user: undefined,
+      headers: {},
+      query: { userId: "U1" },
+    });
+    expect(res.kode).toBe(403);
+  });
+});
