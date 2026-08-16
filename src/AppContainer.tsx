@@ -1084,7 +1084,7 @@ function AppContainer() {
 
     setSocket(socket);
 
-    socket.on("FORCE_LOGOUT_EVENT", (data: any) => {
+    socket.on("FORCE_LOGOUT_EVENT", async (data: any) => {
       if (data.browserSessionId === BROWSER_SESSION_ID) {
         return;
       }
@@ -1100,11 +1100,36 @@ function AppContainer() {
       const currentUserId = activeUser?.id || activeUser?.uid;
       const currentToken = safeLocalStorage.getItem("lanpro_jwt_token");
 
-      if (
-        currentUserId &&
-        currentUserId.toString() === data.userId &&
-        currentToken !== data.newToken
-      ) {
+      if (!currentUserId || currentUserId.toString() !== data.userId || !currentToken) {
+        return;
+      }
+
+      // #51 — server tidak lagi mengirim token sesi baru; ia mengirim SIDIK
+      // JARI-nya. Yang perlu dijawab di sini cuma satu: apakah sesi baru itu
+      // aku sendiri? Kalau ya, jangan keluarkan diri sendiri.
+      //
+      // Bila sidik jari tak bisa dihitung (crypto.subtle tidak tersedia, atau
+      // server versi lama tidak mengirimkannya), pilihannya jatuh ke TIDAK
+      // mengeluarkan pengguna. Gagal dengan membiarkan orang tetap bekerja jauh
+      // lebih baik daripada gagal dengan melempar semua orang ke layar login.
+      let sidikTokenSaya: string | null = null;
+      try {
+        if (globalThis.crypto?.subtle) {
+          const bytes = new TextEncoder().encode(currentToken);
+          const digest = await globalThis.crypto.subtle.digest("SHA-256", bytes);
+          sidikTokenSaya = Array.from(new Uint8Array(digest))
+            .map((b) => b.toString(16).padStart(2, "0"))
+            .join("");
+        }
+      } catch {
+        sidikTokenSaya = null;
+      }
+
+      if (!data.sidikTokenBaru || !sidikTokenSaya) {
+        return;
+      }
+
+      if (sidikTokenSaya !== data.sidikTokenBaru) {
         toast.error("Sesi Anda telah diakhiri karena login di perangkat/browser lain.");
         handleLogout(true);
       }
