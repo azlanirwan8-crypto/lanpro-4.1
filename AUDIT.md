@@ -24,7 +24,7 @@ melanjutkan pekerjaan tanpa perlu menelusuri riwayat percakapan.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **277 lulus / 30 suite**                                    | `npm test`                                   |
+| Test                | **315 lulus / 32 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -332,21 +332,21 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 
 ### Indeks cepat
 
-|  Fase   |  Prio  | Nama                               | Item                                 | Sesi | Risiko            | Status                       | TERTAHAN OLEH APA — dan siapa yang harus bergerak                                                                                                                                                                                                                                                          |
-| :-----: | :----: | ---------------------------------- | ------------------------------------ | ---- | ----------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **F0**  |   —    | Kejelasan & fondasi dokumen        | #1, #12, #10, #38, #39, #79          | 1–2  | Sangat rendah     | `SELESAI` 16 Agu (ulang)     | — tidak ada. Gerbangnya kini PUNYA PERINTAH: `npm run db:verify-schema`, dan lulus 3× berturut-turut. Sempat dicabut hari yang sama karena ternyata tidak pernah diuji (§13.14)                                                                                                                            |
-| **F1**  | **P0** | Cabut kredensial lama              | #15 (#2 DITAHAN)                     | <1   | Sangat rendah     | `MENUNGGU`                   | **PEMILIK.** Cabut 2 Google API key lama di Google Cloud Console. Kerja ±5 menit, tidak menyentuh kode. **#2 ditahan 16 Agu 2026** — storage beralih ke drive user (#30), jadi fase ini TIDAK lagi membuka jalan rilis; yang membukanya kini F11                                                           |
-| **F2**  | **P0** | Audit & perbaikan LOGIKA           | #16, #18–#20, #49–#75                | 3–5  | Rendah            | `JALAN` — audit SELESAI      | **PEMILIK, 9 keputusan.** Audit 9 area §13.1 tuntas & 15 item diperbaiki. Sisa murni keputusan peran/perilaku: #69 #70 #71 #72 #73 (penetapan peran), #74 (izin sentuh `AppContainer`), #18 #19 #20 (perilaku notebook-lm, penjaga read-only `db-query`, kode mati DB Explorer), #57 (dua endpoint health) |
-| **F3**  |   P1   | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | `SIAP JALAN`                 | **TIDAK LAGI TERTAHAN.** Syarat "login pemilik" sudah terpenuhi — sesi hidup dipakai sepanjang 16 Agu. Yang masih perlu Anda: izin membuat objek percobaan untuk alur TULIS (§14.2), dan sesi admin bila layar khusus admin ikut diperiksa                                                                 |
-| **F4**  |   —    | Performa muat                      | #3                                   | 1    | Rendah–sedang     | `SELESAI` 16 Agu             | — tidak ada                                                                                                                                                                                                                                                                                                |
-| **F5**  |   —    | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | `SELESAI` 16 Agu             | — tidak ada                                                                                                                                                                                                                                                                                                |
-| **F6**  |   P1   | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28 | 3–4  | Rendah–sedang     | `MENUNGGU` domain            | **PEMILIK.** Domain email belum terverifikasi (#44). Tanpa itu penyedia mana pun hanya mengirim ke alamat pemilik akun, jadi email tidak akan sampai ke user lain dan gagalnya SENYAP. F6.1 sudah beres; tinggal isi `RESEND_API_KEY` + `EMAIL_FROM`                                                       |
-| **F7**  | **P0** | **Two-Tier RBAC** & validasi       | **#76**, #4, #81, #82, #83           | 5–8  | **Tinggi**        | `JALAN` — tahap 0, 1 & 5a ✅ | **PEMILIK, 3 keputusan.** Rancangan di **§19**. SELESAI: katalog peran (tahap 0) & nol hardcode (#82, tahap 5a). Tahap 1–2–4 bisa jalan TANPA pemilik. Sisa keputusan: pemetaan `member` → peran apa (7 baris) · Department Head A/B/C (#83) · Business Owner ada atau tidak                               |
-| **F8**  |   P2   | Jaring pengaman                    | #9, #8                               | 4–6  | Rendah            | `TERBUKA`                    | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, karena F3 akan menambah kasus uji                                                                                                                                                                                                                        |
-| **F9**  |   P3   | Lapisan backend                    | #6                                   | 6–10 | Tinggi            | `TERBUKA`                    | — bisa jalan tanpa pemilik, tapi butuh F7 & F8 lebih dulu sebagai pengaman                                                                                                                                                                                                                                 |
-| **F10** |   P3   | Arsitektur frontend                | #5, #7, #21                          | 8–15 | **Sangat tinggi** | `TERBUKA`                    | — bisa jalan tanpa pemilik, tapi JANGAN sebelum F8. Merefactor 4.581 baris `AppContainer` dengan jaring pengaman sekarang adalah judi                                                                                                                                                                      |
-| **F11** | **P0** | **Drive-per-user — JALUR RILIS**   | #30 (prasyarat #46)                  | 6–10 | **Tinggi**        | `SIAP DIRANCANG`             | **PEMILIK, 3 hal.** 6 keputusan desain sudah DIJAWAB 16 Agu (§11.1). Sisa: konfirmasi D1b & D3b · perbaiki **#46** (`SSO_ALLOWED_DOMAINS=gmail.com` membatalkan asumsi kuota corporate, §11.1b) · setujui rancangan penyimpanan refresh token terenkripsi                                                  |
-| **F12** |   P3   | Konsolidasi desain                 | #14, #13                             | 2–3  | Rendah            | `TERBUKA`                    | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, yang akan mendata sendiri layar mana yang kontras & jarak sentuhnya bermasalah                                                                                                                                                                           |
+|  Fase   |  Prio  | Nama                               | Item                                 | Sesi | Risiko            | Status                              | TERTAHAN OLEH APA — dan siapa yang harus bergerak                                                                                                                                                                                                                                                          |
+| :-----: | :----: | ---------------------------------- | ------------------------------------ | ---- | ----------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **F0**  |   —    | Kejelasan & fondasi dokumen        | #1, #12, #10, #38, #39, #79          | 1–2  | Sangat rendah     | `SELESAI` 16 Agu (ulang)            | — tidak ada. Gerbangnya kini PUNYA PERINTAH: `npm run db:verify-schema`, dan lulus 3× berturut-turut. Sempat dicabut hari yang sama karena ternyata tidak pernah diuji (§13.14)                                                                                                                            |
+| **F1**  | **P0** | Cabut kredensial lama              | #15 (#2 DITAHAN)                     | <1   | Sangat rendah     | `MENUNGGU`                          | **PEMILIK.** Cabut 2 Google API key lama di Google Cloud Console. Kerja ±5 menit, tidak menyentuh kode. **#2 ditahan 16 Agu 2026** — storage beralih ke drive user (#30), jadi fase ini TIDAK lagi membuka jalan rilis; yang membukanya kini F11                                                           |
+| **F2**  | **P0** | Audit & perbaikan LOGIKA           | #16, #18–#20, #49–#75                | 3–5  | Rendah            | `JALAN` — audit SELESAI             | **PEMILIK, 9 keputusan.** Audit 9 area §13.1 tuntas & 15 item diperbaiki. Sisa murni keputusan peran/perilaku: #69 #70 #71 #72 #73 (penetapan peran), #74 (izin sentuh `AppContainer`), #18 #19 #20 (perilaku notebook-lm, penjaga read-only `db-query`, kode mati DB Explorer), #57 (dua endpoint health) |
+| **F3**  |   P1   | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | `SIAP JALAN`                        | **TIDAK LAGI TERTAHAN.** Syarat "login pemilik" sudah terpenuhi — sesi hidup dipakai sepanjang 16 Agu. Yang masih perlu Anda: izin membuat objek percobaan untuk alur TULIS (§14.2), dan sesi admin bila layar khusus admin ikut diperiksa                                                                 |
+| **F4**  |   —    | Performa muat                      | #3                                   | 1    | Rendah–sedang     | `SELESAI` 16 Agu                    | — tidak ada                                                                                                                                                                                                                                                                                                |
+| **F5**  |   —    | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | `SELESAI` 16 Agu                    | — tidak ada                                                                                                                                                                                                                                                                                                |
+| **F6**  |   P1   | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28 | 3–4  | Rendah–sedang     | `MENUNGGU` domain                   | **PEMILIK.** Domain email belum terverifikasi (#44). Tanpa itu penyedia mana pun hanya mengirim ke alamat pemilik akun, jadi email tidak akan sampai ke user lain dan gagalnya SENYAP. F6.1 sudah beres; tinggal isi `RESEND_API_KEY` + `EMAIL_FROM`                                                       |
+| **F7**  | **P0** | **Two-Tier RBAC** & validasi       | **#76**, #4, #81, #82, #83           | 5–8  | **Tinggi**        | `JALAN` — tahap 0, 1, 2, 3ᵖ & 5a ✅ | **PEMILIK, 3 keputusan.** Rancangan di **§19**. SELESAI: katalog peran (tahap 0) & nol hardcode (#82, tahap 5a). Tahap 1–2–4 bisa jalan TANPA pemilik. Sisa keputusan: pemetaan `member` → peran apa (7 baris) · Department Head A/B/C (#83) · Business Owner ada atau tidak                               |
+| **F8**  |   P2   | Jaring pengaman                    | #9, #8                               | 4–6  | Rendah            | `TERBUKA`                           | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, karena F3 akan menambah kasus uji                                                                                                                                                                                                                        |
+| **F9**  |   P3   | Lapisan backend                    | #6                                   | 6–10 | Tinggi            | `TERBUKA`                           | — bisa jalan tanpa pemilik, tapi butuh F7 & F8 lebih dulu sebagai pengaman                                                                                                                                                                                                                                 |
+| **F10** |   P3   | Arsitektur frontend                | #5, #7, #21                          | 8–15 | **Sangat tinggi** | `TERBUKA`                           | — bisa jalan tanpa pemilik, tapi JANGAN sebelum F8. Merefactor 4.581 baris `AppContainer` dengan jaring pengaman sekarang adalah judi                                                                                                                                                                      |
+| **F11** | **P0** | **Drive-per-user — JALUR RILIS**   | #30 (prasyarat #46)                  | 6–10 | **Tinggi**        | `SIAP DIRANCANG`                    | **PEMILIK, 3 hal.** 6 keputusan desain sudah DIJAWAB 16 Agu (§11.1). Sisa: konfirmasi D1b & D3b · perbaiki **#46** (`SSO_ALLOWED_DOMAINS=gmail.com` membatalkan asumsi kuota corporate, §11.1b) · setujui rancangan penyimpanan refresh token terenkripsi                                                  |
+| **F12** |   P3   | Konsolidasi desain                 | #14, #13                             | 2–3  | Rendah            | `TERBUKA`                           | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, yang akan mendata sendiri layar mana yang kontras & jarak sentuhnya bermasalah                                                                                                                                                                           |
 
 \*Perkiraan kasar dan **belum terverifikasi** — untuk membandingkan bobot antar
 fase, bukan janji jadwal. Perbarui dengan angka nyata setelah fase pertama tutup.
@@ -3714,16 +3714,16 @@ dipakai pada `board` (memindahkan kartu) dan `access` (mengubah peran anggota).
 
 ### 19.8 Keadaan pengerjaan
 
-| Tahap | Isi                                                                             | Status                                                                                                                                        |
-| :---: | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-|   0   | Katalog peran di `MasterData`                                                   | ✅ **SELESAI 16 Agu** — `npm run db:seed-roles`. Katalog final: **4 SYSTEM + 8 PROJECT**, terverifikasi tampil di layar Master Data           |
-|   1   | Satu enum peran, satu tempat. Hapus `\| string`, satukan dua `AppRole`          | ✅ **SELESAI 16 Agu** — `src/types/roles.ts`. Jadi **DUA** enum, bukan satu; alasan & temuan #87 di §19.15. 13 test mengikat enum ke penyemai |
-|   2   | Penjaga saat boot — server menolak menyala bila rute memakai peran di luar enum | `TERBUKA`                                                                                                                                     |
-|   3   | Migrasi data `ProjectMembers` (10 baris) & `Users` (11 baris)                   | `MENUNGGU` keputusan                                                                                                                          |
-|   4   | `verifyProjectAccess` baca matriks terpusat + deny-by-default                   | `TERBUKA`                                                                                                                                     |
-|  5a   | **Dropdown & tampilan peran dari katalog** (#82)                                | ✅ **SELESAI 16 Agu** — 6 dropdown + 4 tampilan, nol hardcode, kolom `code` di MasterData                                                     |
-|  5b   | `can(action, module, projectId)` menggantikan 36 `hasPermission` di 13 berkas   | `TERBUKA`                                                                                                                                     |
-|   6   | Panel "Active System Permissions & Overrides" jadi **baca-saja**                | `TERBUKA`                                                                                                                                     |
+| Tahap | Isi                                                                             | Status                                                                                                                                               |
+| :---: | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+|   0   | Katalog peran di `MasterData`                                                   | ✅ **SELESAI 16 Agu** — `npm run db:seed-roles`. Katalog final: **4 SYSTEM + 8 PROJECT**, terverifikasi tampil di layar Master Data                  |
+|   1   | Satu enum peran, satu tempat. Hapus `\| string`, satukan dua `AppRole`          | ✅ **SELESAI 16 Agu** — `src/types/roles.ts`. Jadi **DUA** enum, bukan satu; alasan & temuan #87 di §19.15. 13 test mengikat enum ke penyemai        |
+|   2   | Penjaga saat boot — server menolak menyala bila rute memakai peran di luar enum | 🟡 **SEBAGIAN 16 Agu** — matriks terpusat + penjaga boot SELESAI, tetapi masih **mode LAPOR**. Menaikkan ke TOLAK menunggu pemetaan `member`. §19.16 |
+|   3   | Migrasi data `ProjectMembers` (10 baris) & `Users` (11 baris)                   | `MENUNGGU` keputusan                                                                                                                                 |
+|   4   | `verifyProjectAccess` baca matriks terpusat + deny-by-default                   | `TERBUKA`                                                                                                                                            |
+|  5a   | **Dropdown & tampilan peran dari katalog** (#82)                                | ✅ **SELESAI 16 Agu** — 6 dropdown + 4 tampilan, nol hardcode, kolom `code` di MasterData                                                            |
+|  5b   | `can(action, module, projectId)` menggantikan 36 `hasPermission` di 13 berkas   | `TERBUKA`                                                                                                                                            |
+|   6   | Panel "Active System Permissions & Overrides" jadi **baca-saja**                | `TERBUKA`                                                                                                                                            |
 
 **Tahap 1 dan 2 tidak butuh keputusan apa pun** dan bisa dikerjakan kapan saja.
 Keduanya kecil, tidak mengubah perilaku, tetapi langsung membuat kompilator dan
@@ -4198,3 +4198,92 @@ berganti sebelum browser dibuka.
 socket sama sekali (nol kecocokan untuk `socket`/`WebSocket`/`io(`), jadi
 kemungkinan besar ia sudah ada sebelumnya — tetapi §0.1 mengklaim "0 error
 console", jadi salah satunya perlu diukur ulang. Belum dilakukan.
+
+### 19.16 Tahap 2 & 3 — matriks terpusat dan penjaga saat boot
+
+Dikerjakan 16 Agu 2026. Dua berkas baru, keduanya **belum menegakkan apa pun**:
+
+| Berkas                                 | Isi                                       | Test |
+| -------------------------------------- | ----------------------------------------- | ---- |
+| `src/lib/matriksAkses.ts`              | §19.4 + §19.5 sebagai data + fungsi murni | 26   |
+| `server/middleware/daftarPeranRute.ts` | pendataan penjaga rute saat boot          | 12   |
+
+Penegakannya tahap 4. Dipisah dengan sengaja: matriksnya bisa diuji lengkap
+terhadap §19 **sebelum** ada satu permintaan pun yang ditolak olehnya.
+
+#### Testnya MEMBACA dokumen ini, bukan menyalinnya
+
+`matriksAkses.test.ts` mengurai tabel §19.4 dan §19.5 dari `AUDIT.md` lalu
+membandingkannya dengan matriks — baris per baris, 16 modul.
+
+Menyalin tabel ke dalam test hanya akan memindahkan tempat penyimpangan bisa
+lahir: kode dan test sama-sama salah, dokumennya benar, dan semua tetap hijau.
+Itu bentuk lain dari §13.14 dan §19.10.
+
+**Testnya dibuktikan bisa merah**, lewat `git worktree` di luar repo sesuai
+§0.5 aturan 4. `viewer` diberi `CRUD` pada modul `list` — bentuk persis #66 — dan
+2 test langsung gagal: perbandingan dokumen untuk `list`, dan aturan "viewer
+tidak pernah C/U/D".
+
+⚠️ Percobaan pertama pembuktian itu **gagal dan sempat terbaca sebagai test yang
+tumpul**: kunci `viewer` ditambahkan di AWAL objek padahal `viewer` sudah ada di
+bawahnya, sehingga kunci belakangan menimpanya dan sabotasenya jadi tanpa efek.
+26 test tetap hijau. Yang salah sabotasenya, bukan testnya. Layak dicatat karena
+"test tidak merah" hampir dipercaya sebagai kesimpulan.
+
+#### Penjaga boot mendaftar saat rute dipasang, bukan memindai teks
+
+§13.11 mencatat aturan "hasil pemindaian bukan temuan, wajib dibaca isinya" —
+lalu #80 tetap luput karena nama rutenya terbaca seperti utilitas demo.
+Memindai teks berkas mengulang kelemahan yang sama: ia melihat apa yang
+TERTULIS. `verifyProjectAccess` kini mendaftarkan dirinya saat dipanggil, jadi
+yang tercatat adalah penjaga yang **benar-benar terpasang**.
+
+#### Gerbangnya menangkap kekeliruannya sendiri
+
+Versi pertama dipanggil di tengah pemasangan rute, sesudah `discussion-points`.
+Hasilnya:
+
+```
+[RBAC] 31 penjaga rute terdaftar · 18 ber-["*"] polos · 0 korslet
+```
+
+**0 korslet padahal #73 nyata ada.** Sebabnya `file.routes`, `user.routes`, dan
+`project.routes` baru dipasang ratusan baris sesudahnya. Gerbang yang menghitung
+separuh isi lebih berbahaya daripada tidak ada gerbang — ia memberi rasa aman
+yang salah, persis cara gerbang F0 dulu dinyatakan lulus.
+
+Sesudah dipindah ke tempat seluruh rute selesai terpasang:
+
+```
+[RBAC] 54 penjaga rute terdaftar · 31 ber-["*"] polos · 1 korslet ("*" + peran lain, #73)
+[RBAC] peran warisan masih terpakai: designer, head, member — menunggu pemetaan
+```
+
+**54 = 54** terhadap hitungan statis `grep`, dan `designer` yang tadi luput kini
+muncul. Angka ini juga memperbarui §19.2: **31 dari 54 penjaga (57%)** berbunyi
+`["*"]` polos — badan #66 dan #72 dalam satu angka.
+
+#### Kenapa masih mode LAPOR, belum menolak
+
+Menyalakan penolakan hari ini membuat server **langsung mati**: 7 penjaga
+memakai `member`/`designer`, dan `head` dipakai sebagai peran proyek padahal ia
+peran sistem. Pemetaan `member` masih menunggu Anda. Menaikkannya cukup mengubah
+`MODE` di `daftarPeranRute.ts`, dan ada test yang berjaga supaya kenaikan itu
+tidak terjadi tanpa sengaja.
+
+#### Gerbang tahap 2 & 3
+
+| Cek                 | Hasil                                              |
+| ------------------- | -------------------------------------------------- |
+| `tsc --noEmit`      | 0 error                                            |
+| Test                | **315 lulus / 32 suite** — naik +38 test, +2 suite |
+| Build               | sukses                                             |
+| Browser, tab bersih | layar Sign In tampil normal                        |
+
+⚠️ **Kerusakan yang saya perbuat dan sudah diperbaiki.** Saat membersihkan
+worktree pembuktian, perintah penghapusan menembus symlink dan mengosongkan
+sebagian `node_modules` repo — `.bin/` dan `@google/*` hilang, dan `tsc` sempat
+melaporkan 5 modul tak ditemukan. Dipulihkan dengan `npm install`;
+`package.json` dan `package-lock.json` tidak berubah. Pelajarannya: worktree
+pembuktian jangan disambungkan ke `node_modules` repo asli.
