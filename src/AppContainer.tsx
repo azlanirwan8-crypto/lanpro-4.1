@@ -851,6 +851,34 @@ function AppContainer() {
   // Auth functions (handleManualLogin, handleRegister) are now managed by useAuth hook
   // See src/hooks/useAuth.ts for implementation
 
+  /**
+   * #74 — penjaga respons BASI.
+   *
+   * Efek pengambil data bergantung pada `[selectedProject?.id]` dan memakai
+   * jeda 300 ms dengan `clearTimeout` di cleanup. Jeda itu menahan permintaan
+   * yang BELUM berangkat — tetapi tidak membatalkan yang SUDAH berangkat, dan
+   * hasilnya tetap ditulis ke state tanpa memeriksa apakah proyeknya masih
+   * sama.
+   *
+   * Akibatnya berpindah dari proyek A ke B di dalam jendela permintaan membuat
+   * data A menimpa data B, dan pengguna melihat isi proyek yang salah tanpa
+   * satu pun galat.
+   *
+   * Ref ini menyimpan proyek yang SEDANG dilihat. Tiap pengambil menangkap id
+   * saat permintaan berangkat, lalu membandingkannya sebelum menulis state —
+   * pola yang sama dengan penjaga `isMounted` pada `fetchMembers`, tetapi
+   * menjaga hal yang berbeda: bukan komponen yang sudah dilepas, melainkan
+   * proyek yang sudah berganti.
+   */
+  const proyekAktifRef = React.useRef<string | undefined>(undefined);
+  React.useEffect(() => {
+    proyekAktifRef.current = selectedProject?.id;
+  }, [selectedProject?.id]);
+
+  /** `true` bila proyeknya belum berganti sejak permintaan berangkat. */
+  const masihProyekSama = (idSaatBerangkat: string | undefined) =>
+    proyekAktifRef.current === idSaatBerangkat;
+
   const fetchProjects = async () => {
     if (!getAuthToken()) return;
     const effectiveUserId = currentUser?.uid || user?.uid;
@@ -946,6 +974,7 @@ function AppContainer() {
   }, [currentUser?.uid, isLoggedIn]);
 
   const fetchTasks = async () => {
+    const proyekSaatBerangkat = selectedProject?.id;
     if (!getAuthToken()) return;
     if (!selectedProject) {
       setTasks([]);
@@ -987,6 +1016,7 @@ function AppContainer() {
           effectiveNamaLengkap,
         ].filter(Boolean);
 
+        if (!masihProyekSama(proyekSaatBerangkat)) return;
         setTasks(uniqueAllTasks);
       }
     } catch (e: any) {
@@ -1339,6 +1369,7 @@ function AppContainer() {
   }, [selectedProject?.members?.join(","), selectedProject?.id, isLoggedIn]);
 
   const fetchSprints = async () => {
+    const proyekSaatBerangkat = selectedProject?.id;
     if (!getAuthToken()) return;
     if (!selectedProject) {
       setSprints([]);
@@ -1348,6 +1379,7 @@ function AppContainer() {
     try {
       const data = await fetchSprintsApi(selectedProject.id);
       if (data.status === "success") {
+        if (!masihProyekSama(proyekSaatBerangkat)) return;
         setSprints(data.data as Sprint[]);
       }
     } catch (e: any) {
@@ -1391,6 +1423,7 @@ function AppContainer() {
   }, [newProjectName]);
 
   const fetchComments = async () => {
+    const proyekSaatBerangkat = selectedProject?.id;
     if (!getAuthToken()) return;
     if (!selectedProject || !selectedTaskForDetail) {
       setComments([]);
@@ -1399,6 +1432,7 @@ function AppContainer() {
     try {
       const data = await fetchTaskComments(selectedProject.id, selectedTaskForDetail.id);
       if (data.status === "success") {
+        if (!masihProyekSama(proyekSaatBerangkat)) return;
         setComments(data.data as Comment[]);
       }
     } catch (error: any) {
@@ -1419,6 +1453,7 @@ function AppContainer() {
   }, [selectedProject?.id, selectedTaskForDetail?.id]);
 
   const fetchActivityLogs = async () => {
+    const proyekSaatBerangkat = selectedProject?.id;
     if (!getAuthToken()) return;
     if (!selectedProject) {
       setActivityLogs([]);
@@ -1427,6 +1462,7 @@ function AppContainer() {
     try {
       const data = await fetchActivity(selectedProject.id);
       if (data.status === "success") {
+        if (!masihProyekSama(proyekSaatBerangkat)) return;
         setActivityLogs(data.data as ActivityLog[]);
       }
     } catch (error: any) {
