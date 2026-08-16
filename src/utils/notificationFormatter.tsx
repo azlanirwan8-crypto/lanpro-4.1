@@ -208,7 +208,7 @@ export const formatNotification = (
       icon = <Edit3 className="w-4 h-4 text-content-secondary" />;
       iconBgClass = "bg-surface-muted border border-border-subtle text-content-secondary";
       badgeText = "PEMBARUAN";
-      badgeClass = "bg-surface-muted text-content-body border-slate-300";
+      badgeClass = "bg-surface-muted text-content-body border-border-subtle";
       formattedTitleStr = "Detail Tugas Diperbarui";
       break;
 
@@ -331,7 +331,7 @@ export const formatNotification = (
         className="inline-flex items-center gap-0.5 px-1 py-0 rounded bg-surface-muted hover:bg-slate-200 border border-border-subtle/60 text-xs sm:text-[10px] font-medium text-content-strong font-mono transition-colors my-0.5 select-all"
       >
         <span className="text-violet-600 font-medium">{code}</span>
-        <span className="text-slate-300">|</span>
+        <span className="text-content-subtle">|</span>
         <span className="truncate max-w-[120px]">{name}</span>
       </span>
     );

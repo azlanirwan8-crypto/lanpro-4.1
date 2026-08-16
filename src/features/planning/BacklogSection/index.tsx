@@ -81,7 +81,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 type="priority"
                 masterData={masterData}
                 className="w-full"
-                buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-slate-300 shadow-2xs px-3 text-xs font-medium"
+                buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-3 text-xs font-medium"
               />
             </div>
           </div>

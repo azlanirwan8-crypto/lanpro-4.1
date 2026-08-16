@@ -250,7 +250,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                 placeholder="Cari anggota tim..."
                 value={searchMember}
                 onChange={(e) => setSearchMember(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-content-muted focus:outline-none focus:border-indigo-500"
               />
             </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
@@ -427,7 +427,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-slate-900 text-slate-300 text-xs sm:text-[10px] font-medium uppercase font-mono">
+                        <span className="px-2 py-0.5 rounded bg-slate-900 text-content-subtle text-xs sm:text-[10px] font-medium uppercase font-mono">
                           {task.taskNumber || `TSK-${idx + 1}`}
                         </span>
                         {isBlocked ? (
@@ -483,7 +483,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
         <div className="space-y-6 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 space-y-4">
-              <h3 className="text-sm font-medium uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <h3 className="text-sm font-medium uppercase tracking-wider text-content-subtle flex items-center gap-2">
                 <Zap className="w-4 h-4 text-emerald-400" /> Beban Tugas per Departemen
               </h3>
               <div className="space-y-3">
@@ -509,7 +509,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
             </div>
 
             <div className="bg-slate-800/80 border border-slate-700/80 rounded-xl p-5 space-y-4">
-              <h3 className="text-sm font-medium uppercase tracking-wider text-slate-300 flex items-center gap-2">
+              <h3 className="text-sm font-medium uppercase tracking-wider text-content-subtle flex items-center gap-2">
                 <Flame className="w-4 h-4 text-amber-400" /> Informasi Sprint Aktif
               </h3>
               {activeSprint ? (
@@ -565,7 +565,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
       {/* Tab 4: Activity Log */}
       {selectedTab === "activity" && (
         <div className="space-y-4 relative z-10">
-          <h3 className="text-sm font-medium uppercase tracking-wider text-slate-300 flex items-center gap-2">
+          <h3 className="text-sm font-medium uppercase tracking-wider text-content-subtle flex items-center gap-2">
             <Activity className="w-4 h-4 text-violet-400" /> Log Aktivitas & Perubahan Terakhir Tim
           </h3>
           <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">

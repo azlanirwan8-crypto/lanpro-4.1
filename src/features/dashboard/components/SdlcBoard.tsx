@@ -31,7 +31,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
             SDLC Waterfall Governance
           </span>
         </div>
-        <GripVertical className="w-4 h-4 text-content-muted hover:text-slate-300 cursor-move custom-drag-grip shrink-0" />
+        <GripVertical className="w-4 h-4 text-content-muted hover:text-content-subtle cursor-move custom-drag-grip shrink-0" />
       </div>
 
       {/* Horizontal Phase Timeline */}
@@ -72,7 +72,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
                     "w-5 h-5 rounded-full flex items-center justify-center text-xs sm:text-[10px] font-medium pointer-events-none",
                     isApproved
                       ? "bg-emerald-500 text-white shadow-soft"
-                      : "bg-slate-700 text-slate-300"
+                      : "bg-slate-700 text-content-subtle"
                   )}
                 >
                   {isApproved ? "✓" : idx + 1}
@@ -190,7 +190,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
                   {activeInfo.title}
                 </h4>
-                <p className="text-slate-300 text-xs mt-1 max-w-2xl">{activeInfo.desc}</p>
+                <p className="text-content-subtle text-xs mt-1 max-w-2xl">{activeInfo.desc}</p>
               </div>
 
               {/* Approval Toggle */}
@@ -226,7 +226,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
                 </h5>
                 <ul className="space-y-1.5">
                   {activeInfo.deliverables.map((del, dIdx) => (
-                    <li key={dIdx} className="text-xs text-slate-300 flex items-start gap-2">
+                    <li key={dIdx} className="text-xs text-content-subtle flex items-start gap-2">
                       <span className="text-amber-400 text-sm leading-none">•</span>
                       <span>{del}</span>
                     </li>

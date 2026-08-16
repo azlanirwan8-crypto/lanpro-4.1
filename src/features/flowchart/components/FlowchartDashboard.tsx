@@ -180,7 +180,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                           {fw.description ? (
                             fw.description
                           ) : (
-                            <span className="text-slate-300 italic">No description</span>
+                            <span className="text-content-subtle italic">No description</span>
                           )}
                         </td>
                         <td className="py-3 px-4 whitespace-nowrap">
@@ -192,7 +192,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                               🎯 {linkedEpic.title}
                             </span>
                           ) : (
-                            <span className="text-slate-300 font-normal text-xs">-</span>
+                            <span className="text-content-subtle font-normal text-xs">-</span>
                           )}
                         </td>
                         <td className="py-3 px-4 text-content-body font-medium whitespace-nowrap">

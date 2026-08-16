@@ -18,7 +18,7 @@ export const usePlanning = (props: PlanningViewProps) => {
     Highest: "text-red-700 bg-red-100 border-red-200",
     Medium: "text-amber-500 bg-amber-50 border-amber-100",
     Low: "text-blue-500 bg-blue-50 border-blue-100",
-    Lowest: "text-slate-500 bg-slate-100 border-slate-200",
+    Lowest: "text-content-muted bg-surface-muted border-border-subtle",
   };
 
   return {

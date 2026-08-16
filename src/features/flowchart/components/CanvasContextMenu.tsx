@@ -1,8 +1,21 @@
 import React, { useEffect, useRef } from "react";
 import { motion } from "motion/react";
-import { 
-  Plus, Square, Diamond, Circle, StickyNote, CreditCard, 
-  FileText, Database, ZoomIn, ZoomOut, RotateCcw, Undo, Redo, Trash2, MapPin
+import {
+  Plus,
+  Square,
+  Diamond,
+  Circle,
+  StickyNote,
+  CreditCard,
+  FileText,
+  Database,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Undo,
+  Redo,
+  Trash2,
+  MapPin,
 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 
@@ -56,7 +69,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
 
     document.addEventListener("mousedown", handleOutsideClick, true);
     document.addEventListener("keydown", handleKeyDown);
-    
+
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick, true);
       document.removeEventListener("keydown", handleKeyDown);
@@ -67,7 +80,13 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
     { type: "oval", label: "Mulai / Selesai", icon: Circle, color: "emerald", text: "Start/End" },
     { type: "rect", label: "Langkah Proses", icon: Square, color: "indigo", text: "Proses" },
     { type: "diamond", label: "Keputusan Alur", icon: Diamond, color: "amber", text: "Keputusan" },
-    { type: "sticky", label: "Catatan Tempel", icon: StickyNote, color: "yellow", text: "Memo/Sticky" },
+    {
+      type: "sticky",
+      label: "Catatan Tempel",
+      icon: StickyNote,
+      color: "yellow",
+      text: "Memo/Sticky",
+    },
     { type: "card", label: "Kartu Informasi", icon: CreditCard, color: "slate", text: "Kartu" },
     { type: "document", label: "Dokumen Cetak", icon: FileText, color: "sky", text: "Dokumen" },
     { type: "database", label: "Basis Data", icon: Database, color: "violet", text: "Database" },
@@ -117,8 +136,12 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
             >
               <Icon className={cn("w-3.5 h-3.5 text-content-subtle", `text-${shape.color}-500`)} />
               <div className="flex flex-col">
-                <span className="font-medium text-content-body hover:text-indigo-600">{shape.text}</span>
-                <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-normal">{shape.label}</span>
+                <span className="font-medium text-content-body hover:text-indigo-600">
+                  {shape.text}
+                </span>
+                <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-normal">
+                  {shape.label}
+                </span>
               </div>
             </button>
           );
@@ -176,9 +199,9 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
           disabled={!canUndo}
           className={cn(
             "flex-1 flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs sm:text-[10px] font-medium border transition-all",
-            canUndo 
-              ? "text-slate-650 hover:bg-surface-sunken hover:text-violet-600 border-border-faint/80 cursor-pointer" 
-              : "text-slate-300 border-transparent cursor-not-allowed"
+            canUndo
+              ? "text-slate-650 hover:bg-surface-sunken hover:text-violet-600 border-border-faint/80 cursor-pointer"
+              : "text-content-subtle border-transparent cursor-not-allowed"
           )}
         >
           <Undo className="w-3 h-3" />
@@ -193,9 +216,9 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
           disabled={!canRedo}
           className={cn(
             "flex-1 flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs sm:text-[10px] font-medium border transition-all",
-            canRedo 
-              ? "text-slate-650 hover:bg-surface-sunken hover:text-violet-600 border-border-faint/80 cursor-pointer" 
-              : "text-slate-300 border-transparent cursor-not-allowed"
+            canRedo
+              ? "text-slate-650 hover:bg-surface-sunken hover:text-violet-600 border-border-faint/80 cursor-pointer"
+              : "text-content-subtle border-transparent cursor-not-allowed"
           )}
         >
           <Redo className="w-3 h-3" />

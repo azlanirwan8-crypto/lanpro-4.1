@@ -74,7 +74,7 @@ export const HeaderAvatarGroup: React.FC<HeaderAvatarGroupProps> = ({
               className={`w-8 h-8 border-2 ${
                 isCurrentUser
                   ? "border-indigo-400 ring-2 ring-indigo-100 z-10"
-                  : "border-white ring-1 ring-slate-100"
+                  : "border-white ring-1 ring-border-faint"
               } relative group-hover:z-20 group-hover:scale-110 transition-all shadow-soft`}
             />
             {/* Indikator Online: Bullet hijau */}
@@ -86,7 +86,7 @@ export const HeaderAvatarGroup: React.FC<HeaderAvatarGroupProps> = ({
                 {member.displayName || member.name || member.username || "Anggota Tim"}{" "}
                 {isCurrentUser ? "(Anda)" : ""}
               </span>
-              <span className="text-xs sm:text-[10px] sm:text-[8px] text-slate-300 capitalize mt-0.5">
+              <span className="text-xs sm:text-[10px] sm:text-[8px] text-content-subtle capitalize mt-0.5">
                 {member.role || "User"}
               </span>
             </div>
@@ -95,7 +95,7 @@ export const HeaderAvatarGroup: React.FC<HeaderAvatarGroupProps> = ({
       })}
 
       {displayUsers.length > 5 && (
-        <div className="w-8 h-8 rounded-full border-2 border-white bg-surface-sunken flex items-center justify-center text-xs sm:text-[10px] font-medium text-content-muted shadow-soft ring-1 ring-slate-200 z-0 relative hover:z-10 hover:bg-surface-muted transition-all cursor-default shrink-0">
+        <div className="w-8 h-8 rounded-full border-2 border-white bg-surface-sunken flex items-center justify-center text-xs sm:text-[10px] font-medium text-content-muted shadow-soft ring-1 ring-border-subtle z-0 relative hover:z-10 hover:bg-surface-muted transition-all cursor-default shrink-0">
           +{displayUsers.length - 5}
         </div>
       )}

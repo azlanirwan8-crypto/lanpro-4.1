@@ -32,7 +32,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
 
   const formatValue = (val: any) => {
     if (val === null || val === undefined)
-      return <span className="text-slate-300 font-normal italic">kosong</span>;
+      return <span className="text-content-subtle font-normal italic">kosong</span>;
     if (typeof val === "boolean") return val ? "Ya" : "Tidak";
     if (typeof val === "object") return JSON.stringify(val);
     return String(val);

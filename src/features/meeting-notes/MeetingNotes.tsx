@@ -522,7 +522,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                                 <span className="truncate max-w-[140px]">{meeting.fileName}</span>
                               </button>
                             ) : (
-                              <span className="text-slate-300 italic text-xs">—</span>
+                              <span className="text-content-subtle italic text-xs">—</span>
                             )}
                           </td>
                           <td className="py-3 px-4 text-content-body font-medium">

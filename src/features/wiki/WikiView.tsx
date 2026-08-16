@@ -908,7 +908,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                   <span className="truncate max-w-[130px]">{doc.fileName}</span>
                                 </button>
                               ) : (
-                                <span className="text-slate-300 italic text-xs">—</span>
+                                <span className="text-content-subtle italic text-xs">—</span>
                               )}
                             </td>
                             <td className="py-2.5 px-4 text-content-body font-medium whitespace-nowrap">
@@ -1083,7 +1083,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       <User className="w-3 h-3 text-content-subtle" />{" "}
                       {getUserName(activeDoc.createdBy)}
                     </span>
-                    <span className="text-slate-300">•</span>
+                    <span className="text-content-subtle">•</span>
                     <span className="text-xs sm:text-[10px] text-content-subtle font-medium flex items-center gap-1">
                       <Calendar className="w-3 h-3 text-content-subtle" />
                       {new Date(activeDoc.createdAt).toLocaleDateString("id-ID", {

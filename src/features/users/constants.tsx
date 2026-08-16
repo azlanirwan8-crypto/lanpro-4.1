@@ -115,7 +115,7 @@ export const ROLE_DESCRIPTIONS: Partial<
   },
   viewer: {
     label: "Observer",
-    badgeColor: "bg-surface-muted border-slate-300 text-content-body",
+    badgeColor: "bg-surface-muted border-border-subtle text-content-body",
     icon: <Eye className="w-4 h-4 text-content-secondary shrink-0" />,
     desc: "Read-only workspace access. Best suited for clients, corporate stakeholders, or general auditors who need high visibility into work items.",
   },
