@@ -262,6 +262,10 @@ router.post(
   verifyProjectAccess(["admin", "manager", "head", "developer", "member"]),
   async (req, res) => {
     let connection;
+    // #60 — penanda apakah masih ada transaksi yang belum ditutup. Diperlukan
+    // karena `rollback()` pada koneksi tanpa transaksi terbuka akan mengenai
+    // transaksi milik permintaan lain bila koneksinya sudah kembali ke pool.
+    let transaksiTerbuka = false;
     try {
       const { projectId } = req.params;
       const {
@@ -287,7 +291,12 @@ router.post(
       const newId = crypto.randomUUID();
 
       // Atomic increment-and-read with SELECT...FOR UPDATE to prevent race conditions
-      await connection.query("START TRANSACTION");
+      //
+      // #60 — memakai helper adapter, bukan SQL mentah, supaya jalur buka/tutup
+      // transaksi di berkas ini sama dengan yang dipakai rute lain (lihat
+      // project.routes.ts pada penghapusan proyek).
+      await connection.beginTransaction();
+      transaksiTerbuka = true;
       const [lockRows] = await connection.query(
         "SELECT id, projectKey, taskCounter FROM Projects WHERE id = ? FOR UPDATE",
         [projectId]
@@ -303,7 +312,8 @@ router.post(
         ]);
         taskKey = `${proj.projectKey}-${newCounter}`;
       }
-      await connection.query("COMMIT");
+      await connection.commit();
+      transaksiTerbuka = false;
 
       // Extract active authenticated user
       const authenticatedUserStr =
@@ -466,9 +476,27 @@ router.post(
         },
       });
     } catch (error: any) {
+      // #60 — TANPA baris ini, koneksi kembali ke pool dengan transaksi masih
+      // terbuka: `src/lib/db.ts` melepas koneksi lewat `client.release()` saja,
+      // tanpa reset apa pun. Permintaan berikutnya yang mengambil koneksi itu
+      // mewarisi transaksinya, berikut kunci baris `Projects` yang dipegang
+      // `SELECT … FOR UPDATE` di atas.
+      if (connection && transaksiTerbuka) {
+        await connection.rollback();
+        transaksiTerbuka = false;
+      }
       console.error("LOG ANOMALI CRITICAL: POST /api/projects/:projectId/tasks error:", error);
       res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
     } finally {
+      // Jaring terakhir: bila ada jalur keluar yang terlewat, transaksinya
+      // ditutup di sini alih-alih ikut terbawa ke pemakai koneksi berikutnya.
+      if (connection && transaksiTerbuka) {
+        try {
+          await connection.rollback();
+        } catch {
+          /* rollback gagal pun koneksi tetap harus dilepas */
+        }
+      }
       if (connection) connection.release();
     }
   }
