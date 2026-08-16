@@ -33,7 +33,7 @@ jest.mock("../../src/lib/db", () => ({
   default: { getConnection: async () => ({ query: mockKueri, release: mockLepas }) },
 }));
 
-import { jagaProyek, jagaHapusProyek, peranProyekEfektif } from "./jagaProyek";
+import { jagaProyek, jagaHapusProyek, jagaSetelanProyek, peranProyekEfektif } from "./jagaProyek";
 
 /**
  * Menyiapkan jawaban DB berurutan sesuai tiga mockKueri `jagaProyek`:
@@ -345,6 +345,66 @@ describe("#54 identitas hanya dari token", () => {
       user: undefined,
       headers: {},
       query: { userId: "U1" },
+    });
+    expect(res.kode).toBe(403);
+  });
+});
+
+describe("#55 tanpa projectId, penjaga MENOLAK — bukan meloloskan", () => {
+  /**
+   * `rbac.ts:50` berbunyi `if (!targetProjectId) return next()` — rute tanpa
+   * proyek diloloskan begitu saja. Itu #55, dan bahayanya bukan pada rute yang
+   * memang tidak berlingkup proyek, melainkan pada rute yang SEHARUSNYA
+   * berlingkup proyek tetapi parameternya salah nama: penjaganya berubah jadi
+   * no-op tanpa satu pun tanda.
+   *
+   * Divalidasi ketiga penjaga baru, sebab #54 membuktikan cacat penjaga lama
+   * bisa tersalin tanpa disadari.
+   */
+  it("jagaProyek menolak", async () => {
+    siapkanDb({ user: { id: "U1", role: "user" } });
+    const { res } = await jalankan(jagaProyek("list", "R"), { params: {} });
+    expect(res.kode).toBe(403);
+  });
+
+  it("jagaHapusProyek menolak", async () => {
+    siapkanDb({ user: { id: "U1", role: "user" } });
+    const { res } = await jalankan(jagaHapusProyek(), { params: {} });
+    expect(res.kode).toBe(403);
+  });
+
+  it("jagaSetelanProyek menolak", async () => {
+    siapkanDb({ user: { id: "U1", role: "user" } });
+    const { res } = await jalankan(jagaSetelanProyek(), { params: {}, body: {} });
+    expect(res.kode).toBe(403);
+  });
+});
+
+describe("#71 penjaga setelan proyek untuk project-modules", () => {
+  it("`projectId` dari BODY menunjuk sasaran, keanggotaan tetap diperiksa", async () => {
+    // Bukan anggota proyek sasaran -> ditolak, walau ia yang menyebut proyeknya.
+    siapkanDb({ user: { id: "U1", role: "user" }, ownerId: "LAIN", peranAnggota: null });
+    const { res } = await jalankan(jagaSetelanProyek(), {
+      params: {},
+      body: { projectId: "P-LAIN" },
+    });
+    expect(res.kode).toBe(403);
+  });
+
+  it("Project Admin proyek sasaran DIIZINKAN", async () => {
+    siapkanDb({ user: { id: "U1", role: "user" }, ownerId: "LAIN", peranAnggota: "admin" });
+    const { next } = await jalankan(jagaSetelanProyek(), {
+      params: {},
+      body: { projectId: "P1" },
+    });
+    expect(next).toHaveBeenCalled();
+  });
+
+  it("developer TIDAK boleh mengubah setelan proyek", async () => {
+    siapkanDb({ user: { id: "U1", role: "user" }, ownerId: "LAIN", peranAnggota: "developer" });
+    const { res } = await jalankan(jagaSetelanProyek(), {
+      params: {},
+      body: { projectId: "P1" },
     });
     expect(res.kode).toBe(403);
   });

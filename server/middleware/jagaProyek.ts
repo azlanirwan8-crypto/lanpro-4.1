@@ -135,13 +135,20 @@ const tolak = (res: any) => res.status(403).json({ status: "error", message: "Ak
  * ada, permintaannya ditolak 403 — bukan 404 — supaya tidak bisa dipakai
  * menebak id rapat milik proyek lain.
  */
-export type LewatEntitas = "meeting";
+export type LewatEntitas = "meeting" | "projectModule";
 
 const proyekDariEntitas = async (
   connection: any,
   lewat: LewatEntitas,
   entitasId: string
 ): Promise<string | null> => {
+  if (lewat === "projectModule") {
+    const [rows]: any = await connection.query(
+      "SELECT projectId FROM ProjectModules WHERE id = ?",
+      [entitasId]
+    );
+    return rows.length > 0 ? rows[0].projectId : null;
+  }
   if (lewat === "meeting") {
     const [rows]: any = await connection.query("SELECT projectId FROM Meetings WHERE id = ?", [
       entitasId,
@@ -288,15 +295,24 @@ export const jagaHapusProyek = () => {
  * pada `dashboard-layout` bahkan menyelipkan `"*"` sehingga siapa pun anggota
  * bisa mengubah tata letak yang dipakai SELURUH tim (#73).
  */
-export const jagaSetelanProyek = () => {
+export const jagaSetelanProyek = (lewat?: LewatEntitas) => {
   return async (req: any, res: any, next: any) => {
     let connection;
     try {
-      const projectId = req.params?.projectId || req.params?.id;
       const userIdMentah = identitasPemanggil(req);
-      if (!userIdMentah || !projectId) return tolak(res);
+      if (!userIdMentah) return tolak(res);
 
       connection = await db.getConnection();
+
+      // Tanpa `lewat`, proyeknya disebut langsung. `req.body.projectId`
+      // diterima HANYA sebagai penunjuk SASARAN, bukan identitas — ia
+      // menentukan proyek MANA yang disentuh, dan keanggotaan pemanggil pada
+      // proyek itu tetap diperiksa di bawah. Ini berbeda jauh dari #54, yang
+      // membiarkan body menentukan SIAPA pemanggilnya.
+      const projectId = lewat
+        ? await proyekDariEntitas(connection, lewat, String(req.params?.id || ""))
+        : req.params?.projectId || req.params?.id || req.body?.projectId;
+      if (!projectId) return tolak(res);
 
       const [uRows]: any = await connection.query(
         "SELECT id, role FROM Users WHERE id = ? OR uid = ?",
