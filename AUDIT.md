@@ -28,7 +28,7 @@ lalu **§0.4** (tiga keputusan yang menahan sisanya). Rinciannya §19.15–§19.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **379 lulus / 40 suite**                                    | `npm test`                                   |
+| Test                | **381 lulus / 40 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -312,7 +312,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 40 BELUM · 51 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 39 BELUM · 52 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -323,9 +323,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 40 item
+### 1.1 BELUM SELESAI — 39 item
 
-**Sebaran per fase:** F1 2 · F2 10 · F3 1 · F6 6 · F7 8 · F8 5 · F9 2 · F10 3 · F11 1 · F12 2
+**Sebaran per fase:** F1 2 · F2 9 · F3 1 · F6 6 · F7 8 · F8 5 · F9 2 · F10 3 · F11 1 · F12 2
 
 **Masih menahan rilis production:** #30 · #46
 
@@ -357,7 +357,6 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — celah daftar, DAN membatalkan asumsi kuota F11           | **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik      | §0.4   |
 | 47  | `discussion_point_comments` punya KOLOM KEMBAR camelCase + snake_case                      | **F9**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 53  | `POST /api/auth/logout` tanpa auth, `userId` sembarang → NULL-kan sesi siapa pun           | **F2**  | 🔴  | Rendah        |          Tidak          | `TERBUKA`               | §13.5  |
-| 54  | `rbac.ts:27` identitas boleh datang dari `x-user-id`/query/body — ranjau impersonasi       | **F2**  | 🟠  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.5  |
 | 55  | `rbac.ts:50` `!targetProjectId → next()` — RBAC no-op senyap bila nama param berbeda       | **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.5  |
 | 56  | Proses Jest mencetak crash `pg` (`isIP` of undefined) saat dibongkar — exit code tetap 0   | **F8**  | 🟡  | Rendah        |          Tidak          | `TERBUKA`               | §13.5  |
 | 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401        | **F2**  | ⚪  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.6  |
@@ -372,7 +371,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 92  | Peran dibaca dari TOKEN di 7 tempat, dari DATABASE di penjaga proyek — pencabutan tertunda | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.28 |
 | 93  | "Remember Me" hanya melupakan PROFIL — token tetap di localStorage lintas sesi peramban    | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.31 |
 
-### 1.2 SUDAH SELESAI — 51 item
+### 1.2 SUDAH SELESAI — 52 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -432,6 +431,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 69  | A01                                                                                           | CWE-639 (IDOR) | 🔴  |
 | 70  | A01                                                                                           |    CWE-639     | 🔴  |
 | 91  | Kredensial admin ter-hardcode di frontend + peran diminta dari body saat mendaftar            |     **F7**     | 🔴  | Rendah        | Ya (blokir production) | `SELESAI` 16 Agu | §19.27 |
+| 54  | ~~identitas dari `x-user-id`/query/body~~ hanya dari token; cacat tersalin ke penjaga baru    |     **F2**     | 🟠  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §13.5  |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -441,6 +441,76 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 31  | ~~Login dengan email di kolom form~~                                                  | **—**  |  —  | —      |       Tidak        | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 
 ---
+
+## §1.4 URUTAN KERJA — termurah lebih dulu
+
+Ketetapan pemilik proyek 16 Agu 2026: **kerjakan yang murah dulu, yang mahal
+belakangan.** Bagian ini mengelompokkan §1.1 berdasarkan kolom **Biaya**, bukan
+severity — sebab yang dioptimalkan di sini adalah jumlah item yang tutup per
+satuan usaha.
+
+⚠️ Severity TIDAK diabaikan; ia tetap tercantum. Bila sebuah item 🔴 muncul di
+kelompok murah, ia dikerjakan lebih dulu di dalam kelompoknya.
+
+### 1.4.1 Sangat rendah — 5 item, kerjakan lebih dulu
+
+| #   | Sev | Fase | Isi                                                          | Perlu pemilik? |
+| --- | :-: | ---- | ------------------------------------------------------------ | -------------- |
+| 46  | 🔴  | F1   | `SSO_ALLOWED_DOMAINS=gmail.com` **(blokir production)**      | **ya**         |
+| 55  | 🟡  | F2   | `rbac.ts:50` `!targetProjectId → next()` — RBAC no-op senyap | tidak          |
+| 57  | ⚪  | F2   | Dua endpoint health                                          | **ya**         |
+| 71  | 🟠  | F2   | `project-modules` POST/PUT/DELETE tanpa penjaga              | tidak          |
+| 81  | 🟡  | F7   | `parentAdminId` ditulis, tidak pernah dibaca                 | **ya**         |
+
+**#55 dan #71 bisa langsung dikerjakan.** #55 kemungkinan besar sudah gugur
+sendiri — `rbac.ts` nol pemakai — tetapi itu **wajib divalidasi**, bukan
+diasumsikan: #54 tampak gugur dengan alasan yang sama, ternyata cacatnya sudah
+tersalin ke penjaga baru.
+
+### 1.4.2 Rendah — 16 item
+
+| #   | Sev | Fase | Isi                                             | Perlu pemilik? |
+| --- | :-: | ---- | ----------------------------------------------- | -------------- |
+| 15  | 🔴  | F1   | Cabut 2 Google API key — **±5 menit, nol kode** | **ya**         |
+| 19  | 🔴  | F2   | `POST /api/db-query` tanpa penjaga read-only    | **ya**         |
+| 53  | 🔴  | F2   | `POST /api/auth/logout` tanpa auth              | tidak          |
+| 44  | 🔴  | F6   | Domain email belum terverifikasi                | **ya**         |
+| 18  | 🟠  | F2   | notebook-lm rusak di dua sisi                   | **ya**         |
+| 74  | 🟠  | F2   | 7 pengambil data tanpa penjaga respons basi     | **ya**         |
+| 83  | 🟠  | F7   | `department` & `position` tidak fungsional      | **ya**         |
+| 86  | 🟠  | F7   | `modul_aplikasi` dua sumber                     | **ya**         |
+| 92  | 🟠  | F7   | Peran dari token vs database                    | **ya**         |
+| 93  | 🟠  | F7   | "Remember Me" tidak melupakan token             | tidak          |
+| 20  | 🟡  | F2   | Kode mati DB Explorer                           | **ya**         |
+| 21  | 🟡  | F10  | `authStore` & `uiStore` menganggur              | tidak          |
+| 56  | 🟡  | F8   | Jest mencetak crash `pg` saat dibongkar         | tidak          |
+| 85  | 🟡  | F7   | `category` memuat dua konsep                    | **ya**         |
+| 26  | 🟢  | F6   | Email selamat datang                            | tertahan #44   |
+| 28  | 🟢  | F6   | Digest task pending                             | tertahan #44   |
+
+**Bisa dikerjakan tanpa keputusan: #53, #93, #21, #56.** #53 yang paling
+mendesak — 🔴 dan tanpa penghalang.
+
+### 1.4.3 Sedang — 12 item
+
+Didahului yang tidak menunggu pemilik: **#77** (4 kerentanan `moderate`), **#8**
+(1.290 `any`), **#47** (kolom kembar `discussion_point_comments`), **#87**
+(frontend abai peran proyek), **#13**/**#14** (F12 desain).
+
+Menunggu pemilik: #4, #16, #17, #25, #27, #45.
+
+### 1.4.4 Tinggi — 6 item, TUNDA
+
+#5 · #6 · #7 · #9 · #30 · #40. Kelompok ini yang membuat §19.31 menyimpulkan
+jaring pengaman `AppContainer` tidak bisa dibangun sebelum komponennya dipecah.
+**#30 satu-satunya penahan production di sini** dan tetap menunggu pemilik.
+
+### Urutan yang disarankan
+
+1. **#53** 🔴 tanpa penghalang · **#55** & **#71** sangat murah
+2. **#93**, **#56**, **#21** — murah, tanpa keputusan
+3. **#77** → **#47** — sedang, tanpa keputusan
+4. Sisanya menunggu jawaban Anda; **#15** paling murah dan menutup F1
 
 ## §1.5 PETA FASE — panggil pekerjaan lewat nomor fase
 
