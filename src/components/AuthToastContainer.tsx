@@ -154,7 +154,7 @@ export const AuthToastContainer: React.FC<AuthToastContainerProps> = ({
   const current = notifications[notifications.length - 1]; // Render latest alert
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-overlay/50 backdrop-blur-xs">
       <AnimatePresence mode="wait">
         <VelzonSweetAlertModal
           key={current.id}

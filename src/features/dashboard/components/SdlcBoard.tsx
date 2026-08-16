@@ -27,7 +27,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
       <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/10 relative z-10 transition-all select-none">
         <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-          <span className="font-medium text-slate-200 text-xs tracking-wider uppercase">
+          <span className="font-medium text-content-inverse-muted text-xs tracking-wider uppercase">
             SDLC Waterfall Governance
           </span>
         </div>
@@ -235,7 +235,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
               </div>
 
               {/* Signoff metadata */}
-              <div className="bg-slate-900/50 p-4 rounded-xl border border-slate-800/80 flex flex-col justify-between">
+              <div className="bg-overlay/50 p-4 rounded-xl border border-slate-800/80 flex flex-col justify-between">
                 <div>
                   <div className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-muted uppercase tracking-widest leading-none mb-1">
                     Status Gate-Approval

@@ -501,7 +501,7 @@ export const MasterDataPanel = ({
                     <span
                       className={cn(
                         "w-1.5 h-1.5 rounded-full shrink-0",
-                        isActive ? "bg-indigo-600" : "bg-slate-300 group-hover:bg-indigo-400"
+                        isActive ? "bg-indigo-600" : "bg-surface-marker group-hover:bg-indigo-400"
                       )}
                     />
                     {t.label}
@@ -695,7 +695,7 @@ export const MasterDataPanel = ({
                           "text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded-full",
                           roleTabFilter === "ALL"
                             ? "bg-surface-muted text-content-body"
-                            : "bg-slate-200/60 text-content-secondary"
+                            : "bg-surface-strong/60 text-content-secondary"
                         )}
                       >
                         {localMasterData.filter((d) => d.type === "project_role").length}
@@ -717,7 +717,7 @@ export const MasterDataPanel = ({
                           "text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded-full",
                           roleTabFilter === "PROJECT"
                             ? "bg-blue-50 text-blue-700"
-                            : "bg-slate-200/60 text-content-secondary"
+                            : "bg-surface-strong/60 text-content-secondary"
                         )}
                       >
                         {
@@ -747,7 +747,7 @@ export const MasterDataPanel = ({
                           "text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded-full",
                           roleTabFilter === "SYSTEM"
                             ? "bg-purple-50 text-purple-700"
-                            : "bg-slate-200/60 text-content-secondary"
+                            : "bg-surface-strong/60 text-content-secondary"
                         )}
                       >
                         {

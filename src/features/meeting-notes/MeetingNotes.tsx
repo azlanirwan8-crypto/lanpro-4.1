@@ -729,7 +729,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
       {/* POPUP MODAL: Add / Edit Meeting */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+        <div className="fixed inset-0 bg-overlay/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
           <div className="bg-surface p-5 sm:p-6 rounded-lg shadow-xl w-full max-w-lg border border-border-subtle text-left relative">
             <button
               onClick={() => {

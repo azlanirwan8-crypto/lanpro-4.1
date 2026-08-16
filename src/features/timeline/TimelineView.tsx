@@ -227,7 +227,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     >
                       {task.key}
                     </button>
-                    <div className="w-1 h-1 rounded-full bg-slate-300" />
+                    <div className="w-1 h-1 rounded-full bg-surface-marker" />
                     <span className="text-xs sm:text-[11px] sm:text-[9px] font-semibold uppercase text-content-muted tracking-wider">
                       {task.status}
                     </span>

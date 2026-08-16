@@ -93,7 +93,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => setCurrentView("team")}
-            className="px-4 py-2.5 rounded-xl bg-surface-inverse hover:bg-slate-700 text-slate-200 text-xs font-medium transition-all border border-border-inverse flex items-center gap-2 shadow-soft"
+            className="px-4 py-2.5 rounded-xl bg-surface-inverse hover:bg-slate-700 text-content-inverse-muted text-xs font-medium transition-all border border-border-inverse flex items-center gap-2 shadow-soft"
           >
             <Users className="w-4 h-4 text-indigo-400" />
             Kelola Anggota Tim
@@ -379,7 +379,10 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
 
                   <div className="mt-4 pt-3 border-t border-slate-700/60 flex items-center justify-between text-xs text-content-subtle font-medium">
                     <span>
-                      Role: <strong className="text-slate-200">{member.role || "Member"}</strong>
+                      Role:{" "}
+                      <strong className="text-content-inverse-muted">
+                        {member.role || "Member"}
+                      </strong>
                     </span>
                     <button
                       onClick={() => {
@@ -444,7 +447,8 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                           </span>
                         )}
                         <span className="text-xs sm:text-[10px] text-content-subtle font-medium">
-                          • Prioritas: <strong className="text-slate-200">{task.priority}</strong>
+                          • Prioritas:{" "}
+                          <strong className="text-content-inverse-muted">{task.priority}</strong>
                         </span>
                       </div>
                       <h4 className="text-sm font-medium text-content-inverse">{task.title}</h4>
@@ -494,7 +498,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                 {teamWorkloadData.map((team, idx) => (
                   <div
                     key={idx}
-                    className="bg-slate-900/60 p-3.5 rounded-xl border border-border-inverse flex items-center justify-between"
+                    className="bg-overlay/60 p-3.5 rounded-xl border border-border-inverse flex items-center justify-between"
                   >
                     <div>
                       <h4 className="text-xs font-medium text-content-inverse">{team.name}</h4>
@@ -518,7 +522,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
               </h3>
               {activeSprint ? (
                 <div className="space-y-4">
-                  <div className="bg-slate-900/60 p-4 rounded-xl border border-border-inverse space-y-2">
+                  <div className="bg-overlay/60 p-4 rounded-xl border border-border-inverse space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="text-xs font-medium text-content-inverse">
                         {activeSprint.name}
@@ -545,7 +549,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                   </div>
                   <button
                     onClick={() => setCurrentView("planning")}
-                    className="w-full py-2.5 rounded-xl bg-surface-inverse hover:bg-slate-700 text-slate-200 text-xs font-medium transition-all border border-border-inverse text-center"
+                    className="w-full py-2.5 rounded-xl bg-surface-inverse hover:bg-slate-700 text-content-inverse-muted text-xs font-medium transition-all border border-border-inverse text-center"
                   >
                     Buka Panel Perencanaan Sprint Lengkap
                   </button>

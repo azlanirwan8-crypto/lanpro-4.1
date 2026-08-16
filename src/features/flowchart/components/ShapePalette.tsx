@@ -93,7 +93,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                   purple: "bg-purple-300 border-purple-400",
                   rose: "bg-rose-300 border-rose-400",
                   sky: "bg-sky-300 border-sky-400",
-                  slate: "bg-slate-300 border-slate-400",
+                  slate: "bg-surface-marker border-slate-400",
                 };
                 return (
                   <button

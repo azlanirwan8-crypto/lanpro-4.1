@@ -600,7 +600,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             download={name}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2.5 p-2 bg-slate-900/5 hover:bg-slate-900/10 text-content-strong rounded-xl transition-all border border-border-subtle/20 max-w-full"
+            className="flex items-center gap-2.5 p-2 bg-overlay/5 hover:bg-overlay/10 text-content-strong rounded-xl transition-all border border-border-subtle/20 max-w-full"
           >
             <span className="p-2 bg-amber-500 text-content-inverse rounded-lg shrink-0">
               <FileText className="w-4 h-4" />
@@ -654,7 +654,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-rose-500 text-content-inverse rounded-full flex items-center justify-center text-xs sm:text-[10px] font-medium px-1.5 border border-white shadow-md animate-pulse"
+              className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-rose-500 text-content-inverse rounded-full flex items-center justify-center text-xs sm:text-[10px] font-medium px-1.5 border border-surface shadow-md animate-pulse"
             >
               {totalUnread}
             </motion.div>
@@ -818,8 +818,8 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                               />
                               {/* Online / Offline Indicator Dot */}
                               <span
-                                className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white shadow-soft ${
-                                  isOnline ? "bg-emerald-500" : "bg-slate-300"
+                                className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-surface shadow-soft ${
+                                  isOnline ? "bg-emerald-500" : "bg-surface-marker"
                                 }`}
                               />
                             </div>
@@ -976,7 +976,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     </div>
                   ) : filteredMessages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center text-center p-4">
-                      <MessageSquare className="w-8 h-8 text-slate-200 mb-1.5" />
+                      <MessageSquare className="w-8 h-8 text-content-inverse-muted mb-1.5" />
                       <p className="text-xs text-content-subtle font-medium">
                         {msgSearchQuery ? "Tidak ada pesan cocok." : "Belum ada percakapan."}
                       </p>
@@ -1079,7 +1079,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                   <div className="px-2.5 py-1 bg-surface-sunken border-t border-border-faint/60 flex items-center justify-between text-xs sm:text-[11px] sm:text-[9px] text-content-subtle shrink-0">
                     <span className="font-medium flex items-center gap-1">
                       <span
-                        className={`w-1.5 h-1.5 rounded-full ${simulationEnabled ? "bg-emerald-400 animate-pulse" : "bg-slate-300"}`}
+                        className={`w-1.5 h-1.5 rounded-full ${simulationEnabled ? "bg-emerald-400 animate-pulse" : "bg-surface-marker"}`}
                       />
                       Simulasi Balasan Otomatis
                     </span>
@@ -1089,7 +1089,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       className={`px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider transition-colors ${
                         simulationEnabled
                           ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                          : "bg-surface-strong text-content-secondary hover:bg-slate-300"
+                          : "bg-surface-strong text-content-secondary hover:bg-surface-marker"
                       }`}
                     >
                       {simulationEnabled ? "AKTIF" : "NONAKTIF"}

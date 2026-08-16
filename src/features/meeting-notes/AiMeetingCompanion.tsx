@@ -753,7 +753,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 PRO
               </span>
             </div>
-            <p className="text-xs sm:text-[11px] text-slate-200/80 mt-0.5">
+            <p className="text-xs sm:text-[11px] text-content-inverse-muted/80 mt-0.5">
               Analisis transkrip suara hasil Speech-to-Text rapat menjadi ringkasan & action items
               terstruktur.
             </p>
@@ -1370,7 +1370,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   <div className="relative border-l-2 border-indigo-100 pl-6 space-y-8 ml-3">
                     {activeMeetingData.tab_kronologi_rapat.map((item: any, index: number) => (
                       <div key={index} className="relative group">
-                        <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-indigo-500 border-4 border-white group-hover:scale-125 transition-transform shadow-soft" />
+                        <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-indigo-500 border-4 border-surface group-hover:scale-125 transition-transform shadow-soft" />
 
                         <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft hover:shadow-md transition-all space-y-4">
                           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1588,7 +1588,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   <div className="relative border-l-2 border-pink-100 pl-6 space-y-8 ml-3">
                     {activeMeetingData.tab_next_plan.map((item: any, index: number) => (
                       <div key={index} className="relative group">
-                        <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-pink-500 border-4 border-white group-hover:scale-125 transition-transform shadow-soft" />
+                        <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-pink-500 border-4 border-surface group-hover:scale-125 transition-transform shadow-soft" />
 
                         <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft hover:shadow-md transition-all">
                           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -1775,7 +1775,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
       {/* Continuous Learning Loop Feedback Modal */}
       {showFeedbackModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-surface rounded-lg max-w-lg w-full overflow-hidden shadow-xl border border-border-subtle transform transition-all scale-100">
             {/* Modal Header */}
             <div className="p-6 bg-gradient-to-r from-slate-900 to-indigo-950 text-content-inverse flex items-center justify-between">

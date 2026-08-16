@@ -419,10 +419,10 @@ export const TeamManagementPanel = ({
                   <div className="relative -mt-8 mx-auto z-10">
                     <UserAvatar
                       user={person}
-                      className="w-16 h-16 border-4 border-white shadow-md text-base"
+                      className="w-16 h-16 border-4 border-surface shadow-md text-base"
                     />
                     <div
-                      className={`w-3.5 h-3.5 rounded-full border-2 border-white absolute bottom-0 right-0 shadow-2xs ${
+                      className={`w-3.5 h-3.5 rounded-full border-2 border-surface absolute bottom-0 right-0 shadow-2xs ${
                         person.isPending ? "bg-amber-500" : "bg-emerald-500"
                       }`}
                     />
@@ -523,7 +523,7 @@ export const TeamManagementPanel = ({
                                 className="w-9 h-9 border border-border-subtle text-xs"
                               />
                               <div
-                                className={`w-2.5 h-2.5 rounded-full border border-white absolute bottom-0 right-0 ${person.isPending ? "bg-amber-500" : "bg-emerald-500"}`}
+                                className={`w-2.5 h-2.5 rounded-full border border-surface absolute bottom-0 right-0 ${person.isPending ? "bg-amber-500" : "bg-emerald-500"}`}
                               />
                             </div>
                             <div>
@@ -585,7 +585,7 @@ export const TeamManagementPanel = ({
 
       {/* View Profile Modal (View-Only) */}
       {selectedProfileUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/40 backdrop-blur-xs animate-in fade-in">
           <div className="bg-surface rounded-xl border border-border-subtle shadow-xl max-w-md w-full overflow-hidden text-left">
             {/* Modal Cover */}
             <div className="h-24 bg-gradient-to-r from-slate-800 via-indigo-900 to-slate-900 p-4 flex justify-end">
@@ -602,7 +602,7 @@ export const TeamManagementPanel = ({
               <div className="-mt-12 mb-4 flex items-end justify-between">
                 <UserAvatar
                   user={selectedProfileUser}
-                  className="w-20 h-20 border-4 border-white shadow-md text-xl"
+                  className="w-20 h-20 border-4 border-surface shadow-md text-xl"
                 />
                 <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
                   Joined Project

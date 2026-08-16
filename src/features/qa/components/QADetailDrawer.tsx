@@ -53,7 +53,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
   return (
     /* BACKDROP OVERLAY WITH AUTO-CLOSE ON CLICK OUTSIDE */
     <div
-      className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex justify-end cursor-pointer animate-in fade-in duration-150"
+      className="fixed inset-0 bg-overlay/50 backdrop-blur-xs z-50 flex justify-end cursor-pointer animate-in fade-in duration-150"
       onClick={() => setSelectedTestCase(null)}
     >
       {/* INNER DRAWER CONTAINER (PREVENT CLICK PROPAGATION & COMPACT SLIM VELZON LOOK) */}
@@ -109,7 +109,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
 
               <button
                 onClick={() => setSelectedTestCase(null)}
-                className="p-1 rounded-md hover:bg-slate-200/80 text-content-subtle hover:text-content-secondary transition-colors cursor-pointer"
+                className="p-1 rounded-md hover:bg-surface-strong/80 text-content-subtle hover:text-content-secondary transition-colors cursor-pointer"
                 title="Tutup (Atau klik di luar panel)"
               >
                 <XCircle className="w-5 h-5" />

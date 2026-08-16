@@ -92,7 +92,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             )}
           </button>
 
-          <div className="w-px h-4 bg-slate-200/60" />
+          <div className="w-px h-4 bg-surface-strong/60" />
 
           {/* Snap To Grid Toggle */}
           <button

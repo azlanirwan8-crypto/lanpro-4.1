@@ -412,19 +412,19 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
           {/* Right East sizing circle handle */}
           <div
             onMouseDown={(e) => handleResizeMouseDown(e, node.id, "e")}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2.5 h-2.5 bg-violet-600 rounded-full border border-white cursor-ew-resize z-30 hover:scale-125 transition-transform shadow-md"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2.5 h-2.5 bg-violet-600 rounded-full border border-surface cursor-ew-resize z-30 hover:scale-125 transition-transform shadow-md"
             title="Tarik untuk melebarkan"
           />
           {/* Bottom South sizing circle handle */}
           <div
             onMouseDown={(e) => handleResizeMouseDown(e, node.id, "s")}
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 bg-violet-600 rounded-full border border-white cursor-ns-resize z-30 hover:scale-125 transition-transform shadow-md"
+            className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 bg-violet-600 rounded-full border border-surface cursor-ns-resize z-30 hover:scale-125 transition-transform shadow-md"
             title="Tarik untuk mempertinggi"
           />
           {/* Corners SE sizing square handle */}
           <div
             onMouseDown={(e) => handleResizeMouseDown(e, node.id, "se")}
-            className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 bg-violet-600 rounded border border-white cursor-nwse-resize z-30 hover:scale-125 transition-transform shadow-md"
+            className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 bg-violet-600 rounded border border-surface cursor-nwse-resize z-30 hover:scale-125 transition-transform shadow-md"
             title="Sizing Bebas"
           />
 

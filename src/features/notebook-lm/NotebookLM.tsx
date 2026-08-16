@@ -1102,7 +1102,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
 
       {/* Add Custom Source Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-overlay/40 backdrop-blur-sm flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -1167,11 +1167,11 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
               </div>
 
               <div className="flex items-center gap-1.5 flex-wrap justify-center pt-2 text-xs sm:text-[10px] text-content-subtle font-medium">
-                <span className="px-2 py-0.5 bg-slate-200/60 rounded">PDF</span>
-                <span className="px-2 py-0.5 bg-slate-200/60 rounded">DOCX / DOC</span>
-                <span className="px-2 py-0.5 bg-slate-200/60 rounded">TXT / MD</span>
-                <span className="px-2 py-0.5 bg-slate-200/60 rounded">CSV / JSON</span>
-                <span className="px-2 py-0.5 bg-slate-200/60 rounded">Dokumen Apapun</span>
+                <span className="px-2 py-0.5 bg-surface-strong/60 rounded">PDF</span>
+                <span className="px-2 py-0.5 bg-surface-strong/60 rounded">DOCX / DOC</span>
+                <span className="px-2 py-0.5 bg-surface-strong/60 rounded">TXT / MD</span>
+                <span className="px-2 py-0.5 bg-surface-strong/60 rounded">CSV / JSON</span>
+                <span className="px-2 py-0.5 bg-surface-strong/60 rounded">Dokumen Apapun</span>
               </div>
             </div>
 
@@ -1192,7 +1192,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
 
       {/* Velzon Modal Tambah Catatan Baru */}
       {isNewNoteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/60 backdrop-blur-xs">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}

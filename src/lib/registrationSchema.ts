@@ -50,7 +50,7 @@ export function evaluatePasswordStrength(password: string): {
       percentage: 0,
       label: "Belum Diisi",
       color: "text-content-subtle",
-      barColor: "bg-slate-300",
+      barColor: "bg-surface-marker",
       criteria,
     };
   }
