@@ -265,10 +265,10 @@ lepas. Catatan lepas selalu terlupakan.
 | 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401      |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.6  |
 | 58  | `GET /metrics` terbuka TANPA autentikasi — di luar `/api/`, lolos gerbang global         |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.6  |
 | 59  | `presence_sync` menyiarkan profil LENGKAP + matriks permission ke klien mana pun         |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.6  |
-| 60  | `POST .../tasks` buka transaksi tanpa `ROLLBACK` — koneksi balik ke pool masih terbuka   |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `TERBUKA`                | §13.8  |
+| 60  | `POST .../tasks` buka transaksi tanpa `ROLLBACK` — koneksi balik ke pool masih terbuka   |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.8  |
 | 61  | Transaksi `POST .../tasks` hanya melingkupi penghitung, bukan INSERT task-nya           |  **F2**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`                | §13.8  |
-| 62  | Hapus proyek memakai kode galat MySQL; di Postgres `continue` dalam transaksi mustahil   |  **F2**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`                | §13.8  |
-| 63  | Register menelan `ER_DUP_ENTRY` (MySQL) — di Postgres jadi 500, bukan pesan yang benar   |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.8  |
+| 62  | Hapus proyek memakai kode galat MySQL; di Postgres `continue` dalam transaksi mustahil   |  **F2**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu | §13.8  |
+| 63  | Register menelan `ER_DUP_ENTRY` (MySQL) — di Postgres jadi 500, bukan pesan yang benar   |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu | §13.8  |
 | 64  | `tasks/reorder` melepas koneksi dua kali bila galat terjadi setelah `commit`             |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.8  |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -1954,6 +1954,26 @@ bawahnya — koneksi yang sudah dilepas akan di-rollback dan dilepas ulang.
 Dampaknya kecil karena `release()` membungkus dirinya dengan `try/catch`, tapi
 `rollback()` pada koneksi yang sudah kembali ke pool bisa mengenai transaksi
 milik permintaan lain.
+
+#### Kartu verifikasi #60, #62, #63 — SELESAI 16 Agu 2026
+
+| # | Terbukti | Sisa |
+| - | -------- | ---- |
+| 60 | 5 test perilaku lewat supertest, menjalankan rutenya sungguhan dan memaksa galat tepat di dalam jendela transaksi. **4 dari 5 dibuktikan MERAH** terhadap commit sebelum perbaikan di `git worktree` luar repo; yang 1 lulus memang sudah benar | — |
+| 62 | Dibuktikan langsung ke database (semua di dalam transaksi yang di-ROLLBACK): kode lama → `25P02 current transaction is aborted`; kode baru → setelah `ROLLBACK TO SAVEPOINT`, perintah berikutnya **berhasil**. SQLSTATE nyatanya `42P01` | Penghapusan proyek sungguhan — merusak, tidak dijalankan |
+| 63 | 8 test, termasuk penguncian bahwa kode MySQL lama TIDAK lagi dianggap cocok | Pendaftaran email ganda — berarti membuat akun, tidak dijalankan |
+
+Diverifikasi di browser dengan **sesi non-admin (`rido`)**: dashboard termuat
+penuh, menu khusus admin tidak muncul, 0 error console, dan dari log server
+0 "Akses ditolak" · 0 `RBAC Middleware error` · 0 `LOG ANOMALI`.
+
+`main` sesudah merge: tsc 0 · **229 test / 24 suite** · build sukses.
+
+⚠️ Satu jebakan baru yang layak dicatat: saat server di-restart, tab yang
+sedang terbuka menampilkan **skeleton yang tidak pernah selesai** dan console
+memuat `xhr poll error`. Itu bukan cacat kode — halaman kebetulan dimuat saat
+server sedang mati. Setelah muat ulang, semuanya normal. Gejalanya sangat mirip
+kerusakan sungguhan, jadi periksa timestamp-nya sebelum menyimpulkan.
 
 #### Yang belum tersentuh sesudah gelombang 2
 
