@@ -388,7 +388,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-all border shadow-2xs cursor-pointer shrink-0",
               showAiAssistant
-                ? "bg-surface-muted hover:bg-slate-200 text-content-body border-slate-300"
+                ? "bg-surface-muted hover:bg-slate-200 text-content-body border-border-subtle"
                 : "bg-indigo-50 hover:bg-indigo-100/80 text-primary border-indigo-100"
             )}
           >
@@ -613,7 +613,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                         <td className="py-3 px-4 align-middle">
                           <div className="text-content-secondary text-xs font-normal leading-relaxed">
                             {p.keterangan || p.comment || (
-                              <span className="text-slate-300 italic">No notes</span>
+                              <span className="text-content-subtle italic">No notes</span>
                             )}
                           </div>
                         </td>
@@ -637,7 +637,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                               </span>
                             )}
                             {!p.fitur && !p.system && !p.surrounding && (
-                              <span className="text-slate-300 text-xs sm:text-[11px] italic">
+                              <span className="text-content-subtle text-xs sm:text-[11px] italic">
                                 No tags
                               </span>
                             )}
@@ -659,7 +659,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                               <span>{p.targetDate || p.target_date}</span>
                             </div>
                           ) : (
-                            <span className="text-slate-300 text-xs italic">-</span>
+                            <span className="text-content-subtle text-xs italic">-</span>
                           )}
                         </td>
 
@@ -828,7 +828,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                       </td>
 
                       {/* Thread */}
-                      <td className="py-2.5 px-4 text-center align-middle text-slate-300 text-xs">
+                      <td className="py-2.5 px-4 text-center align-middle text-content-subtle text-xs">
                         -
                       </td>
 

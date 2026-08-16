@@ -443,13 +443,13 @@ export const DbExplorerPanel: React.FC<any> = ({
                                         onChange={(e) =>
                                           setEditValues({ ...editValues, [key]: e.target.value })
                                         }
-                                        className="w-full border border-slate-300 rounded px-2 py-1 text-sm bg-surface"
+                                        className="w-full border border-border-subtle rounded px-2 py-1 text-sm bg-surface"
                                         disabled={key === pkField}
                                       />
                                     ) : (
                                       <div className="truncate w-full text-content-secondary">
                                         {row[key] === null ? (
-                                          <span className="text-slate-300 italic">null</span>
+                                          <span className="text-content-subtle italic">null</span>
                                         ) : typeof row[key] === "object" ? (
                                           JSON.stringify(row[key])
                                         ) : (

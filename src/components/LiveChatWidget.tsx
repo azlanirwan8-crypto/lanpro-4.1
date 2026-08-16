@@ -1037,7 +1037,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                                 {msg.read ? (
                                   <CheckCheck className="w-3 h-3 text-sky-500" />
                                 ) : (
-                                  <Check className="w-3 h-3 text-slate-300" />
+                                  <Check className="w-3 h-3 text-content-subtle" />
                                 )}
                               </span>
                             )}

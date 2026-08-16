@@ -57,7 +57,7 @@ const Button = ({
     variantStyle = "bg-surface-muted text-content-body hover:bg-slate-200 active:scale-95";
   if (variant === "outline")
     variantStyle =
-      "border-2 border-border-subtle text-content-body hover:border-slate-300 hover:bg-surface-sunken active:scale-95";
+      "border-2 border-border-subtle text-content-body hover:border-border-subtle hover:bg-surface-sunken active:scale-95";
   if (variant === "danger")
     variantStyle =
       "bg-rose-500 text-white hover:bg-rose-600 active:scale-95 shadow-md shadow-rose-500/20";
@@ -584,7 +584,7 @@ export const MasterDataPanel = ({
                 </div>
               ) : projectModules.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-content-subtle">
-                  <Layers className="w-12 h-12 mb-3 text-slate-300 animate-pulse" />
+                  <Layers className="w-12 h-12 mb-3 text-content-subtle animate-pulse" />
                   <p className="text-xs font-medium text-content-body">
                     Belum ada modul / aplikasi
                   </p>
@@ -616,7 +616,9 @@ export const MasterDataPanel = ({
                             </div>
                             <p className="text-xs sm:text-[11px] text-content-subtle font-medium mt-0.5">
                               {mod.keterangan || (
-                                <span className="text-slate-300 italic">Tidak ada keterangan</span>
+                                <span className="text-content-subtle italic">
+                                  Tidak ada keterangan
+                                </span>
                               )}
                             </p>
                           </div>
@@ -852,7 +854,7 @@ export const MasterDataPanel = ({
                                     )}
                                   >
                                     <div className="flex items-center gap-3">
-                                      <div className="text-slate-300 group-hover:text-content-muted transition-colors cursor-grab active:cursor-grabbing p-1">
+                                      <div className="text-content-subtle group-hover:text-content-muted transition-colors cursor-grab active:cursor-grabbing p-1">
                                         <GripVertical className="w-4 h-4" />
                                       </div>
 
