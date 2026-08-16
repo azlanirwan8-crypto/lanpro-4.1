@@ -312,7 +312,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 31 BELUM · 61 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 30 BELUM · 62 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -323,7 +323,7 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 31 item
+### 1.1 BELUM SELESAI — 30 item
 
 **Sebaran per fase:** F1 2 · F2 6 · F3 1 · F6 6 · F7 7 · F8 4 · F9 2 · F10 3 · F11 1 · F12 2
 
@@ -354,7 +354,6 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend               | **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik      | §0.4   |
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — celah daftar, DAN membatalkan asumsi kuota F11           | **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik      | §0.4   |
-| 47  | `discussion_point_comments` kolom kembar — baca & tulis SUDAH camelCase; sisa hapus kolom  | **F9**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §0.3   |
 | 74  | 7 pengambil data tanpa penjaga respons basi — data proyek lama menimpa proyek baru         | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §13.12 |
 | 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
 | 83  | `Users.department` & `Users.position` TIDAK fungsional — rancangan §19.4 belum bisa jalan  | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.13 |
@@ -363,7 +362,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 87  | `effectiveRole` DIKOREKSI — ia hanya bawa peran sistem; frontend abai peran proyek         | **F7**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §19.27 |
 | 92  | Peran dibaca dari TOKEN di 7 tempat, dari DATABASE di penjaga proyek — pencabutan tertunda | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.28 |
 
-### 1.2 SUDAH SELESAI — 61 item
+### 1.2 SUDAH SELESAI — 62 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -431,6 +430,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 20  | ~~Kode mati DB Explorer~~ toggle mode DB, fetchDbStatus, dan servicenya dibuang                      |  **F2**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §6.3   |
 | 57  | ~~Dua endpoint health~~ `/api/health` dibuang; `/api/health-check` pindah ke health.routes           |  **F2**  | ⚪  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §13.6  |
 | 81  | ~~`parentAdminId` ditulis tapi tidak pernah dibaca~~ berhenti ditulis; kolom menyusul                |  **F7**  | 🟡  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §19.2  |
+| 47  | ~~kolom kembar `discussion_point_comments`~~ 11 kolom -> 6, camelCase sumber kebenaran               |  **F9**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -5851,3 +5851,59 @@ ditampilkan), `handleToggleDbMode`, dan `toggleDbMode` di `explorer.service.ts`.
 
 Rute backend `POST /api/system/db-status` **sengaja tidak disentuh**:
 menghapus pemanggil tidak otomatis berarti rutenya tak punya pemakai lain.
+
+### 19.44 #47 langkah 4 & #81 — kolom dijatuhkan, gerbang F0 tetap lulus
+
+Dikerjakan 16 Agu 2026 atas persetujuan pemilik proyek. **Tindakan merusak**,
+dijalankan dengan pola `db:migrasi-peran`: uji-coba dulu, rencananya
+diperlihatkan, baru ditulis. Perintahnya `npm run db:hapus-kolom-kembar`.
+
+| Tabel                       |           Sebelum |     Sesudah |
+| --------------------------- | ----------------: | ----------: |
+| `discussion_point_comments` |          11 kolom |       **6** |
+| `ProjectMembers`            | + `parentAdminId` | **dibuang** |
+
+| Kolom dijatuhkan                                             | Terisi | Penggantinya                                         |
+| ------------------------------------------------------------ | -----: | ---------------------------------------------------- |
+| `point_id` `user_id` `user_name` `comment_text` `created_at` |      4 | terisi **9** — tidak ada data yang hilang            |
+| `parentAdminId`                                              |      6 | **tidak menggantikan apa pun** — tidak pernah dibaca |
+
+#### Penjaga yang dipasang di dalam skripnya
+
+Skrip menolak menjatuhkan kolom terisi bila **penggantinya belum selengkap**
+kolom yang dibuang, dan memeriksanya **per kolom** — bukan sekali di awal.
+Pemeriksaan sekali di awal akan lolos selama satu kolom saja aman, dan
+menjatuhkan sisanya bersamaan.
+
+Setiap kolom yang dijatuhkan **wajib menyebut penggantinya** di rencana;
+`pengganti: null` hanya sah untuk kolom yang tidak pernah dibaca sama sekali.
+Itu memaksa alasannya ditulis, bukan diasumsikan.
+
+#### Gerbang F0 diperiksa SESUDAHNYA
+
+Definisi kolomnya lebih dulu dicabut dari `src/lib/pg-migrate.ts`. Tanpa itu,
+production akan menyimpang dari migrasi dan `db:verify-schema` akan merah —
+gerbang yang justru dibuat karena 13 tabel dan 54 kolom pernah berbeda diam-diam
+(§13.14).
+
+```
+GERBANG F0 LULUS — schema database bersih IDENTIK dengan production.
+```
+
+Data utuh sesudahnya: **9 baris, `commenttext` 9 terisi.**
+
+#### Satu jebakan kecil yang layak dicatat
+
+Komentar SQL yang saya tulis memuat **backtick**, dan komentar itu berada di
+dalam **template literal** — berkasnya pecah seketika. `tsc` menangkapnya
+sebelum apa pun berjalan. Menulis SQL di dalam template literal berarti backtick
+tidak boleh muncul bahkan di dalam komentarnya.
+
+#### #15 TIDAK ditandai selesai
+
+Mencabut Google API key hanya bisa dilakukan pemilik proyek di Google Cloud
+Console. Menandainya selesai atas dasar "diminta dikerjakan" adalah persis
+kegagalan yang §13.14 catat: gerbang dinyatakan lulus tanpa pernah diuji.
+
+**Ia tetap `MENUNGGU` sampai pemilik proyek menyatakan kedua kunci sudah
+dicabut.**
