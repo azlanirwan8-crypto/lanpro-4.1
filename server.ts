@@ -1075,6 +1075,20 @@ app.use(errorHandler);
     });
   }
 
+  // Penjaga saat boot — §19.8 tahap 2. Letaknya di SINI, sesudah SELURUH rute
+  // terpasang, bukan di tengah pemasangan.
+  //
+  // Versi pertama dipanggil sesudah `discussion-points` dan melaporkan 31
+  // penjaga — padahal `file.routes`, `user.routes`, dan `project.routes` baru
+  // dipasang ratusan baris sesudahnya. Ia juga melaporkan NOL korslet padahal
+  // #73 nyata ada, sebab rutenya belum termuat. Gerbang yang menghitung
+  // separuh isi lebih berbahaya daripada tidak ada gerbang: ia memberi rasa
+  // aman yang salah, persis cara gerbang F0 dulu dinyatakan lulus (§13.14).
+  //
+  // Mode saat ini LAPOR, belum menolak. Lihat `MODE` di daftarPeranRute.ts.
+  const { laporkanPenjaga } = await import('./server/middleware/daftarPeranRute');
+  laporkanPenjaga();
+
   if (isServerless) {
     console.log("[SERVERLESS] Running in serverless mode. Skipping httpServer.listen.");
     return;
