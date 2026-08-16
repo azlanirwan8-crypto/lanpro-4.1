@@ -260,7 +260,7 @@ router.get(
 router.post(
   "/api/projects/:projectId/tasks",
   authenticateJWT,
-  verifyProjectAccess(["admin", "manager", "head", "developer", "member"]),
+  jagaProyek("list", "C"),
   async (req, res) => {
     let connection;
     // #60 — penanda apakah masih ada transaksi yang belum ditutup. Diperlukan
@@ -543,7 +543,7 @@ router.post(
 router.put(
   "/api/projects/:projectId/tasks/reorder",
   authenticateJWT,
-  verifyProjectAccess(["admin", "manager", "head"]),
+  jagaProyek("list", "U"),
   async (req, res) => {
     let connection;
     // #64 — penanda pemilik transaksi; lihat catatan di blok catch di bawah.
@@ -604,7 +604,7 @@ router.put(
 router.put(
   "/api/projects/:projectId/tasks/:id",
   authenticateJWT,
-  verifyProjectAccess(["admin", "manager", "head", "developer", "member"]),
+  jagaProyek("list", "U"),
   async (req, res) => {
     let connection;
     try {
@@ -1284,7 +1284,7 @@ router.delete(
 router.post(
   "/api/projects/:projectId/tasks/bulk-delete",
   authenticateJWT,
-  verifyProjectAccess(["admin", "manager", "head", "developer", "member"]),
+  jagaProyek("list", "D"),
   async (req, res) => {
     let connection;
     try {
@@ -1547,7 +1547,7 @@ async function hasCycle(connection: any, startNode: string, targetNode: string):
 // Task Links API
 router.post(
   "/api/projects/:projectId/tasks/:taskId/links",
-  verifyProjectAccess(["admin", "manager", "head", "developer", "member"]),
+  jagaProyek("list", "C"),
   async (req, res) => {
     let connection;
     try {

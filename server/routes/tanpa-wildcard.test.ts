@@ -72,7 +72,9 @@ describe("#72 tidak ada rute proyek yang dijaga wildcard", () => {
     // salah, dan itu justru bentuk kegagalan yang paling sulit disadari.
     const sah: Record<string, string[]> = {
       GET: ["R"],
-      POST: ["C", "U", "R"],
+      // `POST` boleh `D` HANYA bila jalurnya memang operasi hapus — `bulk-delete`
+      // adalah POST karena membawa daftar id di body, bukan karena ia lunak.
+      POST: ["C", "U", "R", "D"],
       PUT: ["U"],
       PATCH: ["U"],
       DELETE: ["D"],
@@ -81,6 +83,12 @@ describe("#72 tidak ada rute proyek yang dijaga wildcard", () => {
       .map((r) => ({ r, m: /jagaProyek\("([^"]+)",\s*"([A-Z])"\)/.exec(r.penjaga) }))
       .filter((x) => x.m !== null)
       .filter((x) => sah[x.r.metode].indexOf(x.m![2]) === -1)
+      .concat(
+        semuaRute()
+          .map((r) => ({ r, m: /jagaProyek\("([^"]+)",\s*"([A-Z])"\)/.exec(r.penjaga) }))
+          .filter((x) => x.m !== null)
+          .filter((x) => x.m![2] === "D" && x.r.metode === "POST" && !/delete/i.test(x.r.jalur))
+      )
       .map((x) => `${x.r.berkas} ${x.r.metode} ${x.r.jalur} -> ${x.m![2]}`);
     expect(janggal).toEqual([]);
   });

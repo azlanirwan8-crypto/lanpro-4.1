@@ -97,7 +97,7 @@ router.get("/api/projects/:projectId/milestones", jagaProyek("timeline", "R"), a
 
 router.post(
   "/api/projects/:projectId/milestones",
-  verifyProjectAccess(["admin", "manager", "head"]),
+  jagaProyek("timeline", "C"),
   async (req, res) => {
     let connection;
     try {
@@ -139,7 +139,7 @@ router.post(
 
 router.put(
   "/api/projects/:projectId/milestones/:id",
-  verifyProjectAccess(["admin", "manager", "head"]),
+  jagaProyek("timeline", "U"),
   async (req, res) => {
     let connection;
     try {

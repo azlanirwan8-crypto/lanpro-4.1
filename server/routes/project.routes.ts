@@ -680,29 +680,25 @@ router.delete(
   }
 );
 
-router.put(
-  "/api/projects/:id/invites",
-  verifyProjectAccess(["admin", "manager", "head"]),
-  async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { emailToInvite } = req.body;
-      const connection = await db.getConnection();
+router.put("/api/projects/:id/invites", jagaProyek("access", "U"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { emailToInvite } = req.body;
+    const connection = await db.getConnection();
 
-      await connection.query("INSERT INTO ProjectInvites (id, projectId, email) VALUES (?, ?, ?)", [
-        crypto.randomUUID(),
-        id,
-        emailToInvite,
-      ]);
+    await connection.query("INSERT INTO ProjectInvites (id, projectId, email) VALUES (?, ?, ?)", [
+      crypto.randomUUID(),
+      id,
+      emailToInvite,
+    ]);
 
-      connection.release();
-      res.json({ status: "success", message: "Invite added" });
-    } catch (error: any) {
-      console.error("LOG ANOMALI CRITICAL: PUT /api/projects/:id/invites error:", error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-    }
+    connection.release();
+    res.json({ status: "success", message: "Invite added" });
+  } catch (error: any) {
+    console.error("LOG ANOMALI CRITICAL: PUT /api/projects/:id/invites error:", error);
+    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
   }
-);
+});
 
 // Sprints API
 
