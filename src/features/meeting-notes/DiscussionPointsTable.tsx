@@ -531,7 +531,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 type="button"
                 onClick={saveEdit}
                 disabled={isSaving}
-                className="px-5 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
               </button>
@@ -562,7 +562,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             <div className="overflow-x-auto">
               <ResponsiveTable className="w-full border-collapse text-left text-xs">
                 <thead>
-                  <tr className="bg-primary/5 border-b border-primary/15 text-xs sm:text-[11px] font-medium uppercase tracking-wider text-primary">
+                  <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-medium uppercase tracking-wider text-primary">
                     <th className="py-3 px-4 w-12 text-center">No</th>
                     <th className="py-3 px-4 min-w-[220px]">Concern</th>
                     <th className="py-3 px-4 min-w-[200px]">Catatan / Keterangan</th>
@@ -845,7 +845,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           type="button"
                           onClick={() => handleLiveQuickAdd()}
                           disabled={isSaving || !quickConcern.trim()}
-                          className="px-3 py-1.5 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
+                          className="px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
                           title="Tambah Poin"
                         >
                           <Plus className="w-3.5 h-3.5" />

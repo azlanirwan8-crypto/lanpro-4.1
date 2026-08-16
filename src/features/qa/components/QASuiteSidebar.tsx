@@ -57,7 +57,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
         {/* Header Title */}
         <div className="flex items-center justify-between border-b border-border-faint pb-2.5">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-primary/10 text-primary flex items-center justify-center font-medium">
+            <div className="w-7 h-7 rounded-md bg-primary-surface/10 text-primary flex items-center justify-center font-medium">
               <FileSpreadsheet className="w-3.5 h-3.5" />
             </div>
             <div>
@@ -69,7 +69,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
               </p>
             </div>
           </div>
-          <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs sm:text-[11px] sm:text-[9px] font-medium rounded-md">
+          <span className="px-2 py-0.5 bg-primary-surface/10 text-primary text-xs sm:text-[11px] sm:text-[9px] font-medium rounded-md">
             {suitesForFilter.length} Modul
           </span>
         </div>
@@ -92,7 +92,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
           {canCreate && (
             <button
               onClick={() => setIsAddSuiteOpen(true)}
-              className="px-2.5 py-1.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md shadow-2xs transition-all flex items-center gap-1 text-xs font-medium cursor-pointer shrink-0"
+              className="px-2.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md shadow-2xs transition-all flex items-center gap-1 text-xs font-medium cursor-pointer shrink-0"
               title="Tambah Modul Testing Baru"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -312,7 +312,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                   {/* Micro Progress Bar */}
                   <div className="w-full h-1 bg-surface-muted rounded-full mt-2 overflow-hidden">
                     <div
-                      className="h-full bg-primary transition-all duration-500 rounded-full"
+                      className="h-full bg-primary-surface transition-all duration-500 rounded-full"
                       style={{ width: `${percent}%` }}
                     />
                   </div>

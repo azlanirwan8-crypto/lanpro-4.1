@@ -86,7 +86,7 @@ export const ConfigureColumnsModal: React.FC<ConfigureColumnsModalProps> = ({
                                     className={cn(
                                       "w-4 h-4 rounded-md border flex items-center justify-center transition-all cursor-pointer",
                                       col.visible
-                                        ? "bg-primary border-primary"
+                                        ? "bg-primary-surface border-primary"
                                         : "bg-surface border-border-subtle"
                                     )}
                                   >
@@ -114,7 +114,7 @@ export const ConfigureColumnsModal: React.FC<ConfigureColumnsModalProps> = ({
           <div className="px-5 py-3.5 border-t border-border-faint flex justify-end items-center gap-2 bg-surface-sunken/50">
             <button
               onClick={onClose}
-              className="px-4 py-2 font-medium bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md transition-all text-xs shadow-xs cursor-pointer"
+              className="px-4 py-2 font-medium bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md transition-all text-xs shadow-xs cursor-pointer"
             >
               Close
             </button>

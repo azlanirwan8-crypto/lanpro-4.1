@@ -1215,7 +1215,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 }}
                 className={`px-3 py-1 text-xs uppercase tracking-wider rounded-md transition-all cursor-pointer ${
                   timelineZoom === z
-                    ? "bg-primary/10 text-primary font-semibold shadow-2xs border border-primary/20"
+                    ? "bg-primary-surface/10 text-primary font-semibold shadow-2xs border border-primary/20"
                     : "text-content-muted hover:text-content-strong hover:bg-surface-sunken font-medium"
                 }`}
               >
@@ -1237,7 +1237,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             <button
               onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
               onBlur={() => setTimeout(() => setIsExportMenuOpen(false), 200)}
-              className="h-8 px-3.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+              className="h-8 px-3.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>EXPORT AS</span> <ChevronDown className="w-3 h-3" />

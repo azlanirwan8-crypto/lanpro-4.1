@@ -143,7 +143,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                   className={`px-2.5 py-1 rounded-md text-xs sm:text-[11px] font-mono font-medium transition-all shadow-xs border ${
                     mode === "whatsapp"
                       ? "bg-success/10 hover:bg-success/15 text-success border-success/20"
-                      : "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
+                      : "bg-primary-surface/10 hover:bg-primary-surface/15 text-primary border-primary/20"
                   }`}
                   title={`Insert ${variable}`}
                 >

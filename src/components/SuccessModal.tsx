@@ -61,7 +61,7 @@ export function SuccessModal({ isOpen, onClose, title = "Berhasil!", message }: 
               <p className="text-content-muted mb-8">{message}</p>
               <button
                 onClick={onClose}
-                className="px-6 py-2 bg-primary hover:bg-primary-hover text-content-inverse font-medium rounded-md transition-colors"
+                className="px-6 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-md transition-colors"
               >
                 Tutup
               </button>

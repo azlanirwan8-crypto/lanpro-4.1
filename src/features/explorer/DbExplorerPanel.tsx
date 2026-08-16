@@ -344,7 +344,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                 {!loading && result && Array.isArray(result) && (
                   <div className="border border-border-subtle rounded-lg overflow-x-auto">
                     <ResponsiveTable className="w-full text-left border-collapse text-sm">
-                      <thead className="bg-primary/5 text-primary font-medium uppercase tracking-wider">
+                      <thead className="bg-primary-surface/5 text-primary font-medium uppercase tracking-wider">
                         <tr>
                           {result.length > 0 && (
                             <th className="p-3 border-b border-border-subtle font-medium w-32">

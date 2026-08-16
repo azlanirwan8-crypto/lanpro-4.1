@@ -71,7 +71,7 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                   snapshot.isDraggingOver &&
                     (TERMINAL_STATUSES.some((s) => status.label.toLowerCase().includes(s))
                       ? "bg-red-50/40 border-2 border-dashed border-red-400 cursor-not-allowed"
-                      : "bg-primary/10 border-2 border-dashed border-primary")
+                      : "bg-primary-surface/10 border-2 border-dashed border-primary")
                 )}
               >
                 {tasks.map((task, index) => (
@@ -99,7 +99,7 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                 {provided.placeholder}
 
                 {tasks.length === 0 && snapshot.isDraggingOver && (
-                  <div className="flex items-center justify-center p-3 rounded-md border border-dashed border-primary bg-primary/10 min-h-[50px] select-none">
+                  <div className="flex items-center justify-center p-3 rounded-md border border-dashed border-primary bg-primary-surface/10 min-h-[50px] select-none">
                     <span className="text-xs sm:text-[10px] font-semibold text-primary uppercase tracking-wider">
                       Drop here
                     </span>

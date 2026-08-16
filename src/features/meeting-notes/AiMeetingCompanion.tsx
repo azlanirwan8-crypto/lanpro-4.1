@@ -830,7 +830,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
           >
             <ListChecks className="w-3.5 h-3.5 text-primary" /> Tindak Lanjut
             {activeMeetingData?.tab_tindak_lanjut?.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 bg-primary text-content-inverse text-xs sm:text-[11px] sm:text-[9px] rounded-full font-medium min-w-[16px] text-center inline-block">
+              <span className="ml-1 px-1.5 py-0.5 bg-primary-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] rounded-full font-medium min-w-[16px] text-center inline-block">
                 {activeMeetingData.tab_tindak_lanjut.length}
               </span>
             )}

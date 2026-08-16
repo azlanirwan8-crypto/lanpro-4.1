@@ -2510,7 +2510,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       setSelectedFlowId(null);
                       setCurrentPage(1);
                     }}
-                    className="flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
+                    className="flex items-center gap-1.5 text-xs font-medium text-primary bg-primary-surface/10 hover:bg-primary-surface/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
                   >
                     ← Back to Flowchart List
                   </button>
@@ -3612,7 +3612,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             {/* Modal Head */}
             <div className="px-5 py-4 bg-surface border-b border-border-subtle flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-primary-surface/10 text-primary flex items-center justify-center">
                   <Layers className="w-4 h-4" />
                 </div>
                 <h3 className="font-medium text-sm text-content">
@@ -3723,7 +3723,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary hover:bg-primary-hover text-content-inverse font-medium rounded-lg text-xs shadow-xs transition-all"
+                  className="px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-lg text-xs shadow-xs transition-all"
                 >
                   {modalMode === "create" ? "Buat Dokumen" : "Simpan Perubahan"}
                 </button>
@@ -3781,7 +3781,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           <div className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col border border-border-subtle animate-in zoom-in-95 duration-200">
             <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-surface">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-md bg-primary/10 text-primary flex items-center justify-center">
+                <div className="w-8 h-8 rounded-md bg-primary-surface/10 text-primary flex items-center justify-center">
                   <FileText className="w-4 h-4" />
                 </div>
                 <h3 className="text-sm font-medium text-content">Upload Dokumen Baru</h3>
@@ -3856,7 +3856,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               <button
                 onClick={handleSaveDocument}
                 disabled={!uploadDocName || !uploadDocFile}
-                className="px-4 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 text-content-inverse text-xs font-medium rounded-md transition-all shadow-xs active:scale-95 cursor-pointer"
+                className="px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-50 text-content-inverse text-xs font-medium rounded-md transition-all shadow-xs active:scale-95 cursor-pointer"
               >
                 Upload & Simpan
               </button>

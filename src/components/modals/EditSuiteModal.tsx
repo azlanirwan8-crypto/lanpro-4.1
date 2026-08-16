@@ -55,7 +55,7 @@ export const EditSuiteModal: React.FC<EditSuiteModalProps> = ({
             </button>
             <button
               onClick={onSubmit}
-              className="px-4 py-2 bg-primary text-content-inverse text-xs font-medium rounded-md cursor-pointer shadow-xs active:scale-95"
+              className="px-4 py-2 bg-primary-surface text-content-inverse text-xs font-medium rounded-md cursor-pointer shadow-xs active:scale-95"
             >
               Simpan Perubahan
             </button>

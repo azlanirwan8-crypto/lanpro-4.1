@@ -63,7 +63,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
         >
           <div className="flex justify-between items-center pb-3 border-b border-border-faint">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-md bg-primary/10 text-primary flex items-center justify-center font-medium">
+              <div className="w-9 h-9 rounded-md bg-primary-surface/10 text-primary flex items-center justify-center font-medium">
                 <Plus className="w-5 h-5" />
               </div>
               <div>
@@ -111,12 +111,12 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
           </div>
 
           {/* Target Suite Banner */}
-          <div className="bg-primary/5 border border-primary/10 px-4 py-2.5 rounded-md flex items-center justify-between text-xs">
+          <div className="bg-primary-surface/5 border border-primary/10 px-4 py-2.5 rounded-md flex items-center justify-between text-xs">
             <span className="font-medium text-primary">
               Modul Target:{" "}
               <strong>{activeSuite ? activeSuite.name : "Belum ada modul terpilih"}</strong>
             </span>
-            <span className="px-2.5 py-0.5 bg-primary text-content-inverse font-medium rounded-full text-xs sm:text-[10px]">
+            <span className="px-2.5 py-0.5 bg-primary-surface text-content-inverse font-medium rounded-full text-xs sm:text-[10px]">
               {activeSuite ? activeSuite.phase : "SIT"}
             </span>
           </div>
@@ -198,7 +198,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-primary hover:bg-primary-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
                 >
                   <Plus className="w-4 h-4" /> Simpan Test Case
                 </button>
@@ -218,7 +218,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 <button
                   type="button"
                   onClick={onDownloadTemplate}
-                  className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-content-inverse text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Download Template Excel</span>
@@ -244,7 +244,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 />
                 <label
                   htmlFor="bulk_upload_input"
-                  className="inline-block px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium rounded-md cursor-pointer transition-colors"
+                  className="inline-block px-4 py-2 bg-primary-surface/10 hover:bg-primary-surface/20 text-primary text-xs font-medium rounded-md cursor-pointer transition-colors"
                 >
                   {uploadFile ? uploadFile.name : "Pilih Berkas Excel"}
                 </label>
@@ -261,7 +261,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 <button
                   type="submit"
                   disabled={!uploadFile}
-                  className="px-5 py-2 bg-primary hover:bg-primary-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md shadow-xs disabled:opacity-50 cursor-pointer active:scale-95"
+                  className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md shadow-xs disabled:opacity-50 cursor-pointer active:scale-95"
                 >
                   Proses Bulk Upload
                 </button>

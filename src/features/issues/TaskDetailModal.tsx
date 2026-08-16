@@ -49,7 +49,7 @@ const Button = ({
 }: any) => {
   const variants = {
     primary:
-      "bg-primary text-content-inverse hover:bg-primary-hover active:bg-primary-active shadow-xs border-transparent",
+      "bg-primary-surface text-content-inverse hover:bg-primary-surface-hover active:bg-primary-active shadow-xs border-transparent",
     secondary:
       "bg-surface text-content-body border-border-subtle/80 hover:bg-surface-sunken shadow-xs",
     ghost: "bg-transparent text-content-muted hover:bg-surface-muted border-transparent",

@@ -56,6 +56,20 @@
    * (`bg-overlay/60`), sehingga nilainya cukup satu. */
   --color-overlay: #0f172a;
 
+  /* Permukaan bermerek (sidebar, tombol utama). SENGAJA tetap #405189 di kedua
+   * mode, dan itu memperbaiki tabrakan yang terukur di layar.
+   *
+   * `--color-primary` sengaja DITERANGKAN di mode gelap agar terbaca sebagai
+   * warna TEKS di atas permukaan gelap — catatannya ada di blok `html.dark`.
+   * Tetapi ia juga dipakai sebagai LATAR sidebar, dan di sanalah tradeoff itu
+   * berbalik: sidebar jadi biru muda, sementara teks di atasnya memakai token
+   * `content-*` yang gelap. Terukur 47 elemen di bawah rasio 4.5, sebagian
+   * serendah 1.07 — praktis tak terbaca.
+   *
+   * Satu token tidak bisa memikul dua peran yang saling berlawanan. */
+  --color-primary-surface: #405189;
+  --color-primary-surface-hover: #364473;
+
   /* Tiga token bernilai TETAP berikutnya, alasannya sama seperti
    * `surface-inverse`: elemennya duduk di atas permukaan yang tidak ikut
    * berganti (kartu aksen, lencana, titik penanda), sehingga warnanya memang
@@ -110,6 +124,8 @@ html.dark {
 
   /* Sengaja sama dengan mode terang — lihat catatan di `:root`. */
   --color-overlay: #0f172a;
+  --color-primary-surface: #405189;
+  --color-primary-surface-hover: #364473;
   --color-content-inverse-strong: #f1f5f9;
   --color-content-inverse-muted: #e2e8f0;
   --color-surface-marker: #cbd5e1;
