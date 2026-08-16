@@ -24,7 +24,7 @@ jest.mock("../../src/lib/db", () => ({
   default: { getConnection: async () => ({ query: mockKueri, release: mockLepas }) },
 }));
 
-import { jagaProyek, peranProyekEfektif } from "./jagaProyek";
+import { jagaProyek, jagaHapusProyek, peranProyekEfektif } from "./jagaProyek";
 
 /**
  * Menyiapkan jawaban DB berurutan sesuai tiga mockKueri `jagaProyek`:
@@ -206,5 +206,40 @@ describe("koneksi selalu dilepas", () => {
     siapkanDb({ user: { id: "U1", role: "user" }, ownerId: "LAIN", peranAnggota: "viewer" });
     await jalankan(jagaProyek("list", "D"));
     expect(mockLepas).toHaveBeenCalled();
+  });
+});
+
+describe("jagaHapusProyek — §19.5, menghapus proyek hanya milik Owner", () => {
+  it("pemilik proyek boleh menghapus", async () => {
+    siapkanDb({ user: { id: "U1", role: "user" }, ownerId: "U1" });
+    const { next } = await jalankan(jagaHapusProyek());
+    expect(next).toHaveBeenCalled();
+  });
+
+  it("Administrator sistem menembus lewat God Mode", async () => {
+    siapkanDb({ user: { id: "U1", role: "admin" } });
+    const { next } = await jalankan(jagaHapusProyek());
+    expect(next).toHaveBeenCalled();
+  });
+
+  it("Project Admin yang BUKAN pemilik TIDAK boleh — pengetatan nyata", async () => {
+    // Penjaga lama berbunyi verifyProjectAccess(["admin", "head"]), sehingga
+    // anggota berperan `admin` bisa menghapus seluruh proyek. Sekarang tidak.
+    siapkanDb({ user: { id: "U1", role: "user" }, ownerId: "LAIN", peranAnggota: "admin" });
+    const { res, next } = await jalankan(jagaHapusProyek());
+    expect(res.kode).toBe(403);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it("`head` sistem TIDAK boleh menghapus proyek", async () => {
+    siapkanDb({ user: { id: "U1", role: "head" }, ownerId: "LAIN", peranAnggota: null });
+    const { res } = await jalankan(jagaHapusProyek());
+    expect(res.kode).toBe(403);
+  });
+
+  it("tanpa projectId ditolak", async () => {
+    siapkanDb({ user: { id: "U1", role: "user" } });
+    const { res } = await jalankan(jagaHapusProyek(), { params: {} });
+    expect(res.kode).toBe(403);
   });
 });

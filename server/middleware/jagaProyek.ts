@@ -37,6 +37,7 @@ import db from "../../src/lib/db";
 import { normalkanPeran } from "../../src/types/roles";
 import {
   bolehDiProyek,
+  bolehHapusProyek,
   punyaGodMode,
   type Aksi,
   type ModulProyek,
@@ -138,6 +139,59 @@ export const jagaProyek = (modul: ModulProyek, aksi: Aksi) => {
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: jagaProyek error:", error);
       // Galat TIDAK boleh berarti "izinkan". §19.6 aturan 3.
+      return res.status(500).json({ status: "error", message: "Gagal memverifikasi hak akses." });
+    } finally {
+      if (connection) connection.release();
+    }
+  };
+};
+
+/**
+ * Penjaga khusus PENGHAPUSAN PROYEK. §19.5.
+ *
+ * Menghapus proyek bukan operasi pada sebuah modul, melainkan pada proyek itu
+ * sendiri — karena itu ia tidak lewat `MATRIKS_PROYEK`. §19.5 memberikannya
+ * HANYA kepada Project Owner; Administrator sistem tetap menembus lewat God
+ * Mode seperti operasi lain.
+ *
+ * ⚠️ INI PENGETATAN NYATA. Penjaga sebelumnya berbunyi
+ * `verifyProjectAccess(["admin", "head"])`, sehingga anggota proyek berperan
+ * `admin` — Project Admin, BUKAN pemilik — juga bisa menghapus seluruh proyek.
+ * Sesudah ini ia tidak bisa. Yang tersisa: pemilik proyek, dan Administrator
+ * sistem.
+ */
+export const jagaHapusProyek = () => {
+  return async (req: any, res: any, next: any) => {
+    let connection;
+    try {
+      const projectId = req.params?.projectId || req.params?.id;
+      const userIdMentah =
+        req.user?.id || req.user?.uid || req.headers?.["x-user-id"] || req.query?.userId;
+      if (!userIdMentah || !projectId) return tolak(res);
+
+      connection = await db.getConnection();
+
+      const [uRows]: any = await connection.query(
+        "SELECT id, role FROM Users WHERE id = ? OR uid = ?",
+        [userIdMentah, userIdMentah]
+      );
+      if (uRows.length === 0) return tolak(res);
+
+      if (punyaGodMode(uRows[0].role)) {
+        catatGodMode(String(uRows[0].id), String(projectId), "(hapus proyek)", "D");
+        return next();
+      }
+
+      const [proj]: any = await connection.query("SELECT ownerId FROM Projects WHERE id = ?", [
+        projectId,
+      ]);
+      if (proj.length > 0 && proj[0].ownerId === uRows[0].id && bolehHapusProyek("owner")) {
+        return next();
+      }
+
+      return tolak(res);
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: jagaHapusProyek error:", error);
       return res.status(500).json({ status: "error", message: "Gagal memverifikasi hak akses." });
     } finally {
       if (connection) connection.release();
