@@ -15,8 +15,12 @@ kebutuhan mengevaluasi ulang dari nol setiap kali memulai sesi kerja.
 Bagian ini ditulis agar siapa pun — manusia maupun agen AI lain — bisa
 melanjutkan pekerjaan tanpa perlu menelusuri riwayat percakapan.
 
-**Diperbarui: 16 Agustus 2026.** Seluruh pekerjaan ada di branch `main` lokal.
-**BELUM di-push ke `origin/main`** (tertinggal sekitar 40+ commit).
+**Diperbarui: 16 Agustus 2026, sesudah F7 Two-Tier RBAC.** Seluruh pekerjaan ada
+di branch `main` lokal dan **BELUM di-push ke `origin/main`** — tertinggal
+sekitar 190 commit.
+
+Bacaan tercepat untuk tahu keadaan hari ini: **§0.2 blok F7** (apa yang berubah),
+lalu **§0.4** (tiga keputusan yang menahan sisanya). Rinciannya §19.15–§19.23.
 
 ### 0.1 Kondisi aplikasi saat ini
 
@@ -91,10 +95,70 @@ sistem migrasi menulis nama tabel tanpa kutip.
 | `daftarkanSesi()` dipanggil di callback SSO                            | `authenticateJWT` menegakkan sesi tunggal; tanpa ini login SSO gagal SENYAP bagi siapa pun yang pernah login memakai password                        |
 | Form email Settings terbukti dekoratif                                 | `useState` lokal, tanpa pemuatan/penyimpanan, tanpa tombol simpan (item #45)                                                                         |
 
+**F7 · Two-Tier RBAC (#76) — DIKERJAKAN BESAR-BESARAN 16 Agu 2026.**
+
+Ini pekerjaan terbesar sesi terakhir. Akar 56% temuan F2 (14 dari 25 masuk OWASP
+A01) ditutup secara struktural, bukan per rute. Rancangannya §19; catatan
+pengerjaannya §19.15–§19.23.
+
+| Tahap | Isi                                      | Hasil                                                                                                                    |
+| :---: | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+|   1   | Satu definisi peran, `\| string` dicabut | ✅ `src/types/roles.ts`. Jadi DUA enum, bukan satu — kode `admin` bertabrakan antar lingkup dan memicu God Mode (§19.15) |
+|   2   | Matriks otorisasi terpusat               | ✅ `src/lib/matriksAkses.ts`, diikat ke tabel §19.4/§19.5 lewat test yang MEMBACA AUDIT.md                               |
+|  2b   | Penjaga saat boot                        | ✅ `daftarPeranRute.ts`, masih mode `LAPOR`                                                                              |
+|   3   | Migrasi data                             | ✅ dijalankan ke Neon. 7 baris `member` → `developer`                                                                    |
+|   4   | `jagaProyek(modul, aksi)` + pemasangan   | 🟢 **51 dari 54 rute**. Sisa 3 menunggu #89                                                                              |
+
+**Angka yang paling menjelaskan keadaan** — dari log boot server sungguhan:
+
+| Laporan boot                          |               Sebelum F7 |        Sekarang |
+| ------------------------------------- | -----------------------: | --------------: |
+| Penjaga lama `verifyProjectAccess`    |                       54 |           **3** |
+| Rute ber-`["*"]` (= anggota mana pun) |                 31 (57%) |           **0** |
+| Peran warisan terpakai                | member · designer · head | designer · head |
+
+**#66 dan #72 tertutup secara struktural.** `viewer` kini benar-benar hanya
+membaca. **#80 juga ditutup** — pintu kedua pembuatan proyek.
+
+**Dua pengetatan yang bisa dirasakan pengguna**, keduanya sesuai §19.5:
+
+1. Menghapus PROYEK kini hanya Project Owner. Dulu Project Admin pun bisa.
+2. `tasks/bulk-delete` kini hanya Owner/Admin/Manager. Dulu developer pun bisa —
+   penghapusan massal justru lebih longgar daripada penghapusan satuan.
+
+**Temuan baru sesi ini:** #87 `effectiveRole` membawa dua kosakata peran ·
+#88 God Mode belum tercatat di `AuditLogs` · #89 tiga operasi tingkat proyek
+tidak punya modul di §19.5.
+
 ### 0.4 Yang PALING MUNGKIN dikerjakan berikutnya
 
-**F6 sedang DITAHAN** atas keputusan pemilik proyek 16 Agu 2026: menunggu
-domain email disiapkan lebih dulu.
+**Prioritas fase ada di §1.5 kolom `Prio`.** P0 = menahan rilis production:
+F1 · F2 · F7 · F11.
+
+#### Yang bisa dikerjakan TANPA keputusan pemilik proyek
+
+Per 16 Agu 2026 sesudah F7: **hampir tidak ada tersisa di F7.** Tahap 1–4 sudah
+dikerjakan sampai batas yang tidak memerlukan keputusan. Yang tersisa di F7
+seluruhnya tertahan tiga pertanyaan di bawah.
+
+Yang masih bisa jalan tanpa pemilik: **F3** (audit UI), **F8** (jaring
+pengaman), **F12** (konsolidasi desain).
+
+#### Tiga keputusan yang menahan penutupan F7
+
+| #      | Pertanyaan                                                                                                                                   | Menutup apa                                         |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| **89** | Siapa boleh menyunting proyek & mengubah setelannya? Atau: tata letak dashboard adalah preferensi per-pengguna sehingga keluar dari matriks? | 3 rute terakhir **dan** menaikkan `MODE` ke `TOLAK` |
+| **83** | Department Head — A / B / C                                                                                                                  | pencabutan `head` dari penjaga proyek               |
+| **88** | Bentuk pencatatan God Mode ke `AuditLogs`                                                                                                    | §19.6 aturan 2 secara penuh                         |
+
+**#89 paling murah dan paling membuka** — ia hanya butuh satu baris tambahan di
+§19.5.
+
+#### F6 masih DITAHAN
+
+Atas keputusan pemilik proyek 16 Agu 2026: menunggu domain email disiapkan
+lebih dulu.
 
 Alasannya nyata, bukan kehati-hatian berlebih. Tanpa domain terverifikasi,
 penyedia email mana pun (Resend, SendGrid, SES — semuanya sama, ini aturan
@@ -109,20 +173,18 @@ Yang sudah disiapkan supaya tinggal lanjut:
 - Alamat pengirim hanya **satu variabel** — ganti `EMAIL_FROM` saat domain siap,
   kode tidak berubah sedikit pun
 
-Urutan saran setelah domain siap:
-
-1. **F6.2** fondasi `email.service.ts` → **F6.3** email selamat datang (#26)
-2. **F1 · Storage** — wajib tutup **sebelum rilis production**
-3. **F0** — #39 migrasi gagal senyap & #38 `APP_URL` placeholder
+Urutan saran setelah domain siap: **F6.2** fondasi `email.service.ts` →
+**F6.3** email selamat datang (#26).
 
 ⚠️ **Tiga hal yang WAJIB beres sebelum production**, semuanya menunggu
 keputusan pemilik proyek:
 
-| #   | Hal                              | Akibat bila terlewat                                                                                            |
-| --- | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| 30  | Storage drive-per-user (F11)     | Berkas unggahan hilang tiap deploy di Vercel. Driver `s3` (#2) DITAHAN 16 Agu 2026 — jalan rilis kini lewat F11 |
-| 44  | Domain email belum terverifikasi | Email tidak sampai ke user, gagal senyap                                                                        |
-| 46  | `SSO_ALLOWED_DOMAINS=gmail.com`  | Siapa pun ber-Gmail bisa mendaftar                                                                              |
+| #   | Hal                                   | Akibat bila terlewat                                                                                            |
+| --- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| 30  | Storage drive-per-user (F11)          | Berkas unggahan hilang tiap deploy di Vercel. Driver `s3` (#2) DITAHAN 16 Agu 2026 — jalan rilis kini lewat F11 |
+| 44  | Domain email belum terverifikasi      | Email tidak sampai ke user, gagal senyap                                                                        |
+| 46  | `SSO_ALLOWED_DOMAINS=gmail.com`       | Siapa pun ber-Gmail bisa mendaftar                                                                              |
+| 15  | Dua Google API key lama belum dicabut | **±5 menit kerja Anda, nol kode.** ROI tertinggi di seluruh papan (F1)                                          |
 
 ### 0.5 Aturan yang WAJIB dipatuhi penerus
 
