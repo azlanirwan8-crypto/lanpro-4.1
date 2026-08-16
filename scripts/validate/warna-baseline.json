@@ -36,7 +36,7 @@
   "src/features/qa/components/QADetailDrawer.tsx": 2,
   "src/features/qa/components/QATestCaseTable.tsx": 2,
   "src/features/sidebar/index.tsx": 1,
-  "src/features/sidebar/styles.ts": 4,
+  "src/features/sidebar/styles.ts": 1,
   "src/features/team/TeamManagementPanel.tsx": 1,
   "src/features/timeline/TimelinePanel.tsx": 13,
   "src/features/users/AdminUserPanel.tsx": 1,
