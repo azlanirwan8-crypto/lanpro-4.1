@@ -32,6 +32,7 @@ import { TERMINAL_STATUSES } from "./src/lib/constants";
 
 
 import { authenticateJWT, verifyGlobalAdmin, getJwtSecret, generateToken } from './server/middleware/auth.ts';
+import { penjagaSocket, idPemilikSocket, profilAman } from './server/middleware/socketAuth.ts';
 import healthRoutes from "./server/routes/health.routes";
 import systemRoutes from "./server/routes/system.routes";
 import auditRoutes from "./server/routes/audit.routes";
@@ -135,6 +136,23 @@ async function startServer() {
       methods: ["GET", "POST", "PUT", "DELETE"]
     }
   });
+
+  // #50 — Gerbang autentikasi koneksi Socket.IO.
+  //
+  // Sebelum ini TIDAK ADA `io.use()` sama sekali: siapa pun yang bisa menjangkau
+  // origin ini boleh menyambung tanpa token. Dibuktikan dengan klien anonim —
+  // ia menerima `presence_sync` berisi profil lengkap akun admin yang sedang
+  // login, dan berhasil menyuntikkan identitas palsu ke daftar kehadiran.
+  //
+  // Daftar origin CORS di atas BUKAN pengganti ini: origin hanya menahan
+  // browser di halaman lain, bukan skrip mana pun yang bicara langsung ke
+  // server.
+  //
+  // Identitas hasil verifikasi disimpan di `socket.data.user` dan itulah
+  // SATU-SATUNYA sumber identitas yang dipercaya di seluruh handler di bawah.
+  // Payload dari klien tetap boleh membawa data tampilan, tapi tidak boleh lagi
+  // menentukan SIAPA pengirimnya.
+  io.use(penjagaSocket);
 
   // Daftarkan instance ke registry agar modul route dapat memancarkan event
   // tanpa meng-import server.ts (yang akan membentuk lingkaran dependensi).
@@ -615,19 +633,31 @@ async function startServer() {
     });
 
     socket.on("join_presence", (user) => {
-      if (user && (user.id || user.uid)) {
-        const userId = user.uid || user.id;
-        
-        // Add or update user in global presence map
-        globalPresence.set(userId, user);
+      // #50 — identitas diambil dari token, BUKAN dari payload. Sebelumnya siapa
+      // pun bisa hadir sebagai orang lain cukup dengan menyebutkan id-nya.
+      const userId = idPemilikSocket(socket);
+      if (userId) {
+        // Data tampilan boleh datang dari klien, tapi id/uid ditimpa oleh token
+        // dan bidangnya disaring (#59) supaya PII tidak ikut disiarkan.
+        const profil = profilAman({
+          ...(user || {}),
+          id: socket.data.user.id,
+          uid: socket.data.user.uid,
+        });
+
+        globalPresence.set(userId, profil);
         globalPresenceSockets.set(socket.id, userId);
-        
+
         // Broadcast the full list of online users to everyone
         io.emit("presence_sync", Array.from(globalPresence.values()));
-        console.log(`[GLOBAL PRESENCE] User ${user.displayName || user.username || userId} joined. Total online: ${globalPresence.size}`);
+        console.log(`[GLOBAL PRESENCE] User ${profil?.displayName || profil?.username || userId} joined. Total online: ${globalPresence.size}`);
       }
     });
-    socket.on("user_connected", (userId) => {
+    socket.on("user_connected", () => {
+      // #50 — dulu userId diambil dari argumen event, sehingga socket mana pun
+      // bisa mendaftarkan diri sebagai pengguna lain dan ikut menerima pesan
+      // pribadi yang ditujukan ke orang itu.
+      const userId = idPemilikSocket(socket);
       if (userId) {
         if (!chatSockets.has(userId)) {
           chatSockets.set(userId, new Set());
@@ -647,8 +677,15 @@ async function startServer() {
 
     socket.on("send_message", (msg) => {
       // msg: { id, senderId, receiverId, message, timestamp, read }
+
+      // #50 — pengirim ditetapkan dari token. Sebelumnya `senderId` dipercaya
+      // apa adanya dari payload, jadi pesan bisa dikirim atas nama siapa pun.
+      const pengirim = idPemilikSocket(socket);
+      if (!pengirim || !msg) return;
+      msg.senderId = pengirim;
+
       // Sanitize message content to prevent XSS
-      if (msg && msg.message) {
+      if (msg.message) {
         msg.message = xss(msg.message);
       }
 
@@ -678,6 +715,17 @@ async function startServer() {
       } else if (payload && typeof payload === 'object') {
         projectId = payload.projectId || "";
         user = payload.user;
+      }
+
+      // #50 — data tampilan boleh dari payload, identitasnya tidak.
+      if (idPemilikSocket(socket)) {
+        user = profilAman({
+          ...(user || {}),
+          id: socket.data.user.id,
+          uid: socket.data.user.uid,
+        });
+      } else {
+        user = null;
       }
 
       if (!projectId) {
@@ -718,7 +766,10 @@ async function startServer() {
       }
     });
  
-    socket.on("leave_project", ({ projectId, userId }) => {
+    socket.on("leave_project", ({ projectId }) => {
+      // #50 — dulu userId datang dari payload, sehingga satu klien bisa
+      // mengeluarkan orang lain dari daftar kehadiran proyek.
+      const userId = idPemilikSocket(socket);
       socket.leave(projectId);
       if (projectPresence[projectId]) {
         projectPresence[projectId] = projectPresence[projectId].filter(u => (u.id || u.uid) !== userId);
