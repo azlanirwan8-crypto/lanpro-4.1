@@ -43,7 +43,13 @@ function ruteHapus(): RuteHapus[] {
     // `app.delete` DAN `router.delete` — qa.routes.ts memakai bentuk pertama, dan
     // pendata versi pertama melewatkannya sehingga dua rute DELETE QA lolos dari
     // pemeriksaan tanpa jejak.
-    const pola = /(?:app|router)\.delete\(\s*["']([^"']+)["']([\s\S]*?)(?:async\s*\(|\(req)/g;
+    // Penutupnya menerima TIGA bentuk: handler inline `async (`, `(req`, dan
+    // HANDLER BERNAMA seperti `getCommentsHandler);`. Bentuk ketiga sempat
+    // terlewat, dan dua dari empat rute komentar #94 karena itu tidak terdata
+    // sama sekali — pengurai yang buta sebagian lebih berbahaya daripada tidak
+    // ada pengurai.
+    const pola =
+      /(?:app|router)\.delete\(\s*["']([^"']+)["']([\s\S]*?)(?:async\s*\(|\(req|\w+\s*\)\s*;)/g;
     let m: RegExpExecArray | null;
     while ((m = pola.exec(sumber)) !== null) {
       // Komentar DIBUANG sebelum penjaganya dinilai. Tanpa ini, catatan

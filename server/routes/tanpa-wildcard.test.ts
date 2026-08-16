@@ -34,8 +34,13 @@ function semuaRute(): Rute[] {
   const hasil: Rute[] = [];
   for (const berkas of fs.readdirSync(DIR).filter((f) => f.endsWith(".routes.ts"))) {
     const sumber = fs.readFileSync(path.join(DIR, berkas), "utf8");
+    // Penutupnya menerima TIGA bentuk: handler inline `async (`, `(req`, dan
+    // HANDLER BERNAMA seperti `getCommentsHandler);`. Bentuk ketiga sempat
+    // terlewat, dan dua dari empat rute komentar #94 karena itu tidak terdata
+    // sama sekali — pengurai yang buta sebagian lebih berbahaya daripada tidak
+    // ada pengurai.
     const pola =
-      /(?:app|router)\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']([\s\S]{0,900}?)(?:async\s*\(|\(req)/g;
+      /(?:app|router)\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']([\s\S]{0,900}?)(?:async\s*\(|\(req|\w+\s*\)\s*;)/g;
     let m: RegExpExecArray | null;
     while ((m = pola.exec(sumber)) !== null) {
       hasil.push({
