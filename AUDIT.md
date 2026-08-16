@@ -217,7 +217,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 66 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 67 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -263,7 +263,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 55  | `rbac.ts:50` `!targetProjectId → next()` — RBAC no-op senyap bila nama param berbeda     |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.5  |
 | 56  | Proses Jest mencetak crash `pg` (`isIP` of undefined) saat dibongkar — exit code tetap 0 |  **F8**  | 🟡  | Rendah        |          Tidak          | `TERBUKA`                | §13.5  |
 | 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401      |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.6  |
-| 58  | `GET /metrics` terbuka TANPA autentikasi — di luar `/api/`, lolos gerbang global         |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.6  |
+| 58  | `GET /metrics` terbuka TANPA autentikasi — di luar `/api/`, lolos gerbang global         |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.6  |
 | 59  | `presence_sync` menyiarkan profil LENGKAP + matriks permission ke klien mana pun         |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.6  |
 | 60  | `POST .../tasks` buka transaksi tanpa `ROLLBACK` — koneksi balik ke pool masih terbuka   |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.8  |
 | 61  | Transaksi `POST .../tasks` hanya melingkupi penghitung, bukan INSERT task-nya           |  **F2**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu | §13.8  |
@@ -271,8 +271,9 @@ lepas. Catatan lepas selalu terlupakan.
 | 63  | Register menelan `ER_DUP_ENTRY` (MySQL) — di Postgres jadi 500, bukan pesan yang benar   |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu | §13.8  |
 | 64  | `tasks/reorder` melepas koneksi dua kali bila galat terjadi setelah `commit`             |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu | §13.8  |
 | 65  | `affectedRows` selalu `undefined` — 3 pemeriksaan mati; penjaga jendela balapan mati    |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.9  |
-| 66  | 5 rute DELETE dijaga hanya `['*']` — anggota berperan `viewer` bisa menghapus data        |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.9  |
-| 67  | `/uploads` menyajikan SEMUA berkas gambar tanpa autentikasi — bukan hanya avatar        |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.10 |
+| 66  | 5 rute DELETE dijaga hanya `['*']` — anggota berperan `viewer` bisa menghapus data        |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.9  |
+| 67  | `/uploads` menyajikan SEMUA berkas gambar tanpa autentikasi — bukan hanya avatar        |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.10 |
+| 68  | `DELETE .../tasks/:taskId/links/:linkId` TANPA `verifyProjectAccess` sama sekali        |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu         | §13.10 |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -2155,6 +2156,51 @@ apakah avatar memang disengaja publik? Bila ya, perbaikannya cukup membuang
 klausa ekstensi dan menyisakan `startsWith('avatar-')`. Bila tidak, keduanya
 dibuang dan avatar ikut lewat token — tetapi itu menuntut penyesuaian di sisi
 antarmuka pada setiap tempat avatar dirender.
+
+#### #68 🔴 `DELETE .../tasks/:taskId/links/:linkId` tanpa penjaga sama sekali
+
+`server/routes/task.routes.ts:1577`. Rute ini **tidak punya**
+`verifyProjectAccess`; yang menjaganya hanya gerbang global `authenticateJWT`.
+Siapa pun yang login — dari proyek mana pun — bisa menghapus tautan task di
+proyek orang lain hanya dengan mengetahui `taskId` dan `linkId`.
+
+**Ditemukan oleh test, bukan oleh mata.** Daftar #66 hasil pembacaan manual
+hanya memuat lima rute ber-`['*']`; yang ini luput justru karena tidak punya
+penjaga untuk dicari. Test penjaga #66 sengaja ditulis memeriksa SELURUH rute
+DELETE di 8 berkas rute, bukan hanya lima yang diputuskan — dan itulah yang
+menangkapnya.
+
+Bukan kebijakan baru: pasangan `POST`-nya (`:1530`) sudah memakai
+`['admin','manager','head','developer','member']`, dan daftar itu yang dipakai.
+
+### Kartu verifikasi gelombang 4 — #58, #66, #67, #68 SELESAI 16 Agu 2026
+
+Ketiga keputusan pemilik proyek diambil 16 Agu 2026 lewat pilihan tertulis:
+avatar tetap publik (#67), penghapusan dibatasi admin/manager/head (#66), dan
+`/metrics` dijaga token khusus (#58).
+
+| # | Terbukti | Sisa |
+| - | -------- | ---- |
+| 67 | Terhadap server berjalan tanpa kredensial: avatar tetap `200`, berkas gambar non-avatar berubah `200` → **`403`**. Berkas uji dibuat di `uploads/` (data runtime ber-gitignore) lalu dihapus | — |
+| 66 + 68 | 5 test penjaga, **4 MERAH** terhadap `main` di worktree luar repo | Penolakan `viewer` sungguhan — penjaganya STATIS; perilaku `verifyProjectAccess` sendiri diuji di `rbac.test.ts` |
+| 58 | 7 test perilaku, **5 MERAH** terhadap `main`. Terhadap server berjalan: `/metrics` → **503**, `/api/health-check` tetap `200` | Scraping dengan token sungguhan — `METRIK_TOKEN` sengaja dibiarkan kosong |
+
+⚠️ **`METRIK_TOKEN` masih KOSONG di `.env`**, jadi `/metrics` saat ini
+**dinonaktifkan (503)**. Itu perilaku yang disengaja — aman secara bawaan. Isi
+variabelnya bila Prometheus perlu kembali men-scrape; contoh pembuatannya ada di
+`.env.example`. Nilainya tidak diisi dari sisi ini karena itu rahasia milik
+pemilik proyek.
+
+⚠️ **Satu test lama sengaja diubah, dan itu bukan pelemahan.**
+`health.routes.test.ts` memuat `expect([200, 500]).toContain(status)` yang
+mengunci keadaan SEBELUM #58 — endpoint terbuka. Ia gagal setelah perubahan,
+dan justru kegagalannya membuktikan perubahan berlaku. Asersinya disesuaikan ke
+`[401, 503]` **plus** penjaminan bahwa isi metrik tidak ikut terkirim.
+
+`main` sesudah merge: tsc 0 · lint 0 · **254 test / 28 suite** · build sukses ·
+doctor SIAP JALAN. Diverifikasi di browser dengan sesi non-admin (`rido`):
+dashboard termuat penuh, avatar tetap tampil, 0 error console, dan dari log
+server 0 "Akses ditolak" · 0 `LOG ANOMALI` · 0 `query error`.
 
 ---
 
