@@ -3888,6 +3888,43 @@ Project Role : Project Owner·owner · Project Admin·admin ·
 +8 test perilaku. Gerbang: tsc 0 · lint 0 · **264 test / 29 suite** · build
 sukses · 0 error console.
 
+##### Lanjutan — tampilan peran juga ikut dibersihkan
+
+Pemilik proyek menemukan sisanya setelah dropdown diperbaiki: *"di project ada
+juga bukannya itu role project, tapi datanya beda dengan di master data"*.
+
+Benar. Dropdown sudah membaca katalog, tetapi **tampilan** peran masih
+menampilkan nilai mentah database. Layar menyebut `MANAGER`, Master Data
+menyebut `Project Manager` — dua nama untuk hal yang sama, dan wajar dikira
+data berbeda.
+
+Empat tempat lagi diperbaiki, semuanya memakai `labelPeran()` dari katalog:
+
+| Berkas | Sebelumnya |
+| ------ | ---------- |
+| `UserDetailView.tsx:1163` | nilai mentah + cadangan `"Owner"`/`"Member"` ditulis di kode |
+| `TeamManagementPanel.tsx:396` | cadangan `"Team Member"` |
+| `TeamManagementPanel.tsx:495` | cadangan `"Team Member"` |
+| `TeamManagementPanel.tsx:617` | cadangan `"Member"` |
+
+Ditambah **penanda visual**: peran yang TIDAK ada di katalog kini ditampilkan
+dengan lencana kuning beserta keterangan *"perlu dimigrasikan"*, bukan
+disamarkan sebagai peran normal. Nilai `member` yang masih tersisa di
+`ProjectMembers` karena itu langsung terlihat — dan itu memang tujuannya.
+
+##### Position ≠ System Role — pertanyaan yang wajar muncul
+
+Pemilik proyek juga bertanya apakah `Position` sama dengan System Role.
+**Tidak.** `Position` adalah **jabatan organisasi**; System Role adalah **hak
+akses**. Contoh nyata dari data sendiri: Dimas M Wibowo berjabatan
+`Project Manager` tetapi System Role-nya `Standard User` — dan itu memang
+perilaku yang benar untuk Two-Tier.
+
+Kebingungannya tetap beralasan: `jabatan` memuat nama yang mirip peran —
+`Project Manager`, `Department Head`, `QA Engineer`, `Product Owner`. Secara
+teknis tidak salah, tetapi menyulitkan pembacaan. Perlu diputuskan apakah nama
+jabatan yang bertabrakan dengan nama peran sebaiknya diubah.
+
 ⚠️ **BELUM ditutup, dan penting:** empat project role baru (System Analyst,
 Business Analyst, Developer, QA) kini **bisa dipilih**, tetapi penjaga rute
 belum mengenalinya — `verifyProjectAccess` masih memakai daftar peran lama.

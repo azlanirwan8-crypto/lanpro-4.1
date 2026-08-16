@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { katalogPeranProyek } from "../../lib/roleCatalog";
+import { katalogPeranProyek, labelPeran } from "../../lib/roleCatalog";
 import {
   Users,
   LayoutGrid,
@@ -392,8 +392,11 @@ export const TeamManagementPanel = ({
               const initials = (initialsMatch ? initialsMatch.join("") : name.substring(0, 2))
                 .substring(0, 2)
                 .toUpperCase();
-              const roleName =
-                selectedProject?.memberRoles?.[person.uid] || person?.role || "Team Member";
+              // #82 — label dari katalog Master Data, bukan nilai mentah.
+              const roleName = labelPeran(
+                peranProyek,
+                selectedProject?.memberRoles?.[person.uid] || person?.role
+              );
               const userAssignedTasks = getUserTasks(person);
               const completedTasks = userAssignedTasks.filter((t) => {
                 const st = String(t.status || "").toUpperCase();
@@ -491,8 +494,11 @@ export const TeamManagementPanel = ({
                     const initials = (initialsMatch ? initialsMatch.join("") : name.substring(0, 2))
                       .substring(0, 2)
                       .toUpperCase();
-                    const roleName =
-                      selectedProject?.memberRoles?.[person.uid] || person?.role || "Team Member";
+                    // #82 — label dari katalog Master Data.
+                    const roleName = labelPeran(
+                      peranProyek,
+                      selectedProject?.memberRoles?.[person.uid] || person?.role
+                    );
                     const userAssignedTasks = getUserTasks(person);
                     const completedTasks = userAssignedTasks.filter((t) => {
                       const st = String(t.status || "").toUpperCase();
@@ -614,9 +620,12 @@ export const TeamManagementPanel = ({
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-content-subtle font-medium">Project Role</span>
                   <span className="font-medium text-content-body capitalize">
-                    {selectedProject?.memberRoles?.[selectedProfileUser.uid] ||
-                      selectedProfileUser.role ||
-                      "Member"}
+                    {/* #82 — label dari katalog. */}
+                    {labelPeran(
+                      peranProyek,
+                      selectedProject?.memberRoles?.[selectedProfileUser.uid] ||
+                        selectedProfileUser.role
+                    ) || "—"}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">

@@ -29,7 +29,12 @@ import {
 } from "lucide-react";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { cn } from "../../lib/utils";
-import { katalogPeranSistem, katalogPeranProyek } from "../../lib/roleCatalog";
+import {
+  katalogPeranSistem,
+  katalogPeranProyek,
+  labelPeran,
+  cariPeran,
+} from "../../lib/roleCatalog";
 import { toast } from "sonner";
 import {
   updateUser,
@@ -1140,8 +1145,26 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="space-y-2 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
                     {userProjectsList.map((p) => {
                       const uId = user.id || user.uid;
-                      const roleInProject =
-                        p.memberRoles?.[uId] || (p.ownerId === uId ? "Owner" : "Member");
+
+                      // #82 — label diambil dari katalog Master Data, bukan
+                      // menampilkan nilai mentah dari database.
+                      //
+                      // Versi lama menampilkan `manager` apa adanya, sehingga
+                      // layar ini menyebut "MANAGER" sementara Master Data
+                      // menyebut "Project Manager" — dua nama untuk hal yang
+                      // sama, dan pemilik proyek wajar mengiranya data berbeda.
+                      //
+                      // Cadangannya pun dulu ditulis di kode ("Owner"/"Member").
+                      // Kini pemilik proyek dikenali dari katalog lewat kode
+                      // `owner`, dan bila peran tidak ada di katalog, KODE
+                      // MENTAHNYA yang ditampilkan — supaya nilai lama yang
+                      // belum dimigrasikan TERLIHAT, bukan disamarkan.
+                      const kodePeranProyek =
+                        p.memberRoles?.[uId] || (p.ownerId === uId ? "owner" : "");
+                      const roleInProject = kodePeranProyek
+                        ? labelPeran(peranProyek, kodePeranProyek)
+                        : "—";
+                      const peranDikenal = Boolean(cariPeran(peranProyek, kodePeranProyek));
                       const projectTasks = userTasks.filter((t) => t.projectId === p.id);
 
                       return (
@@ -1160,7 +1183,19 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             </div>
 
                             <div className="flex items-center gap-2">
-                              <span className="text-xs sm:text-[10px] font-medium uppercase px-2 py-0.5 bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-md border border-indigo-200 dark:border-indigo-800">
+                              <span
+                                className={cn(
+                                  "text-xs sm:text-[10px] font-medium uppercase px-2 py-0.5 rounded-md border",
+                                  peranDikenal
+                                    ? "bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
+                                    : "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800"
+                                )}
+                                title={
+                                  peranDikenal
+                                    ? undefined
+                                    : "Peran ini tidak ada di katalog Master Data — perlu dimigrasikan"
+                                }
+                              >
                                 {roleInProject}
                               </span>
                               {isAdmin && (
