@@ -28,7 +28,7 @@ lalu **§0.4** (tiga keputusan yang menahan sisanya). Rinciannya §19.15–§19.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **358 lulus / 37 suite**                                    | `npm test`                                   |
+| Test                | **363 lulus / 37 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -289,7 +289,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 41 BELUM · 47 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 40 BELUM · 48 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -300,57 +300,56 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 41 item
+### 1.1 BELUM SELESAI — 40 item
 
-**Sebaran per fase:** F1 2 · F2 12 · F3 1 · F6 6 · F7 7 · F8 5 · F9 2 · F10 3 · F11 1 · F12 2
+**Sebaran per fase:** F1 2 · F2 12 · F3 1 · F6 6 · F7 6 · F8 5 · F9 2 · F10 3 · F11 1 · F12 2
 
 **Masih menahan rilis production:** #30 · #46 · #69 · #70 · #87
 
-| #   | Temuan                                                                                        |  Fase   | Sev | Biaya         |   Blokir modul baru?    | Status                  | Detail |
-| --- | --------------------------------------------------------------------------------------------- | :-----: | :-: | ------------- | :---------------------: | ----------------------- | ------ |
-| 4   | ±100 endpoint tanpa validasi skema                                                            | **F7**  | 🔴  | Sedang        |      Ya (keamanan)      | `TERBUKA`               | §3     |
-| 5   | Routing palsu + 47 props di satu persimpangan                                                 | **F10** | 🔴  | Tinggi        |           Ya            | `TERBUKA`               | §5     |
-| 6   | 222 query SQL di lapisan rute, repository tak ada                                             | **F9**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §3     |
-| 7   | 59% baris kode di 37 berkas > 500 baris                                                       | **F10** | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §2     |
-| 8   | 1.313 `any` melemahkan seluruh jaring tipe                                                    | **F8**  | 🟠  | Sedang        |           Ya            | `TERBUKA`               | §7     |
-| 9   | Rasio test ±1 : 1.000 baris                                                                   | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §7     |
-| 13  | 28 berkas `dark:` + 48 hex di luar token                                                      | **F12** | 🟡  | Sedang        |          Tidak          | `TERBUKA`               | §8     |
-| 14  | Kontras sidebar & jarak target sentuh                                                         | **F12** | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §8     |
-| 15  | Dua Google API key lama belum dicabut                                                         | **F1**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` pemilik      | §6     |
-| 16  | **Logika aplikasi belum pernah diaudit**                                                      | **F2**  | 🔴  | Sedang        |           Ya            | `TERBUKA`               | §13    |
-| 17  | **UI belum pernah diaudit di balik login**                                                    | **F3**  | 🔴  | Sedang        |           Ya            | `MENUNGGU` login        | §14    |
-| 18  | notebook-lm rusak di dua sisi                                                                 | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
-| 19  | `POST /api/db-query` tanpa penjaga read-only                                                  | **F2**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
-| 20  | Kode mati DB Explorer                                                                         | **F2**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
-| 21  | `authStore` & `uiStore` menganggur                                                            | **F10** | 🟡  | Rendah        |          Tidak          | `DITUNDA` (disengaja)   | §5.3   |
-| 25  | Fondasi `email.service.ts`                                                                    | **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email | §1.5   |
-| 26  | **Email selamat datang** (poin 2)                                                             | **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email | §1.5   |
-| 27  | **Lupa password → password random** (poin 3)                                                  | **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email | §1.5   |
-| 28  | **Digest task pending + jumlah** (poin 4)                                                     | **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email | §1.5   |
-| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)                   | **F11** | 🔴  | Tinggi        |    Blokir production    | `MENUNGGU` desain       | §1.5   |
-| 40  | `tsconfig.json` tanpa `strict` — penyempitan diskriminan boolean tidak bekerja                | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §0.6   |
-| 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend                  | **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik      | §0.4   |
-| 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan             | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
-| 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — celah daftar, DAN membatalkan asumsi kuota F11              | **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik      | §0.4   |
-| 47  | `discussion_point_comments` punya KOLOM KEMBAR camelCase + snake_case                         | **F9**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
-| 53  | `POST /api/auth/logout` tanpa auth, `userId` sembarang → NULL-kan sesi siapa pun              | **F2**  | 🔴  | Rendah        |          Tidak          | `TERBUKA`               | §13.5  |
-| 54  | `rbac.ts:27` identitas boleh datang dari `x-user-id`/query/body — ranjau impersonasi          | **F2**  | 🟠  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.5  |
-| 55  | `rbac.ts:50` `!targetProjectId → next()` — RBAC no-op senyap bila nama param berbeda          | **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.5  |
-| 56  | Proses Jest mencetak crash `pg` (`isIP` of undefined) saat dibongkar — exit code tetap 0      | **F8**  | 🟡  | Rendah        |          Tidak          | `TERBUKA`               | §13.5  |
-| 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401           | **F2**  | ⚪  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.6  |
-| 69  | `POST /api/users/:userId/notifications` tanpa cek kepemilikan — GET & PUT punya               | **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` keputusan    | §13.11 |
-| 70  | Rute `/api/v1/meetings/:id*` tanpa penjaga proyek — baca & ubah rapat lintas proyek           | **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `MENUNGGU` keputusan    | §13.11 |
-| 71  | `project-modules` POST/PUT/DELETE tanpa penjaga — CRUD modul lintas proyek                    | **F2**  | 🟠  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan    | §13.11 |
-| 74  | 7 pengambil data tanpa penjaga respons basi — data proyek lama menimpa proyek baru            | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §13.12 |
-| 77  | 4 kerentanan `moderate` di dependensi — hanya tertutup lewat kenaikan versi mayor             | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
-| 81  | `ProjectMembers.parentAdminId` ditulis tapi TIDAK PERNAH dibaca — 6 baris, nol `SELECT`       | **F7**  | 🟡  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan    | §19.2  |
-| 83  | `Users.department` & `Users.position` TIDAK fungsional — rancangan §19.4 belum bisa jalan     | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.13 |
-| 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)          | **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
-| 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)          | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
-| 87  | `effectiveRole` membawa DUA kosakata peran — system role & project role dalam satu nilai      | **F7**  | 🔴  | Sedang        | Ya (blokir production)  | `TERBUKA`               | §19.15 |
-| 90  | Penjaga boot kini mendata NOL penjaga — ia mengawasi `verifyProjectAccess` yang sudah pensiun | **F7**  | 🟠  | Sangat rendah |          Tidak          | `TERBUKA`               | §19.24 |
+| #   | Temuan                                                                                    |  Fase   | Sev | Biaya         |   Blokir modul baru?    | Status                  | Detail |
+| --- | ----------------------------------------------------------------------------------------- | :-----: | :-: | ------------- | :---------------------: | ----------------------- | ------ |
+| 4   | ±100 endpoint tanpa validasi skema                                                        | **F7**  | 🔴  | Sedang        |      Ya (keamanan)      | `TERBUKA`               | §3     |
+| 5   | Routing palsu + 47 props di satu persimpangan                                             | **F10** | 🔴  | Tinggi        |           Ya            | `TERBUKA`               | §5     |
+| 6   | 222 query SQL di lapisan rute, repository tak ada                                         | **F9**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §3     |
+| 7   | 59% baris kode di 37 berkas > 500 baris                                                   | **F10** | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §2     |
+| 8   | 1.313 `any` melemahkan seluruh jaring tipe                                                | **F8**  | 🟠  | Sedang        |           Ya            | `TERBUKA`               | §7     |
+| 9   | Rasio test ±1 : 1.000 baris                                                               | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §7     |
+| 13  | 28 berkas `dark:` + 48 hex di luar token                                                  | **F12** | 🟡  | Sedang        |          Tidak          | `TERBUKA`               | §8     |
+| 14  | Kontras sidebar & jarak target sentuh                                                     | **F12** | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §8     |
+| 15  | Dua Google API key lama belum dicabut                                                     | **F1**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` pemilik      | §6     |
+| 16  | **Logika aplikasi belum pernah diaudit**                                                  | **F2**  | 🔴  | Sedang        |           Ya            | `TERBUKA`               | §13    |
+| 17  | **UI belum pernah diaudit di balik login**                                                | **F3**  | 🔴  | Sedang        |           Ya            | `MENUNGGU` login        | §14    |
+| 18  | notebook-lm rusak di dua sisi                                                             | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
+| 19  | `POST /api/db-query` tanpa penjaga read-only                                              | **F2**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
+| 20  | Kode mati DB Explorer                                                                     | **F2**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
+| 21  | `authStore` & `uiStore` menganggur                                                        | **F10** | 🟡  | Rendah        |          Tidak          | `DITUNDA` (disengaja)   | §5.3   |
+| 25  | Fondasi `email.service.ts`                                                                | **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email | §1.5   |
+| 26  | **Email selamat datang** (poin 2)                                                         | **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email | §1.5   |
+| 27  | **Lupa password → password random** (poin 3)                                              | **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email | §1.5   |
+| 28  | **Digest task pending + jumlah** (poin 4)                                                 | **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email | §1.5   |
+| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)               | **F11** | 🔴  | Tinggi        |    Blokir production    | `MENUNGGU` desain       | §1.5   |
+| 40  | `tsconfig.json` tanpa `strict` — penyempitan diskriminan boolean tidak bekerja            | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §0.6   |
+| 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend              | **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik      | §0.4   |
+| 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan         | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
+| 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — celah daftar, DAN membatalkan asumsi kuota F11          | **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik      | §0.4   |
+| 47  | `discussion_point_comments` punya KOLOM KEMBAR camelCase + snake_case                     | **F9**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
+| 53  | `POST /api/auth/logout` tanpa auth, `userId` sembarang → NULL-kan sesi siapa pun          | **F2**  | 🔴  | Rendah        |          Tidak          | `TERBUKA`               | §13.5  |
+| 54  | `rbac.ts:27` identitas boleh datang dari `x-user-id`/query/body — ranjau impersonasi      | **F2**  | 🟠  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.5  |
+| 55  | `rbac.ts:50` `!targetProjectId → next()` — RBAC no-op senyap bila nama param berbeda      | **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.5  |
+| 56  | Proses Jest mencetak crash `pg` (`isIP` of undefined) saat dibongkar — exit code tetap 0  | **F8**  | 🟡  | Rendah        |          Tidak          | `TERBUKA`               | §13.5  |
+| 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401       | **F2**  | ⚪  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.6  |
+| 69  | `POST /api/users/:userId/notifications` tanpa cek kepemilikan — GET & PUT punya           | **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` keputusan    | §13.11 |
+| 70  | Rute `/api/v1/meetings/:id*` tanpa penjaga proyek — baca & ubah rapat lintas proyek       | **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `MENUNGGU` keputusan    | §13.11 |
+| 71  | `project-modules` POST/PUT/DELETE tanpa penjaga — CRUD modul lintas proyek                | **F2**  | 🟠  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan    | §13.11 |
+| 74  | 7 pengambil data tanpa penjaga respons basi — data proyek lama menimpa proyek baru        | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §13.12 |
+| 77  | 4 kerentanan `moderate` di dependensi — hanya tertutup lewat kenaikan versi mayor         | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
+| 81  | `ProjectMembers.parentAdminId` ditulis tapi TIDAK PERNAH dibaca — 6 baris, nol `SELECT`   | **F7**  | 🟡  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan    | §19.2  |
+| 83  | `Users.department` & `Users.position` TIDAK fungsional — rancangan §19.4 belum bisa jalan | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.13 |
+| 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)      | **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
+| 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)      | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
+| 87  | `effectiveRole` membawa DUA kosakata peran — system role & project role dalam satu nilai  | **F7**  | 🔴  | Sedang        | Ya (blokir production)  | `TERBUKA`               | §19.15 |
 
-### 1.2 SUDAH SELESAI — 47 item
+### 1.2 SUDAH SELESAI — 48 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -404,6 +403,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 89  | TIGA operasi tingkat proyek tak punya modul di §19.5 — dashboard-layout, sunting, methodology |  **F7**  | 🟠  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §19.21 |
 | 72  | ~~16 rute POST/PUT/PATCH ber-`['*']`~~ seluruh 31 rute wildcard dijaga matriks                |  **F2**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §19.21 |
 | 76  | ~~Otorisasi tidak deny-by-default~~ matriks terpusat, 54/54 rute, `MODE=TOLAK`                |  **F7**  | 🔴  | Sedang        | Ya (blokir production) | `SELESAI` 16 Agu | §19.24 |
+| 90  | ~~Penjaga boot mendata NOL penjaga~~ kini mengawasi penjaga matriks + kombinasi mati          |  **F7**  | 🟠  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §19.24 |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -4793,3 +4793,35 @@ memberi rasa aman.
 
 **Perbaikannya:** `jagaProyek` ikut mendaftarkan `(modul, aksi)`-nya, dan
 penjaga boot memvalidasinya terhadap `MATRIKS_PROYEK`. Belum dikerjakan.
+
+### 19.25 #90 — penjaga boot hidup kembali
+
+Laporan boot sesudah tahap 4 tutup berbunyi **`0 penjaga rute terdaftar`**. Itu
+benar, dan justru itu masalahnya: penjaga boot hanya mengawasi
+`verifyProjectAccess`, yang sudah pensiun tanpa pemakai. Ia **mengukur himpunan
+kosong** — akan selalu melapor bersih apa pun yang terjadi pada 54 rute.
+
+Bentuk kegagalan §13.14, dan yang membuatnya layak dicatat: **ia lahir justru
+dari keberhasilan.** Memindahkan seluruh rute ke penjaga baru mematikan
+gerbangnya sendiri, tanpa satu pun test berubah warna.
+
+`jagaProyek` kini mendaftarkan `(modul, aksi)`-nya. Yang divalidasi saat boot
+adalah dua hal yang **tidak bisa ditangkap kompilator maupun test statis**:
+
+| Yang ditangkap                                                   | Kenapa tidak ketahuan dengan cara lain                                                                                                                                            |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Modul asing** — nama modul di luar `MATRIKS_PROYEK`            | Salah ketik menolak semua orang **diam-diam**; tidak ada galat                                                                                                                    |
+| **Kombinasi mati** — modul+aksi yang tidak mengizinkan SIAPA PUN | `jagaProyek("dashboard","U")` sah secara tipe, tetapi §19.5 memberi `dashboard` hanya `R`. Rutenya mustahil dipakai, dan baru ketahuan sebagai keluhan pengguna berbulan kemudian |
+
+Keduanya **menjatuhkan boot** dalam `MODE = TOLAK`.
+
+#### Laporan boot sungguhan sekarang
+
+```
+[RBAC] 50 penjaga matriks · 0 penjaga lama · 0 ber-["*"] polos · 0 korslet (#73)
+```
+
+**50 + 1 `jagaHapusProyek` + 3 `jagaSetelanProyek` = 54.** Dua penjaga terakhir
+tidak didaftarkan karena **tidak menerima parameter** — tidak ada nama modul
+yang bisa salah ketik di sana, jadi tidak ada yang perlu divalidasi. Angka 50
+bukan kebocoran; ia bisa dijelaskan seluruhnya.
