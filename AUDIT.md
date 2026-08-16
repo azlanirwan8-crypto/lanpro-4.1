@@ -6019,3 +6019,61 @@ kegagalan yang §13.14 catat: gerbang dinyatakan lulus tanpa pernah diuji.
 
 **Ia tetap `MENUNGGU` sampai pemilik proyek menyatakan kedua kunci sudah
 dicabut.**
+
+### 19.45 Audit tema gelap — diminta pemilik proyek, hasilnya BELUM bersih
+
+Diukur 16 Agu 2026 di atas 47 berkas yang belum di-commit (pencabutan `dark:`).
+
+#### Ringkasan angka
+
+| Yang diukur                                         |  Jumlah | Sebaran        |
+| --------------------------------------------------- | ------: | -------------- |
+| Sisa kelas `dark:`                                  |  **13** | hanya 2 berkas |
+| Kelas warna KERAS netral (`slate`/`gray`/`white`/…) | **964** | **91 berkas**  |
+| Nilai `#hex` di luar token                          | **569** | 27 berkas      |
+
+Pencabutan `dark:` sudah 97,6% selesai, tetapi **itu baru separuh pekerjaan.**
+Mencabut varian gelap tanpa mengganti warna kerasnya menjadi token berarti
+komponennya **berhenti punya mode gelap sama sekali** — bukan menjadi konsisten.
+
+#### Temuan pokok: Dashboard akan jadi PULAU TERANG
+
+`src/features/dashboard/styles.ts` memuat warna keras **tanpa pasangan gelap**
+pada hampir seluruh permukaannya:
+
+| Gaya                                                                                        | Kelas yang bertahan terang                 |
+| ------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `healthCard` · `statCard` · `chartCard` · `actionCard` · `statCardRose` · `actionCardSlate` | `bg-white`                                 |
+| `headerTitle` · `healthLabelBottom` · `statValue` · `chartTitle`                            | `text-slate-900` / `text-slate-800`        |
+| `header` · `healthCard` · `statCard`                                                        | `border-slate-200` / `border-slate-100/80` |
+
+Sisa aplikasi sudah memakai token semantik (`bg-surface`, `text-content`) yang
+ikut berubah di `html.dark`. Dashboard tidak. Akibatnya bukan "warna kurang
+pas", melainkan **kartu putih menyala di dalam kerangka gelap** — dan teks
+`text-slate-900` di atasnya justru tetap terbaca, sehingga cacatnya tidak
+terlihat sebagai teks hilang, melainkan sebagai silau.
+
+#### Dua sisa di `issues/styles.ts`
+
+| Gaya       | Masalah                                                                                                                          |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `toolbar`  | `border-slate-200/80` tanpa pasangan gelap, padahal latarnya punya `dark:bg-slate-800/30` — **garis terang di atas latar gelap** |
+| `tableRow` | memakai `bg-slate-50/70` dan `dark:hover:bg-slate-800/50`; hover terangnya tidak ditimpa                                         |
+
+#### Kesimpulan jujur
+
+**Tema gelap LanPro belum bersih.** Yang sudah dikerjakan Antigravity nyata dan
+besar — 532 → 13 — tetapi pekerjaan yang tersisa **lebih besar dari yang
+tercabut**: 964 kelas warna keras di 91 berkas, dan 569 hex di 27 berkas.
+
+Ini memperbesar #13 dan #14, bukan menutupnya. Urutan yang benar:
+
+1. **Ganti warna keras menjadi token** — itu yang membuat gelap bekerja.
+2. Baru cabut `dark:` yang jadi berlebihan.
+
+Mencabut lebih dulu meninggalkan komponen yang **terkunci terang**, dan itulah
+keadaan Dashboard sekarang.
+
+⚠️ **Belum diverifikasi di layar.** Analisis ini statis terhadap kelas. Yang
+membuktikannya hanya menyalakan mode gelap lewat antarmuka dan membuka Dashboard
+— dan itu memerlukan sesi login pemilik proyek (§0.5 aturan 5).
