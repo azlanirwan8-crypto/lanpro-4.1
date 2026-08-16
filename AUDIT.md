@@ -217,7 +217,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 58 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 63 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -265,6 +265,11 @@ lepas. Catatan lepas selalu terlupakan.
 | 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401      |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.6  |
 | 58  | `GET /metrics` terbuka TANPA autentikasi — di luar `/api/`, lolos gerbang global         |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.6  |
 | 59  | `presence_sync` menyiarkan profil LENGKAP + matriks permission ke klien mana pun         |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.6  |
+| 60  | `POST .../tasks` buka transaksi tanpa `ROLLBACK` — koneksi balik ke pool masih terbuka   |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `TERBUKA`                | §13.8  |
+| 61  | Transaksi `POST .../tasks` hanya melingkupi penghitung, bukan INSERT task-nya           |  **F2**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`                | §13.8  |
+| 62  | Hapus proyek memakai kode galat MySQL; di Postgres `continue` dalam transaksi mustahil   |  **F2**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`                | §13.8  |
+| 63  | Register menelan `ER_DUP_ENTRY` (MySQL) — di Postgres jadi 500, bukan pesan yang benar   |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.8  |
+| 64  | `tasks/reorder` melepas koneksi dua kali bila galat terjadi setelah `commit`             |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.8  |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -1856,6 +1861,105 @@ build sukses · doctor SIAP JALAN.
 
 Dua sisa di kolom kanan sengaja tidak dipaksakan tertutup. Keduanya butuh
 memancing kejadian yang menuntut kredensial sungguhan, dan itu tidak dilakukan.
+
+### 13.8 Temuan audit F2 — gelombang 2 (task · project · transaksi), 16 Agu 2026
+
+Sasaran gelombang ini: **penanganan error & rollback transaksi**, salah satu dari
+9 area §13.1 yang sebelumnya belum tersentuh. Semua temuan hasil pembacaan kode;
+tidak ada yang dipicu terhadap server hidup, dan tidak ada source yang diubah.
+
+Benang merahnya satu: **sisa-sisa MySQL di basis kode yang kini murni Postgres.**
+Ketiganya (#60, #62, #63) tidak menghasilkan error saat build maupun test — ia
+hanya diam sampai jalur galatnya benar-benar terlewati.
+
+#### #60 🔴 `POST /api/projects/:projectId/tasks` membuka transaksi tanpa `ROLLBACK`
+
+`server/routes/task.routes.ts:290` `START TRANSACTION` → `:306` `COMMIT`.
+`catch` di `:468` **tidak** memanggil rollback, dan `finally` di `:471`
+mengembalikan koneksi ke pool.
+
+Yang membuat ini serius adalah perilaku pelepasannya. `src/lib/db.ts:255`:
+
+```ts
+release: () => { try { client.release(); } catch {} },
+```
+
+Tidak ada reset, tidak ada rollback. Jadi bila salah satu query di antara baris
+290 dan 306 gagal — `SELECT … FOR UPDATE` bentrok kunci, atau `UPDATE` gagal —
+koneksi kembali ke pool dengan **transaksi masih terbuka**, memegang kunci baris
+`Projects`. Permintaan berikutnya yang mengambil koneksi itu mewarisi transaksi
+tersebut.
+
+Bahwa pola yang benar sudah dikenal di repo ini terlihat di
+`server/routes/project.routes.ts:498-499`, yang memanggil `connection.rollback()`
+di `catch`. Rute task hanya tidak mengikutinya. Adapter juga sudah menyediakan
+`beginTransaction`/`commit`/`rollback` (`src/lib/db.ts:246-254`), tapi rute ini
+memakai SQL mentah.
+
+#### #61 🟠 Transaksinya hanya melingkupi penghitung, bukan task-nya
+
+Masih di rute yang sama: `COMMIT` terjadi di baris 306, sedangkan `INSERT` task
+baru berlangsung jauh sesudahnya. Artinya `taskCounter` sudah bertambah permanen
+sebelum task-nya ada. Bila pembuatan task gagal, penghitung tetap termakan dan
+penomoran `PROJECTKEY-n` berlubang.
+
+Tidak berbahaya bagi data, tapi bertentangan dengan komentar di atasnya sendiri
+yang menyebut "atomic increment-and-read … to prevent race conditions".
+
+#### #62 🟠 Hapus proyek: kode galat MySQL & `continue` yang mustahil di Postgres
+
+`server/routes/project.routes.ts:477-490` menjalankan 22 perintah `DELETE`
+berurutan di dalam satu transaksi, dan sengaja melewati tabel yang tidak ada:
+
+```ts
+if (execError.code === "ER_NO_SUCH_TABLE" || execError.code === "ER_BAD_TABLE_ERROR" …)
+  continue;
+```
+
+Dua hal salah sekaligus:
+
+1. `ER_NO_SUCH_TABLE` dan `ER_BAD_TABLE_ERROR` adalah kode **MySQL**. Postgres
+   memakai `42P01`, jadi cabang ini tidak pernah tercapai.
+2. Bahkan seandainya kodenya benar, `continue` tetap tidak bisa bekerja: di
+   Postgres, satu galat **membatalkan seluruh transaksi**. Perintah berikutnya
+   pasti gagal dengan "current transaction is aborted".
+
+Akibatnya satu tabel yang hilang membuat seluruh penghapusan gagal, sementara
+pesan yang sampai ke pengguna menyalahkan "kendala integritas database".
+
+#### #63 🟠 Register menelan kode duplikat milik MySQL
+
+`server/routes/auth.routes.ts:400`:
+
+```ts
+if (insertError.code === "ER_DUP_ENTRY" || insertError.errno === 1062) { … }
+else { throw insertError; }
+```
+
+Postgres memakai `23505` untuk pelanggaran keunikan, jadi cabang penelan itu
+tidak pernah tercapai dan galatnya **selalu** dilempar ke `catch` luar. Alih-alih
+jawaban 201 dengan pesan "hubungi Admin untuk diaktifkan", pendaftaran dengan
+email yang sudah ada menghasilkan **500 "Terjadi kesalahan internal server"**.
+
+**Belum dipicu terhadap server hidup** — membuktikannya berarti mencoba membuat
+akun, dan itu tidak dilakukan.
+
+#### #64 🟡 `tasks/reorder` berpotensi melepas koneksi dua kali
+
+`server/routes/task.routes.ts:501-515`. `connection.release()` dipanggil di dalam
+`try` setelah `commit`, lalu `catch` memanggil `rollback()` **dan** `release()`
+lagi. Bila ada yang gagal setelah `commit` — misalnya pemancaran socket di
+bawahnya — koneksi yang sudah dilepas akan di-rollback dan dilepas ulang.
+
+Dampaknya kecil karena `release()` membungkus dirinya dengan `try/catch`, tapi
+`rollback()` pada koneksi yang sudah kembali ke pool bisa mengenai transaksi
+milik permintaan lain.
+
+#### Yang belum tersentuh sesudah gelombang 2
+
+Masih `TERBUKA` penuh: 104 endpoint, perhitungan (progress/sprint/KPI/timeline —
+baru diperiksa sekilas, pembagiannya sudah dijaga `=== 0`), alur state antar
+view, race condition, alur unggah–simpan–tampil. Berikutnya `qa` (33 query).
 
 ---
 
