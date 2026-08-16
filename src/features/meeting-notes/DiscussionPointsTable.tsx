@@ -388,7 +388,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             className={cn(
               "inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-all border shadow-2xs cursor-pointer shrink-0",
               showAiAssistant
-                ? "bg-surface-muted hover:bg-slate-200 text-content-body border-border-subtle"
+                ? "bg-surface-muted hover:bg-surface-strong text-content-body border-border-subtle"
                 : "bg-indigo-50 hover:bg-indigo-100/80 text-primary border-indigo-100"
             )}
           >
@@ -531,7 +531,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 type="button"
                 onClick={saveEdit}
                 disabled={isSaving}
-                className="px-5 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-white rounded-md text-xs font-medium shadow-xs disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs disabled:opacity-50 cursor-pointer"
               >
                 {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
               </button>
@@ -845,7 +845,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           type="button"
                           onClick={() => handleLiveQuickAdd()}
                           disabled={isSaving || !quickConcern.trim()}
-                          className="px-3 py-1.5 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-40 text-white rounded-md text-xs font-medium shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
+                          className="px-3 py-1.5 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
                           title="Tambah Poin"
                         >
                           <Plus className="w-3.5 h-3.5" />
@@ -982,7 +982,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           className={cn(
                             "px-3.5 py-2 rounded-2xl relative shadow-soft group",
                             isMine
-                              ? "bg-indigo-600 text-white rounded-br-sm"
+                              ? "bg-indigo-600 text-content-inverse rounded-br-sm"
                               : "bg-surface text-content-strong border border-border-subtle rounded-bl-sm"
                           )}
                         >

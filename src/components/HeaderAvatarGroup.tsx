@@ -81,7 +81,7 @@ export const HeaderAvatarGroup: React.FC<HeaderAvatarGroupProps> = ({
             <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white absolute bottom-0 right-0 z-20"></span>
 
             {/* Tooltip Nama Pengguna */}
-            <div className="absolute top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-slate-800 text-white text-xs sm:text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-30 flex flex-col items-center">
+            <div className="absolute top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-surface-inverse text-content-inverse text-xs sm:text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-30 flex flex-col items-center">
               <span className="font-medium">
                 {member.displayName || member.name || member.username || "Anggota Tim"}{" "}
                 {isCurrentUser ? "(Anda)" : ""}

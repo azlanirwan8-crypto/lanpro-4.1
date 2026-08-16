@@ -83,13 +83,13 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2.5 bg-surface-muted hover:bg-slate-200 text-content-body text-xs font-medium uppercase tracking-wider rounded-md transition-all cursor-pointer"
+                className="px-4 py-2.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium uppercase tracking-wider rounded-md transition-all cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-medium uppercase tracking-wider rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+                className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
               >
                 <Plus className="w-4 h-4" /> Buat Dokumen
               </button>

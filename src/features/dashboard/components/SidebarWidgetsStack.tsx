@@ -65,7 +65,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             <Zap className="w-4 h-4 text-indigo-500" /> My Active Tasks ({myActiveTasks.length})
           </h3>
           {myActiveTasks.some((task) => isDueSoon24h(task.endDate)) && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-white animate-pulse shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-content-inverse animate-pulse shrink-0">
               ⏰ Urgen (24j)
             </span>
           )}
@@ -96,7 +96,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                       {task.key}
                     </div>
                     {isDueSoon24h(task.endDate) && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-white animate-pulse">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
@@ -128,7 +128,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             {blockedTasks.length})
           </h3>
           {blockedTasks.some((task) => isDueSoon24h(task.endDate)) && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-white animate-pulse shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-content-inverse animate-pulse shrink-0">
               ⏰ Urgen (24j)
             </span>
           )}
@@ -159,7 +159,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                       {task.key}
                     </div>
                     {isDueSoon24h(task.endDate) && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-white animate-pulse">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
@@ -222,7 +222,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             <Zap className="w-4 h-4 text-amber-500" /> Due Soon (3 Days) ({dueSoonTasks.length})
           </h3>
           {dueSoonTasks.some((task) => isDueSoon24h(task.endDate)) && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-white animate-pulse shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-content-inverse animate-pulse shrink-0">
               ⏰ Urgen (24j)
             </span>
           )}
@@ -253,7 +253,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                       {task.key}
                     </div>
                     {isDueSoon24h(task.endDate) && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-white animate-pulse">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
@@ -346,7 +346,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </div>
 
       {/* Live Activity (24h) */}
-      <div className="bg-slate-800 rounded-xl p-5 shadow-soft-lg text-white relative overflow-hidden">
+      <div className="bg-surface-inverse rounded-xl p-5 shadow-soft-lg text-content-inverse relative overflow-hidden">
         <div className="absolute top-0 right-0 -translate-y-4 translate-x-4 opacity-10 pointer-events-none">
           <Globe className="w-32 h-32" />
         </div>
@@ -362,7 +362,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
                 <div>
                   <div className="text-xs sm:text-[11px] text-content-subtle font-medium leading-tight">
-                    <span className="text-white font-medium">{author}</span>{" "}
+                    <span className="text-content-inverse font-medium">{author}</span>{" "}
                     {humanizeActivityAction(log.action)}
                   </div>
                   <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle mt-0.5">
@@ -377,7 +377,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
         </div>
         <button
           onClick={() => setCurrentView("activity")}
-          className="w-full mt-4 py-3 min-h-11 text-xs font-medium uppercase tracking-wider text-white bg-surface/10 hover:bg-surface/20 rounded-lg transition-colors border border-white/10 cursor-pointer"
+          className="w-full mt-4 py-3 min-h-11 text-xs font-medium uppercase tracking-wider text-content-inverse bg-surface/10 hover:bg-surface/20 rounded-lg transition-colors border border-white/10 cursor-pointer"
         >
           View Full Audit Log
         </button>

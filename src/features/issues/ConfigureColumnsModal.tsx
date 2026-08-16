@@ -90,7 +90,9 @@ export const ConfigureColumnsModal: React.FC<ConfigureColumnsModalProps> = ({
                                         : "bg-surface border-border-subtle"
                                     )}
                                   >
-                                    {col.visible && <Check className="w-3 h-3 text-white" />}
+                                    {col.visible && (
+                                      <Check className="w-3 h-3 text-content-inverse" />
+                                    )}
                                   </div>
                                   <span className="text-xs font-medium text-content-strong">
                                     {col.label}
@@ -112,7 +114,7 @@ export const ConfigureColumnsModal: React.FC<ConfigureColumnsModalProps> = ({
           <div className="px-5 py-3.5 border-t border-border-faint flex justify-end items-center gap-2 bg-surface-sunken/50">
             <button
               onClick={onClose}
-              className="px-4 py-2 font-medium bg-primary hover:bg-primary-hover active:bg-primary-active text-white rounded-md transition-all text-xs shadow-xs cursor-pointer"
+              className="px-4 py-2 font-medium bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md transition-all text-xs shadow-xs cursor-pointer"
             >
               Close
             </button>

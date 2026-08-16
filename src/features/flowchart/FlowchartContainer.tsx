@@ -2495,7 +2495,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 </p>
                 <button
                   onClick={openCreateModal}
-                  className="mt-4 flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white font-medium p-2.5 px-5 rounded-xl text-xs shadow-md transition-all active:scale-95"
+                  className="mt-4 flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-content-inverse font-medium p-2.5 px-5 rounded-xl text-xs shadow-md transition-all active:scale-95"
                 >
                   <Plus className="w-4 h-4" /> Tambah Dokumen Baru
                 </button>
@@ -2646,7 +2646,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           </h4>
                           <button
                             onClick={openUploadDocumentModal}
-                            className="p-2 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded text-xs transition-colors cursor-pointer shadow-soft active:scale-95 flex items-center gap-2"
+                            className="p-2 bg-violet-600 hover:bg-violet-700 text-content-inverse font-medium rounded text-xs transition-colors cursor-pointer shadow-soft active:scale-95 flex items-center gap-2"
                             title="Upload Dokumen Baru"
                           >
                             <Plus className="w-4 h-4" /> Tambah Dokumen
@@ -2740,7 +2740,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           className={cn(
                             "p-2 rounded-lg transition-all",
                             activeTool === "select"
-                              ? "bg-violet-650 text-white shadow-md scale-105"
+                              ? "bg-violet-650 text-content-inverse shadow-md scale-105"
                               : "text-slate-650 hover:bg-surface-muted"
                           )}
                           title="Pointer Selector tool"
@@ -2756,7 +2756,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           className={cn(
                             "p-2 rounded-lg transition-all",
                             activeTool === "hand"
-                              ? "bg-violet-650 text-white shadow-md scale-105"
+                              ? "bg-violet-650 text-content-inverse shadow-md scale-105"
                               : "text-slate-650 hover:bg-surface-muted"
                           )}
                           title="Hand Panner tool"
@@ -2764,7 +2764,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           <Hand className="w-4 h-4" />
                         </button>
 
-                        <div className="w-6 h-px bg-slate-200" />
+                        <div className="w-6 h-px bg-surface-strong" />
 
                         {/* Quick Sticky Note Adder */}
                         <button
@@ -2825,7 +2825,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           </span>
                         </button>
 
-                        <div className="w-6 h-px bg-slate-200" />
+                        <div className="w-6 h-px bg-surface-strong" />
 
                         {/* Quick tutorial indicator */}
                         <div className="text-content-subtle hover:text-violet-600 transition-colors cursor-pointer">
@@ -2846,7 +2846,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           "absolute inset-0 w-full h-full overflow-hidden z-0 transition-colors duration-300 rounded-xl",
                           canvasTheme === "miro"
                             ? "bg-surface/95 text-slate-850 grid-dots-light"
-                            : "bg-[#0a1124] text-sky-100 grid-blueprint-dark border-slate-800"
+                            : "bg-[#0a1124] text-sky-100 grid-blueprint-dark border-border-inverse"
                         )}
                         onMouseDown={handleCanvasMouseDown}
                         onMouseMove={handleCanvasMouseMove}
@@ -3019,7 +3019,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                         {/* Miro Coordinate & Element Stats Hover HUD overlay (HIDDEN AS REQUESTED) */}
                         {/* <div className={cn(
-              "absolute bottom-16 z-30 p-1.5 px-3 bg-slate-900/95 backdrop-blur-sm border border-slate-800 text-content-subtle shadow-xl rounded-xl flex items-center gap-2 text-xs sm:text-[10px] font-mono select-none transition-all duration-300",
+              "absolute bottom-16 z-30 p-1.5 px-3 bg-slate-900/95 backdrop-blur-sm border border-border-inverse text-content-subtle shadow-xl rounded-xl flex items-center gap-2 text-xs sm:text-[10px] font-mono select-none transition-all duration-300",
               // HUD hidden coordinate info
               false ? "left-[356px]" : "left-4"
             )}>
@@ -3084,7 +3084,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             <Redo className="w-3.5 h-3.5" />
                           </button>
 
-                          <div className="w-px h-5 bg-slate-200 mx-1" />
+                          <div className="w-px h-5 bg-surface-strong mx-1" />
 
                           {/* Auto-Align Layout Engine */}
                           <button
@@ -3124,7 +3124,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </span>
                           </button>
 
-                          <div className="w-px h-5 bg-slate-200 mx-1" />
+                          <div className="w-px h-5 bg-surface-strong mx-1" />
 
                           {/* Export JPG Image */}
                           <button
@@ -3163,7 +3163,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           {isWorkspaceEditable ? (
                             <button
                               onClick={() => handleSaveWorkspace()}
-                              className="p-2 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-xl flex items-center gap-1.5 transition-all shadow-soft active:scale-95"
+                              className="p-2 bg-violet-600 hover:bg-violet-700 text-content-inverse font-medium rounded-xl flex items-center gap-1.5 transition-all shadow-soft active:scale-95"
                               title="Simpan seluruh flowchart ini ke database"
                             >
                               <Save className="w-3.5 h-3.5" />
@@ -3175,7 +3175,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </div>
                           )}
 
-                          <div className="w-px h-5 bg-slate-200 mx-1" />
+                          <div className="w-px h-5 bg-surface-strong mx-1" />
 
                           {/* Clear Canvas */}
                           <button
@@ -3186,13 +3186,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             <RefreshCw className="w-3.5 h-3.5 text-rose-500" />
                           </button>
 
-                          <div className="w-px h-5 bg-slate-200 mx-1" />
+                          <div className="w-px h-5 bg-surface-strong mx-1" />
 
                           {/* Zoom Controls */}
                           <div className="flex items-center gap-0.5 bg-surface-sunken/50 rounded-xl p-0.5 border border-border-subtle/60">
                             <button
                               onClick={() => setZoomLevel((prev) => Math.max(0.2, prev - 0.1))}
-                              className="p-1.5 text-content-muted hover:bg-slate-200 hover:text-content-strong rounded-lg transition-all active:scale-95"
+                              className="p-1.5 text-content-muted hover:bg-surface-strong hover:text-content-strong rounded-lg transition-all active:scale-95"
                               title="Perkecil (-)"
                             >
                               <ZoomOut className="w-3.5 h-3.5" />
@@ -3206,14 +3206,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </button>
                             <button
                               onClick={() => setZoomLevel((prev) => Math.min(3.0, prev + 0.1))}
-                              className="p-1.5 text-content-muted hover:bg-slate-200 hover:text-content-strong rounded-lg transition-all active:scale-95"
+                              className="p-1.5 text-content-muted hover:bg-surface-strong hover:text-content-strong rounded-lg transition-all active:scale-95"
                               title="Perbesar (+)"
                             >
                               <ZoomIn className="w-3.5 h-3.5" />
                             </button>
                           </div>
 
-                          <div className="w-px h-5 bg-slate-200 mx-1" />
+                          <div className="w-px h-5 bg-surface-strong mx-1" />
 
                           {/* Keyboard assistance trigger */}
                           <button
@@ -3232,14 +3232,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                         {/* KEYBOARD SHORTCUTS NAVIGATIONAL HELP PANELS */}
                         {isKeyboardHelpOpen && (
-                          <div className="absolute left-4 right-4 md:left-auto md:right-4 bottom-20 z-40 bg-slate-900/95 backdrop-blur text-white p-4 rounded-xl border border-slate-750 shadow-2xl max-w-sm space-y-3 p-4 select-none">
-                            <div className="flex justify-between items-center pb-2 border-b border-slate-800">
+                          <div className="absolute left-4 right-4 md:left-auto md:right-4 bottom-20 z-40 bg-slate-900/95 backdrop-blur text-content-inverse p-4 rounded-xl border border-slate-750 shadow-2xl max-w-sm space-y-3 p-4 select-none">
+                            <div className="flex justify-between items-center pb-2 border-b border-border-inverse">
                               <span className="font-medium uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-violet-400">
                                 Pintasan Keyboard & Tips
                               </span>
                               <button
                                 onClick={() => setIsKeyboardHelpOpen(false)}
-                                className="text-content-subtle hover:text-white transition-colors"
+                                className="text-content-subtle hover:text-content-inverse transition-colors"
                               >
                                 <X className="w-3.5 h-3.5" />
                               </button>
@@ -3249,7 +3249,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   Batal Aksi (Undo)
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Ctrl + Z
                                 </kbd>
                               </div>
@@ -3257,7 +3257,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   Ulangi Aksi (Redo)
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Ctrl + Y / Ctrl+Shift+Z
                                 </kbd>
                               </div>
@@ -3265,7 +3265,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   Duplikasi Bentuk
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Ctrl + D
                                 </kbd>
                               </div>
@@ -3273,7 +3273,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   Geser Alur (Nudge)
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Tombol Panah Arrow (↑↓←→)
                                 </kbd>
                               </div>
@@ -3281,7 +3281,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans font-sans">
                                   Geser Kelompok Lebar
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Shift + Panah
                                 </kbd>
                               </div>
@@ -3289,7 +3289,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   Batalkan Pilihan / Tool
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Esc
                                 </kbd>
                               </div>
@@ -3297,12 +3297,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   Hapus Element Terpilih
                                 </span>
-                                <kbd className="bg-slate-800 text-slate-100 border border-slate-700 p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium font-sans">
+                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium font-sans">
                                   Delete / Backspace
                                 </kbd>
                               </div>
                             </div>
-                            <div className="h-px bg-slate-800 my-1" />
+                            <div className="h-px bg-surface-inverse my-1" />
                             <p className="text-xs sm:text-[10px] text-content-subtle italic font-mono leading-relaxed">
                               💡 Tips BNI Doc: Aktifkan mode &ldquo;Arrow&rdquo; dari toolbar
                               sebelah kiri, klik pada komponen awal, lalu klik pada komponen kedua
@@ -3717,13 +3717,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-surface-muted hover:bg-slate-200 font-medium text-content-body transition-all text-xs"
+                  className="px-4 py-2 rounded-lg bg-surface-muted hover:bg-surface-strong font-medium text-content-body transition-all text-xs"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary hover:bg-primary-hover text-white font-medium rounded-lg text-xs shadow-xs transition-all"
+                  className="px-4 py-2 bg-primary hover:bg-primary-hover text-content-inverse font-medium rounded-lg text-xs shadow-xs transition-all"
                 >
                   {modalMode === "create" ? "Buat Dokumen" : "Simpan Perubahan"}
                 </button>
@@ -3849,14 +3849,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             <div className="px-5 py-3.5 border-t border-border-faint bg-surface-sunken/50 flex justify-end items-center gap-2">
               <button
                 onClick={closeUploadDocumentModal}
-                className="px-4 py-2 text-xs font-medium text-content-body hover:bg-slate-200 rounded-md transition-colors"
+                className="px-4 py-2 text-xs font-medium text-content-body hover:bg-surface-strong rounded-md transition-colors"
               >
                 Batal
               </button>
               <button
                 onClick={handleSaveDocument}
                 disabled={!uploadDocName || !uploadDocFile}
-                className="px-4 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 text-white text-xs font-medium rounded-md transition-all shadow-xs active:scale-95 cursor-pointer"
+                className="px-4 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 text-content-inverse text-xs font-medium rounded-md transition-all shadow-xs active:scale-95 cursor-pointer"
               >
                 Upload & Simpan
               </button>

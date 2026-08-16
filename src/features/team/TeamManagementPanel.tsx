@@ -357,14 +357,14 @@ export const TeamManagementPanel = ({
             <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded transition-all ${viewMode === "grid" ? "bg-indigo-600 text-white shadow-2xs" : "text-content-muted hover:text-content-strong"}`}
+                className={`p-1.5 rounded transition-all ${viewMode === "grid" ? "bg-indigo-600 text-content-inverse shadow-2xs" : "text-content-muted hover:text-content-strong"}`}
                 title="Grid View"
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-1.5 rounded transition-all ${viewMode === "list" ? "bg-indigo-600 text-white shadow-2xs" : "text-content-muted hover:text-content-strong"}`}
+                className={`p-1.5 rounded transition-all ${viewMode === "list" ? "bg-indigo-600 text-content-inverse shadow-2xs" : "text-content-muted hover:text-content-strong"}`}
                 title="List View"
               >
                 <List className="w-4 h-4" />
@@ -373,7 +373,7 @@ export const TeamManagementPanel = ({
 
             <button
               onClick={handleExportTeamCSV}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-muted hover:bg-slate-200 text-content-body border border-border-subtle rounded-md text-xs font-medium shadow-2xs transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body border border-border-subtle rounded-md text-xs font-medium shadow-2xs transition-all cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" /> Export CSV
             </button>
@@ -591,7 +591,7 @@ export const TeamManagementPanel = ({
             <div className="h-24 bg-gradient-to-r from-slate-800 via-indigo-900 to-slate-900 p-4 flex justify-end">
               <button
                 onClick={() => setSelectedProfileUser(null)}
-                className="w-7 h-7 rounded-full bg-surface/20 hover:bg-surface/40 text-white flex items-center justify-center transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-full bg-surface/20 hover:bg-surface/40 text-content-inverse flex items-center justify-center transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -669,7 +669,7 @@ export const TeamManagementPanel = ({
               <div className="mt-6 flex justify-end">
                 <button
                   onClick={() => setSelectedProfileUser(null)}
-                  className="px-4 py-1.5 bg-surface-muted hover:bg-slate-200 text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle cursor-pointer"
+                  className="px-4 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle cursor-pointer"
                 >
                   Tutup
                 </button>

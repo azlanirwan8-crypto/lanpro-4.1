@@ -107,7 +107,7 @@ export const CompleteRegistrationScreen = ({
           type="button"
           onClick={kembali}
           className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-6
-                     text-sm font-medium text-white transition-colors duration-150 hover:bg-primary-hover"
+                     text-sm font-medium text-content-inverse transition-colors duration-150 hover:bg-primary-hover"
         >
           Kembali ke Halaman Masuk
         </button>
@@ -171,7 +171,7 @@ export const CompleteRegistrationScreen = ({
           type="submit"
           disabled={mengirim || !username}
           className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg
-                     bg-primary px-4 text-sm font-medium text-white
+                     bg-primary px-4 text-sm font-medium text-content-inverse
                      transition-colors duration-150 hover:bg-primary-hover
                      disabled:cursor-not-allowed disabled:opacity-60"
         >

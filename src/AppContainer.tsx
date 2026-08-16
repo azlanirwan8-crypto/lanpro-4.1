@@ -2462,7 +2462,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       // Real-time Floating Toast Alert
       toast.custom(
         (t: any) => (
-          <div className="max-w-md w-full bg-slate-900 border border-emerald-500/60 shadow-2xl rounded-xl pointer-events-auto flex p-4 items-center justify-between gap-3 text-white ring-1 ring-emerald-500/30">
+          <div className="max-w-md w-full bg-surface-inverse border border-emerald-500/60 shadow-2xl rounded-xl pointer-events-auto flex p-4 items-center justify-between gap-3 text-content-inverse ring-1 ring-emerald-500/30">
             <div className="flex items-center gap-3 min-w-0">
               <div className="p-2.5 bg-emerald-500/20 text-emerald-400 rounded-xl shrink-0">
                 <Bug className="w-5 h-5 animate-bounce text-emerald-400" />
@@ -3274,7 +3274,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           {/* Micro logo for mobile (<1024px) */}
           <div className="absolute top-6 left-6 lg:hidden flex items-center gap-2">
             <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center shadow-md shadow-primary/20">
-              <ShieldCheck className="text-white w-4 h-4" />
+              <ShieldCheck className="text-content-inverse w-4 h-4" />
             </div>
             <span className="text-sm font-medium text-content tracking-tight">LANPRO</span>
           </div>
@@ -3753,7 +3753,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               ) && (
                 <button
                   onClick={() => setIsNewProjectModalOpen(true)}
-                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm shadow-md shadow-indigo-200 transition-all flex items-center gap-2"
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-xl font-medium text-sm shadow-md shadow-indigo-200 transition-all flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Buat Proyek Baru</span>
@@ -3822,7 +3822,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               <Button
                 onClick={wrapAppSubmit("createSprint", handleCreateSprint)}
                 disabled={isSubmitting["createSprint"]}
-                className="w-full justify-center bg-primary hover:bg-primary-hover active:bg-primary-active text-white shadow-xs py-2.5 rounded-md font-medium text-xs cursor-pointer"
+                className="w-full justify-center bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse shadow-xs py-2.5 rounded-md font-medium text-xs cursor-pointer"
               >
                 Create Phase & Assign Tasks
               </Button>
@@ -3955,7 +3955,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   <Button
                     onClick={wrapAppSubmit("updateSprint", handleUpdateSprint)}
                     disabled={isSubmitting["updateSprint"]}
-                    className="flex-1 justify-center bg-primary hover:bg-primary-hover active:bg-primary-active text-white shadow-xs rounded-md text-xs font-medium py-2 cursor-pointer"
+                    className="flex-1 justify-center bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse shadow-xs rounded-md text-xs font-medium py-2 cursor-pointer"
                   >
                     Save Changes
                   </Button>

@@ -739,17 +739,17 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   return (
     <div className="w-full flex flex-col bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">
       {/* Companion Header Banner */}
-      <div className="p-4 sm:p-5 bg-gradient-to-r from-primary-active via-primary to-primary-hover text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
+      <div className="p-4 sm:p-5 bg-gradient-to-r from-primary-active via-primary to-primary-hover text-content-inverse flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div className="flex items-center gap-3">
           <span className="p-2.5 bg-surface/10 border border-white/15 rounded-lg text-indigo-200 shadow-2xs">
             <Cpu className="w-5 h-5 animate-pulse" />
           </span>
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="text-sm font-medium tracking-tight text-white">
+              <h4 className="text-sm font-medium tracking-tight text-content-inverse">
                 Asisten Notulen Rapat Otomatis
               </h4>
-              <span className="px-2 py-0.5 bg-indigo-500/80 text-white text-xs sm:text-[11px] sm:text-[9px] font-medium rounded-md uppercase tracking-wider">
+              <span className="px-2 py-0.5 bg-indigo-500/80 text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-medium rounded-md uppercase tracking-wider">
                 PRO
               </span>
             </div>
@@ -762,14 +762,14 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setShowFeedbackModal(true)}
-            className="px-3.5 py-1.5 bg-surface/10 hover:bg-surface/20 border border-white/20 text-white text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+            className="px-3.5 py-1.5 bg-surface/10 hover:bg-surface/20 border border-white/20 text-content-inverse text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
           >
             <Brain className="w-3.5 h-3.5" /> Beri Masukan Kualitas Notulen
           </button>
           {aiData && (
             <button
               onClick={() => setActiveTab("transcript")}
-              className="px-3.5 py-1.5 bg-surface/10 hover:bg-surface/20 border border-white/20 text-white text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+              className="px-3.5 py-1.5 bg-surface/10 hover:bg-surface/20 border border-white/20 text-content-inverse text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
             >
               <Sparkles className="w-3.5 h-3.5 text-indigo-200" /> Analisis Transkrip Baru
             </button>
@@ -830,7 +830,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
           >
             <ListChecks className="w-3.5 h-3.5 text-primary" /> Tindak Lanjut
             {activeMeetingData?.tab_tindak_lanjut?.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 bg-primary text-white text-xs sm:text-[11px] sm:text-[9px] rounded-full font-medium min-w-[16px] text-center inline-block">
+              <span className="ml-1 px-1.5 py-0.5 bg-primary text-content-inverse text-xs sm:text-[11px] sm:text-[9px] rounded-full font-medium min-w-[16px] text-center inline-block">
                 {activeMeetingData.tab_tindak_lanjut.length}
               </span>
             )}
@@ -1016,7 +1016,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         <div className="flex items-center justify-end gap-3 pt-2">
                           <button
                             onClick={() => setIsEditingTranscript(false)}
-                            className="px-4 py-2.5 bg-surface-muted hover:bg-slate-200 text-content-body text-xs  rounded-xl border border-border-subtle/60 transition-all cursor-pointer"
+                            className="px-4 py-2.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs  rounded-xl border border-border-subtle/60 transition-all cursor-pointer"
                           >
                             Batal
                           </button>
@@ -1031,7 +1031,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               setTranscript(editedTranscriptText);
                               await runAnalysisApi(editedTranscriptText, meetingLink);
                             }}
-                            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer hover:scale-[1.01] transition-transform"
+                            className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse text-xs font-medium rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer hover:scale-[1.01] transition-transform"
                           >
                             <Save className="w-4 h-4" />
                             Simpan & Mulai Analisis Ulang
@@ -1070,7 +1070,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               onClick={() => setFilterOnlyMatches(!filterOnlyMatches)}
                               className={`px-4 py-2.5 rounded-xl border text-xs font-medium transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
                                 filterOnlyMatches
-                                  ? "bg-indigo-600 border-indigo-600 text-white shadow-md"
+                                  ? "bg-indigo-600 border-indigo-600 text-content-inverse shadow-md"
                                   : "bg-surface border-border-subtle text-slate-655 hover:text-content-strong hover:bg-surface-sunken"
                               }`}
                             >
@@ -1158,7 +1158,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     <div className="flex flex-col items-center justify-center gap-3 w-full py-4">
                       <button
                         onClick={isRecording ? stopRecording : startRecording}
-                        className={`px-8 py-4 ${isRecording ? "bg-slate-800" : "bg-red-600"} hover:opacity-90 text-white rounded-xl text-sm font-medium shadow-soft-lg shadow-red-150 flex items-center gap-3 cursor-pointer transition-transform hover:scale-[1.02]`}
+                        className={`px-8 py-4 ${isRecording ? "bg-surface-inverse" : "bg-red-600"} hover:opacity-90 text-content-inverse rounded-xl text-sm font-medium shadow-soft-lg shadow-red-150 flex items-center gap-3 cursor-pointer transition-transform hover:scale-[1.02]`}
                       >
                         <Brain className="w-5 h-5" />{" "}
                         {isRecording ? "Hentikan Rekaman" : "Mulai Merekam"}
@@ -1275,7 +1275,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </div>
 
                             {/* Progress bar with a contrast blue gradient */}
-                            <div className="w-full bg-slate-200 h-3 rounded-full overflow-hidden shadow-inner relative">
+                            <div className="w-full bg-surface-strong h-3 rounded-full overflow-hidden shadow-inner relative">
                               <div
                                 className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500 ease-out"
                                 style={{
@@ -1345,7 +1345,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   <div className="flex justify-end">
                     <button
                       onClick={handleAnalyze}
-                      className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl text-xs font-medium shadow-soft-lg shadow-indigo-150 flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
+                      className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-xl text-xs font-medium shadow-soft-lg shadow-indigo-150 flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
                     >
                       <Sparkles className="w-4 h-4 text-indigo-200" /> MULAI ANALISIS AI
                     </button>
@@ -1482,7 +1482,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     <button
                       onClick={handleImportAllActionItems}
                       disabled={importingIds.length > 0}
-                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-medium flex items-center gap-1.5 shadow-soft transition-colors cursor-pointer disabled:opacity-55"
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-xl text-xs font-medium flex items-center gap-1.5 shadow-soft transition-colors cursor-pointer disabled:opacity-55"
                     >
                       <Database className="w-3.5 h-3.5 text-indigo-200" /> Impor Semua ke Poin
                       Diskusi
@@ -1778,13 +1778,13 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-surface rounded-lg max-w-lg w-full overflow-hidden shadow-xl border border-border-subtle transform transition-all scale-100">
             {/* Modal Header */}
-            <div className="p-6 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between">
+            <div className="p-6 bg-gradient-to-r from-slate-900 to-indigo-950 text-content-inverse flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-indigo-500/20 border border-indigo-500/30 rounded-xl text-indigo-300">
                   <Brain className="w-5 h-5 animate-pulse" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium tracking-tight text-white">
+                  <h4 className="text-sm font-medium tracking-tight text-content-inverse">
                     Continuous Learning Loop
                   </h4>
                   <p className="text-xs sm:text-[10px] text-content-subtle ">
@@ -1796,7 +1796,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 onClick={() => setShowFeedbackModal(false)}
                 className="p-1.5 hover:bg-surface/10 rounded-xl transition-all cursor-pointer"
               >
-                <X className="w-4 h-4 text-content-subtle hover:text-white" />
+                <X className="w-4 h-4 text-content-subtle hover:text-content-inverse" />
               </button>
             </div>
 
@@ -1842,7 +1842,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
               </button>
               <button
                 onClick={handleSubmitFeedback}
-                className="px-4 py-2.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md hover:shadow-soft-lg hover:shadow-indigo-100 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                className="px-4 py-2.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-xl shadow-md hover:shadow-soft-lg hover:shadow-indigo-100 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
                 disabled={submittingFeedback || !feedbackText.trim()}
               >
                 {submittingFeedback ? (

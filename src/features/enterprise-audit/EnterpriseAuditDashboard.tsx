@@ -237,7 +237,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
               </span>
               <span className="font-medium text-content-strong">{logs.length}</span>
             </div>
-            <div className="h-4 w-px bg-slate-200" />
+            <div className="h-4 w-px bg-surface-strong" />
             <div className="flex items-center gap-1.5">
               <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
                 Status:
@@ -317,7 +317,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                   fetchLogs(true);
                   scrollContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
                 }}
-                className="bg-indigo-600 text-white px-4 py-1.5 rounded-full text-xs font-medium shadow-md flex items-center gap-1.5 hover:bg-indigo-700 transition-all border border-indigo-400 cursor-pointer"
+                className="bg-indigo-600 text-content-inverse px-4 py-1.5 rounded-full text-xs font-medium shadow-md flex items-center gap-1.5 hover:bg-indigo-700 transition-all border border-indigo-400 cursor-pointer"
               >
                 <ArrowDown className="w-3.5 h-3.5" />
                 <span>Log Baru Terdeteksi</span>
@@ -545,7 +545,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                   <summary className="text-xs sm:text-[10px] font-medium text-content-subtle cursor-pointer uppercase hover:text-content-secondary transition-colors">
                     Tampilkan Raw Technical Trace (JSON)
                   </summary>
-                  <div className="mt-4 p-4 rounded-xl bg-slate-900 text-indigo-400 font-mono text-xs sm:text-[10px] overflow-x-auto border border-slate-800">
+                  <div className="mt-4 p-4 rounded-xl bg-surface-inverse text-indigo-400 font-mono text-xs sm:text-[10px] overflow-x-auto border border-border-inverse">
                     <pre>{JSON.stringify(selectedLog, null, 2)}</pre>
                   </div>
                 </details>
@@ -557,7 +557,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 </p>
                 <button
                   onClick={() => setSelectedLog(null)}
-                  className="px-8 py-3 bg-slate-900 text-white text-xs font-medium rounded-xl hover:bg-slate-800 transition-all shadow-xl hover:shadow-2xl shadow-slate-200 active:scale-95"
+                  className="px-8 py-3 bg-surface-inverse text-content-inverse text-xs font-medium rounded-xl hover:bg-surface-inverse transition-all shadow-xl hover:shadow-2xl shadow-slate-200 active:scale-95"
                 >
                   SELESAI MENINJAU
                 </button>

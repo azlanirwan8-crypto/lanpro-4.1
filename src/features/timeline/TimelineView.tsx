@@ -466,7 +466,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                 className="absolute top-0 bottom-0 z-20 border-l-2 border-red-500 border-dashed pointer-events-none"
                 style={{ left: `${todayLeft}%` }}
               >
-                <div className="bg-red-500 text-white text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded-sm absolute -top-0 -translate-x-1/2 shadow-soft">
+                <div className="bg-red-500 text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded-sm absolute -top-0 -translate-x-1/2 shadow-soft">
                   TODAY
                 </div>
               </div>

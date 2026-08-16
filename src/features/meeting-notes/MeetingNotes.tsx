@@ -426,7 +426,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 {canAdd && (
                   <button
                     onClick={startAddMeeting}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-white rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer shrink-0"
                   >
                     <Plus className="w-4 h-4" /> Add Meeting
                   </button>
@@ -605,7 +605,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   >
                     Previous
                   </button>
-                  <span className="px-3 py-1.5 bg-primary text-white rounded-md text-xs font-medium shadow-xs">
+                  <span className="px-3 py-1.5 bg-primary text-content-inverse rounded-md text-xs font-medium shadow-xs">
                     {currentPage}
                   </span>
                   <button
@@ -643,7 +643,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer"
                       >
                         <Video className="w-3.5 h-3.5" /> Join Meeting{" "}
                         <ExternalLink className="w-3 h-3 opacity-80" />
@@ -943,7 +943,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   type="button"
                   onClick={handleCreateMeeting}
                   disabled={loading || !newTitle.trim()}
-                  className="px-5 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 text-white rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-5 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer"
                 >
                   {loading ? (
                     <>

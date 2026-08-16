@@ -116,7 +116,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
               Modul Target:{" "}
               <strong>{activeSuite ? activeSuite.name : "Belum ada modul terpilih"}</strong>
             </span>
-            <span className="px-2.5 py-0.5 bg-primary text-white font-medium rounded-full text-xs sm:text-[10px]">
+            <span className="px-2.5 py-0.5 bg-primary text-content-inverse font-medium rounded-full text-xs sm:text-[10px]">
               {activeSuite ? activeSuite.phase : "SIT"}
             </span>
           </div>
@@ -192,13 +192,13 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 bg-surface-muted hover:bg-slate-200 text-content-body text-xs font-medium uppercase tracking-wider rounded-md cursor-pointer"
+                  className="px-4 py-2 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium uppercase tracking-wider rounded-md cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-medium uppercase tracking-wider rounded-md shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  className="px-5 py-2 bg-primary hover:bg-primary-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
                 >
                   <Plus className="w-4 h-4" /> Simpan Test Case
                 </button>
@@ -218,7 +218,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 <button
                   type="button"
                   onClick={onDownloadTemplate}
-                  className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-content-inverse text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Download Template Excel</span>
@@ -254,14 +254,14 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 bg-surface-muted hover:bg-slate-200 text-content-body text-xs font-medium uppercase tracking-wider rounded-md cursor-pointer"
+                  className="px-4 py-2 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium uppercase tracking-wider rounded-md cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={!uploadFile}
-                  className="px-5 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-medium uppercase tracking-wider rounded-md shadow-xs disabled:opacity-50 cursor-pointer active:scale-95"
+                  className="px-5 py-2 bg-primary hover:bg-primary-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md shadow-xs disabled:opacity-50 cursor-pointer active:scale-95"
                 >
                   Proses Bulk Upload
                 </button>

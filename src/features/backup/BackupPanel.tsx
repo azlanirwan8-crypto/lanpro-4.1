@@ -212,7 +212,7 @@ export const BackupPanel = (_props: {
           <div className="mt-4 pt-3 border-t border-border-faint flex justify-end">
             <button
               onClick={exportProjectBackup}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium text-xs transition-all shadow-2xs active:scale-95 flex items-center gap-1.5 cursor-pointer"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-content-inverse rounded-md font-medium text-xs transition-all shadow-2xs active:scale-95 flex items-center gap-1.5 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Export Project Backup</span>
@@ -306,7 +306,7 @@ export const BackupPanel = (_props: {
                             </span>
                             <span>{item.progress}%</span>
                           </div>
-                          <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                          <div className="w-full bg-surface-strong h-1.5 rounded-full overflow-hidden">
                             <div
                               className="bg-amber-500 h-full rounded-full transition-all duration-300 ease-out"
                               style={{ width: `${item.progress}%` }}
@@ -331,7 +331,7 @@ export const BackupPanel = (_props: {
                       {item.status === "completed" && (
                         <button
                           onClick={() => handleDownloadItem(item)}
-                          className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-medium text-xs sm:text-[11px] transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
+                          className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded font-medium text-xs sm:text-[11px] transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
                           title="Download Backup"
                         >
                           <Download className="w-3 h-3" />

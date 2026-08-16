@@ -158,7 +158,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-primary text-white font-medium text-xs sm:text-[11px] sm:text-[9px] rounded-md uppercase tracking-wider">
+              <span className="px-2 py-0.5 bg-primary text-content-inverse font-medium text-xs sm:text-[11px] sm:text-[9px] rounded-md uppercase tracking-wider">
                 {activeSuite.phase}
               </span>
               <h2 className="text-base font-medium text-content-strong tracking-tight">
@@ -179,7 +179,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                   setIsAddCaseOpen(true);
                   setActiveAddTab("single");
                 }}
-                className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+                className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah Task</span>
@@ -190,7 +190,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               <button
                 onClick={handleGenerateWithAi}
                 disabled={isGeneratingAi}
-                className="px-3 py-1.5 bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-700 hover:to-indigo-800 disabled:opacity-50 text-white font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+                className="px-3 py-1.5 bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-700 hover:to-indigo-800 disabled:opacity-50 text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
                 title="Generate test cases dengan AI"
               >
                 <Sparkles className={`w-3.5 h-3.5 ${isGeneratingAi ? "animate-spin" : ""}`} />
@@ -200,7 +200,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
             <button
               onClick={handleExportQAReport}
-              className="px-2.5 py-1.5 bg-surface-muted hover:bg-slate-200 text-content-body font-medium rounded-md text-xs flex items-center gap-1 transition-all cursor-pointer"
+              className="px-2.5 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body font-medium rounded-md text-xs flex items-center gap-1 transition-all cursor-pointer"
               title="Export Laporan Eksekusi QA"
             >
               <Download className="w-3.5 h-3.5 text-primary" />
@@ -213,7 +213,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               canUpdate && (
                 <button
                   onClick={handleMigrateSuitePhase}
-                  className="px-3 py-1.5 bg-success hover:bg-success-hover text-white font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+                  className="px-3 py-1.5 bg-success hover:bg-success-hover text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>{activeSuite.phase === "SIT" ? "Migrate to UAT" : "Migrate to PTR"}</span>
@@ -316,7 +316,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
       {/* FLOATING BULK ACTIONS TOOLBAR FOR ADMIN / PROJECT ADMIN */}
       {selectedCaseIds.length > 0 && (canUpdate || isAdminRole) && (
-        <div className="bg-gradient-to-r from-primary to-indigo-900 text-white p-3 rounded-md shadow-xl flex flex-wrap items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="bg-gradient-to-r from-primary to-indigo-900 text-content-inverse p-3 rounded-md shadow-xl flex flex-wrap items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center gap-2">
             <span className="p-1.5 bg-surface/10 rounded-md">
               <CheckSquare className="w-4 h-4 text-emerald-400" />
@@ -329,7 +329,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             <div className="relative">
               <button
                 onClick={() => setIsBulkPicDropdownOpen(!isBulkPicDropdownOpen)}
-                className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-white text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-white/20"
+                className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-content-inverse text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-white/20"
               >
                 <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Bulk Assign PIC</span>
@@ -388,7 +388,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             <div className="relative">
               <button
                 onClick={() => setIsBulkStatusDropdownOpen(!isBulkStatusDropdownOpen)}
-                className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-white text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-white/20"
+                className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-content-inverse text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-white/20"
               >
                 <Layers className="w-3.5 h-3.5 text-amber-300" />
                 <span>Bulk Status</span>
@@ -423,7 +423,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             {canDelete && (
               <button
                 onClick={handleBulkDeleteCases}
-                className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white text-xs font-medium rounded-md flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+                className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-content-inverse text-xs font-medium rounded-md flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Hapus Terpilih</span>

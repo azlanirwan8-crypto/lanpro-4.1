@@ -213,7 +213,7 @@ export function DashboardView(props: DashboardViewProps) {
     if (id === "sdlc") {
       return cn(
         heightClass,
-        "flex flex-col rounded-lg transition-all duration-300 relative w-full bg-slate-900 border border-slate-800 text-white shadow-2xl pb-8 overflow-y-auto no-scrollbar"
+        "flex flex-col rounded-lg transition-all duration-300 relative w-full bg-surface-inverse border border-border-inverse text-content-inverse shadow-2xl pb-8 overflow-y-auto no-scrollbar"
       );
     }
     if (id === "sidebar-widgets-stack") {
@@ -231,7 +231,7 @@ export function DashboardView(props: DashboardViewProps) {
     if (id === "velocity-bar" || id === "velocity-line") {
       return cn(
         heightClass,
-        "flex flex-col rounded-lg bg-slate-900 border border-slate-800 text-white shadow-xl p-5 hover:border-slate-700 transition-all duration-300 relative overflow-hidden"
+        "flex flex-col rounded-lg bg-surface-inverse border border-border-inverse text-content-inverse shadow-xl p-5 hover:border-border-inverse transition-all duration-300 relative overflow-hidden"
       );
     }
     return cn(
@@ -624,7 +624,7 @@ export function DashboardView(props: DashboardViewProps) {
             {props.setIsNewTaskModalOpen && (
               <button
                 onClick={() => props.setIsNewTaskModalOpen?.(true)}
-                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white px-3.5 py-2.5 min-h-11 rounded-lg text-xs font-medium shadow-soft transition-all cursor-pointer shrink-0"
+                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-content-inverse px-3.5 py-2.5 min-h-11 rounded-lg text-xs font-medium shadow-soft transition-all cursor-pointer shrink-0"
               >
                 <Plus className="w-4 h-4" />
                 <span>Task Baru</span>
@@ -775,7 +775,7 @@ export function DashboardView(props: DashboardViewProps) {
                       className={cn(
                         "px-3 py-2.5 min-h-11 min-w-11 inline-flex items-center justify-center rounded text-xs sm:text-[11px] font-medium transition cursor-pointer",
                         revenueFilter === filter
-                          ? "bg-indigo-600 text-white shadow-2xs"
+                          ? "bg-indigo-600 text-content-inverse shadow-2xs"
                           : "text-content-secondary hover:text-content"
                       )}
                     >

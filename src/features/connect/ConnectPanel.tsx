@@ -216,7 +216,7 @@ export const ConnectPanel = () => {
               <button
                 type="submit"
                 disabled={loading || saveLoading}
-                className="bg-surface-muted hover:bg-slate-200 text-content-body border border-border-subtle font-medium py-2 px-4 rounded-md transition-all flex items-center justify-center text-xs cursor-pointer disabled:opacity-50"
+                className="bg-surface-muted hover:bg-surface-strong text-content-body border border-border-subtle font-medium py-2 px-4 rounded-md transition-all flex items-center justify-center text-xs cursor-pointer disabled:opacity-50"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -232,7 +232,7 @@ export const ConnectPanel = () => {
                 type="button"
                 onClick={handleSaveConnection}
                 disabled={loading || saveLoading}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-5 rounded-md shadow-2xs active:scale-95 transition-all flex items-center justify-center text-xs cursor-pointer disabled:opacity-50"
+                className="bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium py-2 px-5 rounded-md shadow-2xs active:scale-95 transition-all flex items-center justify-center text-xs cursor-pointer disabled:opacity-50"
               >
                 {saveLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

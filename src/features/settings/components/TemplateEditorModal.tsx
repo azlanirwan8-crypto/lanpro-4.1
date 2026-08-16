@@ -257,7 +257,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           </button>
           <button
             onClick={() => onSave(subject, body)}
-            className={`px-4 py-1.5 rounded-md text-white text-xs font-medium shadow-xs transition-colors ${
+            className={`px-4 py-1.5 rounded-md text-content-inverse text-xs font-medium shadow-xs transition-colors ${
               mode === "whatsapp"
                 ? "bg-emerald-600 hover:bg-emerald-700"
                 : "bg-indigo-600 hover:bg-indigo-700"

@@ -14,15 +14,15 @@ export const Button = ({
   let variantStyle = "";
   if (variant === "primary")
     variantStyle =
-      "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 shadow-md shadow-indigo-600/20";
+      "bg-indigo-600 text-content-inverse hover:bg-indigo-700 active:scale-95 shadow-md shadow-indigo-600/20";
   if (variant === "secondary")
-    variantStyle = "bg-surface-muted text-content-body hover:bg-slate-200 active:scale-95";
+    variantStyle = "bg-surface-muted text-content-body hover:bg-surface-strong active:scale-95";
   if (variant === "outline")
     variantStyle =
       "border-2 border-border-subtle text-content-body hover:border-border-subtle hover:bg-surface-sunken active:scale-95";
   if (variant === "danger")
     variantStyle =
-      "bg-rose-500 text-white hover:bg-rose-600 active:scale-95 shadow-md shadow-rose-500/20";
+      "bg-rose-500 text-content-inverse hover:bg-rose-600 active:scale-95 shadow-md shadow-rose-500/20";
   if (variant === "ghost")
     variantStyle =
       "bg-transparent text-content-secondary hover:bg-surface-muted hover:text-content active:scale-95";

@@ -169,7 +169,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
         <h2 className="text-xl font-medium text-content-strong mb-2">Pengguna tidak ditemukan</h2>
         <button
           onClick={onBack}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md text-xs font-medium"
+          className="px-4 py-2 bg-indigo-600 text-content-inverse rounded-md text-xs font-medium"
         >
           Kembali
         </button>
@@ -503,12 +503,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="p-1.5 bg-surface-muted hover:bg-indigo-600 hover:text-white text-content-body rounded-md transition-all flex items-center gap-2 text-xs font-medium cursor-pointer shadow-xs"
+              className="p-1.5 bg-surface-muted hover:bg-indigo-600 hover:text-content-inverse text-content-body rounded-md transition-all flex items-center gap-2 text-xs font-medium cursor-pointer shadow-xs"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Kembali ke Manajemen Pengguna</span>
             </button>
-            <div className="h-4 w-px bg-slate-200 " />
+            <div className="h-4 w-px bg-surface-strong " />
             <div className="flex flex-col">
               <span className="text-xs sm:text-[11px] font-medium text-indigo-600 tracking-wider uppercase">
                 DETAIL PROFIL & MATRIX HAK AKSES
@@ -522,7 +522,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
           <button
             onClick={handleSaveUser}
             disabled={isSaving}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-medium shadow-xs transition disabled:opacity-50"
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse rounded-md text-xs font-medium shadow-xs transition disabled:opacity-50"
           >
             {isSaving ? (
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -545,11 +545,11 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 className="w-20 h-20 text-2xl shadow-soft border-2 border-white ring-2 ring-indigo-50 shrink-0"
               />
               {previewUrl && (
-                <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
+                <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
                   Pratinjau
                 </span>
               )}
-              <label className="absolute inset-0 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity ring-2 ring-indigo-50 border-2 border-white ">
+              <label className="absolute inset-0 bg-black/50 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity ring-2 ring-indigo-50 border-2 border-white ">
                 <span className="text-xs sm:text-[10px] font-medium uppercase tracking-wider">
                   {isUploading ? "..." : "Pilih Foto"}
                 </span>
@@ -861,7 +861,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     <button
                       type="button"
                       onClick={handleResetToRoleDefaults}
-                      className="px-2.5 py-1 text-xs sm:text-[11px] bg-surface-muted hover:bg-slate-200 text-content-body rounded-md font-medium transition flex items-center gap-1 shrink-0"
+                      className="px-2.5 py-1 text-xs sm:text-[11px] bg-surface-muted hover:bg-surface-strong text-content-body rounded-md font-medium transition flex items-center gap-1 shrink-0"
                       title="Reset to role default permissions"
                     >
                       <RotateCcw className="w-3 h-3" /> Reset Role Default
@@ -929,7 +929,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                         className={cn(
                                           "w-5 h-5 rounded-md flex items-center justify-center mx-auto transition-all cursor-pointer border relative",
                                           isChecked
-                                            ? "bg-indigo-600 text-white border-indigo-500 shadow-xs"
+                                            ? "bg-indigo-600 text-content-inverse border-indigo-500 shadow-xs"
                                             : "bg-surface-sunken text-content-subtle border-border-subtle hover:bg-surface-muted ",
                                           isOverride && "ring-2 ring-amber-400 ring-offset-1 "
                                         )}
@@ -1060,7 +1060,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       <button
                         type="button"
                         onClick={handleAssignToProject}
-                        className="w-full flex items-center justify-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-medium shadow-xs transition"
+                        className="w-full flex items-center justify-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-md text-xs font-medium shadow-xs transition"
                       >
                         <Plus className="w-3.5 h-3.5" />
                         <span>Delegasikan</span>

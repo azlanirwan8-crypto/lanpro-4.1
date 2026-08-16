@@ -71,7 +71,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
               setIsImportModalOpen(false);
               setParsedImportData(null);
             }}
-            className="p-1 hover:bg-slate-200 rounded-lg text-content-subtle hover:text-content-secondary transition-all active:scale-95"
+            className="p-1 hover:bg-surface-strong rounded-lg text-content-subtle hover:text-content-secondary transition-all active:scale-95"
           >
             <X className="w-4 h-4" />
           </button>
@@ -314,7 +314,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
               <button
                 type="button"
                 onClick={handleApplyImportReplace}
-                className="p-2 px-4 bg-gradient-to-tr from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-medium rounded-xl transition-all text-xs sm:text-[11px] shadow-soft flex items-center gap-1 active:scale-95"
+                className="p-2 px-4 bg-gradient-to-tr from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-content-inverse font-medium rounded-xl transition-all text-xs sm:text-[11px] shadow-soft flex items-center gap-1 active:scale-95"
               >
                 <span>🔥 Ganti Kanvas Aktif</span>
               </button>
