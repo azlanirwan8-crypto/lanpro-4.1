@@ -115,7 +115,7 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "projectId"     VARCHAR(36) NOT NULL,
         "userId"        VARCHAR(36) NOT NULL,
         role            VARCHAR(50) DEFAULT 'developer',
-        "parentAdminId" VARCHAR(36),
+        -- #81 - kolom parentAdminId DIBUANG: ditulis, tidak pernah dibaca.
         PRIMARY KEY ("projectId", "userId")
       );
     `);
@@ -567,30 +567,27 @@ export async function runMigrations(pool: Pool): Promise<void> {
     // menulis ke sini. Di database yang sedang berjalan tabelnya sudah ada
     // dengan data nyata, sehingga cacatnya tidak terlihat.
     //
-    // Definisinya disalin PERSIS APA ADANYA, termasuk kolom kembarnya
-    // (`pointId` dan `point_id`, `userId` dan `user_id`, dan seterusnya).
-    // Kolom kembar itu memang keliru — kodenya menulis ke keduanya setiap kali
-    // menyimpan komentar — tetapi merapikannya menyentuh data hidup dan
-    // dikerjakan terpisah (item #47). Menyatukan sistem migrasi dulu, baru
-    // membersihkan bentuknya.
+    // #47 LANGKAH 4 — kolom kembar snake_case DIBUANG 16 Agu 2026 atas ketetapan
+    // pemilik proyek: camelCase adalah sumber kebenaran (§19.38).
+    //
+    // Urutannya sengaja: baca diseragamkan, tulis diseragamkan, jalur tulis
+    // dibuktikan lewat komentar sungguhan (baris 4 -> 5, sisi snake tetap 4),
+    // BARU definisinya dicabut di sini dan kolomnya dijatuhkan dari production
+    // lewat `npm run db:hapus-kolom-kembar`.
+    //
+    // #79 tetap berlaku: `"userId"` dan `"createdAt"` WAJIB ber-kutip. Tanpa
+    // kutip PostgreSQL melipatnya jadi userid/createdat, sementara production
+    // menyimpan versi camelCase. `pointid`, `username`, `commenttext` sengaja
+    // TANPA kutip karena production memang menyimpannya dalam huruf kecil —
+    // ketiganya lahir dari identifier tak berkutip di masa lalu (§19.39).
     await client.query(`
       CREATE TABLE IF NOT EXISTS discussion_point_comments (
         id VARCHAR(36) PRIMARY KEY,
         pointId VARCHAR(36) NOT NULL,
-        point_id VARCHAR(36),
-        -- #79 — "userId" dan "createdAt" WAJIB ber-kutip. Tanpa kutip, PostgreSQL
-        -- melipatnya menjadi userid/createdat, sementara production memiliki
-        -- versi camelCase dan kode menulis versi camelCase. Kolom lain di bawah
-        -- sengaja dibiarkan tanpa kutip karena production memang menyimpannya
-        -- dalam huruf kecil (pointid, username, commenttext).
         "userId" VARCHAR(50),
-        user_id VARCHAR(50),
         userName VARCHAR(255),
-        user_name VARCHAR(255),
         commentText TEXT NOT NULL,
-        comment_text TEXT,
-        "createdAt" VARCHAR(50) NOT NULL,
-        created_at VARCHAR(50)
+        "createdAt" VARCHAR(50) NOT NULL
       );
     `);
 
