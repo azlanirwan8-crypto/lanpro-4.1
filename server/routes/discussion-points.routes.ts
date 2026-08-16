@@ -208,7 +208,25 @@ const getCommentsHandler = async (req: any, res: any) => {
       // kolom kembar. Diukur 16 Agu 2026: keempat baris punya `pointId` terisi
       // (4/4), jadi cabang `OR` tidak pernah menambah satu baris pun.
       // camelCase ditetapkan sebagai sumber kebenaran — §19.38.
-      "SELECT * FROM discussion_point_comments WHERE pointId = ? ORDER BY createdAt ASC",
+      // REGRESI #47 — `SELECT *` mengembalikan nama kolom APA ADANYA, dan tiga di
+      // antaranya terlipat jadi huruf kecil: `commenttext`, `username`, `pointid`.
+      // Frontend membaca `comment.commentText || comment.comment_text`; yang
+      // pertama tidak pernah ada, dan yang kedua baru NULL sejak penulisan ganda
+      // dihentikan. Akibatnya komentar baru tampil TANPA teks dan TANPA nama —
+      // hanya jamnya yang muncul, sebab `createdAt` kebetulan camel sungguhan.
+      //
+      // Diberi alias eksplisit supaya jawabannya berbentuk camelCase apa pun
+      // bentuk kolomnya di database. Ini juga menghapus ketergantungan pada
+      // kolom snake yang akan dijatuhkan di langkah 4.
+      `SELECT id,
+              pointid     AS "pointId",
+              "userId"    AS "userId",
+              username    AS "userName",
+              commenttext AS "commentText",
+              "createdAt" AS "createdAt"
+         FROM discussion_point_comments
+        WHERE pointId = ?
+        ORDER BY createdAt ASC`,
       [pointId]
     );
     connection.release();

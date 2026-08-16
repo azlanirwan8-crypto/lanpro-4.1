@@ -264,7 +264,14 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
         currentUser?.uid || (currentUser as any)?.id
       );
 
-      showSuccessAlert("Berhasil!", "Balasan berhasil dikirim!");
+      // Popup "Balasan berhasil dikirim!" DIHAPUS atas keputusan pemilik proyek
+      // 16 Agu 2026. Balasannya langsung muncul di daftar tepat di bawah kotak
+      // ketik, jadi dialog modal yang harus ditutup manual hanya menambah satu
+      // klik untuk memberi tahu hal yang sudah terlihat sendiri.
+      //
+      // Konfirmasi tetap ada untuk aksi yang HASILNYA TIDAK LANGSUNG TERLIHAT —
+      // menghapus poin, menyimpan perubahan, impor AI. Bedanya di situ, bukan
+      // pada berhasil atau tidaknya.
       setNewCommentText("");
       const updated = await fetchCommentsForPoint(activeThreadPoint.id);
       setThreadComments(updated);
