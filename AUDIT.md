@@ -28,7 +28,7 @@ lalu **§0.4** (tiga keputusan yang menahan sisanya). Rinciannya §19.15–§19.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **391 lulus / 41 suite**                                    | `npm test`                                   |
+| Test                | **400 lulus / 42 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -312,7 +312,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 36 BELUM · 55 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 35 BELUM · 56 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -323,9 +323,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 36 item
+### 1.1 BELUM SELESAI — 35 item
 
-**Sebaran per fase:** F1 2 · F2 6 · F3 1 · F6 6 · F7 8 · F8 5 · F9 2 · F10 3 · F11 1 · F12 2
+**Sebaran per fase:** F1 2 · F2 6 · F3 1 · F6 6 · F7 7 · F8 5 · F9 2 · F10 3 · F11 1 · F12 2
 
 **Masih menahan rilis production:** #30 · #46
 
@@ -367,9 +367,8 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 87  | `effectiveRole` DIKOREKSI — ia hanya bawa peran sistem; frontend abai peran proyek         | **F7**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §19.27 |
 | 92  | Peran dibaca dari TOKEN di 7 tempat, dari DATABASE di penjaga proyek — pencabutan tertunda | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.28 |
-| 93  | "Remember Me" hanya melupakan PROFIL — token tetap di localStorage lintas sesi peramban    | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.31 |
 
-### 1.2 SUDAH SELESAI — 55 item
+### 1.2 SUDAH SELESAI — 56 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -432,6 +431,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 54  | ~~identitas dari `x-user-id`/query/body~~ hanya dari token; cacat tersalin ke penjaga baru           |     **F2**     | 🟠  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §13.5  |
 | 53  | ~~logout tanpa auth, `userId` sembarang~~ identitas hanya dari token                                 |     **F2**     | 🔴  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.5  |
 | 55  | ~~`rbac.ts:50` RBAC no-op senyap~~ divalidasi TIDAK tersalin ke penjaga baru bila nama param berbeda |     **F2**     | 🟡  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §13.5  |
+| 93  | ~~"Remember Me" hanya melupakan PROFIL~~ token kini ikut pilihan itu                                 |     **F7**     | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §19.31 |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -5335,3 +5335,39 @@ tanpa penyaringan. Item #71 menyebut POST/PUT/DELETE saja, jadi ini di luar
 lingkupnya — tetapi ia kebocoran baca lintas proyek yang setara #70. Belum
 dicatat sebagai item bernomor; perlu diputuskan apakah ia bagian #71 yang
 terlewat atau temuan tersendiri.
+
+### 19.34 #93 — token mengikuti "Remember Me"
+
+`setAuthToken` selalu menulis ke localStorage tanpa cabang `remember` sama
+sekali, sementara profil sesi (`sessionUser`) memang mengikutinya. Jadi tidak
+mencentang "Remember Me" hanya melupakan **profil**; **kredensialnya** tetap
+tinggal melewati penutupan peramban.
+
+#### Dua hal yang mudah terlewat, dan keduanya diuji
+
+**1. Beralih ke sesi sementara WAJIB membuang salinan permanennya.**
+`getAuthToken` membaca localStorage lebih dulu. Token permanen yang tertinggal
+akan **menutupi** token sementara — mengembalikan persis cacat #93 sambil
+terlihat sudah diperbaiki. Ini jenis kegagalan yang paling sulit dilihat:
+kodenya berubah, perilakunya tidak.
+
+**2. Tanpa argumen `remember`, lokasi DIPERTAHANKAN.**
+Penyegaran token (`SessionExpiryWarning`) dan kembalian SSO (`main.tsx`)
+memanggil `setAuthToken` tanpa tahu pilihan pengguna. Bila keduanya memaksa
+localStorage, **satu penyegaran** memindahkan sesi sementara ke penyimpanan
+permanen dan membatalkan pilihan penggunanya tanpa ada yang menyadari.
+
+Karena itu bawaannya bukan `true`, melainkan "ikuti yang sekarang".
+
+`clearAuthToken` kini membersihkan kedua penyimpanan.
+
+#### Bentuk testnya
+
+Yang diperiksa adalah **di mana** token tersimpan dan **apa yang terjadi pada
+salinan lamanya** — bukan sekadar `getAuthToken()` mengembalikan nilai.
+Pemeriksaan yang terakhir itu akan lulus baik cacatnya ada maupun tidak, sebab
+token yang salah tempat tetap terbaca.
+
+Berkas testnya sempat jatuh ke project Jest `node` yang tanpa `jsdom`
+(`localStorage is not defined`); environment-nya ditetapkan eksplisit lewat
+pragma `@jest-environment jsdom`.
