@@ -217,7 +217,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 67 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 72 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -274,6 +274,11 @@ lepas. Catatan lepas selalu terlupakan.
 | 66  | 5 rute DELETE dijaga hanya `['*']` — anggota berperan `viewer` bisa menghapus data        |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.9  |
 | 67  | `/uploads` menyajikan SEMUA berkas gambar tanpa autentikasi — bukan hanya avatar        |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.10 |
 | 68  | `DELETE .../tasks/:taskId/links/:linkId` TANPA `verifyProjectAccess` sama sekali        |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu         | §13.10 |
+| 69  | `POST /api/users/:userId/notifications` tanpa cek kepemilikan — GET & PUT punya          |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.11 |
+| 70  | Rute `/api/v1/meetings/:id*` tanpa penjaga proyek — baca & ubah rapat lintas proyek      |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.11 |
+| 71  | `project-modules` POST/PUT/DELETE tanpa penjaga — CRUD modul lintas proyek               |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §13.11 |
+| 72  | 16 rute POST/PUT/PATCH masih ber-`['*']` — `viewer` bisa membuat & mengubah data         |  **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §13.11 |
+| 73  | `PUT .../dashboard-layout` menyelipkan `"*"` di daftar peran sehingga penjaganya korslet |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §13.11 |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -1597,7 +1602,7 @@ Tabel ini adalah daftar kerja F2. Isi kolom `Status` sambil jalan.
 | Area                                          | Kenapa berisiko                                                                                            | Status                                                                                              |
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | RBAC / permission per peran                   | `hasPermission` dioper sebagai prop ke seluruh view; satu kekeliruan membocorkan fitur ke peran yang salah | `JALAN` — sisi server ditelaah, temuan #49/#54/#55 (§13.5); sisi klien belum                        |
-| 104 endpoint                                  | Tak satu pun diuji perilakunya                                                                             | `TERBUKA`                                                                                           |
+| 104 endpoint                                  | Tak satu pun diuji perilakunya                                                                             | `JALAN` — 119 rute dipetakan menyeluruh; 5 temuan #69–#73 (§13.11) |
 | Perhitungan (progress, sprint, KPI, timeline) | Salah hitung tidak melempar error — ia hanya menampilkan angka keliru                                      | `TERBUKA`                                                                                           |
 | Alur state antar view                         | 21 `useState` + 21 `useEffect` di `AppContainer`, dioper 47 props                                          | `TERBUKA`                                                                                           |
 | Socket.IO realtime                            | Pemancaran event sebagian di `runAIPipeline()` yang jalan **setelah** response terkirim                    | `JALAN` — autentikasi handshake ditelaah, temuan #50/#51 (§13.5); urutan emit `runAIPipeline` belum |
@@ -2201,6 +2206,82 @@ dan justru kegagalannya membuktikan perubahan berlaku. Asersinya disesuaikan ke
 doctor SIAP JALAN. Diverifikasi di browser dengan sesi non-admin (`rido`):
 dashboard termuat penuh, avatar tetap tampil, 0 error console, dan dari log
 server 0 "Akses ditolak" · 0 `LOG ANOMALI` · 0 `query error`.
+
+### 13.11 Temuan audit F2 — gelombang 5 (104 endpoint), 16 Agu 2026
+
+Area §13.1 "104 endpoint · tak satu pun diuji perilakunya" akhirnya ditelusuri
+**menyeluruh**, bukan lewat sampel. Metodenya sama dengan yang menemukan #68:
+memetakan penjaga SETIAP rute, lalu membaca isi handler yang tampak telanjang.
+
+**119 rute terdeteksi, 84 di antaranya mutasi** (POST/PUT/PATCH/DELETE).
+Angka 104 di §13.1 karena itu perlu dikoreksi menjadi **119**.
+
+⚠️ **Hasil pemindaian bukan temuan.** Beberapa rute yang tampak tanpa penjaga
+ternyata memeriksanya DI DALAM handler, dan itu hanya terlihat dengan membaca.
+Contoh terbaik `POST /api/chat/messages` (`chat.routes.ts:131`): tanpa
+`verifyProjectAccess`, tetapi memakai `matchesCaller(req.user, senderId)` dan
+menolak 403. **Bukan temuan.** Empat rute lain gugur dengan alasan serupa.
+
+#### #69 🔴 `POST /api/users/:userId/notifications` tanpa cek kepemilikan
+
+Yang membuatnya meyakinkan adalah kontras di dalam berkasnya sendiri:
+
+| Rute | Penjaga |
+| ---- | ------- |
+| `GET /api/users/:userId/notifications` (`:19`) | Ada — komentarnya bahkan menyebut "Anti-IDOR / Data Leakage Protection" |
+| `PUT /api/users/:userId/notifications/:id` (`:274`) | Ada — `matchesCaller(req.user, userId)` |
+| `POST /api/users/:userId/notifications` (`:233`) | **TIDAK ADA** |
+
+`recipientId` diambil dari parameter URL dan `senderId` dari body — keduanya
+tidak diperiksa. Siapa pun yang login bisa menyuntikkan notifikasi ke kotak
+masuk siapa pun, **mengatasnamakan orang lain**. Itu jalur phishing di dalam
+aplikasi: notifikasi palsu dari "Administrator" tampak asli karena memang
+dirender oleh aplikasi sendiri.
+
+#### #70 🔴 Rute `/api/v1/meetings/:id*` tanpa penjaga proyek
+
+`meetings.routes.ts`. `POST /api/projects/:projectId/meetings/:id/upload-recording`
+sekilas aman karena ber-`:projectId`, tetapi isinya hanya:
+
+```ts
+res.redirect(307, `/api/v1/meetings/${req.params.id}/upload-recording`);
+```
+
+dan tujuannya itu **tidak** punya penjaga proyek. Serupa untuk `/cancel`,
+`/analyze`, dan `GET /api/v1/meetings/:id` yang mengembalikan seluruh baris
+rapat. Jadi siapa pun yang login bisa membaca, mengunggah rekaman ke, dan
+membatalkan rapat di proyek mana pun, cukup bermodal id rapat.
+
+#### #71 🟠 `project-modules` POST/PUT/DELETE tanpa penjaga
+
+`projectId` diambil dari body dan tidak pernah diadu dengan keanggotaan
+pemanggil. Siapa pun yang login bisa membuat, mengubah, dan menghapus modul di
+proyek mana pun.
+
+#### #72 🟠 Enam belas rute POST/PUT/PATCH masih ber-`['*']`
+
+#66 baru menutup sisi DELETE. Sisi buat/ubah masih terbuka bagi anggota berperan
+apa pun, termasuk `viewer`: `documents` (2), `meetings` (2),
+`discussion-points` (2), `qa` (8), `task` (2 — komentar dan activity).
+
+Perlu keputusan yang sama bentuknya dengan #66: peran mana yang boleh membuat
+dan mengubah. Tidak otomatis sama dengan hak menghapus — lumrah bila `developer`
+dan `member` boleh menulis tetapi tidak boleh menghapus.
+
+#### #73 🟡 `"*"` diselipkan di daftar peran `dashboard-layout`
+
+```ts
+verifyProjectAccess(["admin", "manager", "head", "developer", "designer", "viewer", "*"])
+```
+
+`project.routes.ts:199`. Sekilas tampak dibatasi enam peran, padahal `"*"` di
+ujungnya membuat penjaganya berperilaku persis seperti `['*']`. Sudah disinggung
+di §13.5 saat #49 dikerjakan, kini diberi nomor sendiri supaya tidak hilang.
+
+#### Yang tersisa di F2 sesudah gelombang 5
+
+Satu area §13.1 belum tersentuh: **alur state antar view** (21 `useState` +
+21 `useEffect` di `AppContainer`, 47 props). Sisanya sudah `JALAN` atau tertutup.
 
 ---
 
