@@ -101,7 +101,11 @@ const router = Router();
     }
   });
 
-  router.delete("/api/projects/:projectId/meetings/:id/discussionPoints/:pointId", verifyProjectAccess(['*']), async (req, res) => {
+  // #66 — dulu `['*']`, yang sesudah #49 berarti anggota proyek dengan peran
+  // APA PUN — termasuk `viewer` — bisa menghapus. Ketetapan pemilik proyek
+  // 16 Agu 2026: penghapusan dibatasi admin/manager/head, mengikuti pola yang
+  // sudah dipakai milestones dan sprints.
+  router.delete("/api/projects/:projectId/meetings/:id/discussionPoints/:pointId", verifyProjectAccess(["admin", "manager", "head"]), async (req, res) => {
     try {
       const { pointId } = req.params;
       const connection = await db.getConnection();
