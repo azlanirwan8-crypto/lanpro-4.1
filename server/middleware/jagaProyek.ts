@@ -36,6 +36,23 @@
 import db from "../../src/lib/db";
 import { createAuditLog } from "../services/audit.service";
 import { catatPenjagaMatriks } from "./daftarPeranRute";
+
+/**
+ * Identitas pemanggil — HANYA dari token yang sudah diverifikasi. #54.
+ *
+ * Penjaga lama menerima `x-user-id` dari header dan `userId` dari query maupun
+ * body sebagai cadangan. Saya MENYALIN cadangan itu ke ketiga penjaga baru
+ * tanpa memeriksanya — kesalahan yang baru ketahuan saat #54 dibaca ulang.
+ *
+ * Cadangan itu berbahaya bukan karena hari ini bisa ditembus — seluruh rute
+ * berlingkup proyek berada di balik gerbang `/api/*` yang mengisi `req.user`.
+ * Ia berbahaya karena bersandar pada lapisan LAIN untuk keselamatannya, dan
+ * itu persis bentuk asumsi yang melahirkan #49 dan #68: sebuah penjaga yang
+ * aman "selama ada yang menjaganya lebih dulu".
+ *
+ * Sebuah header yang bisa ditulis klien tidak boleh pernah menjadi identitas.
+ */
+const identitasPemanggil = (req: any): string | undefined => req.user?.id || req.user?.uid;
 import { normalkanPeran } from "../../src/types/roles";
 import {
   bolehDiProyek,
@@ -150,8 +167,7 @@ export const jagaProyek = (modul: ModulProyek, aksi: Aksi, lewat?: LewatEntitas)
     try {
       let targetProjectId = req.params?.projectId || req.params?.id;
 
-      const userIdMentah =
-        req.user?.id || req.user?.uid || req.headers?.["x-user-id"] || req.query?.userId;
+      const userIdMentah = identitasPemanggil(req);
       if (!userIdMentah) return tolak(res);
 
       connection = await db.getConnection();
@@ -227,8 +243,7 @@ export const jagaHapusProyek = () => {
     let connection;
     try {
       const projectId = req.params?.projectId || req.params?.id;
-      const userIdMentah =
-        req.user?.id || req.user?.uid || req.headers?.["x-user-id"] || req.query?.userId;
+      const userIdMentah = identitasPemanggil(req);
       if (!userIdMentah || !projectId) return tolak(res);
 
       connection = await db.getConnection();
@@ -278,8 +293,7 @@ export const jagaSetelanProyek = () => {
     let connection;
     try {
       const projectId = req.params?.projectId || req.params?.id;
-      const userIdMentah =
-        req.user?.id || req.user?.uid || req.headers?.["x-user-id"] || req.query?.userId;
+      const userIdMentah = identitasPemanggil(req);
       if (!userIdMentah || !projectId) return tolak(res);
 
       connection = await db.getConnection();
