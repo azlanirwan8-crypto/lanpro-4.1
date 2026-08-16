@@ -32,7 +32,7 @@ import { TERMINAL_STATUSES } from "./src/lib/constants";
 
 
 import { authenticateJWT, verifyGlobalAdmin, getJwtSecret, generateToken } from './server/middleware/auth.ts';
-import { penjagaSocket, idPemilikSocket, profilAman } from './server/middleware/socketAuth.ts';
+import { penjagaSocket, idPemilikSocket, profilAman, roomPengguna } from './server/middleware/socketAuth.ts';
 import healthRoutes from "./server/routes/health.routes";
 import systemRoutes from "./server/routes/system.routes";
 import auditRoutes from "./server/routes/audit.routes";
@@ -598,6 +598,18 @@ async function startServer() {
   io.on("connection", (socket) => {
     socketActiveConnections.inc();
     console.log("Client connected via socket:", socket.id);
+
+    // #51 — setiap socket masuk ke room miliknya sendiri, dinamai dari identitas
+    // hasil verifikasi token (bukan dari payload klien). Ini yang membuat
+    // FORCE_LOGOUT_EVENT bisa dikirim HANYA ke pemilik akunnya, alih-alih
+    // ditebar ke seluruh klien yang terhubung lewat io.emit.
+    //
+    // Aman karena berada di belakang penjagaSocket: room ini hanya bisa dimasuki
+    // pemilik token yang sah.
+    const idPemilik = idPemilikSocket(socket);
+    if (idPemilik) {
+      socket.join(roomPengguna(idPemilik));
+    }
 
     // Live Chat Socket Handlers
     

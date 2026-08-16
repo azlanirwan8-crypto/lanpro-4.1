@@ -4,6 +4,7 @@ import { UAParser } from "ua-parser-js";
 import db from "../../src/lib/db";
 import { authenticateJWT, activeUserSessions, generateToken } from "../middleware/auth";
 import { hashPassword } from "../helpers/hash";
+import { roomPengguna, sidikToken } from "../middleware/socketAuth";
 import { z } from "zod";
 import { formatUserForAuthResponse, handleUserAuthentication } from "../services/auth.service";
 
@@ -155,12 +156,17 @@ router.post("/api/auth/login", async (req, res) => {
     });
 
     if (force) {
-      // Broadcast force logout event to old sessions
+      // #51 — dikirim HANYA ke room milik pengguna ini, dan TANPA token.
+      //
+      // Dulu barisnya `io.emit(... newToken: token ...)`: JWT yang baru terbit
+      // dan berlaku dua jam disiarkan ke SELURUH klien yang terhubung. Klien
+      // sebenarnya tidak pernah memakai token itu — ia hanya membandingkannya
+      // untuk tahu "apakah sesi baru itu aku?" — jadi sidik jarinya sudah cukup.
       const io = req.app.get("io") || (req as any).io;
       if (io) {
-        io.emit("FORCE_LOGOUT_EVENT", {
+        io.to(roomPengguna(userId.toString())).emit("FORCE_LOGOUT_EVENT", {
           userId: userId.toString(),
-          newToken: token,
+          sidikTokenBaru: sidikToken(token),
           browserSessionId: req.body.browserSessionId || "",
         });
       }
@@ -245,11 +251,12 @@ router.post("/api/auth/force-logout", async (req, res) => {
       browserSessionId: req.body.browserSessionId || "",
     });
 
+    // #51 — lihat catatan di jalur login: hanya ke room pemilik akun, tanpa token.
     const io = req.app.get("io") || (req as any).io;
     if (io) {
-      io.emit("FORCE_LOGOUT_EVENT", {
+      io.to(roomPengguna(userId.toString())).emit("FORCE_LOGOUT_EVENT", {
         userId: userId.toString(),
-        newToken: token,
+        sidikTokenBaru: sidikToken(token),
         browserSessionId: req.body.browserSessionId || "",
       });
     }

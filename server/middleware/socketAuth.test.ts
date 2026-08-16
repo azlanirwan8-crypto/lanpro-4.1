@@ -14,6 +14,8 @@ import {
   penjagaSocket,
   idPemilikSocket,
   profilAman,
+  roomPengguna,
+  sidikToken,
   PESAN_TANPA_TOKEN,
   PESAN_TOKEN_TIDAK_VALID,
 } from "./socketAuth";
@@ -150,5 +152,51 @@ describe("profilAman — #59 presence tidak boleh membawa PII & matriks permissi
   it("mengembalikan null untuk masukan kosong", () => {
     expect(profilAman(null)).toBeNull();
     expect(profilAman(undefined)).toBeNull();
+  });
+});
+
+describe("#51 FORCE_LOGOUT_EVENT tidak lagi membawa token ke seluruh klien", () => {
+  it("room pengguna berawalan user: sehingga tak mungkin bentrok dengan room proyek", () => {
+    // Room proyek dinamai memakai id proyek apa adanya, mis. 'zes0sOR02S9VzkjP4UYw'.
+    expect(roomPengguna("1")).toBe("user:1");
+    expect(roomPengguna("zes0sOR02S9VzkjP4UYw")).not.toBe("zes0sOR02S9VzkjP4UYw");
+  });
+
+  it("menerima id berupa angka maupun string dan menghasilkan room yang sama", () => {
+    expect(roomPengguna(1)).toBe(roomPengguna("1"));
+  });
+
+  it("sidik jari token tidak memuat tokennya sendiri", () => {
+    const token = jwt.sign({ id: "user-1" }, RAHASIA);
+    const sidik = sidikToken(token);
+
+    expect(sidik).not.toContain(token);
+    expect(token).not.toContain(sidik);
+  });
+
+  it("sidik jari berbentuk sha256 heksadesimal 64 karakter", () => {
+    expect(sidikToken("apa saja")).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("token yang sama menghasilkan sidik jari yang sama", () => {
+    const token = jwt.sign({ id: "user-1" }, RAHASIA);
+
+    expect(sidikToken(token)).toBe(sidikToken(token));
+  });
+
+  it("token yang berbeda menghasilkan sidik jari yang berbeda", () => {
+    const a = jwt.sign({ id: "user-1" }, RAHASIA);
+    const b = jwt.sign({ id: "user-2" }, RAHASIA);
+
+    expect(sidikToken(a)).not.toBe(sidikToken(b));
+  });
+
+  it("sidik jari cocok dengan perhitungan SHA-256 yang dipakai peramban", () => {
+    // Klien menghitungnya lewat crypto.subtle.digest('SHA-256', ...) lalu
+    // merangkainya jadi heksadesimal. Nilai acuan di bawah dihitung terpisah,
+    // supaya kedua sisi tidak sekadar sepakat pada implementasi yang sama.
+    expect(sidikToken("abc")).toBe(
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+    );
   });
 });
