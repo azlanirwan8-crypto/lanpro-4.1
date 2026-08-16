@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { katalogPeranProyek } from "../../lib/roleCatalog";
 import {
   Users,
   LayoutGrid,
@@ -75,6 +76,9 @@ export const TeamManagementPanel = ({
   const rawMembers = Array.isArray(propMembers) ? propMembers : [];
   const tasks = teamTasks.length > 0 ? teamTasks : Array.isArray(propTasks) ? propTasks : [];
   const masterData = Array.isArray(propMaster) ? propMaster : [];
+
+  // #82 — peran proyek dibaca dari Master Data.
+  const peranProyek = React.useMemo(() => katalogPeranProyek(masterData), [masterData]);
 
   const getUserTasks = (person: any) => {
     if (!person) return [];
@@ -336,14 +340,15 @@ export const TeamManagementPanel = ({
                 onChange={(e) => setRoleFilter(e.target.value)}
                 className="w-full pl-3 pr-8 py-1.5 bg-surface-sunken border border-border-subtle rounded-md outline-none text-content-body font-medium text-xs cursor-pointer appearance-none"
               >
+                {/* #82 — dari Master Data. Versi lama menyebut "UI/UX Designer"
+                    dan "QA Engineer" yang tidak pernah ada di katalog peran,
+                    sehingga penyaringnya tidak pernah cocok dengan data. */}
                 <option value="all">Semua Role</option>
-                <option value="admin">Admin</option>
-                <option value="project manager">Project Manager</option>
-                <option value="system analyst">System Analyst</option>
-                <option value="developer">Developer</option>
-                <option value="ui/ux">UI/UX Designer</option>
-                <option value="qa">QA Engineer</option>
-                <option value="viewer">Viewer</option>
+                {peranProyek.map((p) => (
+                  <option key={p.code} value={p.code}>
+                    {p.label}
+                  </option>
+                ))}
               </select>
               <ChevronDown className="w-3.5 h-3.5 text-content-subtle absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>

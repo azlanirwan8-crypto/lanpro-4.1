@@ -139,6 +139,12 @@ Ini bukan preferensi gaya; semuanya lahir dari insiden nyata di repo ini.
 8. **Baca §18 sebelum mengklaim apa pun soal kepatuhan.** Audit ini BUKAN audit
    ISO 27001 dan tidak akan menjadi ISO 27001 hanya dengan dirapikan. §18 memuat
    pemetaan OWASP/CWE, rubrik keparahan, batas lingkup, dan klasifikasi data.
+9. **TANPA HARDCODE — semuanya berparameter dari Master Data.** Ketetapan
+   pemilik proyek 16 Agu 2026. Daftar peran, status, prioritas, departemen,
+   jabatan, dan sejenisnya TIDAK BOLEH ditulis sebagai `<option>` di kode; ia
+   dibaca dari `MasterData`. Yang disimpan ke database adalah **`code`**, bukan
+   `label`, supaya mengganti nama tampilan tidak merusak otorisasi. Lihat #82
+   dan `src/lib/roleCatalog.ts`.
 
 ### 0.6 Jebakan teknis khas repo ini
 
@@ -291,7 +297,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 79  | **Migrasi ≠ database hidup**: 13 tabel drift, 54 kolom tak akan dibuat migrasi           |  **F0**  | 🔴  | Sedang        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.14 |
 | 80  | `POST /api/projects/generate-bni-demo` membuat proyek TANPA penjaga admin — pintu kedua  |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.15 |
 | 81  | `ProjectMembers.parentAdminId` ditulis tapi TIDAK PERNAH dibaca — 6 baris, nol `SELECT`  |  **F7**  | 🟡  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §19.2  |
-| 82  | Dropdown peran HARDCODED, tidak membaca katalog `MasterData` — duplikat & nilai bentrok |  **F7**  | 🔴  | Rendah        | Ya (blokir production)  | `TERBUKA`                | §19.12 |
+| 82  | Dropdown peran HARDCODED, tidak membaca katalog `MasterData` — duplikat & nilai bentrok |  **F7**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §19.12 |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -3840,5 +3846,52 @@ tetap hanya bisa memilih peran lama.
 3. Nilai yang disimpan = **kode peran baku**, bukan label — supaya penggantian
    nama label di Master Data tidak merusak otorisasi
 4. Tahap 2 (penjaga saat boot) ikut memvalidasi bahwa katalog dan enum sepadan
+
+---
+
+#### 19.12.5 Kartu verifikasi #82 — SELESAI 16 Agu 2026
+
+**Ketetapan pemilik proyek:** tidak boleh ada daftar peran yang ditulis di kode;
+semuanya berparameter, dan parameternya dari Master Data. Dicatat sebagai aturan
+tetap §0.5 nomor 9.
+
+| Sebelum | Sesudah |
+| ------- | ------- |
+| **6 dropdown hardcoded** di 3 berkas | **0** |
+| `Department Head` tampil 2× dengan nilai `head` dan `"Department Head"` | tampil 1× |
+| `Project Manager` muncul sebagai system role | tidak lagi |
+| `lead` & `member` bisa dipilih padahal tak ada di katalog | tidak lagi |
+| System Analyst, Business Analyst, Developer, QA **tak bisa dipilih** | **bisa** |
+
+Dropdown keenam ditemukan saat pengerjaan — `AdminUserPanel.tsx:1221`, terlewat
+dari pemindaian awal karena berada jauh di bawah lima yang lain.
+
+**Kolom `code` ditambahkan ke `MasterData`.** Inilah nilai yang disimpan ke
+`Users.role` dan `ProjectMembers.role` — bukan `label`. Dengan begitu mengganti
+nama tampilan sebuah peran tidak merusak otorisasi. Baris katalog tanpa `code`
+sengaja **dilewati**, bukan ditebak dari label: menebak dari label persis cara
+`Department Head` dulu tersimpan sebagai `"Department Head"`.
+
+Seluruhnya dipusatkan di `src/lib/roleCatalog.ts` — satu berkas, satu sumber.
+
+**Terverifikasi di layar** dengan sesi Administrator:
+
+```
+System Role  : Administrator·admin · Department Head·head ·
+               Standard User·user · Observer·viewer
+Project Role : Project Owner·owner · Project Admin·admin ·
+               Project Manager·manager · System Analyst·system_analyst ·
+               Business Analyst·business_analyst · Developer·developer ·
+               QA·qa · Viewer·viewer
+```
+
++8 test perilaku. Gerbang: tsc 0 · lint 0 · **264 test / 29 suite** · build
+sukses · 0 error console.
+
+⚠️ **BELUM ditutup, dan penting:** empat project role baru (System Analyst,
+Business Analyst, Developer, QA) kini **bisa dipilih**, tetapi penjaga rute
+belum mengenalinya — `verifyProjectAccess` masih memakai daftar peran lama.
+Pengguna yang diberi peran itu hanya akan lolos rute ber-`['*']`. Ini ditutup
+**Tahap 4** (§19.8), dan sebaiknya dikerjakan segera sesudah ini.
 
 ---
