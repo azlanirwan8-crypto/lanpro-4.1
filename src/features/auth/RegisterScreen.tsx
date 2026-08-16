@@ -304,7 +304,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         <button
           type="submit"
           disabled={isRegistering}
-          className="w-full bg-primary text-content-inverse py-3 rounded-lg font-semibold uppercase tracking-wider text-xs hover:bg-primary-hover transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full bg-primary-surface text-content-inverse py-3 rounded-lg font-semibold uppercase tracking-wider text-xs hover:bg-primary-surface-hover transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isRegistering ? (
             <>
@@ -367,7 +367,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleSuccessModalConfirm}
-              className="px-8 py-2.5 bg-primary hover:bg-primary-hover text-content-inverse rounded-md text-sm font-semibold shadow-md transition-all cursor-pointer min-w-[120px] mt-2"
+              className="px-8 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-sm font-semibold shadow-md transition-all cursor-pointer min-w-[120px] mt-2"
             >
               Ke Halaman Login
             </motion.button>

@@ -113,7 +113,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   if (!activeSuite) {
     return (
       <div className="lg:col-span-9 bg-surface border border-border-subtle/80 p-10 rounded-md text-center shadow-xs">
-        <div className="w-10 h-10 bg-primary/10 text-primary rounded-md flex items-center justify-center mx-auto mb-2.5">
+        <div className="w-10 h-10 bg-primary-surface/10 text-primary rounded-md flex items-center justify-center mx-auto mb-2.5">
           <FileSpreadsheet className="w-5 h-5" />
         </div>
         <h3 className="text-sm font-medium text-content-strong">Silakan Pilih Modul Testing</h3>
@@ -158,7 +158,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-primary text-content-inverse font-medium text-xs sm:text-[11px] sm:text-[9px] rounded-md uppercase tracking-wider">
+              <span className="px-2 py-0.5 bg-primary-surface text-content-inverse font-medium text-xs sm:text-[11px] sm:text-[9px] rounded-md uppercase tracking-wider">
                 {activeSuite.phase}
               </span>
               <h2 className="text-base font-medium text-content-strong tracking-tight">
@@ -179,7 +179,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                   setIsAddCaseOpen(true);
                   setActiveAddTab("single");
                 }}
-                className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+                className="px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah Task</span>
@@ -224,7 +224,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
         {/* Velzon Compact Micro Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-          <div className="bg-primary/5 border border-primary/10 p-2 rounded-md text-center">
+          <div className="bg-primary-surface/5 border border-primary/10 p-2 rounded-md text-center">
             <span className="text-xs sm:text-[11px] sm:text-[9px] text-primary font-medium uppercase tracking-wider block">
               Total Case
             </span>
@@ -438,7 +438,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="overflow-x-auto">
           <ResponsiveTable className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-primary/5 border-b border-primary/15 text-xs sm:text-[10px] font-medium uppercase tracking-wider text-primary">
+              <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[10px] font-medium uppercase tracking-wider text-primary">
                 {/* SELECT ALL CHECKBOX (For Admin / Users with edit access) */}
                 <th className="py-2.5 px-3 w-8 text-center" onClick={(e) => e.stopPropagation()}>
                   {(canUpdate || isAdminRole) && (
@@ -481,7 +481,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     <tr
                       key={tc.id || idx}
                       onClick={() => setSelectedTestCase(tc)}
-                      className={`hover:bg-primary/[0.03] transition-colors cursor-pointer group ${
+                      className={`hover:bg-primary-surface/[0.03] transition-colors cursor-pointer group ${
                         isChecked ? "bg-indigo-50/40" : ""
                       }`}
                     >
@@ -573,7 +573,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                   : "cursor-default"
                               } ${
                                 tc.assignedTo
-                                  ? "bg-primary/10 border-primary/40"
+                                  ? "bg-primary-surface/10 border-primary/40"
                                   : "bg-surface-muted border-border-subtle/80 text-content-muted"
                               }`}
                               title={

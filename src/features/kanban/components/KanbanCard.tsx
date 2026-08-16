@@ -135,7 +135,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                 )}
               />
             )}
-            <span className="font-mono font-semibold text-xs sm:text-[11px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-md border border-primary/20">
+            <span className="font-mono font-semibold text-xs sm:text-[11px] text-primary bg-primary-surface/10 px-1.5 py-0.5 rounded-md border border-primary/20">
               {task.key}
             </span>
             {task.priority && (
@@ -244,7 +244,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
           <div className="flex items-center gap-2">
             <div
               className={cn(
-                "flex items-center gap-1 bg-surface-sunken border border-border-faint group-hover:bg-primary/5 group-hover:border-primary/20 transition-colors duration-300 rounded-full",
+                "flex items-center gap-1 bg-surface-sunken border border-border-faint group-hover:bg-primary-surface/5 group-hover:border-primary/20 transition-colors duration-300 rounded-full",
                 isCompact ? "px-1.5 py-0" : "px-2 py-0.5"
               )}
             >
@@ -312,7 +312,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                     ? "bg-border-subtle"
                     : percentage === 100
                       ? "bg-success"
-                      : "bg-primary"
+                      : "bg-primary-surface"
                 )}
                 style={{ width: `${percentage}%` }}
               />

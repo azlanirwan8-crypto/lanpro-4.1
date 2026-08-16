@@ -426,7 +426,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 {canAdd && (
                   <button
                     onClick={startAddMeeting}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer shrink-0"
                   >
                     <Plus className="w-4 h-4" /> Add Meeting
                   </button>
@@ -438,7 +438,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
             <div className="flex-1 overflow-x-auto overflow-y-auto m-4 md:m-6 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs">
               <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
-                  <tr className="bg-primary/5 border-b border-primary/15 text-xs sm:text-[11px] font-medium uppercase tracking-wider text-primary whitespace-nowrap">
+                  <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-medium uppercase tracking-wider text-primary whitespace-nowrap">
                     <th className="py-3 px-4 w-14 text-center">No</th>
                     <th className="py-3 px-4 min-w-[180px] max-w-[260px]">Meeting Title</th>
                     <th className="py-3 px-4 w-44">Datetime Meeting</th>
@@ -605,7 +605,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   >
                     Previous
                   </button>
-                  <span className="px-3 py-1.5 bg-primary text-content-inverse rounded-md text-xs font-medium shadow-xs">
+                  <span className="px-3 py-1.5 bg-primary-surface text-content-inverse rounded-md text-xs font-medium shadow-xs">
                     {currentPage}
                   </span>
                   <button
@@ -643,7 +643,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer"
                       >
                         <Video className="w-3.5 h-3.5" /> Join Meeting{" "}
                         <ExternalLink className="w-3 h-3 opacity-80" />
@@ -943,7 +943,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   type="button"
                   onClick={handleCreateMeeting}
                   disabled={loading || !newTitle.trim()}
-                  className="px-5 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                  className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-50 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer"
                 >
                   {loading ? (
                     <>

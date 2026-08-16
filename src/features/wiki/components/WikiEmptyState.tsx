@@ -204,7 +204,7 @@ export const WikiEmptyState: React.FC<WikiEmptyStateProps> = ({
           whileHover={{ scale: 1.02, y: -1 }}
           whileTap={{ scale: 0.98 }}
           onClick={onCreateClick}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse font-medium text-xs rounded-md shadow-xs transition-all cursor-pointer relative overflow-hidden group"
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse font-medium text-xs rounded-md shadow-xs transition-all cursor-pointer relative overflow-hidden group"
         >
           {/* Dynamic shimmer gloss on button hover */}
           <div className="absolute inset-0 w-1/2 h-full bg-surface/10 skew-x-12 -translate-x-full group-hover:animate-shimmer pointer-events-none" />

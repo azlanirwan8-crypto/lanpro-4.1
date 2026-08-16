@@ -20,7 +20,7 @@ export const KpiMetricsRow: React.FC<KpiMetricsRowProps> = ({
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 w-full h-full select-none">
       {/* Card 1: Total Completion */}
       <div className="bg-surface p-5 rounded-xl border border-border-subtle/60 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-soft group">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
+        <div className="w-10 h-10 rounded-xl bg-primary-surface/10 text-primary flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
           <CheckCircle2 className="w-5 h-5" />
         </div>
         <span className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-subtle mb-1">

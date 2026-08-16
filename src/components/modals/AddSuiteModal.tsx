@@ -35,7 +35,7 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
           className="bg-surface border border-border-subtle/80 rounded-md p-6 max-w-md w-full shadow-2xl space-y-5"
         >
           <div className="flex items-center gap-3 border-b border-border-faint pb-3">
-            <div className="w-10 h-10 rounded-md bg-primary/10 text-primary flex items-center justify-center font-medium">
+            <div className="w-10 h-10 rounded-md bg-primary-surface/10 text-primary flex items-center justify-center font-medium">
               <Plus className="w-5 h-5" />
             </div>
             <div>
@@ -89,7 +89,7 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+                className="px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
               >
                 <Plus className="w-4 h-4" /> Buat Dokumen
               </button>

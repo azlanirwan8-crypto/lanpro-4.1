@@ -3273,7 +3273,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
           {/* Micro logo for mobile (<1024px) */}
           <div className="absolute top-6 left-6 lg:hidden flex items-center gap-2">
-            <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center shadow-md shadow-primary/20">
+            <div className="w-7 h-7 bg-primary-surface rounded-lg flex items-center justify-center shadow-md shadow-primary/20">
               <ShieldCheck className="text-content-inverse w-4 h-4" />
             </div>
             <span className="text-sm font-medium text-content tracking-tight">LANPRO</span>
@@ -3470,7 +3470,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                           setTheme("light");
                           setIsThemeOpen(false);
                         }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "light" ? "bg-primary/10 text-primary" : "text-content-secondary hover:bg-surface-sunken"}`}
+                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "light" ? "bg-primary-surface/10 text-primary" : "text-content-secondary hover:bg-surface-sunken"}`}
                       >
                         <Sun
                           className={`w-4 h-4 ${theme === "light" ? "text-amber-500" : "text-content-subtle"}`}
@@ -3482,7 +3482,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                           setTheme("dark");
                           setIsThemeOpen(false);
                         }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "dark" ? "bg-primary/10 text-primary" : "text-content-secondary hover:bg-surface-sunken"}`}
+                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "dark" ? "bg-primary-surface/10 text-primary" : "text-content-secondary hover:bg-surface-sunken"}`}
                       >
                         <Moon
                           className={`w-4 h-4 ${theme === "dark" ? "text-primary" : "text-content-subtle"}`}
@@ -3494,7 +3494,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                           setTheme("system");
                           setIsThemeOpen(false);
                         }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "system" ? "bg-primary/10 text-primary" : "text-content-secondary hover:bg-surface-sunken"}`}
+                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "system" ? "bg-primary-surface/10 text-primary" : "text-content-secondary hover:bg-surface-sunken"}`}
                       >
                         <Monitor
                           className={`w-4 h-4 ${theme === "system" ? "text-primary" : "text-content-subtle"}`}
@@ -3822,7 +3822,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               <Button
                 onClick={wrapAppSubmit("createSprint", handleCreateSprint)}
                 disabled={isSubmitting["createSprint"]}
-                className="w-full justify-center bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse shadow-xs py-2.5 rounded-md font-medium text-xs cursor-pointer"
+                className="w-full justify-center bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse shadow-xs py-2.5 rounded-md font-medium text-xs cursor-pointer"
               >
                 Create Phase & Assign Tasks
               </Button>
@@ -3955,7 +3955,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   <Button
                     onClick={wrapAppSubmit("updateSprint", handleUpdateSprint)}
                     disabled={isSubmitting["updateSprint"]}
-                    className="flex-1 justify-center bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse shadow-xs rounded-md text-xs font-medium py-2 cursor-pointer"
+                    className="flex-1 justify-center bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse shadow-xs rounded-md text-xs font-medium py-2 cursor-pointer"
                   >
                     Save Changes
                   </Button>

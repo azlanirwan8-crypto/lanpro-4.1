@@ -246,7 +246,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setIsNewSprintModalOpen(true)}
-                    className="h-8 px-3.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="h-8 px-3.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>NEW SPRINT</span>

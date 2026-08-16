@@ -155,7 +155,7 @@ const getStatusClasses = (val: string) => {
   ) {
     return "bg-success/10 text-success border-success/20 hover:bg-success/15";
   }
-  return "bg-primary/10 text-primary border-primary/20 hover:bg-primary/15";
+  return "bg-primary-surface/10 text-primary border-primary/20 hover:bg-primary-surface/15";
 };
 
 const getPriorityClasses = (val: string) => {

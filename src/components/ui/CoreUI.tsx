@@ -100,7 +100,7 @@ export const Button = ({
   };
   const variants: any = {
     primary:
-      "bg-primary text-content-inverse hover:bg-primary-hover active:bg-primary-active shadow-soft",
+      "bg-primary-surface text-content-inverse hover:bg-primary-surface-hover active:bg-primary-active shadow-soft",
     secondary:
       "bg-surface-muted text-content-body hover:bg-border-subtle border border-border-subtle",
     danger: "bg-danger text-content-inverse hover:opacity-90 shadow-soft",
@@ -291,7 +291,7 @@ export const Badge = ({
   className?: string;
 }) => {
   const variants: Record<BadgeVariant, string> = {
-    primary: "bg-primary/10 text-primary border-primary/20",
+    primary: "bg-primary-surface/10 text-primary border-primary/20",
     success: "bg-success/10 text-success border-success/20",
     warning: "bg-warning/15 text-warning border-warning/30",
     danger: "bg-danger/10 text-danger border-danger/20",

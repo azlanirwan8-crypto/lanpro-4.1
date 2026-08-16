@@ -143,7 +143,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                       <div
                         className={cn(
                           "h-full rounded-full transition-all duration-300",
-                          completionPercentage === 100 ? "bg-emerald-500" : "bg-primary"
+                          completionPercentage === 100 ? "bg-emerald-500" : "bg-primary-surface"
                         )}
                         style={{ width: `${completionPercentage}%` }}
                       />
@@ -179,7 +179,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                               e.stopPropagation();
                               handleStartSprint(sprint.id);
                             }}
-                            className="h-7 px-2.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse text-xs font-medium rounded-md transition-all flex items-center gap-1 shadow-2xs shrink-0 cursor-pointer"
+                            className="h-7 px-2.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse text-xs font-medium rounded-md transition-all flex items-center gap-1 shadow-2xs shrink-0 cursor-pointer"
                           >
                             <Zap className="w-3 h-3" /> <span>START</span>
                           </button>
@@ -265,7 +265,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                               className={cn(
                                 "min-h-[80px] transition-all duration-200 rounded-md p-2.5 border border-dashed",
                                 snapshot.isDraggingOver
-                                  ? "bg-primary/10 border-primary shadow-2xs"
+                                  ? "bg-primary-surface/10 border-primary shadow-2xs"
                                   : "border-border-subtle/80 bg-surface",
                                 sprintTasks.length === 0 &&
                                   !snapshot.isDraggingOver &&

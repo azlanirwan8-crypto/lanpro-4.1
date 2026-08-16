@@ -32,7 +32,9 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
         <Upload className="w-10 h-10 text-primary mx-auto" />
         <div>
           <p className="text-xs font-medium text-content-body">Upload file</p>
-          {helperText && <p className="text-xs sm:text-[10px] text-content-subtle mt-1">{helperText}</p>}
+          {helperText && (
+            <p className="text-xs sm:text-[10px] text-content-subtle mt-1">{helperText}</p>
+          )}
         </div>
         <input
           type="file"
@@ -43,7 +45,7 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
         />
         <label
           htmlFor="file_upload_input"
-          className="inline-block px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium rounded-md cursor-pointer transition-colors"
+          className="inline-block px-4 py-2 bg-primary-surface/10 hover:bg-primary-surface/20 text-primary text-xs font-medium rounded-md cursor-pointer transition-colors"
         >
           {file ? file.name : "Choose File"}
         </label>
