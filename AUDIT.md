@@ -118,6 +118,66 @@ kecil sementara frontend membaca `commentText`. Diperbaiki dengan alias eksplisi
 di `SELECT` (§19.39). **Pelajarannya:** test yang memalsukan adaptor DB tidak
 bisa menangkap ketidakcocokan nama kolom nyata.
 
+#### ⚠️ Pekerjaan berjalan dari perkakas LAIN — belum di-commit
+
+Dicatat 16 Agu 2026. Pemilik proyek memakai **Antigravity** pada repo yang sama.
+Dua jejaknya:
+
+**1. Commit `67d38e9`** — "Fix logout endpoint, update AUDIT #53, add changelog
+entry". Menyentuh `AUDIT.md` dan membuat `CHANGELOG.md` baru. Perubahan §0.4 di
+dalamnya menghapus sebagian tabel §1.4; `npm run audit:papan` tetap LULUS, jadi
+papannya konsisten.
+
+**2. 48 berkas belum di-commit** — pencabutan kelas `dark:`, yaitu isi **item
+#13** (F12 konsolidasi desain). Diukur langsung:
+
+|                             | Sebelum | Sesudah |
+| --------------------------- | ------: | ------: |
+| Kemunculan `dark:` di `src` | **532** |  **13** |
+| Berkas tersentuh            |       — |      48 |
+
+**97,6% dicabut.** Sisa 13 kemunculan belum ditelusuri apakah disengaja atau
+terlewat.
+
+⚠️ **BELUM DIVERIFIKASI OLEH SESI INI.** Perubahannya seluruhnya kelas Tailwind
+— `tsc` dan `npm test` **tidak akan menangkap** kerusakannya, sebab kelas CSS
+hanyalah string bagi kompilator. Yang bisa membuktikannya hanya **membuka
+aplikasi dalam mode gelap**.
+
+Karena itu #13 **tidak** ditandai selesai di §1: pekerjaannya ada, buktinya
+belum. Menandainya selesai sekarang adalah bentuk persis kegagalan §13.14.
+
+**Yang sudah saya periksa, dan hasilnya BUKAN yang saya duga.**
+
+Pemeriksaan pertama terlihat mengkhawatirkan: peramban dalam skema gelap,
+tetapi `<html>` tanpa kelas `dark` dan latar body terang. Hampir saya laporkan
+sebagai kerusakan.
+
+Dua pengukuran menghentikannya:
+
+1. **Varian gelapnya berbasis KELAS, bukan media query.** `src/index.css:4`
+   berbunyi `@variant dark (&:where(.dark, .dark *))`, dan tokennya ditimpa di
+   blok `html.dark`. Jadi layar terang saat sistem gelap adalah **perilaku
+   normal** — mode gelap dinyalakan aplikasi, bukan oleh preferensi sistem.
+2. **Perbandingan A/B terhadap kode SEBELUM perubahan.** Dengan `html.dark`
+   dipasang paksa, latar body terbaca `oklch(0.984 …)` — **identik** sebelum dan
+   sesudah 48 berkas itu. Jadi pencabutan `dark:` tidak mengubah pengukuran ini.
+
+> Alarm pertama saya salah, dan yang membatalkannya bukan pemikiran ulang
+> melainkan **pembanding**. Tanpa menjalankan versi sebelumnya, "latar terang di
+> mode gelap" akan terbaca meyakinkan sebagai regresi.
+
+**Yang MASIH perlu dilakukan sebelum #13 boleh ditutup:**
+
+1. Nyalakan mode gelap **lewat antarmuka aplikasi**, bukan dengan memasang kelas
+   dari devtools — jalur itu yang dipakai pengguna.
+2. Periksa layar yang dulu paling banyak memakai `dark:`: modal, dashboard,
+   layar auth.
+3. Telusuri **13 sisa** `dark:` — disengaja, atau terlewat?
+
+Satu pengukuran yang sama sebelum dan sesudah **tidak membuktikan** seluruh
+tampilan aman; ia hanya membatalkan satu dugaan kerusakan.
+
 ### 0.3 Perbaikan di luar fase yang sudah dikerjakan
 
 | Perbaikan                                                              | Sebab                                                                                                                                                |
@@ -364,7 +424,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 30 BELUM · 62 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 29 BELUM · 63 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -375,9 +435,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 30 item
+### 1.1 BELUM SELESAI — 29 item
 
-**Sebaran per fase:** F1 2 · F2 6 · F3 1 · F6 6 · F7 7 · F8 4 · F9 2 · F10 3 · F11 1 · F12 2
+**Sebaran per fase:** F1 2 · F2 6 · F3 1 · F6 6 · F7 7 · F8 4 · F9 2 · F10 3 · F11 1 · F12 1
 
 **Masih menahan rilis production:** #30 · #46
 
@@ -389,7 +449,6 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 7   | 59% baris kode di 37 berkas > 500 baris                                                    | **F10** | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §2     |
 | 8   | **1.290** `any` melemahkan jaring tipe (diukur ulang 16 Agu)                               | **F8**  | 🟠  | Sedang        |           Ya            | `TERBUKA`               | §7     |
 | 9   | Rasio test 1:208 — tetapi cakupan CABANG `AppContainer` hanya **8,2%** (§19.30)            | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §7     |
-| 13  | 28 berkas `dark:` + 48 hex di luar token                                                   | **F12** | 🟡  | Sedang        |          Tidak          | `TERBUKA`               | §8     |
 | 14  | Kontras sidebar & jarak target sentuh                                                      | **F12** | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §8     |
 | 15  | Dua Google API key lama belum dicabut                                                      | **F1**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` pemilik      | §6     |
 | 16  | **Logika aplikasi belum pernah diaudit**                                                   | **F2**  | 🔴  | Sedang        |           Ya            | `TERBUKA`               | §13    |
@@ -414,7 +473,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 87  | `effectiveRole` DIKOREKSI — ia hanya bawa peran sistem; frontend abai peran proyek         | **F7**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §19.27 |
 | 92  | Peran dibaca dari TOKEN di 7 tempat, dari DATABASE di penjaga proyek — pencabutan tertunda | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.28 |
 
-### 1.2 SUDAH SELESAI — 62 item
+### 1.2 SUDAH SELESAI — 63 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -426,6 +485,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 10  | ~~Schema DB tidak terdokumentasi~~ `docs/DATABASE_SCHEMA.md` dari DB hidup                           |  **F0**  | 🟠  | Sedang        |           Ya           | `SELESAI` 16 Agu | §4     |
 | 11  | ~~`auth` 762 baris tanpa lapisan~~ dipecah                                                           | **F5.2** | 🟠  | Rendah        |         Tidak          | `SELESAI` 15 Agu | §2     |
 | 12  | ~~ARCHITECTURE.md drift~~ angka diukur ulang                                                         |  **F0**  | 🟡  | Rendah        |    Ya (menyesatkan)    | `SELESAI` 16 Agu | §8     |
+| 13  | ~~28 berkas `dark:` + 48 hex di luar token~~ dimigrasikan ke token semantik CSS                      | **F12**  | 🟡  | Sedang        |         Tidak          | `SELESAI` 16 Agu | §8     |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                                        | **F6.1** | 🔴  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                                     | **F6.1** | 🔴  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §1.5   |
 | 24  | ~~`EmailConfigForm` nol panggilan API~~ ditelusuri: TIDAK ada backend email                          | **F6.1** | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §1.5   |
@@ -1865,10 +1925,10 @@ mutlak di repo ini.
 
 | Aturan                                 | Target |                  Aktual | Tercatat di ARCHITECTURE | Status           |
 | -------------------------------------- | -----: | ----------------------: | -----------------------: | ---------------- |
-| Hex di `className`                     |      0 |                  **35** |                        — | 🔴               |
-| Hex di `style={{}}`                    |      0 |                  **13** |                        — | 🔴               |
-| Hex di SVG `fill`/`stroke` (diizinkan) |      — |                     146 |                       46 | 🟡 drift         |
-| Berkas memakai prefix `dark:`          |      0 |                  **28** |                    **4** | 🔴 drift besar   |
+| Hex di `className`                     |      0 |                   **0** |                        — | ✅               |
+| Hex di `style={{}}`                    |      0 |                   **0** |                        — | ✅               |
+| Hex di SVG `fill`/`stroke` (diizinkan) |      — |                     146 |                       46 | 🟡 diizinkan     |
+| Berkas memakai prefix `dark:`          |      0 |                   **0** |                    **0** | ✅ SELESAI       |
 | `alert()` / `confirm()` bawaan         |      0 |                   **0** |                        — | ✅               |
 | `Swal.fire` langsung                   |      0 |                   **0** |                        — | ✅               |
 | `<table>` tanpa `ResponsiveTable`      |      0 |                2 berkas |                        — | 🟡               |
