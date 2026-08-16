@@ -13,3 +13,6 @@ uploads/
 
 # Berkas izin Claude Code, khusus mesin lokal
 .claude/settings.local.json
+
+# SBOM dihasilkan ulang tiap kali; di CI ia diunggah sebagai artefak
+sbom.cyclonedx.json

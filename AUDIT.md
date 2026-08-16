@@ -220,7 +220,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 75 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 76 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -261,17 +261,17 @@ lepas. Catatan lepas selalu terlupakan.
 | 50  | Socket.IO **tanpa autentikasi sama sekali** — tak ada `io.use()` handshake               |  **F2**  | 🔴  | Sedang        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.5  |
 | 51  | `FORCE_LOGOUT_EVENT` menyiarkan JWT sah ke SELURUH socket lewat `io.emit`                |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.5  |
 | 52  | `/api/auth/force-logout` memeriksa password TANPA `loginLimiter` — jalur brute force     |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.5  |
-| 53  | `POST /api/auth/logout` tanpa auth, `userId` sembarang → NULL-kan sesi siapa pun         |  **F2**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`                | §13.5  |
+| 53  | `POST /api/auth/logout` tanpa auth, `userId` sembarang → NULL-kan sesi siapa pun         |  **F2**  | 🔴  | Rendah        |          Tidak          | `TERBUKA`                | §13.5  |
 | 54  | `rbac.ts:27` identitas boleh datang dari `x-user-id`/query/body — ranjau impersonasi     |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.5  |
 | 55  | `rbac.ts:50` `!targetProjectId → next()` — RBAC no-op senyap bila nama param berbeda     |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.5  |
 | 56  | Proses Jest mencetak crash `pg` (`isIP` of undefined) saat dibongkar — exit code tetap 0 |  **F8**  | 🟡  | Rendah        |          Tidak          | `TERBUKA`                | §13.5  |
-| 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401      |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.6  |
+| 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401      |  **F2**  | ⚪  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.6  |
 | 58  | `GET /metrics` terbuka TANPA autentikasi — di luar `/api/`, lolos gerbang global         |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.6  |
 | 59  | `presence_sync` menyiarkan profil LENGKAP + matriks permission ke klien mana pun         |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.6  |
 | 60  | `POST .../tasks` buka transaksi tanpa `ROLLBACK` — koneksi balik ke pool masih terbuka   |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.8  |
 | 61  | Transaksi `POST .../tasks` hanya melingkupi penghitung, bukan INSERT task-nya           |  **F2**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu | §13.8  |
-| 62  | Hapus proyek memakai kode galat MySQL; di Postgres `continue` dalam transaksi mustahil   |  **F2**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu | §13.8  |
-| 63  | Register menelan `ER_DUP_ENTRY` (MySQL) — di Postgres jadi 500, bukan pesan yang benar   |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu | §13.8  |
+| 62  | Hapus proyek memakai kode galat MySQL; di Postgres `continue` dalam transaksi mustahil   |  **F2**  | 🟡  | Rendah        |          Tidak          | `SELESAI` 16 Agu | §13.8  |
+| 63  | Register menelan `ER_DUP_ENTRY` (MySQL) — di Postgres jadi 500, bukan pesan yang benar   |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu | §13.8  |
 | 64  | `tasks/reorder` melepas koneksi dua kali bila galat terjadi setelah `commit`             |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu | §13.8  |
 | 65  | `affectedRows` selalu `undefined` — 3 pemeriksaan mati; penjaga jendela balapan mati    |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.9  |
 | 66  | 5 rute DELETE dijaga hanya `['*']` — anggota berperan `viewer` bisa menghapus data        |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.9  |
@@ -285,6 +285,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 74  | 7 pengambil data tanpa penjaga respons basi — data proyek lama menimpa proyek baru      |  **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §13.12 |
 | 75  | Angka §13.1 & ARCHITECTURE drift lagi: 21 `useState` aktualnya 11, 104 rute aktualnya 119 |  **F0**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §13.12 |
 | 76  | Otorisasi tidak deny-by-default — akar 56% temuan F2 (14 dari 25 masuk OWASP A01)        |  **F7**  | 🔴  | Sedang        | Ya (blokir production)  | `MENUNGGU` keputusan     | §18.3  |
+| 77  | 4 kerentanan `moderate` di dependensi — hanya tertutup lewat kenaikan versi mayor      |  **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan     | §18.7  |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -2728,16 +2729,16 @@ Dikerjakan 16 Agu 2026 atas 25 temuan F2 (#49–#74; #56 masuk F8, #75 masuk F0)
 | 50 | A07 Identification & Authentication Failures | CWE-306 Missing Authentication for Critical Function | 🔴 |
 | 51 | A02 Cryptographic Failures | CWE-200 Exposure of Sensitive Information | 🔴 |
 | 52 | A07 | CWE-307 Improper Restriction of Excessive Authentication Attempts | 🔴 |
-| 53 | A01 | CWE-639 Authorization Bypass Through User-Controlled Key | 🟠 |
+| 53 | A01 | CWE-639 Authorization Bypass Through User-Controlled Key | 🔴 |
 | 54 | A01 | CWE-290 Authentication Bypass by Spoofing | 🟠 |
 | 55 | A01 | CWE-284 | 🟡 |
-| 57 | — (operasional, bukan keamanan) | — | 🟡 |
+| 57 | — (operasional, bukan keamanan) | — | ⚪ |
 | 58 | A05 Security Misconfiguration | CWE-200 | 🟠 |
 | 59 | A01 | CWE-359 Exposure of Private Personal Information | 🔴 |
 | 60 | A04 Insecure Design | CWE-459 Incomplete Cleanup | 🔴 |
 | 61 | A04 | CWE-662 Improper Synchronization | 🟠 |
-| 62 | A04 | CWE-544 Missing Standardized Error Handling | 🟠 |
-| 63 | A04 | CWE-544 | 🟠 |
+| 62 | A04 | CWE-544 Missing Standardized Error Handling | 🟡 |
+| 63 | A04 | CWE-544 | 🟡 |
 | 64 | A04 | CWE-459 | 🟡 |
 | 65 | A04 | CWE-362 Race Condition | 🔴 |
 | 66 | A01 | CWE-285 Improper Authorization | 🔴 |
@@ -2835,6 +2836,7 @@ yang menanggung dan sejak kapan.
 | 72 | `viewer` bisa membuat & mengubah data proyek | Pemilik proyek | 16 Agu 2026 |
 | 73 | Penjaga `dashboard-layout` korslet | Pemilik proyek | 16 Agu 2026 |
 | 74 | Data proyek lama menimpa layar proyek baru | Pemilik proyek | 16 Agu 2026 |
+| 77 | 4 kerentanan dependensi `moderate`: react-router & react-router-dom (open redirect → XSS), exceljs, uuid. Hanya tertutup lewat `npm audit fix --force` = kenaikan versi mayor | Pemilik proyek | 16 Agu 2026 |
 | 2 | Berkas unggahan hilang tiap deploy (driver `s3` belum diuji) | Pemilik proyek | 15 Agu 2026 |
 | 15 | Dua Google API key lama belum dicabut | Pemilik proyek | 15 Agu 2026 |
 | 46 | `SSO_ALLOWED_DOMAINS=gmail.com` — siapa pun ber-Gmail bisa mendaftar | Pemilik proyek | 15 Agu 2026 |
@@ -2875,8 +2877,8 @@ dibuktikan**.
 | ------- | --- | :------------: |
 | 1 | Tetapkan target **OWASP ASVS Level 1**, lalu Level 2 sebelum production. Tanpa target, tidak ada definisi "cukup" | Ya — 1 keputusan |
 | 2 | Kerjakan **#76** (otorisasi deny-by-default). Menutup akar 56% temuan sekaligus | Ya — izin arsitektur |
-| 3 | Jalankan `npm audit` + hasilkan SBOM, masukkan ke gerbang CI | — |
-| 4 | Terapkan rubrik §18.5 ke seluruh temuan lama, catat yang berubah | — |
+| 3 | ~~`npm audit` + SBOM ke gerbang CI~~ **SELESAI 16 Agu 2026** — lihat §18.10 | — |
+| 4 | ~~Terapkan rubrik §18.5 ke temuan lama~~ **SELESAI 16 Agu 2026** — lihat §18.11 | — |
 | 5 | Prosedur rotasi rahasia — `JWT_SECRET` belum pernah dirotasi | Ya |
 | 6 | Uji pulih dari cadangan, sekali, dan catat hasilnya | Ya |
 | 7 | Tetapkan siapa membaca `AuditLogs` dan seberapa sering | Ya |
@@ -2885,5 +2887,77 @@ dibuktikan**.
 **Jangan lakukan:** menempelkan kata "ISO 27001" di dokumen ini tanpa ISMS.
 Klaim kepatuhan yang tidak berdasar lebih berbahaya daripada mengaku belum
 patuh — ia membuat orang berhenti memeriksa.
+
+---
+
+### 18.10 Gerbang rantai pasok & SBOM — SELESAI 16 Agu 2026
+
+Langkah 3 §18.9. Dua perintah baru, keduanya juga jalan di CI:
+
+| Perintah | Isi |
+| -------- | --- |
+| `npm run audit:deps` | Menjalankan `npm audit`, memblokir bila ada kerentanan `high` ke atas |
+| `npm run sbom` | Menghasilkan `sbom.cyclonedx.json` — CycloneDX 1.5, **790 dependensi production** |
+
+Di `.github/workflows/deploy.yml` keduanya berjalan sesudah Gitleaks, dan
+SBOM-nya diunggah sebagai artefak dengan retensi 90 hari.
+
+**Kenapa ambangnya `high`, bukan `moderate`.** Repo ini punya 4 kerentanan
+`moderate` yang **hanya** bisa ditutup lewat `npm audit fix --force`, dan itu
+berarti kenaikan versi mayor pada `react-router`, `exceljs`, dan `uuid`.
+Memasang ambang di `moderate` hari ini membuat CI merah tanpa jalan keluar yang
+aman — dan gerbang yang selalu merah cepat dimatikan orang, sehingga hasilnya
+justru lebih buruk daripada tidak punya gerbang. Keempatnya tercatat sebagai
+risiko yang ditanggung (#77), bukan disembunyikan. Ambang dinaikkan ke
+`moderate` begitu #77 tuntas.
+
+**Gerbangnya dibuktikan bisa merah**, bukan hanya bisa hijau:
+
+```
+AUDIT_AMBANG=high      -> LULUS  (exit 0)
+AUDIT_AMBANG=moderate  -> GAGAL  (exit 1), 4 kerentanan disebut satu per satu
+```
+
+Keduanya ditulis tanpa menambah dependensi apa pun — SBOM dibangun dari
+`package-lock.json` yang sudah ada. ARCHITECTURE.md menuntut alasan kuat untuk
+tiap dependensi baru, dan untuk membaca daftar dari lockfile alasan itu tidak
+ada.
+
+Hanya dependensi **production** yang masuk SBOM. Alat build dan test tidak
+terkirim ke pengguna, jadi memasukkannya membuat SBOM menakut-nakuti tanpa
+sebab.
+
+### 18.11 Penerapan rubrik §18.5 ke temuan lama — SELESAI 16 Agu 2026
+
+Langkah 4 §18.9. Seluruh 25 temuan F2 dinilai ulang memakai rubrik berbasis
+**dampak & keterjangkauan**, menggantikan penilaian lama yang berbasis biaya
+bisnis.
+
+**Hasilnya: 21 dari 25 tidak berubah.** Itu sendiri sebuah temuan — penilaian
+intuitif ternyata sudah cukup dekat, jadi rubriknya bukan mengoreksi besar-besaran
+melainkan **membuat alasannya bisa diperiksa orang lain**.
+
+Empat yang berubah, beserta sebabnya:
+
+| # | Lama | Baru | Sebab |
+| - | :--: | :--: | ----- |
+| 53 | 🟠 | 🔴 | Bisa dipanggil **tanpa kredensial apa pun** — `POST /api/auth/logout` berada di prefix publik. Rubrik menaruh "dapat dieksploitasi tanpa kredensial sah" di 🔴 tanpa syarat lain. Penilaian lama menurunkannya karena dampaknya "hanya" melemahkan sesi tunggal, dan itu mencampur dampak dengan keterjangkauan |
+| 57 | 🟡 | ⚪ | **Bukan temuan keamanan.** Dua endpoint health adalah cacat operasional; memaksanya masuk skala keamanan membuat ⚪ berarti dua hal berbeda. Diberi tanda ⚪ **operasional** |
+| 62 | 🟠 | 🟡 | Butuh kondisi yang tidak wajar terjadi (tabel hilang di database yang sehat). Rubrik menaruhnya di 🟡: melemahkan pertahanan dan menyesatkan saat insiden, tetapi tidak bisa dipicu pada operasi normal |
+| 63 | 🟠 | 🟡 | Sama — hanya muncul saat mendaftar dengan email ganda, dan akibatnya pesan galat yang keliru, bukan kehilangan atau kebocoran data |
+
+**#61 dan #74 sengaja TIDAK diturunkan** meski butuh akun sah: keduanya
+menghilangkan atau merusak data pengguna tanpa jejak, dan rubrik menaruh itu di
+🟠 walaupun butuh kredensial. #65 tetap 🔴 karena kehilangannya senyap.
+
+Tanda baru **⚪ operasional** ditambahkan ke §1: temuan nyata yang **bukan**
+soal keamanan. Tanpa itu skala keamanan ikut menampung cacat operasional dan
+kehilangan arti.
+
+**Yang tidak dikerjakan, dan alasannya:** vektor CVSS v3.1 tidak diberikan.
+Menyusun vektor menuntut penilaian yang kompeten atas 8 metrik per temuan, dan
+angka 0–10 yang dikarang menciptakan presisi palsu — pembaca akan mengurutkan
+pekerjaan berdasarkan angka yang tidak punya dasar. Lebih jujur tidak punya skor
+daripada punya skor yang salah. Ini tetap terbuka di §18.4.
 
 ---
