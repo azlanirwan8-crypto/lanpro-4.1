@@ -312,7 +312,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 35 BELUM · 56 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 34 BELUM · 57 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -323,9 +323,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 35 item
+### 1.1 BELUM SELESAI — 34 item
 
-**Sebaran per fase:** F1 2 · F2 6 · F3 1 · F6 6 · F7 7 · F8 5 · F9 2 · F10 3 · F11 1 · F12 2
+**Sebaran per fase:** F1 2 · F2 6 · F3 1 · F6 6 · F7 7 · F8 4 · F9 2 · F10 3 · F11 1 · F12 2
 
 **Masih menahan rilis production:** #30 · #46
 
@@ -356,7 +356,6 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — celah daftar, DAN membatalkan asumsi kuota F11           | **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik      | §0.4   |
 | 47  | `discussion_point_comments` punya KOLOM KEMBAR camelCase + snake_case                      | **F9**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
-| 56  | Proses Jest mencetak crash `pg` (`isIP` of undefined) saat dibongkar — exit code tetap 0   | **F8**  | 🟡  | Rendah        |          Tidak          | `TERBUKA`               | §13.5  |
 | 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401        | **F2**  | ⚪  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.6  |
 | 71  | `project-modules` POST/PUT/DELETE tanpa penjaga — CRUD modul lintas proyek                 | **F2**  | 🟠  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan    | §13.11 |
 | 74  | 7 pengambil data tanpa penjaga respons basi — data proyek lama menimpa proyek baru         | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §13.12 |
@@ -368,7 +367,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 87  | `effectiveRole` DIKOREKSI — ia hanya bawa peran sistem; frontend abai peran proyek         | **F7**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §19.27 |
 | 92  | Peran dibaca dari TOKEN di 7 tempat, dari DATABASE di penjaga proyek — pencabutan tertunda | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.28 |
 
-### 1.2 SUDAH SELESAI — 56 item
+### 1.2 SUDAH SELESAI — 57 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -432,6 +431,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 53  | ~~logout tanpa auth, `userId` sembarang~~ identitas hanya dari token                                 |     **F2**     | 🔴  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.5  |
 | 55  | ~~`rbac.ts:50` RBAC no-op senyap~~ divalidasi TIDAK tersalin ke penjaga baru bila nama param berbeda |     **F2**     | 🟡  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §13.5  |
 | 93  | ~~"Remember Me" hanya melupakan PROFIL~~ token kini ikut pilihan itu                                 |     **F7**     | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §19.31 |
+| 56  | ~~Jest mencetak crash `pg` saat dibongkar~~ fungsi murni dipisah ke helper                           |     **F8**     | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.5  |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -5371,3 +5371,46 @@ token yang salah tempat tetap terbaca.
 Berkas testnya sempat jatuh ke project Jest `node` yang tanpa `jsdom`
 (`localStorage is not defined`); environment-nya ditetapkan eksplisit lewat
 pragma `@jest-environment jsdom`.
+
+### 19.35 #56 — dan validasi saya yang hampir menutupnya secara keliru
+
+`user.routes.avatar.test.ts` hanya menguji `sanitizeAvatarValue`, sebuah fungsi
+**murni**. Tetapi meng-import-nya dari `user.routes.ts` ikut menarik adaptor DB,
+dan adaptor itu membuka koneksi Postgres sungguhan. Koneksinya masih menyambung
+saat Jest membongkar environment:
+
+```
+ReferenceError: You are trying to `require` a file after the Jest environment
+has been torn down. From server/routes/user.routes.avatar.test.ts.
+TypeError: Cannot read properties of undefined (reading 'isIP')
+```
+
+**Exit code-nya tetap 0**, jadi crash ini tidak pernah menggagalkan apa pun.
+Itu justru bahayanya: ia melatih orang mengabaikan galat di akhir test, dan
+peringatan sungguhan berikutnya akan ikut terabaikan.
+
+Fungsinya dipindahkan ke `server/helpers/avatarValue.ts` — mengulang
+penyelesaian `getJwtSecret` (§0.3), dengan alasan yang sama: **fungsi murni
+tidak boleh menyeret koneksi database.**
+
+| Keluaran non-ringkasan `npm test` | Sebelum | Sesudah   |
+| --------------------------------- | ------- | --------- |
+| Blok peringatan SSL `pg`          | 2       | 1         |
+| Crash saat teardown               | ada     | **nihil** |
+
+#### Validasi pertama saya MELESET, dan hampir menutup item ini keliru
+
+Grep atas keluaran `npm test` menghasilkan **nol** kecocokan `isIP`. Kesimpulan
+yang menggoda: masalahnya sudah hilang sendiri, coret saja.
+
+Dua berkas keluaran yang saya jadikan pembanding ternyata **sudah tersaring
+`grep` sewaktu dibuat** — isinya hanya baris `Tests:`/`Suites:`. Nol-nya tidak
+membuktikan apa pun. Diulang dengan menangkap keluaran **penuh tanpa filter**,
+crash-nya masih ada.
+
+> **Aturan:** bukti negatif hanya sah bila sumbernya BELUM disaring. Mencari
+> sesuatu di dalam keluaran yang sudah difilter akan selalu menemukan nol, dan
+> nol itu terbaca persis seperti "bersih".
+
+Ini pasangan dari aturan §19.32 (item yang tampak gugur wajib divalidasi di kode
+baru). Keduanya soal yang sama: **ketiadaan bukti bukan bukti ketiadaan.**
