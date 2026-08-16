@@ -28,7 +28,7 @@ lalu **§0.4** (tiga keputusan yang menahan sisanya). Rinciannya §19.15–§19.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **375 lulus / 39 suite**                                    | `npm test`                                   |
+| Test                | **379 lulus / 40 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -312,7 +312,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 39 BELUM · 51 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 40 BELUM · 51 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -323,9 +323,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 39 item
+### 1.1 BELUM SELESAI — 40 item
 
-**Sebaran per fase:** F1 2 · F2 10 · F3 1 · F6 6 · F7 7 · F8 5 · F9 2 · F10 3 · F11 1 · F12 2
+**Sebaran per fase:** F1 2 · F2 10 · F3 1 · F6 6 · F7 8 · F8 5 · F9 2 · F10 3 · F11 1 · F12 2
 
 **Masih menahan rilis production:** #30 · #46
 
@@ -370,6 +370,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 87  | `effectiveRole` DIKOREKSI — ia hanya bawa peran sistem; frontend abai peran proyek         | **F7**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §19.27 |
 | 92  | Peran dibaca dari TOKEN di 7 tempat, dari DATABASE di penjaga proyek — pencabutan tertunda | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.28 |
+| 93  | "Remember Me" hanya melupakan PROFIL — token tetap di localStorage lintas sesi peramban    | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.31 |
 
 ### 1.2 SUDAH SELESAI — 51 item
 
@@ -5117,3 +5118,56 @@ Bukan "tambah test", melainkan **naikkan cakupan CABANG** — itu satu-satunya
 angka yang mengukur apakah keputusan di dalam kode benar-benar diuji. Perintah
 di atas membuatnya bisa diulang kapan saja, jadi kemajuannya tidak perlu
 dipercaya, cukup dijalankan.
+
+### 19.31 F8 langkah pertama — hasilnya kecil, dan itu informasinya
+
+Empat test cabang ditambahkan ke `AppContainer` (`AppContainer.pemulihan-sesi.test.tsx`).
+Keduanya divalidasi **di sumbernya** lebih dulu, bukan diduga dari nama fungsi.
+
+| Cabang                                                               | Kenapa belum tersentuh                                                                                              |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `safeSessionStorage.getItem(...) \|\| safeLocalStorage.getItem(...)` | Test yang ada hanya mengisi localStorage, jadi sisi kiri `\|\|` — jalur "jangan ingat saya" — tak pernah dijalankan |
+| `catch` pada `JSON.parse(sessionPayload)`                            | Storage rusak mengunci pengguna di layar putih tanpa jalan keluar selain devtools                                   |
+
+#### Hasilnya diukur, bukan diasumsikan
+
+| Metrik     |   Sebelum |   Sesudah |
+| ---------- | --------: | --------: |
+| Pernyataan |    23,74% |    23,80% |
+| **Cabang** | **8,19%** | **8,26%** |
+
+**Empat test menaikkan cakupan cabang 0,07 poin.**
+
+Itu angka yang mengecewakan, dan justru karena itu ia berguna: pada laju ini,
+mencapai cabang 50% membutuhkan sekitar **2.400 test render**. Menaikkan cakupan
+cabang `AppContainer` lewat render-test **tidak sebanding usahanya** — bukan
+karena testnya buruk, melainkan karena 4.581 baris dalam satu komponen membuat
+tiap test hanya menyentuh sepetak kecil.
+
+**Implikasi untuk rencana F8**, dan ini membalik urutan yang tertulis di §1.5:
+jaring pengaman untuk `AppContainer` **tidak bisa dibangun sebelum** komponennya
+dipecah. Selama logikanya terkurung di dalam satu komponen, satu-satunya cara
+mengujinya adalah me-render seluruhnya. Yang bisa dilakukan lebih dulu adalah
+mengekstrak logika murni keluar — dan logika yang sudah keluar bisa diuji dengan
+biaya normal.
+
+Ini **perlu keputusan pemilik proyek**, sebab ia menggeser sebagian F10 ke
+depan F8, berlawanan dengan urutan yang sudah ditetapkan.
+
+#### Item #93 — "Remember Me" hanya melupakan profil, bukan kredensial
+
+Ditemukan saat **memvalidasi asumsi test saya sendiri**. Versi pertama test
+menaruh token di `sessionStorage`; ia gagal, dan penelusurannya menunjukkan:
+
+| Yang disimpan               | Ke mana                              | Bergantung "Remember Me"?           |
+| --------------------------- | ------------------------------------ | ----------------------------------- |
+| Profil sesi (`sessionUser`) | localStorage **atau** sessionStorage | **Ya** (`AppContainer.tsx:531-533`) |
+| **Token JWT**               | **selalu** localStorage              | **TIDAK** (`src/lib/api.ts:50`)     |
+
+Jadi tidak mencentang "Remember Me" hanya membuat **profilnya** hilang saat tab
+ditutup; **kredensialnya tetap tinggal**. Hanya logout eksplisit yang
+membersihkannya lewat `clearAuthToken`.
+
+Di komputer bersama, menutup peramban tidak mengakhiri sesi pada tingkat yang
+penting. Belum diperbaiki — perbaikannya menyentuh alur masuk, dan sesudah #91
+alur itu layak disentuh dengan hati-hati.
