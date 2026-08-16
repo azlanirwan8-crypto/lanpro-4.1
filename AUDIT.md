@@ -3659,7 +3659,7 @@ dipakai pada `board` (memindahkan kartu) dan `access` (mengubah peran anggota).
 
 | Tahap | Isi | Status |
 | :---: | --- | ------ |
-| 0 | Katalog peran di `MasterData` | ✅ **SELESAI 16 Agu** — `npm run db:seed-roles`, 8 baris ditambahkan (4 SYSTEM + 4 PROJECT), idempoten |
+| 0 | Katalog peran di `MasterData` | ✅ **SELESAI 16 Agu** — `npm run db:seed-roles`. Katalog final: **4 SYSTEM + 6 PROJECT**, terverifikasi tampil di layar Master Data |
 | 1 | Satu enum peran, satu tempat. Hapus `\| string`, satukan dua `AppRole` | `TERBUKA` |
 | 2 | Penjaga saat boot — server menolak menyala bila rute memakai peran di luar enum | `TERBUKA` |
 | 3 | Migrasi data `ProjectMembers` (10 baris) & `Users` (11 baris) | `MENUNGGU` keputusan |
@@ -3683,22 +3683,56 @@ server menolak 11 nama peran hantu.
 | K3 | Product Owner & Scrum Master dilebur ke Project Manager? | **Ya** — fungsinya beririsan |
 | K4 | Nasib `parentAdminId` | **Buang** — item #81, ditulis tapi tidak pernah dibaca |
 
-### 19.10 Yang SUDAH dikerjakan dan yang SENGAJA ditahan
+### 19.10 Kontrak dengan antarmuka — kekeliruan yang layak dicatat
 
-Sudah:
+Versi pertama penyemai membuat `type = 'system_role'` untuk peran sistem.
+Barisnya masuk ke database dengan benar dan seluruh pemeriksaan sisi database
+lulus — tetapi **tidak pernah muncul di layar**. Pemilik proyek yang
+menemukannya: *"saya cek di data master untuk project role dan system role masih
+kosong"*.
 
-- Katalog `MasterData` bertambah 8 peran lewat `npm run db:seed-roles`
-- `SYSTEM` role dari **0 menjadi 4** — sebelumnya `role_type` hanya berisi `PROJECT`
+Sebabnya: `MasterDataPanel.tsx` hanya mengenal `type = 'project_role'`, lalu
+memisahkan dua lapis lewat kolom `role_type`.
 
-Sengaja **tidak** dikerjakan, karena menghapus/memindahkan data dan bergantung
-pada K1–K4:
+```
+type       = 'project_role'    untuk SELURUH peran, dua-duanya
+role_type  = 'SYSTEM'          peran sistem
+role_type  = 'PROJECT'         peran proyek
+```
 
-- `Product Owner` & `Scrum Master` **tidak** dihapus
-- Lead/Frontend/Backend Engineer **tidak** dipindah ke `jabatan`
-- Typo `"Businnes Analyst"` **tidak** diperbaiki
-- `ProjectMembers.role` **tidak** dimigrasikan
+**Pelajarannya:** menambah tipe data baru tanpa memeriksa apa yang dibaca
+antarmuka menghasilkan data yang benar tetapi tidak terlihat — bentuk kegagalan
+paling membingungkan, karena tidak ada satu pun pemeriksaan yang merah. Ini
+saudara kandung §13.14: gerbang yang dinyatakan lulus tanpa dijalankan.
 
-Karena itu katalog `PROJECT` kini berisi **11 peran**, bukan 6 — yang lama masih
-berdampingan dengan yang baru sampai K1–K4 terjawab.
+### 19.11 Yang SUDAH dikerjakan dan yang SENGAJA ditahan
+
+**K1–K3 dijawab pemilik proyek 16 Agu 2026** dengan izin hard delete, karena
+LanPro masih tahap pengembangan dan katalog lama belum dirujuk satu pun baris
+`ProjectMembers`.
+
+Sudah dikerjakan lewat `npm run db:seed-roles`:
+
+| Aksi | Isi |
+| ---- | --- |
+| **Dihapus** (9) | `Product Owner`, `Scrum Master` (K3 — dilebur ke Project Manager) · `Lead Developer`, `Frontend Engineer`, `Backend Engineer` (K2 — profesi, bukan izin) · 4 baris `system_role` keliru dari versi pertama |
+| **SYSTEM** (4) | Administrator · Department Head · Standard User · Observer |
+| **PROJECT** (6) | Project Owner · Project Admin · Project Manager · Contributor · QA · Viewer |
+| **Jabatan** (+3) | System Analyst · Frontend Engineer · Backend Engineer |
+| **Typo diperbaiki** | `"Businnes Analyst"` → `"Business Analyst"` |
+
+Hasil akhir: `MasterData` 84 → **82 baris** · Project Role **10** (4 SYSTEM +
+6 PROJECT) · Position **15**. Diverifikasi tampil benar di layar Master Data
+dengan sesi Administrator, 0 error console.
+
+**K1 terjawab implisit: 6 project role, bukan 8.** System Analyst dan Business
+Analyst menjadi *jabatan*, hak aksesnya Contributor.
+
+Sengaja **masih ditahan**:
+
+- **`ProjectMembers.role` belum dimigrasikan.** 10 baris masih berisi
+  `member`/`manager`/`developer` — nilai yang tidak ada lagi di katalog. Ini
+  Tahap 3, dan mengubahnya berarti mengubah hak akses orang yang sedang bekerja.
+- **K4 (`parentAdminId`) belum diputuskan** — item #81.
 
 ---

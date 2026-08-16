@@ -1,27 +1,34 @@
 #!/usr/bin/env node
 /**
  * Penyemai katalog peran ke `MasterData` — F7 / item #76 (Two-Tier RBAC).
+ * Rancangan lengkapnya di AUDIT.md §19.
  *
- * KENAPA ADA. `MasterData` sudah memuat 7 baris `project_role` sejak 5 Agu 2026
- * lengkap dengan kolom `role_type`, tetapi barisnya TIDAK pernah disemai oleh
- * migrasi — ia masuk dari luar. Sesudah item #79 menjadikan `pg-migrate.ts`
- * sumber kebenaran schema, katalog peran pun perlu jalur yang bisa diulang,
- * bukan SQL sekali pakai yang hilang jejaknya.
+ * KONTRAK DENGAN UI — pelajaran dari kekeliruan versi pertama.
  *
- * SIFATNYA. Idempoten dan HANYA MENAMBAH. Menjalankannya berkali-kali aman.
- * Skrip ini TIDAK menghapus, TIDAK memindahkan, dan TIDAK mengubah baris yang
- * tidak dikenalnya. Peran lama (`Product Owner`, `Scrum Master`,
- * `Frontend Engineer`, ...) sengaja DIBIARKAN — pemindahannya ke `jabatan` dan
- * penghapusannya masih menunggu keputusan pemilik proyek, dan operasi itu tidak
- * bisa dibatalkan.
+ * Versi pertama skrip ini membuat `type = 'system_role'` untuk peran sistem.
+ * Barisnya masuk ke database dengan benar, tetapi **tidak pernah muncul di
+ * layar**: `MasterDataPanel.tsx` hanya mengenal `type = 'project_role'`, lalu
+ * memisahkan dua lapis itu lewat kolom `role_type` (`PROJECT` / `SYSTEM`).
  *
- * URUTAN. Peran baru diberi `order` 10 ke atas supaya tidak bertabrakan dengan
- * baris lama. Perapian urutan dilakukan bersama pembersihan, bukan sekarang.
+ * Jadi kontraknya:
+ *
+ *   type       = 'project_role'   untuk SELURUH peran, dua-duanya
+ *   role_type  = 'SYSTEM'         peran sistem
+ *   role_type  = 'PROJECT'        peran proyek
+ *
+ * Menambah tipe baru ke database tanpa memeriksa apa yang dibaca antarmuka
+ * menghasilkan data yang benar tetapi tidak terlihat — bentuk kegagalan yang
+ * paling membingungkan, karena semua pemeriksaan di sisi database lulus.
+ *
+ * SIFATNYA. Idempoten. Menjalankan berkali-kali aman dan hasilnya sama.
+ *
+ * ⚠️ SKRIP INI MENGHAPUS BARIS. Atas izin pemilik proyek 16 Agu 2026, karena
+ * LanPro masih dalam tahap pengembangan dan katalog lama belum dipakai satu pun
+ * baris `ProjectMembers`. Daftar yang dihapus ditulis eksplisit di `DIHAPUS`;
+ * skrip tidak akan menghapus apa pun di luar daftar itu.
  *
  * Jalankan: npm run db:seed-roles
  */
-
-const path = require("path");
 
 const warna = {
   hijau: (t) => `\x1b[32m${t}\x1b[0m`,
@@ -32,14 +39,31 @@ const warna = {
 };
 
 /**
- * SYSTEM ROLE — mengatur hal DI LUAR proyek.
+ * Baris yang DIHAPUS dari katalog peran.
  *
- * Empat, bukan lima: `Project Manager` sengaja tidak ada di sini atas ketetapan
- * pemilik proyek 16 Agu 2026. Sesudah pembuatan proyek dibatasi ke Administrator,
- * peran itu tidak menyisakan pembeda apa pun dari Standard User — dan menyimpan
- * peran yang bedanya nol mengulang persis masalah `developer` vs `member`.
- * Tempatnya di project role.
+ * Product Owner & Scrum Master: fungsinya beririsan dan dilebur ke
+ * Project Manager (§19.9 K3). Keduanya tetap tersedia sebagai `jabatan`.
+ *
+ * Lead / Frontend / Backend Engineer: hak aksesnya IDENTIK satu sama lain dan
+ * identik dengan Contributor. Yang membedakan cuma profesinya, dan itu jabatan
+ * — bukan izin (§19.3). Dipindahkan ke `type = 'jabatan'`.
+ *
+ * md-system_role-*: kekeliruan versi pertama skrip ini, tipe yang tidak dikenal
+ * antarmuka.
  */
+const DIHAPUS = [
+  "md-project_role-product-owner",
+  "md-project_role-scrum-master",
+  "md-project_role-lead-developer",
+  "md-project_role-frontend-engineer",
+  "md-project_role-backend-engineer",
+  "md-system_role-administrator",
+  "md-system_role-department-head",
+  "md-system_role-standard-user",
+  "md-system_role-observer",
+];
+
+/** SYSTEM ROLE — mengatur hal DI LUAR proyek. Empat peran (§19.4). */
 const SYSTEM_ROLES = [
   {
     slug: "administrator",
@@ -80,53 +104,74 @@ const SYSTEM_ROLES = [
 ];
 
 /**
- * PROJECT ROLE — mengatur hal DI DALAM satu proyek.
- *
- * Empat baris di bawah adalah yang BELUM ada. `Project Admin` dan `QA Engineer`
- * sudah ada di katalog dan tidak disentuh.
- *
- * Disusun sebagai tangga mengikuti GitLab (Guest -> Reporter -> Developer ->
- * Maintainer -> Owner), bukan berdasarkan profesi. `Frontend Engineer` dan
- * `Backend Engineer` tidak menjadi peran karena hak aksesnya identik — itu
- * jabatan, dan tempatnya di `MasterData.type = 'jabatan'`.
+ * PROJECT ROLE — mengatur hal DI DALAM satu proyek. Enam peran (§19.5).
+ * Disusun sebagai tangga mengikuti GitLab: tiap tingkat mewarisi yang di bawah.
  */
 const PROJECT_ROLES = [
   {
     slug: "project-owner",
     label: "Project Owner",
-    order: 10,
+    order: 1,
     color: "#B91C1C",
     icon: "Crown",
     description:
-      "Pemilik proyek. Satu-satunya project role yang boleh MENGHAPUS proyek. Mewarisi seluruh hak Project Admin.",
+      "Pemilik proyek. SATU-SATUNYA project role yang boleh MENGHAPUS proyek. Mewarisi seluruh hak Project Admin.",
+  },
+  {
+    slug: "project-admin",
+    label: "Project Admin",
+    order: 2,
+    color: "#6366F1",
+    icon: "Shield",
+    description:
+      "Tata kelola proyek: mengelola anggota, peran, dan pengaturan proyek. Hak penuh di seluruh modul kecuali menghapus proyek.",
   },
   {
     slug: "project-manager",
     label: "Project Manager",
-    order: 11,
+    order: 3,
     color: "#0891B2",
     icon: "ClipboardList",
     description:
-      "Mengelola sprint, milestone, dan timeline. Menggantikan peran Product Owner dan Scrum Master yang fungsinya beririsan.",
+      "Mengelola sprint, milestone, dan timeline. Menggantikan Product Owner dan Scrum Master yang fungsinya beririsan.",
   },
   {
     slug: "contributor",
     label: "Contributor",
-    order: 12,
+    order: 4,
     color: "#059669",
     icon: "Code2",
     description:
-      "Pelaksana pekerjaan: membuat dan mengubah task, menulis dokumentasi, flowchart, dan notulen. Tidak menghapus. Mencakup developer, system analyst, dan business analyst — pembedanya ada di jabatan, bukan di hak akses.",
+      "Pelaksana pekerjaan: membuat dan mengubah task, dokumentasi, flowchart, dan notulen. TIDAK menghapus. Mencakup developer, system analyst, dan business analyst — pembedanya di jabatan, bukan hak akses.",
+  },
+  {
+    slug: "qa-engineer",
+    label: "QA",
+    order: 5,
+    color: "#F59E0B",
+    icon: "CheckCircle",
+    description:
+      "Pemilik penuh modul Quality Assessment: membuat, mengubah, dan menghapus test case serta bukti pengujian. Setara Contributor di modul lain.",
   },
   {
     slug: "viewer",
     label: "Viewer",
-    order: 13,
+    order: 6,
     color: "#94A3B8",
     icon: "Eye",
     description:
       "Hanya membaca seluruh modul proyek. Tidak membuat, mengubah, maupun menghapus apa pun.",
   },
+];
+
+/**
+ * Jabatan yang perlu ada setelah peran dipisahkan dari profesi.
+ * `slug` dipakai untuk id; bila jabatan dengan label sama sudah ada, dilewati.
+ */
+const JABATAN_BARU = [
+  { slug: "system-analyst", label: "System Analyst", order: 8, description: "Analis sistem dan perancang alur proses" },
+  { slug: "frontend-engineer", label: "Frontend Engineer", order: 9, description: "Pengembang antarmuka pengguna" },
+  { slug: "backend-engineer", label: "Backend Engineer", order: 10, description: "Pengembang logika bisnis dan layanan API" },
 ];
 
 (async () => {
@@ -141,52 +186,101 @@ const PROJECT_ROLES = [
   const client = new Client({ connectionString: url, ssl: { rejectUnauthorized: false } });
   await client.connect();
 
+  let dihapus = 0;
   let ditambah = 0;
   let diperbarui = 0;
 
-  const semai = async (baris, type, roleType) => {
-    for (const r of baris) {
-      const id = `md-${type}-${r.slug}`;
-      const { rows } = await client.query(
-        `INSERT INTO "MasterData" (id, type, label, "order", color, icon, description, role_type)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-         ON CONFLICT (id) DO UPDATE SET
-           label = EXCLUDED.label,
-           "order" = EXCLUDED."order",
-           color = EXCLUDED.color,
-           icon = EXCLUDED.icon,
-           description = EXCLUDED.description,
-           role_type = EXCLUDED.role_type
-         RETURNING (xmax = 0) AS baru`,
-        [id, type, r.label, r.order, r.color, r.icon, r.description, roleType]
-      );
-      const baru = rows[0].baru;
-      if (baru) ditambah++;
-      else diperbarui++;
-      console.log(
-        `  ${baru ? warna.hijau("TAMBAH ") : warna.redup("perbarui")} ${roleType.padEnd(7)} ${r.label}`
-      );
-    }
+  const upsert = async (r, type, roleType) => {
+    const id = `md-${type}-${r.slug}`;
+    const { rows } = await client.query(
+      `INSERT INTO "MasterData" (id, type, label, "order", color, icon, description, role_type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       ON CONFLICT (id) DO UPDATE SET
+         label = EXCLUDED.label, "order" = EXCLUDED."order", color = EXCLUDED.color,
+         icon = EXCLUDED.icon, description = EXCLUDED.description, role_type = EXCLUDED.role_type
+       RETURNING (xmax = 0) AS baru`,
+      [id, type, r.label, r.order, r.color || null, r.icon || null, r.description, roleType]
+    );
+    if (rows[0].baru) ditambah++;
+    else diperbarui++;
+    return rows[0].baru;
   };
 
   try {
     console.log("");
     console.log(warna.tebal("Menyemai katalog peran ke MasterData"));
-    console.log(warna.redup("  hanya menambah — tidak menghapus atau memindahkan apa pun"));
+    console.log(warna.redup("  type='project_role' untuk keduanya; dipisah lewat role_type"));
     console.log("");
 
-    await semai(SYSTEM_ROLES, "system_role", "SYSTEM");
-    await semai(PROJECT_ROLES, "project_role", "PROJECT");
+    // 1. Hapus baris usang — hanya yang terdaftar eksplisit
+    console.log(warna.tebal("  Pembersihan"));
+    for (const id of DIHAPUS) {
+      const { rowCount } = await client.query(`DELETE FROM "MasterData" WHERE id = $1`, [id]);
+      if (rowCount > 0) {
+        dihapus++;
+        console.log(`    ${warna.merah("HAPUS  ")} ${id}`);
+      }
+    }
+    if (dihapus === 0) console.log(warna.redup("    (tidak ada yang perlu dihapus)"));
 
+    // 2. SYSTEM role
+    console.log("");
+    console.log(warna.tebal("  SYSTEM ROLE"));
+    for (const r of SYSTEM_ROLES) {
+      const baru = await upsert(r, "project_role", "SYSTEM");
+      console.log(`    ${baru ? warna.hijau("TAMBAH ") : warna.redup("perbarui")} ${r.label}`);
+    }
+
+    // 3. PROJECT role
+    console.log("");
+    console.log(warna.tebal("  PROJECT ROLE"));
+    for (const r of PROJECT_ROLES) {
+      const baru = await upsert(r, "project_role", "PROJECT");
+      console.log(`    ${baru ? warna.hijau("TAMBAH ") : warna.redup("perbarui")} ${r.label}`);
+    }
+
+    // 4. Jabatan — profesi yang dipindahkan dari katalog peran
+    console.log("");
+    console.log(warna.tebal("  JABATAN (profesi, bukan izin)"));
+    for (const j of JABATAN_BARU) {
+      const { rows: ada } = await client.query(
+        `SELECT id FROM "MasterData" WHERE type='jabatan' AND lower(label)=lower($1)`,
+        [j.label]
+      );
+      if (ada.length > 0) {
+        console.log(warna.redup(`    lewati  ${j.label} (sudah ada)`));
+        continue;
+      }
+      await client.query(
+        `INSERT INTO "MasterData" (id, type, label, "order", description)
+         VALUES ($1, 'jabatan', $2, $3, $4) ON CONFLICT (id) DO NOTHING`,
+        [`md-jabatan-${j.slug}`, j.label, j.order, j.description]
+      );
+      ditambah++;
+      console.log(`    ${warna.hijau("TAMBAH ")} ${j.label}`);
+    }
+
+    // 5. Perbaiki typo yang sudah lama ada
+    const { rowCount: typo } = await client.query(
+      `UPDATE "MasterData" SET label='Business Analyst'
+       WHERE type='jabatan' AND label='Businnes Analyst'`
+    );
+    if (typo > 0) console.log(`    ${warna.kuning("PERBAIKI")} typo "Businnes Analyst" -> "Business Analyst"`);
+
+    // Ringkasan
     const { rows: ringkas } = await client.query(
       `SELECT role_type, COUNT(*)::int AS n FROM "MasterData"
-       WHERE role_type IS NOT NULL GROUP BY role_type ORDER BY role_type`
+       WHERE type='project_role' GROUP BY role_type ORDER BY role_type NULLS LAST`
     );
 
     console.log("");
     console.log("──────────────────────────────────────────────────────────");
-    console.log(warna.hijau(`  ${ditambah} baris ditambahkan · ${diperbarui} diperbarui`));
-    for (const r of ringkas) console.log(warna.redup(`  katalog ${r.role_type}: ${r.n} peran`));
+    console.log(
+      warna.hijau(`  ${ditambah} ditambahkan · ${diperbarui} diperbarui · ${dihapus} dihapus`)
+    );
+    for (const r of ringkas) {
+      console.log(warna.redup(`  role_type=${r.role_type || "(kosong)"} : ${r.n} peran`));
+    }
     console.log("──────────────────────────────────────────────────────────");
     console.log("");
   } catch (e) {
