@@ -5615,19 +5615,27 @@ Catatan untuk §19.38: angka 183 camelCase di sana **tidak terpengaruh** — kol
 yang terlipat seperti `pointid` masuk hitungan "satu kata" (149), bukan
 camelCase. Rekomendasinya tetap berdiri.
 
-#### Yang BELUM terverifikasi, dan kenapa
+#### Jalur TULIS TERBUKTI — diukur, bukan disimpulkan
 
-**Jalur TULIS belum dijalankan sungguhan.** Memposting komentar memerlukan sesi
-login, dan §0.5 aturan 5 melarang penerus memakai kredensial sendiri.
+Pemilik proyek memposting satu komentar sungguhan lewat antarmuka. Hitungan
+kolom sesudahnya:
 
-Dasar keyakinan saat ini **argumentatif, bukan hasil pengukuran**: gaya
-identifier yang dipakai `INSERT` **tidak berubah** dari versi lama yang terbukti
-menghasilkan 4 baris — hanya jumlah kolomnya yang berkurang. Itu alasan yang
-kuat, tetapi ia bukan pengamatan.
+| Kolom                                                                        | Sebelum | Sesudah |
+| ---------------------------------------------------------------------------- | ------: | ------: |
+| **baris total**                                                              |       4 |   **5** |
+| `pointid` · `commenttext` · `createdAt` · `userId` · `username` (camel)      |       4 |   **5** |
+| `point_id` · `comment_text` · `created_at` · `user_id` · `user_name` (snake) |       4 |   **4** |
 
-**Langkah 4 menunggu dua hal:** pemilik proyek memposting satu komentar untuk
-membuktikan jalur tulis, lalu penghapusan kolom dijalankan terpisah — ia merusak
-dan tidak bisa dibatalkan.
+Tiga hal terbukti sekaligus dari satu pengukuran:
+
+1. **`INSERT` 6 kolom berhasil** — jalur tulis tidak rusak oleh perubahan.
+2. **Penulisan ganda benar-benar berhenti** — baris baru `NULL` di kelima kolom
+   snake, sementara baris lama tetap terisi.
+3. Keyakinan argumentatif di paragraf sebelumnya **digantikan pengamatan**.
+
+**Langkah 4 kini tidak terhalang secara teknis**, tetapi tetap menunggu
+persetujuan eksplisit: menjatuhkan kolom pada data produksi merusak dan tidak
+bisa dibatalkan.
 
 ### 19.40 Item #94 — 4 rute komentar tanpa penjaga, ditemukan saat memverifikasi #47
 
