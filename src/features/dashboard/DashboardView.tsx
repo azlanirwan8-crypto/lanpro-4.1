@@ -213,7 +213,7 @@ export function DashboardView(props: DashboardViewProps) {
     if (id === "sdlc") {
       return cn(
         heightClass,
-        "flex flex-col rounded-lg transition-all duration-300 relative w-full bg-surface-inverse border border-border-inverse text-content-inverse shadow-2xl pb-8 overflow-y-auto no-scrollbar"
+        "flex flex-col rounded-lg transition-all duration-300 relative w-full bg-surface-inverse-strong border border-border-inverse text-content-inverse shadow-2xl pb-8 overflow-y-auto no-scrollbar"
       );
     }
     if (id === "sidebar-widgets-stack") {
@@ -231,7 +231,7 @@ export function DashboardView(props: DashboardViewProps) {
     if (id === "velocity-bar" || id === "velocity-line") {
       return cn(
         heightClass,
-        "flex flex-col rounded-lg bg-surface-inverse border border-border-inverse text-content-inverse shadow-xl p-5 hover:border-border-inverse transition-all duration-300 relative overflow-hidden"
+        "flex flex-col rounded-lg bg-surface-inverse-strong border border-border-inverse text-content-inverse shadow-xl p-5 hover:border-border-inverse transition-all duration-300 relative overflow-hidden"
       );
     }
     return cn(

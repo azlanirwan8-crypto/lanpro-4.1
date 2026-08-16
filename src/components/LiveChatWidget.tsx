@@ -642,7 +642,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="relative w-12 h-12 rounded-full bg-surface-inverse text-content-inverse flex items-center justify-center shadow-xl border border-border-inverse hover:bg-orange-600 hover:border-orange-500 hover:text-content-inverse transition-all duration-300"
+        className="relative w-12 h-12 rounded-full bg-surface-inverse-strong text-content-inverse flex items-center justify-center shadow-xl border border-border-inverse hover:bg-orange-600 hover:border-orange-500 hover:text-content-inverse transition-all duration-300"
         title="Live Chat Obrolan LanPro"
       >
         <MessageSquare className="w-5 h-5" />
@@ -1174,7 +1174,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-full py-1.5 bg-surface-inverse text-content-inverse rounded-xl text-xs sm:text-[10px] font-medium tracking-wider uppercase flex items-center justify-center gap-1.5 hover:bg-orange-600 transition-colors shadow-soft"
+                        className="w-full py-1.5 bg-surface-inverse-strong text-content-inverse rounded-xl text-xs sm:text-[10px] font-medium tracking-wider uppercase flex items-center justify-center gap-1.5 hover:bg-orange-600 transition-colors shadow-soft"
                       >
                         <FileUp className="w-3.5 h-3.5" />
                         Unggah File Komputer Anda
@@ -1224,7 +1224,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                   <button
                     type="submit"
                     disabled={!inputMessage.trim() || isUploading}
-                    className="p-2 bg-surface-inverse text-content-inverse hover:bg-orange-500 rounded-xl transition-all shadow-soft disabled:opacity-30 disabled:hover:bg-surface-inverse flex items-center justify-center shrink-0"
+                    className="p-2 bg-surface-inverse-strong text-content-inverse hover:bg-orange-500 rounded-xl transition-all shadow-soft disabled:opacity-30 disabled:hover:bg-surface-inverse-strong flex items-center justify-center shrink-0"
                     title="Kirim Pesan"
                   >
                     <Send className="w-3.5 h-3.5" />

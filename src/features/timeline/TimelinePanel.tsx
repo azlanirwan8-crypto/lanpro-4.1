@@ -1662,7 +1662,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           {/* Dynamic Floating Tooltip */}
                           <div
                             className={cn(
-                              "absolute -top-12 left-1/2 -translate-x-1/2 bg-surface-inverse border border-border-inverse text-content-inverse text-xs sm:text-[10px] font-medium px-2.5 py-1.5 rounded-lg shadow-xl pointer-events-none z-50 flex items-center gap-1.5 whitespace-nowrap transition-all duration-150 origin-bottom scale-90 opacity-0",
+                              "absolute -top-12 left-1/2 -translate-x-1/2 bg-surface-inverse-strong border border-border-inverse text-content-inverse text-xs sm:text-[10px] font-medium px-2.5 py-1.5 rounded-lg shadow-xl pointer-events-none z-50 flex items-center gap-1.5 whitespace-nowrap transition-all duration-150 origin-bottom scale-90 opacity-0",
                               "group-hover/bar:opacity-100 group-hover/bar:scale-100",
                               timelineInteraction?.taskId === task.id
                                 ? "opacity-100 scale-100 ring-2"

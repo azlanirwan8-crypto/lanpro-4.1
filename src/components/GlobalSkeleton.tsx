@@ -4,7 +4,7 @@ export const GlobalSkeleton = () => {
   return (
     <div className="min-h-screen flex h-screen bg-surface-sunken">
       {/* Sidebar Skeleton */}
-      <div className="w-64 bg-surface-inverse flex-shrink-0 flex flex-col hidden md:flex">
+      <div className="w-64 bg-surface-inverse-strong flex-shrink-0 flex flex-col hidden md:flex">
         <div className="p-4 border-b border-border-inverse flex items-center gap-3">
           <div className="w-8 h-8 rounded bg-surface-inverse animate-pulse" />
           <div className="h-5 w-24 bg-surface-inverse rounded animate-pulse" />

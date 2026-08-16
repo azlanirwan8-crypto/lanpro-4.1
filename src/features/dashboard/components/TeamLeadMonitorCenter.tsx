@@ -64,7 +64,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
   });
 
   return (
-    <div className="bg-surface-inverse text-content-inverse rounded-xl border border-border-inverse p-6 md:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+    <div className="bg-surface-inverse-strong text-content-inverse rounded-xl border border-border-inverse p-6 md:p-8 shadow-2xl space-y-6 relative overflow-hidden">
       {/* Decorative gradient blur */}
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -250,7 +250,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                 placeholder="Cari anggota tim..."
                 value={searchMember}
                 onChange={(e) => setSearchMember(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 rounded-xl bg-surface-inverse border border-border-inverse text-xs text-content-inverse placeholder-content-muted focus:outline-none focus:border-indigo-500"
+                className="w-full pl-9 pr-4 py-2 rounded-xl bg-surface-inverse-strong border border-border-inverse text-xs text-content-inverse placeholder-content-muted focus:outline-none focus:border-indigo-500"
               />
             </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
@@ -361,7 +361,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                         <span>Rasio Penyelesaian</span>
                         <span>{workloadPercentage}%</span>
                       </div>
-                      <div className="w-full h-2 rounded-full bg-surface-inverse overflow-hidden">
+                      <div className="w-full h-2 rounded-full bg-surface-inverse-strong overflow-hidden">
                         <div
                           className={cn(
                             "h-full rounded-full transition-all duration-500",
@@ -434,7 +434,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-surface-inverse text-content-subtle text-xs sm:text-[10px] font-medium uppercase font-mono">
+                        <span className="px-2 py-0.5 rounded bg-surface-inverse-strong text-content-subtle text-xs sm:text-[10px] font-medium uppercase font-mono">
                           {task.taskNumber || `TSK-${idx + 1}`}
                         </span>
                         {isBlocked ? (
@@ -610,7 +610,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                       </span>
                     </div>
                   </div>
-                  <span className="px-2 py-1 rounded bg-surface-inverse text-content-subtle text-xs sm:text-[10px] font-mono">
+                  <span className="px-2 py-1 rounded bg-surface-inverse-strong text-content-subtle text-xs sm:text-[10px] font-mono">
                     {log.targetType || "Aktivitas"}
                   </span>
                 </div>
