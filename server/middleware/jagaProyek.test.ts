@@ -19,6 +19,15 @@ const mockLepas = jest.fn();
 // `jest.fn` di dalam factory — sehingga `getConnection()` mengembalikan
 // `undefined` dan SELURUH test gagal dengan pesan yang menyesatkan
 // ("next tidak dipanggil"), bukan dengan pesan tentang koneksi.
+// Pencatatan audit dipalsukan. `createAuditLog` menjalankan tulisannya di
+// `setImmediate`, jadi ia menyala SESUDAH test selesai dan memicu peringatan
+// Jest "Cannot log after tests are done" — bising yang menyamarkan peringatan
+// sungguhan. Yang diuji di sini otorisasinya, bukan pencatatannya.
+jest.mock("../services/audit.service", () => ({
+  __esModule: true,
+  createAuditLog: async () => undefined,
+}));
+
 jest.mock("../../src/lib/db", () => ({
   __esModule: true,
   default: { getConnection: async () => ({ query: mockKueri, release: mockLepas }) },

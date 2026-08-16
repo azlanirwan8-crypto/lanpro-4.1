@@ -3,8 +3,7 @@ import crypto from "crypto";
 import db from "../../src/lib/db";
 import { buatProyekDemoBni } from "../services/demo-seed.service";
 import { authenticateJWT, verifyGlobalAdmin } from "../middleware/auth";
-import { jagaHapusProyek, jagaProyek } from "../middleware/jagaProyek";
-import { verifyProjectAccess } from "../middleware/rbac";
+import { jagaHapusProyek, jagaProyek, jagaSetelanProyek } from "../middleware/jagaProyek";
 import { createAuditLog } from "../services/audit.service";
 import { adalahTabelTidakAda } from "../helpers/pgErrors";
 const router = express.Router();
@@ -209,153 +208,145 @@ router.post("/api/projects", authenticateJWT, verifyGlobalAdmin, async (req, res
   }
 });
 
-router.put(
-  "/api/projects/:projectId/dashboard-layout",
-  verifyProjectAccess(["admin", "manager", "head", "developer", "designer", "viewer", "*"]),
-  async (req, res) => {
-    let connection;
-    try {
-      const { projectId } = req.params;
-      const { layout } = req.body;
+router.put("/api/projects/:projectId/dashboard-layout", jagaSetelanProyek(), async (req, res) => {
+  let connection;
+  try {
+    const { projectId } = req.params;
+    const { layout } = req.body;
 
-      // Validasi tipe data array
-      if (!Array.isArray(layout)) {
-        return res
-          .status(400)
-          .json({ status: "error", message: "Layout harus berupa tipe data array." });
-      }
-
-      connection = await db.getConnection();
-      const jsonLayout = JSON.stringify(layout);
-
-      // Simpan ke dashboard_layout dan dashboardLayout untuk kompatibilitas penuh
-      await connection.query(
-        "UPDATE Projects SET dashboard_layout = ?, dashboardLayout = ? WHERE id = ?",
-        [jsonLayout, jsonLayout, projectId]
-      );
-
-      res.json({ status: "success", message: "Layout updated" });
-    } catch (error: any) {
-      console.error(
-        "LOG ANOMALI CRITICAL: PUT /api/projects/:projectId/dashboard-layout error:",
-        error
-      );
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-    } finally {
-      if (connection) connection.release();
+    // Validasi tipe data array
+    if (!Array.isArray(layout)) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Layout harus berupa tipe data array." });
     }
-  }
-);
 
-router.put(
-  "/api/projects/:id",
-  verifyProjectAccess(["admin", "manager", "head"]),
-  async (req, res) => {
-    let connection;
-    try {
-      const { id } = req.params;
-      const {
-        name,
-        description,
-        status,
-        currentSprintId,
-        projectKey,
+    connection = await db.getConnection();
+    const jsonLayout = JSON.stringify(layout);
+
+    // Simpan ke dashboard_layout dan dashboardLayout untuk kompatibilitas penuh
+    await connection.query(
+      "UPDATE Projects SET dashboard_layout = ?, dashboardLayout = ? WHERE id = ?",
+      [jsonLayout, jsonLayout, projectId]
+    );
+
+    res.json({ status: "success", message: "Layout updated" });
+  } catch (error: any) {
+    console.error(
+      "LOG ANOMALI CRITICAL: PUT /api/projects/:projectId/dashboard-layout error:",
+      error
+    );
+    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+  } finally {
+    if (connection) connection.release();
+  }
+});
+
+router.put("/api/projects/:id", jagaSetelanProyek(), async (req, res) => {
+  let connection;
+  try {
+    const { id } = req.params;
+    const {
+      name,
+      description,
+      status,
+      currentSprintId,
+      projectKey,
+      ownerId,
+      category,
+      taskCounter,
+      dashboardLayout,
+    } = req.body;
+    connection = await db.getConnection();
+
+    const updates = [];
+    const values = [];
+    const changedFields: any = {};
+
+    // Whitelist: Only allow these column names in dynamic updates
+    const ALLOWED_COLUMNS = [
+      "name",
+      "description",
+      "status",
+      "projectKey",
+      "ownerId",
+      "category",
+      "taskCounter",
+      "dashboardLayout",
+    ];
+
+    if (name !== undefined) {
+      updates.push("name = ?");
+      values.push(name);
+      changedFields.name = name;
+    }
+    if (description !== undefined) {
+      updates.push("description = ?");
+      values.push(description);
+      changedFields.description = description;
+    }
+    if (status !== undefined) {
+      updates.push("status = ?");
+      values.push(status);
+      changedFields.status = status;
+    }
+    if (projectKey !== undefined) {
+      updates.push("projectKey = ?");
+      values.push(projectKey);
+      changedFields.projectKey = projectKey;
+    }
+    if (ownerId !== undefined) {
+      let resolvedOwnerId = ownerId;
+      const [uRows]: any = await connection.query("SELECT id FROM Users WHERE id = ? OR uid = ?", [
         ownerId,
-        category,
-        taskCounter,
-        dashboardLayout,
-      } = req.body;
-      connection = await db.getConnection();
-
-      const updates = [];
-      const values = [];
-      const changedFields: any = {};
-
-      // Whitelist: Only allow these column names in dynamic updates
-      const ALLOWED_COLUMNS = [
-        "name",
-        "description",
-        "status",
-        "projectKey",
-        "ownerId",
-        "category",
-        "taskCounter",
-        "dashboardLayout",
-      ];
-
-      if (name !== undefined) {
-        updates.push("name = ?");
-        values.push(name);
-        changedFields.name = name;
+        ownerId,
+      ]);
+      if (uRows.length > 0) {
+        resolvedOwnerId = uRows[0].id;
       }
-      if (description !== undefined) {
-        updates.push("description = ?");
-        values.push(description);
-        changedFields.description = description;
-      }
-      if (status !== undefined) {
-        updates.push("status = ?");
-        values.push(status);
-        changedFields.status = status;
-      }
-      if (projectKey !== undefined) {
-        updates.push("projectKey = ?");
-        values.push(projectKey);
-        changedFields.projectKey = projectKey;
-      }
-      if (ownerId !== undefined) {
-        let resolvedOwnerId = ownerId;
-        const [uRows]: any = await connection.query(
-          "SELECT id FROM Users WHERE id = ? OR uid = ?",
-          [ownerId, ownerId]
-        );
-        if (uRows.length > 0) {
-          resolvedOwnerId = uRows[0].id;
-        }
-        updates.push("ownerId = ?");
-        values.push(resolvedOwnerId);
-        changedFields.ownerId = resolvedOwnerId;
-      }
-      if (category !== undefined) {
-        updates.push("category = ?");
-        values.push(category);
-        changedFields.category = category;
-      }
-      if (taskCounter !== undefined) {
-        updates.push("taskCounter = ?");
-        values.push(taskCounter);
-        changedFields.taskCounter = taskCounter;
-      }
-      if (dashboardLayout !== undefined) {
-        updates.push("dashboardLayout = ?");
-        values.push(dashboardLayout !== null ? JSON.stringify(dashboardLayout) : null);
-        changedFields.dashboardLayout = dashboardLayout;
-      }
-
-      if (updates.length > 0) {
-        values.push(id);
-        const query = `UPDATE Projects SET ${updates.join(", ")} WHERE id = ?`;
-        await connection.query(query, values);
-
-        const userId = req.headers["x-user-id"] || "guest";
-        await createAuditLog(userId as string, id, "UPDATE", "Projects", id, null, changedFields);
-      }
-
-      res.json({ status: "success", message: "Project updated" });
-    } catch (error: any) {
-      console.error("LOG ANOMALI CRITICAL: PUT /api/projects error:", error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-    } finally {
-      if (connection) connection.release();
+      updates.push("ownerId = ?");
+      values.push(resolvedOwnerId);
+      changedFields.ownerId = resolvedOwnerId;
     }
+    if (category !== undefined) {
+      updates.push("category = ?");
+      values.push(category);
+      changedFields.category = category;
+    }
+    if (taskCounter !== undefined) {
+      updates.push("taskCounter = ?");
+      values.push(taskCounter);
+      changedFields.taskCounter = taskCounter;
+    }
+    if (dashboardLayout !== undefined) {
+      updates.push("dashboardLayout = ?");
+      values.push(dashboardLayout !== null ? JSON.stringify(dashboardLayout) : null);
+      changedFields.dashboardLayout = dashboardLayout;
+    }
+
+    if (updates.length > 0) {
+      values.push(id);
+      const query = `UPDATE Projects SET ${updates.join(", ")} WHERE id = ?`;
+      await connection.query(query, values);
+
+      const userId = req.headers["x-user-id"] || "guest";
+      await createAuditLog(userId as string, id, "UPDATE", "Projects", id, null, changedFields);
+    }
+
+    res.json({ status: "success", message: "Project updated" });
+  } catch (error: any) {
+    console.error("LOG ANOMALI CRITICAL: PUT /api/projects error:", error);
+    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+  } finally {
+    if (connection) connection.release();
   }
-);
+});
 
 // --- LanPro v1.5: BNI SDLC Advisor Route ---
 router.post(
   "/api/projects/:projectId/methodology",
   authenticateJWT,
-  verifyProjectAccess(["admin", "manager", "head"]),
+  jagaSetelanProyek(),
   async (req: any, res: any) => {
     let connection;
     try {

@@ -4,7 +4,6 @@
  */
 
 import { Router } from "express";
-import { verifyProjectAccess } from "../middleware/rbac";
 import db from "../../src/lib/db";
 import multer from "multer";
 import path from "path";

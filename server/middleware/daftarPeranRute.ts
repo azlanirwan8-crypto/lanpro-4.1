@@ -36,10 +36,17 @@ import { normalkanPeran, peranTakDikenal } from "../../src/types/roles";
 export type ModePenjaga = "LAPOR" | "TOLAK";
 
 /**
- * Naikkan ke `"TOLAK"` HANYA sesudah `member` dipetakan dan `designer` dibuang.
- * Sebelum itu, server tidak akan menyala sama sekali.
+ * Dinaikkan ke `"TOLAK"` pada 16 Agu 2026, sesudah tiga syaratnya terpenuhi:
+ * `member` dimigrasikan ke `developer` (tahap 3), `designer` dibuang, dan
+ * `head` dicabut dari penjaga proyek (#83) — ketiganya lenyap dengan
+ * sendirinya begitu 54 rute pindah ke penjaga matriks.
+ *
+ * Sejak sekarang, server MENOLAK MENYALA bila ada rute yang menjaga dirinya
+ * dengan nama peran di luar katalog. Itu yang menutup #73 dan #80 secara
+ * permanen: kesalahan ketik pada nama peran berhenti jadi lubang senyap dan
+ * berubah jadi kegagalan boot yang keras.
  */
-export const MODE: ModePenjaga = "LAPOR";
+export const MODE: ModePenjaga = "TOLAK";
 
 export interface PendaftaranPenjaga {
   peran: string[];
