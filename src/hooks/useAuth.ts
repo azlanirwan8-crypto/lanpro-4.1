@@ -105,24 +105,15 @@ export function useAuth(
   // Effective role calculation
   const user: any = currentUser;
   const effectiveRole = useMemo(() => {
-    const usernameLower = (
-      currentUser?.username ||
-      currentUserProfile?.username ||
-      user?.username ||
-      ""
-    )
-      .toLowerCase()
-      .trim();
     const roleLower = (userRole || currentUser?.role || currentUserProfile?.role || "")
       .toLowerCase()
       .trim();
 
-    if (
-      usernameLower === "admin" ||
-      roleLower === "admin" ||
-      roleLower === "administrator" ||
-      roleLower === "superadmin"
-    )
+    // `usernameLower === "admin"` DICABUT (#91): ia memberi hak Administrator
+    // berdasarkan NAMA, bukan peran. Siapa pun yang berhasil mendaftar dengan
+    // username `admin` mendapat seluruh antarmuka admin, apa pun peran
+    // sebenarnya di database. Identitas bukan otorisasi.
+    if (roleLower === "admin" || roleLower === "administrator" || roleLower === "superadmin")
       return "admin";
 
     return (userRole || "user") as PeranEfektif;
@@ -232,29 +223,21 @@ export function useAuth(
       setIsAuthLoading(true);
       setLoginStatusText("Authenticating...");
 
-      // Special Hardcoded Admin bypass
-      if (username === "admin" && (password === "admin" || password === "admin123")) {
-        const adminData = {
-          uid: "admin-fixed-id",
-          username: "admin",
-          status: "approved",
-          role: "admin",
-          displayName: "Admin Manager",
-        };
-
-        try {
-          await apiRequest("/api/auth/register", {
-            method: "POST",
-            body: { ...adminData, password: password, id: "admin-fixed-id" },
-          });
-        } catch (e) {}
-
-        if (remember) {
-          safeLocalStorage.setItem("isAdminMode", "true");
-        } else {
-          safeSessionStorage.setItem("isAdminMode", "true");
-        }
-      }
+      // #91 — DI SINI DULU ADA PINTU BELAKANG:
+      //
+      //   if (username === "admin" && (password === "admin" || password === "admin123"))
+      //
+      // Ia mendaftarkan akun ber-`role: "admin"` dengan id tetap
+      // `admin-fixed-id`, lalu menandai `isAdminMode` di penyimpanan peramban.
+      // Kredensialnya tertulis di berkas ini, artinya ada di bundel yang
+      // dikirim ke SETIAP pengunjung — siapa pun yang membuka devtools
+      // membacanya.
+      //
+      // Ia tidak menembus autentikasi server (alurnya tetap lanjut ke
+      // /api/auth/login), tetapi ia MENANAM akun beperan admin, dan sesudah
+      // #91 sisi server pun peran itu tidak lagi bisa diminta dari body.
+      //
+      // Akun admin dibuat lewat panel admin oleh admin yang sudah masuk.
 
       // MySQL login with session collision check
       const endpoint = force ? "/api/auth/force-logout" : "/api/auth/login";

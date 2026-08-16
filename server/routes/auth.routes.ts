@@ -1,4 +1,6 @@
 import express from "express";
+import jwt from "jsonwebtoken";
+import { getJwtSecret } from "../helpers/jwtSecret";
 import crypto from "crypto";
 import { UAParser } from "ua-parser-js";
 import db from "../../src/lib/db";
@@ -10,6 +12,37 @@ import { z } from "zod";
 import { formatUserForAuthResponse, handleUserAuthentication } from "../services/auth.service";
 
 const router = express.Router();
+
+/**
+ * Peran sistem pemanggil, bila ia membawa token yang sah. `null` bila tidak.
+ *
+ * Rute pendaftaran sengaja berada DI LUAR gerbang autentikasi `/api/*` — kalau
+ * tidak, tidak ada yang bisa mendaftar. Karena itu `req.user` tidak terisi di
+ * sini dan tokennya harus dibaca sendiri.
+ *
+ * Kegagalan apa pun mengembalikan `null`, yang berarti "bukan admin". Itu arah
+ * yang benar: token rusak tidak boleh menghasilkan hak lebih.
+ */
+async function peraminta(req: any): Promise<string | null> {
+  const header = req.headers?.authorization;
+  if (!header || !header.startsWith("Bearer ")) return null;
+  let connection;
+  try {
+    const decoded: any = jwt.verify(header.split(" ")[1], getJwtSecret());
+    const id = decoded?.id || decoded?.uid;
+    if (!id) return null;
+    connection = await db.getConnection();
+    const [rows]: any = await connection.query("SELECT role FROM Users WHERE id = ? OR uid = ?", [
+      id,
+      id,
+    ]);
+    return rows.length > 0 ? String(rows[0].role || "").toLowerCase() : null;
+  } catch {
+    return null;
+  } finally {
+    if (connection) connection.release();
+  }
+}
 
 router.get("/api/auth/verify", authenticateJWT, async (req: any, res) => {
   let connection;
@@ -376,7 +409,19 @@ router.post("/api/auth/register", async (req, res) => {
       .trim();
 
     const insertDisplayName = displayName || nama_lengkap || name || username;
-    const insertRole = role || "user";
+    // #91 — `role` DULU diambil mentah dari body pada endpoint pendaftaran yang
+    // PUBLIK (tidak lewat gerbang autentikasi `/api/*`). Artinya siapa pun,
+    // tanpa akun, bisa mendaftar sambil meminta `role: "admin"`.
+    //
+    // Statusnya memang dipaksa PENDING sehingga ia belum bisa masuk — tetapi
+    // yang menyetujui melihat daftar tunggu, bukan kolom peran, dan satu klik
+    // "approve" menjadikannya Administrator sistem lengkap dengan God Mode
+    // lintas proyek (§19.6).
+    //
+    // Endpoint ini tetap dipakai panel admin untuk menambah pengguna berperan,
+    // jadi `role` tidak dibuang — ia hanya dihormati bila PEMANGGILNYA terbukti
+    // Administrator. Peran diberikan, tidak diminta.
+    const insertRole = (await peraminta(req)) === "admin" ? role || "user" : "user";
     const insertStatus = "PENDING";
     const insertDepartment = department || null;
     const insertPosition = position || null;
@@ -410,10 +455,7 @@ router.post("/api/auth/register", async (req, res) => {
       // dengan email yang sudah ada menjawab 500 "Terjadi kesalahan internal
       // server", bukan pesan 201 yang dimaksud di bawah.
       if (adalahDuplikat(insertError)) {
-        console.log(
-          "User sudah ada (SQLSTATE " + insertError.code + "), insert diabaikan:",
-          email
-        );
+        console.log("User sudah ada (SQLSTATE " + insertError.code + "), insert diabaikan:", email);
       } else {
         throw insertError;
       }
