@@ -230,11 +230,28 @@ router.get("/api/users/:userId/notifications", async (req, res) => {
   }
 });
 
-router.post("/api/users/:userId/notifications", async (req, res) => {
+router.post("/api/users/:userId/notifications", async (req: any, res) => {
   let connection;
   try {
     const { userId } = req.params;
-    const { type, title, message, relatedId, senderId, read } = req.body;
+    const { type, title, message, relatedId, read } = req.body;
+
+    // #69 — §13.11 mencatat rute ini "tanpa cek kepemilikan" karena GET dan PUT
+    // memakai `matchesCaller` sedangkan POST tidak. Diperiksa ulang: KEPEMILIKAN
+    // BUKAN kontrol yang tepat di sini.
+    //
+    // GET dan PUT membaca dan mengubah notifikasi MILIK pemanggil, jadi wajar
+    // dibatasi ke dirinya sendiri. POST MENGIRIM notifikasi KEPADA orang lain —
+    // itu justru gunanya. Menuntut `matchesCaller` akan membuat seorang pengguna
+    // hanya bisa mengirim notifikasi kepada dirinya sendiri, dan mematikan
+    // seluruh pemberitahuan penugasan dan penyebutan.
+    //
+    // Lubang yang SUNGGUHAN ada di `senderId`: ia dibaca dari body, sehingga
+    // siapa pun bisa mengaku sebagai orang lain. Notifikasi palsu atas nama
+    // atasan adalah pemalsuan identitas, bukan sekadar data kotor.
+    //
+    // Pengirim kini diambil dari token, dan nilai `senderId` di body diabaikan.
+    const senderId = req.user?.id || req.user?.uid || null;
     connection = await db.getConnection();
 
     const newId = crypto.randomUUID();

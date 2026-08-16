@@ -252,3 +252,75 @@ describe("jagaHapusProyek — §19.5, menghapus proyek hanya milik Owner", () =>
     expect(res.kode).toBe(403);
   });
 });
+
+describe("#70 rute yang beralamat ke ENTITAS, bukan ke proyek", () => {
+  /**
+   * `/api/v1/meetings/:id` tidak menyebut proyek mana pun. Penjaga lama
+   * meloloskannya karena tidak ada `:projectId` — itulah #70, dan sebabnya
+   * bukan penjaga yang longgar melainkan rute yang tidak bisa dijaga tanpa
+   * tahu proyeknya.
+   */
+  function siapkanLewatMeeting(opsi: {
+    user: { id: string; role: string };
+    projectIdRapat?: string | null;
+    ownerId?: string | null;
+    peranAnggota?: string | null;
+  }) {
+    mockKueri.mockReset();
+    mockKueri
+      .mockResolvedValueOnce([[{ id: opsi.user.id, role: opsi.user.role }]])
+      .mockResolvedValueOnce([opsi.projectIdRapat ? [{ projectId: opsi.projectIdRapat }] : []])
+      .mockResolvedValueOnce([opsi.ownerId ? [{ ownerId: opsi.ownerId }] : []])
+      .mockResolvedValueOnce([opsi.peranAnggota ? [{ role: opsi.peranAnggota }] : []]);
+  }
+
+  it("anggota proyek rapat itu boleh membacanya", async () => {
+    siapkanLewatMeeting({
+      user: { id: "U1", role: "user" },
+      projectIdRapat: "P1",
+      ownerId: "LAIN",
+      peranAnggota: "developer",
+    });
+    const { next } = await jalankan(jagaProyek("meetingNotes", "R", "meeting"), {
+      params: { id: "M1" },
+    });
+    expect(next).toHaveBeenCalled();
+  });
+
+  it("BUKAN anggota proyek rapat itu ditolak — inti #70", async () => {
+    siapkanLewatMeeting({
+      user: { id: "U1", role: "user" },
+      projectIdRapat: "P-LAIN",
+      ownerId: "LAIN",
+      peranAnggota: null,
+    });
+    const { res, next } = await jalankan(jagaProyek("meetingNotes", "R", "meeting"), {
+      params: { id: "M1" },
+    });
+    expect(res.kode).toBe(403);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it("rapat yang tidak ada ditolak 403, BUKAN 404", async () => {
+    // 404 akan membocorkan id rapat mana yang nyata, sehingga id milik proyek
+    // lain bisa ditebak satu per satu.
+    siapkanLewatMeeting({ user: { id: "U1", role: "user" }, projectIdRapat: null });
+    const { res } = await jalankan(jagaProyek("meetingNotes", "R", "meeting"), {
+      params: { id: "TIDAK-ADA" },
+    });
+    expect(res.kode).toBe(403);
+  });
+
+  it("viewer tidak boleh membatalkan rapat — aksi `U`", async () => {
+    siapkanLewatMeeting({
+      user: { id: "U1", role: "user" },
+      projectIdRapat: "P1",
+      ownerId: "LAIN",
+      peranAnggota: "viewer",
+    });
+    const { res } = await jalankan(jagaProyek("meetingNotes", "U", "meeting"), {
+      params: { meetingId: "M1" },
+    });
+    expect(res.kode).toBe(403);
+  });
+});
