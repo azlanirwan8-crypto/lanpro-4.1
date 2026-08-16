@@ -312,7 +312,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 34 BELUM · 57 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 35 BELUM · 57 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -323,11 +323,11 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 34 item
+### 1.1 BELUM SELESAI — 35 item
 
-**Sebaran per fase:** F1 2 · F2 6 · F3 1 · F6 6 · F7 7 · F8 4 · F9 2 · F10 3 · F11 1 · F12 2
+**Sebaran per fase:** F1 2 · F2 7 · F3 1 · F6 6 · F7 7 · F8 4 · F9 2 · F10 3 · F11 1 · F12 2
 
-**Masih menahan rilis production:** #30 · #46
+**Masih menahan rilis production:** #30 · #46 · #94
 
 | #   | Temuan                                                                                     |  Fase   | Sev | Biaya         |   Blokir modul baru?    | Status                  | Detail |
 | --- | ------------------------------------------------------------------------------------------ | :-----: | :-: | ------------- | :---------------------: | ----------------------- | ------ |
@@ -366,6 +366,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 87  | `effectiveRole` DIKOREKSI — ia hanya bawa peran sistem; frontend abai peran proyek         | **F7**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §19.27 |
 | 92  | Peran dibaca dari TOKEN di 7 tempat, dari DATABASE di penjaga proyek — pencabutan tertunda | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.28 |
+| 94  | 4 rute komentar discussion point TANPA penjaga sama sekali — baca & tulis lintas proyek    | **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `TERBUKA`               | §19.40 |
 
 ### 1.2 SUDAH SELESAI — 57 item
 
@@ -5627,3 +5628,54 @@ kuat, tetapi ia bukan pengamatan.
 **Langkah 4 menunggu dua hal:** pemilik proyek memposting satu komentar untuk
 membuktikan jalur tulis, lalu penghapusan kolom dijalankan terpisah — ia merusak
 dan tidak bisa dibatalkan.
+
+### 19.40 Item #94 — 4 rute komentar tanpa penjaga, ditemukan saat memverifikasi #47
+
+Pemilik proyek memposting untuk membuktikan jalur tulis #47. Tabelnya **tidak
+bertambah** — tetap 4 baris. Penelusurannya membuka dua hal.
+
+#### Yang terjadi
+
+Log boot mencatat `[RBAC][GOD-MODE] modul=meetingNotes aksi=C`. Jadi permintaan
+tulis memang masuk dan lolos penjaga — tetapi itu rute **pembuatan discussion
+POINT**, bukan komentar. Jalur tulis #47 karena itu **masih belum terbukti**.
+
+Efek samping yang menyenangkan: baris log itu sekaligus **membuktikan #88
+bekerja di produksi** — pencatatan God Mode benar-benar menyala pada permintaan
+nyata, bukan hanya di test.
+
+#### Temuan #94
+
+Keempat rute komentar **tidak punya penjaga sama sekali**:
+
+```
+GET  /api/discussion-points/:pointId/comments
+GET  /api/projects/:projectId/meetings/:meetingId/discussionPoints/:pointId/comments
+POST /api/discussion-points/:pointId/comments
+POST /api/projects/:projectId/meetings/:meetingId/discussionPoints/:pointId/comments
+```
+
+Dua di antaranya bahkan **tidak menyebut proyek** di jalurnya — pola yang sama
+persis dengan #70, dan dengan sebab yang sama: tanpa `:projectId`, penjaga lama
+tidak punya apa pun untuk diperiksa, jadi rutenya dibiarkan telanjang.
+
+Akibatnya komentar bisa **dibaca dan ditulis lintas proyek** oleh siapa pun yang
+punya akun. Komentar memuat pembahasan internal rapat.
+
+#### Kenapa ia luput dari seluruh sapuan sebelumnya
+
+Ini yang layak dicatat. §19.20–§19.22 memindahkan **54 penjaga** ke matriks dan
+mengunci hasilnya dengan test himpunan rute. Semua test itu bekerja pada rute
+yang **punya penjaga** — mereka memeriksa penjaganya benar, bukan **ada**.
+
+`penjaga-lama.test.ts` mengunci pemakai `verifyProjectAccess` di nol.
+`tanpa-wildcard.test.ts` mengunci ketiadaan `["*"]`. **Rute tanpa penjaga sama
+sekali tidak muncul di kedua himpunan itu** — ia tak terlihat oleh keduanya.
+
+> Sapuan yang mendata "penjaga yang salah" tidak akan pernah menemukan "penjaga
+> yang tidak ada". Keduanya butuh pendataan yang berbeda: satu berangkat dari
+> daftar penjaga, satunya dari daftar RUTE.
+
+Perbaikannya karena itu bukan hanya memasang penjaga pada 4 rute ini, melainkan
+menambah test yang berangkat dari **himpunan rute berlingkup proyek** dan
+menuntut setiap anggotanya punya penjaga.
