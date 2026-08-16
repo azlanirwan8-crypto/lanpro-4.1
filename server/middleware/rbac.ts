@@ -3,6 +3,31 @@ import db from "../../src/lib/db";
 import { getJwtSecret } from "./auth";
 import { catatPenjaga } from "./daftarPeranRute";
 
+/**
+ * ⚠️ PENJAGA LAMA — JANGAN DIPAKAI UNTUK RUTE BARU. §19.8 tahap 4.
+ *
+ * Digantikan `jagaProyek(modul, aksi)` di `./jagaProyek.ts`.
+ *
+ * Kelemahannya struktural, bukan soal isi daftar perannya: karena ia menerima
+ * DAFTAR PERAN, setiap rute mengarang sendiri siapa yang boleh. Diukur 16 Agu
+ * 2026, 54 pemanggilan menghasilkan 8 daftar berbeda, dan 31 di antaranya
+ * berbunyi `["*"]` — yang sesudah #49 berarti "anggota dengan peran APA PUN",
+ * sehingga `viewer` ikut boleh menghapus (#66, #72).
+ *
+ * Ia juga **izinkan-secara-bawaan**: rute tanpa `:projectId` diloloskan begitu
+ * saja. Itu kebalikan dari §19.6 aturan 3.
+ *
+ * TERSISA 3 PEMAKAI, dan ketiganya menunggu keputusan pemilik proyek (#89) —
+ * ketiganya operasi TINGKAT PROYEK yang §19.5 belum punya modulnya:
+ *
+ *   PUT  /api/projects/:projectId/dashboard-layout
+ *   PUT  /api/projects/:id
+ *   POST /api/projects/:projectId/methodology
+ *
+ * Jumlah itu DIKUNCI oleh `server/routes/penjaga-lama.test.ts`. Menambah
+ * pemakai keempat akan memerahkan test — disengaja, supaya berkas ini menyusut
+ * menuju nol alih-alih diam-diam terpakai lagi.
+ */
 export const verifyProjectAccess = (allowedRoles: string[]) => {
   // Mendaftarkan diri saat penjaga DIBUAT — yaitu saat modul rute dimuat.
   // Yang tercatat adalah penjaga yang benar-benar terpasang, bukan yang
