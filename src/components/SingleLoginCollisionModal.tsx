@@ -35,7 +35,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
           >
             <X className="w-4 h-4" />
           </button>
-          <div className="w-16 h-16 bg-surface rounded-full shadow-soft border border-rose-100 flex items-center justify-center mb-4 relative">
+          <div className="w-16 h-16 bg-surface rounded-full shadow-soft border border-rose-500/30 flex items-center justify-center mb-4 relative">
             <div className="absolute inset-0 rounded-full border-2 border-rose-400 border-t-transparent animate-spin opacity-20"></div>
             <AlertTriangle className="w-8 h-8 text-rose-500" />
           </div>

@@ -43,7 +43,7 @@ const getStatusColors = (status: string = "", isEpic: boolean) => {
   if (isEpic) {
     return {
       bg: "bg-gradient-to-r from-purple-100 to-purple-50/50",
-      border: "border-purple-200 hover:border-purple-300",
+      border: "border-purple-500/30 hover:border-purple-500/30",
       text: "text-purple-900",
       activeBg: "bg-purple-950 ring-2 ring-purple-400 border-purple-800",
       handle: "hover:bg-purple-600/15 active:bg-purple-600/25 group/l-handle",
@@ -59,7 +59,7 @@ const getStatusColors = (status: string = "", isEpic: boolean) => {
   if (s.includes("done") || s.includes("complete")) {
     return {
       bg: "bg-gradient-to-r from-emerald-50 to-white",
-      border: "border-emerald-200/80 hover:border-emerald-300",
+      border: "border-emerald-500/30 hover:border-emerald-500/30",
       text: "text-emerald-900",
       activeBg: "bg-emerald-950 ring-2 ring-emerald-400 border-emerald-800",
       handle: "hover:bg-emerald-600/15 active:bg-emerald-600/25 group/l-handle",
@@ -73,7 +73,7 @@ const getStatusColors = (status: string = "", isEpic: boolean) => {
   if (s.includes("progress") || s.includes("active") || s.includes("review") || s.includes("uat")) {
     return {
       bg: "bg-gradient-to-r from-indigo-50 to-white",
-      border: "border-indigo-200/80 hover:border-indigo-300",
+      border: "border-indigo-500/30 hover:border-indigo-500/30",
       text: "text-indigo-900",
       activeBg: "bg-indigo-950 ring-2 ring-indigo-400 border-indigo-800",
       handle: "hover:bg-indigo-600/15 active:bg-indigo-600/25 group/l-handle",
@@ -1356,11 +1356,11 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       {/* Task type icon */}
                       <div className="shrink-0 flex items-center justify-center">
                         {isEpic ? (
-                          <div className="p-1 rounded-md bg-purple-500/10 text-purple-600 shadow-soft border border-purple-100">
+                          <div className="p-1 rounded-md bg-purple-500/10 text-purple-600 shadow-soft border border-purple-500/30">
                             <Zap className="w-3.5 h-3.5" />
                           </div>
                         ) : (
-                          <div className="p-1 rounded-md bg-indigo-500/10 text-indigo-500 border border-indigo-100/40">
+                          <div className="p-1 rounded-md bg-indigo-500/10 text-indigo-500 border border-indigo-500/30">
                             <ListTodo className="w-3.5 h-3.5" />
                           </div>
                         )}
@@ -1384,7 +1384,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               setSelectedTaskForDetail(task);
                               setIsTaskDetailModalOpen(true);
                             }}
-                            className="text-xs sm:text-[11px] sm:text-[9px] font-semibold text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-200/60 rounded-md px-1 py-0.2 tracking-tight text-left uppercase transition-colors"
+                            className="text-xs sm:text-[11px] sm:text-[9px] font-semibold text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/30 rounded-md px-1 py-0.2 tracking-tight text-left uppercase transition-colors"
                           >
                             {task.key}
                           </button>

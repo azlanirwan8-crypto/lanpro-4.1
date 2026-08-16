@@ -584,7 +584,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           {/* Statistics Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
             <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
-              <div className="w-9 h-9 bg-blue-500/10 text-blue-600 rounded-lg flex items-center justify-center border border-blue-100/40 shrink-0">
+              <div className="w-9 h-9 bg-blue-500/10 text-blue-600 rounded-lg flex items-center justify-center border border-blue-500/30 shrink-0">
                 <Users className="w-4.5 h-4.5" />
               </div>
               <div>
@@ -597,7 +597,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               </div>
             </div>
             <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
-              <div className="w-9 h-9 bg-emerald-500/10 text-emerald-600 rounded-lg flex items-center justify-center border border-emerald-100/40 shrink-0">
+              <div className="w-9 h-9 bg-emerald-500/10 text-emerald-600 rounded-lg flex items-center justify-center border border-emerald-500/30 shrink-0">
                 <CheckCircle className="w-4.5 h-4.5" />
               </div>
               <div>
@@ -610,7 +610,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               </div>
             </div>
             <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
-              <div className="w-9 h-9 bg-amber-500/10 text-amber-500 rounded-lg flex items-center justify-center border border-amber-100/40 shrink-0">
+              <div className="w-9 h-9 bg-amber-500/10 text-amber-500 rounded-lg flex items-center justify-center border border-amber-500/30 shrink-0">
                 <Clock className="w-4.5 h-4.5" />
               </div>
               <div>
@@ -623,7 +623,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               </div>
             </div>
             <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
-              <div className="w-9 h-9 bg-rose-500/10 text-rose-600 rounded-lg flex items-center justify-center border border-rose-100/40 shrink-0">
+              <div className="w-9 h-9 bg-rose-500/10 text-rose-600 rounded-lg flex items-center justify-center border border-rose-500/30 shrink-0">
                 <Shield className="w-4.5 h-4.5" />
               </div>
               <div>
@@ -640,7 +640,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           {/* User List */}
           <div className="bg-surface rounded-xl shadow-soft border border-border-subtle/50 overflow-hidden flex-1 flex flex-col">
             {selectedUserIds.length > 0 && (
-              <div className="bg-indigo-500/10 border-b border-indigo-100 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-top duration-300">
+              <div className="bg-indigo-500/10 border-b border-indigo-500/30 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-top duration-300">
                 <div className="flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-indigo-600 text-content-inverse text-xs font-medium flex items-center justify-center">
                     {selectedUserIds.length}
@@ -863,7 +863,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 className={cn(
                                   "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs sm:text-[10px] font-medium border transition-colors",
                                   userProjectsCount > 0
-                                    ? "bg-indigo-500/10 text-indigo-700 border-indigo-100/70"
+                                    ? "bg-indigo-500/10 text-indigo-700 border-indigo-500/30"
                                     : "bg-surface-sunken/50 text-content-subtle border-border-faint"
                                 )}
                               >
@@ -876,7 +876,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 className={cn(
                                   "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs sm:text-[10px] font-medium border transition-colors",
                                   userTasksCount > 0
-                                    ? "bg-violet-500/10 text-violet-700 border-violet-100/70"
+                                    ? "bg-violet-500/10 text-violet-700 border-violet-500/30"
                                     : "bg-surface-sunken/50 text-content-subtle border-border-faint"
                                 )}
                               >
@@ -891,9 +891,9 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             className={cn(
                               "inline-flex font-medium text-xs sm:text-[11px] sm:text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-md border",
                               user.role === "admin"
-                                ? "bg-rose-500/10 text-rose-600 border-rose-200"
+                                ? "bg-rose-500/10 text-rose-600 border-rose-500/30"
                                 : user.role === "head"
-                                  ? "bg-purple-500/10 text-purple-600 border-purple-200"
+                                  ? "bg-purple-500/10 text-purple-600 border-purple-500/30"
                                   : "bg-surface-sunken text-content-secondary border-border-subtle"
                             )}
                           >
@@ -935,7 +935,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               // dan fungsinya sudah digantikan UserDetailView yang lebih
                               // lengkap. Modal beserta cabangnya ikut dihapus.
                               onClick={() => props.onSelectUserForDetail?.(user)}
-                              className="p-1.5 bg-indigo-500/10 hover:bg-indigo-600 text-indigo-600 hover:text-content-inverse border border-indigo-200/80 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer font-medium flex items-center justify-center gap-1"
+                              className="p-1.5 bg-indigo-500/10 hover:bg-indigo-600 text-indigo-600 hover:text-content-inverse border border-indigo-500/30 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer font-medium flex items-center justify-center gap-1"
                               title="Detail Pengguna"
                             >
                               <UserCog className="w-3.5 h-3.5 shrink-0" />
@@ -963,7 +963,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 });
                               }}
                               disabled={user.role === "admin"}
-                              className="p-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-200/80 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-1"
+                              className="p-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-1"
                               title="Hapus Pengguna"
                             >
                               <Trash2 className="w-3.5 h-3.5 shrink-0" />
@@ -1055,7 +1055,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
         title="Add New User"
       >
         <div className="space-y-4">
-          <div className="p-4 bg-violet-500/10 rounded-xl border border-violet-100 mb-2">
+          <div className="p-4 bg-violet-500/10 rounded-xl border border-violet-500/30 mb-2">
             <p className="text-sm font-medium text-violet-900">Registrasi Pengguna</p>
             <p className="text-xs text-violet-700 mt-1">Register new user to the system.</p>
           </div>

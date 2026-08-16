@@ -1,6 +1,18 @@
 @import "sweetalert2/dist/sweetalert2.min.css";
 
+/* #13 — SEBELUM INI berkas ini punya aturan `.dark` untuk TEKS tetapi tidak
+ * untuk LATAR. Popup karena itu tetap putih (bawaan sweetalert2) sementara
+ * teksnya berubah jadi terang: teks terang di atas latar putih, praktis tak
+ * terbaca. Dilaporkan pemilik proyek lewat tangkapan layar.
+ *
+ * Setengah migrasi seperti itu lebih buruk daripada tidak bermigrasi sama
+ * sekali — tanpa aturan `.dark`, teksnya akan tetap gelap dan MASIH terbaca.
+ *
+ * Seluruh warna kini memakai token, sehingga dialog mengikuti tema tanpa perlu
+ * aturan `.dark` terpisah yang bisa tertinggal separuh lagi. */
 .velzon-swal-popup {
+  background-color: var(--color-surface) !important;
+  border: 1px solid var(--color-border-subtle) !important;
   border-radius: 0.3rem !important;
   padding: 2rem 2rem 1.25rem !important;
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -18,37 +30,33 @@
 }
 
 .velzon-swal-popup .swal2-close {
-  color: #878a99 !important;
+  color: var(--color-content-muted) !important;
   font-size: 1.5rem !important;
   transition: color 0.15s ease;
 }
 
 .velzon-swal-popup .swal2-close:hover {
-  color: #495057 !important;
+  color: var(--color-content-body) !important;
 }
 
 .velzon-swal-content h4 {
   font-size: 1.21875rem;
   font-weight: 600;
-  color: #495057;
+  color: var(--color-content-strong);
   margin: 0 0 0.5rem;
   line-height: 1.4;
 }
 
 .velzon-swal-content .velzon-swal-text {
-  color: #878a99;
+  color: var(--color-content-muted);
   font-size: 0.9375rem;
   margin: 0;
   line-height: 1.5;
 }
 
-.dark .velzon-swal-content h4 {
-  color: #e9ecef;
-}
-
-.dark .velzon-swal-content .velzon-swal-text {
-  color: #adb5bd;
-}
+/* Aturan `.dark` terpisah DIBUANG: tokennya sudah berganti sendiri di
+ * `html.dark`, jadi menuliskannya dua kali hanya membuka peluang salah satunya
+ * tertinggal — persis yang terjadi sebelumnya. */
 
 .velzon-swal-btn {
   display: inline-flex;
@@ -68,19 +76,19 @@
 }
 
 .velzon-swal-btn-primary {
-  background-color: #405189;
-  color: #fff;
+  background-color: var(--color-primary-surface);
+  color: var(--color-content-inverse);
 }
 
 .velzon-swal-btn-primary:hover {
-  background-color: #364574;
+  background-color: var(--color-primary-surface-hover);
 }
 
 .velzon-swal-btn-danger {
-  background-color: #f06548;
+  background-color: var(--color-danger);
   color: #fff;
 }
 
 .velzon-swal-btn-danger:hover {
-  background-color: #d95a40;
+  background-color: var(--color-danger-hover);
 }

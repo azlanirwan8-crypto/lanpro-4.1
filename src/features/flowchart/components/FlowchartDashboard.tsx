@@ -172,7 +172,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                           {fw.name}
                         </td>
                         <td className="py-3 px-4 whitespace-nowrap">
-                          <span className="inline-block px-2.5 py-1 bg-indigo-500/10 text-primary border border-indigo-200/80 text-xs sm:text-[10px] font-medium rounded-md uppercase">
+                          <span className="inline-block px-2.5 py-1 bg-indigo-500/10 text-primary border border-indigo-500/30 text-xs sm:text-[10px] font-medium rounded-md uppercase">
                             {fw.category || "Panduan"}
                           </span>
                         </td>
@@ -186,7 +186,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         <td className="py-3 px-4 whitespace-nowrap">
                           {linkedEpic ? (
                             <span
-                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-violet-500/10 text-violet-700 border border-violet-200 text-xs sm:text-[10px] font-medium rounded-md max-w-[180px] truncate"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-violet-500/10 text-violet-700 border border-violet-500/30 text-xs sm:text-[10px] font-medium rounded-md max-w-[180px] truncate"
                               title={linkedEpic.title}
                             >
                               🎯 {linkedEpic.title}

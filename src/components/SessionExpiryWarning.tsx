@@ -215,7 +215,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
               className="relative w-full max-w-md bg-surface rounded-lg border border-border-subtle shadow-xl overflow-hidden p-5 text-center"
             >
               {/* Alert Icon & Ring */}
-              <div className="mx-auto w-16 h-16 bg-rose-500/10 border border-rose-100 rounded-full flex items-center justify-center mb-4 text-rose-500 relative">
+              <div className="mx-auto w-16 h-16 bg-rose-500/10 border border-rose-500/30 rounded-full flex items-center justify-center mb-4 text-rose-500 relative">
                 <ShieldAlert className="w-8 h-8 animate-pulse" />
                 <span className="absolute inset-0 rounded-full border-2 border-rose-500/20 animate-ping" />
               </div>

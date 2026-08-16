@@ -14,10 +14,10 @@ export const usePlanning = (props: PlanningViewProps) => {
   );
 
   const priorityColorMap: Record<string, string> = {
-    High: "text-red-500 bg-red-500/10 border-red-100",
-    Highest: "text-red-700 bg-red-500/15 border-red-200",
-    Medium: "text-amber-500 bg-amber-500/10 border-amber-100",
-    Low: "text-blue-500 bg-blue-500/10 border-blue-100",
+    High: "text-red-500 bg-red-500/10 border-red-500/30",
+    Highest: "text-red-700 bg-red-500/15 border-red-500/30",
+    Medium: "text-amber-500 bg-amber-500/10 border-amber-500/30",
+    Low: "text-blue-500 bg-blue-500/10 border-blue-500/30",
     Lowest: "text-content-muted bg-surface-muted border-border-subtle",
   };
 

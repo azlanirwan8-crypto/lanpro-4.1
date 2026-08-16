@@ -197,7 +197,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
   ) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8 text-center">
-        <div className="w-16 h-16 rounded-xl bg-indigo-500/15 border border-indigo-200 flex items-center justify-center text-indigo-600 mb-4 shadow-soft">
+        <div className="w-16 h-16 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 mb-4 shadow-soft">
           <FolderKanban className="w-8 h-8" />
         </div>
         <h3 className="text-xl font-medium text-content-strong mb-2">

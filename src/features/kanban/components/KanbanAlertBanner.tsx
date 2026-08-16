@@ -11,7 +11,7 @@ export const KanbanAlertBanner: React.FC<AlertBannerProps> = ({ message, classNa
   return (
     <div
       className={cn(
-        "flex items-center gap-2 p-2.5 text-xs font-medium text-red-700 bg-red-500/10 border border-red-200/90 rounded-md shadow-2xs",
+        "flex items-center gap-2 p-2.5 text-xs font-medium text-red-700 bg-red-500/10 border border-red-500/30 rounded-md shadow-2xs",
         className
       )}
     >

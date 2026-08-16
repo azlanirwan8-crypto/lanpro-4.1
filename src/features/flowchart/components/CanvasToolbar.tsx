@@ -104,7 +104,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             className={cn(
               "p-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer",
               isSnapToGrid
-                ? "bg-violet-500/10 text-violet-700 hover:bg-violet-500/15 border border-violet-100"
+                ? "bg-violet-500/10 text-violet-700 hover:bg-violet-500/15 border border-violet-500/30"
                 : "text-content-subtle hover:bg-surface-muted"
             )}
             title={`Snap to Grid (Saat ini: ${isSnapToGrid ? "Aktif" : "Mati"})`}
@@ -127,13 +127,13 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <div className="bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1 rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.06)] flex items-center gap-1.5 transition-all duration-300">
           <button
             onClick={handleExportJPG}
-            className="flex items-center gap-1 px-2.5 py-1 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/15 border border-emerald-200 rounded-lg text-xs sm:text-[10px] font-medium transition-all cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-1 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/15 border border-emerald-500/30 rounded-lg text-xs sm:text-[10px] font-medium transition-all cursor-pointer"
           >
             <Download className="w-3 h-3" /> Ekspor
           </button>
           <button
             onClick={handleExportJSON}
-            className="flex items-center gap-1 px-2.5 py-1 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/15 border border-indigo-200 rounded-lg text-xs sm:text-[10px] font-medium transition-all cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-1 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/15 border border-indigo-500/30 rounded-lg text-xs sm:text-[10px] font-medium transition-all cursor-pointer"
           >
             <Database className="w-3 h-3" /> Backup
           </button>

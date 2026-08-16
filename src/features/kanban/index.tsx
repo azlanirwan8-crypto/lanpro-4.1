@@ -262,7 +262,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                     {/* Epic Card Content */}
                     <div
                       className={cn(
-                        "bg-surface rounded-lg shadow-2xs border border-border-subtle/80 border-l-4 border-l-purple-600 transition-all duration-200 hover:border-purple-300 p-3",
+                        "bg-surface rounded-lg shadow-2xs border border-border-subtle/80 border-l-4 border-l-purple-600 transition-all duration-200 hover:border-purple-500/30 p-3",
                         isCompact ? "p-2.5" : "p-3"
                       )}
                     >
@@ -270,10 +270,10 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                         <div className="w-5 h-5 rounded bg-primary-surface/10 flex items-center justify-center text-primary shrink-0">
                           <Layers className="w-3 h-3" />
                         </div>
-                        <span className="text-xs sm:text-[10px] font-mono font-medium text-purple-600 bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-100">
+                        <span className="text-xs sm:text-[10px] font-mono font-medium text-purple-600 bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-500/30">
                           {epic.key || "EPIC"}
                         </span>
-                        <span className="ml-auto bg-primary-surface/10 text-primary px-1.5 py-0.2 rounded text-xs sm:text-[10px] font-medium border border-purple-100/60">
+                        <span className="ml-auto bg-primary-surface/10 text-primary px-1.5 py-0.2 rounded text-xs sm:text-[10px] font-medium border border-purple-500/30">
                           {boardStatuses.reduce(
                             (acc, status) =>
                               acc + (groupedTasks[`${epic.id}:${status.label}`]?.length || 0),

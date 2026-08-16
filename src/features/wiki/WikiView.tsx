@@ -705,30 +705,30 @@ export const WikiView: React.FC<WikiViewProps> = ({
     switch (type?.toUpperCase()) {
       case "PRD":
         return {
-          bg: "bg-indigo-500/10 border-indigo-100 text-primary hover:bg-indigo-500/15",
+          bg: "bg-indigo-500/10 border-indigo-500/30 text-primary hover:bg-indigo-500/15",
           badge:
-            "bg-indigo-500/10 text-primary border border-indigo-100 text-xs sm:text-[10px] font-medium px-2.5 py-0.5 rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
+            "bg-indigo-500/10 text-primary border border-indigo-500/30 text-xs sm:text-[10px] font-medium px-2.5 py-0.5 rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
           accent: "border-primary",
         };
       case "PANDUAN":
         return {
-          bg: "bg-blue-500/10 border-blue-100 text-blue-700 hover:bg-blue-500/15",
+          bg: "bg-blue-500/10 border-blue-500/30 text-blue-700 hover:bg-blue-500/15",
           badge:
-            "bg-blue-500/10 text-blue-700 border border-blue-100 text-xs sm:text-[10px] font-medium px-2.5 py-0.5 rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
+            "bg-blue-500/10 text-blue-700 border border-blue-500/30 text-xs sm:text-[10px] font-medium px-2.5 py-0.5 rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
           accent: "border-blue-500",
         };
       case "LAPORAN":
         return {
-          bg: "bg-emerald-500/10 border-emerald-100 text-emerald-700 hover:bg-emerald-500/15",
+          bg: "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 hover:bg-emerald-500/15",
           badge:
-            "bg-emerald-500/10 text-emerald-700 border border-emerald-100 text-xs sm:text-[10px] font-medium px-2.5 py-0.5 rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
+            "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 text-xs sm:text-[10px] font-medium px-2.5 py-0.5 rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
           accent: "border-emerald-500",
         };
       case "SPESIFIKASI":
         return {
-          bg: "bg-purple-500/10 border-purple-100 text-purple-700 hover:bg-purple-500/15",
+          bg: "bg-purple-500/10 border-purple-500/30 text-purple-700 hover:bg-purple-500/15",
           badge:
-            "bg-purple-500/10 text-purple-700 border border-purple-100 text-xs sm:text-[10px] font-medium px-2.5 py-0.5 rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
+            "bg-purple-500/10 text-purple-700 border border-purple-500/30 text-xs sm:text-[10px] font-medium px-2.5 py-0.5 rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
           accent: "border-purple-500",
         };
       default:
@@ -790,7 +790,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
               {/* Header / Action Bar */}
               <div className="p-5 md:p-6 border-b border-border-subtle/80 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-indigo-500/10 border border-indigo-100 rounded-md text-primary shadow-2xs">
+                  <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/30 rounded-md text-primary shadow-2xs">
                     <BookOpen className="w-5 h-5" />
                   </div>
                   <div>
@@ -847,7 +847,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     {currentDocs.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="text-center py-16 text-content-subtle">
-                          <div className="w-12 h-12 rounded-md bg-indigo-500/10 border border-indigo-100 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
+                          <div className="w-12 h-12 rounded-md bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
                             <FileText className="w-5 h-5" />
                           </div>
                           <p className="font-medium text-content-strong text-sm">
@@ -901,7 +901,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               {doc.fileName ? (
                                 <button
                                   onClick={() => handleDownload(doc.id, doc.fileName)}
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-200 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
                                   title="Klik untuk mengunduh berkas"
                                 >
                                   <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
@@ -1009,7 +1009,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 <div className="bg-surface border border-border-subtle rounded-lg p-3.5 md:p-4 flex items-center justify-between shadow-2xs shrink-0">
                   <button
                     onClick={() => setActiveDocId(null)}
-                    className="flex items-center gap-1.5 text-xs font-medium text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-100 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
+                    className="flex items-center gap-1.5 text-xs font-medium text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/30 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
                     title="Kembali ke Daftar Dokumen"
                   >
                     <ChevronLeft className="w-4 h-4" /> Daftar
@@ -1020,7 +1020,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     {activeDoc.fileName && (
                       <button
                         onClick={() => handleDownload(activeDoc.id, activeDoc.fileName)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 font-medium text-xs border border-emerald-200 rounded-md transition-all cursor-pointer whitespace-nowrap shadow-2xs"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 font-medium text-xs border border-emerald-500/30 rounded-md transition-all cursor-pointer whitespace-nowrap shadow-2xs"
                         title="Unduh Lampiran Berkas"
                       >
                         <Download className="w-3.5 h-3.5" />
@@ -1111,7 +1111,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         Pratinjau Dokumen Utama
                       </span>
                       {activeDoc.fileName && (
-                        <span className="text-xs sm:text-[10px] sm:text-[8px] font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                        <span className="text-xs sm:text-[10px] sm:text-[8px] font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 px-2 py-0.5 rounded-md uppercase tracking-wider">
                           Disematkan: {activeDoc.fileType.split("/")[1]?.toUpperCase() || "FILE"}
                         </span>
                       )}
@@ -1130,7 +1130,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         /* Embedded Document Viewer with Bulletproof Safe View Actions */
                         <div className="flex-1 flex flex-col relative bg-surface-sunken min-h-0 overflow-hidden">
                           {/* Safe View Toolbar Info Bar */}
-                          <div className="bg-amber-500/10 border-b border-amber-200/60 p-3 sm:px-4 sm:py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs z-10 shrink-0">
+                          <div className="bg-amber-500/10 border-b border-amber-500/30 p-3 sm:px-4 sm:py-3 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs z-10 shrink-0">
                             <div className="flex items-start gap-2.5">
                               <span className="p-1 bg-amber-500/15 text-amber-800 rounded-md mt-0.5 shrink-0">
                                 <Info className="w-3.5 h-3.5" />
@@ -1268,7 +1268,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3.5 bg-surface-sunken/30">
                       {!activeDocId || (docCommentsMap[activeDocId] || []).length === 0 ? (
                         <div className="text-center py-12 px-4 my-auto">
-                          <div className="w-12 h-12 rounded-md bg-indigo-500/10 border border-indigo-100 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
+                          <div className="w-12 h-12 rounded-md bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
                             <MessageSquare className="w-6 h-6" />
                           </div>
                           <h4 className="text-xs font-medium text-content-strong">
@@ -1370,7 +1370,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
             ) : (
               /* Workspace Empty State */
               <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-surface border border-border-subtle rounded-lg shadow-2xs select-none">
-                <div className="w-14 h-14 rounded-md bg-indigo-500/10 border border-indigo-100 flex items-center justify-center mb-4 text-primary shadow-2xs">
+                <div className="w-14 h-14 rounded-md bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mb-4 text-primary shadow-2xs">
                   <BookOpen className="w-7 h-7" />
                 </div>
                 <h2 className="text-sm font-medium text-content-strong tracking-tight">
@@ -1411,7 +1411,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
               {/* Modal header decor */}
               <div className="bg-surface-sunken/80 px-5 py-3.5 border-b border-border-faint flex justify-between items-center select-none">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-indigo-500/10 border border-indigo-100 text-primary rounded-md flex items-center justify-center shadow-2xs">
+                  <div className="w-8 h-8 bg-indigo-500/10 border border-indigo-500/30 text-primary rounded-md flex items-center justify-center shadow-2xs">
                     {isNew ? <Plus className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
                   </div>
                   <div>
@@ -1531,7 +1531,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
                     {editFile ? (
                       <div>
-                        <p className="text-xs sm:text-[11px] font-medium text-primary bg-indigo-500/10 border border-indigo-100 px-2.5 py-1 rounded-md inline-flex items-center gap-1">
+                        <p className="text-xs sm:text-[11px] font-medium text-primary bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-1 rounded-md inline-flex items-center gap-1">
                           <Paperclip className="w-3 h-3" />
                           {editFile.name}
                         </p>
@@ -1561,7 +1561,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               setShouldRemoveFile(true);
                               toast.info("Lampiran lama akan terhapus setelah disimpan");
                             }}
-                            className="text-xs sm:text-[10px] sm:text-[8px] font-medium text-rose-600 bg-rose-500/10 border border-rose-100 p-0.5 px-1.5 rounded hover:bg-rose-500/15 transition-colors"
+                            className="text-xs sm:text-[10px] sm:text-[8px] font-medium text-rose-600 bg-rose-500/10 border border-rose-500/30 p-0.5 px-1.5 rounded hover:bg-rose-500/15 transition-colors"
                           >
                             Hapus
                           </button>
@@ -1579,7 +1579,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     )}
 
                     {shouldRemoveFile && !editFile && (
-                      <div className="p-0.5 px-2 bg-rose-500/10 text-rose-700 border border-rose-100 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium">
+                      <div className="p-0.5 px-2 bg-rose-500/10 text-rose-700 border border-rose-500/30 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium">
                         Lampiran lama akan terhapus
                       </div>
                     )}

@@ -395,7 +395,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
             {/* Table Header / Action Bar */}
             <div className="p-4 md:p-6 border-b border-border-subtle/80 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
               <div className="flex items-center gap-3.5">
-                <div className="p-2.5 bg-indigo-500/10 border border-indigo-100 rounded-lg text-primary shadow-2xs">
+                <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/30 rounded-lg text-primary shadow-2xs">
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
@@ -453,7 +453,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   {paginatedMeetings.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="text-center py-16 text-content-subtle">
-                        <div className="w-12 h-12 rounded-lg bg-indigo-500/10 border border-indigo-100 flex items-center justify-center mx-auto mb-3 shadow-2xs">
+                        <div className="w-12 h-12 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-3 shadow-2xs">
                           <MessageSquare className="w-6 h-6 text-primary" />
                         </div>
                         <p className="font-medium text-content-strong text-sm">No meetings found</p>
@@ -497,7 +497,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                                 }
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 text-primary hover:bg-indigo-500/15 rounded-md font-medium truncate max-w-[150px] transition-all text-xs sm:text-[11px] border border-indigo-100/80"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 text-primary hover:bg-indigo-500/15 rounded-md font-medium truncate max-w-[150px] transition-all text-xs sm:text-[11px] border border-indigo-500/30"
                                 title={meeting.meetingLink}
                               >
                                 <Video className="w-3.5 h-3.5 shrink-0" />
@@ -515,7 +515,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                                 onClick={() =>
                                   handleDownloadMeeting(meeting.id!, meeting.fileName!)
                                 }
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-200/80 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
                                 title="Klik untuk mengunduh berkas"
                               >
                                 <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
@@ -660,7 +660,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     {canDeleteMeeting(activeMeeting) && (
                       <button
                         onClick={() => handleDeleteMeeting(activeMeeting.id!)}
-                        className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 rounded-md text-xs font-medium transition-all cursor-pointer border border-rose-200/80 flex items-center gap-1.5"
+                        className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 rounded-md text-xs font-medium transition-all cursor-pointer border border-rose-500/30 flex items-center gap-1.5"
                       >
                         <Trash2 className="w-3.5 h-3.5" /> Delete
                       </button>
@@ -675,7 +675,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   </h2>
 
                   {activeMeeting.description && (
-                    <div className="mt-4 p-4 border border-indigo-100/80 bg-indigo-500/10 rounded-lg border-l-4 border-l-primary flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div className="mt-4 p-4 border border-indigo-500/30 bg-indigo-500/10 rounded-lg border-l-4 border-l-primary flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <span className="text-xs sm:text-[10px] font-medium text-primary tracking-wider uppercase block mb-1">
                           Meeting Description / Agenda
@@ -695,7 +695,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                           onClick={() =>
                             handleDownloadMeeting(activeMeeting.id!, activeMeeting.fileName!)
                           }
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 rounded-md text-xs font-medium transition-all border border-emerald-200/80 cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 rounded-md text-xs font-medium transition-all border border-emerald-500/30 cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
                           title="Unduh Berkas Lampiran"
                         >
                           <FileText className="w-3.5 h-3.5 text-emerald-600" />
@@ -749,7 +749,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
             </button>
 
             <div className="flex items-center gap-3 mb-5 pr-10">
-              <div className="w-9 h-9 rounded-md bg-indigo-500/10 border border-indigo-100 flex items-center justify-center text-primary shrink-0">
+              <div className="w-9 h-9 rounded-md bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-primary shrink-0">
                 <Calendar className="w-5 h-5" />
               </div>
               <div>
@@ -934,7 +934,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 Close
               </button>
               {!canModify ? (
-                <div className="text-xs font-medium text-rose-600 flex items-center gap-1.5 bg-rose-500/10 px-3.5 py-2 rounded-md border border-rose-100 shadow-2xs">
+                <div className="text-xs font-medium text-rose-600 flex items-center gap-1.5 bg-rose-500/10 px-3.5 py-2 rounded-md border border-rose-500/30 shadow-2xs">
                   <Eye className="w-4 h-4 text-rose-500" />
                   <span>Mode Baca Saja (Bukan Author/Admin)</span>
                 </div>

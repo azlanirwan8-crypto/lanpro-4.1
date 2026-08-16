@@ -153,7 +153,7 @@ export const DbExplorerPanel: React.FC<any> = ({
       <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-100/60">
+            <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-500/30">
               System Tools
             </span>
             <span className="text-xs text-content-subtle font-medium">
@@ -275,7 +275,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                       <button
                         key={tableName}
                         onClick={() => loadTable(tableName)}
-                        className={`flex items-center justify-between gap-2 px-3 py-1.5 text-xs rounded-md transition-colors cursor-pointer ${activeTable === tableName ? "bg-indigo-500/10 text-indigo-700 font-medium border border-indigo-100" : "text-content-secondary hover:bg-surface-muted font-medium"}`}
+                        className={`flex items-center justify-between gap-2 px-3 py-1.5 text-xs rounded-md transition-colors cursor-pointer ${activeTable === tableName ? "bg-indigo-500/10 text-indigo-700 font-medium border border-indigo-500/30" : "text-content-secondary hover:bg-surface-muted font-medium"}`}
                       >
                         <div className="flex items-center gap-2 truncate">
                           <TableIcon className="w-3.5 h-3.5 shrink-0 text-content-subtle" />
@@ -336,7 +336,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                 )}
 
                 {!loading && error && (
-                  <div className="bg-red-500/10 border border-red-200 text-red-700 p-4 rounded-lg font-mono text-sm max-w-full overflow-x-auto whitespace-pre-wrap">
+                  <div className="bg-red-500/10 border border-red-500/30 text-red-700 p-4 rounded-lg font-mono text-sm max-w-full overflow-x-auto whitespace-pre-wrap">
                     {error}
                   </div>
                 )}

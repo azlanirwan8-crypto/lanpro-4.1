@@ -97,11 +97,11 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                         "text-xs sm:text-[10px] font-bold uppercase px-2 py-0.5 rounded-md border shrink-0 whitespace-nowrap",
                         sprint.status === "active"
                           ? isOverdue
-                            ? "bg-red-500/10 text-red-700 border-red-200"
-                            : "bg-emerald-500/10 text-emerald-700 border-emerald-200"
+                            ? "bg-red-500/10 text-red-700 border-red-500/30"
+                            : "bg-emerald-500/10 text-emerald-700 border-emerald-500/30"
                           : sprint.status === "planned"
                             ? "bg-surface-muted text-content-secondary border-border-subtle/60"
-                            : "bg-blue-500/10 text-blue-700 border-blue-100"
+                            : "bg-blue-500/10 text-blue-700 border-blue-500/30"
                       )}
                     >
                       {sprint.status === "active"
@@ -287,7 +287,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                     return [
                                       <div
                                         key={`sprint-header-${epic.id}`}
-                                        className="flex items-center justify-between px-3 py-1.5 bg-purple-500/10 border border-purple-100 rounded-md mb-2 mt-2 first:mt-0"
+                                        className="flex items-center justify-between px-3 py-1.5 bg-purple-500/10 border border-purple-500/30 rounded-md mb-2 mt-2 first:mt-0"
                                       >
                                         <div className="flex items-center gap-2">
                                           <Zap className="w-3.5 h-3.5 text-purple-600" />
@@ -295,7 +295,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                             {epic.title}
                                           </span>
                                         </div>
-                                        <div className="text-xs sm:text-[10px] font-medium text-purple-600 bg-surface border border-purple-100 px-2 py-0.2 rounded-md">
+                                        <div className="text-xs sm:text-[10px] font-medium text-purple-600 bg-surface border border-purple-500/30 px-2 py-0.2 rounded-md">
                                           {items.length}
                                         </div>
                                       </div>,

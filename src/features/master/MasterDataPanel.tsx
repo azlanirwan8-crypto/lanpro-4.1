@@ -528,7 +528,7 @@ export const MasterDataPanel = ({
           <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 mb-4 flex justify-between items-center shadow-2xs shrink-0">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-100/60">
+                <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-500/30">
                   System Master
                 </span>
                 <span className="text-xs text-content-subtle font-medium">
@@ -599,7 +599,7 @@ export const MasterDataPanel = ({
                     return (
                       <div
                         key={mod.id}
-                        className="flex items-center justify-between p-3 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs hover:border-indigo-300 transition-all group"
+                        className="flex items-center justify-between p-3 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs hover:border-indigo-500/30 transition-all group"
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-md bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0 font-medium text-xs">
@@ -610,7 +610,7 @@ export const MasterDataPanel = ({
                               <span className="text-xs font-medium text-content-strong">
                                 {mod.namaModul}
                               </span>
-                              <span className="text-xs sm:text-[10px] bg-indigo-500/10 text-indigo-700 font-medium px-2 py-0.5 rounded-md border border-indigo-100">
+                              <span className="text-xs sm:text-[10px] bg-indigo-500/10 text-indigo-700 font-medium px-2 py-0.5 rounded-md border border-indigo-500/30">
                                 {p ? p.name : mod.projectId}
                               </span>
                             </div>
@@ -652,7 +652,7 @@ export const MasterDataPanel = ({
                                   label: `${mod.namaModul} (Modul)`,
                                 });
                               }}
-                              className="w-7 h-7 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-200/80 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
+                              className="w-7 h-7 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
                               title="Hapus Modul"
                             >
                               <Trash2 className="w-3.5 h-3.5 shrink-0" />
@@ -847,7 +847,7 @@ export const MasterDataPanel = ({
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
                                     className={cn(
-                                      "flex justify-between items-center p-3 bg-surface border border-border-subtle/80 rounded-lg transition-all group hover:border-indigo-300 shadow-2xs",
+                                      "flex justify-between items-center p-3 bg-surface border border-border-subtle/80 rounded-lg transition-all group hover:border-indigo-500/30 shadow-2xs",
                                       snapshot.isDragging
                                         ? "shadow-soft-lg border-indigo-500 bg-indigo-500/10 cursor-grabbing z-50"
                                         : ""
@@ -904,11 +904,11 @@ export const MasterDataPanel = ({
                                               return (
                                                 <div className="flex items-center gap-1 shrink-0 select-none">
                                                   {rType === "PROJECT" ? (
-                                                    <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-blue-500/10 text-blue-700 border border-blue-200/50 uppercase">
+                                                    <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-blue-500/10 text-blue-700 border border-blue-500/30 uppercase">
                                                       PROJECT ROLE
                                                     </span>
                                                   ) : (
-                                                    <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-purple-500/10 text-purple-700 border border-purple-200/50 uppercase">
+                                                    <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-purple-500/10 text-purple-700 border border-purple-500/30 uppercase">
                                                       SYSTEM ROLE
                                                     </span>
                                                   )}
@@ -927,7 +927,7 @@ export const MasterDataPanel = ({
                                             })()}
 
                                           {usageCount > 0 && (
-                                            <span className="text-xs sm:text-[10px] font-medium px-2 py-0.2 rounded-md bg-indigo-500/10 text-indigo-700 border border-indigo-100 flex items-center gap-1">
+                                            <span className="text-xs sm:text-[10px] font-medium px-2 py-0.2 rounded-md bg-indigo-500/10 text-indigo-700 border border-indigo-500/30 flex items-center gap-1">
                                               <Tag className="w-3 h-3" /> {usageCount} Task aktif
                                             </span>
                                           )}
@@ -967,7 +967,7 @@ export const MasterDataPanel = ({
                                                 label: item.label,
                                               })
                                             }
-                                            className="w-7 h-7 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-200/80 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
+                                            className="w-7 h-7 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
                                             title="Hapus Master Data"
                                           >
                                             <Trash2 className="w-3.5 h-3.5 shrink-0" />

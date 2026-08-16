@@ -83,7 +83,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                   "group p-3 rounded-xl border transition-all cursor-pointer",
                   isDueSoon24h(task.endDate)
                     ? "border-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-amber-500 hover:bg-amber-500/10"
-                    : "border-indigo-100/50 hover:border-indigo-300 hover:shadow-2xs bg-surface"
+                    : "border-indigo-500/30 hover:border-indigo-500/30 hover:shadow-2xs bg-surface"
                 )}
                 onClick={() => {
                   setSelectedTaskForDetail(task);
@@ -146,7 +146,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                   "group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
                   isDueSoon24h(task.endDate)
                     ? "border-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-amber-500 hover:bg-amber-500/10"
-                    : "border-rose-100 hover:border-rose-300 hover:shadow-2xs"
+                    : "border-rose-500/30 hover:border-rose-500/30 hover:shadow-2xs"
                 )}
                 onClick={() => {
                   setSelectedTaskForDetail(task);
@@ -178,7 +178,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </div>
 
       {/* Needs Attention / Overdue */}
-      <div className="bg-surface shadow-soft border border-rose-100/80 rounded-xl p-5">
+      <div className="bg-surface shadow-soft border border-rose-500/30 rounded-xl p-5">
         <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2 mb-3">
           <AlertCircle className="w-4 h-4 text-rose-500 animate-pulse" /> Needs Attention (
           {overdueTasks.length})
@@ -192,7 +192,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             overdueTasks.map((task) => (
               <div
                 key={task.id}
-                className="group p-3 rounded-xl border border-border-faint hover:border-rose-200 hover:shadow-2xs transition-all cursor-pointer bg-surface"
+                className="group p-3 rounded-xl border border-border-faint hover:border-rose-500/30 hover:shadow-2xs transition-all cursor-pointer bg-surface"
                 onClick={() => {
                   setSelectedTaskForDetail(task);
                   setIsTaskDetailModalOpen(true);
@@ -240,7 +240,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                   "group p-3 rounded-xl border transition-all cursor-pointer",
                   isDueSoon24h(task.endDate)
                     ? "border-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-amber-500 hover:bg-amber-500/10"
-                    : "border-border-faint hover:border-indigo-200 hover:shadow-2xs bg-surface"
+                    : "border-border-faint hover:border-indigo-500/30 hover:shadow-2xs bg-surface"
                 )}
                 onClick={() => {
                   setSelectedTaskForDetail(task);
@@ -289,7 +289,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             meetings.map((meeting: any) => (
               <div
                 key={meeting.id}
-                className="group p-3 rounded-xl border border-border-subtle/70 hover:border-sky-300 transition-all cursor-pointer bg-surface shadow-2xs"
+                className="group p-3 rounded-xl border border-border-subtle/70 hover:border-sky-500/30 transition-all cursor-pointer bg-surface shadow-2xs"
                 onClick={() => setCurrentView("meetings")}
               >
                 <div className="text-xs font-medium text-content-strong line-clamp-1 mb-1 leading-normal">
@@ -325,7 +325,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             documents.map((doc: any) => (
               <div
                 key={doc.id}
-                className="group p-3 rounded-xl border border-border-faint hover:border-teal-200 hover:shadow-2xs transition-all cursor-pointer bg-surface"
+                className="group p-3 rounded-xl border border-border-faint hover:border-teal-500/30 hover:shadow-2xs transition-all cursor-pointer bg-surface"
                 onClick={() => setCurrentView("wiki")}
               >
                 <div className="text-xs font-medium text-content-strong leading-snug line-clamp-1 mb-1">

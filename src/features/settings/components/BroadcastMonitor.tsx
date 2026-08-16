@@ -287,7 +287,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
                   </div>
                   WhatsApp Preview
                 </div>
-                <div className="bg-emerald-500/10 border border-emerald-100 rounded-xl p-4 text-sm font-mono text-emerald-800 whitespace-pre-wrap leading-relaxed shadow-soft">
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-sm font-mono text-emerald-800 whitespace-pre-wrap leading-relaxed shadow-soft">
                   {replaceMockData(waTemplate)}
                 </div>
               </div>

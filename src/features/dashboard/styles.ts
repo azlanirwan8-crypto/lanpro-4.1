@@ -23,7 +23,7 @@ export const styles = {
   statCard:
     "bg-surface shadow-sm border border-border-faint/80 rounded-xl p-6 hover:shadow-md transition-shadow relative overflow-hidden group",
   statCardRose:
-    "bg-surface shadow-sm border border-rose-100/80 rounded-xl p-6 hover:shadow-md transition-shadow relative overflow-hidden group",
+    "bg-surface shadow-sm border border-rose-500/30 rounded-xl p-6 hover:shadow-md transition-shadow relative overflow-hidden group",
   statIconBackground:
     "absolute right-[-10px] bottom-[-10px] opacity-[0.03] transform group-hover:scale-110 transition-transform",
   statLabel:
@@ -53,7 +53,7 @@ export const styles = {
   chartTitle:
     "text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2 mb-6",
   rightSidebar: "w-full xl:w-[380px] shrink-0 space-y-6",
-  actionCard: "bg-surface shadow-sm border border-rose-100/80 rounded-xl p-6",
+  actionCard: "bg-surface shadow-sm border border-rose-500/30 rounded-xl p-6",
   actionCardSlate: "bg-surface shadow-sm border border-border-faint/80 rounded-xl p-6",
   // SENGAJA warna keras, BUKAN token. Kartu ini dirancang GELAP di kedua mode —
   // token `content-*` adalah kosakata TEKS, dan di mode gelap nilainya justru
