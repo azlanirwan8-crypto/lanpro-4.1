@@ -424,7 +424,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 29 BELUM · 63 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 27 BELUM · 65 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -435,7 +435,7 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 29 item
+### 1.1 BELUM SELESAI — 27 item
 
 **Sebaran per fase:** F1 2 · F2 6 · F3 1 · F6 6 · F7 7 · F8 4 · F9 2 · F10 3 · F11 1 · F12 1
 
@@ -455,7 +455,6 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 17  | **UI belum pernah diaudit di balik login**                                                 | **F3**  | 🔴  | Sedang        |           Ya            | `MENUNGGU` login        | §14    |
 | 18  | notebook-lm rusak di dua sisi                                                              | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
 | 19  | `POST /api/db-query` tanpa penjaga read-only                                               | **F2**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
-| 21  | `authStore` & `uiStore` menganggur                                                         | **F10** | 🟡  | Rendah        |          Tidak          | `DITUNDA` (disengaja)   | §5.3   |
 | 25  | Fondasi `email.service.ts`                                                                 | **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email | §1.5   |
 | 26  | **Email selamat datang** (poin 2)                                                          | **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email | §1.5   |
 | 27  | **Lupa password → password random** (poin 3)                                               | **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email | §1.5   |
@@ -465,7 +464,6 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend               | **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik      | §0.4   |
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — celah daftar, DAN membatalkan asumsi kuota F11           | **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik      | §0.4   |
-| 74  | 7 pengambil data tanpa penjaga respons basi — data proyek lama menimpa proyek baru         | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §13.12 |
 | 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
 | 83  | `Users.department` & `Users.position` TIDAK fungsional — rancangan §19.4 belum bisa jalan  | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.13 |
 | 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)       | **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
@@ -473,7 +471,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 87  | `effectiveRole` DIKOREKSI — ia hanya bawa peran sistem; frontend abai peran proyek         | **F7**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §19.27 |
 | 92  | Peran dibaca dari TOKEN di 7 tempat, dari DATABASE di penjaga proyek — pencabutan tertunda | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.28 |
 
-### 1.2 SUDAH SELESAI — 63 item
+### 1.2 SUDAH SELESAI — 65 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -543,6 +541,8 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 57  | ~~Dua endpoint health~~ `/api/health` dibuang; `/api/health-check` pindah ke health.routes           |  **F2**  | ⚪  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §13.6  |
 | 81  | ~~`parentAdminId` ditulis tapi tidak pernah dibaca~~ berhenti ditulis; kolom menyusul                |  **F7**  | 🟡  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §19.2  |
 | 47  | ~~kolom kembar `discussion_point_comments`~~ 11 kolom -> 6, camelCase sumber kebenaran               |  **F9**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
+| 21  | ~~`authStore` & `uiStore` menganggur~~ dibuang; hook-nya ikut                                        | **F10**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §5.3   |
+| 74  | ~~7 pengambil data tanpa penjaga respons basi~~ 4 pengambil proyek dijaga                            |  **F2**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.12 |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -6373,3 +6373,81 @@ Yang menyelamatkan bukan kehati-hatian, melainkan **tabel nilai token** — bukt
 statis yang tidak bergantung pada alat ukur mana pun.
 
 **Kesimpulan: tema terang TIDAK rusak oleh pekerjaan tema gelap.**
+
+## §20 SERAH TERIMA UNTUK PERKAKAS LAIN — 27 item yang belum selesai
+
+Ditulis 16 Agu 2026 atas permintaan pemilik proyek, yang akan melanjutkan
+sebagian pekerjaan lewat **Antigravity**.
+
+**Tujuannya satu: agar perkakas berikutnya tidak mengarang.** Tiap item menyebut
+apa yang SUDAH diketahui, apa yang BELUM, dan apa yang akan salah bila ditebak.
+Nomor item mengikuti §1 — jangan menomori ulang.
+
+### 20.1 Aturan bagi siapa pun yang melanjutkan
+
+1. **§1 adalah HIPOTESIS, bukan instruksi.** Tiga kali dalam satu sesi rumusan
+   item terbukti keliru saat ditelusuri (#69, #87, #77). Ukur dulu.
+2. **Gerbang wajib** sebelum menyatakan apa pun selesai:
+   `npm run doctor && npm run lint && npm test && npm run build`, lalu
+   `npm run audit:papan && npm run audit:warna`, lalu **buka browser di tab
+   bersih** — build hijau bukan bukti (§15.3).
+3. **`src/lib/db.ts` tidak boleh disentuh** (§0.5 aturan 3).
+4. **Jangan memakai kredensial pemilik proyek.** Bila verifikasi butuh login,
+   minta pemilik proyek yang login.
+5. **`MENUNGGU` berarti menunggu KEPUTUSAN**, bukan menunggu pengerjaan.
+   Mengerjakannya tanpa jawaban berarti menebak keputusan orang.
+
+### 20.2 Item TERBUKA — boleh dikerjakan tanpa bertanya
+
+| #         | Fase | Isi                                 | Yang perlu diketahui SEBELUM mulai                                                                                                                                                                                                             |
+| --------- | ---- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **87**    | F7   | frontend abai peran proyek          | Rumusan lamanya SUDAH DIKOREKSI (§19.27). Ini BUKAN lubang keamanan — server menegakkan sendiri sejak tahap 4. Perbaikannya §19.8 tahap 5b: `can(action, modul, projectId)` membaca `src/lib/matriksAkses.ts`, matriks yang SAMA dengan server |
+| **92**    | F7   | peran dari token vs database        | Token 2 jam, jadi pencabutan hak admin tertunda. Perbaikannya butuh keputusan: daftar-cabut, token lebih pendek, atau baca DB tiap permintaan                                                                                                  |
+| **4**     | F7   | ±100 endpoint tanpa validasi skema  | §19.1 melarang menulis skema di atas otorisasi yang belum benar. Itu sudah beres, jadi ini boleh jalan                                                                                                                                         |
+| **8**     | F8   | 1.290 `any`                         | Tanpa target terukur, pekerjaan ini tidak berujung                                                                                                                                                                                             |
+| **9**     | F8   | cakupan CABANG `AppContainer` 8,26% | §19.31: 4 test menaikkannya 0,07 poin. Pada laju itu 50% butuh ~2.400 test. Kesimpulannya komponennya perlu dipecah dulu — dan itu menggeser sebagian F10 ke depan F8                                                                          |
+| **40**    | F8   | `tsconfig` tanpa `strict`           | §0.6: diskriminan BOOLEAN tidak bekerja, pakai STRING                                                                                                                                                                                          |
+| **16**    | F2   | logika belum diaudit                | Sebagian besar sudah lewat item turunannya; ukur ulang sisanya                                                                                                                                                                                 |
+| **45**    | F6   | form email dekoratif                | `useState` lokal tanpa simpan. Tertahan F6                                                                                                                                                                                                     |
+| **5 · 7** | F10  | routing palsu, berkas >500 baris    | JANGAN mulai sebelum F8 — merefactor 4.581 baris dengan cakupan cabang 8% adalah judi                                                                                                                                                          |
+| **6**     | F9   | 222 query SQL di lapisan rute       | Butuh F7 dan F8 sebagai pengaman                                                                                                                                                                                                               |
+| **14**    | F12  | kontras sidebar, jarak sentuh       | Sebagian sudah tertutup pekerjaan tema gelap — ukur ulang dulu                                                                                                                                                                                 |
+
+### 20.3 Item MENUNGGU — JANGAN dikerjakan sebelum dijawab
+
+| #                  | Yang menahan                                                  | Yang salah bila ditebak                                                                                        |
+| ------------------ | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **15**             | cabut 2 Google API key                                        | Hanya pemilik proyek yang bisa. Menandainya selesai tanpa pernyataannya adalah kegagalan §13.14                |
+| **46**             | nilai `SSO_ALLOWED_DOMAINS`                                   | Menebak domain berarti menentukan siapa boleh masuk. Juga menahan #30                                          |
+| **30**             | konfirmasi D1b dan D3b (§11.1)                                | Jalur rilis storage. Salah arah = 6–10 sesi terbuang                                                           |
+| **77**             | pemilik memilih **SheetJS `xlsx`** — belum dikerjakan         | Status kerentanan SheetJS BELUM diukur. Jalankan `npm audit` dulu                                              |
+| **83**             | **SUDAH DIJAWAB** (§19.48): Head di-assign, akses **R saja**  | Tinggal menambah baris `head` ke §19.5 dengan `R` di seluruh modul. `Users.department` TIDAK perlu difungsikan |
+| **86**             | **SUDAH DIJAWAB** (§19.48): `ProjectModules` sumber kebenaran | 4 baris `modul_aplikasi` di MasterData dibuang                                                                 |
+| **85**             | `category` dua konsep — pisah atau biarkan                    | Rekomendasi: pisah; `issue_type` sudah jadi rumahnya                                                           |
+| **17**             | izin objek percobaan + sesi admin                             | Audit UI di balik login                                                                                        |
+| **18 · 19**        | notebook-lm, penjaga read-only `db-query`                     | Keduanya MENGUBAH PERILAKU; #19 mematikan fitur ubah/hapus di DB Explorer                                      |
+| **25 26 27 28 44** | seluruh F6 tertahan **#44**                                   | Tanpa domain terverifikasi, email hanya sampai ke pemilik akun dan gagalnya SENYAP                             |
+
+### 20.4 Enam kesalahan sesi ini — jangan diulang
+
+| Kesalahan                                     | Akibat                                                                                                                                               | Cara menghindarinya                                              |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Percaya alat ukur buatan sendiri              | **4 kali** salah: `oklch` tak terbaca, saringan ukuran membuang lencana, induk transparan, dan cadangan latar putih yang MENGARANG 78 tabrakan palsu | Periksa SATU kasus dengan tangan sebelum bertindak atas angkanya |
+| Konversi menyeluruh lewat regex               | Mengubah yang TIDAK dimaksud secepat yang dimaksud                                                                                                   | Daftar ulang SELURUH hasilnya, jangan baca sampelnya             |
+| Item tampak gugur karena kode lamanya pensiun | #54 tampak gugur, cacatnya ternyata sudah TERSALIN ke penjaga baru                                                                                   | Validasi di kode BARU                                            |
+| Bukti negatif dari keluaran tersaring         | `grep` atas berkas yang sudah difilter selalu nol                                                                                                    | Tangkap keluaran PENUH dulu                                      |
+| Sapuan dari daftar PENJAGA                    | Tidak akan menemukan rute yang TIDAK punya penjaga — 7 rute telanjang luput                                                                          | Sapu dari daftar RUTE                                            |
+| Dokumentasi di ujung berkas                   | §0 basi **tiga kali**, pemilik proyek yang menemukannya                                                                                              | Perbarui §0 setiap fase berubah                                  |
+
+### 20.5 Perkakas yang tersedia
+
+    npm run audit:papan            integritas papan §1
+    npm run audit:warna            ratchet warna keras, garis dasar per BERKAS
+    npm run audit:deps             rantai pasok, ambang blokir high
+    npm run db:verify-schema       gerbang F0, migrasi vs production
+    npm run db:migrasi-peran       bawaannya uji-coba, --tulis untuk menyimpan
+    npm run db:hapus-kolom-kembar  bawaannya uji-coba, MERUSAK
+    npm run fix:warna              konversi warna keras ke token
+
+Ketiga gerbang pertama **sudah terbukti bisa merah** — diuji terhadap salinan
+rusak di luar repo, bukan dengan menyabotase sumber (§0.5 aturan 4).
