@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
 
 @variant dark (&:where(.dark, .dark *));
@@ -25,8 +25,10 @@
 
   /* Status */
   --color-success: #0ab39c;
+  --color-success-hover: #089683;
   --color-warning: #f7b84b;
   --color-danger: #f06548;
+  --color-danger-hover: #d95338;
   --color-info: #3577f1;
   --color-secondary: #299cdb;
 
@@ -34,15 +36,15 @@
   --color-surface: #ffffff;
   --color-surface-muted: #f4f7f9;
   --color-surface-raised: #ffffff;
-  --color-border-subtle: #e2e8f0;   /* = slate-200 */
-  --color-border-faint: #f1f5f9;    /* = slate-100 */
-  --color-surface-sunken: #f8fafc;  /* = slate-50  */
-  --color-content: #0f172a;         /* = slate-900 */
-  --color-content-strong: #1e293b;  /* = slate-800 */
-  --color-content-body: #334155;    /* = slate-700 */
+  --color-border-subtle: #e2e8f0; /* = slate-200 */
+  --color-border-faint: #f1f5f9; /* = slate-100 */
+  --color-surface-sunken: #f8fafc; /* = slate-50  */
+  --color-content: #0f172a; /* = slate-900 */
+  --color-content-strong: #1e293b; /* = slate-800 */
+  --color-content-body: #334155; /* = slate-700 */
   --color-content-secondary: #475569; /* = slate-600 */
-  --color-content-muted: #64748b;   /* = slate-500 */
-  --color-content-subtle: #94a3b8;  /* = slate-400 */
+  --color-content-muted: #64748b; /* = slate-500 */
+  --color-content-subtle: #94a3b8; /* = slate-400 */
 }
 
 /* Padanan mode gelap. Hanya nilainya yang berganti; nama tokennya tetap. */
@@ -54,8 +56,10 @@ html.dark {
   --color-primary-active: #5d6fa8;
 
   --color-success: #2fd5bd;
+  --color-success-hover: #38e8cf;
   --color-warning: #ffca6a;
   --color-danger: #ff8071;
+  --color-danger-hover: #ff9585;
   --color-info: #5b93f7;
   --color-secondary: #4fb8ef;
 
@@ -80,20 +84,34 @@ html.dark {
 }
 
 body {
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  transition:
+    background-color 0.2s ease-in-out,
+    color 0.2s ease-in-out;
 }
 
-.dark .markdown-body h2 { border-bottom-color: #334155; }
-.dark .markdown-body blockquote { border-left-color: #475569; color: #94a3b8; }
-.dark .markdown-body code { background-color: #1e293b; color: #e2e8f0; }
-.dark .markdown-body pre { background-color: #0f172a; color: #e2e8f0; }
+.dark .markdown-body h2 {
+  border-bottom-color: #334155;
+}
+.dark .markdown-body blockquote {
+  border-left-color: #475569;
+  color: #94a3b8;
+}
+.dark .markdown-body code {
+  background-color: #1e293b;
+  color: #e2e8f0;
+}
+.dark .markdown-body pre {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
 
 @media print {
   /* Hide everything except the element we want to print */
   body * {
     visibility: hidden;
   }
-  .print-roadmap-container, .print-roadmap-container * {
+  .print-roadmap-container,
+  .print-roadmap-container * {
     visibility: visible;
   }
   .print-roadmap-container {
@@ -105,7 +123,6 @@ body {
     overflow: visible !important;
   }
 }
-
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -124,16 +141,58 @@ body {
   display: none;
 }
 
-.markdown-body h1, .markdown-body h2, .markdown-body h3 { font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; }
-.markdown-body h1 { font-size: 1.5em; }
-.markdown-body h2 { font-size: 1.25em; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.25em; }
-.markdown-body p { margin-bottom: 1em; }
-.markdown-body ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
-.markdown-body ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
-.markdown-body blockquote { border-left: 4px solid #e5e7eb; padding-left: 1em; color: #6b7280; font-style: italic; }
-.markdown-body code { background-color: #f3f4f6; padding: 0.2em 0.4em; border-radius: 0.25em; font-family: monospace; font-size: 0.875em; }
-.markdown-body pre { background-color: #f3f4f6; padding: 1em; border-radius: 0.5em; overflow-x: auto; font-family: monospace; }
-.markdown-body pre code { background-color: transparent; padding: 0; }
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  font-weight: bold;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+.markdown-body h1 {
+  font-size: 1.5em;
+}
+.markdown-body h2 {
+  font-size: 1.25em;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.25em;
+}
+.markdown-body p {
+  margin-bottom: 1em;
+}
+.markdown-body ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+.markdown-body ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+.markdown-body blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1em;
+  color: #6b7280;
+  font-style: italic;
+}
+.markdown-body code {
+  background-color: #f3f4f6;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25em;
+  font-family: monospace;
+  font-size: 0.875em;
+}
+.markdown-body pre {
+  background-color: #f3f4f6;
+  padding: 1em;
+  border-radius: 0.5em;
+  overflow-x: auto;
+  font-family: monospace;
+}
+.markdown-body pre code {
+  background-color: transparent;
+  padding: 0;
+}
 
 /* React Grid Layout Styles */
 .react-grid-layout {
@@ -174,10 +233,18 @@ body {
   right: 0;
   cursor: se-resize;
   z-index: 20;
-}@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
 }
 .animate-shake {
   animation: shake 0.3s ease-in-out;
@@ -193,7 +260,13 @@ body {
 /* 1. Transisi bawaan untuk elemen interaktif.
  *    Durasi 150ms dengan easing standar — cukup terasa, tidak memperlambat.
  *    Dibatasi pada properti yang murah agar tidak memicu re-layout. */
-button, a, [role="button"], select, input, textarea, summary {
+button,
+a,
+[role="button"],
+select,
+input,
+textarea,
+summary {
   transition-property: color, background-color, border-color, box-shadow, opacity, transform;
   transition-duration: 150ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -204,23 +277,37 @@ button, a, [role="button"], select, input, textarea, summary {
  *    Velzon terasa "empuk". Nilai alpha diturunkan pada mode gelap karena
  *    bayangan hitam di atas permukaan gelap tidak terbaca. */
 @utility shadow-soft {
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 2px 8px rgb(15 23 42 / 0.05);
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 2px 8px rgb(15 23 42 / 0.05);
 }
 @utility shadow-soft-lg {
-  box-shadow: 0 2px 4px rgb(15 23 42 / 0.04), 0 12px 32px rgb(15 23 42 / 0.08);
+  box-shadow:
+    0 2px 4px rgb(15 23 42 / 0.04),
+    0 12px 32px rgb(15 23 42 / 0.08);
 }
 html.dark .shadow-soft {
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 2px 8px rgb(0 0 0 / 0.28);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.3),
+    0 2px 8px rgb(0 0 0 / 0.28);
 }
 html.dark .shadow-soft-lg {
-  box-shadow: 0 2px 4px rgb(0 0 0 / 0.32), 0 12px 32px rgb(0 0 0 / 0.4);
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 0.32),
+    0 12px 32px rgb(0 0 0 / 0.4);
 }
 
 /* 3. Animasi masuk dropdown & popover: memudar sambil sedikit membesar dan
  *    naik. 120ms dipilih supaya terasa responsif, bukan lamban. */
 @keyframes velzon-in {
-  from { opacity: 0; transform: scale(0.97) translateY(-4px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 @utility animate-dropdown {
   animation: velzon-in 120ms cubic-bezier(0.16, 1, 0.3, 1);
@@ -230,6 +317,16 @@ html.dark .shadow-soft-lg {
  *    ini, seluruh kehalusan di atas justru menjadi gangguan bagi sebagian
  *    orang — dan itu kegagalan aksesibilitas, bukan sekadar preferensi. */
 @media (prefers-reduced-motion: reduce) {
-  button, a, [role="button"], select, input, textarea, summary { transition-duration: 1ms; }
-  .animate-dropdown { animation: none; }
+  button,
+  a,
+  [role="button"],
+  select,
+  input,
+  textarea,
+  summary {
+    transition-duration: 1ms;
+  }
+  .animate-dropdown {
+    animation: none;
+  }
 }

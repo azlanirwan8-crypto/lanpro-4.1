@@ -3376,7 +3376,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           <div className="absolute inset-0 bg-surface-sunken/50 backdrop-blur-3xl z-[-1]" />
 
           {/* Global Top Header Bar */}
-          <header className="flex items-center justify-between w-full px-6 py-3 border-b border-border-faint dark:border-slate-800 bg-surface dark:bg-slate-900 shrink-0 pl-14 md:pl-6 text-content-strong dark:text-white transition-all z-20">
+          <header className="flex items-center justify-between w-full px-6 py-3 border-b border-border-faint bg-surface shrink-0 pl-14 md:pl-6 text-content-strong transition-all z-20">
             <div className="flex items-center gap-4 min-w-0">
               {selectedProject &&
               ![
@@ -3392,10 +3392,10 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                 "configuration",
               ].includes(currentView as string) ? (
                 <>
-                  <h2 className="text-sm md:text-lg font-medium text-content dark:text-white truncate text-ellipsis whitespace-nowrap max-w-[150px] sm:max-w-[300px] md:max-w-none">
+                  <h2 className="text-sm md:text-lg font-medium text-content truncate text-ellipsis whitespace-nowrap max-w-[150px] sm:max-w-[300px] md:max-w-none">
                     {selectedProject.name}
                   </h2>
-                  <div className="h-4 w-px bg-gray-200 dark:bg-slate-800 mx-2 shrink-0" />
+                  <div className="h-4 w-px bg-border-subtle mx-2 shrink-0" />
                   <HeaderAvatarGroup
                     allUsers={allUsers}
                     currentUserUid={currentUser?.uid || currentUser?.id}
@@ -3430,7 +3430,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               {/* Fullscreen Toggle Button */}
               <button
                 onClick={toggleFullscreen}
-                className="hidden sm:flex p-2.5 min-w-11 min-h-11 items-center justify-center text-content-subtle hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-slate-800 rounded-full transition-all items-center justify-center"
+                className="hidden sm:flex p-2.5 min-w-11 min-h-11 items-center justify-center text-content-subtle hover:text-primary hover:bg-surface-sunken rounded-full transition-all"
                 title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
               >
                 {isFullscreen ? (
@@ -3444,13 +3444,13 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               <div className="relative" ref={themeDropdownRef}>
                 <button
                   onClick={() => setIsThemeOpen(!isThemeOpen)}
-                  className="p-2.5 min-w-11 min-h-11 items-center justify-center text-content-subtle hover:text-indigo-600 hover:bg-indigo-50 dark:hover:text-indigo-400 dark:hover:bg-slate-800 rounded-full transition-all flex items-center justify-center relative"
+                  className="p-2.5 min-w-11 min-h-11 items-center justify-center text-content-subtle hover:text-primary hover:bg-surface-sunken rounded-full transition-all flex relative"
                   title="Ubah Tema"
                 >
                   {theme === "light" ? (
                     <Sun className="w-5 h-5 text-amber-500" />
                   ) : theme === "dark" ? (
-                    <Moon className="w-5 h-5 text-indigo-400" />
+                    <Moon className="w-5 h-5 text-primary" />
                   ) : (
                     <Monitor className="w-5 h-5" />
                   )}
@@ -3463,17 +3463,17 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.15, ease: "easeOut" }}
-                      className="absolute right-0 mt-2 w-36 bg-surface dark:bg-slate-800 border border-border-subtle dark:border-slate-700 rounded-xl shadow-soft-lg z-50 py-1.5 overflow-hidden origin-top-right"
+                      className="absolute right-0 mt-2 w-36 bg-surface border border-border-subtle rounded-xl shadow-soft-lg z-50 py-1.5 overflow-hidden origin-top-right"
                     >
                       <button
                         onClick={() => {
                           setTheme("light");
                           setIsThemeOpen(false);
                         }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "light" ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400" : "text-content-secondary dark:text-slate-300 hover:bg-surface-sunken dark:hover:bg-slate-700/50"}`}
+                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "light" ? "bg-primary/10 text-primary" : "text-content-secondary hover:bg-surface-sunken"}`}
                       >
                         <Sun
-                          className={`w-4 h-4 ${theme === "light" ? "text-amber-500" : "text-content-subtle dark:text-slate-500"}`}
+                          className={`w-4 h-4 ${theme === "light" ? "text-amber-500" : "text-content-subtle"}`}
                         />
                         <span>Light</span>
                       </button>
@@ -3482,10 +3482,10 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                           setTheme("dark");
                           setIsThemeOpen(false);
                         }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "dark" ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400" : "text-content-secondary dark:text-slate-300 hover:bg-surface-sunken dark:hover:bg-slate-700/50"}`}
+                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "dark" ? "bg-primary/10 text-primary" : "text-content-secondary hover:bg-surface-sunken"}`}
                       >
                         <Moon
-                          className={`w-4 h-4 ${theme === "dark" ? "text-indigo-400" : "text-content-subtle dark:text-slate-500"}`}
+                          className={`w-4 h-4 ${theme === "dark" ? "text-primary" : "text-content-subtle"}`}
                         />
                         <span>Dark</span>
                       </button>
@@ -3494,10 +3494,10 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                           setTheme("system");
                           setIsThemeOpen(false);
                         }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "system" ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400" : "text-content-secondary dark:text-slate-300 hover:bg-surface-sunken dark:hover:bg-slate-700/50"}`}
+                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "system" ? "bg-primary/10 text-primary" : "text-content-secondary hover:bg-surface-sunken"}`}
                       >
                         <Monitor
-                          className={`w-4 h-4 ${theme === "system" ? "text-indigo-600 dark:text-indigo-400" : "text-content-subtle dark:text-slate-500"}`}
+                          className={`w-4 h-4 ${theme === "system" ? "text-primary" : "text-content-subtle"}`}
                         />
                         <span>Auto</span>
                       </button>
@@ -3583,7 +3583,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -12 }}
                   transition={{ duration: 0.22, ease: "easeOut" }}
-                  className="flex-1 flex flex-col min-h-0 bg-surface-sunken dark:bg-slate-950 transition-colors duration-200"
+                  className="flex-1 flex flex-col min-h-0 bg-surface-sunken transition-colors duration-200"
                 >
                   {currentView === "issueDetail" && (
                     <div className="w-full flex-1 flex flex-col p-3 md:p-4 min-h-0 overflow-hidden bg-surface-muted text-left">

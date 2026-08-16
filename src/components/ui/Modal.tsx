@@ -41,13 +41,13 @@ export const Modal = ({
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className={`bg-surface dark:bg-slate-900 rounded-lg shadow-xl w-full ${maxWidth} overflow-hidden max-h-[90vh] flex flex-col border border-border-subtle dark:border-slate-800`}
+          className={`bg-surface rounded-lg shadow-xl w-full ${maxWidth} overflow-hidden max-h-[90vh] flex flex-col border border-border-subtle`}
         >
-          <div className="px-5 py-3.5 border-b border-border-subtle dark:border-slate-800 flex justify-between items-center shrink-0">
-            <h3 className="text-base font-medium text-content dark:text-slate-100">{title}</h3>
+          <div className="px-5 py-3.5 border-b border-border-subtle flex justify-between items-center shrink-0">
+            <h3 className="text-base font-medium text-content">{title}</h3>
             <button
               onClick={onClose}
-              className="text-content-subtle hover:text-content-secondary dark:hover:text-slate-200 p-1 rounded-md hover:bg-surface-muted dark:hover:bg-slate-800 transition-colors"
+              className="text-content-subtle hover:text-content-secondary p-1 rounded-md hover:bg-surface-muted transition-colors"
             >
               <Plus className="rotate-45 w-5 h-5" />
             </button>

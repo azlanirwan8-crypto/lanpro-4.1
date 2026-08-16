@@ -434,7 +434,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
         neutralBg: [248, 250, 252], // Slate-50
         border: [226, 232, 240], // Slate-200
         text: [51, 65, 85], // Slate-700
-        textDark: [15, 23, 42], // Slate-900
+        textHeading: [15, 23, 42], // Slate-900
         white: [255, 255, 255],
       };
 
@@ -550,7 +550,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
         doc.setFontSize(14);
         doc.setFont("Helvetica", "bold");
-        doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2]);
+        doc.setTextColor(colors.textHeading[0], colors.textHeading[1], colors.textHeading[2]);
         doc.text(m.value, x + 4, startY + 15);
 
         doc.setFontSize(6.5);
@@ -563,7 +563,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
       const progressY = startY + tileHeight + 8;
       doc.setFontSize(9.5);
       doc.setFont("Helvetica", "bold");
-      doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2]);
+      doc.setTextColor(colors.textHeading[0], colors.textHeading[1], colors.textHeading[2]);
       doc.text("PROGRES IMPLEMENTASI PROYEK", 12, progressY);
 
       const completeRate = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
@@ -585,7 +585,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
       const narrativeY = progressY + 14;
       doc.setFontSize(9);
       doc.setFont("Helvetica", "bold");
-      doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2]);
+      doc.setTextColor(colors.textHeading[0], colors.textHeading[1], colors.textHeading[2]);
       doc.text("RINGKASAN EKSEKUTIF", 12, narrativeY);
 
       doc.setFont("Helvetica", "normal");
@@ -604,7 +604,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
       const summaryTableY = narrativeY + 22;
       doc.setFontSize(9);
       doc.setFont("Helvetica", "bold");
-      doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2]);
+      doc.setTextColor(colors.textHeading[0], colors.textHeading[1], colors.textHeading[2]);
       doc.text("IKHTISAR EPIC MILESTONE", 12, summaryTableY);
 
       // Simple Table Headers
@@ -640,7 +640,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
         doc.setTextColor(colors.accent[0], colors.accent[1], colors.accent[2]);
         doc.text(epic.key || "-", 16, currentY + 5.5);
 
-        doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2]);
+        doc.setTextColor(colors.textHeading[0], colors.textHeading[1], colors.textHeading[2]);
         // Clip epic title if too long
         const epicTitle = epic.title.length > 42 ? epic.title.slice(0, 42) + "..." : epic.title;
         doc.text(epicTitle, 38, currentY + 5.5);
@@ -885,7 +885,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
         doc.text(task.key, 15, itemRowY + 5.5);
 
         // Task Title - indented slightly if row is a nested child
-        doc.setTextColor(colors.textDark[0], colors.textDark[1], colors.textDark[2]);
+        doc.setTextColor(colors.textHeading[0], colors.textHeading[1], colors.textHeading[2]);
         const titleIndent = row.isChild ? 41 : 35;
         if (row.isChild) {
           doc.setFont("Helvetica", "normal");

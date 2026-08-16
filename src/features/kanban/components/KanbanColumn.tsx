@@ -25,12 +25,12 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
     return (
       <div
         className={cn(
-          "shrink-0 flex flex-col h-full rounded-md transition-all duration-200 group/col relative bg-surface-muted/50 dark:bg-slate-900/60 border border-border-subtle/70 dark:border-slate-800",
+          "shrink-0 flex flex-col h-full rounded-md transition-all duration-200 group/col relative bg-surface-muted/50 border border-border-subtle/70",
           isCompact ? "w-[240px]" : "w-[270px]"
         )}
       >
         {showHeader && (
-          <div className="flex items-center justify-between px-3.5 py-2 border-b border-border-subtle/70 dark:border-slate-800 bg-surface dark:bg-slate-800/80 rounded-t-md shadow-2xs">
+          <div className="flex items-center justify-between px-3.5 py-2 border-b border-border-subtle/70 bg-surface rounded-t-md shadow-2xs">
             <div className="flex items-center gap-2">
               {status.icon ? (
                 <RenderIcon
@@ -44,11 +44,11 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                   style={{ backgroundColor: status.color }}
                 />
               )}
-              <span className="text-xs font-semibold uppercase tracking-wider text-content-strong dark:text-slate-200">
+              <span className="text-xs font-semibold uppercase tracking-wider text-content-strong">
                 {status.label}
               </span>
             </div>
-            <span className="bg-surface-muted dark:bg-slate-700 text-content-secondary dark:text-slate-300 px-2 py-0.5 rounded-md text-xs sm:text-[10px] font-semibold border border-border-subtle/60">
+            <span className="bg-surface-muted text-content-secondary px-2 py-0.5 rounded-md text-xs sm:text-[10px] font-semibold border border-border-subtle/60">
               {tasks.length}
             </span>
           </div>

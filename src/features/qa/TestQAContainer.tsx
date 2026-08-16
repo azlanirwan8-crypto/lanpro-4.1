@@ -36,7 +36,7 @@ export function TestQAPanel({
 }: TestQAPanelProps) {
   if (!selectedProject) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-6 bg-surface dark:bg-slate-900 rounded-md border border-border-subtle dark:border-slate-800 shadow-soft max-w-lg mx-auto mt-12">
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-6 bg-surface rounded-md border border-border-subtle shadow-soft max-w-lg mx-auto mt-12">
         <div className="p-4 bg-indigo-50 text-indigo-600 rounded-full mb-4 animate-bounce">
           <ShieldAlert className="w-8 h-8" />
         </div>

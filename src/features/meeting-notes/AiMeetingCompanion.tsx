@@ -739,7 +739,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   return (
     <div className="w-full flex flex-col bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">
       {/* Companion Header Banner */}
-      <div className="p-4 sm:p-5 bg-gradient-to-r from-[#1a233a] via-primary to-[#283863] text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
+      <div className="p-4 sm:p-5 bg-gradient-to-r from-primary-active via-primary to-primary-hover text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
         <div className="flex items-center gap-3">
           <span className="p-2.5 bg-surface/10 border border-white/15 rounded-lg text-indigo-200 shadow-2xs">
             <Cpu className="w-5 h-5 animate-pulse" />
@@ -1776,7 +1776,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
       {/* Continuous Learning Loop Feedback Modal */}
       {showFeedbackModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-surface rounded-lg max-w-lg w-full overflow-hidden shadow-xl border border-border-subtle dark:border-slate-800 transform transition-all scale-100">
+          <div className="bg-surface rounded-lg max-w-lg w-full overflow-hidden shadow-xl border border-border-subtle transform transition-all scale-100">
             {/* Modal Header */}
             <div className="p-6 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between">
               <div className="flex items-center gap-3">

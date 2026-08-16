@@ -131,7 +131,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
       <div className="flex justify-between items-start">
         <div className="space-y-2 flex-1 pr-4">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-base font-medium text-content-strong dark:text-slate-100">
+            <h2 className="text-base font-medium text-content-strong">
               Daily Broadcast Live Monitor
             </h2>
             <span className="relative flex h-2.5 w-2.5">
@@ -145,11 +145,9 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
               <span className="text-content-muted font-medium">
                 Kirim Hari Ini: {successCount}/{totalCount} Berhasil
               </span>
-              <span className="text-content-body dark:text-slate-200 font-medium">
-                {progressPercent}%
-              </span>
+              <span className="text-content-body font-medium">{progressPercent}%</span>
             </div>
-            <div className="w-full bg-surface-muted dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div className="w-full bg-surface-muted rounded-full h-1.5 overflow-hidden">
               <div
                 className="bg-gradient-to-r from-emerald-400 to-emerald-500 h-1.5 rounded-full transition-all duration-1000 ease-out"
                 style={{ width: `${progressPercent}%` }}
@@ -160,7 +158,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
 
         <button
           onClick={() => setIsPreviewOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100 rounded-md text-xs font-medium transition border border-indigo-100 dark:border-indigo-900 shadow-xs"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary hover:bg-primary/15 rounded-md text-xs font-medium transition border border-primary/20 shadow-xs"
         >
           <Eye size={14} />
           Preview Template
@@ -168,9 +166,9 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
       </div>
 
       {/* List container scroll max 6 data */}
-      <div className="max-h-[315px] overflow-y-auto pr-1.5 custom-scrollbar relative rounded-md border border-border-faint dark:border-slate-800/80 p-1.5 bg-surface-sunken/30 dark:bg-slate-900/20">
+      <div className="max-h-[315px] overflow-y-auto pr-1.5 custom-scrollbar relative rounded-md border border-border-faint p-1.5 bg-surface-sunken/30">
         {loading && (
-          <div className="absolute inset-0 bg-surface/50 dark:bg-slate-900/50 backdrop-blur-xs flex items-center justify-center z-10 rounded-md">
+          <div className="absolute inset-0 bg-surface/50 backdrop-blur-xs flex items-center justify-center z-10 rounded-md">
             <Loader2 className="w-5 h-5 text-emerald-500 animate-spin" />
           </div>
         )}
@@ -183,26 +181,20 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
             return (
               <div
                 key={item.id}
-                className={`flex items-center justify-between p-2 px-3 bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-800 rounded-md transition-all duration-200 hover:shadow-xs ${
-                  isWhatsApp
-                    ? "hover:border-emerald-300 dark:hover:border-emerald-800"
-                    : "hover:border-blue-300 dark:hover:border-blue-800"
+                className={`flex items-center justify-between p-2 px-3 bg-surface border border-border-subtle rounded-md transition-all duration-200 hover:shadow-xs ${
+                  isWhatsApp ? "hover:border-success" : "hover:border-info"
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   <div
                     className={`p-1.5 rounded-full transition-colors ${
-                      isWhatsApp
-                        ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400"
-                        : "bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400"
+                      isWhatsApp ? "bg-success/10 text-success" : "bg-info/10 text-info"
                     }`}
                   >
                     {isWhatsApp ? <MessageSquare size={14} /> : <Mail size={14} />}
                   </div>
                   <div>
-                    <div className="font-medium text-content-strong dark:text-slate-100 text-xs">
-                      {item.name}
-                    </div>
+                    <div className="font-medium text-content-strong text-xs">{item.name}</div>
                     <div className="text-xs sm:text-[11px] text-content-subtle font-normal">
                       {item.time}
                     </div>
@@ -213,10 +205,10 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
                   <span
                     className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[11px] font-medium transition-all ${
                       item.status === "success"
-                        ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
+                        ? "bg-success/10 text-success"
                         : item.status === "pending"
-                          ? "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400"
-                          : "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
+                          ? "bg-warning/10 text-warning"
+                          : "bg-danger/10 text-danger"
                     }`}
                   >
                     {item.status === "success" ? (
@@ -238,7 +230,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
                     <button
                       onClick={() => handleManualRetry(item.id)}
                       disabled={isRetrying}
-                      className="p-1 text-content-subtle hover:text-content-body dark:hover:text-slate-200 hover:bg-surface-muted dark:hover:bg-slate-800 rounded-md transition-all disabled:opacity-50"
+                      className="p-1 text-content-subtle hover:text-content-body hover:bg-surface-muted rounded-md transition-all disabled:opacity-50"
                       title="Retry Broadcast"
                     >
                       <RotateCcw
@@ -258,15 +250,15 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
       {/* Preview Modal */}
       {isPreviewOpen && (
         <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 rounded-lg transition-all">
-          <div className="bg-surface dark:bg-slate-900 rounded-lg shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[85vh] border border-border-subtle dark:border-slate-800">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle dark:border-slate-800 shrink-0">
-              <h3 className="font-medium text-sm text-content-strong dark:text-slate-100 flex items-center gap-2">
+          <div className="bg-surface rounded-lg shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[85vh] border border-border-subtle">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle shrink-0">
+              <h3 className="font-medium text-sm text-content-strong flex items-center gap-2">
                 <Eye size={16} className="text-indigo-500" />
                 Template Preview
               </h3>
               <button
                 onClick={() => setIsPreviewOpen(false)}
-                className="text-content-subtle hover:text-content-secondary dark:hover:text-slate-200 hover:bg-surface-muted dark:hover:bg-slate-800 p-1 rounded-md transition-colors"
+                className="text-content-subtle hover:text-content-secondary hover:bg-surface-muted p-1 rounded-md transition-colors"
               >
                 <X size={16} />
               </button>

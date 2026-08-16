@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  XCircle, Search, CheckCircle2, Bug, ChevronDown
-} from "lucide-react";
+import { XCircle, Search, CheckCircle2, Bug, ChevronDown } from "lucide-react";
 import { QATestCase } from "../../features/qa/types";
 
 interface CreateBugTicketModalProps {
@@ -85,7 +83,9 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
                 <Bug className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-medium text-content-strong">Buat Tiket Bug Terstruktur</h3>
+                <h3 className="text-base font-medium text-content-strong">
+                  Buat Tiket Bug Terstruktur
+                </h3>
                 <p className="text-xs sm:text-[11px] text-content-muted font-medium">
                   Dibuat dari Test Case #{testCase.rowNum}
                 </p>
@@ -168,9 +168,12 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
                             }`}
                           >
                             <span className="truncate">
-                              [{pt.key || pt.taskKey || (pt.type ? pt.type.toUpperCase() : "TASK")}] {pt.title}
+                              [{pt.key || pt.taskKey || (pt.type ? pt.type.toUpperCase() : "TASK")}]{" "}
+                              {pt.title}
                             </span>
-                            {selectedParentId === pt.id && <CheckCircle2 className="w-4 h-4 text-danger shrink-0" />}
+                            {selectedParentId === pt.id && (
+                              <CheckCircle2 className="w-4 h-4 text-danger shrink-0" />
+                            )}
                           </div>
                         ))
                       )}
@@ -239,7 +242,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
               <button
                 type="submit"
                 disabled={isSubmitting || !selectedParentId}
-                className="flex-1 py-3 bg-danger hover:bg-[#d95338] text-white text-xs font-medium rounded-md uppercase tracking-wider cursor-pointer shadow-xs flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
+                className="flex-1 py-3 bg-danger hover:bg-danger-hover text-white text-xs font-medium rounded-md uppercase tracking-wider cursor-pointer shadow-xs flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
               >
                 <Bug className="w-4 h-4" />
                 <span>{isSubmitting ? "Menyimpan Tiket..." : "SIMPAN & TAUTKAN BUG"}</span>

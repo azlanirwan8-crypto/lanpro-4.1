@@ -18,14 +18,14 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
 
   return (
     <div className="space-y-0.5">
-      <label className="text-xs font-medium text-content-body dark:text-slate-300">{label}</label>
+      <label className="text-xs font-medium text-content-body">{label}</label>
       <div className="relative">
         <input
           type={showPassword ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full pl-3 pr-10 py-1.5 border border-border-subtle dark:border-slate-700 rounded-md text-xs font-medium text-content-strong dark:text-slate-100 bg-surface dark:bg-slate-900 focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
+          className="w-full pl-3 pr-10 py-1.5 border border-border-subtle rounded-md text-xs font-medium text-content-strong bg-surface focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition"
         />
         <button
           type="button"

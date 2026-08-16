@@ -135,7 +135,7 @@ const getStatusClasses = (val: string) => {
     normalized.includes("rencana") ||
     normalized.includes("backlog")
   ) {
-    return "bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100 dark:bg-sky-950/30 dark:text-sky-400 dark:border-sky-900";
+    return "bg-info/10 text-info border-info/20 hover:bg-info/15";
   }
   if (
     normalized.includes("in progress") ||
@@ -144,7 +144,7 @@ const getStatusClasses = (val: string) => {
     normalized.includes("progress") ||
     normalized.includes("uji")
   ) {
-    return "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900";
+    return "bg-warning/10 text-warning border-warning/20 hover:bg-warning/15";
   }
   if (
     normalized.includes("done") ||
@@ -153,9 +153,9 @@ const getStatusClasses = (val: string) => {
     normalized.includes("closed") ||
     normalized.includes("ready")
   ) {
-    return "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900";
+    return "bg-success/10 text-success border-success/20 hover:bg-success/15";
   }
-  return "bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100 dark:bg-violet-950/30 dark:text-violet-400 dark:border-violet-900";
+  return "bg-primary/10 text-primary border-primary/20 hover:bg-primary/15";
 };
 
 const getPriorityClasses = (val: string) => {
@@ -167,15 +167,15 @@ const getPriorityClasses = (val: string) => {
     normalized.includes("tinggi") ||
     normalized.includes("mendesak")
   ) {
-    return "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900";
+    return "bg-danger/10 text-danger border-danger/20 hover:bg-danger/15";
   }
   if (normalized.includes("medium") || normalized.includes("sedang")) {
-    return "bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-900";
+    return "bg-warning/10 text-warning border-warning/20 hover:bg-warning/15";
   }
   if (normalized.includes("low") || normalized.includes("rendah")) {
-    return "bg-surface-muted text-content-body border-border-subtle hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
+    return "bg-surface-muted text-content-body border-border-subtle hover:bg-surface-sunken";
   }
-  return "bg-surface-sunken text-content-secondary border-border-subtle hover:bg-surface-muted dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
+  return "bg-surface-sunken text-content-secondary border-border-subtle hover:bg-surface-muted";
 };
 
 export const StyledDropdown = ({

@@ -103,7 +103,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 className="flex flex-col"
               >
                 <span className={styles.logoText}>LANPRO</span>
-                <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-[#878a99] tracking-widest uppercase -mt-1">
+                <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-subtle tracking-widest uppercase -mt-1">
                   Project Management
                 </span>
               </motion.div>
@@ -165,13 +165,15 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
               <div
                 className={cn(
                   styles.indicator,
-                  selectedProject?.id === p.id ? "bg-amber-400 scale-125 shadow-xs" : "bg-[#878a99]"
+                  selectedProject?.id === p.id
+                    ? "bg-amber-400 scale-125 shadow-xs"
+                    : "bg-content-subtle"
                 )}
               />
               {!isSidebarCollapsed && (
                 <>
                   <span className="truncate flex-1 text-left text-xs font-medium">{p.name}</span>
-                  <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded bg-black/20 text-[#abb9e8]">
+                  <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded bg-black/20 text-primary">
                     {p.key}
                   </span>
                 </>
@@ -222,7 +224,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
             <React.Fragment key={section.id}>
               {!isSidebarCollapsed && (
                 <div className="flex items-center justify-between px-3 mt-5 mb-1.5">
-                  <div className="text-xs sm:text-[11px] font-medium text-[#878a99] uppercase tracking-wider">
+                  <div className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider">
                     {section.title}
                   </div>
                 </div>
@@ -310,9 +312,9 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
       </nav>
 
       {/* Velzon Bottom User Profile Footer */}
-      <div className="p-3 border-t border-[#364574] bg-[#364574]/40 mt-auto relative">
+      <div className="p-3 border-t border-border-subtle bg-border-subtle/40 mt-auto relative">
         {isUserMenuOpen && (
-          <div className="absolute bottom-full left-3 right-3 mb-2 bg-[#2a3447] border border-[#364574] rounded-xl shadow-2xl py-1.5 z-50 text-white animate-in fade-in zoom-in-95 duration-150">
+          <div className="absolute bottom-full left-3 right-3 mb-2 bg-surface-raised border border-border-subtle rounded-xl shadow-2xl py-1.5 z-50 text-white animate-in fade-in zoom-in-95 duration-150">
             <button
               onClick={() => {
                 setIsUserMenuOpen(false);
@@ -323,7 +325,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
               <User className="w-4 h-4 text-amber-400" />
               <span>Profil Anda</span>
             </button>
-            <div className="h-px bg-[#364574] my-1" />
+            <div className="h-px bg-border-subtle my-1" />
             <button
               onClick={() => {
                 setIsUserMenuOpen(false);
@@ -356,7 +358,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 <div className="text-xs font-medium text-white truncate">
                   {user?.displayName || currentUser?.displayName || currentUser?.username || "User"}
                 </div>
-                <div className="text-xs sm:text-[10px] text-[#878a99] truncate font-mono">
+                <div className="text-xs sm:text-[10px] text-content-subtle truncate font-mono">
                   {currentUser?.username || "admin"}
                 </div>
               </div>

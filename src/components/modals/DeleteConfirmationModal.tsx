@@ -30,7 +30,9 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
         >
           <Trash2 className="w-10 h-10 text-danger mx-auto" />
           <div>
-            <h3 className="text-sm font-medium text-content-strong uppercase tracking-wider">{title}</h3>
+            <h3 className="text-sm font-medium text-content-strong uppercase tracking-wider">
+              {title}
+            </h3>
             <p className="text-xs text-content-muted mt-1">
               Apakah Anda yakin ingin menghapus <strong>{itemName}</strong>?
             </p>
@@ -44,7 +46,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
             </button>
             <button
               onClick={onConfirm}
-              className="flex-1 py-2.5 bg-danger hover:bg-[#d95338] text-white text-xs font-medium rounded-md cursor-pointer shadow-xs transition-colors"
+              className="flex-1 py-2.5 bg-danger hover:bg-danger-hover text-white text-xs font-medium rounded-md cursor-pointer shadow-xs transition-colors"
             >
               Ya, Hapus
             </button>

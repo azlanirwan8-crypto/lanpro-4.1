@@ -349,7 +349,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                   />
                   <button
                     type="submit"
-                    className="p-2 bg-primary hover:bg-[#354473] text-white rounded-md transition-colors cursor-pointer shadow-2xs"
+                    className="p-2 bg-primary hover:bg-primary-hover text-white rounded-md transition-colors cursor-pointer shadow-2xs"
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -361,7 +361,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                 <div className="pt-2 border-t border-border-faint">
                   <button
                     onClick={() => handleOpenCreateBugModal(selectedTestCase)}
-                    className="w-full py-2 bg-danger hover:bg-[#d95338] text-white font-medium rounded-md text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
+                    className="w-full py-2 bg-danger hover:bg-danger-hover text-white font-medium rounded-md text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
                   >
                     <Bug className="w-4 h-4" />
                     <span>Buat Tiket Bug dari Test Case Ini</span>

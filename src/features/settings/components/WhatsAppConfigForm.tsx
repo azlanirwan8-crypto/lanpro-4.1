@@ -120,14 +120,10 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
 
       {isTestModalOpen && (
         <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 rounded-lg">
-          <div className="bg-surface dark:bg-slate-900 p-5 rounded-lg shadow-xl max-w-sm w-full space-y-3 border border-border-subtle dark:border-slate-800">
-            <h3 className="font-medium text-sm text-content-strong dark:text-slate-100">
-              Uji Coba Koneksi
-            </h3>
+          <div className="bg-surface p-5 rounded-lg shadow-xl max-w-sm w-full space-y-3 border border-border-subtle">
+            <h3 className="font-medium text-sm text-content-strong">Uji Coba Koneksi</h3>
             <div className="space-y-1">
-              <label className="text-xs text-content-muted dark:text-slate-400">
-                Nomor Tujuan (Format: 628xxx)
-              </label>
+              <label className="text-xs text-content-muted">Nomor Tujuan (Format: 628xxx)</label>
               <input
                 value={testTargetNumber}
                 onChange={(e) => setTestTargetNumber(e.target.value)}
@@ -138,7 +134,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
             <div className="flex gap-2 justify-end pt-2">
               <button
                 onClick={() => setIsTestModalOpen(false)}
-                className="px-3 py-1.5 rounded-md text-content-secondary dark:text-slate-300 text-xs font-medium hover:bg-surface-muted dark:hover:bg-slate-800 transition-colors"
+                className="px-3 py-1.5 rounded-md text-content-secondary text-xs font-medium hover:bg-surface-muted transition-colors"
               >
                 Batal
               </button>
