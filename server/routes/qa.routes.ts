@@ -7,6 +7,7 @@ import multer from "multer";
 import { validateFileBuffer, sanitizeFilename } from "../../src/lib/fileSecurity";
 import db from "../../src/lib/db";
 import { verifyProjectAccess } from "../middleware/rbac";
+import { jagaProyek } from "../middleware/jagaProyek";
 import { generateContentWithFallback } from "../services/ai.service";
 import { simpanBerkas } from "../services/storage.service";
 import {
@@ -394,11 +395,14 @@ export function setupQARoutes(
   // DELETE: Remove QA Test Suite and related Test Cases
   app.delete(
     "/api/projects/:projectId/qa-test-suites/:id",
-    // #66 — dulu `["*"]`, yang sesudah #49 berarti anggota proyek dengan peran
-    // APA PUN — termasuk `viewer` — bisa menghapus. Penghapusan suite bahkan
-    // berjenjang: seluruh test case di dalamnya ikut terhapus. Ketetapan
-    // pemilik proyek 16 Agu 2026: dibatasi admin/manager/head.
-    verifyProjectAccess(["admin", "manager", "head"]),
+    // #66 — dulu wildcard, yang sesudah #49 berarti anggota proyek dengan peran
+    // APA PUN, termasuk Viewer, bisa menghapus. Penghapusan suite bahkan
+    // berjenjang: seluruh test case di dalamnya ikut terhapus.
+    //
+    // Sekarang dijaga matriks (§19.8 tahap 4): modul `qa`, aksi `D`. Menurut
+    // §19.5 itu berarti Owner, Project Admin, Project Manager, dan QA — QA
+    // karena `qa` adalah wilayah kuasanya.
+    jagaProyek("qa", "D"),
     async (req, res) => {
       let connection;
       try {
@@ -961,11 +965,14 @@ export function setupQARoutes(
   // DELETE: Remove QA Test Case
   app.delete(
     "/api/projects/:projectId/qa-test-cases/:id",
-    // #66 — dulu `["*"]`, yang sesudah #49 berarti anggota proyek dengan peran
-    // APA PUN — termasuk `viewer` — bisa menghapus. Penghapusan suite bahkan
-    // berjenjang: seluruh test case di dalamnya ikut terhapus. Ketetapan
-    // pemilik proyek 16 Agu 2026: dibatasi admin/manager/head.
-    verifyProjectAccess(["admin", "manager", "head"]),
+    // #66 — dulu wildcard, yang sesudah #49 berarti anggota proyek dengan peran
+    // APA PUN, termasuk Viewer, bisa menghapus. Penghapusan suite bahkan
+    // berjenjang: seluruh test case di dalamnya ikut terhapus.
+    //
+    // Sekarang dijaga matriks (§19.8 tahap 4): modul `qa`, aksi `D`. Menurut
+    // §19.5 itu berarti Owner, Project Admin, Project Manager, dan QA — QA
+    // karena `qa` adalah wilayah kuasanya.
+    jagaProyek("qa", "D"),
     async (req, res) => {
       let connection;
       try {

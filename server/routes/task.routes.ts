@@ -21,6 +21,7 @@ import {
   validateTimelineBoundaries,
   checkUserPermissionBackend,
 } from "../services/task.service";
+import { jagaProyek } from "../middleware/jagaProyek";
 
 const router = express.Router();
 
@@ -428,9 +429,7 @@ router.post(
         for (const att of attachments) {
           const urlLampiran = att.url || "";
           const namaTersimpan =
-            urlLampiran.split("?")[0].split("/").filter(Boolean).pop() ||
-            att.name ||
-            "lampiran";
+            urlLampiran.split("?")[0].split("/").filter(Boolean).pop() || att.name || "lampiran";
 
           await connection.query(
             `INSERT INTO Attachments (id, taskId, filename, name, url, fileType, uploadedByName, createdAt)
@@ -1201,7 +1200,7 @@ router.put(
 router.delete(
   "/api/projects/:projectId/tasks/:id",
   authenticateJWT,
-  verifyProjectAccess(["admin", "manager", "head", "developer", "member"]),
+  jagaProyek("list", "D"),
   async (req, res) => {
     let connection;
     try {
@@ -1605,36 +1604,40 @@ router.post(
 // Bukan kebijakan baru: pasangan POST-nya di baris 1530 sudah memakai daftar
 // peran di bawah ini. Yang dilakukan di sini cuma memulihkan penjaga yang hilang
 // agar membuat dan menghapus tautan tunduk pada aturan yang sama.
-router.delete("/api/projects/:projectId/tasks/:taskId/links/:linkId", verifyProjectAccess(["admin", "manager", "head", "developer", "member"]), async (req, res) => {
-  let connection;
-  try {
-    const { taskId, linkId } = req.params;
-    connection = await db.getConnection();
+router.delete(
+  "/api/projects/:projectId/tasks/:taskId/links/:linkId",
+  jagaProyek("list", "D"),
+  async (req, res) => {
+    let connection;
+    try {
+      const { taskId, linkId } = req.params;
+      connection = await db.getConnection();
 
-    // Get targetTaskId first
-    const [linkRows] = await connection.query("SELECT * FROM LinkedTasks WHERE id = ?", [linkId]);
-    if ((linkRows as any[]).length > 0) {
-      const link = (linkRows as any[])[0];
-      // Delete original link
-      await connection.query("DELETE FROM LinkedTasks WHERE id = ?", [linkId]);
-      // Delete inverse link
-      await connection.query(
-        "DELETE FROM LinkedTasks WHERE sourceTaskId = ? AND targetTaskId = ?",
-        [link.targetTaskId, link.sourceTaskId]
+      // Get targetTaskId first
+      const [linkRows] = await connection.query("SELECT * FROM LinkedTasks WHERE id = ?", [linkId]);
+      if ((linkRows as any[]).length > 0) {
+        const link = (linkRows as any[])[0];
+        // Delete original link
+        await connection.query("DELETE FROM LinkedTasks WHERE id = ?", [linkId]);
+        // Delete inverse link
+        await connection.query(
+          "DELETE FROM LinkedTasks WHERE sourceTaskId = ? AND targetTaskId = ?",
+          [link.targetTaskId, link.sourceTaskId]
+        );
+      }
+
+      res.json({ status: "success", message: "Task link deleted" });
+    } catch (error: any) {
+      console.error(
+        "LOG ANOMALI CRITICAL: DELETE /api/projects/:projectId/tasks/:taskId/links/:linkId error:",
+        error
       );
+      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    } finally {
+      if (connection) connection.release();
     }
-
-    res.json({ status: "success", message: "Task link deleted" });
-  } catch (error: any) {
-    console.error(
-      "LOG ANOMALI CRITICAL: DELETE /api/projects/:projectId/tasks/:taskId/links/:linkId error:",
-      error
-    );
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
   }
-});
+);
 
 // Documents API
 

@@ -3,6 +3,7 @@ import crypto from "crypto";
 import db from "../../src/lib/db";
 import { buatProyekDemoBni } from "../services/demo-seed.service";
 import { authenticateJWT, verifyGlobalAdmin } from "../middleware/auth";
+import { jagaHapusProyek } from "../middleware/jagaProyek";
 import { verifyProjectAccess } from "../middleware/rbac";
 import { createAuditLog } from "../services/audit.service";
 import { adalahTabelTidakAda } from "../helpers/pgErrors";
@@ -428,111 +429,107 @@ router.post(
   }
 );
 
-router.delete(
-  "/api/projects/:projectId",
-  verifyProjectAccess(["admin", "head"]),
-  async (req, res) => {
-    let connection;
-    try {
-      const { projectId } = req.params;
-      connection = await db.getConnection();
+router.delete("/api/projects/:projectId", jagaHapusProyek(), async (req, res) => {
+  let connection;
+  try {
+    const { projectId } = req.params;
+    connection = await db.getConnection();
 
-      await connection.beginTransaction();
+    await connection.beginTransaction();
 
-      const cascadeQueries: [string, any[]][] = [
-        [
-          "DELETE FROM LinkedTasks WHERE sourceTaskId IN (SELECT id FROM Tasks WHERE projectId = ?) OR targetTaskId IN (SELECT id FROM Tasks WHERE projectId = ?)",
-          [projectId, projectId],
-        ],
-        [
-          "DELETE FROM Comments WHERE taskId IN (SELECT id FROM Tasks WHERE projectId = ?)",
-          [projectId],
-        ],
-        [
-          "DELETE FROM Attachments WHERE taskId IN (SELECT id FROM Tasks WHERE projectId = ?)",
-          [projectId],
-        ],
-        [
-          "DELETE FROM TaskExternalLinks WHERE taskId IN (SELECT id FROM Tasks WHERE projectId = ?)",
-          [projectId],
-        ],
-        [
-          "DELETE FROM TaskCustomFields WHERE taskId IN (SELECT id FROM Tasks WHERE projectId = ?)",
-          [projectId],
-        ],
-        [
-          "DELETE FROM DiscussionPoints WHERE meetingId IN (SELECT id FROM Meetings WHERE projectId = ?)",
-          [projectId],
-        ],
-        [
-          "DELETE FROM MilestoneSprints WHERE milestoneId IN (SELECT id FROM Milestones WHERE projectId = ?)",
-          [projectId],
-        ],
-        [
-          "DELETE FROM meeting_details WHERE meeting_id IN (SELECT id FROM Meetings WHERE projectId = ?)",
-          [projectId],
-        ],
-        ["DELETE FROM QATestCaseExecutionLogs WHERE projectId = ?", [projectId]],
-        ["DELETE FROM Tasks WHERE projectId = ?", [projectId]],
-        ["DELETE FROM Sprints WHERE projectId = ?", [projectId]],
-        ["DELETE FROM ProjectMembers WHERE projectId = ?", [projectId]],
-        ["DELETE FROM ProjectInvites WHERE projectId = ?", [projectId]],
-        ["DELETE FROM Meetings WHERE projectId = ?", [projectId]],
-        ["DELETE FROM Milestones WHERE projectId = ?", [projectId]],
-        ["DELETE FROM Documents WHERE projectId = ?", [projectId]],
-        ["DELETE FROM ActivityLogs WHERE projectId = ?", [projectId]],
-        ["DELETE FROM AuditLogs WHERE projectId = ?", [projectId]],
-        ["DELETE FROM QATestCases WHERE projectId = ?", [projectId]],
-        ["DELETE FROM QATestSuites WHERE projectId = ?", [projectId]],
-        ["DELETE FROM ProjectModules WHERE projectId = ?", [projectId]],
-        ["DELETE FROM Projects WHERE id = ?", [projectId]],
-      ];
+    const cascadeQueries: [string, any[]][] = [
+      [
+        "DELETE FROM LinkedTasks WHERE sourceTaskId IN (SELECT id FROM Tasks WHERE projectId = ?) OR targetTaskId IN (SELECT id FROM Tasks WHERE projectId = ?)",
+        [projectId, projectId],
+      ],
+      [
+        "DELETE FROM Comments WHERE taskId IN (SELECT id FROM Tasks WHERE projectId = ?)",
+        [projectId],
+      ],
+      [
+        "DELETE FROM Attachments WHERE taskId IN (SELECT id FROM Tasks WHERE projectId = ?)",
+        [projectId],
+      ],
+      [
+        "DELETE FROM TaskExternalLinks WHERE taskId IN (SELECT id FROM Tasks WHERE projectId = ?)",
+        [projectId],
+      ],
+      [
+        "DELETE FROM TaskCustomFields WHERE taskId IN (SELECT id FROM Tasks WHERE projectId = ?)",
+        [projectId],
+      ],
+      [
+        "DELETE FROM DiscussionPoints WHERE meetingId IN (SELECT id FROM Meetings WHERE projectId = ?)",
+        [projectId],
+      ],
+      [
+        "DELETE FROM MilestoneSprints WHERE milestoneId IN (SELECT id FROM Milestones WHERE projectId = ?)",
+        [projectId],
+      ],
+      [
+        "DELETE FROM meeting_details WHERE meeting_id IN (SELECT id FROM Meetings WHERE projectId = ?)",
+        [projectId],
+      ],
+      ["DELETE FROM QATestCaseExecutionLogs WHERE projectId = ?", [projectId]],
+      ["DELETE FROM Tasks WHERE projectId = ?", [projectId]],
+      ["DELETE FROM Sprints WHERE projectId = ?", [projectId]],
+      ["DELETE FROM ProjectMembers WHERE projectId = ?", [projectId]],
+      ["DELETE FROM ProjectInvites WHERE projectId = ?", [projectId]],
+      ["DELETE FROM Meetings WHERE projectId = ?", [projectId]],
+      ["DELETE FROM Milestones WHERE projectId = ?", [projectId]],
+      ["DELETE FROM Documents WHERE projectId = ?", [projectId]],
+      ["DELETE FROM ActivityLogs WHERE projectId = ?", [projectId]],
+      ["DELETE FROM AuditLogs WHERE projectId = ?", [projectId]],
+      ["DELETE FROM QATestCases WHERE projectId = ?", [projectId]],
+      ["DELETE FROM QATestSuites WHERE projectId = ?", [projectId]],
+      ["DELETE FROM ProjectModules WHERE projectId = ?", [projectId]],
+      ["DELETE FROM Projects WHERE id = ?", [projectId]],
+    ];
 
-      // #62 — melewati tabel yang tidak ada, dengan cara yang benar-benar bisa
-      // bekerja di PostgreSQL.
-      //
-      // Versi sebelumnya memeriksa `ER_NO_SUCH_TABLE`/`ER_BAD_TABLE_ERROR`
-      // (kode MySQL, tidak pernah diterbitkan Postgres) lalu `continue`. Dua-duanya
-      // keliru: kodenya tak pernah cocok, DAN `continue` memang mustahil di sini —
-      // di Postgres satu galat membatalkan SELURUH transaksi, sehingga perintah
-      // berikutnya pasti gagal dengan "current transaction is aborted".
-      //
-      // SAVEPOINT menyelesaikan keduanya: tiap perintah dibatasi titik pulihnya
-      // sendiri, jadi melewati satu tabel yang hilang tidak ikut menjatuhkan
-      // 21 penghapusan lainnya.
-      for (const [query, params] of cascadeQueries) {
-        await connection.query("SAVEPOINT hapus_bertingkat");
-        try {
-          await connection.query(query, params);
-          await connection.query("RELEASE SAVEPOINT hapus_bertingkat");
-        } catch (execError: any) {
-          await connection.query("ROLLBACK TO SAVEPOINT hapus_bertingkat");
-          if (adalahTabelTidakAda(execError)) {
-            console.warn(`[HAPUS PROYEK] Melewati tabel yang tidak ada: ${query.substring(0, 60)}`);
-            continue;
-          }
-          throw execError;
+    // #62 — melewati tabel yang tidak ada, dengan cara yang benar-benar bisa
+    // bekerja di PostgreSQL.
+    //
+    // Versi sebelumnya memeriksa `ER_NO_SUCH_TABLE`/`ER_BAD_TABLE_ERROR`
+    // (kode MySQL, tidak pernah diterbitkan Postgres) lalu `continue`. Dua-duanya
+    // keliru: kodenya tak pernah cocok, DAN `continue` memang mustahil di sini —
+    // di Postgres satu galat membatalkan SELURUH transaksi, sehingga perintah
+    // berikutnya pasti gagal dengan "current transaction is aborted".
+    //
+    // SAVEPOINT menyelesaikan keduanya: tiap perintah dibatasi titik pulihnya
+    // sendiri, jadi melewati satu tabel yang hilang tidak ikut menjatuhkan
+    // 21 penghapusan lainnya.
+    for (const [query, params] of cascadeQueries) {
+      await connection.query("SAVEPOINT hapus_bertingkat");
+      try {
+        await connection.query(query, params);
+        await connection.query("RELEASE SAVEPOINT hapus_bertingkat");
+      } catch (execError: any) {
+        await connection.query("ROLLBACK TO SAVEPOINT hapus_bertingkat");
+        if (adalahTabelTidakAda(execError)) {
+          console.warn(`[HAPUS PROYEK] Melewati tabel yang tidak ada: ${query.substring(0, 60)}`);
+          continue;
         }
+        throw execError;
       }
-
-      await connection.commit();
-
-      res.json({
-        status: "success",
-        message: "Proyek berhasil dihapus beserta seluruh dependensinya.",
-      });
-    } catch (error: any) {
-      if (connection) await connection.rollback();
-      console.error("LOG ANOMALI CRITICAL: DELETE /api/projects error:", error);
-      return res.status(500).json({
-        status: "error",
-        message: "Gagal menghapus proyek akibat kendala integritas database.",
-      });
-    } finally {
-      if (connection) connection.release();
     }
+
+    await connection.commit();
+
+    res.json({
+      status: "success",
+      message: "Proyek berhasil dihapus beserta seluruh dependensinya.",
+    });
+  } catch (error: any) {
+    if (connection) await connection.rollback();
+    console.error("LOG ANOMALI CRITICAL: DELETE /api/projects error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Gagal menghapus proyek akibat kendala integritas database.",
+    });
+  } finally {
+    if (connection) connection.release();
   }
-);
+});
 
 // Project Members & Invites API
 router.put("/api/projects/:id/members", authenticateJWT, verifyGlobalAdmin, async (req, res) => {

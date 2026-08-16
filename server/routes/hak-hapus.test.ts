@@ -36,16 +36,30 @@ const BERKAS = [
  */
 const penjagaRuteHapus = (isi: string): { rute: string; penjaga: string }[] => {
   const hasil: { rute: string; penjaga: string }[] = [];
-  const re = /(?:app|router)\.delete\(\s*(["'])([^"']+)\1([\s\S]{0,400}?)async/g;
+  const re = /(?:app|router)\.delete\(\s*(["'])([^"']+)\1([\s\S]{0,900}?)async/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(isi)) !== null) {
+    // Jendelanya sempat 400 karakter, dan itu DIAM-DIAM menjatuhkan dua rute
+    // DELETE QA dari pemeriksaan begitu komentar penjelasnya diperpanjang:
+    // rutenya tidak dilaporkan longgar, ia hilang sama sekali dari himpunan.
+    // Test yang memeriksa himpunan wajib memastikan himpunannya utuh dulu.
     const rute = m[2];
     const sesudahnya = m[3];
     const penjaga = sesudahnya.match(/verifyProjectAccess\(\[[^\]]*\]\)/);
+    // Penjaga matriks (§19.8 tahap 4) menggantikan daftar peran. Pengurai ini
+    // wajib mengenalinya, kalau tidak rute yang SUDAH dijaga akan terbaca
+    // "TANPA PENJAGA" — kebalikan dari yang seharusnya dilaporkan.
+    const matriks = sesudahnya.match(/jaga(?:Proyek|HapusProyek)\([^)]*\)/);
     const global = /verifyGlobalAdmin/.test(sesudahnya);
     hasil.push({
       rute,
-      penjaga: penjaga ? penjaga[0] : global ? "verifyGlobalAdmin" : "TANPA PENJAGA",
+      penjaga: matriks
+        ? matriks[0]
+        : penjaga
+          ? penjaga[0]
+          : global
+            ? "verifyGlobalAdmin"
+            : "TANPA PENJAGA",
     });
   }
   return hasil;
@@ -83,7 +97,13 @@ describe("#66 tidak ada rute DELETE yang terbuka bagi peran apa pun", () => {
     expect(telanjang.map((r) => `${r.berkas}: DELETE ${r.rute}`)).toEqual([]);
   });
 
-  it("lima rute yang diputuskan pemilik proyek dibatasi admin/manager/head", () => {
+  it("rute yang dulu ditambal daftar peran kini dijaga MATRIKS", () => {
+    // Versi pertama test ini mengunci bentuk penjaganya:
+    //   verifyProjectAccess(["admin", "manager", "head"])
+    // Itu tepat selama perbaikannya masih per rute. Sesudah §19.8 tahap 4,
+    // rute tidak lagi menyebut peran sama sekali — ia menyebut modul + aksi,
+    // dan matriks yang menjawab. Asersinya diperbarui ke MAKSUD yang sama:
+    // rute-rute ini wajib dijaga, dan penjaganya bukan daftar peran karangan.
     const wajib = [
       "/api/projects/:projectId/documents/:id",
       "/api/projects/:projectId/meetings/:id",
@@ -95,7 +115,8 @@ describe("#66 tidak ada rute DELETE yang terbuka bagi peran apa pun", () => {
     for (const rute of wajib) {
       const ditemukan = semuaRuteHapus.find((r) => r.rute === rute);
       expect(ditemukan).toBeDefined();
-      expect(ditemukan!.penjaga).toBe('verifyProjectAccess(["admin", "manager", "head"])');
+      expect(ditemukan!.penjaga).toMatch(/^jagaProyek\(/);
+      expect(ditemukan!.penjaga).toContain('"D"');
     }
   });
 });
