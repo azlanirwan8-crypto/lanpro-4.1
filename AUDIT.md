@@ -217,7 +217,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 72 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 74 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -279,6 +279,8 @@ lepas. Catatan lepas selalu terlupakan.
 | 71  | `project-modules` POST/PUT/DELETE tanpa penjaga — CRUD modul lintas proyek               |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §13.11 |
 | 72  | 16 rute POST/PUT/PATCH masih ber-`['*']` — `viewer` bisa membuat & mengubah data         |  **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §13.11 |
 | 73  | `PUT .../dashboard-layout` menyelipkan `"*"` di daftar peran sehingga penjaganya korslet |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §13.11 |
+| 74  | 7 pengambil data tanpa penjaga respons basi — data proyek lama menimpa proyek baru      |  **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §13.12 |
+| 75  | Angka §13.1 & ARCHITECTURE drift lagi: 21 `useState` aktualnya 11, 104 rute aktualnya 119 |  **F0**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §13.12 |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -1602,9 +1604,9 @@ Tabel ini adalah daftar kerja F2. Isi kolom `Status` sambil jalan.
 | Area                                          | Kenapa berisiko                                                                                            | Status                                                                                              |
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | RBAC / permission per peran                   | `hasPermission` dioper sebagai prop ke seluruh view; satu kekeliruan membocorkan fitur ke peran yang salah | `JALAN` — sisi server ditelaah, temuan #49/#54/#55 (§13.5); sisi klien belum                        |
-| 104 endpoint                                  | Tak satu pun diuji perilakunya                                                                             | `JALAN` — 119 rute dipetakan menyeluruh; 5 temuan #69–#73 (§13.11) |
+| 119 rute (tertulis 104)                                 | Tak satu pun diuji perilakunya                                                                             | `JALAN` — 119 rute dipetakan menyeluruh; 5 temuan #69–#73 (§13.11) |
 | Perhitungan (progress, sprint, KPI, timeline) | Salah hitung tidak melempar error — ia hanya menampilkan angka keliru                                      | `TERBUKA`                                                                                           |
-| Alur state antar view                         | 21 `useState` + 21 `useEffect` di `AppContainer`, dioper 47 props                                          | `TERBUKA`                                                                                           |
+| Alur state antar view                         | 21 `useState` + 21 `useEffect` di `AppContainer`, dioper 47 props                                          | `JALAN` — ditelusuri, menghasilkan #74 (§13.12). Angka 21 useState dikoreksi jadi 11 |
 | Socket.IO realtime                            | Pemancaran event sebagian di `runAIPipeline()` yang jalan **setelah** response terkirim                    | `JALAN` — autentikasi handshake ditelaah, temuan #50/#51 (§13.5); urutan emit `runAIPipeline` belum |
 | Race condition / concurrency                  | Ada 1 test, belum ditelaah cakupannya                                                                      | `JALAN` — #65 optimistic locking terbukti mati senyap (§13.9); pola lain belum |
 | Alur unggah–simpan–tampil berkas              | Baru dibaca kodenya (§6.1), belum dijalankan                                                               | `JALAN` — sisi unggah diuji & bersih; sisi tampil menghasilkan #67 (§13.10) |
@@ -2282,6 +2284,62 @@ di §13.5 saat #49 dikerjakan, kini diberi nomor sendiri supaya tidak hilang.
 
 Satu area §13.1 belum tersentuh: **alur state antar view** (21 `useState` +
 21 `useEffect` di `AppContainer`, 47 props). Sisanya sudah `JALAN` atau tertutup.
+
+### 13.12 Temuan audit F2 — gelombang 6 (alur state antar view), 16 Agu 2026
+
+Area §13.1 terakhir. Dengan ini **kesembilan area sudah ditelusuri**.
+
+#### #74 🟠 Tujuh pengambil data tanpa penjaga respons basi
+
+`src/AppContainer.tsx`. Efek pengambil data bergantung pada
+`[selectedProject?.id]` dan memakai jeda 300 ms dengan `clearTimeout` di
+cleanup. Jeda itu menahan permintaan yang belum berangkat — tetapi **tidak
+membatalkan yang sudah berangkat**, dan hasilnya tetap ditulis ke state tanpa
+memeriksa apakah proyeknya masih sama.
+
+Kontras di dalam berkas yang sama membuat ini jelas bukan gaya melainkan
+kelalaian: `fetchMembers` (`:1300`) memakai penjaga `isMounted` dan
+membersihkannya di cleanup. Tujuh pengambil lain tidak.
+
+| Pengambil | Penjaga | `setState` | Ulangan 429 memakai closure basi |
+| --------- | :-----: | :--------: | :------------------------------: |
+| `fetchSprints` | — | 3 | **ya** |
+| `fetchActivityLogs` | — | 3 | **ya** |
+| `fetchProjects` | — | 3 | **ya** |
+| `fetchTasks` | — | 3 | — |
+| `fetchComments` | — | 2 | — |
+| `fetchMasterData` | — | 3 | — |
+| `fetchMembers` | `isMounted` | — | — |
+
+Akibatnya: berpindah dari proyek A ke B di dalam jendela permintaan membuat
+jawaban A bisa mendarat **sesudah** jawaban B, sehingga layar proyek B
+menampilkan sprint dan aktivitas milik proyek A. Tidak ada error, tidak ada
+peringatan — persis bentuk kegagalan yang §13.1 khawatirkan: "salah hitung
+tidak melempar error, ia hanya menampilkan angka keliru".
+
+Yang memperburuk pada tiga pengambil: jalur ulangan 429 memanggil
+`setTimeout(fetchSprints, 5000)`. Fungsi itu menangkap `selectedProject` dari
+lima detik sebelumnya, jadi sesudah 429 data proyek lama hampir pasti mendarat
+di layar proyek yang sedang dibuka.
+
+**`MENUNGGU` keputusan.** Perbaikannya sendiri jelas — tangkap `selectedProject.id`
+saat permintaan berangkat, lalu buang hasilnya bila id sudah berubah — tetapi
+letaknya di `AppContainer.tsx`, tempat state global aplikasi. Aturan §0.5 nomor 1
+dan pemisahan cakupan menuntut persetujuan sebelum menyentuhnya. Perlu juga
+disepakati apakah jalur ulangan 429 dipertahankan atau dibuang.
+
+#### #75 🟡 Angka dokumen drift lagi — sudah dikoreksi
+
+Dua angka yang dipakai untuk menakar pekerjaan ternyata keliru:
+
+| Tempat | Tertulis | Aktual |
+| ------ | -------- | ------ |
+| §13.1 "104 endpoint" | 104 | **119** rute (84 mutasi) |
+| §13.1 "21 `useState` di AppContainer" | 21 | **11** |
+
+Keduanya dikoreksi di §13.11 dan di sini. Ini pengulangan item #12 dari F0 —
+angka dokumen memburuk lagi begitu kode bergerak. Dicatat sebagai temuan
+tersendiri supaya polanya terlihat, bukan diperbaiki diam-diam.
 
 ---
 
