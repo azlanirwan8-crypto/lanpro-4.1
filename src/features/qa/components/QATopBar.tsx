@@ -36,7 +36,7 @@ export const QATopBar: React.FC<QATopBarProps> = ({
     <div className="page-title-box flex flex-col md:flex-row justify-between items-start md:items-center gap-3.5 bg-surface border border-border-subtle/80 p-3.5 sm:p-4 rounded-xl shadow-xs">
       {/* Velzon Header Title Section */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-primary text-white flex items-center justify-center font-medium shadow-xs shadow-primary/20 shrink-0">
+        <div className="w-10 h-10 rounded-lg bg-primary text-content-inverse flex items-center justify-center font-medium shadow-xs shadow-primary/20 shrink-0">
           <FileSpreadsheet className="w-5 h-5" />
         </div>
         <div>
@@ -71,7 +71,7 @@ export const QATopBar: React.FC<QATopBarProps> = ({
                   currentUserRole === "manager") && (
                   <button
                     onClick={handleForceUnlock}
-                    className="ml-auto md:ml-2 px-2.5 py-1.5 bg-danger hover:bg-danger-hover text-white text-xs sm:text-[10px] font-semibold uppercase tracking-wider rounded-md transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+                    className="ml-auto md:ml-2 px-2.5 py-1.5 bg-danger hover:bg-danger-hover text-content-inverse text-xs sm:text-[10px] font-semibold uppercase tracking-wider rounded-md transition-all shadow-xs flex items-center gap-1 cursor-pointer"
                   >
                     <ShieldAlert className="w-3.5 h-3.5" />
                     Force Unlock

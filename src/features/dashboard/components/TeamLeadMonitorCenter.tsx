@@ -64,13 +64,13 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
   });
 
   return (
-    <div className="bg-slate-900 text-white rounded-xl border border-slate-800 p-6 md:p-8 shadow-2xl space-y-6 relative overflow-hidden">
+    <div className="bg-surface-inverse text-content-inverse rounded-xl border border-border-inverse p-6 md:p-8 shadow-2xl space-y-6 relative overflow-hidden">
       {/* Decorative gradient blur */}
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6 relative z-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border-inverse pb-6 relative z-10">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs sm:text-[10px] font-medium uppercase tracking-widest">
@@ -80,7 +80,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
               • Pantauan Real-Time Tim & Kinerja
             </span>
           </div>
-          <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-white flex items-center gap-3">
+          <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-content-inverse flex items-center gap-3">
             Dashboard Pemantauan Tim Lead
           </h2>
           <p className="text-xs text-content-subtle font-medium mt-1 max-w-2xl leading-relaxed">
@@ -93,14 +93,14 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => setCurrentView("team")}
-            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-all border border-slate-700 flex items-center gap-2 shadow-soft"
+            className="px-4 py-2.5 rounded-xl bg-surface-inverse hover:bg-slate-700 text-slate-200 text-xs font-medium transition-all border border-border-inverse flex items-center gap-2 shadow-soft"
           >
             <Users className="w-4 h-4 text-indigo-400" />
             Kelola Anggota Tim
           </button>
           <button
             onClick={() => setCurrentView("planning")}
-            className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-all flex items-center gap-2 shadow-soft-lg shadow-indigo-600/25"
+            className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-content-inverse text-xs font-medium transition-all flex items-center gap-2 shadow-soft-lg shadow-indigo-600/25"
           >
             <Zap className="w-4 h-4" />
             Manajemen Sprint & Backlog
@@ -115,7 +115,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
             <span className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-subtle">
               Total Anggota Aktif
             </span>
-            <div className="text-2xl font-medium text-white mt-1">
+            <div className="text-2xl font-medium text-content-inverse mt-1">
               {projectMembers.length} Personil
             </div>
             <span className="text-xs sm:text-[10px] text-emerald-400 font-medium mt-1 inline-block">
@@ -180,14 +180,14 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
       </div>
 
       {/* Navigation Tabs for Monitor */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-4 relative z-10">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border-inverse pb-4 relative z-10">
         <button
           onClick={() => setSelectedTab("workload")}
           className={cn(
             "px-4 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center gap-2",
             selectedTab === "workload"
-              ? "bg-indigo-600 text-white shadow-soft-lg shadow-indigo-600/30"
-              : "bg-slate-800 text-content-subtle hover:text-white hover:bg-slate-700"
+              ? "bg-indigo-600 text-content-inverse shadow-soft-lg shadow-indigo-600/30"
+              : "bg-surface-inverse text-content-subtle hover:text-content-inverse hover:bg-slate-700"
           )}
         >
           <Users className="w-4 h-4" />
@@ -199,8 +199,8 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
           className={cn(
             "px-4 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center gap-2 relative",
             selectedTab === "blockers"
-              ? "bg-rose-600 text-white shadow-soft-lg shadow-rose-600/30"
-              : "bg-slate-800 text-content-subtle hover:text-white hover:bg-slate-700"
+              ? "bg-rose-600 text-content-inverse shadow-soft-lg shadow-rose-600/30"
+              : "bg-surface-inverse text-content-subtle hover:text-content-inverse hover:bg-slate-700"
           )}
         >
           <AlertTriangle className="w-4 h-4" />
@@ -217,8 +217,8 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
           className={cn(
             "px-4 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center gap-2",
             selectedTab === "sprint"
-              ? "bg-emerald-600 text-white shadow-soft-lg shadow-emerald-600/30"
-              : "bg-slate-800 text-content-subtle hover:text-white hover:bg-slate-700"
+              ? "bg-emerald-600 text-content-inverse shadow-soft-lg shadow-emerald-600/30"
+              : "bg-surface-inverse text-content-subtle hover:text-content-inverse hover:bg-slate-700"
           )}
         >
           <Zap className="w-4 h-4" />
@@ -230,8 +230,8 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
           className={cn(
             "px-4 py-2.5 rounded-xl text-xs font-medium transition-all flex items-center gap-2",
             selectedTab === "activity"
-              ? "bg-violet-600 text-white shadow-soft-lg shadow-violet-600/30"
-              : "bg-slate-800 text-content-subtle hover:text-white hover:bg-slate-700"
+              ? "bg-violet-600 text-content-inverse shadow-soft-lg shadow-violet-600/30"
+              : "bg-surface-inverse text-content-subtle hover:text-content-inverse hover:bg-slate-700"
           )}
         >
           <Activity className="w-4 h-4" />
@@ -242,7 +242,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
       {/* Tab 1: Workload & Capacity */}
       {selectedTab === "workload" && (
         <div className="space-y-4 relative z-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-800/40 p-4 rounded-xl border border-slate-800">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-800/40 p-4 rounded-xl border border-border-inverse">
             <div className="flex items-center gap-2 w-full sm:w-72 relative">
               <Search className="w-4 h-4 text-content-subtle absolute left-3" />
               <input
@@ -250,7 +250,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                 placeholder="Cari anggota tim..."
                 value={searchMember}
                 onChange={(e) => setSearchMember(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-content-muted focus:outline-none focus:border-indigo-500"
+                className="w-full pl-9 pr-4 py-2 rounded-xl bg-surface-inverse border border-border-inverse text-xs text-content-inverse placeholder-content-muted focus:outline-none focus:border-indigo-500"
               />
             </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
@@ -262,8 +262,8 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
                   selectedDepartment === "all"
-                    ? "bg-indigo-600 text-white"
-                    : "bg-slate-800 text-content-subtle hover:text-white"
+                    ? "bg-indigo-600 text-content-inverse"
+                    : "bg-surface-inverse text-content-subtle hover:text-content-inverse"
                 )}
               >
                 Semua
@@ -275,8 +275,8 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                   className={cn(
                     "px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap",
                     selectedDepartment === dept
-                      ? "bg-indigo-600 text-white"
-                      : "bg-slate-800 text-content-subtle hover:text-white"
+                      ? "bg-indigo-600 text-content-inverse"
+                      : "bg-surface-inverse text-content-subtle hover:text-content-inverse"
                   )}
                 >
                   {dept}
@@ -314,7 +314,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                           className="w-10 h-10 text-sm shadow-md rounded-xl shrink-0"
                         />
                         <div>
-                          <h4 className="font-medium text-white text-sm tracking-tight">
+                          <h4 className="font-medium text-content-inverse text-sm tracking-tight">
                             {member.displayName || member.email}
                           </h4>
                           <span className="text-xs sm:text-[10px] text-indigo-400 font-medium">
@@ -338,7 +338,9 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                         <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle uppercase tracking-widest font-medium block">
                           Total
                         </span>
-                        <span className="text-sm font-medium text-white">{totalAssigned}</span>
+                        <span className="text-sm font-medium text-content-inverse">
+                          {totalAssigned}
+                        </span>
                       </div>
                       <div>
                         <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle uppercase tracking-widest font-medium block">
@@ -359,7 +361,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                         <span>Rasio Penyelesaian</span>
                         <span>{workloadPercentage}%</span>
                       </div>
-                      <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden">
+                      <div className="w-full h-2 rounded-full bg-surface-inverse overflow-hidden">
                         <div
                           className={cn(
                             "h-full rounded-full transition-all duration-500",
@@ -409,9 +411,11 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
 
           <div className="space-y-3">
             {blockedTasks.length === 0 && overdueTasks.length === 0 ? (
-              <div className="text-center py-12 bg-slate-800/40 rounded-xl border border-slate-800">
+              <div className="text-center py-12 bg-slate-800/40 rounded-xl border border-border-inverse">
                 <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                <h4 className="text-base font-medium text-white">Tidak Ada Kendala Kritis!</h4>
+                <h4 className="text-base font-medium text-content-inverse">
+                  Tidak Ada Kendala Kritis!
+                </h4>
                 <p className="text-xs text-content-subtle mt-1">
                   Semua tugas berjalan lancar tanpa blocker maupun overdue yang tertunda.
                 </p>
@@ -427,7 +431,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-slate-900 text-content-subtle text-xs sm:text-[10px] font-medium uppercase font-mono">
+                        <span className="px-2 py-0.5 rounded bg-surface-inverse text-content-subtle text-xs sm:text-[10px] font-medium uppercase font-mono">
                           {task.taskNumber || `TSK-${idx + 1}`}
                         </span>
                         {isBlocked ? (
@@ -443,7 +447,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                           • Prioritas: <strong className="text-slate-200">{task.priority}</strong>
                         </span>
                       </div>
-                      <h4 className="text-sm font-medium text-white">{task.title}</h4>
+                      <h4 className="text-sm font-medium text-content-inverse">{task.title}</h4>
                       <p className="text-xs text-content-subtle line-clamp-1">
                         {task.description || "Tidak ada deskripsi tambahan."}
                       </p>
@@ -465,7 +469,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                           setSelectedTaskForDetail(task);
                           setIsTaskDetailModalOpen(true);
                         }}
-                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-all shadow-soft flex items-center gap-1.5"
+                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-content-inverse text-xs font-medium transition-all shadow-soft flex items-center gap-1.5"
                       >
                         Detail Tugas <ArrowRight className="w-3.5 h-3.5" />
                       </button>
@@ -490,10 +494,10 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                 {teamWorkloadData.map((team, idx) => (
                   <div
                     key={idx}
-                    className="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between"
+                    className="bg-slate-900/60 p-3.5 rounded-xl border border-border-inverse flex items-center justify-between"
                   >
                     <div>
-                      <h4 className="text-xs font-medium text-white">{team.name}</h4>
+                      <h4 className="text-xs font-medium text-content-inverse">{team.name}</h4>
                       <span className="text-xs sm:text-[10px] text-content-subtle">
                         Selesai: {team.Done} | Aktif: {team.Active}
                       </span>
@@ -514,9 +518,11 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
               </h3>
               {activeSprint ? (
                 <div className="space-y-4">
-                  <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-2">
+                  <div className="bg-slate-900/60 p-4 rounded-xl border border-border-inverse space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-medium text-white">{activeSprint.name}</span>
+                      <span className="text-xs font-medium text-content-inverse">
+                        {activeSprint.name}
+                      </span>
                       <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-xs sm:text-[10px] font-medium">
                         Aktif
                       </span>
@@ -529,7 +535,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                         <span>Progress Sprint</span>
                         <span>{activeSprint.progress || 0}%</span>
                       </div>
-                      <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+                      <div className="w-full h-2 rounded-full bg-surface-inverse overflow-hidden">
                         <div
                           className="h-full bg-emerald-500 rounded-full"
                           style={{ width: `${activeSprint.progress || 0}%` }}
@@ -539,7 +545,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                   </div>
                   <button
                     onClick={() => setCurrentView("planning")}
-                    className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-all border border-slate-700 text-center"
+                    className="w-full py-2.5 rounded-xl bg-surface-inverse hover:bg-slate-700 text-slate-200 text-xs font-medium transition-all border border-border-inverse text-center"
                   >
                     Buka Panel Perencanaan Sprint Lengkap
                   </button>
@@ -551,7 +557,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                   </p>
                   <button
                     onClick={() => setCurrentView("planning")}
-                    className="mt-3 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-all"
+                    className="mt-3 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-content-inverse text-xs font-medium transition-all"
                   >
                     Buat Sprint Baru
                   </button>
@@ -587,7 +593,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                       className="w-8 h-8 text-xs rounded-lg shrink-0"
                     />
                     <div>
-                      <p className="text-xs text-white font-medium">
+                      <p className="text-xs text-content-inverse font-medium">
                         <strong className="text-indigo-300">
                           {log.userName || log.userEmail || "Anggota Tim"}
                         </strong>{" "}
@@ -600,7 +606,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                       </span>
                     </div>
                   </div>
-                  <span className="px-2 py-1 rounded bg-slate-900 text-content-subtle text-xs sm:text-[10px] font-mono">
+                  <span className="px-2 py-1 rounded bg-surface-inverse text-content-subtle text-xs sm:text-[10px] font-mono">
                     {log.targetType || "Aktivitas"}
                   </span>
                 </div>

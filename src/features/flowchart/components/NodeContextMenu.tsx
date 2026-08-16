@@ -142,7 +142,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
               title={c.name.toUpperCase()}
             >
               {isSelected && (
-                <Check className="w-3.5 h-3.5 text-white stroke-[3.5px] drop-shadow-sm" />
+                <Check className="w-3.5 h-3.5 text-content-inverse stroke-[3.5px] drop-shadow-sm" />
               )}
             </button>
           );

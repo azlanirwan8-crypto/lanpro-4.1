@@ -13,7 +13,7 @@ export const LoginSkeletonState = ({ loadingText }: LoginSkeletonStateProps) => 
       {/* Velzon Center Animated Logo Icon */}
       <div className="relative inline-flex items-center justify-center pt-2">
         <motion.div
-          className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-soft-lg shadow-primary/30 relative z-10"
+          className="w-16 h-16 rounded-2xl bg-primary text-content-inverse flex items-center justify-center shadow-soft-lg shadow-primary/30 relative z-10"
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
         >

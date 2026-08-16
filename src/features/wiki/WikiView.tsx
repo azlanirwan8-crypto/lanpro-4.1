@@ -821,7 +821,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   {canCreate && (
                     <button
                       onClick={handleCreateNew}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-white rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer shrink-0"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer shrink-0"
                     >
                       <Plus className="w-4 h-4" /> Add Document
                     </button>
@@ -1035,7 +1035,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         className={cn(
                           "flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs border rounded-md transition-all cursor-pointer whitespace-nowrap shadow-2xs",
                           isFullscreenPreview
-                            ? "bg-slate-900 border-slate-900 text-white hover:bg-slate-800"
+                            ? "bg-surface-inverse border-slate-900 text-content-inverse hover:bg-surface-inverse"
                             : "bg-surface border-border-subtle text-content-body hover:bg-surface-sunken"
                         )}
                         title={isFullscreenPreview ? "Keluar Layar Penuh" : "Pratinjau Layar Penuh"}
@@ -1151,7 +1151,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                 href={previewFileData}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-white font-medium text-xs sm:text-[10px] uppercase tracking-wide rounded-md shadow-xs transition-all cursor-pointer whitespace-nowrap"
+                                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse font-medium text-xs sm:text-[10px] uppercase tracking-wide rounded-md shadow-xs transition-all cursor-pointer whitespace-nowrap"
                               >
                                 <ExternalLink className="w-3 h-3" />
                                 Buka di Tab Baru
@@ -1309,7 +1309,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                   className={cn(
                                     "px-3.5 py-2.5 rounded-md relative shadow-2xs group",
                                     isMine
-                                      ? "bg-primary text-white"
+                                      ? "bg-primary text-content-inverse"
                                       : "bg-surface text-content-strong border border-border-subtle"
                                   )}
                                 >
@@ -1357,7 +1357,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         <button
                           onClick={handleSendDocComment}
                           disabled={!newDocCommentText.trim()}
-                          className="p-1.5 bg-primary hover:bg-primary-hover text-white disabled:opacity-40 cursor-pointer rounded-md transition-all shrink-0 shadow-2xs flex items-center justify-center"
+                          className="p-1.5 bg-primary hover:bg-primary-hover text-content-inverse disabled:opacity-40 cursor-pointer rounded-md transition-all shrink-0 shadow-2xs flex items-center justify-center"
                           title="Kirim Catatan"
                         >
                           <Send className="w-3.5 h-3.5" />
@@ -1383,7 +1383,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 {canCreate && (
                   <button
                     onClick={handleCreateNew}
-                    className="mt-5 px-4 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-white rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer"
+                    className="mt-5 px-4 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer"
                   >
                     <Plus className="w-4 h-4" /> TAMBAH DOKUMEN BARU
                   </button>
@@ -1620,7 +1620,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 <button
                   onClick={handleSave}
                   disabled={loading}
-                  className="px-4 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-white rounded-md text-xs font-medium shadow-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                  className="px-4 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>{loading ? "Menyimpan..." : "Simpan Dokumen"}</span>

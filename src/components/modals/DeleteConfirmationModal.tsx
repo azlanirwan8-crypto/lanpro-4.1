@@ -40,13 +40,13 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
           <div className="flex gap-2.5 pt-2">
             <button
               onClick={onClose}
-              className="flex-1 py-2.5 bg-surface-muted hover:bg-slate-200 text-content-body text-xs font-medium rounded-md cursor-pointer transition-colors"
+              className="flex-1 py-2.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium rounded-md cursor-pointer transition-colors"
             >
               Batal
             </button>
             <button
               onClick={onConfirm}
-              className="flex-1 py-2.5 bg-danger hover:bg-danger-hover text-white text-xs font-medium rounded-md cursor-pointer shadow-xs transition-colors"
+              className="flex-1 py-2.5 bg-danger hover:bg-danger-hover text-content-inverse text-xs font-medium rounded-md cursor-pointer shadow-xs transition-colors"
             >
               Ya, Hapus
             </button>

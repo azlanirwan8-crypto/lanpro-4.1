@@ -328,7 +328,7 @@ export const formatNotification = (
     parts.push(
       <span
         key={`task-${code}-${startIndex}`}
-        className="inline-flex items-center gap-0.5 px-1 py-0 rounded bg-surface-muted hover:bg-slate-200 border border-border-subtle/60 text-xs sm:text-[10px] font-medium text-content-strong font-mono transition-colors my-0.5 select-all"
+        className="inline-flex items-center gap-0.5 px-1 py-0 rounded bg-surface-muted hover:bg-surface-strong border border-border-subtle/60 text-xs sm:text-[10px] font-medium text-content-strong font-mono transition-colors my-0.5 select-all"
       >
         <span className="text-violet-600 font-medium">{code}</span>
         <span className="text-content-subtle">|</span>

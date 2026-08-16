@@ -18,7 +18,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
   handleToggleGate,
 }) => {
   return (
-    <div className="w-full h-auto bg-slate-900 text-white rounded-xl relative overflow-y-auto no-scrollbar shadow-2xl flex flex-col p-6 md:p-8 min-h-[460px]">
+    <div className="w-full h-auto bg-surface-inverse text-content-inverse rounded-xl relative overflow-y-auto no-scrollbar shadow-2xl flex flex-col p-6 md:p-8 min-h-[460px]">
       <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-amber-400 via-transparent to-transparent pointer-events-none"></div>
       <div className="absolute -right-10 -bottom-10 opacity-5 pointer-events-none">
         <PackageOpen className="w-64 h-64 text-amber-500" />
@@ -71,7 +71,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
                   className={cn(
                     "w-5 h-5 rounded-full flex items-center justify-center text-xs sm:text-[10px] font-medium pointer-events-none",
                     isApproved
-                      ? "bg-emerald-500 text-white shadow-soft"
+                      ? "bg-emerald-500 text-content-inverse shadow-soft"
                       : "bg-slate-700 text-content-subtle"
                   )}
                 >
@@ -84,7 +84,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
                 )}
               </div>
 
-              <div className="text-xs font-medium truncate text-white">{phase.label}</div>
+              <div className="text-xs font-medium truncate text-content-inverse">{phase.label}</div>
               <div className="text-xs sm:text-[10px] text-content-subtle truncate mt-0.5 leading-tight">
                 {phase.desc}
               </div>
@@ -183,10 +183,10 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
         const phaseGateStatus = waterfallGates[activeWaterfallTab];
 
         return (
-          <div className="bg-slate-800/40 border border-slate-800 rounded-xl p-5 md:p-6 relative z-10 select-none">
+          <div className="bg-slate-800/40 border border-border-inverse rounded-xl p-5 md:p-6 relative z-10 select-none">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4 pb-4 border-b border-white/5">
               <div>
-                <h4 className="text-base font-medium text-white flex items-center gap-2">
+                <h4 className="text-base font-medium text-content-inverse flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
                   {activeInfo.title}
                 </h4>
@@ -258,11 +258,15 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
                     <>
                       <div>
                         Disetujui oleh:{" "}
-                        <span className="font-medium text-white">{phaseGateStatus.approvedBy}</span>
+                        <span className="font-medium text-content-inverse">
+                          {phaseGateStatus.approvedBy}
+                        </span>
                       </div>
                       <div className="mt-0.5">
                         Waktu:{" "}
-                        <span className="font-mono text-white">{phaseGateStatus.approvedAt}</span>
+                        <span className="font-mono text-content-inverse">
+                          {phaseGateStatus.approvedAt}
+                        </span>
                       </div>
                     </>
                   ) : (

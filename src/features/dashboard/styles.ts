@@ -38,7 +38,7 @@ export const styles = {
   mainSection: "flex flex-col xl:flex-row gap-8 items-start",
   majorArea: "flex-1 w-full space-y-8",
   activeSprintCard:
-    "bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 rounded-xl p-8 text-white relative overflow-hidden shadow-xl",
+    "bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 rounded-xl p-8 text-content-inverse relative overflow-hidden shadow-xl",
   activeSprintHeader:
     "relative z-10 flex flex-col md:flex-row gap-8 justify-between items-start md:items-center",
   // Kedua kartu di bawah MENUMPANG di atas `activeSprintCard` yang sengaja
@@ -57,7 +57,8 @@ export const styles = {
   actionCardSlate: "bg-surface shadow-sm border border-border-faint/80 rounded-xl p-6",
   // SENGAJA warna keras, BUKAN token. Kartu ini dirancang GELAP di kedua mode —
   // token `content-*` adalah kosakata TEKS, dan di mode gelap nilainya justru
-  // terang (#e2e8f0), sehingga `text-white` di atasnya jadi tak terbaca.
+  // terang (#e2e8f0), sehingga `text-content-inverse` di atasnya jadi tak terbaca.
   // Pemetaan otomatis sempat melakukan persis itu.
-  darkCard: "bg-slate-800 rounded-xl p-6 shadow-lg text-white relative overflow-hidden",
+  darkCard:
+    "bg-surface-inverse rounded-xl p-6 shadow-lg text-content-inverse relative overflow-hidden",
 };

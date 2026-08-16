@@ -215,11 +215,11 @@ export const ProfileEditModal = ({
               className="w-16 h-16 text-2xl"
             />
             {previewUrl && (
-              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
+              <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
                 Pratinjau
               </span>
             )}
-            <label className="absolute inset-0 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+            <label className="absolute inset-0 bg-black/50 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
               <span className="text-xs sm:text-[10px] font-medium uppercase tracking-wider">
                 {isUploading ? "..." : "Pilih Foto"}
               </span>
@@ -320,7 +320,7 @@ export const ProfileEditModal = ({
           type="button"
           onClick={handleUpdateProfile}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-4 py-2 font-medium transition-all disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-lg px-4 py-2 font-medium transition-all disabled:opacity-50"
         >
           {loading ? (
             "Saving..."

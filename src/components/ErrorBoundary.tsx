@@ -1,5 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 
 interface Props {
   children?: ReactNode;
@@ -14,7 +14,7 @@ interface State {
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
-    error: null
+    error: null,
   };
 
   public static getDerivedStateFromError(error: Error): State {
@@ -22,7 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    console.error("Uncaught error:", error, errorInfo);
   }
 
   public render() {
@@ -37,7 +37,9 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="w-16 h-16 bg-surface rounded-full flex items-center justify-center mx-auto mb-6 shadow-soft">
               <AlertTriangle className="w-8 h-8 text-rose-500" />
             </div>
-            <h2 className="text-lg font-medium text-content-strong mb-2">Terjadi Kesalahan Sistem</h2>
+            <h2 className="text-lg font-medium text-content-strong mb-2">
+              Terjadi Kesalahan Sistem
+            </h2>
             <p className="text-sm text-content-muted mb-6">
               Maaf, widget atau komponen ini mengalami gangguan (Crash). Silakan muat ulang halaman.
             </p>
@@ -48,7 +50,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
             <button
               onClick={() => window.location.reload()}
-              className="inline-flex items-center gap-2 bg-slate-800 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors shadow-soft"
+              className="inline-flex items-center gap-2 bg-surface-inverse text-content-inverse px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors shadow-soft"
             >
               <RefreshCw className="w-4 h-4" />
               Muat Ulang Halaman

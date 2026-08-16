@@ -41,161 +41,198 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
   if (!isSelected) return null;
 
   return (
-                      <div
-                        className="absolute -top-16 left-1/2 -translate-x-1/2 bg-surface/95 backdrop-blur-md text-slate-850 p-2 px-3 rounded-xl border border-border-subtle/90 shadow-[0_10px_35px_rgba(0,0,0,0.12)] flex items-center gap-2 z-40 select-none pointer-events-auto transition-all"
-                        onMouseDown={(e) => e.stopPropagation()}
-                      >
-                        {/* Shape Converter Selector */}
-                        <select
-                          value={node.type}
-                          onChange={(e) => {
-                            handleUpdateActiveNode({ type: e.target.value as FlowNode["type"] });
-                            toast.success(`Bentuk bentuk diubah ke ${e.target.value.toUpperCase()}!`);
-                          }}
-                          className="bg-surface-sunken border border-border-subtle text-xs sm:text-[10px] font-medium text-content-body outline-none p-1 rounded-lg cursor-pointer hover:bg-surface-muted max-w-[120px]"
-                          title="Ubah jenis bentuk"
-                        >
-                          <option value="rect">Rectangle</option>
-                          <option value="oval">Oval (Start/End)</option>
-                          <option value="diamond">Decision (Diamond)</option>
-                          <option value="triangle">Triangle</option>
-                          <option value="pentagon">Pentagon</option>
-                          <option value="hexagon">Hexagon</option>
-                          <option value="octagon">Octagon</option>
-                          <option value="star">Star</option>
-                          <option value="arrowRight">Arrow Right</option>
-                          <option value="arrowLeft">Arrow Left</option>
-                          <option value="arrowLeftRight">Arrow Left Right</option>
-                          <option value="trapezoid">Trapezoid</option>
-                          <option value="cross">Cross / Plus</option>
-                          <option value="chevron">Chevron</option>
-                          <option value="delay">Delay (Bullet)</option>
-                          <option value="callout">Callout / Bubble</option>
-                          <option value="cylinder">Database Server</option>
-                          <option value="sticky">Sticky Note</option>
-                          <option value="cloud">Cloud API</option>
-                          <option value="circle">Circle</option>
-                          <option value="card">Card Item</option>
-                          <option value="document">Doc Page</option>
-                          <option value="subprocess">Subprocess</option>
-                          <option value="actor">Actor Icon</option>
-                          <option value="folder">Folder Block</option>
-                          <option value="curlyLeft">{`Curly Left {`}</option>
-                          <option value="curlyRight">{`Curly Right }`}</option>
-                        </select>
+    <div
+      className="absolute -top-16 left-1/2 -translate-x-1/2 bg-surface/95 backdrop-blur-md text-slate-850 p-2 px-3 rounded-xl border border-border-subtle/90 shadow-[0_10px_35px_rgba(0,0,0,0.12)] flex items-center gap-2 z-40 select-none pointer-events-auto transition-all"
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      {/* Shape Converter Selector */}
+      <select
+        value={node.type}
+        onChange={(e) => {
+          handleUpdateActiveNode({ type: e.target.value as FlowNode["type"] });
+          toast.success(`Bentuk bentuk diubah ke ${e.target.value.toUpperCase()}!`);
+        }}
+        className="bg-surface-sunken border border-border-subtle text-xs sm:text-[10px] font-medium text-content-body outline-none p-1 rounded-lg cursor-pointer hover:bg-surface-muted max-w-[120px]"
+        title="Ubah jenis bentuk"
+      >
+        <option value="rect">Rectangle</option>
+        <option value="oval">Oval (Start/End)</option>
+        <option value="diamond">Decision (Diamond)</option>
+        <option value="triangle">Triangle</option>
+        <option value="pentagon">Pentagon</option>
+        <option value="hexagon">Hexagon</option>
+        <option value="octagon">Octagon</option>
+        <option value="star">Star</option>
+        <option value="arrowRight">Arrow Right</option>
+        <option value="arrowLeft">Arrow Left</option>
+        <option value="arrowLeftRight">Arrow Left Right</option>
+        <option value="trapezoid">Trapezoid</option>
+        <option value="cross">Cross / Plus</option>
+        <option value="chevron">Chevron</option>
+        <option value="delay">Delay (Bullet)</option>
+        <option value="callout">Callout / Bubble</option>
+        <option value="cylinder">Database Server</option>
+        <option value="sticky">Sticky Note</option>
+        <option value="cloud">Cloud API</option>
+        <option value="circle">Circle</option>
+        <option value="card">Card Item</option>
+        <option value="document">Doc Page</option>
+        <option value="subprocess">Subprocess</option>
+        <option value="actor">Actor Icon</option>
+        <option value="folder">Folder Block</option>
+        <option value="curlyLeft">{`Curly Left {`}</option>
+        <option value="curlyRight">{`Curly Right }`}</option>
+      </select>
 
-                        <div className="h-4 w-px bg-slate-200" />
+      <div className="h-4 w-px bg-surface-strong" />
 
-                        {/* Quick Pastel Selection circle dots */}
-                        <div className="flex items-center gap-1">
-                          {["yellow", "blue", "green", "purple", "rose", "slate"].map(colName => {
-                            const colorClassMap: Record<string, string> = {
-                              yellow: "bg-amber-100 hover:bg-amber-200",
-                              blue: "bg-blue-150 hover:bg-blue-200",
-                              green: "bg-emerald-100 hover:bg-emerald-200",
-                              purple: "bg-purple-100 hover:bg-purple-200",
-                              rose: "bg-rose-100 hover:bg-rose-200",
-                              slate: "bg-surface-muted hover:bg-slate-200"
-                            };
-                            return (
-                              <button
-                                key={colName}
-                                onClick={() => {
-                                  handleUpdateActiveNode({ color: colName });
-                                }}
-                                className={cn(
-                                  "w-3.5 h-3.5 rounded-full border border-black/10 transition-transform hover:scale-125 focus:outline-none",
-                                  colorClassMap[colName],
-                                  node.color === colName && "ring-2 ring-violet-500 scale-110"
-                                )}
-                                title={`Ubah warna ke: ${colName}`}
-                              />
-                            );
-                          })}
-                        </div>
+      {/* Quick Pastel Selection circle dots */}
+      <div className="flex items-center gap-1">
+        {["yellow", "blue", "green", "purple", "rose", "slate"].map((colName) => {
+          const colorClassMap: Record<string, string> = {
+            yellow: "bg-amber-100 hover:bg-amber-200",
+            blue: "bg-blue-150 hover:bg-blue-200",
+            green: "bg-emerald-100 hover:bg-emerald-200",
+            purple: "bg-purple-100 hover:bg-purple-200",
+            rose: "bg-rose-100 hover:bg-rose-200",
+            slate: "bg-surface-muted hover:bg-surface-strong",
+          };
+          return (
+            <button
+              key={colName}
+              onClick={() => {
+                handleUpdateActiveNode({ color: colName });
+              }}
+              className={cn(
+                "w-3.5 h-3.5 rounded-full border border-black/10 transition-transform hover:scale-125 focus:outline-none",
+                colorClassMap[colName],
+                node.color === colName && "ring-2 ring-violet-500 scale-110"
+              )}
+              title={`Ubah warna ke: ${colName}`}
+            />
+          );
+        })}
+      </div>
 
-                        <div className="h-4 w-px bg-slate-200" />
+      <div className="h-4 w-px bg-surface-strong" />
 
-                        {/* Font Family switch */}
-                        <button
-                          onClick={() => {
-                            const nextStyle: FlowNode["fontStyle"] = node.fontStyle === "sans" ? "serif" : node.fontStyle === "serif" ? "mono" : "sans";
-                            handleUpdateActiveNode({ fontStyle: nextStyle });
-                          }}
-                          className="p-1 px-1.5 hover:bg-surface-muted text-xs sm:text-[10px] rounded font-medium uppercase"
-                          title="Format Huruf (Sans / Serif / Mono)"
-                        >
-                          {node.fontStyle || "sans"}
-                        </button>
+      {/* Font Family switch */}
+      <button
+        onClick={() => {
+          const nextStyle: FlowNode["fontStyle"] =
+            node.fontStyle === "sans" ? "serif" : node.fontStyle === "serif" ? "mono" : "sans";
+          handleUpdateActiveNode({ fontStyle: nextStyle });
+        }}
+        className="p-1 px-1.5 hover:bg-surface-muted text-xs sm:text-[10px] rounded font-medium uppercase"
+        title="Format Huruf (Sans / Serif / Mono)"
+      >
+        {node.fontStyle || "sans"}
+      </button>
 
-                        {/* Toggle Align text */}
-                        <button
-                          onClick={() => {
-                            const nextAlign: FlowNode["align"] = node.align === "left" ? "center" : node.align === "center" ? "right" : "left";
-                            handleUpdateActiveNode({ align: nextAlign });
-                          }}
-                          className="p-1 hover:bg-surface-muted rounded text-content-secondary pointer-events-auto"
-                          title="Rata Kiri/Tengah/Kanan"
-                        >
-                          {node.align === "left" ? <AlignLeft className="w-3.5 h-3.5" /> : node.align === "right" ? <AlignRight className="w-3.5 h-3.5" /> : <AlignCenter className="w-3.5 h-3.5" />}
-                        </button>
+      {/* Toggle Align text */}
+      <button
+        onClick={() => {
+          const nextAlign: FlowNode["align"] =
+            node.align === "left" ? "center" : node.align === "center" ? "right" : "left";
+          handleUpdateActiveNode({ align: nextAlign });
+        }}
+        className="p-1 hover:bg-surface-muted rounded text-content-secondary pointer-events-auto"
+        title="Rata Kiri/Tengah/Kanan"
+      >
+        {node.align === "left" ? (
+          <AlignLeft className="w-3.5 h-3.5" />
+        ) : node.align === "right" ? (
+          <AlignRight className="w-3.5 h-3.5" />
+        ) : (
+          <AlignCenter className="w-3.5 h-3.5" />
+        )}
+      </button>
 
-                        <div className="h-4 w-px bg-slate-200" />
+      <div className="h-4 w-px bg-surface-strong" />
 
-                        {/* Font sizing buttons */}
-                        <div className="flex items-center gap-0.5">
-                          <button onClick={() => handleUpdateActiveNode({ fontSize: Math.max(9, (node.fontSize || 12) - 1) })} className="p-1 hover:bg-surface-muted text-xs rounded font-medium" title="Perkecil Font">-</button>
-                          <span className="text-xs sm:text-[10px] font-mono font-medium px-0.5 whitespace-nowrap">{node.fontSize || 12}px</span>
-                          <button onClick={() => handleUpdateActiveNode({ fontSize: Math.min(22, (node.fontSize || 12) + 1) })} className="p-1 hover:bg-surface-muted text-xs rounded font-medium" title="Perbesar Font">+</button>
-                        </div>
+      {/* Font sizing buttons */}
+      <div className="flex items-center gap-0.5">
+        <button
+          onClick={() =>
+            handleUpdateActiveNode({ fontSize: Math.max(9, (node.fontSize || 12) - 1) })
+          }
+          className="p-1 hover:bg-surface-muted text-xs rounded font-medium"
+          title="Perkecil Font"
+        >
+          -
+        </button>
+        <span className="text-xs sm:text-[10px] font-mono font-medium px-0.5 whitespace-nowrap">
+          {node.fontSize || 12}px
+        </span>
+        <button
+          onClick={() =>
+            handleUpdateActiveNode({ fontSize: Math.min(22, (node.fontSize || 12) + 1) })
+          }
+          className="p-1 hover:bg-surface-muted text-xs rounded font-medium"
+          title="Perbesar Font"
+        >
+          +
+        </button>
+      </div>
 
-                        <div className="h-4 w-px bg-slate-200" />
+      <div className="h-4 w-px bg-surface-strong" />
 
-                        {/* Border style loop selector */}
-                        <button
-                          onClick={() => {
-                            const nextStyle = node.borderStyle === "dashed" ? "none" : node.borderStyle === "none" ? "solid" : "dashed";
-                            handleUpdateActiveNode({ borderStyle: nextStyle as FlowNode["borderStyle"] });
-                            toast.success(`Jenis garis diubah ke: ${(nextStyle || "solid").toUpperCase()}`);
-                          }}
-                          className="p-1 hover:bg-surface-muted rounded text-content-secondary"
-                          title="Ubah garis tepian (Solid/Dashed/None)"
-                        >
-                          <Square className={cn("w-3.5 h-3.5", node.borderStyle === "dashed" && "border-dashed border-2", node.borderStyle === "none" && "opacity-30")} />
-                        </button>
+      {/* Border style loop selector */}
+      <button
+        onClick={() => {
+          const nextStyle =
+            node.borderStyle === "dashed"
+              ? "none"
+              : node.borderStyle === "none"
+                ? "solid"
+                : "dashed";
+          handleUpdateActiveNode({ borderStyle: nextStyle as FlowNode["borderStyle"] });
+          toast.success(`Jenis garis diubah ke: ${(nextStyle || "solid").toUpperCase()}`);
+        }}
+        className="p-1 hover:bg-surface-muted rounded text-content-secondary"
+        title="Ubah garis tepian (Solid/Dashed/None)"
+      >
+        <Square
+          className={cn(
+            "w-3.5 h-3.5",
+            node.borderStyle === "dashed" && "border-dashed border-2",
+            node.borderStyle === "none" && "opacity-30"
+          )}
+        />
+      </button>
 
-                        {/* Duplicate */}
-                        <button
-                          onClick={() => handleDuplicateNode(node)}
-                          className="p-1 text-content-muted hover:text-indigo-600 rounded hover:bg-indigo-50"
-                          title="Duplikat Bentuk (Ctrl+D)"
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                        </button>
+      {/* Duplicate */}
+      <button
+        onClick={() => handleDuplicateNode(node)}
+        className="p-1 text-content-muted hover:text-indigo-600 rounded hover:bg-indigo-50"
+        title="Duplikat Bentuk (Ctrl+D)"
+      >
+        <Copy className="w-3.5 h-3.5" />
+      </button>
 
-                        {/* Connection Drawer mode toggle */}
-                        <button
-                          onClick={() => {
-                            setActiveTool('connect');
-                            setConnectSourceId(node.id);
-                            toast.info(`Sambungkan alur dari "${node.label}" ke shape berikutnya.`);
-                          }}
-                          className="p-1 text-content-muted hover:text-amber-500 rounded hover:bg-amber-50"
-                          title="Mulai tarik panah hubungan"
-                        >
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
+      {/* Connection Drawer mode toggle */}
+      <button
+        onClick={() => {
+          setActiveTool("connect");
+          setConnectSourceId(node.id);
+          toast.info(`Sambungkan alur dari "${node.label}" ke shape berikutnya.`);
+        }}
+        className="p-1 text-content-muted hover:text-amber-500 rounded hover:bg-amber-50"
+        title="Mulai tarik panah hubungan"
+      >
+        <ArrowRight className="w-3.5 h-3.5" />
+      </button>
 
-                        <div className="h-4 w-px bg-slate-200" />
+      <div className="h-4 w-px bg-surface-strong" />
 
-                        {/* Delete shape */}
-                        <button
-                          onClick={handleDeleteSelected}
-                          className="p-1 text-slate-450 hover:text-rose-600 rounded hover:bg-rose-50"
-                          title="Hapus shape"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+      {/* Delete shape */}
+      <button
+        onClick={handleDeleteSelected}
+        className="p-1 text-slate-450 hover:text-rose-600 rounded hover:bg-rose-50"
+        title="Hapus shape"
+      >
+        <Trash2 className="w-3.5 h-3.5" />
+      </button>
+    </div>
   );
 };

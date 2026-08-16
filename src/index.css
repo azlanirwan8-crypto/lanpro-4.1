@@ -32,6 +32,25 @@
   --color-info: #3577f1;
   --color-secondary: #299cdb;
 
+  /* ── Permukaan & teks yang SENGAJA tetap di kedua mode ──────────────────
+   * Sebagian elemen dirancang gelap terlepas dari tema: kartu aksen, tombol
+   * berwarna, lencana. Warnanya dulu ditulis keras (`bg-slate-800`,
+   * `text-white`) justru karena token yang ada semuanya BERGANTI di mode gelap
+   * — memakai `surface` di sana akan membuat kartunya ikut terang dan teks
+   * putihnya hilang.
+   *
+   * Tiga token berikut menutup celah itu: namanya semantik, tetapi nilainya
+   * SAMA di `:root` dan `html.dark`. Dengan begitu warna keras bisa dicabut
+   * tanpa mengubah satu piksel pun di kedua mode. */
+  --color-surface-inverse: #1e293b;
+  --color-border-inverse: #334155;
+  --color-content-inverse: #ffffff;
+
+  /* Permukaan terisi setingkat slate-200. Tidak ada padanannya sebelum ini;
+   * `surface-muted` (#f4f7f9) terlalu terang, sehingga 82 pemakaian
+   * `bg-slate-200` tidak bisa dipetakan tanpa menggeser mode terang. */
+  --color-surface-strong: #e2e8f0;
+
   /* Permukaan & teks */
   --color-surface: #ffffff;
   --color-surface-muted: #f4f7f9;
@@ -62,6 +81,14 @@ html.dark {
   --color-danger-hover: #ff9585;
   --color-info: #5b93f7;
   --color-secondary: #4fb8ef;
+
+  /* Sengaja SAMA dengan mode terang — lihat catatan di `:root`. */
+  --color-surface-inverse: #1e293b;
+  --color-border-inverse: #334155;
+  --color-content-inverse: #ffffff;
+
+  /* Yang ini justru HARUS berganti: ia permukaan terisi, bukan aksen. */
+  --color-surface-strong: #24314a;
 
   --color-surface: #121a2a;
   --color-surface-muted: #0b0f19;

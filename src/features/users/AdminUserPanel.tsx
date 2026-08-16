@@ -536,7 +536,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 </button>
                 <Button
                   onClick={() => setIsInviteModalOpen(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1.5 px-3 rounded text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98] shadow-soft h-8.5"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium py-1.5 px-3 rounded text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98] shadow-soft h-8.5"
                 >
                   <UserPlus className="w-3.5 h-3.5" /> Add User
                 </Button>
@@ -642,7 +642,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             {selectedUserIds.length > 0 && (
               <div className="bg-indigo-50/80 border-b border-indigo-100 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-top duration-300">
                 <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-medium flex items-center justify-center">
+                  <span className="w-6 h-6 rounded-full bg-indigo-600 text-content-inverse text-xs font-medium flex items-center justify-center">
                     {selectedUserIds.length}
                   </span>
                   <span className="text-sm font-medium text-indigo-950">
@@ -653,14 +653,14 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   <button
                     onClick={() => handleBulkAction("approve")}
                     disabled={isBulkActionPending}
-                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <CheckCircle className="w-3.5 h-3.5" /> Setujui
                   </button>
                   <button
                     onClick={() => handleBulkAction("reject")}
                     disabled={isBulkActionPending}
-                    className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <Clock className="w-3.5 h-3.5" /> Pending/Tolak
                   </button>
@@ -696,14 +696,14 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       });
                     }}
                     disabled={isBulkActionPending}
-                    className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" /> Hapus Massal
                   </button>
                   <button
                     onClick={() => setSelectedUserIds([])}
                     disabled={isBulkActionPending}
-                    className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-705 text-xs font-medium rounded-lg transition-all cursor-pointer"
+                    className="px-3 py-1.5 bg-surface-strong hover:bg-slate-300 text-slate-705 text-xs font-medium rounded-lg transition-all cursor-pointer"
                   >
                     Batal
                   </button>
@@ -935,7 +935,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               // dan fungsinya sudah digantikan UserDetailView yang lebih
                               // lengkap. Modal beserta cabangnya ikut dihapus.
                               onClick={() => props.onSelectUserForDetail?.(user)}
-                              className="p-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-white border border-indigo-200/80 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer font-medium flex items-center justify-center gap-1"
+                              className="p-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-600 hover:text-content-inverse border border-indigo-200/80 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer font-medium flex items-center justify-center gap-1"
                               title="Detail Pengguna"
                             >
                               <UserCog className="w-3.5 h-3.5 shrink-0" />
@@ -963,7 +963,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 });
                               }}
                               disabled={user.role === "admin"}
-                              className="p-1.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200/80 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-1"
+                              className="p-1.5 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-200/80 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-1"
                               title="Hapus Pengguna"
                             >
                               <Trash2 className="w-3.5 h-3.5 shrink-0" />
@@ -1027,7 +1027,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     className={cn(
                       "w-7 h-7 rounded-lg text-xs font-medium transition-colors",
                       currentPage === i + 1
-                        ? "bg-indigo-600 text-white shadow-2xs"
+                        ? "bg-indigo-600 text-content-inverse shadow-2xs"
                         : "bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken"
                     )}
                   >
@@ -1338,7 +1338,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       {/* Senior Portal-Style Hover Tooltip overlay */}
       {hoveredTooltip && (
         <div
-          className="fixed z-9999 pointer-events-none bg-slate-900/95 backdrop-blur-md border border-slate-700/80 text-white text-xs font-medium rounded-xl px-3.5 py-2.5 max-w-xs shadow-2xl transition-all duration-100 ease-out animate-in fade-in zoom-in-95"
+          className="fixed z-9999 pointer-events-none bg-slate-900/95 backdrop-blur-md border border-slate-700/80 text-content-inverse text-xs font-medium rounded-xl px-3.5 py-2.5 max-w-xs shadow-2xl transition-all duration-100 ease-out animate-in fade-in zoom-in-95"
           style={{
             left: `${hoveredTooltip.x + 14}px`,
             top: `${hoveredTooltip.y + 14}px`,

@@ -602,7 +602,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             rel="noopener noreferrer"
             className="flex items-center gap-2.5 p-2 bg-slate-900/5 hover:bg-slate-900/10 text-content-strong rounded-xl transition-all border border-border-subtle/20 max-w-full"
           >
-            <span className="p-2 bg-amber-500 text-white rounded-lg shrink-0">
+            <span className="p-2 bg-amber-500 text-content-inverse rounded-lg shrink-0">
               <FileText className="w-4 h-4" />
             </span>
             <div className="min-w-0 flex-1">
@@ -642,7 +642,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
-        className="relative w-12 h-12 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-xl border border-slate-800 hover:bg-orange-600 hover:border-orange-500 hover:text-white transition-all duration-300"
+        className="relative w-12 h-12 rounded-full bg-surface-inverse text-content-inverse flex items-center justify-center shadow-xl border border-border-inverse hover:bg-orange-600 hover:border-orange-500 hover:text-content-inverse transition-all duration-300"
         title="Live Chat Obrolan LanPro"
       >
         <MessageSquare className="w-5 h-5" />
@@ -654,7 +654,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-rose-500 text-white rounded-full flex items-center justify-center text-xs sm:text-[10px] font-medium px-1.5 border border-white shadow-md animate-pulse"
+              className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-rose-500 text-content-inverse rounded-full flex items-center justify-center text-xs sm:text-[10px] font-medium px-1.5 border border-white shadow-md animate-pulse"
             >
               {totalUnread}
             </motion.div>
@@ -678,17 +678,17 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             {!activeChatUser ? (
               <div id="chat-user-list-view" className="flex flex-col h-full bg-surface">
                 {/* Header */}
-                <div className="px-4 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex items-center justify-between border-b border-slate-800">
+                <div className="px-4 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-content-inverse flex items-center justify-between border-b border-border-inverse">
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
-                    <span className="font-medium text-sm tracking-tight text-white">
+                    <span className="font-medium text-sm tracking-tight text-content-inverse">
                       Obrolan LanPro
                     </span>
                   </div>
                   <div className="flex items-center gap-2.5">
                     <button
                       onClick={() => setSoundEnabled(!soundEnabled)}
-                      className="text-content-subtle hover:text-white transition-colors"
+                      className="text-content-subtle hover:text-content-inverse transition-colors"
                       title={soundEnabled ? "Matikan Suara" : "Aktifkan Suara"}
                     >
                       {soundEnabled ? (
@@ -699,7 +699,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     </button>
                     <button
                       onClick={() => setIsOpen(false)}
-                      className="text-content-subtle hover:text-white transition-colors"
+                      className="text-content-subtle hover:text-content-inverse transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -741,11 +741,11 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           >
                             <div className="shrink-0">
                               {isGroup ? (
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-white flex items-center justify-center border border-orange-400 shadow-soft">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-content-inverse flex items-center justify-center border border-orange-400 shadow-soft">
                                   <Users className="w-4 h-4" />
                                 </div>
                               ) : (
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-white flex items-center justify-center border border-purple-500 shadow-soft relative">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-content-inverse flex items-center justify-center border border-purple-500 shadow-soft relative">
                                   <Sparkles className="w-4 h-4 animate-pulse text-yellow-200" />
                                 </div>
                               )}
@@ -776,7 +776,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                             </div>
 
                             {unread > 0 && (
-                              <div className="shrink-0 min-w-[16px] h-4 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 animate-bounce">
+                              <div className="shrink-0 min-w-[16px] h-4 bg-orange-500 text-content-inverse rounded-full flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 animate-bounce">
                                 {unread}
                               </div>
                             )}
@@ -849,7 +849,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
                             {/* Unread Count Badge */}
                             {userUnread > 0 && (
-                              <div className="shrink-0 min-w-[16px] h-4 bg-orange-500 text-white rounded-full flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 shadow-soft">
+                              <div className="shrink-0 min-w-[16px] h-4 bg-orange-500 text-content-inverse rounded-full flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 shadow-soft">
                                 {userUnread}
                               </div>
                             )}
@@ -864,11 +864,11 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
               /* VIEW B: ACTIVE CHAT VIEW */
               <div id="chat-active-room-view" className="flex flex-col h-full bg-surface">
                 {/* Header */}
-                <div className="px-3 py-2 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
+                <div className="px-3 py-2 bg-gradient-to-r from-slate-900 to-slate-800 text-content-inverse flex items-center justify-between border-b border-border-inverse shrink-0">
                   <div className="flex items-center gap-2 min-w-0">
                     <button
                       onClick={() => setActiveChatUser(null)}
-                      className="p-1 text-content-subtle hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                      className="p-1 text-content-subtle hover:text-content-inverse hover:bg-surface-inverse rounded-lg transition-all"
                       title="Kembali"
                     >
                       <ArrowLeft className="w-4 h-4" />
@@ -876,17 +876,17 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     {/* Active User info */}
                     <div className="relative shrink-0">
                       {activeChatUser.id === "group" ? (
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-white flex items-center justify-center border border-orange-400/30">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-content-inverse flex items-center justify-center border border-orange-400/30">
                           <Users className="w-3.5 h-3.5" />
                         </div>
                       ) : activeChatUser.id === "lanpro-ai" ? (
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-white flex items-center justify-center border border-purple-500/30">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-content-inverse flex items-center justify-center border border-purple-500/30">
                           <Bot className="w-3.5 h-3.5 text-yellow-200" />
                         </div>
                       ) : (
                         <UserAvatar
                           user={activeChatUser}
-                          className="w-8 h-8 border border-slate-700 text-xs"
+                          className="w-8 h-8 border border-border-inverse text-xs"
                         />
                       )}
 
@@ -901,7 +901,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       )}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-white truncate leading-tight flex items-center gap-1">
+                      <p className="text-xs font-medium text-content-inverse truncate leading-tight flex items-center gap-1">
                         {activeChatUser?.displayName}
                         {activeChatUser.id === "lanpro-ai" && (
                           <span className="px-1 py-0.2 bg-purple-500/20 text-purple-300 text-xs sm:text-[10px] sm:text-[8px] font-medium rounded uppercase border border-purple-500/30">
@@ -927,14 +927,14 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         setIsMsgSearchOpen(!isMsgSearchOpen);
                         setMsgSearchQuery("");
                       }}
-                      className={`p-1.5 rounded-lg transition-all ${isMsgSearchOpen ? "bg-slate-800 text-orange-500" : "text-content-subtle hover:text-white"}`}
+                      className={`p-1.5 rounded-lg transition-all ${isMsgSearchOpen ? "bg-surface-inverse text-orange-500" : "text-content-subtle hover:text-content-inverse"}`}
                       title="Cari dalam chat ini"
                     >
                       <Search className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => setActiveChatUser(null)}
-                      className="p-1.5 text-content-subtle hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                      className="p-1.5 text-content-subtle hover:text-content-inverse hover:bg-surface-inverse rounded-lg transition-all"
                       title="Sembunyikan"
                     >
                       <Minus className="w-3.5 h-3.5" />
@@ -1006,7 +1006,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           {!isSelf && msg.receiverId === "group" && (
                             <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-muted mb-0.5 ml-1 flex items-center gap-1 select-none">
                               {senderDisplayName}
-                              <span className="px-1 bg-slate-200 text-content-secondary rounded-[3px] text-xs sm:text-[10px] sm:text-[7px] font-medium">
+                              <span className="px-1 bg-surface-strong text-content-secondary rounded-[3px] text-xs sm:text-[10px] sm:text-[7px] font-medium">
                                 {senderProfile?.role || "anggota"}
                               </span>
                             </span>
@@ -1022,7 +1022,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           <div
                             className={`max-w-[85%] px-3 py-2 rounded-xl text-xs break-all shadow-soft ${
                               isSelf
-                                ? "bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-br-none"
+                                ? "bg-gradient-to-br from-slate-900 to-slate-800 text-content-inverse rounded-br-none"
                                 : "bg-surface border border-border-faint text-content-strong rounded-bl-none"
                             }`}
                           >
@@ -1089,7 +1089,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       className={`px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider transition-colors ${
                         simulationEnabled
                           ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                          : "bg-slate-200 text-content-secondary hover:bg-slate-300"
+                          : "bg-surface-strong text-content-secondary hover:bg-slate-300"
                       }`}
                     >
                       {simulationEnabled ? "AKTIF" : "NONAKTIF"}
@@ -1131,7 +1131,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           }
                           className="flex items-center gap-2 p-2 bg-surface border border-border-subtle rounded-xl text-left hover:border-orange-500 hover:bg-orange-50/10 transition-all group"
                         >
-                          <span className="p-1.5 bg-orange-100 text-orange-600 rounded-lg group-hover:bg-orange-600 group-hover:text-white transition-all shrink-0">
+                          <span className="p-1.5 bg-orange-100 text-orange-600 rounded-lg group-hover:bg-orange-600 group-hover:text-content-inverse transition-all shrink-0">
                             <Image className="w-3.5 h-3.5" />
                           </span>
                           <div className="min-w-0">
@@ -1156,7 +1156,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           }
                           className="flex items-center gap-2 p-2 bg-surface border border-border-subtle rounded-xl text-left hover:border-orange-500 hover:bg-orange-50/10 transition-all group"
                         >
-                          <span className="p-1.5 bg-amber-100 text-amber-600 rounded-lg group-hover:bg-amber-600 group-hover:text-white transition-all shrink-0">
+                          <span className="p-1.5 bg-amber-100 text-amber-600 rounded-lg group-hover:bg-amber-600 group-hover:text-content-inverse transition-all shrink-0">
                             <FileText className="w-3.5 h-3.5" />
                           </span>
                           <div className="min-w-0">
@@ -1174,7 +1174,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-full py-1.5 bg-slate-900 text-white rounded-xl text-xs sm:text-[10px] font-medium tracking-wider uppercase flex items-center justify-center gap-1.5 hover:bg-orange-600 transition-colors shadow-soft"
+                        className="w-full py-1.5 bg-surface-inverse text-content-inverse rounded-xl text-xs sm:text-[10px] font-medium tracking-wider uppercase flex items-center justify-center gap-1.5 hover:bg-orange-600 transition-colors shadow-soft"
                       >
                         <FileUp className="w-3.5 h-3.5" />
                         Unggah File Komputer Anda
@@ -1224,7 +1224,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                   <button
                     type="submit"
                     disabled={!inputMessage.trim() || isUploading}
-                    className="p-2 bg-slate-900 text-white hover:bg-orange-500 rounded-xl transition-all shadow-soft disabled:opacity-30 disabled:hover:bg-slate-900 flex items-center justify-center shrink-0"
+                    className="p-2 bg-surface-inverse text-content-inverse hover:bg-orange-500 rounded-xl transition-all shadow-soft disabled:opacity-30 disabled:hover:bg-surface-inverse flex items-center justify-center shrink-0"
                     title="Kirim Pesan"
                   >
                     <Send className="w-3.5 h-3.5" />

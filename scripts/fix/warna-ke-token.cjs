@@ -52,6 +52,12 @@ const warna = {
 const PETA = {
   bg: {
     white: "surface",
+    // Permukaan yang SENGAJA gelap di kedua mode. Nilai tokennya sama persis
+    // dengan slate yang digantikan, jadi tidak ada piksel yang berubah.
+    "slate-800": "surface-inverse",
+    "slate-900": "surface-inverse",
+    "slate-200": "surface-strong",
+    "gray-200": "surface-strong",
     "slate-50": "surface-sunken",
     "slate-100": "surface-muted",
     "gray-50": "surface-sunken",
@@ -73,6 +79,8 @@ const PETA = {
     "gray-900": "content",
   },
   border: {
+    "slate-800": "border-inverse",
+    "slate-700": "border-inverse",
     "slate-100": "border-faint",
     "slate-200": "border-subtle",
     "slate-300": "border-subtle",
@@ -95,9 +103,13 @@ function ubah(isi) {
       dilewati.push(`${utuh} (opasitas — lapisan)`);
       return utuh;
     }
+    // `text-white` kini PUNYA token: `content-inverse` bernilai #ffffff di
+    // KEDUA mode, jadi penggantiannya identik piksel demi piksel. Sebelum token
+    // itu ada, ia harus dilewati — bukan karena tidak boleh diganti, melainkan
+    // karena tidak ada tujuan yang aman.
     if (prop === "text" && wrn === "white") {
-      dilewati.push(`${utuh} (teks di atas permukaan berwarna)`);
-      return utuh;
+      diganti++;
+      return "text-content-inverse";
     }
     const tujuan = PETA[prop] && PETA[prop][wrn];
     if (!tujuan) {

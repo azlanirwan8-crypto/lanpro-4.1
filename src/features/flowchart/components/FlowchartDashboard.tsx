@@ -92,7 +92,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
 
             <button
               onClick={openCreateModal}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-white rounded-md text-xs font-medium transition-all shadow-xs shadow-primary/20 cursor-pointer shrink-0"
+              className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs shadow-primary/20 cursor-pointer shrink-0"
             >
               <Plus className="w-4 h-4" /> Add Flowchart
             </button>
@@ -128,7 +128,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                       </p>
                       <button
                         onClick={openCreateModal}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-white rounded-md text-xs font-medium transition-all shadow-xs shadow-primary/20 cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs shadow-primary/20 cursor-pointer"
                       >
                         <Plus className="w-4 h-4" /> Add Flowchart
                       </button>
@@ -269,7 +269,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                 >
                   Previous
                 </button>
-                <span className="px-3.5 py-1.5 bg-primary text-white rounded-md text-xs font-medium shadow-xs">
+                <span className="px-3.5 py-1.5 bg-primary text-content-inverse rounded-md text-xs font-medium shadow-xs">
                   {currentPage}
                 </span>
                 <button

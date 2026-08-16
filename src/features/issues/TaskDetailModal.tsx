@@ -49,7 +49,7 @@ const Button = ({
 }: any) => {
   const variants = {
     primary:
-      "bg-primary text-white hover:bg-primary-hover active:bg-primary-active shadow-xs border-transparent",
+      "bg-primary text-content-inverse hover:bg-primary-hover active:bg-primary-active shadow-xs border-transparent",
     secondary:
       "bg-surface text-content-body border-border-subtle/80 hover:bg-surface-sunken shadow-xs",
     ghost: "bg-transparent text-content-muted hover:bg-surface-muted border-transparent",
@@ -882,7 +882,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                             members={projectMembers}
                             className="w-6 h-6 border border-white shadow-soft ring-1 ring-border-faint"
                           />
-                          <div className="h-4 w-px bg-slate-200" />
+                          <div className="h-4 w-px bg-surface-strong" />
                           <PriorityIcon
                             priority={st.priority || "Medium"}
                             masterData={masterData}
@@ -971,13 +971,13 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       <div className="flex-1 relative group">
                         <div className="border border-border-subtle rounded-xl bg-surface overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-300 transition-all shadow-soft">
                           <div className="flex items-center gap-1 p-1.5 border-b border-border-faint bg-surface-sunken/50 text-content-muted overflow-x-auto custom-scrollbar">
-                            <button className="flex items-center gap-1.5 px-2 py-1 hover:bg-slate-200 rounded text-xs sm:text-[11px] font-medium text-content-secondary transition-colors shrink-0">
+                            <button className="flex items-center gap-1.5 px-2 py-1 hover:bg-surface-strong rounded text-xs sm:text-[11px] font-medium text-content-secondary transition-colors shrink-0">
                               <Sparkles className="w-3 h-3 text-indigo-500" />
                               Improve writing
                             </button>
-                            <div className="w-px h-4 bg-slate-200 mx-1 shrink-0" />
+                            <div className="w-px h-4 bg-surface-strong mx-1 shrink-0" />
                             <button
-                              className="p-1 hover:bg-slate-200 rounded text-content-secondary shrink-0"
+                              className="p-1 hover:bg-surface-strong rounded text-content-secondary shrink-0"
                               title="Text format"
                             >
                               <span className="text-xs font-medium leading-none px-0.5 border border-border-subtle rounded font-serif">
@@ -985,28 +985,28 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                               </span>
                             </button>
                             <button
-                              className="p-1 hover:bg-slate-200 rounded font-medium text-content-secondary shrink-0 text-sm leading-none"
+                              className="p-1 hover:bg-surface-strong rounded font-medium text-content-secondary shrink-0 text-sm leading-none"
                               title="Bold"
                             >
                               B
                             </button>
                             <button
-                              className="p-1 hover:bg-slate-200 rounded italic text-content-secondary shrink-0 text-sm leading-none"
+                              className="p-1 hover:bg-surface-strong rounded italic text-content-secondary shrink-0 text-sm leading-none"
                               title="Italic"
                             >
                               I
                             </button>
                             <button
-                              className="p-1 hover:bg-slate-200 rounded text-content-secondary shrink-0"
+                              className="p-1 hover:bg-surface-strong rounded text-content-secondary shrink-0"
                               title="List"
                             >
                               <Layout className="w-3.5 h-3.5" />
                             </button>
-                            <div className="w-px h-4 bg-slate-200 mx-1 shrink-0" />
-                            <button className="p-1 hover:bg-slate-200 rounded shrink-0">
+                            <div className="w-px h-4 bg-surface-strong mx-1 shrink-0" />
+                            <button className="p-1 hover:bg-surface-strong rounded shrink-0">
                               <LinkIcon className="w-3.5 h-3.5" />
                             </button>
-                            <button className="p-1 hover:bg-slate-200 rounded shrink-0">
+                            <button className="p-1 hover:bg-surface-strong rounded shrink-0">
                               <AttachmentIcon className="w-3.5 h-3.5" />
                             </button>
                           </div>

@@ -90,7 +90,7 @@ const getStatusColors = (status: string = "", isEpic: boolean) => {
     bg: "bg-gradient-to-r from-slate-50 to-white",
     border: "border-border-subtle/80 hover:border-border-subtle",
     text: "text-content",
-    activeBg: "bg-slate-950 ring-2 ring-slate-400 border-slate-800",
+    activeBg: "bg-slate-950 ring-2 ring-slate-400 border-border-inverse",
     handle: "hover:bg-slate-600/15 active:bg-slate-600/25 group/l-handle",
     handleBar: "bg-slate-400/80 border-slate-400/20 group-hover/l-handle:bg-slate-600",
     handleR: "hover:bg-slate-600/15 active:bg-slate-600/25 group/r-handle",
@@ -1202,7 +1202,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             >
               <Minus className="w-3.5 h-3.5" />
             </button>
-            <div className="w-px h-4 bg-slate-200 mx-1" />
+            <div className="w-px h-4 bg-surface-strong mx-1" />
 
             {(["days", "weeks", "months"] as const).map((z) => (
               <button
@@ -1223,7 +1223,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               </button>
             ))}
 
-            <div className="w-px h-4 bg-slate-200 mx-1" />
+            <div className="w-px h-4 bg-surface-strong mx-1" />
             <button
               type="button"
               onClick={() => setPixelsPerDay((prev) => Math.min(150, prev + 4))}
@@ -1237,7 +1237,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             <button
               onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
               onBlur={() => setTimeout(() => setIsExportMenuOpen(false), 200)}
-              className="h-8 px-3.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-white rounded-md text-xs font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+              className="h-8 px-3.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>EXPORT AS</span> <ChevronDown className="w-3 h-3" />
@@ -1662,7 +1662,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           {/* Dynamic Floating Tooltip */}
                           <div
                             className={cn(
-                              "absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-800 text-white text-xs sm:text-[10px] font-medium px-2.5 py-1.5 rounded-lg shadow-xl pointer-events-none z-50 flex items-center gap-1.5 whitespace-nowrap transition-all duration-150 origin-bottom scale-90 opacity-0",
+                              "absolute -top-12 left-1/2 -translate-x-1/2 bg-surface-inverse border border-border-inverse text-content-inverse text-xs sm:text-[10px] font-medium px-2.5 py-1.5 rounded-lg shadow-xl pointer-events-none z-50 flex items-center gap-1.5 whitespace-nowrap transition-all duration-150 origin-bottom scale-90 opacity-0",
                               "group-hover/bar:opacity-100 group-hover/bar:scale-100",
                               timelineInteraction?.taskId === task.id
                                 ? "opacity-100 scale-100 ring-2"
@@ -1790,7 +1790,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   className="absolute top-0 bottom-0 z-20 border-l-2 border-danger border-dashed pointer-events-none"
                   style={{ left: `${todayLeft}%` }}
                 >
-                  <div className="bg-danger text-white text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-md absolute top-1.5 -translate-x-1/2 shadow-soft flex items-center gap-1 z-30 tracking-wider">
+                  <div className="bg-danger text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-md absolute top-1.5 -translate-x-1/2 shadow-soft flex items-center gap-1 z-30 tracking-wider">
                     <span className="relative flex h-1.5 w-1.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-surface opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-surface"></span>

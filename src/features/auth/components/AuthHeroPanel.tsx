@@ -54,7 +54,7 @@ export const AuthHeroPanel = () => (
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <h1 className="text-6xl font-medium text-white leading-[0.9] tracking-tighter drop-shadow-md">
+        <h1 className="text-6xl font-medium text-content-inverse leading-[0.9] tracking-tighter drop-shadow-md">
           LAN <span className="text-amber-400">PRO</span>
         </h1>
         <p className="text-xs font-medium text-slate-200 mt-3 tracking-widest uppercase">

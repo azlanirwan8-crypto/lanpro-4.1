@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { Plus, SearchX, BookOpen, Sparkles, RefreshCw } from 'lucide-react';
+import React from "react";
+import { motion } from "motion/react";
+import { Plus, SearchX, BookOpen, Sparkles, RefreshCw } from "lucide-react";
 
 interface WikiEmptyStateProps {
   onCreateClick: () => void;
@@ -13,16 +13,16 @@ export const WikiEmptyState: React.FC<WikiEmptyStateProps> = ({
   onCreateClick,
   searchQuery,
   selectedCategory,
-  onResetFilters
+  onResetFilters,
 }) => {
-  const isFiltered = searchQuery || selectedCategory !== 'SEMUA';
+  const isFiltered = searchQuery || selectedCategory !== "SEMUA";
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.35, ease: 'easeOut' }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
       className="bg-surface/45 backdrop-blur-xl rounded-xl border border-border-subtle/50 p-8 sm:p-14 text-center max-w-xl mx-auto mt-8 shadow-[0_8px_32px_0_rgba(99,102,241,0.04),inset_0_1.5px_1.5px_rgba(255,255,255,0.8)] select-none relative overflow-hidden"
     >
       {/* Decorative ambient background glows */}
@@ -31,27 +31,27 @@ export const WikiEmptyState: React.FC<WikiEmptyStateProps> = ({
 
       {/* Modern Animated Illustration */}
       <div className="relative flex justify-center mb-8">
-        <motion.div 
-          animate={{ 
+        <motion.div
+          animate={{
             y: [0, -8, 0],
           }}
           transition={{
             duration: 5,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
           className="relative w-32 h-32 flex items-center justify-center"
         >
           {/* Circular backdrop rings with gradient & blur */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-indigo-100/40 to-violet-100/40 border border-indigo-200/20 blur-md scale-95" />
           <div className="absolute w-24 h-24 rounded-full bg-surface/70 shadow-soft-lg shadow-indigo-600/5 border border-indigo-100/50 flex items-center justify-center" />
-          
+
           {/* Floating sparks & decorative mini-icons */}
           <motion.div
-            animate={{ 
+            animate={{
               scale: [1, 1.2, 1],
               opacity: [0.6, 1, 0.6],
-              rotate: [0, 45, 0]
+              rotate: [0, 45, 0],
             }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             className="absolute top-2 right-2 text-indigo-500"
@@ -60,9 +60,9 @@ export const WikiEmptyState: React.FC<WikiEmptyStateProps> = ({
           </motion.div>
 
           <motion.div
-            animate={{ 
+            animate={{
               y: [0, 6, 0],
-              opacity: [0.4, 0.8, 0.4]
+              opacity: [0.4, 0.8, 0.4],
             }}
             transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
             className="absolute bottom-3 left-1 text-violet-400"
@@ -93,9 +93,34 @@ export const WikiEmptyState: React.FC<WikiEmptyStateProps> = ({
                 viewBox="0 0 24 30"
                 fill="currentColor"
               >
-                <rect x="2" y="2" width="20" height="26" rx="3" fill="white" stroke="currentColor" strokeWidth="1.5" />
-                <line x1="6" y1="8" x2="18" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                <line x1="6" y1="14" x2="14" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <rect
+                  x="2"
+                  y="2"
+                  width="20"
+                  height="26"
+                  rx="3"
+                  fill="white"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <line
+                  x1="6"
+                  y1="8"
+                  x2="18"
+                  y2="8"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="6"
+                  y1="14"
+                  x2="14"
+                  y2="14"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
               </motion.svg>
 
               <motion.svg
@@ -109,10 +134,43 @@ export const WikiEmptyState: React.FC<WikiEmptyStateProps> = ({
                 viewBox="0 0 24 30"
                 fill="currentColor"
               >
-                <rect x="2" y="2" width="20" height="26" rx="3" fill="white" stroke="currentColor" strokeWidth="1.5" />
-                <line x1="6" y1="8" x2="16" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                <line x1="6" y1="14" x2="18" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                <line x1="6" y1="20" x2="12" y2="20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <rect
+                  x="2"
+                  y="2"
+                  width="20"
+                  height="26"
+                  rx="3"
+                  fill="white"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                />
+                <line
+                  x1="6"
+                  y1="8"
+                  x2="16"
+                  y2="8"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="6"
+                  y1="14"
+                  x2="18"
+                  y2="14"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="6"
+                  y1="20"
+                  x2="12"
+                  y2="20"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
               </motion.svg>
             </>
           )}
@@ -121,13 +179,13 @@ export const WikiEmptyState: React.FC<WikiEmptyStateProps> = ({
 
       {/* Heading & Sub-paragraph */}
       <h3 className="text-lg font-medium text-content-strong tracking-tight leading-snug">
-        {isFiltered ? 'Dokumen Tidak Ditemukan' : 'Mulai Tulis Dokumentasi Proyek'}
+        {isFiltered ? "Dokumen Tidak Ditemukan" : "Mulai Tulis Dokumentasi Proyek"}
       </h3>
-      
+
       <p className="text-xs text-content-subtle font-medium max-w-sm mx-auto mt-2 leading-relaxed">
-        {isFiltered 
+        {isFiltered
           ? `Tidak menemukan hasil untuk kata kunci "${searchQuery}" atau kategori "${selectedCategory}". Coba bersihkan filter pencarian.`
-          : 'Belum ada panduan SOP, spesifikasi produk, atau laporan untuk proyek ini. Abadikan pengetahuan tim Anda sekarang.'}
+          : "Belum ada panduan SOP, spesifikasi produk, atau laporan untuk proyek ini. Abadikan pengetahuan tim Anda sekarang."}
       </p>
 
       {/* Primary Action Button / Reset Button Row */}
@@ -146,12 +204,12 @@ export const WikiEmptyState: React.FC<WikiEmptyStateProps> = ({
           whileHover={{ scale: 1.02, y: -1 }}
           whileTap={{ scale: 0.98 }}
           onClick={onCreateClick}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-white font-medium text-xs rounded-md shadow-xs transition-all cursor-pointer relative overflow-hidden group"
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover active:bg-primary-active text-content-inverse font-medium text-xs rounded-md shadow-xs transition-all cursor-pointer relative overflow-hidden group"
         >
           {/* Dynamic shimmer gloss on button hover */}
           <div className="absolute inset-0 w-1/2 h-full bg-surface/10 skew-x-12 -translate-x-full group-hover:animate-shimmer pointer-events-none" />
-          <Plus className="w-4 h-4 text-white" />
-          <span>{isFiltered ? 'Buat Dokumen Baru' : 'Tambah Dokumen Pertama'}</span>
+          <Plus className="w-4 h-4 text-content-inverse" />
+          <span>{isFiltered ? "Buat Dokumen Baru" : "Tambah Dokumen Pertama"}</span>
         </motion.button>
       </div>
     </motion.div>

@@ -473,7 +473,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                           toggleTaskExpansion(task.id);
                         }}
                         className={cn(
-                          "p-1 hover:bg-slate-200 rounded transition-colors text-content-subtle shrink-0 outline-none",
+                          "p-1 hover:bg-surface-strong rounded transition-colors text-content-subtle shrink-0 outline-none",
                           !hasSubtasks && "opacity-0 pointer-events-none"
                         )}
                       >
@@ -859,7 +859,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                     e.stopPropagation();
                     deleteTask(task.id);
                   }}
-                  className="p-1 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200/80 rounded-lg transition-all cursor-pointer shadow-xs font-medium"
+                  className="p-1 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-200/80 rounded-lg transition-all cursor-pointer shadow-xs font-medium"
                   title="Hapus Issue"
                 >
                   <Trash className="w-3.5 h-3.5 shrink-0" />
@@ -873,7 +873,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                       activeContextMenuTaskId === task.id ? null : task.id
                     );
                   }}
-                  className="p-1 bg-surface-muted hover:bg-indigo-600 text-content-secondary hover:text-white border border-border-subtle rounded-lg transition-all cursor-pointer shadow-xs font-medium"
+                  className="p-1 bg-surface-muted hover:bg-indigo-600 text-content-secondary hover:text-content-inverse border border-border-subtle rounded-lg transition-all cursor-pointer shadow-xs font-medium"
                   title="Menu Aksi"
                 >
                   <MoreVertical className="w-3.5 h-3.5 shrink-0" />
@@ -1060,7 +1060,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                 <button
                   onClick={() => createSubtask(task.id)}
                   disabled={isCreating}
-                  className="p-1 px-2 bg-blue-600 text-white rounded text-xs sm:text-[10px] font-medium hover:bg-blue-700 disabled:opacity-50 transition-all"
+                  className="p-1 px-2 bg-blue-600 text-content-inverse rounded text-xs sm:text-[10px] font-medium hover:bg-blue-700 disabled:opacity-50 transition-all"
                 >
                   {isCreating ? (
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -1077,7 +1077,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                       return next;
                     });
                   }}
-                  className="p-1 px-2 bg-surface-muted text-content-subtle rounded text-xs sm:text-[10px] font-medium hover:bg-slate-200 transition-all"
+                  className="p-1 px-2 bg-surface-muted text-content-subtle rounded text-xs sm:text-[10px] font-medium hover:bg-surface-strong transition-all"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1139,7 +1139,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
 
                 if (activeCount > 0) {
                   return (
-                    <span className="ml-1 bg-primary text-white rounded-full px-1.5 py-0.5 flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-semibold leading-none">
+                    <span className="ml-1 bg-primary text-content-inverse rounded-full px-1.5 py-0.5 flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-semibold leading-none">
                       {activeCount}
                     </span>
                   );
@@ -1592,7 +1592,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                         setListFilterStartDate("");
                         setListFilterEndDate("");
                       }}
-                      className="px-4 h-[34px] bg-surface-muted hover:bg-slate-200 text-content-secondary rounded-xl text-xs font-medium transition-all shrink-0 flex items-center justify-center gap-1.5 select-none"
+                      className="px-4 h-[34px] bg-surface-muted hover:bg-surface-strong text-content-secondary rounded-xl text-xs font-medium transition-all shrink-0 flex items-center justify-center gap-1.5 select-none"
                       title="Clear all fields"
                     >
                       <X className="w-3.5 h-3.5" />
@@ -1661,7 +1661,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                     <Layout className="w-3.5 h-3.5 text-content-subtle opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity" />
                                   )}
                                 </div>
-                                <div className="absolute right-0 top-1/4 bottom-1/4 w-px bg-slate-200" />
+                                <div className="absolute right-0 top-1/4 bottom-1/4 w-px bg-surface-strong" />
                               </th>
                             ))}
                           <th
@@ -1742,7 +1742,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                   onClick={() =>
                     setIsInlineTypeOpen(isInlineTypeOpen === "global" ? null : "global")
                   }
-                  className="flex items-center justify-center p-1.5 hover:bg-slate-200 rounded transition-colors text-content-secondary outline-none"
+                  className="flex items-center justify-center p-1.5 hover:bg-surface-strong rounded transition-colors text-content-secondary outline-none"
                 >
                   {(() => {
                     const typeData = mArr.find(
@@ -1816,7 +1816,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                   members={projectMembers}
                   type="member"
                   masterData={mArr}
-                  className="w-full !border-transparent !bg-transparent hover:!bg-slate-200"
+                  className="w-full !border-transparent !bg-transparent hover:!bg-surface-strong"
                 />
               </div>
 
@@ -1829,19 +1829,19 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                     .map((p) => ({ id: p.label, label: p.label, icon: p.icon, color: p.color }))}
                   type="priority"
                   masterData={mArr}
-                  className="w-full !border-transparent !bg-transparent hover:!bg-slate-200"
+                  className="w-full !border-transparent !bg-transparent hover:!bg-surface-strong"
                 />
               </div>
 
               <button
                 onClick={() => createGlobalIssue()}
                 disabled={!quickCreateTitle.trim() || isCreating}
-                className="w-full sm:w-auto px-4 py-1.5 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 disabled:bg-primary/50 text-white text-xs sm:text-[11px] font-medium rounded-md uppercase tracking-wider transition-all duration-200 shrink-0 flex items-center justify-center gap-1.5 sm:ml-1 shadow-xs cursor-pointer"
+                className="w-full sm:w-auto px-4 py-1.5 bg-primary hover:bg-primary-hover active:bg-primary-active disabled:opacity-50 disabled:bg-primary/50 text-content-inverse text-xs sm:text-[11px] font-medium rounded-md uppercase tracking-wider transition-all duration-200 shrink-0 flex items-center justify-center gap-1.5 sm:ml-1 shadow-xs cursor-pointer"
               >
                 {isCreating ? (
                   <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
-                  <Plus className="w-3.5 h-3.5 text-white stroke-[3px]" />
+                  <Plus className="w-3.5 h-3.5 text-content-inverse stroke-[3px]" />
                 )}
                 <span>{isCreating ? "Creating..." : "+ CREATE"}</span>
               </button>
@@ -1895,7 +1895,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                   className={cn(
                     "w-6 h-6 rounded-lg flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-medium transition-all cursor-pointer active:scale-95 shrink-0",
                     listPage === i + 1
-                      ? "bg-primary text-white shadow-xs"
+                      ? "bg-primary text-content-inverse shadow-xs"
                       : "text-content-muted hover:bg-slate-200/80"
                   )}
                 >
@@ -1931,10 +1931,10 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
               animate={{ y: 0, opacity: 1, x: "-50%" }}
               exit={{ y: 80, opacity: 0, x: "-50%" }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="fixed bottom-6 left-1/2 z-50 bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-6 py-3.5 flex flex-wrap items-center gap-6 text-white text-xs font-medium select-none"
+              className="fixed bottom-6 left-1/2 z-50 bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-6 py-3.5 flex flex-wrap items-center gap-6 text-content-inverse text-xs font-medium select-none"
             >
-              <div className="flex items-center gap-2 border-r border-slate-700 pr-4">
-                <span className="bg-indigo-600 text-white text-xs sm:text-[10px] font-medium rounded-full px-2 py-0.5 min-w-[20px] text-center">
+              <div className="flex items-center gap-2 border-r border-border-inverse pr-4">
+                <span className="bg-indigo-600 text-content-inverse text-xs sm:text-[10px] font-medium rounded-full px-2 py-0.5 min-w-[20px] text-center">
                   {selectedTaskIds.size}
                 </span>
                 <span className="text-content-subtle font-medium uppercase tracking-wider text-xs sm:text-[10px]">
@@ -1960,7 +1960,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                     }
                   }}
                   defaultValue=""
-                  className="bg-slate-800 border border-slate-700 text-white rounded-xl px-2.5 py-1.5 text-xs outline-none focus:border-indigo-500 cursor-pointer font-medium"
+                  className="bg-surface-inverse border border-border-inverse text-content-inverse rounded-xl px-2.5 py-1.5 text-xs outline-none focus:border-indigo-500 cursor-pointer font-medium"
                 >
                   <option value="" disabled>
                     Pilih Status...
@@ -1990,7 +1990,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                     setSelectedTaskIds(new Set());
                   }}
                   defaultValue=""
-                  className="bg-slate-800 border border-slate-700 text-white rounded-xl px-2.5 py-1.5 text-xs outline-none focus:border-indigo-500 cursor-pointer font-medium"
+                  className="bg-surface-inverse border border-border-inverse text-content-inverse rounded-xl px-2.5 py-1.5 text-xs outline-none focus:border-indigo-500 cursor-pointer font-medium"
                 >
                   <option value="" disabled>
                     Pilih Assignee...
@@ -2025,7 +2025,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                           setSelectedTaskIds(new Set());
                         }
                       }}
-                      className="bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-medium rounded-xl px-4 py-2 flex items-center gap-1.5 transition-all shadow-soft cursor-pointer"
+                      className="bg-rose-600 hover:bg-rose-700 active:scale-95 text-content-inverse font-medium rounded-xl px-4 py-2 flex items-center gap-1.5 transition-all shadow-soft cursor-pointer"
                     >
                       <Trash className="w-3.5 h-3.5" />
                       <span>Hapus ({deletableIds.length})</span>
@@ -2037,7 +2037,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
               {/* Deselect All / Close */}
               <button
                 onClick={() => setSelectedTaskIds(new Set())}
-                className="p-1.5 hover:bg-slate-800 text-content-subtle hover:text-white rounded-xl transition-all cursor-pointer"
+                className="p-1.5 hover:bg-surface-inverse text-content-subtle hover:text-content-inverse rounded-xl transition-all cursor-pointer"
                 title="Batal pilih semua"
               >
                 <X className="w-4 h-4" />

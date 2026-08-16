@@ -192,7 +192,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                 onClick={() => {
                   setIsNotificationsOpen(false);
                 }}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-150 text-center block shadow-xs"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-content-inverse py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-150 text-center block shadow-xs"
               >
                 View all notifications
               </button>

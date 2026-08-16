@@ -40,10 +40,11 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
 
   const renderBadge = (badge?: string, badgeColor?: string) => {
     if (!badge) return null;
-    let colorClasses = "bg-danger text-white"; // default Hot orange-red
-    if (badgeColor === "emerald" || badge === "New") colorClasses = "bg-success text-white";
-    if (badgeColor === "blue") colorClasses = "bg-info text-white";
-    if (badgeColor === "purple") colorClasses = "bg-[#878a99] text-white";
+    let colorClasses = "bg-danger text-content-inverse"; // default Hot orange-red
+    if (badgeColor === "emerald" || badge === "New")
+      colorClasses = "bg-success text-content-inverse";
+    if (badgeColor === "blue") colorClasses = "bg-info text-content-inverse";
+    if (badgeColor === "purple") colorClasses = "bg-[#878a99] text-content-inverse";
 
     return (
       <span
@@ -91,7 +92,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
       >
         <div className="flex items-center gap-3">
           <motion.div whileHover={{ rotate: 8, scale: 1.05 }} className={styles.logoIcon}>
-            <Kanban className="text-white w-5 h-5" />
+            <Kanban className="text-content-inverse w-5 h-5" />
           </motion.div>
           <AnimatePresence mode="wait">
             {!isSidebarCollapsed && (
@@ -245,12 +246,12 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                       className={cn(
                         "w-full flex items-center gap-3 px-3 py-2.5 min-h-11 rounded-md transition-all text-xs relative overflow-hidden group",
                         isActive
-                          ? "bg-[#364574] text-white font-medium border-l-3 border-amber-400 shadow-soft"
-                          : "text-[#abb9e8] hover:bg-surface/5 hover:text-white"
+                          ? "bg-[#364574] text-content-inverse font-medium border-l-3 border-amber-400 shadow-soft"
+                          : "text-[#abb9e8] hover:bg-surface/5 hover:text-content-inverse"
                       )}
                       title={isSidebarCollapsed ? item.label : undefined}
                     >
-                      <div className="shrink-0 text-content-subtle group-hover:text-white transition-colors">
+                      <div className="shrink-0 text-content-subtle group-hover:text-content-inverse transition-colors">
                         {item.icon}
                       </div>
                       {!isSidebarCollapsed && (
@@ -262,7 +263,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                           {hasChildren && (
                             <div
                               onClick={(e) => toggleExpand(item.id, e)}
-                              className="p-2 min-w-9 min-h-9 flex items-center justify-center rounded hover:bg-surface/10 text-content-subtle hover:text-white transition-colors ml-1"
+                              className="p-2 min-w-9 min-h-9 flex items-center justify-center rounded hover:bg-surface/10 text-content-subtle hover:text-content-inverse transition-colors ml-1"
                             >
                               {isExpanded ? (
                                 <ChevronDown className="w-3.5 h-3.5" />
@@ -292,8 +293,8 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                               className={cn(
                                 "w-full flex items-center gap-2 py-2 px-2 min-h-11 rounded text-xs transition-colors text-left",
                                 isSubActive
-                                  ? "text-white font-medium bg-surface/10"
-                                  : "text-[#878a99] hover:text-white hover:bg-surface/5"
+                                  ? "text-content-inverse font-medium bg-surface/10"
+                                  : "text-[#878a99] hover:text-content-inverse hover:bg-surface/5"
                               )}
                             >
                               <span className="text-content-subtle text-xs sm:text-[10px]">—</span>
@@ -314,13 +315,13 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
       {/* Velzon Bottom User Profile Footer */}
       <div className="p-3 border-t border-border-subtle bg-border-subtle/40 mt-auto relative">
         {isUserMenuOpen && (
-          <div className="absolute bottom-full left-3 right-3 mb-2 bg-surface-raised border border-border-subtle rounded-xl shadow-2xl py-1.5 z-50 text-white animate-in fade-in zoom-in-95 duration-150">
+          <div className="absolute bottom-full left-3 right-3 mb-2 bg-surface-raised border border-border-subtle rounded-xl shadow-2xl py-1.5 z-50 text-content-inverse animate-in fade-in zoom-in-95 duration-150">
             <button
               onClick={() => {
                 setIsUserMenuOpen(false);
                 if (onOpenProfile) onOpenProfile();
               }}
-              className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-surface/10 flex items-center gap-2.5 transition-colors text-slate-200 hover:text-white cursor-pointer"
+              className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-surface/10 flex items-center gap-2.5 transition-colors text-slate-200 hover:text-content-inverse cursor-pointer"
             >
               <User className="w-4 h-4 text-amber-400" />
               <span>Profil Anda</span>
@@ -355,7 +356,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
           {!isSidebarCollapsed && (
             <>
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-white truncate">
+                <div className="text-xs font-medium text-content-inverse truncate">
                   {user?.displayName || currentUser?.displayName || currentUser?.username || "User"}
                 </div>
                 <div className="text-xs sm:text-[10px] text-content-subtle truncate font-mono">
@@ -376,7 +377,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className="w-full mt-2 flex justify-center p-2 text-content-subtle hover:text-white transition-colors"
+            className="w-full mt-2 flex justify-center p-2 text-content-subtle hover:text-content-inverse transition-colors"
             title="Opsi Profil"
           >
             <User className="w-4 h-4" />

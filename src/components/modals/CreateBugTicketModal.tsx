@@ -235,14 +235,14 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-3 bg-surface-muted hover:bg-slate-200 text-content-body text-xs font-medium rounded-md uppercase tracking-wider cursor-pointer"
+                className="flex-1 py-3 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium rounded-md uppercase tracking-wider cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !selectedParentId}
-                className="flex-1 py-3 bg-danger hover:bg-danger-hover text-white text-xs font-medium rounded-md uppercase tracking-wider cursor-pointer shadow-xs flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
+                className="flex-1 py-3 bg-danger hover:bg-danger-hover text-content-inverse text-xs font-medium rounded-md uppercase tracking-wider cursor-pointer shadow-xs flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
               >
                 <Bug className="w-4 h-4" />
                 <span>{isSubmitting ? "Menyimpan Tiket..." : "SIMPAN & TAUTKAN BUG"}</span>

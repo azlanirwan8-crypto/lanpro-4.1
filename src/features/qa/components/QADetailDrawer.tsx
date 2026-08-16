@@ -65,7 +65,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
         <div className="p-4 border-b border-border-faint bg-primary/5 space-y-2.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-primary text-white font-medium text-xs sm:text-[10px] rounded-md">
+              <span className="px-2 py-0.5 bg-primary text-content-inverse font-medium text-xs sm:text-[10px] rounded-md">
                 TC #{selectedTestCase.rowNum}
               </span>
               <span
@@ -227,7 +227,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                                 ? "bg-emerald-100 text-success"
                                 : st === "FAILED"
                                   ? "bg-rose-100 text-danger"
-                                  : "bg-slate-200 text-content-body"
+                                  : "bg-surface-strong text-content-body"
                             }`}
                           >
                             {st}
@@ -299,7 +299,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                         )}
                         <button
                           onClick={() => handleRemoveSpecificEvidenceFromDrawer(ev.id)}
-                          className="absolute top-1 right-1 p-1 bg-danger text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-1 right-1 p-1 bg-danger text-content-inverse rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
                           title="Hapus Bukti"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -349,7 +349,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                   />
                   <button
                     type="submit"
-                    className="p-2 bg-primary hover:bg-primary-hover text-white rounded-md transition-colors cursor-pointer shadow-2xs"
+                    className="p-2 bg-primary hover:bg-primary-hover text-content-inverse rounded-md transition-colors cursor-pointer shadow-2xs"
                   >
                     <Send className="w-4 h-4" />
                   </button>
@@ -361,7 +361,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                 <div className="pt-2 border-t border-border-faint">
                   <button
                     onClick={() => handleOpenCreateBugModal(selectedTestCase)}
-                    className="w-full py-2 bg-danger hover:bg-danger-hover text-white font-medium rounded-md text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
+                    className="w-full py-2 bg-danger hover:bg-danger-hover text-content-inverse font-medium rounded-md text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
                   >
                     <Bug className="w-4 h-4" />
                     <span>Buat Tiket Bug dari Test Case Ini</span>

@@ -56,7 +56,7 @@ export const FormActions: React.FC<FormActionsProps> = ({
     <button
       type="button"
       onClick={onCancel}
-      className="px-4 py-2 bg-surface-muted hover:bg-slate-200 text-content-body text-xs font-medium rounded-md cursor-pointer transition-all"
+      className="px-4 py-2 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium rounded-md cursor-pointer transition-all"
     >
       {cancelLabel}
     </button>
@@ -64,7 +64,7 @@ export const FormActions: React.FC<FormActionsProps> = ({
       type="submit"
       onClick={onSubmit}
       disabled={isPending}
-      className="px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-medium rounded-md cursor-pointer shadow-xs disabled:opacity-50 transition-all"
+      className="px-4 py-2 bg-primary hover:bg-primary-hover text-content-inverse text-xs font-medium rounded-md cursor-pointer shadow-xs disabled:opacity-50 transition-all"
     >
       {isPending ? "Saving..." : submitLabel}
     </button>

@@ -112,7 +112,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
           Test Connection
         </button>
 
-        <button className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-md text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95">
+        <button className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse px-3.5 py-1.5 rounded-md text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95">
           <Save size={14} />
           Save Config
         </button>
@@ -140,7 +140,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
               </button>
               <button
                 onClick={() => handleTestWhatsApp(testTargetNumber)}
-                className="px-3.5 py-1.5 rounded-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 shadow-xs transition-colors"
+                className="px-3.5 py-1.5 rounded-md bg-emerald-600 text-content-inverse text-xs font-medium hover:bg-emerald-700 shadow-xs transition-colors"
               >
                 Kirim
               </button>

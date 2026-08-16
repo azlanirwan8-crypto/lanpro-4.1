@@ -52,15 +52,15 @@ const Button = ({
   let variantStyle = "";
   if (variant === "primary")
     variantStyle =
-      "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 shadow-md shadow-indigo-600/20";
+      "bg-indigo-600 text-content-inverse hover:bg-indigo-700 active:scale-95 shadow-md shadow-indigo-600/20";
   if (variant === "secondary")
-    variantStyle = "bg-surface-muted text-content-body hover:bg-slate-200 active:scale-95";
+    variantStyle = "bg-surface-muted text-content-body hover:bg-surface-strong active:scale-95";
   if (variant === "outline")
     variantStyle =
       "border-2 border-border-subtle text-content-body hover:border-border-subtle hover:bg-surface-sunken active:scale-95";
   if (variant === "danger")
     variantStyle =
-      "bg-rose-500 text-white hover:bg-rose-600 active:scale-95 shadow-md shadow-rose-500/20";
+      "bg-rose-500 text-content-inverse hover:bg-rose-600 active:scale-95 shadow-md shadow-rose-500/20";
   if (variant === "ghost")
     variantStyle =
       "bg-transparent text-content-secondary hover:bg-surface-muted hover:text-content active:scale-95";
@@ -511,7 +511,7 @@ export const MasterDataPanel = ({
                       "text-xs sm:text-[10px] font-medium px-2 py-0.5 rounded-md transition-all shrink-0",
                       isActive
                         ? "bg-indigo-100 text-indigo-700"
-                        : "bg-surface-muted text-content-muted group-hover:bg-slate-200"
+                        : "bg-surface-muted text-content-muted group-hover:bg-surface-strong"
                     )}
                   >
                     {count}
@@ -566,7 +566,7 @@ export const MasterDataPanel = ({
                     setIsNewMasterModalOpen(true);
                   }
                 }}
-                className="h-8 px-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-xs font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                className="h-8 px-3.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-md text-xs font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" /> Add{" "}
                 {masterDataTypes.find((t) => t.type === selectedType)?.label}
@@ -652,7 +652,7 @@ export const MasterDataPanel = ({
                                   label: `${mod.namaModul} (Modul)`,
                                 });
                               }}
-                              className="w-7 h-7 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200/80 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
+                              className="w-7 h-7 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-200/80 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
                               title="Hapus Modul"
                             >
                               <Trash2 className="w-3.5 h-3.5 shrink-0" />
@@ -967,7 +967,7 @@ export const MasterDataPanel = ({
                                                 label: item.label,
                                               })
                                             }
-                                            className="w-7 h-7 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white border border-rose-200/80 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
+                                            className="w-7 h-7 bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-200/80 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
                                             title="Hapus Master Data"
                                           >
                                             <Trash2 className="w-3.5 h-3.5 shrink-0" />
@@ -1003,7 +1003,7 @@ export const MasterDataPanel = ({
       >
         <div className="space-y-6">
           {/* Live Preview Badge Component */}
-          <div className="p-4 bg-slate-900 text-white rounded-xl flex items-center justify-between shadow-soft-lg border border-slate-800">
+          <div className="p-4 bg-surface-inverse text-content-inverse rounded-xl flex items-center justify-between shadow-soft-lg border border-border-inverse">
             <div className="flex items-center gap-3.5">
               <div
                 className="w-11 h-11 rounded-xl flex items-center justify-center bg-surface/10 shadow-inner"
@@ -1012,7 +1012,7 @@ export const MasterDataPanel = ({
                 <RenderIcon iconName={newMasterIcon} className="w-6 h-6" />
               </div>
               <div className="flex flex-col">
-                <span className="text-base font-medium text-white">
+                <span className="text-base font-medium text-content-inverse">
                   {newMasterLabel || "Label Master Data"}
                 </span>
                 {selectedType === "project_role" && (
@@ -1245,7 +1245,7 @@ export const MasterDataPanel = ({
                     className={cn(
                       "flex flex-col items-center justify-center p-2 rounded-lg transition-all",
                       newMasterIcon === i.id
-                        ? "bg-indigo-600 text-white shadow-md scale-105"
+                        ? "bg-indigo-600 text-content-inverse shadow-md scale-105"
                         : "hover:bg-surface text-content-muted hover:text-content-strong"
                     )}
                     title={i.label}
@@ -1275,7 +1275,7 @@ export const MasterDataPanel = ({
             <Button
               onClick={handleCreateMasterData}
               disabled={isSaving}
-              className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+              className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
             >
               {isSaving ? "Menyimpan..." : "Simpan Master Data"}
             </Button>
@@ -1296,7 +1296,7 @@ export const MasterDataPanel = ({
         {editingMaster && (
           <div className="space-y-6">
             {/* Live Preview Badge */}
-            <div className="p-4 bg-slate-900 text-white rounded-xl flex items-center justify-between shadow-soft-lg border border-slate-800">
+            <div className="p-4 bg-surface-inverse text-content-inverse rounded-xl flex items-center justify-between shadow-soft-lg border border-border-inverse">
               <div className="flex items-center gap-3.5">
                 <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center bg-surface/10 shadow-inner"
@@ -1305,7 +1305,7 @@ export const MasterDataPanel = ({
                   <RenderIcon iconName={editingMaster.icon || "CircleDot"} className="w-6 h-6" />
                 </div>
                 <div>
-                  <span className="text-base font-medium text-white">
+                  <span className="text-base font-medium text-content-inverse">
                     {editingMaster.label || "Label Master Data"}
                   </span>
                 </div>
@@ -1427,7 +1427,7 @@ export const MasterDataPanel = ({
                       className={cn(
                         "flex flex-col items-center justify-center p-2 rounded-lg transition-all",
                         editingMaster.icon === i.id
-                          ? "bg-indigo-600 text-white shadow-md scale-105"
+                          ? "bg-indigo-600 text-content-inverse shadow-md scale-105"
                           : "hover:bg-surface text-content-muted hover:text-content-strong"
                       )}
                       title={i.label}
@@ -1457,7 +1457,7 @@ export const MasterDataPanel = ({
               <Button
                 onClick={handleUpdateMasterData}
                 disabled={isSaving}
-                className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+                className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
               >
                 {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
               </Button>
@@ -1528,7 +1528,7 @@ export const MasterDataPanel = ({
             <Button
               onClick={handleCreateModule}
               disabled={isSaving}
-              className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+              className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
             >
               {isSaving ? "Menyimpan..." : "Tambah Modul"}
             </Button>
@@ -1598,7 +1598,7 @@ export const MasterDataPanel = ({
             <Button
               onClick={handleUpdateModule}
               disabled={isSaving}
-              className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+              className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
             >
               {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
             </Button>
