@@ -1,40 +1,63 @@
 export const styles = {
-  container: "flex-1 overflow-auto p-3 md:p-6 pb-20 md:pb-28 bg-slate-50 dark:bg-slate-950 animate-in fade-in duration-700 custom-scrollbar",
+  container:
+    "flex-1 overflow-auto p-3 md:p-6 pb-20 md:pb-28 bg-surface-sunken animate-in fade-in duration-700 custom-scrollbar",
   wrapper: "space-y-8 w-full pb-16 md:pb-24",
-  header: "flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-200 pb-6 mb-2",
+  header:
+    "flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-border-subtle pb-6 mb-2",
   headerSubtitleWrapper: "flex items-center gap-2 mb-2",
   headerSubtitleLeft: "text-[10px] font-medium tracking-widest text-indigo-600 uppercase",
-  headerSubtitleDot: "text-slate-300",
-  headerSubtitleRight: "text-[10px] font-medium text-slate-500 italic",
-  headerTitle: "text-3xl lg:text-4xl font-medium text-slate-900 tracking-tight leading-none mb-2",
-  headerDescription: "text-slate-500 font-medium text-sm tracking-wide max-w-2xl",
-  healthCard: "flex items-center gap-4 bg-white px-5 py-3 rounded-xl border border-slate-200 shadow-sm",
-  healthProgress: "w-12 h-12 rounded-full border-4 border-indigo-50 relative flex items-center justify-center shrink-0",
+  // `slate-300` tidak punya token setara; `content-subtle` (slate-400) yang
+  // paling dekat. `text-border-*` tidak sah secara semantik — itu kosakata GARIS.
+  headerSubtitleDot: "text-content-subtle",
+  headerSubtitleRight: "text-[10px] font-medium text-content-muted italic",
+  headerTitle: "text-3xl lg:text-4xl font-medium text-content tracking-tight leading-none mb-2",
+  headerDescription: "text-content-muted font-medium text-sm tracking-wide max-w-2xl",
+  healthCard:
+    "flex items-center gap-4 bg-surface px-5 py-3 rounded-xl border border-border-subtle shadow-sm",
+  healthProgress:
+    "w-12 h-12 rounded-full border-4 border-indigo-50 relative flex items-center justify-center shrink-0",
   healthLabelWrapper: "flex flex-col",
-  healthLabelTop: "text-[10px] font-medium uppercase tracking-widest text-slate-400",
-  healthLabelBottom: "text-sm font-medium text-slate-800",
+  healthLabelTop: "text-[10px] font-medium uppercase tracking-widest text-content-subtle",
+  healthLabelBottom: "text-sm font-medium text-content-strong",
   statsGrid: "grid grid-cols-2 lg:grid-cols-4 gap-4",
-  statCard: "bg-white shadow-sm border border-slate-100/80 rounded-xl p-6 hover:shadow-md transition-shadow relative overflow-hidden group",
-  statCardRose: "bg-white shadow-sm border border-rose-100/80 rounded-xl p-6 hover:shadow-md transition-shadow relative overflow-hidden group",
-  statIconBackground: "absolute right-[-10px] bottom-[-10px] opacity-[0.03] transform group-hover:scale-110 transition-transform",
-  statLabel: "text-[10px] font-medium uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2",
-  statLabelRose: "text-[10px] font-medium uppercase tracking-widest text-rose-500 mb-4 flex items-center gap-2",
+  statCard:
+    "bg-surface shadow-sm border border-border-faint/80 rounded-xl p-6 hover:shadow-md transition-shadow relative overflow-hidden group",
+  statCardRose:
+    "bg-surface shadow-sm border border-rose-100/80 rounded-xl p-6 hover:shadow-md transition-shadow relative overflow-hidden group",
+  statIconBackground:
+    "absolute right-[-10px] bottom-[-10px] opacity-[0.03] transform group-hover:scale-110 transition-transform",
+  statLabel:
+    "text-[10px] font-medium uppercase tracking-widest text-content-subtle mb-4 flex items-center gap-2",
+  statLabelRose:
+    "text-[10px] font-medium uppercase tracking-widest text-rose-500 mb-4 flex items-center gap-2",
   statValueWrapper: "flex items-end gap-2",
-  statValue: "text-4xl font-medium text-slate-800 leading-none",
+  statValue: "text-4xl font-medium text-content-strong leading-none",
   statValueRose: "text-4xl font-medium text-rose-600 leading-none",
-  statUnit: "text-xs font-medium text-slate-400 mb-1",
+  statUnit: "text-xs font-medium text-content-subtle mb-1",
   statUnitRose: "text-xs font-medium text-rose-400 mb-1",
   mainSection: "flex flex-col xl:flex-row gap-8 items-start",
   majorArea: "flex-1 w-full space-y-8",
-  activeSprintCard: "bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 rounded-xl p-8 text-white relative overflow-hidden shadow-xl",
-  activeSprintHeader: "relative z-10 flex flex-col md:flex-row gap-8 justify-between items-start md:items-center",
-  activeSprintProgressCard: "bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 min-w-[240px] shadow-lg",
+  activeSprintCard:
+    "bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 rounded-xl p-8 text-white relative overflow-hidden shadow-xl",
+  activeSprintHeader:
+    "relative z-10 flex flex-col md:flex-row gap-8 justify-between items-start md:items-center",
+  // Kedua kartu di bawah MENUMPANG di atas `activeSprintCard` yang sengaja
+  // bergradasi gelap di kedua mode. Lapisannya karena itu tetap berbasis PUTIH
+  // transparan, bukan token `surface` — di mode gelap `surface` bernilai #121a2a,
+  // sehingga lapisan dan garisnya akan gelap-di-atas-gelap alias hilang.
+  activeSprintProgressCard:
+    "bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 min-w-[240px] shadow-lg",
   burndownCard: "mt-8 bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10 shadow-lg",
   chartGrid: "grid grid-cols-1 lg:grid-cols-2 gap-6",
-  chartCard: "bg-white shadow-sm border border-slate-100/80 rounded-xl p-6 flex flex-col",
-  chartTitle: "text-[10px] font-medium uppercase tracking-widest text-slate-800 flex items-center gap-2 mb-6",
+  chartCard: "bg-surface shadow-sm border border-border-faint/80 rounded-xl p-6 flex flex-col",
+  chartTitle:
+    "text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2 mb-6",
   rightSidebar: "w-full xl:w-[380px] shrink-0 space-y-6",
-  actionCard: "bg-white shadow-sm border border-rose-100/80 rounded-xl p-6",
-  actionCardSlate: "bg-white shadow-sm border border-slate-100/80 rounded-xl p-6",
+  actionCard: "bg-surface shadow-sm border border-rose-100/80 rounded-xl p-6",
+  actionCardSlate: "bg-surface shadow-sm border border-border-faint/80 rounded-xl p-6",
+  // SENGAJA warna keras, BUKAN token. Kartu ini dirancang GELAP di kedua mode —
+  // token `content-*` adalah kosakata TEKS, dan di mode gelap nilainya justru
+  // terang (#e2e8f0), sehingga `text-white` di atasnya jadi tak terbaca.
+  // Pemetaan otomatis sempat melakukan persis itu.
   darkCard: "bg-slate-800 rounded-xl p-6 shadow-lg text-white relative overflow-hidden",
 };
