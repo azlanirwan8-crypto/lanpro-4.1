@@ -221,7 +221,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 78 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 79 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -289,6 +289,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 77  | 4 kerentanan `moderate` di dependensi — hanya tertutup lewat kenaikan versi mayor      |  **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan     | §18.7  |
 | 78  | Kode menulis ke tabel `TaskAttachments` yang TIDAK ADA di DB — lampiran task selalu gagal |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.13 |
 | 79  | **Migrasi ≠ database hidup**: 13 tabel drift, 54 kolom tak akan dibuat migrasi           |  **F0**  | 🔴  | Sedang        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.14 |
+| 80  | `POST /api/projects/generate-bni-demo` membuat proyek TANPA penjaga admin — pintu kedua  |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.15 |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -2795,6 +2796,58 @@ kredensial. Jalur ini juga yang membuat #78 bertahan sekian lama tanpa ketahuan
 
 
 ---
+
+### 13.15 Temuan #80 — pintu kedua pembuatan proyek tanpa penjaga admin
+
+Ditemukan 16 Agu 2026 saat pemilik proyek menetapkan bahwa **pembuatan proyek
+difokuskan hanya ke Administrator** pada rancangan Two-Tier RBAC (F7 / #76).
+
+Aturan itu ternyata **sudah terpasang di jalur utama** — `POST /api/projects`
+memakai `verifyGlobalAdmin` sejak item #34. Yang belum: jalur kedua.
+
+```ts
+// server/routes/project.routes.ts:85
+router.post("/api/projects/generate-bni-demo", authenticateJWT, async (req, res) => {
+  return buatProyekDemoBni(req, res);
+});
+```
+
+Hanya `authenticateJWT`. Tidak ada `verifyGlobalAdmin`, tidak ada
+`verifyProjectAccess`. Dan layanan di baliknya benar-benar membuat baris proyek:
+
+```sql
+-- server/services/demo-seed.service.ts:46
+INSERT INTO Projects (id, name, projectKey, description, ownerId, status, taskCounter)
+```
+
+Akibatnya **siapa pun yang login bisa membuat proyek**, cukup dengan memanggil
+endpoint demo. Ketetapan "hanya Administrator" batal lewat pintu ini.
+
+#### Kenapa ini luput dari audit sebelumnya
+
+Gelombang 5 (§13.11) memetakan seluruh 119 rute dan menandai
+`POST /api/projects/generate-bni-demo` sebagai "tanpa penjaga rute". Ia **ada di
+daftar**, tetapi digugurkan bersama empat rute lain yang ternyata memeriksa izin
+di dalam handler — dan yang ini tidak diperiksa satu per satu karena namanya
+terbaca seperti utilitas demo, bukan pembuat proyek.
+
+Pelajarannya: **nama rute bukan bukti tentang apa yang dilakukannya.** §13.11
+sudah menuliskan aturan "hasil pemindaian bukan temuan, wajib dibaca isinya" —
+dan justru di sini aturan itu tidak dijalankan sampai tuntas.
+
+#### Yang perlu diputuskan
+
+| Pilihan | Konsekuensi |
+| ------- | ----------- |
+| Tambahkan `verifyGlobalAdmin` | Konsisten dengan `POST /api/projects`. Fitur demo tetap ada, tapi hanya untuk admin |
+| Hapus rutenya | Paling bersih bila penyemaian demo memang tidak dipakai lagi |
+| Biarkan | ❌ Membatalkan ketetapan pembuatan proyek |
+
+Rekomendasi: **tambahkan `verifyGlobalAdmin`**, jangan dihapus — penyemaian demo
+berguna untuk pengujian F3 nanti, dan menghapusnya membuang alat yang sudah ada.
+
+---
+
 
 ## §14 Checklist audit UI (isi kerja F3, item #17)
 
