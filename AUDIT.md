@@ -5513,3 +5513,62 @@ verifikasi 4 baris utuh → baru jatuhkan kolom yang menganggur.
 ⚠️ **Kaitan dengan #48.** §0.2 mencatat lima pasang TABEL kembar akibat satu
 sistem migrasi menulis nama tanpa kutip. Pola #47 serupa tetapi pada tingkat
 KOLOM. Keduanya sebaiknya diputuskan bersama supaya konvensinya satu.
+
+### 19.38 Rekomendasi konvensi penamaan kolom — diukur, bukan selera
+
+Pemilik proyek meminta rekomendasi untuk #47. Jawabannya tidak diputuskan dari
+preferensi, melainkan dari sebaran yang sudah ada di database yang sama.
+
+| Yang diukur (Neon, 16 Agu 2026)    |                                                                    Jumlah |
+| ---------------------------------- | ------------------------------------------------------------------------: |
+| Kolom **camelCase**                |                                                                   **183** |
+| Kolom snake_case                   |                                                                        34 |
+| Kolom satu kata (netral)           |                                                                       149 |
+| Tabel yang memuat kolom camelCase  |                                                            **28 dari 30** |
+| Tabel yang memuat kolom snake_case |                                                                 8 dari 30 |
+| Tabel bernama snake_case           | **3**: `meeting_details`, `discussion_point_comments`, `ai_learning_logs` |
+
+#### Rekomendasi: **camelCase**
+
+Empat alasan, berurutan dari yang paling menentukan:
+
+1. **Ia sudah jadi konvensi rumah, bukan pilihan baru.** 183 lawan 34, dan 28
+   dari 30 tabel. Memilih snake_case berarti menamai ulang 183 kolom di 28
+   tabel — perubahan besar dan berisiko, dengan nol perolehan fungsional.
+2. **`NOT NULL` sudah ada di sisi camel.** Memilih camel berarti tidak ada
+   batasan yang perlu dipindahkan; memilih snake berarti memindahkannya pada
+   tabel dengan data hidup.
+3. **Sisi camel yang lebih banyak dibaca** — `createdAt` saja 7 kali.
+4. **Ketiga tabel bernama snake berasal dari satu sumber yang sama**, yaitu
+   sistem migrasi `runner.ts` yang sudah dipensiunkan di F0. Jadi snake_case di
+   repo ini bukan standar yang pernah dipilih, melainkan **jejak sisa** dari
+   sistem yang sudah dibuang.
+
+#### Keberatan yang sah, dan cara menjawabnya
+
+Konvensi PostgreSQL memang snake_case, dan camelCase menuntut identifier
+**selalu dikutip**. Itu bukan keberatan teoretis di repo ini — §0.2 mencatat
+**#48: lima pasang TABEL kembar** lahir persis karena satu sistem migrasi
+menulis nama tanpa kutip, sehingga PostgreSQL melipatnya jadi huruf kecil dan
+membuat tabel kedua.
+
+Tetapi bahaya itu berasal dari **kutip yang tidak konsisten**, bukan dari
+camelCase-nya. Menamai ulang 183 kolom untuk menghindarinya adalah menukar
+risiko kecil yang bisa dijaga dengan risiko besar sekali jalan.
+
+**Penjagaannya** sudah ada sebagian: `npm run db:verify-schema` membandingkan
+migrasi dengan produksi kolom per kolom — gerbang itulah yang seharusnya
+menangkap tabel/kolom kembar berikutnya.
+
+#### Urutan kerja bila rekomendasi ini disetujui
+
+1. Seragamkan **pembacaan** ke sisi camel (snake yang dibaca: `point_id`,
+   `comment_text`, `user_name`, `created_at`).
+2. Hentikan **penulisan ganda** di `discussion-points.routes.ts:236`.
+3. Verifikasi **4 baris utuh** — hitung ulang, bukan diasumsikan.
+4. Baru jatuhkan 5 kolom snake yang menganggur.
+
+Langkah 4 merusak dan tidak bisa dibatalkan; ia dijalankan terpisah, sesudah 1–3
+terbukti aman.
+
+⚠️ #48 sebaiknya mengikuti ketetapan yang sama supaya konvensinya tidak jadi dua.
