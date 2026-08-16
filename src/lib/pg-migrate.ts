@@ -224,7 +224,10 @@ export async function runMigrations(pool: Pool): Promise<void> {
       CREATE TABLE IF NOT EXISTS "Attachments" (
         id           VARCHAR(36) PRIMARY KEY,
         "taskId"     VARCHAR(36) NOT NULL,
-        filename     VARCHAR(255),
+        -- #79 — NOT NULL menyamai production. Ini juga yang membuat #78 tidak
+        -- bisa diperbaiki hanya dengan mengganti nama tabel: kode WAJIB menulis
+        -- kolom ini.
+        filename     VARCHAR(255) NOT NULL,
         name         VARCHAR(255),
         "originalName" VARCHAR(255),
         mimetype     VARCHAR(100),
@@ -379,7 +382,8 @@ export async function runMigrations(pool: Pool): Promise<void> {
       CREATE TABLE IF NOT EXISTS "DiscussionPoints" (
         id                    VARCHAR(36) PRIMARY KEY,
         "meetingId"           VARCHAR(36) NOT NULL,
-        content               TEXT DEFAULT '',
+        -- #79 — NOT NULL menyamai production.
+        content               TEXT NOT NULL DEFAULT '',
         "parentPointId"       VARCHAR(36),
         "authorId"            VARCHAR(36),
         "assignTo"            VARCHAR(36),
@@ -481,7 +485,9 @@ export async function runMigrations(pool: Pool): Promise<void> {
     await client.query(`
       CREATE TABLE IF NOT EXISTS "QATestCaseExecutionLogs" (
         id                  VARCHAR(36) PRIMARY KEY,
-        "testCaseId"        VARCHAR(36),
+        -- #79 — NOT NULL menyamai production. Tanpa ini database bersih
+        -- menerima baris tanpa testCaseId, sementara production menolaknya.
+        "testCaseId"        VARCHAR(36) NOT NULL,
         "caseId"            VARCHAR(36),
         "projectId"         VARCHAR(36) NOT NULL,
         "runVersion"        INT NOT NULL DEFAULT 1,
@@ -567,13 +573,18 @@ export async function runMigrations(pool: Pool): Promise<void> {
         id VARCHAR(36) PRIMARY KEY,
         pointId VARCHAR(36) NOT NULL,
         point_id VARCHAR(36),
-        userId VARCHAR(50),
+        -- #79 — "userId" dan "createdAt" WAJIB ber-kutip. Tanpa kutip, PostgreSQL
+        -- melipatnya menjadi userid/createdat, sementara production memiliki
+        -- versi camelCase dan kode menulis versi camelCase. Kolom lain di bawah
+        -- sengaja dibiarkan tanpa kutip karena production memang menyimpannya
+        -- dalam huruf kecil (pointid, username, commenttext).
+        "userId" VARCHAR(50),
         user_id VARCHAR(50),
         userName VARCHAR(255),
         user_name VARCHAR(255),
         commentText TEXT NOT NULL,
         comment_text TEXT,
-        createdAt VARCHAR(50) NOT NULL,
+        "createdAt" VARCHAR(50) NOT NULL,
         created_at VARCHAR(50)
       );
     `);
@@ -639,6 +650,112 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "expiresAt" TIMESTAMP NOT NULL,
         "createdAt" TIMESTAMP DEFAULT NOW()
       );
+    `);
+
+    // ── PENYETARAAN SCHEMA (item #79) ─────────────────────────────────────────
+    //
+    // Diukur 16 Agu 2026: 13 tabel dan 54 kolom ADA di database production tetapi
+    // TIDAK pernah dibuat migrasi ini. Arahnya satu — database selalu lebih
+    // lengkap. Artinya migrasi bukan tertinggal versi; ia belum pernah menjadi
+    // sumber kebenaran.
+    //
+    // Akibatnya nyata: `npm run db:migrate` pada database BERSIH menghasilkan
+    // schema yang kekurangan kolom yang dipakai kode secara aktif — `description`
+    // 80 rujukan, `content` 26, `expectedResult` 6, dan seterusnya. Deployment ke
+    // database baru akan rusak, dan fitur QA paling parah dengan 9 kolom hilang.
+    // Tidak ketahuan selama ini karena seluruh pengembangan memakai satu database
+    // yang sama, yang sudah lengkap sejak lama.
+    //
+    // Ditulis sebagai ADD COLUMN IF NOT EXISTS, bukan mengubah CREATE TABLE di
+    // atas. Alasannya: blok ini menjadi NO-OP di database yang sudah lengkap
+    // (production tidak tersentuh sama sekali) sekaligus memperbaiki database
+    // bersih. Mengubah CREATE TABLE tidak akan berpengaruh apa pun pada database
+    // yang tabelnya sudah ada.
+    //
+    // Kolom kembar SENGAJA ikut disalin apa adanya — `fileName` di samping
+    // `filename`, `tindakanlanjut` di samping `tindakan_lanjut`, dan seterusnya.
+    // Merapikannya adalah pekerjaan terpisah (#47, #78); menyatukan schema dan
+    // membersihkan bentuk dalam satu langkah membuat kegagalan sulit ditelusuri.
+    await client.query(`
+      ALTER TABLE "Projects" ADD COLUMN IF NOT EXISTS "department" VARCHAR(255);
+
+      ALTER TABLE "Sprints" ADD COLUMN IF NOT EXISTS "approvalstatus" VARCHAR(50);
+      ALTER TABLE "Sprints" ADD COLUMN IF NOT EXISTS "approvedby" VARCHAR(36);
+
+      ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS "environment" VARCHAR(255);
+
+      ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "fileName" VARCHAR(255);
+      ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "fileType" VARCHAR(100);
+      ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "fileSize" BIGINT;
+      ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP DEFAULT NOW();
+
+      ALTER TABLE "Comments" ADD COLUMN IF NOT EXISTS "userId" VARCHAR(36);
+      ALTER TABLE "Comments" ADD COLUMN IF NOT EXISTS "content" TEXT;
+
+      ALTER TABLE "ActivityLogs" ADD COLUMN IF NOT EXISTS "entityId" VARCHAR(36);
+      ALTER TABLE "ActivityLogs" ADD COLUMN IF NOT EXISTS "entityName" VARCHAR(255);
+      ALTER TABLE "ActivityLogs" ADD COLUMN IF NOT EXISTS "actionType" VARCHAR(100);
+      ALTER TABLE "ActivityLogs" ADD COLUMN IF NOT EXISTS "description" TEXT;
+
+      ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "projectId" VARCHAR(36);
+      ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "content" TEXT;
+      ALTER TABLE "Messages" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP DEFAULT NOW();
+
+      ALTER TABLE "Notifications" ADD COLUMN IF NOT EXISTS "userId" VARCHAR(36);
+
+      ALTER TABLE "Meetings" ADD COLUMN IF NOT EXISTS "fileData" TEXT;
+      ALTER TABLE "Meetings" ADD COLUMN IF NOT EXISTS "fileName" VARCHAR(255);
+      ALTER TABLE "Meetings" ADD COLUMN IF NOT EXISTS "fileType" VARCHAR(100);
+
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "topic" TEXT;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "assigneeId" VARCHAR(36);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "parentpointid" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "parent_point_id" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "comment" TEXT;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "next_action" TEXT;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "assignee_id" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "feature_id" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "system_id" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "surrounding_id" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "target_date" DATE;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "assignto" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "assign_to" VARCHAR(255);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "tindakanlanjut" TEXT;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "tindakan_lanjut" TEXT;
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "targetdate" VARCHAR(50);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "tanggalupdatestatus" VARCHAR(50);
+      ALTER TABLE "DiscussionPoints" ADD COLUMN IF NOT EXISTS "decision" TEXT;
+
+      ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "description" TEXT;
+      ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "createdBy" VARCHAR(36);
+      ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "createdAt" TIMESTAMP DEFAULT NOW();
+      ALTER TABLE "QATestSuites" ADD COLUMN IF NOT EXISTS "assignedto" VARCHAR(255);
+
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "namaModul" VARCHAR(255);
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "description" TEXT;
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "expectedResult" TEXT;
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "actualResult" TEXT;
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "executionStatus" VARCHAR(50);
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "executedByUserId" VARCHAR(36);
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "executedByName" VARCHAR(255);
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "updatedAt" TIMESTAMP DEFAULT NOW();
+      ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "assignedto" VARCHAR(255);
+    `);
+
+    // #79 — dua kolom di bawah punya sebab yang BERBEDA dari 54 di atas.
+    //
+    // Blok CREATE TABLE untuk `discussion_point_comments` menulis `userId` dan
+    // `createdAt` TANPA KUTIP. PostgreSQL melipat identifier tanpa kutip menjadi
+    // huruf kecil, jadi database bersih memperoleh `userid` dan `createdat` —
+    // sementara production punya `userId` dan `createdAt`, dan kode menulis
+    // versi ber-kutip. Di database bersih, penyimpanan komentar akan GAGAL.
+    //
+    // Ditambahkan di sini alih-alih memperbaiki kutip di CREATE TABLE, karena
+    // memperbaiki di sana tidak berpengaruh pada database yang tabelnya sudah
+    // ada — dan justru menyisakan `userid` yatim di database bersih.
+    await client.query(`
+      ALTER TABLE discussion_point_comments ADD COLUMN IF NOT EXISTS "userId" VARCHAR(50);
+      ALTER TABLE discussion_point_comments ADD COLUMN IF NOT EXISTS "createdAt" VARCHAR(50);
     `);
 
     // ── Indexes ────────────────────────────────────────────────────────────────

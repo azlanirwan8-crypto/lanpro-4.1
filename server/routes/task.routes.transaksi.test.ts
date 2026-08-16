@@ -180,7 +180,7 @@ describe("#61 batas transaksi — penghitung dan task adalah satu kesatuan", () 
   });
 
   it("mengembalikan nomor task bila penyimpanan lampiran gagal", async () => {
-    jawabQuery({ gagalPada: /INSERT INTO TaskAttachments/i });
+    jawabQuery({ gagalPada: /INSERT INTO Attachments/i });
 
     const res = await request(buatApp())
       .post("/api/projects/proyek-A/tasks")
@@ -192,6 +192,49 @@ describe("#61 batas transaksi — penghitung dan task adalah satu kesatuan", () 
     expect(res.status).toBe(500);
     expect(koneksiTiruan.rollback).toHaveBeenCalled();
     expect(koneksiTiruan.commit).not.toHaveBeenCalled();
+  });
+
+  it("#78 menulis lampiran ke tabel Attachments, bukan TaskAttachments", async () => {
+    // `TaskAttachments` tidak pernah ada di database — setiap pembuatan task
+    // berlampiran gagal dengan 42P01. Test ini mengunci nama tabel yang benar.
+    jawabQuery({});
+
+    await request(buatApp())
+      .post("/api/projects/proyek-A/tasks")
+      .send({
+        title: "Task uji",
+        attachments: [{ name: "laporan.pdf", url: "/uploads/laporan_123_abc.pdf" }],
+      });
+
+    const sqlLampiran = koneksiTiruan.query.mock.calls
+      .map((c: any[]) => String(c[0]))
+      .find((sql: string) => /INSERT INTO \w*Attachments/i.test(sql));
+
+    expect(sqlLampiran).toBeDefined();
+    expect(sqlLampiran).toMatch(/INSERT INTO Attachments\b/i);
+    expect(sqlLampiran).not.toMatch(/TaskAttachments/i);
+  });
+
+  it("#78 mengisi kolom filename yang NOT NULL, diambil dari nama berkas di URL", async () => {
+    // Tanpa ini kegagalannya hanya berpindah dari 42P01 ke 23502: `filename`
+    // NOT NULL tanpa default.
+    jawabQuery({});
+
+    await request(buatApp())
+      .post("/api/projects/proyek-A/tasks")
+      .send({
+        title: "Task uji",
+        attachments: [{ name: "laporan.pdf", url: "/uploads/laporan_123_abc.pdf?token=xyz" }],
+      });
+
+    const panggilan = koneksiTiruan.query.mock.calls.find((c: any[]) =>
+      /INSERT INTO Attachments/i.test(String(c[0]))
+    );
+
+    expect(panggilan).toBeDefined();
+    expect(String(panggilan![0])).toMatch(/\bfilename\b/);
+    // Nama berkas diambil dari URL, tanpa query string, bukan dari att.name.
+    expect(panggilan![1]).toContain("laporan_123_abc.pdf");
   });
 
   it("commit terjadi SESUDAH INSERT task, bukan sebelumnya", async () => {

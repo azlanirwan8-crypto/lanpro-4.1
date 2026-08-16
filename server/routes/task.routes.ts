@@ -413,15 +413,34 @@ router.post(
       );
 
       // Save attachments if provided
+      //
+      // #78 — DULU menulis ke `TaskAttachments`, tabel yang TIDAK PERNAH ADA di
+      // database. Setiap pembuatan task berlampiran gagal dengan
+      // `42P01 relation does not exist`. Yang ada — dan yang dibersihkan
+      // `project.routes.ts` saat proyek dihapus — adalah `Attachments`.
+      //
+      // Kolom `filename` WAJIB diisi: ia `NOT NULL` tanpa default. Itulah sebab
+      // mengganti nama tabel saja tidak cukup; tanpa baris ini kegagalannya
+      // hanya berpindah dari 42P01 ke 23502. Nilainya diambil dari nama berkas
+      // pada URL — itu nama yang benar-benar tersimpan di penyimpanan — dengan
+      // `att.name` sebagai cadangan.
       if (attachments && Array.isArray(attachments) && attachments.length > 0) {
         for (const att of attachments) {
+          const urlLampiran = att.url || "";
+          const namaTersimpan =
+            urlLampiran.split("?")[0].split("/").filter(Boolean).pop() ||
+            att.name ||
+            "lampiran";
+
           await connection.query(
-            `INSERT INTO TaskAttachments (id, taskId, name, url, fileType, uploadedByName, createdAt) VALUES (?, ?, ?, ?, ?, ?, NOW())`,
+            `INSERT INTO Attachments (id, taskId, filename, name, url, fileType, uploadedByName, createdAt)
+             VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
             [
               att.id || crypto.randomUUID(),
               newId,
+              namaTersimpan,
               att.name || "Attachment",
-              att.url || "",
+              urlLampiran,
               att.type || "file",
               att.uploadedByName || "User",
             ]

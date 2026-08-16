@@ -287,8 +287,8 @@ lepas. Catatan lepas selalu terlupakan.
 | 75  | Angka §13.1 & ARCHITECTURE drift lagi: 21 `useState` aktualnya 11, 104 rute aktualnya 119 |  **F0**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §13.12 |
 | 76  | Otorisasi tidak deny-by-default — akar 56% temuan F2 (14 dari 25 masuk OWASP A01)        |  **F7**  | 🔴  | Sedang        | Ya (blokir production)  | `MENUNGGU` keputusan     | §18.3  |
 | 77  | 4 kerentanan `moderate` di dependensi — hanya tertutup lewat kenaikan versi mayor      |  **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan     | §18.7  |
-| 78  | Kode menulis ke tabel `TaskAttachments` yang TIDAK ADA di DB — lampiran task selalu gagal |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.13 |
-| 79  | **Migrasi ≠ database hidup**: 12 tabel drift, 52 kolom tak akan dibuat migrasi           |  **F0**  | 🔴  | Sedang        | Ya (blokir production)  | `TERBUKA`                | §13.14 |
+| 78  | Kode menulis ke tabel `TaskAttachments` yang TIDAK ADA di DB — lampiran task selalu gagal |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.13 |
+| 79  | **Migrasi ≠ database hidup**: 13 tabel drift, 54 kolom tak akan dibuat migrasi           |  **F0**  | 🔴  | Sedang        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.14 |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -320,7 +320,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 
 |  Fase   | Nama                               | Item                                 | Sesi | Risiko            | Status                    | TERTAHAN OLEH APA — dan siapa yang harus bergerak                                                                         |
 | :-----: | ---------------------------------- | ------------------------------------ | ---- | ----------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10, #38, #39, **#79**      | 1–2  | Sangat rendah     | `JALAN` — gerbang dicabut | **DITEMUKAN 16 Agu:** gerbang keluar F0 ("`db:migrate` pada database bersih = schema production") ternyata TIDAK terpenuhi — 12 tabel drift, 52 kolom (§13.14). Status diturunkan dari SELESAI. Bisa dikerjakan tanpa pemilik |
+| **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10, #38, #39, #79          | 1–2  | Sangat rendah     | `SELESAI` 16 Agu (ulang)  | — tidak ada. Gerbangnya kini PUNYA PERINTAH: `npm run db:verify-schema`, dan lulus 3× berturut-turut. Sempat dicabut hari yang sama karena ternyata tidak pernah diuji (§13.14) |
 | **F1**  | Cabut kredensial lama              | #15 (#2 DITAHAN)                     | <1   | Sangat rendah     | `MENUNGGU`                | **PEMILIK.** Cabut 2 Google API key lama di Google Cloud Console. Kerja ±5 menit, tidak menyentuh kode. **#2 ditahan 16 Agu 2026** — storage beralih ke drive user (#30), jadi fase ini TIDAK lagi membuka jalan rilis; yang membukanya kini F11 |
 | **F2**  | Audit & perbaikan LOGIKA           | #16, #18–#20, #49–#75                | 3–5  | Rendah            | `JALAN` — audit SELESAI    | **PEMILIK, 9 keputusan.** Audit 9 area §13.1 tuntas & 15 item diperbaiki. Sisa murni keputusan peran/perilaku: #69 #70 #71 #72 #73 (penetapan peran), #74 (izin sentuh `AppContainer`), #18 #19 #20 (perilaku notebook-lm, penjaga read-only `db-query`, kode mati DB Explorer), #57 (dua endpoint health) |
 | **F3**  | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | `SIAP JALAN`              | **TIDAK LAGI TERTAHAN.** Syarat "login pemilik" sudah terpenuhi — sesi hidup dipakai sepanjang 16 Agu. Yang masih perlu Anda: izin membuat objek percobaan untuk alur TULIS (§14.2), dan sesi admin bila layar khusus admin ikut diperiksa |
@@ -419,11 +419,20 @@ berdiri di atas informasi keliru. Biayanya paling rendah di seluruh peta.
 **Gerbang keluar:** gerbang dasar + `npm run db:migrate` pada database bersih
 menghasilkan schema yang identik dengan production.
 
-⚠️ **GERBANG INI DICABUT 16 Agu 2026.** Diukur pada tanggal yang sama: 12 tabel
-drift dan 52 kolom ada di database hidup tetapi tidak akan dibuat migrasi
-(§13.14, item #79). Syarat gerbang **tidak terpenuhi**, dan besar kemungkinan
-tidak pernah benar-benar diuji pada database bersih. F0 karena itu dikembalikan
-ke `JALAN`.
+**Perintah pembuktiannya:**
+
+```bash
+npm run db:verify-schema
+```
+
+⚠️ **RIWAYAT — gerbang ini sempat DICABUT 16 Agu 2026.** Diukur pada tanggal yang
+sama: 13 tabel drift dan 54 kolom ada di database hidup tetapi tidak akan dibuat
+migrasi (§13.14, item #79). Syaratnya **tidak terpenuhi**, dan besar kemungkinan
+tidak pernah benar-benar diuji — karena tidak ada perintah untuk menjalankannya.
+
+Diperbaiki pada hari yang sama: migrasi disamakan dengan production, dan
+gerbangnya diberi perintah yang bisa dijalankan siapa pun. Kini LULUS 3× berturut-
+turut, dan **gagal secara jelas** bila migrasi kembali menyimpang.
 
 Pelajarannya melampaui F0: **gerbang bisa dinyatakan lulus tanpa dijalankan.**
 Untuk gerbang yang menuntut lingkungan bersih, tulis perintah pembuktiannya —
@@ -2580,18 +2589,43 @@ masalah yang jauh lebih luas.
 Dibandingkan lewat klien `pg` mentah terhadap database hidup — bukan lewat
 adaptor, supaya tidak ada kueri yang dicegat:
 
+> ⚠️ **KOREKSI 16 Agu 2026.** Angka yang pertama kali ditulis di sini SALAH,
+> dan dua-duanya karena alat ukurnya sendiri cacat. Dikoreksi di bawah, dan
+> kekeliruannya sengaja tidak dihapus — cara mengukur yang salah adalah bagian
+> dari temuannya.
+>
+> | Klaim awal | Sebenarnya | Sebab |
+> | ---------- | ---------- | ----- |
+> | 12 tabel drift | **13** | — |
+> | 52 kolom | **54** | — |
+> | 0 kolom hanya di migrasi | **2** | — |
+> | **3 tabel tidak ada di migrasi** | **0 — SALAH TOTAL** | Parser hanya menerima nama BER-KUTIP. `meeting_details`, `ai_learning_logs`, dan `discussion_point_comments` ditulis TANPA kutip, jadi terlewat. Ketiganya ADA di migrasi (baris 410, 538, 548) |
+>
+> Kekeliruan kedua: membandingkan nama kolom secara TEKSTUAL. Postgres
+> **melipat identifier tanpa kutip menjadi huruf kecil**, sehingga `pointId`
+> di migrasi menjadi `pointid` di database. Perbandingan tekstual melaporkannya
+> sebagai beda padahal identik. Versi ketiga alat ukur membandingkan nama
+> **sebagaimana akan dibuat Postgres**.
+
 | Ukuran | Nilai |
 | ------ | ----- |
-| Tabel di `src/lib/pg-migrate.ts` | 27 |
+| Tabel di `src/lib/pg-migrate.ts` | 30 |
 | Tabel di database hidup | 30 |
-| **Tabel yang drift** | **12** |
-| **Kolom ada di database, TIDAK dibuat migrasi** | **52** |
-| Kolom ada di migrasi, tidak ada di database | 0 |
-| Tabel di database yang tidak ada di migrasi | 3 — `meeting_details`, `discussion_point_comments`, `ai_learning_logs` |
+| Tabel di database yang tidak ada di migrasi | **0** |
+| **Tabel yang drift** | **13** |
+| **Kolom ada di database, TIDAK dibuat migrasi** | **54** |
+| Kolom ada di migrasi, tidak ada di database | **2** — `discussion_point_comments`: `userid`, `createdat` |
 
-Arahnya satu: **database hidup selalu LEBIH LENGKAP daripada migrasi.** Tidak
-ada satu pun kolom migrasi yang hilang dari production. Artinya migrasi bukan
-tertinggal versi — ia **tidak pernah menjadi sumber kebenaran**.
+Arahnya hampir seluruhnya satu: **database hidup lebih lengkap daripada
+migrasi.** Migrasi bukan tertinggal versi — ia **tidak pernah menjadi sumber
+kebenaran**.
+
+Dua kolom yang hanya ada di migrasi bukan pengecualian, melainkan gejala yang
+sama dari sisi lain: migrasi menulis `userId` dan `createdAt` **tanpa kutip**
+pada `discussion_point_comments`, sehingga database bersih akan memiliki
+`userid` dan `createdat`, sementara production memiliki `userId` dan
+`createdAt`. Kode menulis versi ber-kutip. **Di database bersih, penyimpanan
+komentar akan gagal.**
 
 #### Kenapa ini 🔴
 
@@ -2608,7 +2642,7 @@ Kolom yang hanya ada di database **dipakai kode secara aktif**. Diverifikasi:
 | `environment` | 3 | `Tasks` |
 
 Jadi **deployment ke database baru akan rusak.** `npm run db:migrate` pada
-database bersih menghasilkan schema yang kekurangan 52 kolom yang dibutuhkan
+database bersih menghasilkan schema yang kekurangan 54 kolom yang dibutuhkan
 kode, dan fitur QA termasuk yang paling parah (9 kolom hilang).
 
 Selama ini tidak ketahuan karena semua pengembangan memakai **satu database
@@ -2656,8 +2690,9 @@ paling murah untuk membereskannya — tidak ada data yang perlu dimigrasikan.
 
 #### Yang perlu diputuskan
 
-1. **Migrasi jadi sumber kebenaran** — tambahkan 52 kolom + 3 tabel yang hilang
-   ke `pg-migrate.ts`, lalu buktikan pada database bersih. Melelahkan tapi lurus.
+1. **Migrasi jadi sumber kebenaran** — tambahkan 54 kolom yang hilang ke
+   `pg-migrate.ts` dan perbaiki 2 kolom tanpa kutip, lalu buktikan pada database
+   bersih. Melelahkan tapi lurus.
 2. **Atau hasilkan migrasi dari database hidup** — pakai `npm run db:schema`
    yang sudah ada (#10) sebagai dasar, lalu rapikan manual.
 
@@ -2668,6 +2703,98 @@ kosong sehingga aman dirapikan sekalian.
 
 ---
 
+
+#### Kartu verifikasi #78 & #79 — SELESAI 16 Agu 2026
+
+Keduanya dikerjakan bersama karena #78 tidak bisa diperbaiki di atas schema yang
+belum benar.
+
+##### Gerbang F0 kini punya PERINTAH, bukan hanya kalimat
+
+`npm run db:verify-schema` — `scripts/verifikasi-schema.cjs`.
+
+Menjalankan seluruh blok SQL migrasi pada **schema terpisah** di database yang
+sama, lalu membandingkannya dengan `public` kolom per kolom, **termasuk tipe dan
+nullability**. Schema uji dihapus di akhir, juga bila terjadi galat. Skrip hanya
+MEMBACA `public`.
+
+Inilah tindak lanjut pelajaran #79: gerbang yang menuntut lingkungan bersih
+harus punya perintah, atau ia akan dinyatakan lulus tanpa dijalankan.
+
+| Sebelum | Sesudah |
+| ------- | ------- |
+| 13 tabel drift · 54 kolom kurang | **0 · 0** |
+| Gerbang tidak bisa dijalankan | `npm run db:verify-schema`, exit 0 |
+
+Hasil akhir, tiga kali berturut-turut:
+
+```
+tabel — bersih: 30 · production: 30
+GERBANG F0 LULUS — schema database bersih IDENTIK dengan production.
+```
+
+##### Dua jebakan yang ditemukan saat membangun gerbangnya
+
+Keduanya sempat membuat gerbang ini sendiri melaporkan hasil palsu.
+
+**1. `SET search_path` TIDAK andal di balik pooler Neon.** Dua dari enam
+percobaan menghasilkan schema uji separuh jadi — 11 atau 16 tabel alih-alih 30 —
+karena sebagian perintah mendarat di backend lain. Risikonya lebih besar daripada
+sekadar hasil salah: perintah migrasi bisa mendarat di `public`. Diperbaiki
+dengan menyetel schema di **startup koneksi**, bukan lewat `SET`.
+
+**2. Neon MENOLAK `search_path` di startup pada endpoint ber-pooler:**
+
+```
+unsupported startup parameter in options: search_path.
+Please use unpooled connection or remove this parameter
+```
+
+Penolakan itu justru menegaskan jebakan pertama. `DATABASE_URL` LanPro memang
+memakai endpoint `-pooler`, dan itu benar untuk aplikasi. Verifikasi schema
+karena itu memakai endpoint **unpooled** — host yang sama tanpa `-pooler`.
+
+Ditambah penjaga: bila schema uji berisi kurang dari setengah jumlah tabel
+production, skrip **berhenti dengan galat** alih-alih melaporkan daftar panjang
+"KURANG" yang salah sebabnya.
+
+##### Yang diubah di migrasi
+
+| Perubahan | Alasan |
+| --------- | ------ |
+| +54 kolom lewat `ADD COLUMN IF NOT EXISTS` | No-op di production, memperbaiki database bersih |
+| `"userId"` & `"createdAt"` di `discussion_point_comments` diberi kutip | Tanpa kutip, Postgres melipatnya jadi `userid`/`createdat` sementara production memakai camelCase — komentar akan gagal disimpan di database bersih |
+| `filename`, `testCaseId`, `content` diberi `NOT NULL` | Menyamai production. Terdeteksi hanya setelah gerbang membandingkan nullability, bukan sekadar nama kolom |
+
+Kolom kembar **sengaja disalin apa adanya** — merapikannya pekerjaan terpisah
+(#47). Menyatukan schema dan membersihkan bentuk sekaligus membuat kegagalan
+sulit ditelusuri.
+
+##### Yang diubah untuk #78
+
+`task.routes.ts` menulis ke `Attachments`, bukan `TaskAttachments` yang tidak
+pernah ada, **dan mengisi `filename`** yang `NOT NULL` tanpa default. Tanpa
+bagian kedua, kegagalannya hanya berpindah dari `42P01` ke `23502`. Nilainya
+diambil dari nama berkas pada URL — nama yang benar-benar tersimpan di
+penyimpanan — dengan `att.name` sebagai cadangan.
+
++2 test, keduanya **MERAH** terhadap `main` di worktree luar repo.
+
+##### Gerbang
+
+tsc 0 · lint 0 · **256 test / 28 suite** · build sukses · doctor SIAP JALAN ·
+`audit:deps` LULUS · `db:verify-schema` LULUS 3× berturut-turut.
+
+Aplikasi dijalankan ulang: migrasi otomatis berjalan tanpa galat, halaman Sign In
+tampil, 0 error console.
+
+⚠️ **BELUM terverifikasi:** membuat task berlampiran sungguhan lewat antarmuka.
+Sesi login di peramban berakhir saat pengujian, dan memulihkannya butuh
+kredensial. Jalur ini juga yang membuat #78 bertahan sekian lama tanpa ketahuan
+— §14.2 mencatat seluruh 9 alur ujung-ke-ujung masih `TERBUKA`.
+
+
+---
 
 ## §14 Checklist audit UI (isi kerja F3, item #17)
 
