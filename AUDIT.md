@@ -24,7 +24,7 @@ melanjutkan pekerjaan tanpa perlu menelusuri riwayat percakapan.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **349 lulus / 35 suite**                                    | `npm test`                                   |
+| Test                | **353 lulus / 36 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -227,7 +227,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 88 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 89 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -304,6 +304,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       |  **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §19.14 |
 | 87  | `effectiveRole` membawa DUA kosakata peran — system role & project role dalam satu nilai   |  **F7**  | 🔴  | Sedang        | Ya (blokir production)  | `TERBUKA`                | §19.15 |
 | 88  | God Mode Administrator belum tercatat di `AuditLogs` — §19.6 aturan 2 belum penuh          |  **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`                | §19.19 |
+| 89  | `PUT .../dashboard-layout` tak bisa dinyatakan di matriks — §19.5 beri `dashboard` R saja  |  **F7**  | 🟠  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §19.21 |
 | 31  | ~~Login dengan email di kolom form~~                                                       |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                              | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                           | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -4461,3 +4462,68 @@ baru `MODE` di `daftarPeranRute.ts` dinaikkan ke `TOLAK`.
 ⚠️ **#66 masih belum boleh ditutup sepenuhnya.** Rute DELETE-nya sudah aman,
 tetapi #72 (16 rute POST/PUT/PATCH ber-`["*"]`) masih terbuka — dan keduanya
 lahir dari lubang yang sama.
+
+### 19.21 Gelombang 2 — seluruh rute wildcard dijaga matriks
+
+Dikerjakan 16 Agu 2026. **31 rute** dialihkan dari `verifyProjectAccess(["*"])`
+ke `jagaProyek(modul, aksi)`.
+
+| Laporan boot      | Sebelum F7 | Sesudah gelombang 1 | Sesudah gelombang 2 |
+| ----------------- | ---------: | ------------------: | ------------------: |
+| penjaga lama      |         54 |                  44 |              **13** |
+| ber-`["*"]` polos |         31 |                  31 |               **0** |
+| korslet (#73)     |          1 |                   1 |                   1 |
+
+**#72 tertutup secara struktural**, bukan per rute. `viewer` kini hanya membaca,
+sesuai §19.5 — sebelumnya ia bisa membuat dan mengubah data di hampir seluruh
+modul, karena `["*"]` berarti "anggota dengan peran apa pun" sejak #49.
+
+#### Dua rute ambigu DIPERIKSA ISINYA, bukan ditebak dari namanya
+
+Pelajaran #80 — nama rute bukan bukti tentang apa yang dilakukannya:
+
+| Rute                        | Yang ditemukan di isinya                          | Aksi |
+| --------------------------- | ------------------------------------------------- | :--: |
+| `qa-test-cases/generate-ai` | nol `INSERT`/`UPDATE`, hanya mengembalikan usulan | `R`  |
+| `qa-test-cases/sync`        | hanya `UPDATE`, tidak membuat baris baru          | `U`  |
+
+Keduanya `POST`, dan menebak dari metodenya saja akan memberi `C` pada
+keduanya — yang berarti tiga peran fungsional kehilangan akses ke fitur yang
+sebenarnya tidak menulis apa-apa.
+
+#### Satu pemetaan yang merupakan PERTIMBANGAN saya, bukan ketetapan §19
+
+`POST /api/projects/:projectId/activity` → `list` `U`. Ia menulis `ActivityLogs`
+sebagai efek samping tindakan tulis, jadi `viewer` memang tidak seharusnya
+menghasilkannya. Dicatat terpisah supaya bisa dibantah, bukan disembunyikan di
+tengah 31 rute lain.
+
+#### Item #89 — `dashboard-layout` tidak bisa dinyatakan di matriks
+
+Satu-satunya korslet yang tersisa (#73) adalah:
+
+```ts
+PUT /api/projects/:projectId/dashboard-layout
+verifyProjectAccess(["admin","manager","head","developer","designer","viewer","*"])
+```
+
+Ia **tidak dialihkan**, dan itu disengaja. §19.5 memberi modul `dashboard` hanya
+`R` kepada **seluruh** peran — tidak ada satu pun yang boleh menulis. Memetakan
+rute ini ke `dashboard` `U` akan menolak semua orang dan mematikan fiturnya.
+
+Ada dua kemungkinan, dan keduanya keputusan pemilik proyek, bukan tebakan saya:
+
+1. Tata letak dashboard adalah **preferensi per-pengguna**, bukan sumber daya
+   proyek — maka ia tidak semestinya berada di bawah matriks proyek sama sekali.
+2. §19.5 memang perlu memberi `U` pada `dashboard` untuk sebagian peran.
+
+Sampai dijawab, penjaga lamanya dibiarkan apa adanya. Mencabut `"*"` begitu saja
+juga bukan perbaikan: daftar perannya tidak memuat `owner`, `system_analyst`,
+`business_analyst`, maupun `qa`, sehingga keempatnya justru akan terkunci.
+
+#### Testnya memeriksa lebih dari ketiadaan wildcard
+
+`tanpa-wildcard.test.ts` juga menuntut: aksi masuk akal terhadap metode HTTP-nya,
+dan **modul benar-benar ada di matriks**. Modul yang salah eja tidak memicu galat
+apa pun — ia hanya menolak semua orang diam-diam, dan itu bentuk kegagalan yang
+paling sulit disadari.
