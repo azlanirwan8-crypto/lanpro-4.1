@@ -1,4 +1,5 @@
 import React from "react";
+import { katalogPeranSistem } from "../../lib/roleCatalog";
 import {
   Users,
   UserPlus,
@@ -46,6 +47,9 @@ const Input = ({ value, onChange, placeholder, type = "text", className = "", ..
 
 export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const { projects, tasks, masterData } = props;
+
+  // #82 — peran sistem dibaca dari Master Data, bukan ditulis di JSX.
+  const peranSistem = React.useMemo(() => katalogPeranSistem(masterData), [masterData]);
   const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false);
   const [isInviteSuccessModalOpen, setIsInviteSuccessModalOpen] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<"overview" | "settings">("overview");
@@ -554,12 +558,14 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 onChange={(e) => setFilterRole(e.target.value)}
                 className="px-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded focus:bg-surface focus:ring-1 focus:ring-indigo-500/10 outline-none text-content-body font-medium text-xs cursor-pointer h-8.5"
               >
+                {/* #82 — dari Master Data. Sebelumnya lima opsi ditulis di sini
+                    dan tidak pernah ikut berubah saat katalog diperbarui. */}
                 <option value="all">All Roles</option>
-                <option value="admin">Admin</option>
-                <option value="head">Head</option>
-                <option value="manager">Manager</option>
-                <option value="user">User</option>
-                <option value="viewer">Viewer</option>
+                {peranSistem.map((p) => (
+                  <option key={p.code} value={p.code}>
+                    {p.label}
+                  </option>
+                ))}
               </select>
               <select
                 value={filterStatus}
@@ -669,12 +675,13 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       }}
                       className="px-3.5 py-1.5 bg-surface border border-border-subtle text-slate-750 text-xs font-medium rounded-lg shadow-2xs focus:ring-2 focus:ring-indigo-500/20 outline-none cursor-pointer"
                     >
+                      {/* #82 — dari Master Data. */}
                       <option value="">Ubah Role Massal...</option>
-                      <option value="admin">Administrator</option>
-                      <option value="head">Department Head</option>
-                      <option value="manager">Project Manager</option>
-                      <option value="user">Standard User</option>
-                      <option value="viewer">Observer</option>
+                      {peranSistem.map((p) => (
+                        <option key={p.code} value={p.code}>
+                          {p.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -1211,41 +1218,18 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   onChange={(e) => setAddPeopleRole(e.target.value)}
                   className="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium appearance-none cursor-pointer focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 focus:bg-surface outline-none transition-all"
                 >
-                  <option value="admin">Administrator (Full Access)</option>
-                  <option value="head">Department Head (Head)</option>
-                  <option value="manager">Project Manager (Manager)</option>
-                  <option value="user">Standard User (User)</option>
-                  <option value="viewer">Observer (Viewer - Read Only)</option>
-                  {masterData
-                    .filter(
-                      (d) =>
-                        d.type === "project_role" &&
-                        (d.roleType === "SYSTEM" || d.role_type === "SYSTEM")
-                    )
-                    .map((role) => {
-                      const roleValue = (role.label || "").toLowerCase();
-                      if (
-                        [
-                          "admin",
-                          "head",
-                          "manager",
-                          "user",
-                          "viewer",
-                          "administrator",
-                          "department head",
-                          "project manager",
-                          "standard user",
-                          "observer",
-                        ].includes(roleValue)
-                      ) {
-                        return null;
-                      }
-                      return (
-                        <option key={role.id} value={role.label}>
-                          {role.label}
-                        </option>
-                      );
-                    })}
+                  {/* #82 — dari Master Data. Versi lama menulis lima opsi lalu
+                      menambahkan Master Data di bawahnya dengan daftar
+                      pengecualian yang harus dijaga manual; setiap peran baru
+                      menuntut daftar itu ikut disunting. */}
+                  {peranSistem.length === 0 && (
+                    <option value="">(katalog peran sistem kosong)</option>
+                  )}
+                  {peranSistem.map((p) => (
+                    <option key={p.code} value={p.code}>
+                      {p.label}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-content-subtle" />
               </div>

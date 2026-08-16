@@ -70,6 +70,7 @@ const DIHAPUS = [
 const SYSTEM_ROLES = [
   {
     slug: "administrator",
+    code: "admin",
     label: "Administrator",
     order: 1,
     color: "#DC2626",
@@ -79,6 +80,7 @@ const SYSTEM_ROLES = [
   },
   {
     slug: "department-head",
+    code: "head",
     label: "Department Head",
     order: 2,
     color: "#7C3AED",
@@ -88,6 +90,7 @@ const SYSTEM_ROLES = [
   },
   {
     slug: "standard-user",
+    code: "user",
     label: "Standard User",
     order: 3,
     color: "#2563EB",
@@ -97,6 +100,7 @@ const SYSTEM_ROLES = [
   },
   {
     slug: "observer",
+    code: "viewer",
     label: "Observer",
     order: 4,
     color: "#64748B",
@@ -113,6 +117,7 @@ const SYSTEM_ROLES = [
 const PROJECT_ROLES = [
   {
     slug: "project-owner",
+    code: "owner",
     label: "Project Owner",
     order: 1,
     color: "#B91C1C",
@@ -122,6 +127,7 @@ const PROJECT_ROLES = [
   },
   {
     slug: "project-admin",
+    code: "admin",
     label: "Project Admin",
     order: 2,
     color: "#6366F1",
@@ -131,6 +137,7 @@ const PROJECT_ROLES = [
   },
   {
     slug: "project-manager",
+    code: "manager",
     label: "Project Manager",
     order: 3,
     color: "#0891B2",
@@ -140,6 +147,7 @@ const PROJECT_ROLES = [
   },
   {
     slug: "system-analyst",
+    code: "system_analyst",
     label: "System Analyst",
     order: 4,
     color: "#7C3AED",
@@ -149,6 +157,7 @@ const PROJECT_ROLES = [
   },
   {
     slug: "business-analyst",
+    code: "business_analyst",
     label: "Business Analyst",
     order: 5,
     color: "#DB2777",
@@ -158,6 +167,7 @@ const PROJECT_ROLES = [
   },
   {
     slug: "developer",
+    code: "developer",
     label: "Developer",
     order: 6,
     color: "#059669",
@@ -167,6 +177,7 @@ const PROJECT_ROLES = [
   },
   {
     slug: "qa-engineer",
+    code: "qa",
     label: "QA",
     order: 7,
     color: "#F59E0B",
@@ -176,6 +187,7 @@ const PROJECT_ROLES = [
   },
   {
     slug: "viewer",
+    code: "viewer",
     label: "Viewer",
     order: 8,
     color: "#94A3B8",
@@ -213,13 +225,14 @@ const JABATAN_BARU = [
   const upsert = async (r, type, roleType) => {
     const id = `md-${type}-${r.slug}`;
     const { rows } = await client.query(
-      `INSERT INTO "MasterData" (id, type, label, "order", color, icon, description, role_type)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO "MasterData" (id, type, code, label, "order", color, icon, description, role_type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        ON CONFLICT (id) DO UPDATE SET
-         label = EXCLUDED.label, "order" = EXCLUDED."order", color = EXCLUDED.color,
-         icon = EXCLUDED.icon, description = EXCLUDED.description, role_type = EXCLUDED.role_type
+         code = EXCLUDED.code, label = EXCLUDED.label, "order" = EXCLUDED."order",
+         color = EXCLUDED.color, icon = EXCLUDED.icon,
+         description = EXCLUDED.description, role_type = EXCLUDED.role_type
        RETURNING (xmax = 0) AS baru`,
-      [id, type, r.label, r.order, r.color || null, r.icon || null, r.description, roleType]
+      [id, type, r.code, r.label, r.order, r.color || null, r.icon || null, r.description, roleType]
     );
     if (rows[0].baru) ditambah++;
     else diperbarui++;

@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { cn } from "../../lib/utils";
+import { katalogPeranSistem, katalogPeranProyek } from "../../lib/roleCatalog";
 import { toast } from "sonner";
 import {
   updateUser,
@@ -208,6 +209,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   const [selectedAssignProjectId, setSelectedAssignProjectId] = useState<string>("");
   const [selectedAssignProjectRole, setSelectedAssignProjectRole] = useState<string>("member");
   const [selectedSubordinateIds, setSelectedSubordinateIds] = useState<string[]>([]);
+
+  // #82 — daftar peran dibaca dari Master Data, bukan ditulis di JSX.
+  const peranSistem = React.useMemo(() => katalogPeranSistem(masterData), [masterData]);
+  const peranProyek = React.useMemo(() => katalogPeranProyek(masterData), [masterData]);
   const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const [userProjectsList, setUserProjectsList] = useState<Project[]>([]);
 
@@ -682,37 +687,22 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           }}
                           className="w-full px-3 py-1.5 bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-700 rounded-md text-xs font-medium text-content-strong dark:text-slate-100 outline-none focus:border-indigo-500 transition-all cursor-pointer"
                         >
-                          <option value="admin">Administrator (Full Access)</option>
-                          <option value="head">Department Head (Head)</option>
-                          <option value="manager">Project Manager (Manager)</option>
-                          <option value="user">Standard User (User)</option>
-                          <option value="viewer">Observer (Viewer - Read Only)</option>
-
-                          {masterData
-                            .filter(
-                              (d) =>
-                                d.type === "project_role" &&
-                                (d.roleType === "SYSTEM" || d.role_type === "SYSTEM")
-                            )
-                            .map((role) => {
-                              const roleValue = (role.label || "").toLowerCase();
-                              if (
-                                [
-                                  "admin",
-                                  "head",
-                                  "manager",
-                                  "user",
-                                  "viewer",
-                                  "administrator",
-                                ].includes(roleValue)
-                              )
-                                return null;
-                              return (
-                                <option key={role.id} value={role.label}>
-                                  {role.label}
-                                </option>
-                              );
-                            })}
+                          {/* #82 — TIDAK ADA opsi yang ditulis di sini. Daftarnya
+                              berasal dari Master Data, dan nilai yang disimpan
+                              adalah `code`, bukan label. Versi lama menulis lima
+                              opsi langsung lalu MENAMBAHKAN Master Data di
+                              bawahnya, sehingga Department Head muncul dua kali
+                              dengan nilai berbeda: `head` dan "Department Head". */}
+                          {peranSistem.length === 0 && (
+                            <option value="">
+                              (katalog peran sistem kosong — isi di Master Data)
+                            </option>
+                          )}
+                          {peranSistem.map((p) => (
+                            <option key={p.code} value={p.code}>
+                              {p.label}
+                            </option>
+                          ))}
                         </select>
                       </div>
 
@@ -1054,12 +1044,20 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         onChange={(e) => setSelectedAssignProjectRole(e.target.value)}
                         className="w-full px-3 py-1.5 bg-surface dark:bg-slate-900 border border-border-subtle dark:border-slate-700 rounded-md text-xs font-medium text-content-strong dark:text-slate-100 outline-none focus:border-indigo-500"
                       >
-                        <option value="admin">Project Admin (Administrator Proyek)</option>
-                        <option value="manager">Project Manager (Manager Proyek)</option>
-                        <option value="lead">Project Lead (Lead Proyek)</option>
-                        <option value="member">Member (Anggota Tim)</option>
-                        <option value="viewer">Viewer (Pengamat)</option>
-                        <option value="owner">Owner (Pemilik Proyek)</option>
+                        {/* #82 — dari Master Data, bukan ditulis di sini. Versi
+                            lama menawarkan `lead` dan `member` yang tidak ada di
+                            katalog mana pun, sementara System Analyst, Business
+                            Analyst, Developer, dan QA tidak bisa dipilih. */}
+                        {peranProyek.length === 0 && (
+                          <option value="">
+                            (katalog peran proyek kosong — isi di Master Data)
+                          </option>
+                        )}
+                        {peranProyek.map((p) => (
+                          <option key={p.code} value={p.code}>
+                            {p.label}
+                          </option>
+                        ))}
                       </select>
                     </div>
 

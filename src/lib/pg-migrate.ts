@@ -78,6 +78,11 @@ export async function runMigrations(pool: Pool): Promise<void> {
         role_type         VARCHAR(20),
         "createdAt"       TIMESTAMP DEFAULT NOW()
       );
+      -- #82 — kode peran yang STABIL. Nilai inilah yang disimpan ke
+      -- Users.role dan ProjectMembers.role, bukan labelnya. Dengan begitu
+      -- mengganti nama tampilan sebuah peran di Master Data tidak merusak
+      -- otorisasi, dan sebaliknya otorisasi tidak memaksa label tetap kaku.
+      ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS code VARCHAR(50);
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS color VARCHAR(50);
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS icon VARCHAR(50);
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS description TEXT;
