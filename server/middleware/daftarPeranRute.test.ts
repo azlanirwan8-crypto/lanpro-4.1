@@ -12,6 +12,7 @@
 
 import {
   catatPenjaga,
+  catatPenjagaMatriks,
   kosongkanPendaftaran,
   periksaPenjaga,
   laporkanPenjaga,
@@ -101,7 +102,7 @@ describe("mode TOLAK — server menolak menyala bila peran tak dikenal", () => {
     const pesan: string[] = [];
     laporkanPenjaga((p) => pesan.push(p));
     const teks = pesan.join("\n");
-    expect(teks).toContain("2 penjaga rute terdaftar");
+    expect(teks).toContain("2 penjaga lama");
     expect(teks).toContain("1 ber-");
     expect(teks).toContain("1 korslet");
   });
@@ -119,5 +120,40 @@ describe("pendaftaran", () => {
     const h = periksaPenjaga();
     expect(h.jumlahPenjaga).toBe(0);
     expect(h.hasil).toBe("bersih");
+  });
+});
+
+describe("#90 penjaga boot mengawasi penjaga MATRIKS, bukan tempat kosong", () => {
+  it("menghitung penjaga matriks yang terdaftar", () => {
+    catatPenjagaMatriks("list", "R");
+    catatPenjagaMatriks("qa", "D");
+    expect(periksaPenjaga().jumlahPenjagaMatriks).toBe(2);
+  });
+
+  it("modul yang tidak ada di matriks MENJATUHKAN boot", () => {
+    // Salah ketik nama modul tidak memicu galat apa pun saat berjalan — ia
+    // hanya menolak semua orang diam-diam. Inilah yang menangkapnya.
+    catatPenjagaMatriks("liist", "R");
+    expect(() => laporkanPenjaga(() => {})).toThrow(/liist/);
+  });
+
+  it("modul+aksi yang tidak mengizinkan SIAPA PUN menjatuhkan boot", () => {
+    // `dashboard` hanya `R` di §19.5. Menjaga sebuah rute dengan
+    // `jagaProyek("dashboard","U")` membuat rutenya mustahil dipakai.
+    catatPenjagaMatriks("dashboard", "U");
+    expect(() => laporkanPenjaga(() => {})).toThrow(/dashboard:U/);
+  });
+
+  it("kombinasi yang sah tidak menjatuhkan boot", () => {
+    catatPenjagaMatriks("dashboard", "R");
+    catatPenjagaMatriks("wiki", "D");
+    catatPenjagaMatriks("list", "C");
+    expect(() => laporkanPenjaga(() => {})).not.toThrow();
+    expect(periksaPenjaga().hasil).toBe("bersih");
+  });
+
+  it("nol penjaga apa pun tetap laporan bersih, bukan galat", () => {
+    expect(periksaPenjaga().hasil).toBe("bersih");
+    expect(periksaPenjaga().jumlahPenjagaMatriks).toBe(0);
   });
 });
