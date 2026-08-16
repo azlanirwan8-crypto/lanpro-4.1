@@ -5726,3 +5726,75 @@ test yang memakai pola itu.
 Asersi "empat rute komentar" juga sempat merah karena `/comments` dipakai juga
 oleh komentar **task** (2 rute). Disaring ke discussion point saja — angka yang
 dikunci harus punya arti, bukan sekadar cocok.
+
+### 19.42 Rekomendasi untuk lima item yang menahan jalan — semuanya diukur
+
+Pemilik proyek meminta kelimanya didahulukan. Empat di antaranya pertanyaan;
+satu hanya bisa dikerjakan pemilik proyek sendiri. Semuanya diukur 16 Agu 2026
+supaya jawabannya tinggal satu kata.
+
+#### #57 — dua endpoint health. **Rekomendasi: buang `/api/health`.**
+
+| Endpoint            | Letak                 | Di balik autentikasi?                                     | Isi jawaban                            |
+| ------------------- | --------------------- | --------------------------------------------------------- | -------------------------------------- |
+| `/api/health-check` | `server.ts:552`       | **TIDAK** — terdaftar di `publicRoutes` (`server.ts:409`) | status · timestamp · migrasi           |
+| `/api/health`       | `health.routes.ts:69` | **YA**                                                    | status · timestamp · service · migrasi |
+
+Keduanya menghitung hal yang sama dari `statusMigrasi()`. Bedanya hanya field
+`service` yang bernilai tetap `"LanPro Backend"`.
+
+Yang menentukan: **probe kesehatan tidak punya kredensial.** `/api/health` ada
+di balik gerbang `/api/*`, jadi ia tidak bisa dipakai untuk keperluan yang
+namanya sendiri janjikan. Ia menduplikasi informasi sambil tidak bisa diakses
+oleh yang membutuhkannya.
+
+Buang `/api/health`; `/api/health-check` sudah publik dan sudah memuat status
+migrasi. **Menunggu: setuju / tidak.**
+
+#### #81 — `parentAdminId`. **Rekomendasi: buang.**
+
+Diukur: **4 kemunculan, NOL pembacaan.**
+
+| Berkas                           | Peran                           |
+| -------------------------------- | ------------------------------- |
+| `project.routes.ts:610` · `:615` | **menulis** (UPDATE dan INSERT) |
+| `src/lib/db.ts:99`               | daftar kolom camelCase adaptor  |
+| `src/lib/pg-migrate.ts:118`      | definisi kolom                  |
+
+Tidak ada satu pun `SELECT` yang membacanya, dan tidak ada satu pun keputusan
+yang bergantung padanya. §19.9 K4 sudah merekomendasikan **buang**; pengukuran
+ini menguatkannya.
+
+Kolom yang ditulis tetapi tidak pernah dibaca lebih berbahaya daripada kolom
+kosong: ia terlihat seperti data yang bermakna, dan orang berikutnya akan
+membangun sesuatu di atasnya. **Menunggu: setuju / tidak.**
+
+#### #20 — kode mati DB Explorer. **Rekomendasi: buang.**
+
+`DbExplorerPanel.tsx:38-40` memuat komentar dari sesi sebelumnya yang menyatakan
+perbandingan `dbMode === 'mysql'` **tidak pernah benar**, sebab state-nya
+bertipe `"pg" | "local"`. Toggle-nya karena itu tidak pernah berpindah mode, dan
+`fetchDbStatus` dipanggil tiap mount tanpa ada yang memakai hasilnya.
+
+Sejalan dengan ketetapan "Postgres saja" — tidak ada MySQL di LanPro, jadi
+toggle antar mode DB memang tidak punya alasan untuk ada.
+
+**Menunggu konfirmasi:** benar tidak dipakai? Bila ya, seluruh blok itu dibuang.
+
+#### #46 — `SSO_ALLOWED_DOMAINS=gmail.com`. **Butuh nilai dari Anda.**
+
+Ini satu-satunya dari kelima yang **tidak bisa saya rekomendasikan isinya** —
+jawabannya bergantung pada siapa yang boleh masuk, dan itu keputusan
+organisasi, bukan teknis.
+
+Yang bisa saya sampaikan: nilai sekarang berarti **siapa pun pemilik alamat
+Gmail** bisa mendaftar lewat SSO. Ia juga membatalkan asumsi kuota corporate
+pada rancangan F11 (§11.1b), sehingga #30 ikut tertahan olehnya.
+
+Bentuk yang diharapkan: daftar domain dipisah koma, misal
+`perusahaan.co.id,anakperusahaan.co.id`. **Menunggu: nilainya.**
+
+#### #15 — cabut 2 Google API key. **Hanya Anda yang bisa.**
+
+Di Google Cloud Console, ±5 menit, nol kode. Ia satu-satunya dari kelima yang
+**menutup sebuah fase** (F1).
