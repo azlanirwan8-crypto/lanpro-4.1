@@ -106,10 +106,40 @@ export const catatGodMode = (
 const tolak = (res: any) => res.status(403).json({ status: "error", message: "Akses ditolak" });
 
 /**
+ * Beberapa rute beralamat ke ENTITAS, bukan ke proyek — `/api/v1/meetings/:id`
+ * tidak menyebut proyek mana pun di jalurnya.
+ *
+ * Itulah sebab #70: rute-rute itu tidak punya `:projectId`, sehingga penjaga
+ * lama meloloskannya begitu saja dan sebuah rapat bisa dibaca maupun dibatalkan
+ * LINTAS PROYEK. Bukan penjaganya yang longgar — rutenya memang tak pernah
+ * dijaga, karena tidak ada yang bisa dijaga tanpa tahu proyeknya.
+ *
+ * `lewat` memberi tahu penjaga cara MENEMUKAN proyeknya. Bila entitasnya tidak
+ * ada, permintaannya ditolak 403 — bukan 404 — supaya tidak bisa dipakai
+ * menebak id rapat milik proyek lain.
+ */
+export type LewatEntitas = "meeting";
+
+const proyekDariEntitas = async (
+  connection: any,
+  lewat: LewatEntitas,
+  entitasId: string
+): Promise<string | null> => {
+  if (lewat === "meeting") {
+    const [rows]: any = await connection.query("SELECT projectId FROM Meetings WHERE id = ?", [
+      entitasId,
+    ]);
+    return rows.length > 0 ? rows[0].projectId : null;
+  }
+  return null;
+};
+
+/**
  * @param modul modul §19.5 yang dijaga rute ini
  * @param aksi  huruf CRUD menurut §19.7
+ * @param lewat bila rutenya beralamat ke entitas, bukan ke proyek
  */
-export const jagaProyek = (modul: ModulProyek, aksi: Aksi) => {
+export const jagaProyek = (modul: ModulProyek, aksi: Aksi, lewat?: LewatEntitas) => {
   // Mendaftarkan diri saat penjaga DIBUAT, yaitu saat modul rute dimuat.
   // Penjaga boot memvalidasi modul + aksinya terhadap matriks (#90) — tanpa
   // ini, gerbangnya mengukur himpunan kosong sejak penjaga lama pensiun.
@@ -118,7 +148,7 @@ export const jagaProyek = (modul: ModulProyek, aksi: Aksi) => {
   return async (req: any, res: any, next: any) => {
     let connection;
     try {
-      const targetProjectId = req.params?.projectId || req.params?.id;
+      let targetProjectId = req.params?.projectId || req.params?.id;
 
       const userIdMentah =
         req.user?.id || req.user?.uid || req.headers?.["x-user-id"] || req.query?.userId;
@@ -133,6 +163,13 @@ export const jagaProyek = (modul: ModulProyek, aksi: Aksi) => {
       if (uRows.length === 0) return tolak(res);
 
       const userId = uRows[0].id;
+
+      if (lewat) {
+        const entitasId = req.params?.id || req.params?.meetingId;
+        targetProjectId = entitasId
+          ? await proyekDariEntitas(connection, lewat, String(entitasId))
+          : null;
+      }
 
       // §19.6 langkah 3b — God Mode, HANYA Administrator sistem.
       if (punyaGodMode(uRows[0].role)) {

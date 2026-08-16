@@ -41,6 +41,9 @@ const upload = multer({ dest: GLOBAL_UPLOADS_DIR });
 
 router.post(
   "/api/v1/meetings/:meetingId/upload-recording",
+  // #70 — dulu TANPA penjaga proyek sama sekali. Jalurnya tidak menyebut
+  // proyek, jadi proyeknya ditemukan lewat rapatnya.
+  jagaProyek("meetingNotes", "U", "meeting"),
   upload.single("recording"),
   async (req, res) => {
     // Upload request received (debug log removed for production security)
@@ -306,7 +309,7 @@ router.post("/api/projects/:projectId/meetings/:id/upload-recording", (req, res)
 });
 
 // GET: Retrieve meeting status/details (polling fallback)
-router.get("/api/v1/meetings/:id", async (req, res) => {
+router.get("/api/v1/meetings/:id", jagaProyek("meetingNotes", "R", "meeting"), async (req, res) => {
   try {
     const { id } = req.params;
     const connection = await db.getConnection();
@@ -325,109 +328,117 @@ router.get("/api/v1/meetings/:id", async (req, res) => {
 });
 
 // GET: Dedicated short-polling endpoint for meeting AI processing status
-router.get("/api/v1/meetings/:meetingId/status", async (req, res) => {
-  try {
-    const { meetingId } = req.params;
-    const connection = await db.getConnection();
-    const [rows]: any = await connection.query(
-      "SELECT id, upload_status, transcript, analysis_result, aiSummary FROM Meetings WHERE id = ?",
-      [meetingId]
-    );
-    connection.release();
+router.get(
+  "/api/v1/meetings/:meetingId/status",
+  jagaProyek("meetingNotes", "R", "meeting"),
+  async (req, res) => {
+    try {
+      const { meetingId } = req.params;
+      const connection = await db.getConnection();
+      const [rows]: any = await connection.query(
+        "SELECT id, upload_status, transcript, analysis_result, aiSummary FROM Meetings WHERE id = ?",
+        [meetingId]
+      );
+      connection.release();
 
-    if (!rows || rows.length === 0) {
-      return res.status(404).json({ status: "error", message: "Meeting tidak ditemukan." });
+      if (!rows || rows.length === 0) {
+        return res.status(404).json({ status: "error", message: "Meeting tidak ditemukan." });
+      }
+
+      const meeting = rows[0];
+      let statusValue = meeting.upload_status || "IDLE";
+      let progressPercentage = 0;
+      let message = "Menunggu pemrosesan...";
+
+      // Standardize the status values for consistencies
+      if (statusValue === "PROCESSING_AI") {
+        statusValue = "EXTRACTING_AUDIO";
+      } else if (statusValue === "TRANSCRIBING") {
+        statusValue = "TRANSCRIBING_STT";
+      }
+
+      switch (statusValue) {
+        case "EXTRACTING_AUDIO":
+          progressPercentage = 15;
+          message = "Ekstraksi audio sedang berjalan...";
+          break;
+        case "TRANSCRIBING_STT":
+          progressPercentage = 60;
+          message = "Mengubah suara rekaman audio menjadi teks mentah secara akurat...";
+          break;
+        case "ANALYZING_LLM":
+          progressPercentage = 90;
+          message = "Mengekstrak rangkuman, keputusan, & rencana tindak lanjut dengan AI...";
+          break;
+        case "COMPLETED":
+          progressPercentage = 100;
+          message = "Pemrosesan selesai!";
+          break;
+        case "FAILED":
+          progressPercentage = 0;
+          message = "Pemrosesan gagal.";
+          break;
+        case "UPLOAD_SUCCESS":
+          progressPercentage = 5;
+          message = "Berkas berhasil diunggah. Bersiap memulai pemrosesan...";
+          break;
+        default:
+          progressPercentage = 0;
+          message = "Menunggu pemrosesan...";
+      }
+
+      return res.json({
+        status: statusValue,
+        success: true,
+        upload_status: statusValue,
+        progress_percentage: progressPercentage,
+        message: message,
+        transcript: meeting.transcript,
+        analysis_result: meeting.analysis_result,
+        aiSummary: meeting.aiSummary,
+      });
+    } catch (error: any) {
+      console.error("GET /api/v1/meetings/:meetingId/status error:", error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Gagal mendapatkan status: " + error.message });
     }
-
-    const meeting = rows[0];
-    let statusValue = meeting.upload_status || "IDLE";
-    let progressPercentage = 0;
-    let message = "Menunggu pemrosesan...";
-
-    // Standardize the status values for consistencies
-    if (statusValue === "PROCESSING_AI") {
-      statusValue = "EXTRACTING_AUDIO";
-    } else if (statusValue === "TRANSCRIBING") {
-      statusValue = "TRANSCRIBING_STT";
-    }
-
-    switch (statusValue) {
-      case "EXTRACTING_AUDIO":
-        progressPercentage = 15;
-        message = "Ekstraksi audio sedang berjalan...";
-        break;
-      case "TRANSCRIBING_STT":
-        progressPercentage = 60;
-        message = "Mengubah suara rekaman audio menjadi teks mentah secara akurat...";
-        break;
-      case "ANALYZING_LLM":
-        progressPercentage = 90;
-        message = "Mengekstrak rangkuman, keputusan, & rencana tindak lanjut dengan AI...";
-        break;
-      case "COMPLETED":
-        progressPercentage = 100;
-        message = "Pemrosesan selesai!";
-        break;
-      case "FAILED":
-        progressPercentage = 0;
-        message = "Pemrosesan gagal.";
-        break;
-      case "UPLOAD_SUCCESS":
-        progressPercentage = 5;
-        message = "Berkas berhasil diunggah. Bersiap memulai pemrosesan...";
-        break;
-      default:
-        progressPercentage = 0;
-        message = "Menunggu pemrosesan...";
-    }
-
-    return res.json({
-      status: statusValue,
-      success: true,
-      upload_status: statusValue,
-      progress_percentage: progressPercentage,
-      message: message,
-      transcript: meeting.transcript,
-      analysis_result: meeting.analysis_result,
-      aiSummary: meeting.aiSummary,
-    });
-  } catch (error: any) {
-    console.error("GET /api/v1/meetings/:meetingId/status error:", error);
-    return res
-      .status(500)
-      .json({ status: "error", message: "Gagal mendapatkan status: " + error.message });
   }
-});
+);
 
 // POST: Cancel or reset AI meeting background job & upload state
-router.post("/api/v1/meetings/:meetingId/cancel", async (req, res) => {
-  try {
-    const { meetingId } = req.params;
-    const connection = await db.getConnection();
+router.post(
+  "/api/v1/meetings/:meetingId/cancel",
+  jagaProyek("meetingNotes", "U", "meeting"),
+  async (req, res) => {
+    try {
+      const { meetingId } = req.params;
+      const connection = await db.getConnection();
 
-    // Update database back to IDLE and clear file attributes so user can upload again
-    await connection.query(
-      "UPDATE Meetings SET upload_status = 'IDLE', recording_url = NULL, file_size = NULL, transcript = NULL, aiSummary = NULL, analysis_result = NULL WHERE id = ?",
-      [meetingId]
-    );
-    connection.release();
+      // Update database back to IDLE and clear file attributes so user can upload again
+      await connection.query(
+        "UPDATE Meetings SET upload_status = 'IDLE', recording_url = NULL, file_size = NULL, transcript = NULL, aiSummary = NULL, analysis_result = NULL WHERE id = ?",
+        [meetingId]
+      );
+      connection.release();
 
-    // Emit status back to IDLE
-    io.emit("meeting_ai_status", {
-      meetingId,
-      status: "IDLE",
-      progress_percentage: 0,
-      message: "Pemrosesan dibatalkan.",
-    });
+      // Emit status back to IDLE
+      io.emit("meeting_ai_status", {
+        meetingId,
+        status: "IDLE",
+        progress_percentage: 0,
+        message: "Pemrosesan dibatalkan.",
+      });
 
-    return res.json({ status: "success", message: "Pemrosesan rapat berhasil dibatalkan." });
-  } catch (error: any) {
-    console.error("POST /api/v1/meetings/:meetingId/cancel error:", error);
-    return res
-      .status(500)
-      .json({ status: "error", message: "Gagal membatalkan pemrosesan: " + error.message });
+      return res.json({ status: "success", message: "Pemrosesan rapat berhasil dibatalkan." });
+    } catch (error: any) {
+      console.error("POST /api/v1/meetings/:meetingId/cancel error:", error);
+      return res
+        .status(500)
+        .json({ status: "error", message: "Gagal membatalkan pemrosesan: " + error.message });
+    }
   }
-});
+);
 
 // POST: Trigger asynchronous background AI pipeline analysis
 router.post("/api/v1/meetings/:meetingId/analyze", async (req, res) => {
