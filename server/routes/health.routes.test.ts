@@ -40,9 +40,18 @@ describe('Health Routes (H1 Pattern Example)', () => {
     expect(response.body.service).toBe('LanPro Backend');
   });
 
-  it('should handle metrics endpoint', async () => {
+  it('menolak /metrics tanpa token — perilaku berubah karena item #58', async () => {
+    // Asersi lama di sini adalah `expect([200, 500]).toContain(status)`, yang
+    // mengunci keadaan SEBELUM #58: endpoint terbuka untuk umum. Ketetapan
+    // pemilik proyek 16 Agu 2026 menutupnya di balik METRIK_TOKEN, jadi
+    // asersinya ikut berubah — bukan dilemahkan.
+    //
+    // 401 bila METRIK_TOKEN terisi tapi permintaan tidak membawanya;
+    // 503 bila variabelnya sendiri kosong, yang berarti endpoint dinonaktifkan.
+    // Cakupan lengkapnya ada di `metrics-guard.test.ts`.
     const response = await request(app).get('/metrics');
 
-    expect([200, 500]).toContain(response.status);
+    expect([401, 503]).toContain(response.status);
+    expect(response.text).not.toContain('process_cpu_user_seconds_total');
   });
 });
