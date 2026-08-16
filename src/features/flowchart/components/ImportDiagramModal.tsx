@@ -91,7 +91,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                 "p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5",
                 importType === "drawio"
                   ? "bg-orange-50/70 border-orange-200 text-orange-800 ring-2 ring-orange-500/20 font-medium"
-                  : "border-border-subtle hover:bg-surface-sunken text-slate-605 hover:border-border-subtle font-medium"
+                  : "border-border-subtle hover:bg-surface-sunken  hover:border-border-subtle font-medium"
               )}
             >
               <span className="text-xl">📊</span>
@@ -114,7 +114,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                 "p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5",
                 importType === "miro"
                   ? "bg-amber-50/70 border-amber-200 text-amber-800 ring-2 ring-amber-500/20 font-medium"
-                  : "border-border-subtle hover:bg-surface-sunken text-slate-605 hover:border-border-subtle font-medium"
+                  : "border-border-subtle hover:bg-surface-sunken  hover:border-border-subtle font-medium"
               )}
             >
               <span className="text-xl">🟡</span>
@@ -137,7 +137,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                 "p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5",
                 importType === "native"
                   ? "bg-indigo-50/70 border-indigo-200 text-indigo-800 ring-2 ring-indigo-500/20 font-medium"
-                  : "border-border-subtle hover:bg-surface-sunken text-slate-605 hover:border-border-subtle font-medium"
+                  : "border-border-subtle hover:bg-surface-sunken  hover:border-border-subtle font-medium"
               )}
             >
               <span className="text-xl">🔮</span>
@@ -151,7 +151,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
           </div>
 
           {/* Guidelines helper text */}
-          <div className="bg-surface-sunken p-3 rounded-xl border border-border-subtle text-xs sm:text-[11px] leading-relaxed text-slate-550">
+          <div className="bg-surface-sunken p-3 rounded-xl border border-border-subtle text-xs sm:text-[11px] leading-relaxed">
             {importType === "drawio" && (
               <p>
                 💡 <strong>Petunjuk Draw.io</strong>: Anda dapat mengekspor diagram dari Draw.io

@@ -2610,7 +2610,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       <>
                         <span className="text-content-subtle">•</span>
                         <span
-                          className="text-xs sm:text-[10px] font-medium text-indigo-750 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full truncate max-w-[180px]"
+                          className="text-xs sm:text-[10px] font-medium bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full truncate max-w-[180px]"
                           title={linkedEpic.title}
                         >
                           🎯 Epic: {linkedEpic.title}
@@ -2740,8 +2740,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           className={cn(
                             "p-2 rounded-lg transition-all",
                             activeTool === "select"
-                              ? "bg-violet-650 text-content-inverse shadow-md scale-105"
-                              : "text-slate-650 hover:bg-surface-muted"
+                              ? " text-content-inverse shadow-md scale-105"
+                              : " hover:bg-surface-muted"
                           )}
                           title="Pointer Selector tool"
                         >
@@ -2756,8 +2756,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           className={cn(
                             "p-2 rounded-lg transition-all",
                             activeTool === "hand"
-                              ? "bg-violet-650 text-content-inverse shadow-md scale-105"
-                              : "text-slate-650 hover:bg-surface-muted"
+                              ? " text-content-inverse shadow-md scale-105"
+                              : " hover:bg-surface-muted"
                           )}
                           title="Hand Panner tool"
                         >
@@ -2803,8 +2803,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           className={cn(
                             "p-2 rounded-lg transition-all flex flex-col items-center w-10 border border-border-faint",
                             activeTool === "connect"
-                              ? "bg-amber-505 bg-amber-400 text-content"
-                              : "text-slate-650 hover:bg-surface-muted"
+                              ? " bg-amber-400 text-content"
+                              : " hover:bg-surface-muted"
                           )}
                           title="Anak Panah Penghubung shapes"
                         >
@@ -2816,10 +2816,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                         <button
                           onClick={() => handleAddNewNode("text")}
-                          className="p-2 hover:bg-surface-muted text-slate-650 rounded-lg transition-all flex flex-col items-center w-10"
+                          className="p-2 hover:bg-surface-muted rounded-lg transition-all flex flex-col items-center w-10"
                           title="Tambahkan Teks dokumentasi"
                         >
-                          <Type className="w-4 h-4 text-slate-505" />
+                          <Type className="w-4 h-4" />
                           <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-medium uppercase tracking-tight mt-0.5">
                             Text
                           </span>
@@ -2845,7 +2845,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         className={cn(
                           "absolute inset-0 w-full h-full overflow-hidden z-0 transition-colors duration-300 rounded-xl",
                           canvasTheme === "miro"
-                            ? "bg-surface/95 text-slate-850 grid-dots-light"
+                            ? "bg-surface/95  grid-dots-light"
                             : "bg-[#0a1124] text-sky-100 grid-blueprint-dark border-border-inverse"
                         )}
                         onMouseDown={handleCanvasMouseDown}
@@ -3027,9 +3027,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-xs sm:text-[11px] sm:text-[9px] text-emerald-400 font-medium uppercase tracking-wider">Canvas</span>
               </span>
-              <div className="w-px h-3.5 bg-slate-750" />
+              <div className="w-px h-3.5" />
               <span className="font-medium">X: <span className="text-slate-100">{hoverCoords.x}</span> Y: <span className="text-slate-100">{hoverCoords.y}</span></span>
-              <div className="w-px h-3.5 bg-slate-750" />
+              <div className="w-px h-3.5" />
               <span className="text-violet-300 font-medium">{nodes.length} Objek</span>
             </div> */}
 
@@ -3062,7 +3062,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               "p-2 rounded-xl transition-all flex items-center justify-center",
                               historyIndex <= 0
                                 ? "text-content-subtle cursor-not-allowed"
-                                : "text-slate-750 hover:bg-surface-muted hover:text-violet-600 active:scale-95"
+                                : " hover:bg-surface-muted hover:text-violet-600 active:scale-95"
                             )}
                             title="Undo Gagal Langkah (Ctrl+Z)"
                           >
@@ -3077,7 +3077,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               "p-2 rounded-xl transition-all flex items-center justify-center",
                               historyIndex >= historyStack.length - 1
                                 ? "text-content-subtle cursor-not-allowed"
-                                : "text-slate-750 hover:bg-surface-muted hover:text-violet-600 active:scale-95"
+                                : " hover:bg-surface-muted hover:text-violet-600 active:scale-95"
                             )}
                             title="Redo Langkah Batal (Ctrl+Shift+Z)"
                           >
@@ -3089,7 +3089,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           {/* Auto-Align Layout Engine */}
                           <button
                             onClick={handleAutoAlignNodes}
-                            className="p-1 px-2 text-content-body hover:bg-surface-muted hover:text-violet-605 rounded-xl transition-all flex items-center gap-1 active:scale-95 text-xs sm:text-[10px] font-medium"
+                            className="p-1 px-2 text-content-body hover:bg-surface-muted rounded-xl transition-all flex items-center gap-1 active:scale-95 text-xs sm:text-[10px] font-medium"
                             title="Otomatis merapikan format diagram secara horizontal & vertikal"
                           >
                             <Sparkles className="w-3.5 h-3.5 text-violet-600 fill-violet-200" />
@@ -3102,7 +3102,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className={cn(
                               "p-1 px-2 rounded-xl transition-all flex items-center gap-1 active:scale-95 text-xs sm:text-[10px] font-medium",
                               isSimulating
-                                ? "bg-red-50 text-red-600 hover:bg-red-100 border border-red-150 shadow-soft"
+                                ? "bg-red-50 text-red-600 hover:bg-red-100 border  shadow-soft"
                                 : "text-content-body hover:bg-surface-muted hover:text-emerald-600"
                             )}
                             title={
@@ -3221,7 +3221,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className={cn(
                               "p-2 rounded-xl transition-all flex items-center justify-center",
                               isKeyboardHelpOpen
-                                ? "bg-amber-50 text-amber-600 border border-amber-250"
+                                ? "bg-amber-50 text-amber-600 border "
                                 : "text-content-muted hover:bg-surface-muted"
                             )}
                             title="Bantuan Navigasi & Pintasan Keyboard"
@@ -3232,7 +3232,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                         {/* KEYBOARD SHORTCUTS NAVIGATIONAL HELP PANELS */}
                         {isKeyboardHelpOpen && (
-                          <div className="absolute left-4 right-4 md:left-auto md:right-4 bottom-20 z-40 bg-slate-900/95 backdrop-blur text-content-inverse p-4 rounded-xl border border-slate-750 shadow-2xl max-w-sm space-y-3 p-4 select-none">
+                          <div className="absolute left-4 right-4 md:left-auto md:right-4 bottom-20 z-40 bg-slate-900/95 backdrop-blur text-content-inverse p-4 rounded-xl border shadow-2xl max-w-sm space-y-3 p-4 select-none">
                             <div className="flex justify-between items-center pb-2 border-b border-border-inverse">
                               <span className="font-medium uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-violet-400">
                                 Pintasan Keyboard & Tips
@@ -3325,7 +3325,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           <div className="space-y-4">
                             <div className="flex justify-between items-center bg-surface-sunken p-2.5 rounded-lg border border-border-subtle">
                               <div>
-                                <span className="text-xs sm:text-[10px] sm:text-[8.5px] font-medium tracking-wider text-slate-550 text-content-muted uppercase">
+                                <span className="text-xs sm:text-[10px] sm:text-[8.5px] font-medium tracking-wider text-content-muted uppercase">
                                   Selected Component
                                 </span>
                                 <div className="text-content font-medium capitalize flex items-center gap-1.5 mt-0.5 text-xs">
@@ -3335,7 +3335,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               </div>
                               <button
                                 onClick={handleDeleteSelected}
-                                className="p-2 bg-rose-50 rounded-lg hover:bg-rose-100 text-rose-600 transition-all active:scale-95 shadow-soft border border-rose-150"
+                                className="p-2 bg-rose-50 rounded-lg hover:bg-rose-100 text-rose-600 transition-all active:scale-95 shadow-soft border"
                                 title="Hapus shape"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -3344,7 +3344,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             {/* Shape Type Dropper Selector (Miro Dynamic conversion) */}
                             <div className="space-y-1.5">
-                              <label className="text-xs sm:text-[10px] uppercase font-medium text-slate-550 text-content-muted font-medium flex items-center gap-1">
+                              <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted font-medium flex items-center gap-1">
                                 <Layers className="w-3.5 h-3.5 text-violet-600" />
                                 <span>Ubah Bentuk / Tipe Shape</span>
                               </label>
@@ -3382,7 +3382,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             {/* Edit inline message */}
                             <div className="space-y-1.5">
-                              <label className="text-xs sm:text-[10px] uppercase font-medium text-slate-550 text-content-muted font-medium">
+                              <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted font-medium">
                                 Sunting Teks
                               </label>
                               <textarea
@@ -3395,7 +3395,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             {/* Shape Theme Colors (Miro aesthetics) */}
                             <div className="space-y-2">
-                              <span className="text-xs sm:text-[10px] uppercase font-medium text-slate-550 text-content-muted block font-medium">
+                              <span className="text-xs sm:text-[10px] uppercase font-medium text-content-muted block font-medium">
                                 Warna Palette Miro
                               </span>
                               <div className="grid grid-cols-6 gap-1.5">

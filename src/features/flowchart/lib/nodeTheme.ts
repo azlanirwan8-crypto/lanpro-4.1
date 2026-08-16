@@ -8,9 +8,9 @@
  * Pelengkap `lib/shapes.tsx`: berkas itu menggambar bentuk yang butuh SVG
  * presisi, berkas ini memberi gaya bentuk yang cukup diwakili sebuah div.
  */
-import type { FlowNode } from '../types';
-import { colorPalettes } from '../constants';
-import { customSvgTypes } from './shapes';
+import type { FlowNode } from "../types";
+import { colorPalettes } from "../constants";
+import { customSvgTypes } from "./shapes";
 
 /**
  * Menghasilkan kelas Tailwind untuk sebuah node sesuai tipe, warna, gaya
@@ -24,18 +24,24 @@ export const getShapeThemeClasses = (node: FlowNode, isSelected: boolean): strin
   const palette = colorPalettes[node.color] || colorPalettes.indigo;
   const ringClass = isSelected ? "ring-4 ring-offset-2 ring-violet-500 z-30" : "";
 
-  const base = "transition-all duration-300 flex flex-col justify-center items-center text-center p-3 select-none";
+  const base =
+    "transition-all duration-300 flex flex-col justify-center items-center text-center p-3 select-none";
   let borderStyleClass = "border-2";
   if (node.borderStyle === "dashed") borderStyleClass = "border-2 border-dashed";
   if (node.borderStyle === "none") borderStyleClass = "border-0 shadow-none";
 
-  if (customSvgTypes.includes(node.type as any) || node.type === "parallelogram" || node.type === "diamond" || node.type === "decision") {
+  if (
+    customSvgTypes.includes(node.type as any) ||
+    node.type === "parallelogram" ||
+    node.type === "diamond" ||
+    node.type === "decision"
+  ) {
     const customIsSelectedRing = isSelected ? "z-30" : "";
     return `transition-all duration-300 flex flex-col justify-center items-center text-center p-3 select-none ${palette.text} ${customIsSelectedRing} relative bg-transparent border-0`;
   }
 
   if (node.type === "sticky") {
-    return `${base} justify-start text-left p-4 bg-yellow-150 ${palette.bg} ${palette.text} border-b-[3px] border-black/15 rounded-md ${ringClass}`;
+    return `${base} justify-start text-left p-4  ${palette.bg} ${palette.text} border-b-[3px] border-black/15 rounded-md ${ringClass}`;
   }
 
   if (node.type === "rect") {

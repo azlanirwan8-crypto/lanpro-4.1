@@ -63,7 +63,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
                 "flex flex-col p-4 rounded-xl border text-left transition-all h-full relative focus:outline-none cursor-pointer",
                 isActive
                   ? "bg-slate-800/90 border-amber-400/80 shadow-[0_0_15px_rgba(251,191,36,0.15)]"
-                  : "bg-slate-800/30 border-slate-850 hover:bg-slate-800/60"
+                  : "bg-slate-800/30  hover:bg-slate-800/60"
               )}
             >
               <div className="flex justify-between items-center w-full mb-3 select-none">

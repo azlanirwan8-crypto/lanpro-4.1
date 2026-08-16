@@ -910,7 +910,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-surface p-4 rounded-xl border border-border-subtle/50 shadow-xs flex flex-col justify-between">
-                      <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle  uppercase tracking-wider block">
+                      <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle uppercase tracking-wider block">
                         Segmen Diskusi
                       </span>
                       <p className="text-base font-medium text-indigo-950 mt-1">
@@ -919,7 +919,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                     </div>
 
                     <div className="bg-surface p-4 rounded-xl border border-border-subtle/50 shadow-xs flex flex-col justify-between">
-                      <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle  uppercase tracking-wider block">
+                      <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle uppercase tracking-wider block">
                         Action Items
                       </span>
                       <p className="text-base font-medium text-emerald-700 mt-1">
@@ -995,7 +995,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                     {isEditingTranscript ? (
                       <div className="space-y-4 text-left animate-fade-in">
-                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs  text-amber-800 leading-relaxed flex items-start gap-2.5">
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-800 leading-relaxed flex items-start gap-2.5">
                           <Sparkles className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5 animate-pulse" />
                           <div>
                             Mode Edit Aktif: Anda dapat menambah, mengoreksi, atau menempelkan
@@ -1010,13 +1010,13 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           value={editedTranscriptText}
                           onChange={(e) => setEditedTranscriptText(e.target.value)}
                           placeholder="Sunting atau lengkapi teks transkrip di sini..."
-                          className="w-full min-h-[350px] p-4 border border-border-subtle focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs  outline-none bg-surface font-mono leading-relaxed shadow-inner"
+                          className="w-full min-h-[350px] p-4 border border-border-subtle focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl text-xs outline-none bg-surface font-mono leading-relaxed shadow-inner"
                         />
 
                         <div className="flex items-center justify-end gap-3 pt-2">
                           <button
                             onClick={() => setIsEditingTranscript(false)}
-                            className="px-4 py-2.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs  rounded-xl border border-border-subtle/60 transition-all cursor-pointer"
+                            className="px-4 py-2.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs rounded-xl border border-border-subtle/60 transition-all cursor-pointer"
                           >
                             Batal
                           </button>
@@ -1053,7 +1053,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Cari kata kunci, topik, pembicara, atau keputusan..."
-                                className="w-full pl-10 pr-10 py-2.5 bg-surface border border-border-subtle focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-xs text-slate-705 rounded-xl placeholder:text-content-subtle focus:outline-none transition-all "
+                                className="w-full pl-10 pr-10 py-2.5 bg-surface border border-border-subtle focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-xs rounded-xl placeholder:text-content-subtle focus:outline-none transition-all"
                               />
                               {searchTerm && (
                                 <button
@@ -1071,7 +1071,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               className={`px-4 py-2.5 rounded-xl border text-xs font-medium transition-all flex items-center gap-2 cursor-pointer shadow-xs ${
                                 filterOnlyMatches
                                   ? "bg-indigo-600 border-indigo-600 text-content-inverse shadow-md"
-                                  : "bg-surface border-border-subtle text-slate-655 hover:text-content-strong hover:bg-surface-sunken"
+                                  : "bg-surface border-border-subtle  hover:text-content-strong hover:bg-surface-sunken"
                               }`}
                             >
                               <Filter className="w-3.5 h-3.5" />
@@ -1100,7 +1100,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                   className={`px-2.5 py-1 text-xs sm:text-[10px]  rounded-lg transition-all cursor-pointer border ${
                                     searchTerm === chip
                                       ? "bg-indigo-50 border-indigo-200 text-indigo-700 font-medium"
-                                      : "bg-surface border-slate-150 text-content-muted hover:text-content-body hover:bg-surface-sunken"
+                                      : "bg-surface  text-content-muted hover:text-content-body hover:bg-surface-sunken"
                                   }`}
                                 >
                                   {chip}
@@ -1128,14 +1128,14 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               </div>
                             ))
                           ) : (
-                            <div className="text-center py-8 text-content-subtle  italic">
+                            <div className="text-center py-8 text-content-subtle italic">
                               Tidak ada baris transkrip yang cocok dengan pencarian "{searchTerm}".
                             </div>
                           )}
                         </div>
                       </div>
                     ) : (
-                      <p className="text-xs text-content-subtle  italic">
+                      <p className="text-xs text-content-subtle italic">
                         Transkrip mentah tidak tersedia (Analisis multimodal diekstrak langsung dari
                         rekaman video/audio).
                       </p>
@@ -1158,12 +1158,12 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     <div className="flex flex-col items-center justify-center gap-3 w-full py-4">
                       <button
                         onClick={isRecording ? stopRecording : startRecording}
-                        className={`px-8 py-4 ${isRecording ? "bg-surface-inverse" : "bg-red-600"} hover:opacity-90 text-content-inverse rounded-xl text-sm font-medium shadow-soft-lg shadow-red-150 flex items-center gap-3 cursor-pointer transition-transform hover:scale-[1.02]`}
+                        className={`px-8 py-4 ${isRecording ? "bg-surface-inverse" : "bg-red-600"} hover:opacity-90 text-content-inverse rounded-xl text-sm font-medium shadow-soft-lg  flex items-center gap-3 cursor-pointer transition-transform hover:scale-[1.02]`}
                       >
                         <Brain className="w-5 h-5" />{" "}
                         {isRecording ? "Hentikan Rekaman" : "Mulai Merekam"}
                       </button>
-                      <span className="text-sm font-mono  text-content-muted">
+                      <span className="text-sm font-mono text-content-muted">
                         {formatTime(recordingTime)}
                       </span>
                     </div>
@@ -1267,7 +1267,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 {icon}
-                                <span className="text-xs  text-content-body">{title}</span>
+                                <span className="text-xs text-content-body">{title}</span>
                               </div>
                               <span className="text-xs font-medium text-blue-600 transition-all duration-300">
                                 {pct}%
@@ -1285,7 +1285,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </div>
 
                             {/* Detail of bytes / stage */}
-                            <div className="flex items-center justify-between text-xs sm:text-[10px] text-content-muted ">
+                            <div className="flex items-center justify-between text-xs sm:text-[10px] text-content-muted">
                               <span>{subtext}</span>
                               <button
                                 onClick={(e) => {
@@ -1313,7 +1313,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           className="hidden"
                         />
                         <UploadCloud className="w-8 h-8" />
-                        <p className="text-xs  text-center">Unggah Rekaman ({selectedPlatform})</p>
+                        <p className="text-xs text-center">Unggah Rekaman ({selectedPlatform})</p>
                         <p className="text-xs sm:text-[10px] text-content-subtle text-center">
                           Video / Audio (MP4, AVI, MKV, MOV, MP3, WAV, etc.)
                         </p>
@@ -1324,7 +1324,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                 {/* Section 3: Paste Transcript */}
                 <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
-                  <div className="text-center text-xs  text-content-subtle uppercase tracking-wider py-2">
+                  <div className="text-center text-xs text-content-subtle uppercase tracking-wider py-2">
                     ATAU TEMPEL LINK / TRANSKRIP
                   </div>
 
@@ -1333,19 +1333,19 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     value={meetingLink}
                     onChange={(e) => setMeetingLink(e.target.value)}
                     placeholder="Tempel link rapat (Zoom/Teams/GMeet)..."
-                    className="w-full p-3 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle "
+                    className="w-full p-3 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle"
                   />
 
                   <textarea
                     value={transcript}
                     onChange={(e) => setTranscript(e.target.value)}
                     placeholder="Tempel teks transkrip di sini..."
-                    className="w-full min-h-[160px] p-4 border border-border-subtle rounded-xl text-xs  outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle font-mono leading-relaxed shadow-inner"
+                    className="w-full min-h-[160px] p-4 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle font-mono leading-relaxed shadow-inner"
                   />
                   <div className="flex justify-end">
                     <button
                       onClick={handleAnalyze}
-                      className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-xl text-xs font-medium shadow-soft-lg shadow-indigo-150 flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
+                      className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-xl text-xs font-medium shadow-soft-lg flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
                     >
                       <Sparkles className="w-4 h-4 text-indigo-200" /> MULAI ANALISIS AI
                     </button>
@@ -1363,7 +1363,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 </div>
 
                 {activeMeetingData.tab_kronologi_rapat.length === 0 ? (
-                  <div className="text-center py-8 text-slate-450 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
                     Tidak ada kronologi terdeteksi.
                   </div>
                 ) : (
@@ -1393,7 +1393,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             <h5 className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
                               Isi Percakapan Inti & Hasil Diskusi
                             </h5>
-                            <p className="text-xs text-content-secondary leading-relaxed  whitespace-pre-wrap">
+                            <p className="text-xs text-content-secondary leading-relaxed whitespace-pre-wrap">
                               {item.isi_percakapan_inti}
                             </p>
                           </div>
@@ -1414,7 +1414,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 </div>
 
                 {activeMeetingData.tab_kesimpulan.length === 0 ? (
-                  <div className="text-center py-8 text-slate-450 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
                     Tidak ada kesimpulan keputusan resmi yang terdeteksi.
                   </div>
                 ) : (
@@ -1427,7 +1427,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         <span className="w-5 h-5 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 text-xs font-medium mt-0.5 border border-emerald-100">
                           {index + 1}
                         </span>
-                        <p className="text-xs text-content-body  leading-relaxed">{item}</p>
+                        <p className="text-xs text-content-body leading-relaxed">{item}</p>
                       </div>
                     ))}
                   </div>
@@ -1444,7 +1444,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 </div>
 
                 {activeMeetingData.tab_saran_dan_ide.length === 0 ? (
-                  <div className="text-center py-8 text-slate-450 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
                     Tidak ada usulan ide atau rekomendasi yang tercatat.
                   </div>
                 ) : (
@@ -1455,11 +1455,11 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         className="bg-surface p-4.5 rounded-xl border border-amber-100/60 flex flex-col gap-2 shadow-soft hover:border-amber-200 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 bg-amber-50 text-amber-750 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded border border-amber-100">
+                          <span className="px-2 py-0.5 bg-amber-50 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded border border-amber-100">
                             Diusulkan Oleh: {item.diusulkan_oleh}
                           </span>
                         </div>
-                        <p className="text-xs text-content-body  leading-relaxed pl-1">
+                        <p className="text-xs text-content-body leading-relaxed pl-1">
                           {item.deskripsi_ide}
                         </p>
                       </div>
@@ -1491,7 +1491,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 </div>
 
                 {activeMeetingData.tab_tindak_lanjut.length === 0 ? (
-                  <div className="text-center py-8 text-slate-450 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
                     Tidak ada butir tindak lanjut / action items yang terdeteksi.
                   </div>
                 ) : (
@@ -1520,7 +1520,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               <h4 className="text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
                                 Ketakutan, Kendala Teknis, atau Gap Sistem
                               </h4>
-                              <p className="text-xs  text-content-strong leading-snug">
+                              <p className="text-xs text-content-strong leading-snug">
                                 {item.concern_masalah}
                               </p>
                             </div>
@@ -1529,7 +1529,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               <h4 className="text-xs sm:text-[10px] font-medium text-emerald-600 uppercase tracking-wider mb-0.5">
                                 Solusi & Arahan yang Disepakati
                               </h4>
-                              <p className="text-xs  text-content-secondary leading-normal">
+                              <p className="text-xs text-content-secondary leading-normal">
                                 {item.solusi_disepakati}
                               </p>
                             </div>
@@ -1581,7 +1581,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 </div>
 
                 {activeMeetingData.tab_next_plan.length === 0 ? (
-                  <div className="text-center py-8 text-slate-450 text-xs bg-surface border border-border-subtle/40 rounded-xl">
+                  <div className="text-center py-8 text-xs bg-surface border border-border-subtle/40 rounded-xl">
                     Tidak ada rencana lanjut khusus yang terdeteksi secara eksplisit dari rekaman.
                   </div>
                 ) : (
@@ -1602,7 +1602,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             )}
                           </div>
                           <div className="space-y-2">
-                            <p className="text-xs text-content-strong leading-relaxed  whitespace-pre-wrap">
+                            <p className="text-xs text-content-strong leading-relaxed whitespace-pre-wrap">
                               {item.action_item}
                             </p>
                             {item.pic && (
@@ -1636,7 +1636,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         <span className="w-2 h-2 rounded-full bg-slate-400" />
                         Kondisi Saat Ini (As-Is)
                       </div>
-                      <p className="text-xs text-content-secondary  leading-relaxed whitespace-pre-wrap">
+                      <p className="text-xs text-content-secondary leading-relaxed whitespace-pre-wrap">
                         {activeMeetingData.tab_target_to_be.proses_bisnis_as_is ||
                           "Kondisi sistem/proses saat ini tidak dibahas."}
                       </p>
@@ -1663,7 +1663,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                     {!activeMeetingData.tab_target_to_be.langkah_transisi ||
                     activeMeetingData.tab_target_to_be.langkah_transisi.length === 0 ? (
-                      <p className="text-xs text-content-subtle ">
+                      <p className="text-xs text-content-subtle">
                         Tidak ada langkah transisi spesifik yang dibahas.
                       </p>
                     ) : (
@@ -1674,7 +1674,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               <span className="w-5 h-5 rounded-full bg-cyan-50 border border-cyan-100 text-cyan-600 flex items-center justify-center font-medium shrink-0 mt-0.5">
                                 {idx + 1}
                               </span>
-                              <p className="text-content-secondary  leading-relaxed mt-0.5">
+                              <p className="text-content-secondary leading-relaxed mt-0.5">
                                 {step}
                               </p>
                             </div>
@@ -1702,28 +1702,28 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       Detil Rapat
                     </h5>
                     <div className="space-y-2">
-                      <div className="text-xs  text-content-secondary">
+                      <div className="text-xs text-content-secondary">
                         Host Rapat:{" "}
                         <span className="text-content-strong font-medium">
                           {activeMeetingData.tab_metadata.host_rapat || "TBD"}
                         </span>
                       </div>
-                      <div className="text-xs  text-content-secondary">
+                      <div className="text-xs text-content-secondary">
                         Tanggal Rapat:{" "}
                         <span className="text-content-strong font-medium">
                           {activeMeetingData.tab_metadata.tanggal_rapat || "TBD"}
                         </span>
                       </div>
-                      <div className="text-xs  text-content-secondary">
+                      <div className="text-xs text-content-secondary">
                         Platform:{" "}
-                        <span className="text-slate-850 font-medium px-1.5 py-0.5 bg-surface-muted rounded border border-border-subtle">
+                        <span className="font-medium px-1.5 py-0.5 bg-surface-muted rounded border border-border-subtle">
                           {activeMeetingData.tab_metadata.platform_digunakan || "Zoom"}
                         </span>
                       </div>
                       {activeMeetingData.tab_metadata.durasi_detik > 0 && (
-                        <div className="text-xs  text-content-secondary">
+                        <div className="text-xs text-content-secondary">
                           Durasi:{" "}
-                          <span className="text-slate-850 font-medium">
+                          <span className="font-medium">
                             {Math.floor(activeMeetingData.tab_metadata.durasi_detik / 60)} menit
                           </span>
                         </div>
@@ -1739,7 +1739,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                     {!activeMeetingData.tab_metadata.peserta_rapat ||
                     activeMeetingData.tab_metadata.peserta_rapat.length === 0 ? (
-                      <p className="text-xs text-content-subtle ">
+                      <p className="text-xs text-content-subtle">
                         Tidak ada peserta yang terdeteksi.
                       </p>
                     ) : (
@@ -1765,7 +1765,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
       </div>
 
       {/* Info footer */}
-      <div className="bg-surface-sunken border-t border-slate-150 p-4 px-6 flex items-center gap-2 text-xs sm:text-[11px] text-content-subtle ">
+      <div className="bg-surface-sunken border-t p-4 px-6 flex items-center gap-2 text-xs sm:text-[11px] text-content-subtle">
         <Info className="w-4 h-4 text-content-subtle shrink-0" />
         <span>
           Data di atas dianalisis secara aman menggunakan <strong>Gemini AI</strong>. Anda dapat
@@ -1787,7 +1787,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   <h4 className="text-sm font-medium tracking-tight text-content-inverse">
                     Continuous Learning Loop
                   </h4>
-                  <p className="text-xs sm:text-[10px] text-content-subtle ">
+                  <p className="text-xs sm:text-[10px] text-content-subtle">
                     Latih AI agar belajar dari kesalahan & kritik Anda
                   </p>
                 </div>
@@ -1835,7 +1835,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
             <div className="px-6 py-4 bg-surface-sunken border-t border-border-faint flex justify-end gap-2.5">
               <button
                 onClick={() => setShowFeedbackModal(false)}
-                className="px-4 py-2.5 text-xs  text-content-secondary hover:text-content-strong hover:bg-surface-muted rounded-xl transition-all cursor-pointer"
+                className="px-4 py-2.5 text-xs text-content-secondary hover:text-content-strong hover:bg-surface-muted rounded-xl transition-all cursor-pointer"
                 disabled={submittingFeedback}
               >
                 Batal
