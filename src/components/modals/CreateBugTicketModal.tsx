@@ -79,7 +79,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
         >
           <div className="flex items-center justify-between border-b border-border-faint pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="p-2.5 bg-rose-500/10 text-danger rounded-md">
+              <div className="p-2.5 bg-rose-500/10 text-danger-text rounded-md">
                 <Bug className="w-5 h-5" />
               </div>
               <div>
@@ -116,7 +116,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
 
             {/* Parent Task Searchable Combobox */}
             <div className="space-y-1.5 relative">
-              <label className="text-xs sm:text-[10px] font-medium text-danger uppercase tracking-wider block">
+              <label className="text-xs sm:text-[10px] font-medium text-danger-text uppercase tracking-wider block">
                 TARGET EPIC / TASK UTAMA (PARENT * MANDATORY)
               </label>
 
@@ -163,7 +163,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
                             }}
                             className={`p-2.5 text-xs font-medium flex items-center justify-between cursor-pointer transition-colors ${
                               selectedParentId === pt.id
-                                ? "bg-rose-500/10 text-danger"
+                                ? "bg-rose-500/10 text-danger-text"
                                 : "hover:bg-surface-sunken text-content-body"
                             }`}
                           >
@@ -172,7 +172,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
                               {pt.title}
                             </span>
                             {selectedParentId === pt.id && (
-                              <CheckCircle2 className="w-4 h-4 text-danger shrink-0" />
+                              <CheckCircle2 className="w-4 h-4 text-danger-text shrink-0" />
                             )}
                           </div>
                         ))

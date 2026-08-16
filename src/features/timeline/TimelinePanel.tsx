@@ -1188,7 +1188,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               className="flex items-center gap-1.5 px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-subtle/80 cursor-pointer active:scale-95"
               title="Jump to Today"
             >
-              <Calendar className="w-3.5 h-3.5 text-success" />
+              <Calendar className="w-3.5 h-3.5 text-success-text" />
               <span>Today</span>
             </button>
           </div>
@@ -1248,7 +1248,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   onClick={exportTimelineToPdf}
                   className="w-full text-left px-3.5 py-2 hover:bg-surface-sunken text-xs font-medium text-content-body flex items-center gap-2 cursor-pointer transition-colors"
                 >
-                  <FileText className="w-4 h-4 text-danger" />
+                  <FileText className="w-4 h-4 text-danger-text" />
                   <span>PDF Document</span>
                 </button>
                 <button

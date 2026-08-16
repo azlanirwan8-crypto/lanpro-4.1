@@ -55,11 +55,11 @@ export const QATopBar: React.FC<QATopBarProps> = ({
           <>
             {isLockedBySomeoneElse ? (
               <div className="flex items-center gap-3 w-full md:w-auto">
-                <div className="p-2 bg-danger/10 text-danger rounded-md">
+                <div className="p-2 bg-danger/10 text-danger-text rounded-md">
                   <Lock className="w-4 h-4 animate-pulse" />
                 </div>
                 <div>
-                  <span className="text-xs sm:text-[10px] text-danger font-bold uppercase tracking-wider block">
+                  <span className="text-xs sm:text-[10px] text-danger-text font-bold uppercase tracking-wider block">
                     DILOCK OLEH LAIN
                   </span>
                   <span className="text-xs font-semibold text-content-body block mt-0.5">
@@ -80,12 +80,12 @@ export const QATopBar: React.FC<QATopBarProps> = ({
               </div>
             ) : (
               <div className="flex items-center gap-3 w-full md:w-auto">
-                <div className="p-2 bg-success/10 text-success rounded-md">
+                <div className="p-2 bg-success/10 text-success-text rounded-md">
                   <Unlock className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs sm:text-[10px] text-success font-bold uppercase tracking-wider">
+                    <span className="text-xs sm:text-[10px] text-success-text font-bold uppercase tracking-wider">
                       Anda Memegang Lock
                     </span>
                     <span className="px-2 py-[3px] bg-primary-surface/10 text-primary text-[10px] leading-none font-bold rounded-md">

@@ -99,7 +99,7 @@ export const CompleteRegistrationScreen = ({
         className="w-full max-w-md text-center"
       >
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-success/10">
-          <CheckCircle2 className="h-7 w-7 text-success" />
+          <CheckCircle2 className="h-7 w-7 text-success-text" />
         </div>
         <h2 className="text-2xl font-semibold text-content-strong">Pendaftaran Berhasil</h2>
         <p className="mt-2 text-sm text-content-secondary">{berhasil}</p>
@@ -138,7 +138,7 @@ export const CompleteRegistrationScreen = ({
       <form onSubmit={kirim} className="mt-6 space-y-4">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-content-body">
-            Username <span className="text-danger">*</span>{" "}
+            Username <span className="text-danger-text">*</span>{" "}
             <span className="font-normal text-content-muted">(Huruf saja, maks 10)</span>
           </label>
           <input
@@ -161,7 +161,7 @@ export const CompleteRegistrationScreen = ({
         </div>
 
         {galat && (
-          <div className="flex items-start gap-2 text-sm text-danger">
+          <div className="flex items-start gap-2 text-sm text-danger-text">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{galat}</span>
           </div>

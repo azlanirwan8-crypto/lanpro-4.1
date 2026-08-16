@@ -135,7 +135,7 @@ const getStatusClasses = (val: string) => {
     normalized.includes("rencana") ||
     normalized.includes("backlog")
   ) {
-    return "bg-info/10 text-info border-info/20 hover:bg-info/15";
+    return "bg-info/10 text-info-text border-info/20 hover:bg-info/15";
   }
   if (
     normalized.includes("in progress") ||
@@ -144,7 +144,7 @@ const getStatusClasses = (val: string) => {
     normalized.includes("progress") ||
     normalized.includes("uji")
   ) {
-    return "bg-warning/10 text-warning border-warning/20 hover:bg-warning/15";
+    return "bg-warning/10 text-warning-text border-warning/20 hover:bg-warning/15";
   }
   if (
     normalized.includes("done") ||
@@ -153,7 +153,7 @@ const getStatusClasses = (val: string) => {
     normalized.includes("closed") ||
     normalized.includes("ready")
   ) {
-    return "bg-success/10 text-success border-success/20 hover:bg-success/15";
+    return "bg-success/10 text-success-text border-success/20 hover:bg-success/15";
   }
   return "bg-primary-surface/10 text-primary border-primary/20 hover:bg-primary-surface/15";
 };
@@ -167,10 +167,10 @@ const getPriorityClasses = (val: string) => {
     normalized.includes("tinggi") ||
     normalized.includes("mendesak")
   ) {
-    return "bg-danger/10 text-danger border-danger/20 hover:bg-danger/15";
+    return "bg-danger/10 text-danger-text border-danger/20 hover:bg-danger/15";
   }
   if (normalized.includes("medium") || normalized.includes("sedang")) {
-    return "bg-warning/10 text-warning border-warning/20 hover:bg-warning/15";
+    return "bg-warning/10 text-warning-text border-warning/20 hover:bg-warning/15";
   }
   if (normalized.includes("low") || normalized.includes("rendah")) {
     return "bg-surface-muted text-content-body border-border-subtle hover:bg-surface-sunken";

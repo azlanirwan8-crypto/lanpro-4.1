@@ -292,10 +292,10 @@ export const Badge = ({
 }) => {
   const variants: Record<BadgeVariant, string> = {
     primary: "bg-primary-surface/10 text-primary border-primary/20",
-    success: "bg-success/10 text-success border-success/20",
-    warning: "bg-warning/15 text-warning border-warning/30",
-    danger: "bg-danger/10 text-danger border-danger/20",
-    info: "bg-info/10 text-info border-info/20",
+    success: "bg-success/10 text-success-text border-success/20",
+    warning: "bg-warning/15 text-warning-text border-warning/30",
+    danger: "bg-danger/10 text-danger-text border-danger/20",
+    info: "bg-info/10 text-info-text border-info/20",
     neutral: "bg-surface-muted text-content-secondary border-border-subtle",
   };
   return (

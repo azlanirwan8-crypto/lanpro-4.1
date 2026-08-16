@@ -901,7 +901,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                   showSuccessAlert("Berhasil!", "Subtask berhasil dihapus.");
                                 }
                               }}
-                              className="p-1 text-content-subtle hover:text-danger hover:bg-danger/10 rounded-lg transition-colors ml-1"
+                              className="p-1 text-content-subtle hover:text-danger-text hover:bg-danger/10 rounded-lg transition-colors ml-1"
                               title="Hapus Subtask"
                             >
                               <Trash2 className="w-3.5 h-3.5" />

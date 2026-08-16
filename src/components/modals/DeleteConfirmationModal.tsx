@@ -28,7 +28,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
           exit={{ scale: 0.95, opacity: 0 }}
           className="bg-surface border border-border-subtle/80 rounded-md p-6 max-w-sm w-full shadow-2xl space-y-4 text-center"
         >
-          <Trash2 className="w-10 h-10 text-danger mx-auto" />
+          <Trash2 className="w-10 h-10 text-danger-text mx-auto" />
           <div>
             <h3 className="text-sm font-medium text-content-strong uppercase tracking-wider">
               {title}
