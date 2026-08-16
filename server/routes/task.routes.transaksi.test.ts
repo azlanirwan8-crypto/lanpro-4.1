@@ -137,11 +137,11 @@ describe("#60 POST tasks — transaksi tidak boleh terbawa ke pool", () => {
     expect(koneksiTiruan.release).toHaveBeenCalled();
   });
 
-  it("tidak me-rollback transaksi yang sudah di-commit saat galat terjadi belakangan", async () => {
-    // Galat pada INSERT — yang berlangsung SETELAH commit penghitung. Karena
-    // tidak ada transaksi terbuka pada saat itu, rollback tidak boleh dipanggil:
-    // koneksinya bisa jadi sudah dipakai permintaan lain.
-    jawabQuery({ gagalPada: /INSERT INTO Tasks/i });
+  it("tidak me-rollback koneksi yang transaksinya sudah ditutup", async () => {
+    // Galat pada pengambilan data reporter, yang berlangsung SETELAH commit.
+    // Tidak ada transaksi terbuka pada saat itu, jadi rollback tidak boleh
+    // dipanggil: koneksinya bisa jadi sudah dipakai permintaan lain.
+    jawabQuery({ gagalPada: /SELECT id, uid, displayName/i });
 
     const res = await request(buatApp())
       .post("/api/projects/proyek-A/tasks")
@@ -151,5 +151,66 @@ describe("#60 POST tasks — transaksi tidak boleh terbawa ke pool", () => {
     expect(koneksiTiruan.commit).toHaveBeenCalled();
     expect(koneksiTiruan.rollback).not.toHaveBeenCalled();
     expect(koneksiTiruan.release).toHaveBeenCalled();
+  });
+});
+
+describe("#61 batas transaksi — penghitung dan task adalah satu kesatuan", () => {
+  beforeEach(() => {
+    koneksiTiruan.beginTransaction.mockResolvedValue(undefined);
+    koneksiTiruan.commit.mockResolvedValue(undefined);
+    koneksiTiruan.rollback.mockResolvedValue(undefined);
+    koneksiTiruan.release.mockImplementation(() => undefined);
+    (db as any).getConnection.mockResolvedValue(koneksiTiruan);
+    (db as any).query.mockResolvedValue([[], []]);
+  });
+
+  it("mengembalikan nomor task bila INSERT gagal — penghitung tidak boleh termakan", async () => {
+    // Ini yang DULU tidak terjadi: commit sudah berlangsung sebelum INSERT,
+    // sehingga taskCounter bertambah permanen untuk task yang tak pernah ada
+    // dan penomoran PROJECTKEY-n berlubang.
+    jawabQuery({ gagalPada: /INSERT INTO Tasks/i });
+
+    const res = await request(buatApp())
+      .post("/api/projects/proyek-A/tasks")
+      .send({ title: "Task uji" });
+
+    expect(res.status).toBe(500);
+    expect(koneksiTiruan.rollback).toHaveBeenCalled();
+    expect(koneksiTiruan.commit).not.toHaveBeenCalled();
+  });
+
+  it("mengembalikan nomor task bila penyimpanan lampiran gagal", async () => {
+    jawabQuery({ gagalPada: /INSERT INTO TaskAttachments/i });
+
+    const res = await request(buatApp())
+      .post("/api/projects/proyek-A/tasks")
+      .send({
+        title: "Task uji",
+        attachments: [{ name: "berkas.pdf", url: "/uploads/berkas.pdf" }],
+      });
+
+    expect(res.status).toBe(500);
+    expect(koneksiTiruan.rollback).toHaveBeenCalled();
+    expect(koneksiTiruan.commit).not.toHaveBeenCalled();
+  });
+
+  it("commit terjadi SESUDAH INSERT task, bukan sebelumnya", async () => {
+    const urutan: string[] = [];
+    koneksiTiruan.commit.mockImplementation(async () => {
+      urutan.push("commit");
+    });
+    koneksiTiruan.query.mockImplementation(async (sql: string) => {
+      if (/INSERT INTO Tasks/i.test(sql)) urutan.push("insert-task");
+      if (/UPDATE Projects SET taskCounter/i.test(sql)) urutan.push("naikkan-penghitung");
+      if (/FROM Projects/i.test(sql)) {
+        return [[{ id: "proyek-A", projectKey: "PRJ", taskCounter: 4, ownerId: "user-1" }]];
+      }
+      if (/FROM Users/i.test(sql)) return [[{ id: "user-1", uid: "user-1" }]];
+      return [[]];
+    });
+
+    await request(buatApp()).post("/api/projects/proyek-A/tasks").send({ title: "Task uji" });
+
+    expect(urutan).toEqual(["naikkan-penghitung", "insert-task", "commit"]);
   });
 });
