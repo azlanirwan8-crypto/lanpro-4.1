@@ -28,7 +28,7 @@ lalu **§0.4** (tiga keputusan yang menahan sisanya). Rinciannya §19.15–§19.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **400 lulus / 42 suite**                                    | `npm test`                                   |
+| Test                | **404 lulus / 43 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -312,7 +312,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 35 BELUM · 57 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 34 BELUM · 58 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -323,11 +323,11 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 35 item
+### 1.1 BELUM SELESAI — 34 item
 
-**Sebaran per fase:** F1 2 · F2 7 · F3 1 · F6 6 · F7 7 · F8 4 · F9 2 · F10 3 · F11 1 · F12 2
+**Sebaran per fase:** F1 2 · F2 6 · F3 1 · F6 6 · F7 7 · F8 4 · F9 2 · F10 3 · F11 1 · F12 2
 
-**Masih menahan rilis production:** #30 · #46 · #94
+**Masih menahan rilis production:** #30 · #46
 
 | #   | Temuan                                                                                     |  Fase   | Sev | Biaya         |   Blokir modul baru?    | Status                  | Detail |
 | --- | ------------------------------------------------------------------------------------------ | :-----: | :-: | ------------- | :---------------------: | ----------------------- | ------ |
@@ -366,9 +366,8 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 87  | `effectiveRole` DIKOREKSI — ia hanya bawa peran sistem; frontend abai peran proyek         | **F7**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §19.27 |
 | 92  | Peran dibaca dari TOKEN di 7 tempat, dari DATABASE di penjaga proyek — pencabutan tertunda | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.28 |
-| 94  | 4 rute komentar discussion point TANPA penjaga sama sekali — baca & tulis lintas proyek    | **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `TERBUKA`               | §19.40 |
 
-### 1.2 SUDAH SELESAI — 57 item
+### 1.2 SUDAH SELESAI — 58 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -433,6 +432,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 55  | ~~`rbac.ts:50` RBAC no-op senyap~~ divalidasi TIDAK tersalin ke penjaga baru bila nama param berbeda |     **F2**     | 🟡  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §13.5  |
 | 93  | ~~"Remember Me" hanya melupakan PROFIL~~ token kini ikut pilihan itu                                 |     **F7**     | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §19.31 |
 | 56  | ~~Jest mencetak crash `pg` saat dibongkar~~ fungsi murni dipisah ke helper                           |     **F8**     | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.5  |
+| 94  | ~~4 rute komentar TANPA penjaga~~ 7 rute telanjang dijaga; test dari arah RUTE                       |     **F2**     | 🔴  | Sangat rendah | Ya (blokir production) | `SELESAI` 16 Agu | §19.40 |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -5687,3 +5687,44 @@ sekali tidak muncul di kedua himpunan itu** — ia tak terlihat oleh keduanya.
 Perbaikannya karena itu bukan hanya memasang penjaga pada 4 rute ini, melainkan
 menambah test yang berangkat dari **himpunan rute berlingkup proyek** dan
 menuntut setiap anggotanya punya penjaga.
+
+### 19.41 #94 selesai — dan testnya menemukan tiga lagi saat pertama dijalankan
+
+| Laporan boot    | Sebelum | Sesudah |
+| --------------- | ------: | ------: |
+| Penjaga matriks |      54 |  **61** |
+
+Tujuh rute yang sebelumnya **telanjang** kini dijaga:
+
+| Rute                                                  | Penjaga                                              |
+| ----------------------------------------------------- | ---------------------------------------------------- |
+| `GET`/`POST /api/discussion-points/:pointId/comments` | `jagaProyek("meetingNotes", R/C, "discussionPoint")` |
+| `GET`/`POST .../discussionPoints/:pointId/comments`   | `jagaProyek("meetingNotes", R/C)`                    |
+| `POST /api/v1/meetings/:meetingId/analyze`            | `jagaProyek("meetingNotes","U","meeting")`           |
+| `POST .../meetings/:id/analyze-transcript`            | `jagaProyek("meetingNotes","U")`                     |
+| `POST .../meetings/:id/upload-recording`              | `jagaProyek("meetingNotes","U")`                     |
+
+**Tiga yang terakhir tidak ada di item #94.** Mereka muncul pada eksekusi
+PERTAMA `rute-tanpa-penjaga.test.ts` — bukti bahwa arah pendataannya memang yang
+selama ini hilang, bukan sekadar cara lain menuliskan hal yang sama.
+
+#### Dua kekeliruan saya, keduanya ditangkap testnya sendiri
+
+**1. Sumber id entitas salah.** Penemuan proyek membaca
+`req.params.id || req.params.meetingId`, sedangkan rute komentar memakai
+`:pointId`. Akibatnya penemuan proyek **selalu gagal** dan penjaganya menolak
+SEMUA orang — kegagalan yang terlihat seperti "keamanan bekerja". Sumber id kini
+bergantung pada jenis entitasnya.
+
+**2. Pengurai rute buta sebagian.** Ia hanya mengenali handler inline
+(`async (req, res) => {`), sehingga rute berhandler **bernama**
+(`getCommentsHandler);`) tidak terdata sama sekali — dua dari empat rute
+komentar tak terlihat oleh testnya sendiri. Diperbaiki di **keempat** berkas
+test yang memakai pola itu.
+
+> Pengurai yang buta sebagian lebih berbahaya daripada tidak ada pengurai: yang
+> pertama melaporkan "bersih", yang kedua melaporkan "tidak tahu".
+
+Asersi "empat rute komentar" juga sempat merah karena `/comments` dipakai juga
+oleh komentar **task** (2 rute). Disaring ke discussion point saja — angka yang
+dikunci harus punya arti, bukan sekadar cocok.
