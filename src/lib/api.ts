@@ -5,7 +5,6 @@ import { toast } from "sonner";
  * LanPro v1.3 - Centralized API Service with JWT & Conflict Handling
  */
 
-
 export class ApiError extends Error {
   status: number;
   data: any;
@@ -39,193 +38,266 @@ export function isNetworkOrAuthError(e: any): boolean {
   );
 }
 
+/**
+ * #93 — token mengikuti pilihan "Remember Me", sama seperti profil sesi.
+ *
+ * Sebelumnya `setAuthToken` SELALU menulis ke localStorage, tanpa cabang
+ * `remember` sama sekali, sementara profil sesi (`sessionUser`) memang
+ * mengikutinya. Akibatnya tidak mencentang "Remember Me" hanya melupakan
+ * PROFIL; KREDENSIALNYA tetap tinggal melewati penutupan peramban. Di komputer
+ * bersama, menutup tab tidak mengakhiri sesi pada tingkat yang penting.
+ *
+ * localStorage dibaca lebih dulu supaya sesi "ingat saya" yang sudah ada tidak
+ * berubah perilakunya; sessionStorage jadi cadangan untuk sesi sementara.
+ */
 export const getAuthToken = () => {
-    try {
-      return safeLocalStorage.getItem("lanpro_jwt_token");
-    } catch (e) {
-      return null;
-    }
+  try {
+    return (
+      safeLocalStorage.getItem("lanpro_jwt_token") || safeSessionStorage.getItem("lanpro_jwt_token")
+    );
+  } catch (e) {
+    return null;
+  }
 };
 
-export const setAuthToken = (token: string) => {
-    try {
+/**
+ * @param remember `true` menyimpan lintas sesi peramban, `false` hanya selama
+ *   tab hidup. Bila DIHILANGKAN, lokasi token yang sekarang DIPERTAHANKAN —
+ *   itu penting untuk pemanggil yang tidak tahu pilihan pengguna, yaitu
+ *   penyegaran token dan kembalian SSO. Tanpa aturan ini, satu penyegaran akan
+ *   memindahkan token sesi sementara ke penyimpanan permanen dan membatalkan
+ *   pilihan penggunanya tanpa ada yang menyadari.
+ */
+export const setAuthToken = (token: string, remember?: boolean) => {
+  try {
+    const diSesi = safeSessionStorage.getItem("lanpro_jwt_token") !== null;
+    const permanen = remember === undefined ? !diSesi : remember;
+
+    if (permanen) {
+      safeSessionStorage.removeItem("lanpro_jwt_token");
       safeLocalStorage.setItem("lanpro_jwt_token", token);
-    } catch (e) {}
+    } else {
+      // Membuang salinan lama WAJIB: `getAuthToken` membaca localStorage
+      // lebih dulu, jadi token permanen yang tertinggal akan menutupi token
+      // sementara dan mengembalikan persis cacat #93.
+      safeLocalStorage.removeItem("lanpro_jwt_token");
+      safeSessionStorage.setItem("lanpro_jwt_token", token);
+    }
+  } catch (e) {}
 };
 
 export const clearAuthToken = () => {
-    try {
-      safeLocalStorage.removeItem("lanpro_jwt_token");
-      safeLocalStorage.removeItem("sessionUser");
-      safeSessionStorage.removeItem("sessionUser");
-      safeLocalStorage.removeItem("isAdminMode");
-      safeSessionStorage.removeItem("isAdminMode");
-    } catch (e) {}
+  try {
+    safeLocalStorage.removeItem("lanpro_jwt_token");
+    safeSessionStorage.removeItem("lanpro_jwt_token");
+    safeLocalStorage.removeItem("sessionUser");
+    safeSessionStorage.removeItem("sessionUser");
+    safeLocalStorage.removeItem("isAdminMode");
+    safeSessionStorage.removeItem("isAdminMode");
+  } catch (e) {}
 };
 
 interface FetchOptions extends RequestInit {
-    body?: any;
+  body?: any;
 }
 
-export async function apiRequest(url: string, options: FetchOptions = {}, retries = 3, backoff = 1000): Promise<any> {
-    const token = getAuthToken();
-    const headers = new Headers(options.headers || {});
-    
-    // Prevent Vercel Edge Caching for all API requests to ensure fresh data
-    headers.set("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate");
-    headers.set("Pragma", "no-cache");
-    
-    if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-    }
-    
-    const fetchOptions: RequestInit = {
-        ...options,
-        headers
-    };
+export async function apiRequest(
+  url: string,
+  options: FetchOptions = {},
+  retries = 3,
+  backoff = 1000
+): Promise<any> {
+  const token = getAuthToken();
+  const headers = new Headers(options.headers || {});
 
-    if (options.body && !(options.body instanceof FormData)) {
-        headers.set("Content-Type", "application/json");
-        fetchOptions.body = typeof options.body === "string" ? options.body : JSON.stringify(options.body);
-    }
-    
-    let response: Response;
-    try {
-        response = await fetch(url, fetchOptions);
-    } catch (fetchErr: any) {
-        if (retries > 0) {
-            console.warn(`Network request failed for ${url} (${fetchErr?.message || 'Failed to fetch'}). Retrying in ${backoff}ms... (${retries} left)`);
-            await new Promise(resolve => setTimeout(resolve, backoff));
-            return apiRequest(url, options, retries - 1, backoff * 1.5);
-        }
-        throw new ApiError("Gagal terhubung ke server. Silakan periksa koneksi internet Anda.", 503, { networkError: true, rawMessage: fetchErr?.message });
-    }
-    
-    if (response.status === 429 && retries > 0 && !url.includes("/api/auth/")) {
-        console.warn(`Rate limited (429) for ${url}. Retrying in ${backoff}ms...`);
-        
-        // Dispatch centralized rate limit status event for any global listener
-        window.dispatchEvent(new CustomEvent("rate_limit_status", {
-            detail: { active: true, url, backoff, retriesLeft: retries }
-        }));
+  // Prevent Vercel Edge Caching for all API requests to ensure fresh data
+  headers.set("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate");
+  headers.set("Pragma", "no-cache");
 
-        toast.warning(`Permintaan terlalu cepat (429). Menghubungi server dalam ${(backoff / 1000).toFixed(1)} detik...`, {
-            id: `rate-limit-${url}`,
-            duration: backoff + 1000
-        });
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
 
-        await new Promise(resolve => setTimeout(resolve, backoff));
-        
-        try {
-            const retryRes = await apiRequest(url, options, retries - 1, backoff * 2);
-            
-            // Clean up status on success
-            window.dispatchEvent(new CustomEvent("rate_limit_status", {
-                detail: { active: false, url }
-            }));
-            toast.success(`Berhasil terhubung kembali ke server!`, {
-                id: `rate-limit-${url}`,
-                duration: 2000
-            });
-            
-            return retryRes;
-        } catch (err) {
-            window.dispatchEvent(new CustomEvent("rate_limit_status", {
-                detail: { active: false, url, failed: true }
-            }));
-            throw err;
-        }
-    } else if (response.status === 429 && retries === 0) {
-        window.dispatchEvent(new CustomEvent("rate_limit_status", {
-            detail: { active: false, url, failed: true }
-        }));
-        toast.error(`Batas percobaan habis. Silakan tunggu beberapa saat lagi.`, {
-            id: `rate-limit-${url}`,
-            duration: 4000
-        });
-    } else {
-        // Any other non-429 response cleans up active rate-limit status for this URL
-        window.dispatchEvent(new CustomEvent("rate_limit_status", {
-            detail: { active: false, url }
-        }));
+  const fetchOptions: RequestInit = {
+    ...options,
+    headers,
+  };
+
+  if (options.body && !(options.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+    fetchOptions.body =
+      typeof options.body === "string" ? options.body : JSON.stringify(options.body);
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(url, fetchOptions);
+  } catch (fetchErr: any) {
+    if (retries > 0) {
+      console.warn(
+        `Network request failed for ${url} (${fetchErr?.message || "Failed to fetch"}). Retrying in ${backoff}ms... (${retries} left)`
+      );
+      await new Promise((resolve) => setTimeout(resolve, backoff));
+      return apiRequest(url, options, retries - 1, backoff * 1.5);
     }
-    
-    // v1.6 Hardening: Safe JSON / Text parsing with fallback & Vercel error sanitization
-    let responseData: any = null;
+    throw new ApiError("Gagal terhubung ke server. Silakan periksa koneksi internet Anda.", 503, {
+      networkError: true,
+      rawMessage: fetchErr?.message,
+    });
+  }
 
-    const contentType = response.headers.get("content-type") || "";
-    const isJsonHeader = contentType.includes("application/json");
+  if (response.status === 429 && retries > 0 && !url.includes("/api/auth/")) {
+    console.warn(`Rate limited (429) for ${url}. Retrying in ${backoff}ms...`);
+
+    // Dispatch centralized rate limit status event for any global listener
+    window.dispatchEvent(
+      new CustomEvent("rate_limit_status", {
+        detail: { active: true, url, backoff, retriesLeft: retries },
+      })
+    );
+
+    toast.warning(
+      `Permintaan terlalu cepat (429). Menghubungi server dalam ${(backoff / 1000).toFixed(1)} detik...`,
+      {
+        id: `rate-limit-${url}`,
+        duration: backoff + 1000,
+      }
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, backoff));
 
     try {
-        if (isJsonHeader) {
-            responseData = await response.json().catch(async () => {
-                const text = await response.clone().text().catch(() => "");
-                try { return JSON.parse(text); } catch { return text; }
-            });
-        } else {
-            const rawText = await response.text().catch(() => "");
-            try {
-                responseData = JSON.parse(rawText);
-            } catch {
-                responseData = rawText;
-            }
-        }
+      const retryRes = await apiRequest(url, options, retries - 1, backoff * 2);
+
+      // Clean up status on success
+      window.dispatchEvent(
+        new CustomEvent("rate_limit_status", {
+          detail: { active: false, url },
+        })
+      );
+      toast.success(`Berhasil terhubung kembali ke server!`, {
+        id: `rate-limit-${url}`,
+        duration: 2000,
+      });
+
+      return retryRes;
     } catch (err) {
-        responseData = null;
+      window.dispatchEvent(
+        new CustomEvent("rate_limit_status", {
+          detail: { active: false, url, failed: true },
+        })
+      );
+      throw err;
+    }
+  } else if (response.status === 429 && retries === 0) {
+    window.dispatchEvent(
+      new CustomEvent("rate_limit_status", {
+        detail: { active: false, url, failed: true },
+      })
+    );
+    toast.error(`Batas percobaan habis. Silakan tunggu beberapa saat lagi.`, {
+      id: `rate-limit-${url}`,
+      duration: 4000,
+    });
+  } else {
+    // Any other non-429 response cleans up active rate-limit status for this URL
+    window.dispatchEvent(
+      new CustomEvent("rate_limit_status", {
+        detail: { active: false, url },
+      })
+    );
+  }
+
+  // v1.6 Hardening: Safe JSON / Text parsing with fallback & Vercel error sanitization
+  let responseData: any = null;
+
+  const contentType = response.headers.get("content-type") || "";
+  const isJsonHeader = contentType.includes("application/json");
+
+  try {
+    if (isJsonHeader) {
+      responseData = await response.json().catch(async () => {
+        const text = await response
+          .clone()
+          .text()
+          .catch(() => "");
+        try {
+          return JSON.parse(text);
+        } catch {
+          return text;
+        }
+      });
+    } else {
+      const rawText = await response.text().catch(() => "");
+      try {
+        responseData = JSON.parse(rawText);
+      } catch {
+        responseData = rawText;
+      }
+    }
+  } catch (err) {
+    responseData = null;
+  }
+
+  // v1.4: Enhanced Auth & Session Handling
+  // v1.5: Only logout on 401 (Unauthenticated). 403 (Forbidden) should just show the error without clearing token.
+  if (response.status === 401) {
+    if (!url.includes("/api/auth/")) {
+      const message =
+        responseData && typeof responseData === "object" && responseData.message
+          ? responseData.message
+          : "Sesi berakhir. Silakan login kembali.";
+
+      clearAuthToken();
+      window.dispatchEvent(new Event("auth_expired"));
+      throw new ApiError(message, 401, { authError: true });
+    }
+  }
+
+  if (!response.ok) {
+    let message = `Server error: ${response.status}`;
+    let errorData: any = {};
+
+    if (responseData && typeof responseData === "object" && !Array.isArray(responseData)) {
+      errorData = responseData;
+      message = responseData.message || responseData.error || message;
+    } else if (typeof responseData === "string" && responseData.trim().length > 0) {
+      const text = responseData.trim();
+      if (
+        text.includes("<html>") ||
+        text.includes("<!DOCTYPE") ||
+        text.startsWith("An error") ||
+        text.includes("Vercel")
+      ) {
+        if (response.status === 403) {
+          message = "Akses ditolak. Silakan periksa hak akses Anda.";
+        } else if (response.status === 401) {
+          message = "Sesi autentikasi tidak valid.";
+        } else if (response.status === 429) {
+          message = "Terlalu banyak permintaan. Silakan tunggu beberapa saat.";
+        } else if (response.status >= 500) {
+          message = `Gagal memproses permintaan pada server (${response.status}). Silakan coba beberapa saat lagi.`;
+        } else {
+          message = `Terjadi kesalahan pada server (${response.status}).`;
+        }
+      } else {
+        message = text;
+      }
     }
 
-    // v1.4: Enhanced Auth & Session Handling
-    // v1.5: Only logout on 401 (Unauthenticated). 403 (Forbidden) should just show the error without clearing token.
-    if (response.status === 401) {
-        if (!url.includes("/api/auth/")) {
-            const message = (responseData && typeof responseData === "object" && responseData.message)
-                ? responseData.message
-                : "Sesi berakhir. Silakan login kembali.";
-            
-            clearAuthToken();
-            window.dispatchEvent(new Event("auth_expired"));
-            throw new ApiError(message, 401, { authError: true });
-        }
+    // Sanitize any raw JS syntax error or unhandled Vercel error text
+    if (
+      typeof message === "string" &&
+      (message.includes("Unexpected token") ||
+        message.includes("is not valid JSON") ||
+        message.startsWith("An error occurred") ||
+        message.includes("JSON.parse"))
+    ) {
+      message = `Gagal memproses respons dari server (${response.status}). Silakan coba beberapa saat lagi.`;
     }
 
-    if (!response.ok) {
-        let message = `Server error: ${response.status}`;
-        let errorData: any = {};
+    throw new ApiError(message, response.status, errorData);
+  }
 
-        if (responseData && typeof responseData === "object" && !Array.isArray(responseData)) {
-            errorData = responseData;
-            message = responseData.message || responseData.error || message;
-        } else if (typeof responseData === "string" && responseData.trim().length > 0) {
-            const text = responseData.trim();
-            if (text.includes("<html>") || text.includes("<!DOCTYPE") || text.startsWith("An error") || text.includes("Vercel")) {
-                if (response.status === 403) {
-                    message = "Akses ditolak. Silakan periksa hak akses Anda.";
-                } else if (response.status === 401) {
-                    message = "Sesi autentikasi tidak valid.";
-                } else if (response.status === 429) {
-                    message = "Terlalu banyak permintaan. Silakan tunggu beberapa saat.";
-                } else if (response.status >= 500) {
-                    message = `Gagal memproses permintaan pada server (${response.status}). Silakan coba beberapa saat lagi.`;
-                } else {
-                    message = `Terjadi kesalahan pada server (${response.status}).`;
-                }
-            } else {
-                message = text;
-            }
-        }
-
-        // Sanitize any raw JS syntax error or unhandled Vercel error text
-        if (typeof message === "string" && (
-            message.includes("Unexpected token") || 
-            message.includes("is not valid JSON") || 
-            message.startsWith("An error occurred") ||
-            message.includes("JSON.parse")
-        )) {
-            message = `Gagal memproses respons dari server (${response.status}). Silakan coba beberapa saat lagi.`;
-        }
-
-        throw new ApiError(message, response.status, errorData);
-    }
-    
-    return responseData;
+  return responseData;
 }
