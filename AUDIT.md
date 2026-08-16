@@ -10,6 +10,43 @@ kebutuhan mengevaluasi ulang dari nol setiap kali memulai sesi kerja.
 
 ---
 
+## MULAI DARI SINI
+
+**Baru pertama membuka dokumen ini — manusia maupun perkakas AI?** Baca tiga
+bagian ini, berurutan. Sisanya rujukan, bukan bacaan awal.
+
+| Urutan | Bagian   | Isi                                                                                                                                                         |
+| :----: | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|   1    | **§20**  | **Serah terima.** Aturan yang mengikat, 27 item belum selesai beserta apa yang perlu diketahui SEBELUM menyentuhnya, dan enam kesalahan yang jangan diulang |
+|   2    | **§0**   | Keadaan aplikasi hari ini, fase yang sudah tutup, jebakan khas repo ini                                                                                     |
+|   3    | **§1.1** | Daftar item yang BELUM selesai. §1.4 mengurutkannya dari yang termurah                                                                                      |
+
+⚠️ **Tiga hal yang paling sering membuat penerus salah langkah:**
+
+1. **§1 adalah HIPOTESIS, bukan instruksi.** Tiga kali dalam satu sesi rumusan
+   item terbukti keliru saat ditelusuri (#69, #87, #77). Menambal sesuai rumusan
+   yang salah menghasilkan kerusakan yang tampak seperti perbaikan.
+2. **Status `MENUNGGU` berarti menunggu KEPUTUSAN pemilik proyek**, bukan
+   menunggu pengerjaan. Mengerjakannya berarti menebak keputusan orang.
+3. **`npm test` hijau BUKAN bukti aplikasi benar.** Wajib buka browser di tab
+   bersih (§15.3). Kelas Tailwind, misalnya, hanyalah string bagi kompilator.
+
+### Peta bagian
+
+| Bagian  | Isi                                                                                                |
+| ------- | -------------------------------------------------------------------------------------------------- |
+| §0      | Status serah terima · jebakan repo · peta berkas SSO                                               |
+| §1      | Papan prioritas — §1.1 BELUM · §1.2 SELESAI · §1.3 ditahan · §1.4 urutan termurah · §1.5 peta fase |
+| §2–§9   | Pengukuran per area, dan **§9 memuat perintah untuk mengukur ulang**                               |
+| §10–§12 | Riwayat perbaikan · batas audit · aturan kerja                                                     |
+| §13     | Audit LOGIKA (F2) — asal-usul sebagian besar temuan                                                |
+| §14–§17 | Checklist UI · protokol jaga-jaga · kartu verifikasi · standar develop                             |
+| §18     | Standar & kepatuhan — pemetaan OWASP/CWE, rubrik keparahan                                         |
+| §19     | **Two-Tier RBAC (F7)** dan seluruh catatan pengerjaannya, §19.1–§19.49                             |
+| §20     | **Serah terima untuk perkakas lain**                                                               |
+
+---
+
 ## §0 STATUS SERAH TERIMA — baca ini lebih dulu
 
 Bagian ini ditulis agar siapa pun — manusia maupun agen AI lain — bisa
@@ -17,7 +54,8 @@ melanjutkan pekerjaan tanpa perlu menelusuri riwayat percakapan.
 
 **Diperbarui: 16 Agustus 2026, sesudah F7 Two-Tier RBAC TUTUP.** Seluruh pekerjaan ada
 di branch `main` lokal dan **BELUM di-push ke `origin/main`** — tertinggal
-sekitar **279 commit**.
+**334 commit** — periksa sendiri dengan `git log --oneline main ^origin/main | wc -l`,
+jangan percaya angka ini bila sesi berikutnya sudah menambah commit.
 
 Bacaan tercepat untuk tahu keadaan hari ini: **§0.2** (apa yang berubah), lalu
 **§0.4** (apa yang menahan sisanya). Rinciannya §19.15–§19.44.
