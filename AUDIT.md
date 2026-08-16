@@ -266,10 +266,10 @@ lepas. Catatan lepas selalu terlupakan.
 | 58  | `GET /metrics` terbuka TANPA autentikasi — di luar `/api/`, lolos gerbang global         |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.6  |
 | 59  | `presence_sync` menyiarkan profil LENGKAP + matriks permission ke klien mana pun         |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.6  |
 | 60  | `POST .../tasks` buka transaksi tanpa `ROLLBACK` — koneksi balik ke pool masih terbuka   |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.8  |
-| 61  | Transaksi `POST .../tasks` hanya melingkupi penghitung, bukan INSERT task-nya           |  **F2**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`                | §13.8  |
+| 61  | Transaksi `POST .../tasks` hanya melingkupi penghitung, bukan INSERT task-nya           |  **F2**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu | §13.8  |
 | 62  | Hapus proyek memakai kode galat MySQL; di Postgres `continue` dalam transaksi mustahil   |  **F2**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu | §13.8  |
 | 63  | Register menelan `ER_DUP_ENTRY` (MySQL) — di Postgres jadi 500, bukan pesan yang benar   |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu | §13.8  |
-| 64  | `tasks/reorder` melepas koneksi dua kali bila galat terjadi setelah `commit`             |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.8  |
+| 64  | `tasks/reorder` melepas koneksi dua kali bila galat terjadi setelah `commit`             |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu | §13.8  |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -303,7 +303,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 | :-----: | ---------------------------------- | ------------------------------------ | ---- | ----------------- | --------------------------------- | ----------------- |
 | **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10, #38, #39               | 1–2  | Sangat rendah     | —                                 | `SELESAI` 16 Agu  |
 | **F1**  | Storage minimal — buka jalan rilis | #2, #15                              | 1–2  | Rendah            | **Ya** — kredensial & 1 keputusan | `MENUNGGU`        |
-| **F2**  | Audit & perbaikan LOGIKA           | #16, #18–#20, #49–#59                | 3–5  | Rendah            | **Ya** — 3 keputusan              | `JALAN` gel. 1 tutup |
+| **F2**  | Audit & perbaikan LOGIKA           | #16, #18–#20, #49–#64                | 3–5  | Rendah            | **Ya** — 3 keputusan              | `JALAN` gel. 2 tutup |
 | **F3**  | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | **Ya** — login                    | `MENUNGGU`        |
 | **F4**  | Performa muat                      | #3                                   | 1    | Rendah–sedang     | —                                 | `SELESAI` 16 Agu  |
 | **F5**  | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | **Ya** — 5 keputusan + login uji  | `SELESAI` 16 Agu  |
@@ -1599,7 +1599,7 @@ Tabel ini adalah daftar kerja F2. Isi kolom `Status` sambil jalan.
 | Socket.IO realtime                            | Pemancaran event sebagian di `runAIPipeline()` yang jalan **setelah** response terkirim                    | `JALAN` — autentikasi handshake ditelaah, temuan #50/#51 (§13.5); urutan emit `runAIPipeline` belum |
 | Race condition / concurrency                  | Ada 1 test, belum ditelaah cakupannya                                                                      | `TERBUKA`                                                                                           |
 | Alur unggah–simpan–tampil berkas              | Baru dibaca kodenya (§6.1), belum dijalankan                                                               | `TERBUKA`                                                                                           |
-| Penanganan error & rollback transaksi         | Belum ditelaah                                                                                             | `TERBUKA`                                                                                           |
+| Penanganan error & rollback transaksi         | Belum ditelaah                                                                                             | `JALAN` — gelombang 2 menutup #60–#64 di rute task/project/auth (§13.8); 100+ endpoint lain belum |
 | Kedaluwarsa & refresh JWT                     | Belum ditelaah                                                                                             | `JALAN` — penegakan sesi tunggal ditelaah, temuan #52/#53 (§13.5); alur refresh belum               |
 
 ### 13.2 Urutan telaah yang disarankan
@@ -1974,6 +1974,32 @@ sedang terbuka menampilkan **skeleton yang tidak pernah selesai** dan console
 memuat `xhr poll error`. Itu bukan cacat kode — halaman kebetulan dimuat saat
 server sedang mati. Setelah muat ulang, semuanya normal. Gejalanya sangat mirip
 kerusakan sungguhan, jadi periksa timestamp-nya sebelum menyimpulkan.
+
+#### Kartu verifikasi #61 & #64 — SELESAI 16 Agu 2026
+
+| # | Terbukti | Sisa |
+| - | -------- | ---- |
+| 61 | 3 test perilaku, **ketiganya MERAH** terhadap `main` di worktree luar repo, sementara 5 test #60 di berkas yang sama tetap hijau — jadi batas transaksinya bergeser tanpa melemahkan penguncian #60 | — |
+| 64 | 4 test perilaku memakai `io` yang sengaja melempar galat saat memancarkan event, satu-satunya jalur yang memicu kasus ini. **1 test MERAH** terhadap `main`, 3 lainnya hijau | — |
+
+⚠️ **Satu test #60 sengaja diubah, dan itu bukan pelemahan.** Test
+"tidak me-rollback transaksi yang sudah di-commit" memakai kegagalan pada
+`INSERT INTO Tasks` sebagai titik "sesudah commit". Premis itu ikut berubah
+karena #61 memang menggeser `commit` ke sesudah `INSERT`, jadi titik gagalnya
+dipindah ke pengambilan data reporter — tetap sesudah commit. Bukti bahwa
+asersinya tidak dilemahkan: kelima test #60 tetap hijau saat dijalankan
+terhadap commit sebelum #61.
+
+Diverifikasi di browser dengan sesi non-admin (`rido`): dashboard termuat
+penuh, 0 error console, dan dari log server 0 "Akses ditolak" · 0
+`RBAC Middleware error` · 0 `LOG ANOMALI`.
+
+`main` sesudah merge: tsc 0 · lint 0 · **236 test / 25 suite** · build sukses.
+
+**Gelombang 2 TUTUP.** Kelima temuannya (#60–#64) `SELESAI`. Area §13.1
+"penanganan error & rollback transaksi" karena itu naik dari `TERBUKA` menjadi
+sebagian tertutup — tiga rute penulis utama sudah rapi, tetapi 100+ endpoint
+lain belum ditelusuri satu per satu.
 
 #### Yang belum tersentuh sesudah gelombang 2
 
