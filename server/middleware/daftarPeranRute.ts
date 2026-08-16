@@ -32,6 +32,7 @@
  */
 
 import { normalkanPeran, peranTakDikenal } from "../../src/types/roles";
+import { MATRIKS_PROYEK, type Aksi, type ModulProyek } from "../../src/lib/matriksAkses";
 
 export type ModePenjaga = "LAPOR" | "TOLAK";
 
@@ -54,6 +55,30 @@ export interface PendaftaranPenjaga {
 
 const terdaftar: PendaftaranPenjaga[] = [];
 
+/**
+ * Pendaftaran penjaga MATRIKS. Item #90.
+ *
+ * Sesudah 54 rute pindah ke `jagaProyek`, `verifyProjectAccess` tidak lagi
+ * punya pemakai — dan penjaga boot yang hanya mengawasinya berubah jadi
+ * gerbang yang MENGUKUR HIMPUNAN KOSONG. Ia akan melapor bersih apa pun yang
+ * terjadi pada 54 rute itu.
+ *
+ * Itu bentuk kegagalan §13.14: gerbang yang tidak bisa gagal lebih buruk
+ * daripada gerbang yang tidak ada, sebab ia memberi rasa aman. Jadi penjaga
+ * baru ikut mendaftarkan dirinya, dan yang divalidasi kini modul + aksinya.
+ */
+export interface PendaftaranMatriks {
+  modul: string;
+  aksi: string;
+}
+
+const terdaftarMatriks: PendaftaranMatriks[] = [];
+
+/** Dipanggil `jagaProyek` setiap kali sebuah penjaga matriks dibuat. */
+export function catatPenjagaMatriks(modul: string, aksi: string): void {
+  terdaftarMatriks.push({ modul: String(modul), aksi: String(aksi) });
+}
+
 /** Dipanggil `verifyProjectAccess` setiap kali sebuah penjaga dibuat. */
 export function catatPenjaga(allowedRoles: string[]): void {
   terdaftar.push({ peran: Array.isArray(allowedRoles) ? [...allowedRoles] : [] });
@@ -62,6 +87,7 @@ export function catatPenjaga(allowedRoles: string[]): void {
 /** Dipakai test; produksi tidak memanggilnya. */
 export function kosongkanPendaftaran(): void {
   terdaftar.length = 0;
+  terdaftarMatriks.length = 0;
 }
 
 export interface HasilPemeriksaan {
@@ -76,6 +102,12 @@ export interface HasilPemeriksaan {
   bintangKorslet: number;
   /** Penjaga yang HANYA `["*"]` — "anggota mana pun". Badan #66 dan #72. */
   bintangPolos: number;
+  /** Jumlah penjaga MATRIKS yang terdaftar. Inilah yang kini benar-benar diukur. */
+  jumlahPenjagaMatriks: number;
+  /** Modul yang dipakai penjaga tetapi TIDAK ADA di `MATRIKS_PROYEK`. */
+  modulAsing: string[];
+  /** Pasangan modul+aksi yang tidak memberi izin kepada SIAPA PUN. */
+  kombinasiMati: string[];
 }
 
 /**
@@ -111,8 +143,34 @@ export function periksaPenjaga(): HasilPemeriksaan {
     }
   }
 
+  // --- penjaga matriks (#90) ---------------------------------------------
+  const modulAsing = new Set<string>();
+  const kombinasiMati = new Set<string>();
+
+  for (const p of terdaftarMatriks) {
+    const baris = MATRIKS_PROYEK[p.modul as ModulProyek];
+    if (!baris) {
+      modulAsing.add(p.modul);
+      continue;
+    }
+    // Modul yang ada tetapi tidak memberi aksi ini kepada peran mana pun.
+    // Rutenya akan menolak SEMUA ORANG diam-diam — kegagalan yang tidak
+    // memunculkan galat apa pun, hanya keluhan pengguna berbulan kemudian.
+    const adaYangBoleh = Object.keys(baris).some((peran) => {
+      const izin = baris[peran as keyof typeof baris];
+      return Array.isArray(izin) && (izin as readonly Aksi[]).indexOf(p.aksi as Aksi) !== -1;
+    });
+    if (!adaYangBoleh) kombinasiMati.add(`${p.modul}:${p.aksi}`);
+  }
+
   return {
-    hasil: takDikenal.size > 0 ? "bermasalah" : "bersih",
+    hasil:
+      takDikenal.size > 0 || modulAsing.size > 0 || kombinasiMati.size > 0
+        ? "bermasalah"
+        : "bersih",
+    jumlahPenjagaMatriks: terdaftarMatriks.length,
+    modulAsing: [...modulAsing].sort(),
+    kombinasiMati: [...kombinasiMati].sort(),
     jumlahPenjaga: terdaftar.length,
     takDikenal: [...takDikenal].sort(),
     warisanTerpakai: [...warisan].sort(),
@@ -133,8 +191,8 @@ export function laporkanPenjaga(cetak: (pesan: string) => void = console.warn): 
   const h = periksaPenjaga();
 
   cetak(
-    `[RBAC] ${h.jumlahPenjaga} penjaga rute terdaftar · ` +
-      `${h.bintangPolos} ber-["*"] polos · ${h.bintangKorslet} korslet ("*" + peran lain, #73)`
+    `[RBAC] ${h.jumlahPenjagaMatriks} penjaga matriks · ${h.jumlahPenjaga} penjaga lama · ` +
+      `${h.bintangPolos} ber-["*"] polos · ${h.bintangKorslet} korslet (#73)`
   );
 
   if (h.warisanTerpakai.length > 0) {
@@ -145,9 +203,26 @@ export function laporkanPenjaga(cetak: (pesan: string) => void = console.warn): 
   }
 
   if (h.hasil === "bermasalah") {
-    const pesan =
-      `[RBAC] peran DI LUAR katalog dipakai penjaga rute: ${h.takDikenal.join(", ")}. ` +
-      `Tambahkan ke katalog Master Data, atau perbaiki penjaganya.`;
+    const bagian: string[] = [];
+    if (h.takDikenal.length > 0) {
+      bagian.push(
+        `peran DI LUAR katalog dipakai penjaga rute: ${h.takDikenal.join(", ")} — ` +
+          `tambahkan ke katalog Master Data, atau perbaiki penjaganya`
+      );
+    }
+    if (h.modulAsing.length > 0) {
+      bagian.push(
+        `modul TIDAK ADA di MATRIKS_PROYEK: ${h.modulAsing.join(", ")} — ` +
+          `salah ketik nama modul menolak semua orang diam-diam`
+      );
+    }
+    if (h.kombinasiMati.length > 0) {
+      bagian.push(
+        `modul+aksi yang tidak mengizinkan SIAPA PUN: ${h.kombinasiMati.join(", ")} — ` +
+          `rutenya mustahil dipakai; perbaiki §19.5 atau aksinya`
+      );
+    }
+    const pesan = `[RBAC] ${bagian.join(" | ")}`;
     if (MODE === "TOLAK") throw new Error(pesan);
     cetak(pesan);
   }

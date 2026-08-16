@@ -35,6 +35,7 @@
 
 import db from "../../src/lib/db";
 import { createAuditLog } from "../services/audit.service";
+import { catatPenjagaMatriks } from "./daftarPeranRute";
 import { normalkanPeran } from "../../src/types/roles";
 import {
   bolehDiProyek,
@@ -109,6 +110,11 @@ const tolak = (res: any) => res.status(403).json({ status: "error", message: "Ak
  * @param aksi  huruf CRUD menurut §19.7
  */
 export const jagaProyek = (modul: ModulProyek, aksi: Aksi) => {
+  // Mendaftarkan diri saat penjaga DIBUAT, yaitu saat modul rute dimuat.
+  // Penjaga boot memvalidasi modul + aksinya terhadap matriks (#90) — tanpa
+  // ini, gerbangnya mengukur himpunan kosong sejak penjaga lama pensiun.
+  catatPenjagaMatriks(modul, aksi);
+
   return async (req: any, res: any, next: any) => {
     let connection;
     try {
