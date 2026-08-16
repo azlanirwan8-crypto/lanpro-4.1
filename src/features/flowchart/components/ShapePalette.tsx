@@ -49,7 +49,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
           "p-2 rounded-lg transition-all flex flex-col items-center w-10 border border-border-faint",
           isShapeDropdownOpen
             ? "bg-indigo-50 border-indigo-200 text-indigo-700"
-            : "text-slate-650 hover:bg-surface-muted"
+            : " hover:bg-surface-muted"
         )}
         title="Buka Koleksi Simbol"
       >
@@ -89,7 +89,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                 const colorClassMap: Record<string, string> = {
                   yellow: "bg-amber-300 border-amber-400",
                   blue: "bg-blue-300 border-blue-400",
-                  green: "bg-emerald-350 border-emerald-400",
+                  green: " border-emerald-400",
                   purple: "bg-purple-300 border-purple-400",
                   rose: "bg-rose-300 border-rose-400",
                   sky: "bg-sky-300 border-sky-400",
@@ -106,7 +106,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                       "w-3.5 h-3.5 rounded-full border transition-all active:scale-75",
                       colorClassMap[colName] || "bg-indigo-300",
                       selectedAddColor === colName
-                        ? "ring-2 ring-indigo-500 ring-offset-1 scale-110 border-indigo-650"
+                        ? "ring-2 ring-indigo-500 ring-offset-1 scale-110 "
                         : "border-black/5"
                     )}
                     title={`Mulai dengan warna ${colName}`}
@@ -130,7 +130,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
               {shapeSearchQuery && (
                 <button
                   onClick={() => setShapeSearchQuery("")}
-                  className="absolute right-2.5 top-2.5 text-xs sm:text-[10px] text-content-subtle hover:text-slate-650"
+                  className="absolute right-2.5 top-2.5 text-xs sm:text-[10px] text-content-subtle"
                 >
                   Clear
                 </button>
@@ -215,7 +215,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                             <p className="text-xs sm:text-[10px] font-medium text-content-body leading-tight truncate group-hover:text-indigo-600 transition-colors">
                               {item.name}
                             </p>
-                            <p className="text-xs sm:text-[10px] sm:text-[8.5px] text-slate-450 leading-none truncate mt-0.5">
+                            <p className="text-xs sm:text-[10px] sm:text-[8.5px] leading-none truncate mt-0.5">
                               {item.desc}
                             </p>
                           </div>

@@ -161,7 +161,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
               "p-2 rounded-xl border mb-2 shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-300 relative overflow-hidden",
               isMiro
                 ? "bg-surface/80 border-border-subtle/40 backdrop-blur-md text-content-strong"
-                : "bg-slate-950/80 border-slate-880/60 backdrop-blur-md text-slate-100"
+                : "bg-slate-950/80  backdrop-blur-md text-slate-100"
             )}
           >
             {/* Ambient Background Glow matching selected theme */}
@@ -182,9 +182,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
               }}
               className={cn(
                 "relative rounded-xl overflow-hidden cursor-crosshair border transition-colors duration-300",
-                isMiro
-                  ? "bg-surface-sunken/70 border-border-subtle/50"
-                  : "bg-slate-900/50 border-slate-850"
+                isMiro ? "bg-surface-sunken/70 border-border-subtle/50" : "bg-slate-900/50 "
               )}
             >
               {/* Grid Dots / Grid Mesh in Minimap */}
@@ -213,7 +211,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
                 else if (node.type === "end") bgClass = "bg-rose-500";
                 else if (node.type === "decision") bgClass = "bg-amber-500";
                 else if (node.type === "process") bgClass = "bg-indigo-500";
-                else if (node.type === "sticky") bgClass = "bg-yellow-450 bg-yellow-400";
+                else if (node.type === "sticky") bgClass = " bg-yellow-400";
                 else if (node.type === "card" || node.type === "doc") bgClass = "bg-sky-500";
 
                 return (
@@ -242,7 +240,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
                 className={cn(
                   "absolute border-[1.5px] rounded-md pointer-events-none transition-shadow duration-300",
                   isMiro
-                    ? "border-indigo-650 border-indigo-600 bg-indigo-500/10 shadow-[0_0_8px_rgba(99,102,241,0.2)]"
+                    ? " border-indigo-600 bg-indigo-500/10 shadow-[0_0_8px_rgba(99,102,241,0.2)]"
                     : "border-blue-500 bg-blue-500/15 shadow-[0_0_12px_rgba(59,130,246,0.3)]"
                 )}
                 style={{
@@ -272,8 +270,8 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
         className={cn(
           "flex items-center gap-2 px-3 py-1.5 rounded-xl border font-medium text-xs sm:text-[11px] sm:text-[9px] uppercase tracking-wider transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.04)] cursor-pointer active:scale-95",
           isMiro
-            ? "bg-surface/80 hover:bg-surface/95 border-border-subtle/40 text-slate-650 hover:text-indigo-600"
-            : "bg-slate-900/80 hover:bg-slate-850/95 border-slate-800/60 text-slate-350 hover:text-blue-400"
+            ? "bg-surface/80 hover:bg-surface/95 border-border-subtle/40  hover:text-indigo-600"
+            : "bg-slate-900/80  border-slate-800/60  hover:text-blue-400"
         )}
       >
         <Map

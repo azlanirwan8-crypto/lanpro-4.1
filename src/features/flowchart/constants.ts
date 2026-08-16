@@ -95,7 +95,7 @@ export const colorPalettes: Record<
     bg: "bg-violet-50/80 border-violet-300",
     text: "text-violet-900",
     border: "border-violet-300",
-    preview: "bg-violet-250",
+    preview: "",
   },
   slate: {
     bg: "bg-slate-50/80 border-border-subtle",

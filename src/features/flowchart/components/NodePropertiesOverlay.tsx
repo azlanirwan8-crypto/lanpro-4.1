@@ -42,7 +42,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
 
   return (
     <div
-      className="absolute -top-16 left-1/2 -translate-x-1/2 bg-surface/95 backdrop-blur-md text-slate-850 p-2 px-3 rounded-xl border border-border-subtle/90 shadow-[0_10px_35px_rgba(0,0,0,0.12)] flex items-center gap-2 z-40 select-none pointer-events-auto transition-all"
+      className="absolute -top-16 left-1/2 -translate-x-1/2 bg-surface/95 backdrop-blur-md p-2 px-3 rounded-xl border border-border-subtle/90 shadow-[0_10px_35px_rgba(0,0,0,0.12)] flex items-center gap-2 z-40 select-none pointer-events-auto transition-all"
       onMouseDown={(e) => e.stopPropagation()}
     >
       {/* Shape Converter Selector */}
@@ -91,7 +91,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
         {["yellow", "blue", "green", "purple", "rose", "slate"].map((colName) => {
           const colorClassMap: Record<string, string> = {
             yellow: "bg-amber-100 hover:bg-amber-200",
-            blue: "bg-blue-150 hover:bg-blue-200",
+            blue: " hover:bg-blue-200",
             green: "bg-emerald-100 hover:bg-emerald-200",
             purple: "bg-purple-100 hover:bg-purple-200",
             rose: "bg-rose-100 hover:bg-rose-200",
@@ -228,7 +228,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
       {/* Delete shape */}
       <button
         onClick={handleDeleteSelected}
-        className="p-1 text-slate-450 hover:text-rose-600 rounded hover:bg-rose-50"
+        className="p-1 hover:text-rose-600 rounded hover:bg-rose-50"
         title="Hapus shape"
       >
         <Trash2 className="w-3.5 h-3.5" />

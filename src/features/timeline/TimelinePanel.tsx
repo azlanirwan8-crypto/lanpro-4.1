@@ -1344,7 +1344,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           <ChevronRight
                             className={cn(
                               "w-3.5 h-3.5 transform transition-transform duration-200 ease-in-out",
-                              expanded ? "rotate-90 text-indigo-650" : "text-content-subtle"
+                              expanded ? "rotate-90 " : "text-content-subtle"
                             )}
                           />
                         </button>

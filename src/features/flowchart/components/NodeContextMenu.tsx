@@ -84,7 +84,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
       onContextMenu={(e) => e.preventDefault()}
     >
       {/* Node Info Header */}
-      <div className="px-3 py-1.5 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider text-slate-450 text-content-subtle border-b border-border-faint mb-1 flex items-center justify-between">
+      <div className="px-3 py-1.5 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider text-content-subtle border-b border-border-faint mb-1 flex items-center justify-between">
         <span>Aksi Komponen</span>
         <span className="text-violet-600 font-mono text-xs sm:text-[10px] sm:text-[8px]">
           ID: {nodeId.split("_")[1] || "Active"}

@@ -674,7 +674,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           e.target.value = "";
                         }
                       }}
-                      className="px-3.5 py-1.5 bg-surface border border-border-subtle text-slate-750 text-xs font-medium rounded-lg shadow-2xs focus:ring-2 focus:ring-indigo-500/20 outline-none cursor-pointer"
+                      className="px-3.5 py-1.5 bg-surface border border-border-subtle text-xs font-medium rounded-lg shadow-2xs focus:ring-2 focus:ring-indigo-500/20 outline-none cursor-pointer"
                     >
                       {/* #82 — dari Master Data. */}
                       <option value="">Ubah Role Massal...</option>
@@ -703,7 +703,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   <button
                     onClick={() => setSelectedUserIds([])}
                     disabled={isBulkActionPending}
-                    className="px-3 py-1.5 bg-surface-strong hover:bg-slate-300 text-slate-705 text-xs font-medium rounded-lg transition-all cursor-pointer"
+                    className="px-3 py-1.5 bg-surface-strong hover:bg-slate-300 text-xs font-medium rounded-lg transition-all cursor-pointer"
                   >
                     Batal
                   </button>
@@ -819,7 +819,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 setSelectedUserIds(selectedUserIds.filter((id) => id !== user.id));
                               }
                             }}
-                            className="w-4 h-4 rounded text-indigo-650 border-border-subtle focus:ring-indigo-500 cursor-pointer"
+                            className="w-4 h-4 rounded border-border-subtle focus:ring-indigo-500 cursor-pointer"
                           />
                         </td>
                         <td
@@ -1347,7 +1347,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
         >
           <div className="flex items-start gap-2 max-w-[210px]">
             <Info className="w-4 h-4 text-indigo-300 shrink-0 mt-0.5" />
-            <span className="leading-snug font-medium text-xs sm:text-[11px] text-slate-255">
+            <span className="leading-snug font-medium text-xs sm:text-[11px]">
               {hoveredTooltip.text}
             </span>
           </div>
