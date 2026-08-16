@@ -120,7 +120,7 @@ keputusan pemilik proyek:
 
 | #   | Hal                              | Akibat bila terlewat                         |
 | --- | -------------------------------- | -------------------------------------------- |
-| 2   | Driver `s3` belum diuji          | Berkas unggahan hilang tiap deploy di Vercel |
+| 30  | Storage drive-per-user (F11)     | Berkas unggahan hilang tiap deploy di Vercel. Driver `s3` (#2) DITAHAN 16 Agu 2026 — jalan rilis kini lewat F11 |
 | 44  | Domain email belum terverifikasi | Email tidak sampai ke user, gagal senyap     |
 | 46  | `SSO_ALLOWED_DOMAINS=gmail.com`  | Siapa pun ber-Gmail bisa mendaftar           |
 
@@ -231,7 +231,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 1   | ~~Tiga sistem migrasi DB~~ disatukan jadi satu                                           |  **F0**  | 🔴  | Rendah        |           Ya            | `SELESAI` 16 Agu         | §4     |
 | 12  | ~~ARCHITECTURE.md drift~~ angka diukur ulang                                             |  **F0**  | 🟡  | Rendah        |    Ya (menyesatkan)     | `SELESAI` 16 Agu         | §8     |
 | 10  | ~~Schema DB tidak terdokumentasi~~ `docs/DATABASE_SCHEMA.md` dari DB hidup               |  **F0**  | 🟠  | Sedang        |           Ya            | `SELESAI` 16 Agu         | §4     |
-| 2   | Driver `s3` belum pernah dieksekusi                                                      |  **F1**  | 🔴  | Rendah        |    Blokir production    | `MENUNGGU` kredensial    | §6     |
+| 2   | ~~Driver `s3` belum pernah dieksekusi~~ DITAHAN — storage beralih ke drive user (#30)      |  **F1**  | 🔴  | Rendah        |    Blokir production    | `DITAHAN` 16 Agu       | §6     |
 | 15  | Dua Google API key lama belum dicabut                                                    |  **F1**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` pemilik       | §6     |
 | 16  | **Logika aplikasi belum pernah diaudit**                                                 |  **F2**  | 🔴  | Sedang        |           Ya            | `TERBUKA`                | §13    |
 | 18  | notebook-lm rusak di dua sisi                                                            |  **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §6.3   |
@@ -294,7 +294,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 26  | **Email selamat datang** (poin 2)                                                        |  **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email  | §1.5   |
 | 27  | **Lupa password → password random** (poin 3)                                             |  **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email  | §1.5   |
 | 28  | **Digest task pending + jumlah** (poin 4)                                                |  **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email  | §1.5   |
-| 30  | Drive-per-user (opsional, dinilai ulang setelah F5)                                      | **F11**  | 🟡  | Tinggi        |          Tidak          | `DITUNDA`                | §1.5   |
+| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)             |  **F11**  |  🔴  | Tinggi        |    Blokir production    | `MENUNGGU` desain      | §1.5   |
 | 4   | ±100 endpoint tanpa validasi skema                                                       |  **F7**  | 🔴  | Sedang        |      Ya (keamanan)      | `TERBUKA`                | §3     |
 | 9   | Rasio test ±1 : 1.000 baris                                                              |  **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`                | §7     |
 | 8   | 1.313 `any` melemahkan seluruh jaring tipe                                               |  **F8**  | 🟠  | Sedang        |           Ya            | `TERBUKA`                | §7     |
@@ -318,7 +318,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 |  Fase   | Nama                               | Item                                 | Sesi | Risiko            | Status                    | TERTAHAN OLEH APA — dan siapa yang harus bergerak                                                                         |
 | :-----: | ---------------------------------- | ------------------------------------ | ---- | ----------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10, #38, #39               | 1–2  | Sangat rendah     | `SELESAI` 16 Agu          | — tidak ada                                                                                                                 |
-| **F1**  | Storage minimal — buka jalan rilis | #2, #15                              | 1–2  | Rendah            | `MENUNGGU`                | **PEMILIK.** Isi 6 variabel `STORAGE_*` di `.env`; cabut 2 Google API key lama di Console; jawab: berkas QA & rekaman tetap lewat penjaga auth server (rekomendasi: ya) atau boleh dari bucket publik |
+| **F1**  | Cabut kredensial lama              | #15 (#2 DITAHAN)                     | <1   | Sangat rendah     | `MENUNGGU`                | **PEMILIK.** Cabut 2 Google API key lama di Google Cloud Console. Kerja ±5 menit, tidak menyentuh kode. **#2 ditahan 16 Agu 2026** — storage beralih ke drive user (#30), jadi fase ini TIDAK lagi membuka jalan rilis; yang membukanya kini F11 |
 | **F2**  | Audit & perbaikan LOGIKA           | #16, #18–#20, #49–#75                | 3–5  | Rendah            | `JALAN` — audit SELESAI    | **PEMILIK, 9 keputusan.** Audit 9 area §13.1 tuntas & 15 item diperbaiki. Sisa murni keputusan peran/perilaku: #69 #70 #71 #72 #73 (penetapan peran), #74 (izin sentuh `AppContainer`), #18 #19 #20 (perilaku notebook-lm, penjaga read-only `db-query`, kode mati DB Explorer), #57 (dua endpoint health) |
 | **F3**  | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | `SIAP JALAN`              | **TIDAK LAGI TERTAHAN.** Syarat "login pemilik" sudah terpenuhi — sesi hidup dipakai sepanjang 16 Agu. Yang masih perlu Anda: izin membuat objek percobaan untuk alur TULIS (§14.2), dan sesi admin bila layar khusus admin ikut diperiksa |
 | **F4**  | Performa muat                      | #3                                   | 1    | Rendah–sedang     | `SELESAI` 16 Agu          | — tidak ada                                                                                                                 |
@@ -328,7 +328,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 | **F8**  | Jaring pengaman                    | #9, #8                               | 4–6  | Rendah            | `TERBUKA`                 | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, karena F3 akan menambah kasus uji                                        |
 | **F9**  | Lapisan backend                    | #6                                   | 6–10 | Tinggi            | `TERBUKA`                 | — bisa jalan tanpa pemilik, tapi butuh F7 & F8 lebih dulu sebagai pengaman                                                  |
 | **F10** | Arsitektur frontend                | #5, #7, #21                          | 8–15 | **Sangat tinggi** | `TERBUKA`                 | — bisa jalan tanpa pemilik, tapi JANGAN sebelum F8. Merefactor 4.581 baris `AppContainer` dengan jaring pengaman sekarang adalah judi |
-| **F11** | Drive-per-user (OPSIONAL)          | #30                                  | 6–10 | Tinggi            | `DITUNDA`                 | **PEMILIK.** Sengaja ditunda; perlu keputusan ulang apakah masih diinginkan setelah F5 selesai                              |
+| **F11** | **Drive-per-user — JALUR RILIS**   | #30                                  | 6–10 | **Tinggi**        | `MENUNGGU` desain         | **PEMILIK, 6 keputusan desain** (§11.1). Sejak 16 Agu 2026 ini ARAH RESMI storage, bukan lagi opsional. Selama belum ada, berkas unggahan tetap hilang tiap deploy — risiko #2 berjalan terus |
 | **F12** | Konsolidasi desain                 | #14, #13                             | 2–3  | Rendah            | `TERBUKA`                 | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, yang akan mendata sendiri layar mana yang kontras & jarak sentuhnya bermasalah |
 
 \*Perkiraan kasar dan **belum terverifikasi** — untuk membandingkan bobot antar
@@ -1026,23 +1026,73 @@ jumlah baris.
 
 ---
 
-### F11 · Drive-per-user (OPSIONAL)
+### F11 · Drive-per-user — JALUR RILIS sejak 16 Agu 2026
 
-Ditunda dengan sengaja. Setelah F5 selesai, fondasi OAuth sudah ada sehingga
-biayanya turun drastis — **tapi risikonya tidak berubah**: kolaborasi lintas
-anggota, kontinuitas saat karyawan keluar, pemrosesan AI yang butuh isi berkas,
-dan kuota Drive pribadi. Karena itu fase ini **dinilai ulang**, bukan otomatis
-dikerjakan.
+**Ketetapan pemilik proyek 16 Agu 2026:** driver `s3` (#2) **DITAHAN**. Storage
+akan mengambil dari drive milik pengguna sendiri. Item #30 karena itu berhenti
+menjadi opsional dan **menjadi arah resmi storage**.
 
-| Item | Pekerjaan              | Definisi selesai                                                      |
-| ---- | ---------------------- | --------------------------------------------------------------------- |
-| #30  | Adaptor Drive per user | Hanya bila pemilik proyek memutuskan tetap menginginkannya setelah F5 |
+⚠️ **Akibat yang harus disadari sebelum melangkah.** Sebelum keputusan ini, jalan
+menuju rilis adalah F1 — satu fase kecil, 1–2 sesi, sebagian besar hanya mengisi
+`.env`. Sesudah keputusan ini, jalan menuju rilis adalah F11 — **6–10 sesi,
+risiko tinggi**, dan mengubah kontrak lapisan penyimpanan.
 
-**Syarat masuk:** F5 lulus + keputusan ulang pemilik proyek.
+Selama F11 belum jadi, **risiko #2 berjalan terus**: berkas unggahan hilang
+setiap kali deploy di Vercel, sementara baris database tetap menunjuknya. Itu
+bukan alasan menolak keputusan ini — hanya harus tercatat, bukan terlupa.
 
-⚠️ `storage.service` sekarang tidak punya konsep pemilik —
-`simpanBerkas(nama, isi, tipe)` tidak tahu berkas itu milik siapa. Fase ini
-**mengubah kontrak lapisan**, bukan sekadar menambah driver ketiga.
+#### 11.1 Enam keputusan desain yang harus ada sebelum kode ditulis
+
+Belum satu pun bisa dijawab dari kode; semuanya milik pemilik proyek. Empat di
+antaranya sudah disebut sebagai risiko di catatan F11 lama, kini dijadikan
+pertanyaan yang bisa dijawab.
+
+| # | Pertanyaan | Kenapa memblokir |
+| - | ---------- | ---------------- |
+| D1 | Drive **milik siapa** — pengunggah, atau pemilik proyek? | Bila milik pengunggah, dokumen proyek ikut pergi saat orang itu keluar. Bila milik pemilik proyek, tiap unggahan menuntut izin ke drive orang lain |
+| D2 | Bagaimana anggota lain **membaca** berkas itu? | Tiga jalur, beda konsekuensinya: tautan berbagi (bocor bila diteruskan), akun layanan (butuh Workspace), atau server sebagai perantara (kuota & biaya bandwidth balik ke server) |
+| D3 | Apa yang terjadi bila pemilik drive **mencabut akses** atau keluar? | Tanpa jawaban, proyek bisa kehilangan seluruh notulen dan bukti QA tanpa peringatan |
+| D4 | Rekaman rapat & bukti QA adalah **data bisnis** (§18.8). Pantaskah tinggal di drive pribadi? | Bercampurnya kepemilikan menyulitkan audit, penghapusan atas permintaan, dan pembuktian saat sengketa |
+| D5 | Google Drive saja, atau **OneDrive** juga? | SSO Microsoft sudah ada (F5), jadi sebagian pengguna wajar mengharapkannya. Dua penyedia berarti dua adaptor |
+| D6 | Kuota. Drive pribadi gratis 15 GB, **dibagi dengan Gmail & Foto** pengguna | Rekaman rapat cepat besar. Perlu ditetapkan batas dan perilaku saat penuh |
+
+#### 11.2 Yang berubah di kode — bukan sekadar menambah driver ketiga
+
+`storage.service` sekarang **tidak punya konsep pemilik**:
+
+```ts
+simpanBerkas(nama, isi, tipe)   // tidak tahu berkas ini milik siapa
+```
+
+Drive-per-user menuntut identitas pemilik dan token OAuth-nya ikut mengalir
+sampai ke lapisan penyimpanan. Itu **mengubah kontrak lapisan**, dan setiap
+pemanggil ikut berubah.
+
+Yang juga ikut terdampak dan mudah terlewat:
+
+| Bagian | Kenapa terdampak |
+| ------ | ---------------- |
+| **#67** penjaga `/uploads` | Berkas tidak lagi berada di disk server; penjaga berbasis nama berkas kehilangan makna |
+| Presigned URL (`src/lib/fileSecurity.ts`) | Drive punya mekanisme berbaginya sendiri; dua sistem token akan bertabrakan |
+| Pemrosesan AI rapat | `runAIPipeline` membaca isi berkas dari disk. Bila berkas ada di drive orang, server harus mengunduhnya dulu — dan itu butuh izin yang mungkin sudah dicabut |
+| Cakupan OAuth F5 | Login SSO sekarang hanya minta identitas. Menambah cakupan Drive **mengubah layar persetujuan Google**, dan pengguna lama harus menyetujui ulang |
+| §18.6 batas lingkup | Storage pindah ke pihak ketiga — audit keamanan bertambah satu wilayah yang belum pernah diperiksa |
+
+#### 11.3 Syarat masuk
+
+1. Enam keputusan §11.1 terjawab.
+2. F5 lulus — **sudah**, fondasi OAuth ada sehingga biayanya turun.
+3. Keputusan tertulis soal cakupan OAuth tambahan dan persetujuan ulang pengguna lama.
+
+#### 11.4 Gerbang keluar
+
+Unggah 1 dokumen + 1 rekaman dari akun **A** → **anggota lain (akun B)** bisa
+membukanya dari aplikasi → akun A mencabut akses → aplikasi memberi pesan yang
+jelas, **bukan** layar rusak → objek uji dihapus.
+
+⚠️ Gerbang ini sengaja memuat pencabutan akses. Itu satu-satunya bagian yang
+tidak akan pernah terjadi di jalur bahagia, dan justru paling mungkin terjadi di
+production.
 
 ---
 
@@ -2837,7 +2887,7 @@ yang menanggung dan sejak kapan.
 | 73 | Penjaga `dashboard-layout` korslet | Pemilik proyek | 16 Agu 2026 |
 | 74 | Data proyek lama menimpa layar proyek baru | Pemilik proyek | 16 Agu 2026 |
 | 77 | 4 kerentanan dependensi `moderate`: react-router & react-router-dom (open redirect → XSS), exceljs, uuid. Hanya tertutup lewat `npm audit fix --force` = kenaikan versi mayor | Pemilik proyek | 16 Agu 2026 |
-| 2 | Berkas unggahan hilang tiap deploy (driver `s3` belum diuji) | Pemilik proyek | 15 Agu 2026 |
+| 2 / 30 | Berkas unggahan hilang tiap deploy. **Alasannya berubah 16 Agu 2026**: driver `s3` DITAHAN atas keputusan pemilik, storage beralih ke drive user (F11). Risikonya tetap hidup, dan kini berjalan selama F11 belum jadi — 6–10 sesi, bukan 1–2 | Pemilik proyek | 15 Agu 2026 |
 | 15 | Dua Google API key lama belum dicabut | Pemilik proyek | 15 Agu 2026 |
 | 46 | `SSO_ALLOWED_DOMAINS=gmail.com` — siapa pun ber-Gmail bisa mendaftar | Pemilik proyek | 15 Agu 2026 |
 
