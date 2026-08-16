@@ -209,7 +209,11 @@
     <title>LanPro App</title>
     <script src="https://cdn.lordicon.com/lordicon.js" async defer></script>
   </head>
-  <body class="bg-slate-50 text-slate-900 font-sans antialiased">
+  <!-- #13 — dulu `bg-slate-50 text-slate-900`, yaitu latar TERANG tanpa syarat.
+       Di mode gelap seluruh aplikasi karena itu berdiri di atas permukaan putih;
+       setiap celah antar komponen menyala. Token-nya identik di mode terang
+       (surface-sunken #f8fafc = slate-50, content #0f172a = slate-900). -->
+  <body class="bg-surface-sunken text-content font-sans antialiased">
     <div id="root">
       <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #f8fafc; color: #334155; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-align: center; padding: 20px;">
         <div style="position: relative; width: 48px; height: 48px; margin-bottom: 16px;">
