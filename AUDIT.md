@@ -28,7 +28,7 @@ lalu **§0.4** (tiga keputusan yang menahan sisanya). Rinciannya §19.15–§19.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **356 lulus / 37 suite**                                    | `npm test`                                   |
+| Test                | **358 lulus / 37 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -289,7 +289,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 89 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 90 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -350,7 +350,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 70  | Rute `/api/v1/meetings/:id*` tanpa penjaga proyek — baca & ubah rapat lintas proyek           |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.11 |
 | 71  | `project-modules` POST/PUT/DELETE tanpa penjaga — CRUD modul lintas proyek                    |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §13.11 |
 | 72  | 16 rute POST/PUT/PATCH masih ber-`['*']` — `viewer` bisa membuat & mengubah data              |  **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §13.11 |
-| 73  | `PUT .../dashboard-layout` menyelipkan `"*"` di daftar peran sehingga penjaganya korslet      |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §13.11 |
+| 73  | ~~`PUT .../dashboard-layout` korslet~~ dijaga `jagaSetelanProyek`, `"*"` dicabut              |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §13.11 |
 | 74  | 7 pengambil data tanpa penjaga respons basi — data proyek lama menimpa proyek baru            |  **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §13.12 |
 | 75  | Angka §13.1 & ARCHITECTURE drift lagi: 21 `useState` aktualnya 11, 104 rute aktualnya 119     |  **F0**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §13.12 |
 | 76  | Otorisasi tidak deny-by-default — akar 56% temuan F2 (14 dari 25 masuk OWASP A01)             |  **F7**  | 🔴  | Sedang        | Ya (blokir production)  | `MENUNGGU` keputusan     | §18.3  |
@@ -365,8 +365,9 @@ lepas. Catatan lepas selalu terlupakan.
 | 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)          |  **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §19.14 |
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)          |  **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §19.14 |
 | 87  | `effectiveRole` membawa DUA kosakata peran — system role & project role dalam satu nilai      |  **F7**  | 🔴  | Sedang        | Ya (blokir production)  | `TERBUKA`                | §19.15 |
-| 88  | God Mode Administrator belum tercatat di `AuditLogs` — §19.6 aturan 2 belum penuh             |  **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`                | §19.19 |
-| 89  | TIGA operasi tingkat proyek tak punya modul di §19.5 — dashboard-layout, sunting, methodology |  **F7**  | 🟠  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §19.21 |
+| 88  | God Mode Administrator belum tercatat di `AuditLogs` — §19.6 aturan 2 belum penuh             |  **F7**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §19.19 |
+| 89  | TIGA operasi tingkat proyek tak punya modul di §19.5 — dashboard-layout, sunting, methodology |  **F7**  | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §19.21 |
+| 90  | Penjaga boot kini mendata NOL penjaga — ia mengawasi `verifyProjectAccess` yang sudah pensiun |  **F7**  | 🟠  | Sangat rendah |          Tidak          | `TERBUKA`                | §19.24 |
 | 31  | ~~Login dengan email di kolom form~~                                                          |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                                 | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                              | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -3780,16 +3781,16 @@ dipakai pada `board` (memindahkan kartu) dan `access` (mengubah peran anggota).
 
 ### 19.8 Keadaan pengerjaan
 
-| Tahap | Isi                                                                             | Status                                                                                                                                               |
-| :---: | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-|   0   | Katalog peran di `MasterData`                                                   | ✅ **SELESAI 16 Agu** — `npm run db:seed-roles`. Katalog final: **4 SYSTEM + 8 PROJECT**, terverifikasi tampil di layar Master Data                  |
-|   1   | Satu enum peran, satu tempat. Hapus `\| string`, satukan dua `AppRole`          | ✅ **SELESAI 16 Agu** — `src/types/roles.ts`. Jadi **DUA** enum, bukan satu; alasan & temuan #87 di §19.15. 13 test mengikat enum ke penyemai        |
-|   2   | Penjaga saat boot — server menolak menyala bila rute memakai peran di luar enum | 🟡 **SEBAGIAN 16 Agu** — matriks terpusat + penjaga boot SELESAI, tetapi masih **mode LAPOR**. Menaikkan ke TOLAK menunggu pemetaan `member`. §19.16 |
-|   3   | Migrasi data `ProjectMembers` (10 baris) & `Users` (11 baris)                   | ✅ **SELESAI 16 Agu** — `npm run db:migrasi-peran`. 7 baris `member` -> `developer`. Sesudahnya 8 developer + 2 manager, semua kode katalog          |
-|   4   | `verifyProjectAccess` baca matriks terpusat + deny-by-default                   | 🟢 **HAMPIR TUTUP** — 51 dari 54 rute dialihkan. Sisa 3 rute tingkat proyek yang §19.5 belum punya modulnya (#89). §19.22                            |
-|  5a   | **Dropdown & tampilan peran dari katalog** (#82)                                | ✅ **SELESAI 16 Agu** — 6 dropdown + 4 tampilan, nol hardcode, kolom `code` di MasterData                                                            |
-|  5b   | `can(action, module, projectId)` menggantikan 36 `hasPermission` di 13 berkas   | `TERBUKA`                                                                                                                                            |
-|   6   | Panel "Active System Permissions & Overrides" jadi **baca-saja**                | `TERBUKA`                                                                                                                                            |
+| Tahap | Isi                                                                             | Status                                                                                                                                        |
+| :---: | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+|   0   | Katalog peran di `MasterData`                                                   | ✅ **SELESAI 16 Agu** — `npm run db:seed-roles`. Katalog final: **4 SYSTEM + 8 PROJECT**, terverifikasi tampil di layar Master Data           |
+|   1   | Satu enum peran, satu tempat. Hapus `\| string`, satukan dua `AppRole`          | ✅ **SELESAI 16 Agu** — `src/types/roles.ts`. Jadi **DUA** enum, bukan satu; alasan & temuan #87 di §19.15. 13 test mengikat enum ke penyemai |
+|   2   | Penjaga saat boot — server menolak menyala bila rute memakai peran di luar enum | ✅ **SELESAI 16 Agu** — `MODE = TOLAK`. §19.24                                                                                                |
+|   3   | Migrasi data `ProjectMembers` (10 baris) & `Users` (11 baris)                   | ✅ **SELESAI 16 Agu** — `npm run db:migrasi-peran`. 7 baris `member` -> `developer`. Sesudahnya 8 developer + 2 manager, semua kode katalog   |
+|   4   | `verifyProjectAccess` baca matriks terpusat + deny-by-default                   | ✅ **SELESAI 16 Agu** — 54 dari 54 rute. Penjaga lama NOL pemakai. §19.24                                                                     |
+|  5a   | **Dropdown & tampilan peran dari katalog** (#82)                                | ✅ **SELESAI 16 Agu** — 6 dropdown + 4 tampilan, nol hardcode, kolom `code` di MasterData                                                     |
+|  5b   | `can(action, module, projectId)` menggantikan 36 `hasPermission` di 13 berkas   | `TERBUKA`                                                                                                                                     |
+|   6   | Panel "Active System Permissions & Overrides" jadi **baca-saja**                | `TERBUKA`                                                                                                                                     |
 
 **Tahap 1 dan 2 tidak butuh keputusan apa pun** dan bisa dikerjakan kapan saja.
 Keduanya kecil, tidak mengubah perilaku, tetapi langsung membuat kompilator dan
@@ -4682,3 +4683,89 @@ Tahap 4 **belum boleh dinyatakan tutup**: tiga rute masih memakai penjaga lama,
 dan `MODE` belum `TOLAK`. Yang sudah bisa dinyatakan: #66 dan #72 tertutup
 secara struktural, dan tidak ada lagi rute proyek yang meloloskan anggota
 berperan apa pun.
+
+### 19.24 #89, #83, #88 dijawab — tahap 4 TUTUP
+
+Dikerjakan 16 Agu 2026 sesudah pemilik proyek menjawab ketiganya.
+
+| Laporan boot                       | Sebelum F7 |    Sekarang |
+| ---------------------------------- | ---------: | ----------: |
+| Penjaga lama `verifyProjectAccess` |         54 |       **0** |
+| Rute ber-`["*"]`                   |         31 |       **0** |
+| Korslet (#73)                      |          1 |       **0** |
+| `MODE` penjaga boot                |          — | **`TOLAK`** |
+
+#### #89 — benchmark Jira, dan kenapa hasilnya tidak diterapkan mentah-mentah
+
+Pemilik proyek meminta pembanding ke Jira sebelum memutuskan. Hasilnya:
+
+> Di Jira, sebuah dashboard **dimiliki pembuatnya**. Pemilik dan editor yang
+> ditunjuk boleh menyuntingnya — termasuk mengubah tata letak — dan Jira
+> Administrator dapat mengelola semua dashboard serta mengambil alih
+> kepemilikan.
+
+Kalau dipakai mentah-mentah, kesimpulannya: _setiap pengguna boleh mengatur
+tata letaknya sendiri._ **Itu keliru untuk LanPro**, dan yang membuktikannya
+bukan pendapat melainkan isi rutenya:
+
+```sql
+UPDATE Projects SET dashboard_layout = ?, dashboardLayout = ? WHERE id = ?
+```
+
+Satu tata letak per **PROYEK**, dipakai bersama seluruh anggota — bukan artefak
+pribadi. Padanan Jira yang benar karena itu bukan "dashboard", melainkan
+**konfigurasi board/proyek**, yang di Jira memang dibatasi ke project
+administrator.
+
+Jadi ketetapan pemilik proyek ("hanya admin") **sejalan dengan benchmark begitu
+padanannya diluruskan**. §19.5 diberi baris `(setelan proyek)` = Project Owner +
+Project Admin, dan tiga rute terakhir dijaga `jagaSetelanProyek()`.
+
+Pelajaran yang layak disimpan: **benchmark menjawab pertanyaan tentang aplikasi
+yang dibandingkan, bukan tentang aplikasi kita.** Yang menentukan padanannya
+tepat atau tidak adalah apa yang benar-benar ditulis kodenya ke database.
+
+#### #83 — `head` dicabut tanpa pencabutan terpisah
+
+`head` dan `designer` lenyap **dengan sendirinya** begitu tiga rute terakhir
+pindah. Tidak ada perubahan khusus untuk mencabutnya; keduanya memang hanya
+hidup di daftar peran penjaga lama.
+
+#### #88 — God Mode dicatat, tetapi hanya aksi tulis
+
+`catatGodMode` kini menulis ke `AuditLogs` lewat `createAuditLog`, `actionType`
+= `GOD_MODE_ACCESS`.
+
+**Hanya `C`, `U`, `D`. Membaca tidak dicatat.** Itu bukan kelonggaran melainkan
+syarat agar catatannya BISA DIBACA: Administrator membuka satu layar proyek saja
+memicu belasan `GET`, dan mencatat semuanya akan menenggelamkan penghapusan
+tunggal yang justru ingin ditemukan. **Log yang tidak bisa ditelusuri sama tidak
+bergunanya dengan log yang tidak ada.**
+
+Tulisannya berjalan di `setImmediate`, jadi tidak menahan permintaan dan
+kegagalan mencatat tidak pernah menggagalkan permintaan yang sah.
+
+#### `MODE` = `TOLAK`
+
+Server kini **menolak menyala** bila ada rute memakai peran di luar katalog.
+Salah ketik nama peran berhenti jadi lubang senyap dan berubah jadi kegagalan
+boot yang keras. Diverifikasi: server tetap menyala normal.
+
+#### ⚠️ Item #90 — kelemahan yang lahir dari keberhasilan ini
+
+Laporan boot sekarang berbunyi **`0 penjaga rute terdaftar`**. Itu benar — dan
+justru masalahnya.
+
+Penjaga boot mengawasi `verifyProjectAccess`, yang kini **pensiun tanpa satu pun
+pemakai**. Artinya ia sekarang **mengukur himpunan kosong**: apa pun yang
+terjadi pada 54 rute yang sudah pindah, ia akan tetap melaporkan bersih dan
+tetap membiarkan boot lanjut.
+
+Ini persis bentuk kegagalan §13.14 — gerbang yang tidak bisa gagal. Ia tidak
+berbahaya hari ini karena penjaga barunya bertipe ketat (`ModulProyek` dan
+`Aksi` adalah union, salah ketik ditolak kompilator), tetapi gerbang yang
+mengawasi tempat kosong lebih buruk daripada gerbang yang tidak ada: ia
+memberi rasa aman.
+
+**Perbaikannya:** `jagaProyek` ikut mendaftarkan `(modul, aksi)`-nya, dan
+penjaga boot memvalidasinya terhadap `MATRIKS_PROYEK`. Belum dikerjakan.
