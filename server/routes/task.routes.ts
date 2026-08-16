@@ -1574,7 +1574,19 @@ router.post(
   }
 );
 
-router.delete("/api/projects/:projectId/tasks/:taskId/links/:linkId", async (req, res) => {
+// #68 — rute ini SAMA SEKALI tidak punya `verifyProjectAccess`; yang menjaganya
+// hanya gerbang global `authenticateJWT`. Artinya siapa pun yang login, dari
+// proyek mana pun, bisa menghapus tautan task di proyek orang lain hanya dengan
+// mengetahui taskId dan linkId-nya.
+//
+// Ditemukan oleh test penjaga #66, bukan oleh pembacaan manual — daftar temuan
+// waktu itu hanya memuat lima rute ber-`['*']`, dan yang ini luput karena tidak
+// punya penjaga untuk dicari.
+//
+// Bukan kebijakan baru: pasangan POST-nya di baris 1530 sudah memakai daftar
+// peran di bawah ini. Yang dilakukan di sini cuma memulihkan penjaga yang hilang
+// agar membuat dan menghapus tautan tunduk pada aturan yang sama.
+router.delete("/api/projects/:projectId/tasks/:taskId/links/:linkId", verifyProjectAccess(["admin", "manager", "head", "developer", "member"]), async (req, res) => {
   let connection;
   try {
     const { taskId, linkId } = req.params;

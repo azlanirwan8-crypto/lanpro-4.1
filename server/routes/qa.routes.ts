@@ -394,7 +394,11 @@ export function setupQARoutes(
   // DELETE: Remove QA Test Suite and related Test Cases
   app.delete(
     "/api/projects/:projectId/qa-test-suites/:id",
-    verifyProjectAccess(["*"]),
+    // #66 — dulu `["*"]`, yang sesudah #49 berarti anggota proyek dengan peran
+    // APA PUN — termasuk `viewer` — bisa menghapus. Penghapusan suite bahkan
+    // berjenjang: seluruh test case di dalamnya ikut terhapus. Ketetapan
+    // pemilik proyek 16 Agu 2026: dibatasi admin/manager/head.
+    verifyProjectAccess(["admin", "manager", "head"]),
     async (req, res) => {
       let connection;
       try {
@@ -957,7 +961,11 @@ export function setupQARoutes(
   // DELETE: Remove QA Test Case
   app.delete(
     "/api/projects/:projectId/qa-test-cases/:id",
-    verifyProjectAccess(["*"]),
+    // #66 — dulu `["*"]`, yang sesudah #49 berarti anggota proyek dengan peran
+    // APA PUN — termasuk `viewer` — bisa menghapus. Penghapusan suite bahkan
+    // berjenjang: seluruh test case di dalamnya ikut terhapus. Ketetapan
+    // pemilik proyek 16 Agu 2026: dibatasi admin/manager/head.
+    verifyProjectAccess(["admin", "manager", "head"]),
     async (req, res) => {
       let connection;
       try {
