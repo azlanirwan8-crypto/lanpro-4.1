@@ -121,7 +121,7 @@ export function setupQARoutes(
   // GET: List QA Test Suites
   app.get(
     "/api/projects/:projectId/qa-test-suites",
-    verifyProjectAccess(["*"]),
+    jagaProyek("qa", "R"),
     async (req: any, res) => {
       let connection;
       try {
@@ -321,47 +321,43 @@ export function setupQARoutes(
   });
 
   // POST: Create QA Test Suite
-  app.post(
-    "/api/projects/:projectId/qa-test-suites",
-    verifyProjectAccess(["*"]),
-    async (req, res) => {
-      let connection;
-      try {
-        const { projectId } = req.params;
-        const suite = req.body;
-        connection = await db.getConnection();
-        await connection.query(
-          `INSERT INTO QATestSuites (id, projectId, name, phase, uploadedBy, uploadedAt, fileName, assignedTo)
+  app.post("/api/projects/:projectId/qa-test-suites", jagaProyek("qa", "C"), async (req, res) => {
+    let connection;
+    try {
+      const { projectId } = req.params;
+      const suite = req.body;
+      connection = await db.getConnection();
+      await connection.query(
+        `INSERT INTO QATestSuites (id, projectId, name, phase, uploadedBy, uploadedAt, fileName, assignedTo)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            suite.id,
-            projectId,
-            suite.name,
-            suite.phase,
-            suite.uploadedBy,
-            suite.uploadedAt || new Date().toISOString(),
-            suite.fileName || null,
-            suite.assignedTo || null,
-          ]
-        );
-        res.json({
-          status: "success",
-          message: "Test Suite created",
-          data: suite,
-        });
-      } catch (error: any) {
-        console.error("POST /api/projects/:projectId/qa-test-suites error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-      } finally {
-        if (connection) connection.release();
-      }
+        [
+          suite.id,
+          projectId,
+          suite.name,
+          suite.phase,
+          suite.uploadedBy,
+          suite.uploadedAt || new Date().toISOString(),
+          suite.fileName || null,
+          suite.assignedTo || null,
+        ]
+      );
+      res.json({
+        status: "success",
+        message: "Test Suite created",
+        data: suite,
+      });
+    } catch (error: any) {
+      console.error("POST /api/projects/:projectId/qa-test-suites error:", error);
+      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    } finally {
+      if (connection) connection.release();
     }
-  );
+  });
 
   // PUT: Update QA Test Suite
   app.put(
     "/api/projects/:projectId/qa-test-suites/:id",
-    verifyProjectAccess(["*"]),
+    jagaProyek("qa", "U"),
     async (req, res) => {
       let connection;
       try {
@@ -441,115 +437,104 @@ export function setupQARoutes(
   );
 
   // GET: List QA Test Cases
-  app.get(
-    "/api/projects/:projectId/qa-test-cases",
-    verifyProjectAccess(["*"]),
-    async (req, res) => {
-      let connection;
-      try {
-        const { projectId } = req.params;
-        connection = await db.getConnection();
-        const [rows]: any = await connection.query(
-          "SELECT * FROM QATestCases WHERE projectId = ? ORDER BY rowNum ASC, id ASC",
-          [projectId]
-        );
+  app.get("/api/projects/:projectId/qa-test-cases", jagaProyek("qa", "R"), async (req, res) => {
+    let connection;
+    try {
+      const { projectId } = req.params;
+      connection = await db.getConnection();
+      const [rows]: any = await connection.query(
+        "SELECT * FROM QATestCases WHERE projectId = ? ORDER BY rowNum ASC, id ASC",
+        [projectId]
+      );
 
-        const safeParse = (str: any, fallback = []) => {
-          if (typeof str !== "string") return str || fallback;
-          try {
-            return JSON.parse(str);
-          } catch (e) {
-            return fallback;
-          }
-        };
+      const safeParse = (str: any, fallback = []) => {
+        if (typeof str !== "string") return str || fallback;
+        try {
+          return JSON.parse(str);
+        } catch (e) {
+          return fallback;
+        }
+      };
 
-        const parsed = rows.map((row: any) => ({
-          ...row,
-          steps: safeParse(row.steps, []),
-          history: safeParse(row.history, []),
-          commentsList: safeParse(row.commentsList, []),
-          evidences: safeParse(row.evidences, []),
-        }));
+      const parsed = rows.map((row: any) => ({
+        ...row,
+        steps: safeParse(row.steps, []),
+        history: safeParse(row.history, []),
+        commentsList: safeParse(row.commentsList, []),
+        evidences: safeParse(row.evidences, []),
+      }));
 
-        res.json({ status: "success", data: parsed });
-      } catch (error: any) {
-        console.error("GET /api/projects/:projectId/qa-test-cases error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-      } finally {
-        if (connection) connection.release();
-      }
+      res.json({ status: "success", data: parsed });
+    } catch (error: any) {
+      console.error("GET /api/projects/:projectId/qa-test-cases error:", error);
+      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    } finally {
+      if (connection) connection.release();
     }
-  );
+  });
 
   // POST: Create QA Test Case
-  app.post(
-    "/api/projects/:projectId/qa-test-cases",
-    verifyProjectAccess(["*"]),
-    async (req, res) => {
-      let connection;
-      try {
-        const { projectId } = req.params;
-        const tc = req.body;
-        connection = await db.getConnection();
+  app.post("/api/projects/:projectId/qa-test-cases", jagaProyek("qa", "C"), async (req, res) => {
+    let connection;
+    try {
+      const { projectId } = req.params;
+      const tc = req.body;
+      connection = await db.getConnection();
 
-        await connection.query(
-          `INSERT INTO QATestCases (
+      await connection.query(
+        `INSERT INTO QATestCases (
           id, projectId, judul, deskripsi, tipeTesting, prioritas, caseId, expected, status, steps, history, createdAt, activeTesterId, activeTesterName, lockedAt, modulId,
           suiteId, rowNum, comment, evidenceUrl, evidenceType, evidenceName, linkedBugKey, commentsList, evidences, assignedTo
          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            tc.id,
-            projectId,
-            tc.judul || tc.title,
-            tc.deskripsi || tc.comment || null,
-            tc.tipeTesting || tc.phase || "SIT",
-            tc.prioritas || tc.priority || "Medium",
-            tc.caseId || null,
-            tc.expected || tc.expectedResult || null,
-            tc.status || "untested",
-            JSON.stringify(tc.steps || []),
-            JSON.stringify(tc.history || []),
-            tc.createdAt || new Date().toISOString(),
-            tc.activeTesterId || null,
-            tc.activeTesterName || null,
-            tc.lockedAt || null,
-            tc.modulId || tc.suiteId || null,
-            tc.suiteId || null,
-            tc.rowNum || null,
-            tc.comment || null,
-            tc.evidenceUrl || null,
-            tc.evidenceType || null,
-            tc.evidenceName || null,
-            tc.linkedBugKey || null,
-            JSON.stringify(tc.commentsList || []),
-            JSON.stringify(tc.evidences || []),
-            tc.assignedTo || null,
-          ]
-        );
+        [
+          tc.id,
+          projectId,
+          tc.judul || tc.title,
+          tc.deskripsi || tc.comment || null,
+          tc.tipeTesting || tc.phase || "SIT",
+          tc.prioritas || tc.priority || "Medium",
+          tc.caseId || null,
+          tc.expected || tc.expectedResult || null,
+          tc.status || "untested",
+          JSON.stringify(tc.steps || []),
+          JSON.stringify(tc.history || []),
+          tc.createdAt || new Date().toISOString(),
+          tc.activeTesterId || null,
+          tc.activeTesterName || null,
+          tc.lockedAt || null,
+          tc.modulId || tc.suiteId || null,
+          tc.suiteId || null,
+          tc.rowNum || null,
+          tc.comment || null,
+          tc.evidenceUrl || null,
+          tc.evidenceType || null,
+          tc.evidenceName || null,
+          tc.linkedBugKey || null,
+          JSON.stringify(tc.commentsList || []),
+          JSON.stringify(tc.evidences || []),
+          tc.assignedTo || null,
+        ]
+      );
 
-        res.json({ status: "success", message: "Test Case created" });
-      } catch (error: any) {
-        console.error("POST /api/projects/:projectId/qa-test-cases error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-      } finally {
-        if (connection) connection.release();
-      }
+      res.json({ status: "success", message: "Test Case created" });
+    } catch (error: any) {
+      console.error("POST /api/projects/:projectId/qa-test-cases error:", error);
+      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    } finally {
+      if (connection) connection.release();
     }
-  );
+  });
 
   // PUT: Update QA Test Case
-  app.put(
-    "/api/projects/:projectId/qa-test-cases/:id",
-    verifyProjectAccess(["*"]),
-    async (req, res) => {
-      let connection;
-      try {
-        const { projectId, id } = req.params;
-        const tc = req.body;
-        connection = await db.getConnection();
+  app.put("/api/projects/:projectId/qa-test-cases/:id", jagaProyek("qa", "U"), async (req, res) => {
+    let connection;
+    try {
+      const { projectId, id } = req.params;
+      const tc = req.body;
+      connection = await db.getConnection();
 
-        await connection.query(
-          `UPDATE QATestCases SET
+      await connection.query(
+        `UPDATE QATestCases SET
           judul = ?,
           deskripsi = ?,
           tipeTesting = ?,
@@ -574,50 +559,49 @@ export function setupQARoutes(
           evidences = ?,
           assignedTo = ?
          WHERE id = ? AND projectId = ?`,
-          [
-            tc.judul || tc.title,
-            tc.deskripsi || tc.comment || null,
-            tc.tipeTesting || tc.phase || "SIT",
-            tc.prioritas || tc.priority || "Medium",
-            tc.caseId || null,
-            tc.expected || tc.expectedResult || null,
-            tc.status,
-            JSON.stringify(tc.steps || []),
-            JSON.stringify(tc.history || []),
-            tc.activeTesterId || null,
-            tc.activeTesterName || null,
-            tc.lockedAt || null,
-            tc.modulId || tc.suiteId || null,
-            tc.suiteId || null,
-            tc.rowNum || null,
-            tc.comment || null,
-            tc.evidenceUrl || null,
-            tc.evidenceType || null,
-            tc.evidenceName || null,
-            tc.linkedBugKey || null,
-            JSON.stringify(tc.commentsList || []),
-            JSON.stringify(tc.evidences || []),
-            tc.assignedTo || null,
-            id,
-            projectId,
-          ]
-        );
+        [
+          tc.judul || tc.title,
+          tc.deskripsi || tc.comment || null,
+          tc.tipeTesting || tc.phase || "SIT",
+          tc.prioritas || tc.priority || "Medium",
+          tc.caseId || null,
+          tc.expected || tc.expectedResult || null,
+          tc.status,
+          JSON.stringify(tc.steps || []),
+          JSON.stringify(tc.history || []),
+          tc.activeTesterId || null,
+          tc.activeTesterName || null,
+          tc.lockedAt || null,
+          tc.modulId || tc.suiteId || null,
+          tc.suiteId || null,
+          tc.rowNum || null,
+          tc.comment || null,
+          tc.evidenceUrl || null,
+          tc.evidenceType || null,
+          tc.evidenceName || null,
+          tc.linkedBugKey || null,
+          JSON.stringify(tc.commentsList || []),
+          JSON.stringify(tc.evidences || []),
+          tc.assignedTo || null,
+          id,
+          projectId,
+        ]
+      );
 
-        res.json({ status: "success", message: "Test Case updated" });
-      } catch (error: any) {
-        console.error("PUT /api/projects/:projectId/qa-test-cases/:id error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-      } finally {
-        if (connection) connection.release();
-      }
+      res.json({ status: "success", message: "Test Case updated" });
+    } catch (error: any) {
+      console.error("PUT /api/projects/:projectId/qa-test-cases/:id error:", error);
+      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    } finally {
+      if (connection) connection.release();
     }
-  );
+  });
 
   // POST: Save QA Test Case with evidence upload
   app.post(
     "/api/projects/:projectId/qa-test-cases/:id/save",
     upload.single("evidence"),
-    verifyProjectAccess(["*"]),
+    jagaProyek("qa", "U"),
     async (req, res) => {
       let connection;
       try {
@@ -774,7 +758,7 @@ export function setupQARoutes(
   // GET: Execution History Timeline (Run History Audit Trail)
   app.get(
     "/api/projects/:projectId/qa-test-cases/:id/execution-history",
-    verifyProjectAccess(["*"]),
+    jagaProyek("qa", "R"),
     async (req, res) => {
       let connection;
       try {
@@ -824,7 +808,7 @@ export function setupQARoutes(
   // PATCH: Update Test Case status with auto bug creation
   app.patch(
     "/api/projects/:projectId/qa-test-cases/:id/status",
-    verifyProjectAccess(["*"]),
+    jagaProyek("qa", "U"),
     async (req: any, res) => {
       let connection;
       try {
@@ -995,7 +979,7 @@ export function setupQARoutes(
   // POST: Sync QA Test Cases
   app.post(
     "/api/projects/:projectId/qa-test-cases/sync",
-    verifyProjectAccess(["*"]),
+    jagaProyek("qa", "U"),
     async (req, res) => {
       let connection;
       try {
@@ -1118,7 +1102,7 @@ export function setupQARoutes(
   // POST: AI-Powered QA Test Case Generator (Single)
   app.post(
     "/api/projects/:projectId/qa-test-cases/generate-ai",
-    verifyProjectAccess(["*"]),
+    jagaProyek("qa", "R"),
     async (req, res) => {
       try {
         const { judul, deskripsi, tipeTesting, prioritas } = req.body;

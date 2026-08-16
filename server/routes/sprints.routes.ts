@@ -17,7 +17,7 @@ export function setupSprintsRoutes(
   ) => Promise<any>
 ) {
   // GET: List Sprints for a project
-  app.get("/api/projects/:projectId/sprints", verifyProjectAccess(["*"]), async (req, res) => {
+  app.get("/api/projects/:projectId/sprints", jagaProyek("sprints", "R"), async (req, res) => {
     let connection;
     try {
       const { projectId } = req.params;

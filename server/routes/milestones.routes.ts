@@ -15,7 +15,7 @@ import { jagaProyek } from "../middleware/jagaProyek";
 const router = Router();
 
 // Milestones API (Hybrid Value-Added)
-router.get("/api/projects/:projectId/milestones", verifyProjectAccess(["*"]), async (req, res) => {
+router.get("/api/projects/:projectId/milestones", jagaProyek("timeline", "R"), async (req, res) => {
   let connection;
   try {
     const { projectId } = req.params;
