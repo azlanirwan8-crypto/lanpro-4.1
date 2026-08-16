@@ -19,7 +19,7 @@ export const Button = ({
     variantStyle = "bg-surface-muted text-content-body hover:bg-slate-200 active:scale-95";
   if (variant === "outline")
     variantStyle =
-      "border-2 border-border-subtle text-content-body hover:border-slate-300 hover:bg-surface-sunken active:scale-95";
+      "border-2 border-border-subtle text-content-body hover:border-border-subtle hover:bg-surface-sunken active:scale-95";
   if (variant === "danger")
     variantStyle =
       "bg-rose-500 text-white hover:bg-rose-600 active:scale-95 shadow-md shadow-rose-500/20";

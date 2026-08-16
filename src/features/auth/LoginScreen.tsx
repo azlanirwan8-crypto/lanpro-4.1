@@ -173,7 +173,7 @@ export const LoginScreen = ({
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                    className="w-4 h-4 rounded border-border-subtle text-primary focus:ring-primary cursor-pointer"
                   />
                   <span className="text-xs font-medium text-content-secondary">Remember Me</span>
                 </label>

@@ -345,7 +345,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
           >
             <button
               onClick={handleSuccessModalConfirm}
-              className="absolute top-4 right-4 text-slate-300 hover:text-content-secondary transition-colors p-1 rounded-md"
+              className="absolute top-4 right-4 text-content-subtle hover:text-content-secondary transition-colors p-1 rounded-md"
               title="Close"
             >
               <X className="w-5 h-5" />

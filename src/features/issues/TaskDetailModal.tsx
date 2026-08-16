@@ -431,7 +431,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 )}
               >
                 <UncontrolledInput
-                  className="text-2xl font-medium text-content-strong bg-transparent hover:bg-surface-sunken focus:bg-surface border border-transparent hover:border-border-subtle/80 focus:border-indigo-400 rounded-lg px-3 py-1.5 w-full transition-all outline-none focus:ring-2 focus:ring-indigo-500/10 placeholder:text-slate-300 tracking-tight"
+                  className="text-2xl font-medium text-content-strong bg-transparent hover:bg-surface-sunken focus:bg-surface border border-transparent hover:border-border-subtle/80 focus:border-indigo-400 rounded-lg px-3 py-1.5 w-full transition-all outline-none focus:ring-2 focus:ring-indigo-500/10 placeholder:text-content-subtle tracking-tight"
                   placeholder="Issue Title"
                   initialValue={task.title || (task as any).summary || (task as any).name || ""}
                   onSave={(val: string) => updateTaskField(task.id, "title", val)}
@@ -666,7 +666,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       {isEditable && (
                         <button
                           onClick={() => handleRemoveAttachment?.(att.id)}
-                          className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                          className="p-1.5 text-content-subtle hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all shrink-0"
                           title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -753,7 +753,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                           </span>
                           <button
                             onClick={() => handleRemoveLinkedTask(task.id, link.id)}
-                            className="text-slate-300 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors opacity-0 group-hover/link:opacity-100"
+                            className="text-content-subtle hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors opacity-0 group-hover/link:opacity-100"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -851,7 +851,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       >
                         <input
                           type="checkbox"
-                          className="w-5 h-5 rounded-lg border-slate-300 text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer shadow-soft"
+                          className="w-5 h-5 rounded-lg border-border-subtle text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer shadow-soft"
                           checked={st.status === "Done"}
                           onChange={() =>
                             updateTaskField(
@@ -867,7 +867,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         </span>
                         <UncontrolledInput
                           className={cn(
-                            "text-[13px] font-medium text-content-body bg-transparent border-none focus:ring-0 flex-1 min-w-0 disabled:text-slate-300 transition-all",
+                            "text-[13px] font-medium text-content-body bg-transparent border-none focus:ring-0 flex-1 min-w-0 disabled:text-content-subtle transition-all",
                             st.status === "Done" && "line-through opacity-50"
                           )}
                           initialValue={st.title}
@@ -880,7 +880,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                           <UserAvatar
                             uid={st.assigneeId || ""}
                             members={projectMembers}
-                            className="w-6 h-6 border border-white shadow-soft ring-1 ring-slate-100"
+                            className="w-6 h-6 border border-white shadow-soft ring-1 ring-border-faint"
                           />
                           <div className="h-4 w-px bg-slate-200" />
                           <PriorityIcon
@@ -912,7 +912,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     ))}
                   {tasks.filter((t) => t.parentId === task.id).length === 0 && (
                     <div className="py-4 text-center">
-                      <p className="text-xs font-medium text-slate-300 uppercase tracking-widest italic">
+                      <p className="text-xs font-medium text-content-subtle uppercase tracking-widest italic">
                         No subtasks defined
                       </p>
                     </div>
@@ -980,7 +980,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                               className="p-1 hover:bg-slate-200 rounded text-content-secondary shrink-0"
                               title="Text format"
                             >
-                              <span className="text-xs font-medium leading-none px-0.5 border border-slate-300 rounded font-serif">
+                              <span className="text-xs font-medium leading-none px-0.5 border border-border-subtle rounded font-serif">
                                 Tt
                               </span>
                             </button>
@@ -1120,7 +1120,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       })}
                       {comments.length === 0 && (
                         <div className="py-6 px-4 text-center space-y-1.5 bg-surface-sunken/50 rounded-lg border border-dashed border-border-subtle/80">
-                          <MessageSquare className="w-6 h-6 mx-auto text-slate-300" />
+                          <MessageSquare className="w-6 h-6 mx-auto text-content-subtle" />
                           <p className="text-xs font-medium text-content-subtle">
                             Belum ada diskusi / komentar. Ketik komentar di atas untuk memulai.
                           </p>
@@ -1169,7 +1169,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     })}
                     {filteredLogs.length === 0 && (
                       <div className="py-6 px-4 text-center space-y-1.5 bg-surface-sunken/50 rounded-lg border border-dashed border-border-subtle/80">
-                        <History className="w-6 h-6 mx-auto text-slate-300" />
+                        <History className="w-6 h-6 mx-auto text-content-subtle" />
                         <p className="text-xs font-medium text-content-subtle">
                           Belum ada riwayat aktivitas yang terekam.
                         </p>
@@ -1214,7 +1214,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   onChange={(val) => updateTaskField(task.id, "status", val)}
                   disabled={!isEditable}
                   className="w-full"
-                  buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-slate-300 shadow-2xs px-3 text-xs font-medium"
+                  buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-3 text-xs font-medium"
                 />
               </div>
 
@@ -1242,7 +1242,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     type="member"
                     masterData={[]}
                     className={cn("w-full", blockMember && "pointer-events-none opacity-80")}
-                    buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-slate-300 shadow-2xs px-3 text-xs font-medium text-content-body"
+                    buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
                     disabled={!isEditable || blockMember}
                   />
                 </div>
@@ -1267,7 +1267,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     type="member"
                     masterData={[]}
                     className={cn("w-full", blockMember && "pointer-events-none opacity-80")}
-                    buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-slate-300 shadow-2xs px-3 text-xs font-medium text-content-body"
+                    buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
                     disabled={!isEditable || blockMember}
                   />
                 </div>
@@ -1294,7 +1294,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       onChange={(val) => updateTaskField(task.id, "priority", val)}
                       disabled={!isEditable || blockMember}
                       className={cn("w-full", blockMember && "pointer-events-none opacity-80")}
-                      buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-slate-300 shadow-2xs px-3 text-xs font-medium"
+                      buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-3 text-xs font-medium"
                     />
                   </div>
                   <div className="space-y-1">
@@ -1317,7 +1317,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       onSave={(val: any) =>
                         updateTaskField(task.id, "storyPoints", parseInt(val) || 0)
                       }
-                      className="h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-slate-300 rounded-md px-3 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all shadow-2xs outline-none text-content-body"
+                      className="h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-3 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all shadow-2xs outline-none text-content-body"
                       disabled={!isEditable || blockMember}
                       placeholder="0"
                     />
@@ -1379,7 +1379,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     masterData={masterData}
                     disabled={!isEditable || blockMember}
                     className={cn("w-full", blockMember && "pointer-events-none opacity-80")}
-                    buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-slate-300 shadow-2xs px-3 text-xs font-medium text-content-body"
+                    buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
                   />
                 </div>
 
@@ -1406,7 +1406,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     masterData={masterData}
                     disabled={!isEditable || blockMember}
                     className={cn("w-full", blockMember && "pointer-events-none opacity-80")}
-                    buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-slate-300 shadow-2xs px-3 text-xs font-medium text-content-body"
+                    buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
                   />
                 </div>
 
@@ -1424,7 +1424,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       }
                       onSave={(val: any) => updateTaskField(task.id, "startDate", val)}
                       className={cn(
-                        "h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-slate-300 rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body",
+                        "h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body",
                         blockMember && "opacity-70 cursor-not-allowed"
                       )}
                       disabled={!isEditable || blockMember}
@@ -1442,7 +1442,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       }
                       onSave={(val: any) => updateTaskField(task.id, "endDate", val)}
                       className={cn(
-                        "h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-slate-300 rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body",
+                        "h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body",
                         blockMember && "opacity-70 cursor-not-allowed"
                       )}
                       disabled={!isEditable || blockMember}
@@ -1463,7 +1463,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       }
                       onSave={(val: any) => updateTaskField(task.id, "dueDate", val)}
                       className={cn(
-                        "h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-slate-300 rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body",
+                        "h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body",
                         blockMember && "opacity-70 cursor-not-allowed"
                       )}
                       disabled={!isEditable || blockMember}
@@ -1487,7 +1487,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         )
                       }
                       placeholder="Add tags..."
-                      className="h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-slate-300 rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body"
+                      className="h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body"
                       disabled={!isEditable}
                     />
                   </div>
@@ -1508,7 +1508,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       onSave={(val: any) =>
                         updateTaskField(task.id, "estimatedHours", parseFloat(val) || 0)
                       }
-                      className="h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-slate-300 rounded-md px-3 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body"
+                      className="h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-3 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body"
                       disabled={!isEditable}
                       placeholder="e.g. 5"
                     />

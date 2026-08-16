@@ -446,7 +446,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                 type="checkbox"
                 checked={isSelected}
                 onChange={() => handleToggleSelectOne(task.id)}
-                className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 shadow-soft transition-all cursor-pointer"
+                className="w-4 h-4 rounded border-border-subtle text-blue-600 focus:ring-blue-500 shadow-soft transition-all cursor-pointer"
               />
             </div>
           </td>
@@ -592,7 +592,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                         uid={task.reporterId || ""}
                         user={reporterObj}
                         members={projectMembers}
-                        className="w-5 h-5 border border-white shadow-soft ring-1 ring-slate-100"
+                        className="w-5 h-5 border border-white shadow-soft ring-1 ring-border-faint"
                       />
                       <span
                         className={cn(
@@ -778,7 +778,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                           </span>
                         ))
                       ) : (
-                        <span className="text-xs sm:text-[10px] text-slate-300">-</span>
+                        <span className="text-xs sm:text-[10px] text-content-subtle">-</span>
                       )}
                     </div>
                   );
@@ -1640,7 +1640,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                   displayRoots.length > 0
                                 }
                                 onChange={handleToggleSelectAll}
-                                className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 shadow-soft transition-all cursor-pointer"
+                                className="w-4 h-4 rounded border-border-subtle text-indigo-600 focus:ring-indigo-500 shadow-soft transition-all cursor-pointer"
                               />
                             </div>
                           </th>
@@ -1658,7 +1658,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                 <div className="flex items-center justify-between">
                                   <span>{col.label}</span>
                                   {col.id === "work" && (
-                                    <Layout className="w-3.5 h-3.5 text-slate-300 opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity" />
+                                    <Layout className="w-3.5 h-3.5 text-content-subtle opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity" />
                                   )}
                                 </div>
                                 <div className="absolute right-0 top-1/4 bottom-1/4 w-px bg-slate-200" />
@@ -1686,7 +1686,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                               className="px-10 py-20 text-center"
                             >
                               <div className="flex flex-col items-center gap-3 opacity-40">
-                                <Search className="w-8 h-8 text-slate-300" />
+                                <Search className="w-8 h-8 text-content-subtle" />
                                 <p className="text-xs font-medium text-content-muted uppercase tracking-widest">
                                   No matching records found
                                 </p>
@@ -1937,7 +1937,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                 <span className="bg-indigo-600 text-white text-xs sm:text-[10px] font-medium rounded-full px-2 py-0.5 min-w-[20px] text-center">
                   {selectedTaskIds.size}
                 </span>
-                <span className="text-slate-300 font-medium uppercase tracking-wider text-xs sm:text-[10px]">
+                <span className="text-content-subtle font-medium uppercase tracking-wider text-xs sm:text-[10px]">
                   Tugas Dipilih
                 </span>
               </div>

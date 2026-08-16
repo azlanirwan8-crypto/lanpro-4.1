@@ -466,7 +466,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
           <span className="text-xs sm:text-[10px] text-content-subtle font-medium flex items-center gap-1">
             <User className="w-3 h-3" /> {currentUser?.displayName || "Tim AI"}
           </span>
-          <span className="text-slate-300">•</span>
+          <span className="text-content-subtle">•</span>
           <span className="text-xs sm:text-[10px] text-content-subtle font-medium flex items-center gap-1">
             <Layers className="w-3 h-3" /> {sources.length} Sumber Konteks Aktif
           </span>
@@ -533,7 +533,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
                 <span>Memuat dokumen proyek...</span>
               </div>
             ) : sources.length === 0 ? (
-              <div className="text-center py-12 px-4 border border-dashed border-slate-300 rounded-xl bg-surface-muted/50 ">
+              <div className="text-center py-12 px-4 border border-dashed border-border-subtle rounded-xl bg-surface-muted/50 ">
                 <FileCode className="w-8 h-8 text-content-subtle mx-auto mb-2" />
                 <p className="text-xs text-content-secondary font-medium">
                   Belum ada sumber data terpasang
@@ -832,7 +832,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
                       </div>
 
                       {msg.role === "user" && (
-                        <div className="w-8 h-8 bg-slate-200 rounded-xl flex items-center justify-center shrink-0 border border-slate-300 ">
+                        <div className="w-8 h-8 bg-slate-200 rounded-xl flex items-center justify-center shrink-0 border border-border-subtle ">
                           <User className="w-4 h-4 text-content-secondary " />
                         </div>
                       )}
@@ -875,7 +875,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
                         : "Centang sumber data di sebelah kiri terlebih dahulu..."
                     }
                     disabled={isGenerating || activeSources.length === 0}
-                    className="flex-1 px-4 py-3 bg-surface-sunken border border-border-subtle focus:border-purple-500 rounded-xl text-xs text-content-strong placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50 transition-all"
+                    className="flex-1 px-4 py-3 bg-surface-sunken border border-border-subtle focus:border-purple-500 rounded-xl text-xs text-content-strong placeholder-content-subtle focus:outline-none focus:ring-1 focus:ring-purple-500 disabled:opacity-50 transition-all"
                   />
                   <button
                     type="submit"
@@ -971,7 +971,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-20 bg-surface-muted/50 border border-dashed border-slate-300 rounded-xl">
+                <div className="text-center py-20 bg-surface-muted/50 border border-dashed border-border-subtle rounded-xl">
                   <Layers className="w-10 h-10 text-content-subtle mx-auto mb-3" />
                   <h3 className="text-sm font-medium text-content-body mb-1">
                     Pilih Format Studio Overview
@@ -1039,7 +1039,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
               </div>
 
               {studioNotes.length === 0 ? (
-                <div className="text-center py-20 bg-surface-muted/50 border border-dashed border-slate-300 rounded-xl">
+                <div className="text-center py-20 bg-surface-muted/50 border border-dashed border-border-subtle rounded-xl">
                   <Bookmark className="w-10 h-10 text-content-subtle mx-auto mb-3" />
                   <h3 className="text-sm font-medium text-content-body mb-1">
                     Belum Ada Catatan Saved
@@ -1147,7 +1147,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
               className={`p-8 border-2 border-dashed rounded-xl transition-all cursor-pointer text-center flex flex-col items-center justify-center gap-3 ${
                 isDragging
                   ? "border-purple-500 bg-purple-50/80 scale-[1.01]"
-                  : "border-slate-300 bg-surface-sunken/50 hover:border-purple-400 hover:bg-purple-50/30 "
+                  : "border-border-subtle bg-surface-sunken/50 hover:border-purple-400 hover:bg-purple-50/30 "
               }`}
             >
               <div className="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shadow-inner">

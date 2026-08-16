@@ -250,7 +250,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                       )}
                       title={isSidebarCollapsed ? item.label : undefined}
                     >
-                      <div className="shrink-0 text-slate-300 group-hover:text-white transition-colors">
+                      <div className="shrink-0 text-content-subtle group-hover:text-white transition-colors">
                         {item.icon}
                       </div>
                       {!isSidebarCollapsed && (
@@ -262,7 +262,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                           {hasChildren && (
                             <div
                               onClick={(e) => toggleExpand(item.id, e)}
-                              className="p-2 min-w-9 min-h-9 flex items-center justify-center rounded hover:bg-surface/10 text-slate-300 hover:text-white transition-colors ml-1"
+                              className="p-2 min-w-9 min-h-9 flex items-center justify-center rounded hover:bg-surface/10 text-content-subtle hover:text-white transition-colors ml-1"
                             >
                               {isExpanded ? (
                                 <ChevronDown className="w-3.5 h-3.5" />
@@ -376,7 +376,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className="w-full mt-2 flex justify-center p-2 text-slate-300 hover:text-white transition-colors"
+            className="w-full mt-2 flex justify-center p-2 text-content-subtle hover:text-white transition-colors"
             title="Opsi Profil"
           >
             <User className="w-4 h-4" />
