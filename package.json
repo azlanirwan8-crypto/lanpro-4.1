@@ -7,6 +7,7 @@
     "dev": "tsx server.ts",
     "doctor": "node scripts/doctor.cjs",
     "fix:warna": "node scripts/fix/warna-ke-token.cjs",
+    "audit:warna": "node scripts/validate/audit-warna.cjs",
     "audit:papan": "node scripts/validate/papan-audit.cjs",
     "audit:deps": "node scripts/audit-dependensi.cjs",
     "sbom": "node scripts/buat-sbom.cjs",
