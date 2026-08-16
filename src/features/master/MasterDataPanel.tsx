@@ -257,22 +257,57 @@ export const MasterDataPanel = ({
     );
   }, [editIconSearch]);
 
-  const masterDataTypes = [
-    { type: "priority", label: "Priority" },
-    { type: "status", label: "Status" },
-    { type: "category", label: "Category" },
-    { type: "project_role", label: "Project Role" },
-    { type: "issue_type", label: "Issue Type" },
-    { type: "environment", label: "Environment" },
-    { type: "department", label: "Department" },
-    { type: "jabatan", label: "Position" },
-    { type: "release", label: "Release" },
-    { type: "fitur", label: "Feature" },
-    { type: "system", label: "System" },
-    { type: "surrounding", label: "Surrounding" },
-    { type: "jenis_dokumen", label: "Jenis Dokumen" },
-    { type: "modul_aplikasi", label: "Modul / Aplikasi" },
-  ];
+  // #84 — daftar tipe TIDAK lagi ditulis lengkap di sini.
+  //
+  // Versi lama mencantumkan 14 tipe secara tetap, sehingga tipe baru yang
+  // ditambahkan ke database TIDAK PERNAH MUNCUL di layar sampai berkas ini ikut
+  // disunting. Itu terjadi persis pada `project_status` dan `methodology`: data
+  // masuk dengan benar, tetapi tidak terlihat siapa pun.
+  //
+  // Kini daftarnya diturunkan dari data. `LABEL_TIPE` hanya memperindah nama
+  // yang sudah dikenal; tipe di luar daftar itu tetap tampil, dengan namanya
+  // dirapikan otomatis — jadi menambah tipe baru cukup lewat database.
+  const LABEL_TIPE: Record<string, string> = {
+    priority: "Priority",
+    status: "Status",
+    category: "Category",
+    project_role: "Project Role",
+    project_status: "Project Status",
+    methodology: "Methodology",
+    issue_type: "Issue Type",
+    environment: "Environment",
+    department: "Department",
+    jabatan: "Position",
+    release: "Release",
+    fitur: "Feature",
+    system: "System",
+    surrounding: "Surrounding",
+    jenis_dokumen: "Jenis Dokumen",
+    modul_aplikasi: "Modul / Aplikasi",
+  };
+
+  const URUTAN_TIPE = Object.keys(LABEL_TIPE);
+
+  const rapikanNamaTipe = (t: string) =>
+    t
+      .split(/[_-]/)
+      .filter(Boolean)
+      .map((k) => k.charAt(0).toUpperCase() + k.slice(1))
+      .join(" ");
+
+  const masterDataTypes = React.useMemo(() => {
+    const dariData = Array.from(
+      new Set((localMasterData || []).map((d) => d.type).filter(Boolean) as string[])
+    );
+    // Tipe yang dikenal tampil lebih dulu sesuai urutan LABEL_TIPE; sisanya
+    // menyusul menurut abjad supaya tetap dapat ditebak.
+    const dikenal = URUTAN_TIPE.filter((t) => dariData.includes(t));
+    const belumDikenal = dariData.filter((t) => !URUTAN_TIPE.includes(t)).sort();
+    return [...dikenal, ...belumDikenal].map((type) => ({
+      type,
+      label: LABEL_TIPE[type] || rapikanNamaTipe(type),
+    }));
+  }, [localMasterData]);
 
   const handleCreateMasterData = async () => {
     if (!newMasterLabel) {
