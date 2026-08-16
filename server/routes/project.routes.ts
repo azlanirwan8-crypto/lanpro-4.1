@@ -82,10 +82,23 @@ router.get("/api/projects", async (req: any, res) => {
   }
 });
 
-router.post("/api/projects/generate-bni-demo", authenticateJWT, async (req: any, res: any) => {
-  // Seluruh logika penyemaian ada di lapisan service; rute hanya meneruskan.
-  return buatProyekDemoBni(req, res);
-});
+// `verifyGlobalAdmin` ditambahkan untuk #80 (§13.15). Sebelumnya rute ini hanya
+// ber-`authenticateJWT`, sehingga SIAPA PUN yang login bisa membuat proyek lewat
+// sini — membatalkan ketetapan §19.4 bahwa pembuatan proyek hanya milik
+// Administrator, yang sudah ditegakkan di `POST /api/projects` sejak #34.
+//
+// Ia luput dari gelombang 5 bukan karena tidak terdata, melainkan karena namanya
+// terbaca seperti utilitas demo. Nama rute bukan bukti tentang apa yang
+// dilakukannya: layanan di baliknya benar-benar `INSERT INTO Projects`.
+router.post(
+  "/api/projects/generate-bni-demo",
+  authenticateJWT,
+  verifyGlobalAdmin,
+  async (req: any, res: any) => {
+    // Seluruh logika penyemaian ada di lapisan service; rute hanya meneruskan.
+    return buatProyekDemoBni(req, res);
+  }
+);
 router.get("/api/projects/:id", verifyProjectAccess(["*"]), async (req, res) => {
   try {
     const { id } = req.params;
@@ -495,9 +508,7 @@ router.delete(
         } catch (execError: any) {
           await connection.query("ROLLBACK TO SAVEPOINT hapus_bertingkat");
           if (adalahTabelTidakAda(execError)) {
-            console.warn(
-              `[HAPUS PROYEK] Melewati tabel yang tidak ada: ${query.substring(0, 60)}`
-            );
+            console.warn(`[HAPUS PROYEK] Melewati tabel yang tidak ada: ${query.substring(0, 60)}`);
             continue;
           }
           throw execError;
