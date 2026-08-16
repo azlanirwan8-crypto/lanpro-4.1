@@ -312,7 +312,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 34 BELUM · 58 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 31 BELUM · 61 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -323,7 +323,7 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 34 item
+### 1.1 BELUM SELESAI — 31 item
 
 **Sebaran per fase:** F1 2 · F2 6 · F3 1 · F6 6 · F7 7 · F8 4 · F9 2 · F10 3 · F11 1 · F12 2
 
@@ -344,7 +344,6 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 17  | **UI belum pernah diaudit di balik login**                                                 | **F3**  | 🔴  | Sedang        |           Ya            | `MENUNGGU` login        | §14    |
 | 18  | notebook-lm rusak di dua sisi                                                              | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
 | 19  | `POST /api/db-query` tanpa penjaga read-only                                               | **F2**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
-| 20  | Kode mati DB Explorer                                                                      | **F2**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
 | 21  | `authStore` & `uiStore` menganggur                                                         | **F10** | 🟡  | Rendah        |          Tidak          | `DITUNDA` (disengaja)   | §5.3   |
 | 25  | Fondasi `email.service.ts`                                                                 | **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email | §1.5   |
 | 26  | **Email selamat datang** (poin 2)                                                          | **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email | §1.5   |
@@ -356,17 +355,15 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — celah daftar, DAN membatalkan asumsi kuota F11           | **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik      | §0.4   |
 | 47  | `discussion_point_comments` kolom kembar — baca & tulis SUDAH camelCase; sisa hapus kolom  | **F9**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §0.3   |
-| 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401        | **F2**  | ⚪  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.6  |
 | 74  | 7 pengambil data tanpa penjaga respons basi — data proyek lama menimpa proyek baru         | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §13.12 |
 | 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
-| 81  | `ProjectMembers.parentAdminId` ditulis tapi TIDAK PERNAH dibaca — 6 baris, nol `SELECT`    | **F7**  | 🟡  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan    | §19.2  |
 | 83  | `Users.department` & `Users.position` TIDAK fungsional — rancangan §19.4 belum bisa jalan  | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.13 |
 | 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)       | **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 87  | `effectiveRole` DIKOREKSI — ia hanya bawa peran sistem; frontend abai peran proyek         | **F7**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §19.27 |
 | 92  | Peran dibaca dari TOKEN di 7 tempat, dari DATABASE di penjaga proyek — pencabutan tertunda | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.28 |
 
-### 1.2 SUDAH SELESAI — 58 item
+### 1.2 SUDAH SELESAI — 61 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -431,6 +428,9 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 56  | ~~Jest mencetak crash `pg` saat dibongkar~~ fungsi murni dipisah ke helper                           |  **F8**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.5  |
 | 94  | ~~4 rute komentar TANPA penjaga~~ 7 rute telanjang dijaga; test dari arah RUTE                       |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production) | `SELESAI` 16 Agu | §19.40 |
 | 71  | ~~`project-modules` tanpa penjaga~~ dijaga `jagaSetelanProyek` lewat entitas                         |  **F2**  | 🟠  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §13.11 |
+| 20  | ~~Kode mati DB Explorer~~ toggle mode DB, fetchDbStatus, dan servicenya dibuang                      |  **F2**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §6.3   |
+| 57  | ~~Dua endpoint health~~ `/api/health` dibuang; `/api/health-check` pindah ke health.routes           |  **F2**  | ⚪  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §13.6  |
+| 81  | ~~`parentAdminId` ditulis tapi tidak pernah dibaca~~ berhenti ditulis; kolom menyusul                |  **F7**  | 🟡  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §19.2  |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -5798,3 +5798,56 @@ Bentuk yang diharapkan: daftar domain dipisah koma, misal
 
 Di Google Cloud Console, ±5 menit, nol kode. Ia satu-satunya dari kelima yang
 **menutup sebuah fase** (F1).
+
+### 19.43 #57, #81, #20 dikerjakan — dan satu test yang hampir saya buang
+
+Ketiganya disetujui pemilik proyek 16 Agu 2026 atas dasar pengukuran §19.42.
+
+#### #57 — endpoint kesehatan disatukan
+
+`/api/health` dibuang. Diverifikasi pada server berjalan:
+
+```
+/api/health-check → 200 TANPA kredensial
+/api/health       → 401
+```
+
+⚠️ 401 itu **bukan** bukti rutenya masih ada — §0.6 mencatat gerbang auth
+menjawab sebelum penangan 404, sehingga jalur yang tidak ada pun membalas 401.
+Yang membuktikan penghapusannya adalah hilangnya kode, bukan status ini.
+
+**Tiga test sempat merah**, dan reaksi pertama yang menggoda adalah membuangnya
+— testnya menguji jalur yang memang sengaja dihapus. Itu akan menghapus satu-
+satunya cakupan otomatis untuk endpoint kesehatan.
+
+Sebagai gantinya `/api/health-check` **dipindahkan** dari `server.ts` ke
+`health.routes.ts`. Jalurnya tidak berubah, jadi pendaftarannya di
+`publicRoutes` tetap berlaku; yang berubah hanya letaknya — endpoint kesehatan
+kini berkumpul di berkas yang namanya menjanjikan itu, dan **bisa diuji tanpa
+menyalakan seluruh server**.
+
+> Test yang merah karena kodenya sengaja dihapus tetap harus ditanya: apa yang
+> hilang kalau ia ikut dibuang? Kadang jawabannya "tidak ada", kadang seperti
+> di sini.
+
+#### #81 — `parentAdminId` berhenti ditulis
+
+4 kemunculan, nol pembacaan. Penulisannya dicabut dari `project.routes.ts`.
+
+**Kolomnya belum dijatuhkan dari database.** Itu tindakan merusak, dan
+dijalankan terpisah bersama langkah 4 #47 — keduanya penghapusan kolom pada data
+produksi, dan lebih aman dilakukan sekali dengan satu uji-coba.
+
+`src/lib/db.ts` **tidak disentuh** (§0.5 aturan 3), meski ia memuat
+`parentAdminId` di daftar kolom camelCase.
+
+#### #20 — kode mati DB Explorer
+
+Sesi sebelumnya sudah menandainya mati dan meninggalkan **daftar hapus yang
+tepat**; penghapusannya ditunda agar jadi keputusan sadar. Daftar itu diikuti
+persis: state `dbMode`/`dbHost`/`switching`, `fetchDbStatus` beserta
+pemanggilannya di `useEffect` (menembak API tiap mount tanpa hasilnya pernah
+ditampilkan), `handleToggleDbMode`, dan `toggleDbMode` di `explorer.service.ts`.
+
+Rute backend `POST /api/system/db-status` **sengaja tidak disentuh**:
+menghapus pemanggil tidak otomatis berarti rutenya tak punya pemakai lain.
