@@ -13,7 +13,7 @@ import {
   Star,
   Briefcase,
 } from "lucide-react";
-import { UserProfile, Project, Task, AppRole, MasterData } from "../../types";
+import { UserProfile, Project, Task, AppRole, PeranEfektif, MasterData } from "../../types";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { toast } from "sonner";
 // Diberi alias: komponen sudah punya fungsi lokal bernama fetchTeamTasks yang
@@ -31,7 +31,7 @@ export const TeamManagementPanel = ({
   selectedProject: Project | null;
   tasks: Task[];
   currentUserProfile: UserProfile | null;
-  userRole: AppRole | null;
+  userRole: PeranEfektif | null;
   hasPermission: (...args: any[]) => boolean;
   StyledDropdown?: any;
   updateProjectRole?: (uid: string, role: string) => void;

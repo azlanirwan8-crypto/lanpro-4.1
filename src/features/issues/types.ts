@@ -1,4 +1,4 @@
-import { Task, Sprint, UserProfile, MasterData, AppRole } from '../../types';
+import { Task, Sprint, UserProfile, MasterData, AppRole, PeranEfektif } from "../../types";
 
 export interface IssueListViewProps {
   projectRole?: string;
@@ -8,7 +8,7 @@ export interface IssueListViewProps {
   projectMembers: UserProfile[];
   allUsers: UserProfile[];
   masterData: MasterData[];
-  userRole: AppRole;
+  userRole: PeranEfektif;
   user: UserProfile | null;
   currentUserProfile: UserProfile;
   hasPermission: any;
@@ -32,7 +32,7 @@ export interface TaskDetailModalProps {
   tasks: Task[];
   projectMembers: UserProfile[];
   masterData: MasterData[];
-  userRole: AppRole;
+  userRole: PeranEfektif;
   user: UserProfile | null;
   currentUserProfile: UserProfile;
   sprints: Sprint[];

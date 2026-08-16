@@ -15,6 +15,7 @@ import {
   type DiscussionPointComment,
   type UserProfile,
   type AppRole,
+  type PeranEfektif,
   type UserPermissions,
   type MasterData,
 } from "../../types";
@@ -45,7 +46,7 @@ import { ResponsiveTable } from "../../components/ResponsiveTable";
 interface DiscussionPointsTableProps {
   projectId: string;
   meetingId: string;
-  userRole: AppRole;
+  userRole: PeranEfektif;
   currentUser: UserProfile | null;
   permissions?: Partial<UserPermissions>;
   projectMembers?: UserProfile[];

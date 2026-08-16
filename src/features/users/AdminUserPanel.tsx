@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { AppRole } from "../../types";
+import { sebagaiPeranSistem } from "../../types/roles";
 import { AdminUserPanelProps } from "./types";
 import { useAdminUsers } from "./hooks";
 import { Button, Modal, UserAvatar } from "./styles";
@@ -893,9 +894,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 ? "bg-rose-50 text-rose-600 border-rose-200"
                                 : user.role === "head"
                                   ? "bg-purple-50 text-purple-600 border-purple-200"
-                                  : user.role === "manager"
-                                    ? "bg-blue-50 text-blue-600 border-blue-200"
-                                    : "bg-surface-sunken text-content-secondary border-border-subtle"
+                                  : "bg-surface-sunken text-content-secondary border-border-subtle"
                             )}
                           >
                             {user.role}
@@ -1215,7 +1214,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               <div className="relative group/select">
                 <select
                   value={addPeopleRole}
-                  onChange={(e) => setAddPeopleRole(e.target.value)}
+                  onChange={(e) => setAddPeopleRole(sebagaiPeranSistem(e.target.value))}
                   className="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium appearance-none cursor-pointer focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 focus:bg-surface outline-none transition-all"
                 >
                   {/* #82 — dari Master Data. Versi lama menulis lima opsi lalu

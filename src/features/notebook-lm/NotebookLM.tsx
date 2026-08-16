@@ -27,7 +27,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { validateFileClient } from "../../lib/fileSecurity";
 import Markdown from "react-markdown";
-import { Project, AppRole } from "../../types";
+import { Project, AppRole, PeranEfektif } from "../../types";
 import { hasPermission } from "../../lib/permissions";
 import {
   fetchWikiSources,
@@ -83,14 +83,14 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const canCreate = hasPermission(
-    userRole as AppRole,
+    userRole as PeranEfektif,
     "notebooklm",
     "create",
     false,
     currentUser?.permissions
   );
   const canDelete = hasPermission(
-    userRole as AppRole,
+    userRole as PeranEfektif,
     "notebooklm",
     "delete",
     false,

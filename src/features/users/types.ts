@@ -1,4 +1,12 @@
-import { UserProfile, Project, Task, MasterData, AppRole, UserPermissions } from '../../types';
+import {
+  UserProfile,
+  Project,
+  Task,
+  MasterData,
+  AppRole,
+  PeranEfektif,
+  UserPermissions,
+} from "../../types";
 
 /**
  * Isi form pada modal edit pengguna.
@@ -9,7 +17,7 @@ import { UserProfile, Project, Task, MasterData, AppRole, UserPermissions } from
  */
 export interface EditUserForm {
   role: AppRole;
-  status: UserProfile['status'];
+  status: UserProfile["status"];
   permissions: UserPermissions;
   department: string;
   position: string;
@@ -25,7 +33,7 @@ export interface AdminUserPanelProps {
   projects: Project[];
   tasks: Task[];
   masterData: MasterData[];
-  userRole: AppRole | null;
+  userRole: PeranEfektif | null;
   currentUserId?: string;
   onRefreshProjects?: () => void;
   onSelectUserForDetail?: (user: UserProfile) => void;
@@ -53,14 +61,14 @@ export const DEFAULT_PERMISSIONS: UserPermissions = {
 /** Nilai awal form edit, dipakai saat hook diinisialisasi. */
 export function createEmptyEditForm(): EditUserForm {
   return {
-    role: 'user',
-    status: 'pending',
+    role: "user",
+    status: "pending",
     permissions: DEFAULT_PERMISSIONS,
-    department: '',
-    position: '',
-    fullName: '',
-    email: '',
-    password: '',
-    phone: '',
+    department: "",
+    position: "",
+    fullName: "",
+    email: "",
+    password: "",
+    phone: "",
   };
 }

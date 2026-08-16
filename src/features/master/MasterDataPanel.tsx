@@ -9,7 +9,7 @@ import {
 const Droppable = _Droppable as any;
 const Draggable = _Draggable as any;
 import { toast } from "sonner";
-import { MasterData, AppRole, UserProfile } from "../../types";
+import { MasterData, AppRole, PeranEfektif, UserProfile } from "../../types";
 import { Modal } from "../../components/ui/Modal";
 import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
 import { RenderIcon, AVAILABLE_ICONS } from "../../components/RenderIcon";
@@ -93,7 +93,7 @@ export const MasterDataPanel = ({
   projects?: any[];
   tasks?: any[];
   masterData: MasterData[];
-  userRole: AppRole | null;
+  userRole: PeranEfektif | null;
   currentUserProfile: UserProfile | null;
   hasPermission: (...args: any[]) => boolean;
   onRefresh: () => void;
@@ -545,7 +545,7 @@ export const MasterDataPanel = ({
               </p>
             </div>
             {hasPermission(
-              userRole as AppRole,
+              userRole as PeranEfektif,
               "configuration",
               "update",
               false,
@@ -622,7 +622,7 @@ export const MasterDataPanel = ({
                           </div>
                         </div>
                         {hasPermission(
-                          userRole as AppRole,
+                          userRole as PeranEfektif,
                           "configuration",
                           "update",
                           false,
@@ -940,7 +940,7 @@ export const MasterDataPanel = ({
 
                                     <div className="flex items-center gap-2">
                                       {hasPermission(
-                                        userRole as AppRole,
+                                        userRole as PeranEfektif,
                                         "configuration",
                                         "update",
                                         false,

@@ -3,7 +3,17 @@ import { create } from "zustand";
 import { Project, Task, Sprint, ActivityLog, MasterData, UserProfile } from "../types";
 import { CacheManager } from "../lib/cache";
 
-export type AppRole = "admin" | "manager" | "member" | "viewer";
+/**
+ * Peran — DEFINISINYA ADA DI SATU TEMPAT: `src/types/roles.ts`.
+ *
+ * Berkas ini dulu mendeklarasikan `AppRole` versinya SENDIRI dengan isi yang
+ * berbeda dari `src/types/user.ts`: ia memuat `member` tetapi tidak memuat
+ * `head` maupun `user`. Dua tipe bernama sama dengan isi berbeda, dan tidak ada
+ * satu pun berkas yang meng-import versi ini — ia mati sejak lahir.
+ *
+ * Diganti re-export supaya tidak ada lagi tempat kedua yang bisa menyimpang.
+ */
+export type { AppRole } from "../types/user";
 
 type SetStateAction<S> = S | ((prevState: S) => S);
 
