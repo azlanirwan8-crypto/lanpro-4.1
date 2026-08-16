@@ -321,7 +321,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 setIsUserMenuOpen(false);
                 if (onOpenProfile) onOpenProfile();
               }}
-              className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-surface/10 flex items-center gap-2.5 transition-colors text-slate-200 hover:text-content-inverse cursor-pointer"
+              className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-surface/10 flex items-center gap-2.5 transition-colors text-content-inverse-muted hover:text-content-inverse cursor-pointer"
             >
               <User className="w-4 h-4 text-amber-400" />
               <span>Profil Anda</span>

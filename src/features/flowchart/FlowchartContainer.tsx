@@ -3019,7 +3019,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                         {/* Miro Coordinate & Element Stats Hover HUD overlay (HIDDEN AS REQUESTED) */}
                         {/* <div className={cn(
-              "absolute bottom-16 z-30 p-1.5 px-3 bg-slate-900/95 backdrop-blur-sm border border-border-inverse text-content-subtle shadow-xl rounded-xl flex items-center gap-2 text-xs sm:text-[10px] font-mono select-none transition-all duration-300",
+              "absolute bottom-16 z-30 p-1.5 px-3 bg-overlay/95 backdrop-blur-sm border border-border-inverse text-content-subtle shadow-xl rounded-xl flex items-center gap-2 text-xs sm:text-[10px] font-mono select-none transition-all duration-300",
               // HUD hidden coordinate info
               false ? "left-[356px]" : "left-4"
             )}>
@@ -3028,7 +3028,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 <span className="text-xs sm:text-[11px] sm:text-[9px] text-emerald-400 font-medium uppercase tracking-wider">Canvas</span>
               </span>
               <div className="w-px h-3.5" />
-              <span className="font-medium">X: <span className="text-slate-100">{hoverCoords.x}</span> Y: <span className="text-slate-100">{hoverCoords.y}</span></span>
+              <span className="font-medium">X: <span className="text-content-inverse-strong">{hoverCoords.x}</span> Y: <span className="text-content-inverse-strong">{hoverCoords.y}</span></span>
               <div className="w-px h-3.5" />
               <span className="text-violet-300 font-medium">{nodes.length} Objek</span>
             </div> */}
@@ -3232,7 +3232,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                         {/* KEYBOARD SHORTCUTS NAVIGATIONAL HELP PANELS */}
                         {isKeyboardHelpOpen && (
-                          <div className="absolute left-4 right-4 md:left-auto md:right-4 bottom-20 z-40 bg-slate-900/95 backdrop-blur text-content-inverse p-4 rounded-xl border shadow-2xl max-w-sm space-y-3 p-4 select-none">
+                          <div className="absolute left-4 right-4 md:left-auto md:right-4 bottom-20 z-40 bg-overlay/95 backdrop-blur text-content-inverse p-4 rounded-xl border shadow-2xl max-w-sm space-y-3 p-4 select-none">
                             <div className="flex justify-between items-center pb-2 border-b border-border-inverse">
                               <span className="font-medium uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-violet-400">
                                 Pintasan Keyboard & Tips
@@ -3249,7 +3249,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   Batal Aksi (Undo)
                                 </span>
-                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Ctrl + Z
                                 </kbd>
                               </div>
@@ -3257,7 +3257,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   Ulangi Aksi (Redo)
                                 </span>
-                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Ctrl + Y / Ctrl+Shift+Z
                                 </kbd>
                               </div>
@@ -3265,7 +3265,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   Duplikasi Bentuk
                                 </span>
-                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Ctrl + D
                                 </kbd>
                               </div>
@@ -3273,7 +3273,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   Geser Alur (Nudge)
                                 </span>
-                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Tombol Panah Arrow (↑↓←→)
                                 </kbd>
                               </div>
@@ -3281,7 +3281,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans font-sans">
                                   Geser Kelompok Lebar
                                 </span>
-                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Shift + Panah
                                 </kbd>
                               </div>
@@ -3289,7 +3289,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   Batalkan Pilihan / Tool
                                 </span>
-                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Esc
                                 </kbd>
                               </div>
@@ -3297,7 +3297,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   Hapus Element Terpilih
                                 </span>
-                                <kbd className="bg-surface-inverse text-slate-100 border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium font-sans">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium font-sans">
                                   Delete / Backspace
                                 </kbd>
                               </div>
@@ -3607,7 +3607,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
       {/* DETAILED POPUP DIALOG: TAMBAH DATA / ADD DATA / EDIT INFO DESCRIPTION */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
+        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="bg-surface border border-border-subtle w-full max-w-md rounded-xl shadow-xl overflow-hidden text-content-strong">
             {/* Modal Head */}
             <div className="px-5 py-4 bg-surface border-b border-border-subtle flex justify-between items-center">
@@ -3777,7 +3777,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
       {/* Upload Document Modal */}
       {isUploadDocModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
           <div className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col border border-border-subtle animate-in zoom-in-95 duration-200">
             <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-surface">
               <div className="flex items-center gap-2">

@@ -96,7 +96,7 @@ const getStatusColors = (status: string = "", isEpic: boolean) => {
     handleR: "hover:bg-slate-600/15 active:bg-slate-600/25 group/r-handle",
     handleBarR: "bg-slate-400/80 border-slate-400/20 group-hover/r-handle:bg-slate-600",
     tooltipText: "text-content-subtle",
-    tooltipBadge: "bg-slate-500/30 text-slate-200",
+    tooltipBadge: "bg-slate-500/30 text-content-inverse-muted",
   };
 };
 
@@ -1317,14 +1317,14 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               <React.Fragment key={i}>
                                 <div
                                   className={cn(
-                                    "absolute top-0 w-[2px] bg-slate-200/80",
+                                    "absolute top-0 w-[2px] bg-surface-strong/80",
                                     isCurrentDepth && isLastChild ? "h-7 rounded-bl-lg" : "h-full"
                                   )}
                                   style={{ left: `${14 + i * 20}px` }}
                                 />
                                 {isCurrentDepth && (
                                   <div
-                                    className="absolute top-7 w-[20px] h-[2px] bg-slate-200/80 rounded-tr-lg"
+                                    className="absolute top-7 w-[20px] h-[2px] bg-surface-strong/80 rounded-tr-lg"
                                     style={{ left: `${14 + i * 20}px` }}
                                   />
                                 )}
@@ -1599,7 +1599,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             }}
                             className="absolute left-6 h-8 px-4 rounded-xl flex items-center bg-surface-sunken/60 border border-border-subtle border-dashed hover:border-indigo-400 hover:bg-surface group-hover/row:bg-surface text-xs sm:text-[10px] font-medium text-content-subtle hover:text-indigo-600 hover:shadow-soft transition-all cursor-pointer gap-2"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover/row:bg-indigo-500 animate-pulse transition-colors" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-surface-marker group-hover/row:bg-indigo-500 animate-pulse transition-colors" />
                             Belum diplot. Klik untuk config.
                           </motion.button>
                         </motion.div>

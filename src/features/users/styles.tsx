@@ -47,7 +47,7 @@ export const Modal = ({ isOpen, onClose, title, children, maxWidth = "max-w-md" 
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" onClick={onClose} />
+      <div className="absolute inset-0 bg-overlay/60 backdrop-blur-xs" onClick={onClose} />
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}

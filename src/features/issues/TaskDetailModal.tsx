@@ -880,7 +880,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                           <UserAvatar
                             uid={st.assigneeId || ""}
                             members={projectMembers}
-                            className="w-6 h-6 border border-white shadow-soft ring-1 ring-border-faint"
+                            className="w-6 h-6 border border-surface shadow-soft ring-1 ring-border-faint"
                           />
                           <div className="h-4 w-px bg-surface-strong" />
                           <PriorityIcon
@@ -966,7 +966,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       <UserAvatar
                         uid={user?.uid || ""}
                         members={projectMembers}
-                        className="w-9 h-9 border-2 border-white shadow-md shrink-0"
+                        className="w-9 h-9 border-2 border-surface shadow-md shrink-0"
                       />
                       <div className="flex-1 relative group">
                         <div className="border border-border-subtle rounded-xl bg-surface overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-300 transition-all shadow-soft">
@@ -1088,14 +1088,14 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                             <UserAvatar
                               uid={comment.authorId}
                               members={projectMembers}
-                              className="w-8 h-8 border border-white shadow-2xs shrink-0"
+                              className="w-8 h-8 border border-surface shadow-2xs shrink-0"
                             />
                             <div className="flex-1 space-y-1">
                               <div className="flex items-center gap-2">
                                 <span className="text-xs font-medium text-content-strong tracking-tight">
                                   {author?.displayName || "Unknown User"}
                                 </span>
-                                <div className="w-1 h-1 bg-slate-300 rounded-full" />
+                                <div className="w-1 h-1 bg-surface-marker rounded-full" />
                                 <span className="text-xs sm:text-[10px] font-medium text-content-subtle">
                                   {safeFormat(comment.createdAt, "MMM d, h:mm a", "Just now")}
                                 </span>
@@ -1145,10 +1145,10 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                             <UserAvatar
                               uid={log.userId}
                               members={projectMembers}
-                              className="w-7 h-7 shrink-0 shadow-2xs border border-white relative z-10"
+                              className="w-7 h-7 shrink-0 shadow-2xs border border-surface relative z-10"
                             />
                             {i < filteredLogs.length - 1 && (
-                              <div className="absolute top-7 left-1/2 -content-x-1/2 w-0.5 h-full bg-slate-200/60 z-0" />
+                              <div className="absolute top-7 left-1/2 -content-x-1/2 w-0.5 h-full bg-surface-strong/60 z-0" />
                             )}
                           </div>
                           <div className="space-y-0.5 py-0.5">
@@ -1193,7 +1193,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   <Activity className="w-3.5 h-3.5 text-indigo-500" />
                   Issue Attributes
                 </h4>
-                <span className="text-xs sm:text-[10px] font-medium text-content-muted bg-slate-200/60 px-2 py-0.5 rounded-md">
+                <span className="text-xs sm:text-[10px] font-medium text-content-muted bg-surface-strong/60 px-2 py-0.5 rounded-md">
                   {task.key || "ATTR"}
                 </span>
               </div>
@@ -1218,7 +1218,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 />
               </div>
 
-              <div className="h-px bg-slate-200/70 my-2" />
+              <div className="h-px bg-surface-strong/70 my-2" />
 
               {/* Metadata Controls List */}
               <div className="space-y-3.5">
@@ -1352,7 +1352,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         "w-2 h-2 rounded-full",
                         task.isBlocked
                           ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
-                          : "bg-slate-300"
+                          : "bg-surface-marker"
                       )}
                     />
                   </button>
@@ -1534,7 +1534,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 </div>
               </div>
 
-              <div className="h-px bg-slate-200/70 my-2" />
+              <div className="h-px bg-surface-strong/70 my-2" />
 
               {/* Footer Metadata */}
               <div className="pt-2 space-y-2">

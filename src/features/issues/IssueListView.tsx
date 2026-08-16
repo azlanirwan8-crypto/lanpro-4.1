@@ -592,7 +592,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                         uid={task.reporterId || ""}
                         user={reporterObj}
                         members={projectMembers}
-                        className="w-5 h-5 border border-white shadow-soft ring-1 ring-border-faint"
+                        className="w-5 h-5 border border-surface shadow-soft ring-1 ring-border-faint"
                       />
                       <span
                         className={cn(
@@ -669,7 +669,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                 ? "bg-violet-500 shadow-[0_0_8px_rgba(139,92,246,0.4)]"
                                 : progressValue === 50
                                   ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"
-                                  : "bg-slate-300"
+                                  : "bg-surface-marker"
                           )}
                           style={{ width: `${progressValue}%` }}
                         />
@@ -1896,7 +1896,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                     "w-6 h-6 rounded-lg flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-medium transition-all cursor-pointer active:scale-95 shrink-0",
                     listPage === i + 1
                       ? "bg-primary text-content-inverse shadow-xs"
-                      : "text-content-muted hover:bg-slate-200/80"
+                      : "text-content-muted hover:bg-surface-strong/80"
                   )}
                 >
                   {i + 1}
@@ -1931,7 +1931,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
               animate={{ y: 0, opacity: 1, x: "-50%" }}
               exit={{ y: 80, opacity: 0, x: "-50%" }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="fixed bottom-6 left-1/2 z-50 bg-slate-900/95 backdrop-blur-md border border-slate-700/50 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-6 py-3.5 flex flex-wrap items-center gap-6 text-content-inverse text-xs font-medium select-none"
+              className="fixed bottom-6 left-1/2 z-50 bg-overlay/95 backdrop-blur-md border border-slate-700/50 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-6 py-3.5 flex flex-wrap items-center gap-6 text-content-inverse text-xs font-medium select-none"
             >
               <div className="flex items-center gap-2 border-r border-border-inverse pr-4">
                 <span className="bg-indigo-600 text-content-inverse text-xs sm:text-[10px] font-medium rounded-full px-2 py-0.5 min-w-[20px] text-center">

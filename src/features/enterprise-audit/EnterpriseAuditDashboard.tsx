@@ -455,7 +455,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-900/80 backdrop-blur-md"
+              className="fixed inset-0 bg-overlay/80 backdrop-blur-md"
               onClick={() => setSelectedLog(null)}
             />
 
@@ -482,7 +482,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                         {selectedLog.entityName}
                       </span>
                       <span className="text-content-subtle">•</span>
-                      <code className="text-xs sm:text-[10px] font-medium bg-slate-200/50 text-content-secondary px-2 py-0.5 rounded">
+                      <code className="text-xs sm:text-[10px] font-medium bg-surface-strong/50 text-content-secondary px-2 py-0.5 rounded">
                         {selectedLog.entityId}
                       </code>
                     </div>

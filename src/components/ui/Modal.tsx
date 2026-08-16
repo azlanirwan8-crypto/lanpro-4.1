@@ -31,7 +31,7 @@ export const Modal = ({
   return (
     <Portal>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/60 backdrop-blur-xs"
         onClick={(e) => {
           if (closeOnBackdropClick && e.target === e.currentTarget) {
             onClose();

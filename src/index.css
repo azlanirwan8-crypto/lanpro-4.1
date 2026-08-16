@@ -51,6 +51,24 @@
    * `bg-slate-200` tidak bisa dipetakan tanpa menggeser mode terang. */
   --color-surface-strong: #e2e8f0;
 
+  /* Tirai modal. SENGAJA sama di kedua mode: latar di baliknya memang harus
+   * digelapkan, terang maupun gelap temanya. Dipakai dengan opasitas
+   * (`bg-overlay/60`), sehingga nilainya cukup satu. */
+  --color-overlay: #0f172a;
+
+  /* Tiga token bernilai TETAP berikutnya, alasannya sama seperti
+   * `surface-inverse`: elemennya duduk di atas permukaan yang tidak ikut
+   * berganti (kartu aksen, lencana, titik penanda), sehingga warnanya memang
+   * harus sama di kedua mode.
+   *
+   * Nilainya diambil PERSIS dari slate yang digantikan, jadi penggantiannya
+   * identik piksel demi piksel:
+   *   content-inverse-strong = slate-100   content-inverse-muted = slate-200
+   *   surface-marker         = slate-300 */
+  --color-content-inverse-strong: #f1f5f9;
+  --color-content-inverse-muted: #e2e8f0;
+  --color-surface-marker: #cbd5e1;
+
   /* Permukaan & teks */
   --color-surface: #ffffff;
   --color-surface-muted: #f4f7f9;
@@ -89,6 +107,12 @@ html.dark {
 
   /* Yang ini justru HARUS berganti: ia permukaan terisi, bukan aksen. */
   --color-surface-strong: #24314a;
+
+  /* Sengaja sama dengan mode terang — lihat catatan di `:root`. */
+  --color-overlay: #0f172a;
+  --color-content-inverse-strong: #f1f5f9;
+  --color-content-inverse-muted: #e2e8f0;
+  --color-surface-marker: #cbd5e1;
 
   --color-surface: #121a2a;
   --color-surface-muted: #0b0f19;

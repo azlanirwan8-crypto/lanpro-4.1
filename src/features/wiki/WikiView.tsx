@@ -1259,7 +1259,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         <MessageSquare className="w-4 h-4 text-primary" />
                         Catatan & Komentar Diskusi
                       </span>
-                      <span className="text-xs sm:text-[10px] font-medium text-content-muted bg-slate-200/60 px-2 py-0.5 rounded-full">
+                      <span className="text-xs sm:text-[10px] font-medium text-content-muted bg-surface-strong/60 px-2 py-0.5 rounded-full">
                         {(activeDocId ? docCommentsMap[activeDocId] || [] : []).length} Catatan
                       </span>
                     </div>
@@ -1400,7 +1400,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
             A. FORM MODAL (POP-UP FORM UNTUK CREATE & EDIT)
             ============================================================== */}
         {showFormModal && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}

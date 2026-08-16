@@ -74,11 +74,11 @@ export const HeaderAvatarGroup: React.FC<HeaderAvatarGroupProps> = ({
               className={`w-8 h-8 border-2 ${
                 isCurrentUser
                   ? "border-indigo-400 ring-2 ring-indigo-100 z-10"
-                  : "border-white ring-1 ring-border-faint"
+                  : "border-surface ring-1 ring-border-faint"
               } relative group-hover:z-20 group-hover:scale-110 transition-all shadow-soft`}
             />
             {/* Indikator Online: Bullet hijau */}
-            <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white absolute bottom-0 right-0 z-20"></span>
+            <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-surface absolute bottom-0 right-0 z-20"></span>
 
             {/* Tooltip Nama Pengguna */}
             <div className="absolute top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-surface-inverse text-content-inverse text-xs sm:text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-30 flex flex-col items-center">
@@ -95,7 +95,7 @@ export const HeaderAvatarGroup: React.FC<HeaderAvatarGroupProps> = ({
       })}
 
       {displayUsers.length > 5 && (
-        <div className="w-8 h-8 rounded-full border-2 border-white bg-surface-sunken flex items-center justify-center text-xs sm:text-[10px] font-medium text-content-muted shadow-soft ring-1 ring-border-subtle z-0 relative hover:z-10 hover:bg-surface-muted transition-all cursor-default shrink-0">
+        <div className="w-8 h-8 rounded-full border-2 border-surface bg-surface-sunken flex items-center justify-center text-xs sm:text-[10px] font-medium text-content-muted shadow-soft ring-1 ring-border-subtle z-0 relative hover:z-10 hover:bg-surface-muted transition-all cursor-default shrink-0">
           +{displayUsers.length - 5}
         </div>
       )}

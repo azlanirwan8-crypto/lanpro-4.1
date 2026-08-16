@@ -6,7 +6,7 @@ export const styles = {
   asideCollapsed: "md:w-20",
   asideExpanded: "md:w-64",
   collapseButton:
-    "hidden md:absolute md:flex items-center justify-center -right-3 top-6 bg-[#364574] border border-[#4a5c96] rounded-full p-1.5 min-w-8 min-h-8 text-slate-200 hover:text-content-inverse shadow-md z-10 hover:scale-110 transition-transform cursor-pointer",
+    "hidden md:absolute md:flex items-center justify-center -right-3 top-6 bg-[#364574] border border-[#4a5c96] rounded-full p-1.5 min-w-8 min-h-8 text-content-inverse-muted hover:text-content-inverse shadow-md z-10 hover:scale-110 transition-transform cursor-pointer",
   logoWrapper: "p-5 flex items-center shrink-0 border-b border-[#364574]/70",
   logoIcon:
     "w-8 h-8 bg-gradient-to-tr from-indigo-500 via-blue-500 to-cyan-400 rounded-md flex items-center justify-center shrink-0 shadow-md",

@@ -1,11 +1,11 @@
 export const styles = {
   container:
-    "flex flex-col bg-surface dark:bg-surface-inverse rounded-md border border-slate-200/80 dark:border-border-inverse shadow-xs font-sans relative flex-1 min-h-[500px] overflow-hidden",
+    "flex flex-col bg-surface dark:bg-surface-inverse rounded-md border border-subtle/80 dark:border-border-inverse shadow-xs font-sans relative flex-1 min-h-[500px] overflow-hidden",
   toolbar:
-    "flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-slate-200/80 bg-slate-50/50 dark:bg-slate-800/30 shrink-0",
+    "flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-subtle/80 bg-slate-50/50 dark:bg-slate-800/30 shrink-0",
   searchWrapper: "relative group",
   searchInput:
-    "pl-9 pr-4 py-2 bg-surface dark:bg-slate-950 border border-border-subtle dark:border-border-inverse rounded-md text-xs font-medium text-content-body dark:text-slate-200 w-full sm:w-64 placeholder:font-normal placeholder:text-content-subtle focus:ring-1 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-2xs",
+    "pl-9 pr-4 py-2 bg-surface dark:bg-slate-950 border border-border-subtle dark:border-border-inverse rounded-md text-xs font-medium text-content-body dark:text-content-inverse-muted w-full sm:w-64 placeholder:font-normal placeholder:text-content-subtle focus:ring-1 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-2xs",
   filterPill:
     "px-2.5 py-1 bg-indigo-50/80 dark:bg-indigo-950/20 text-primary dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-900 rounded-md text-[10px] font-medium uppercase tracking-tight shadow-2xs",
   filterPillAmber:
@@ -25,5 +25,5 @@ export const styles = {
   inlineAddBorderedCell:
     "p-0 border-r border-slate-100/50 dark:border-border-inverse relative border-y-2 border-primary",
   inlineAddInput:
-    "w-full bg-transparent border-none text-xs font-medium text-content-strong dark:text-slate-100 placeholder:text-content-subtle focus:ring-0 outline-none",
+    "w-full bg-transparent border-none text-xs font-medium text-content-strong dark:text-content-inverse-strong placeholder:text-content-subtle focus:ring-0 outline-none",
 };

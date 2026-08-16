@@ -39,7 +39,7 @@ export const UserBadge = ({
     <div
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2 pr-3 pl-1 py-1 rounded-full bg-surface-muted/50 hover:bg-slate-200/50 transition-all cursor-pointer border border-transparent hover:border-border-subtle group",
+        "flex items-center gap-2 pr-3 pl-1 py-1 rounded-full bg-surface-muted/50 hover:bg-surface-strong/50 transition-all cursor-pointer border border-transparent hover:border-border-subtle group",
         className
       )}
     >

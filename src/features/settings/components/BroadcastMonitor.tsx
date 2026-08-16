@@ -249,7 +249,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
 
       {/* Preview Modal */}
       {isPreviewOpen && (
-        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 rounded-lg transition-all">
+        <div className="absolute inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 rounded-lg transition-all">
           <div className="bg-surface rounded-lg shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[85vh] border border-border-subtle">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle shrink-0">
               <h3 className="font-medium text-sm text-content-strong flex items-center gap-2">

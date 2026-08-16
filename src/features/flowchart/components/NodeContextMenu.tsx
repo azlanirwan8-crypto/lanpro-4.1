@@ -137,7 +137,9 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
               className={cn(
                 "w-7 h-7 rounded-lg transition-transform hover:scale-110 active:scale-95 flex items-center justify-center relative shadow-soft cursor-pointer border",
                 c.bg,
-                isSelected ? "ring-2 ring-violet-500 border-white scale-105" : "border-transparent"
+                isSelected
+                  ? "ring-2 ring-violet-500 border-surface scale-105"
+                  : "border-transparent"
               )}
               title={c.name.toUpperCase()}
             >

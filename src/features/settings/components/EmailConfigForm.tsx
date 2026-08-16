@@ -127,7 +127,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
       </div>
 
       {isTestModalOpen && (
-        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 rounded-lg">
+        <div className="absolute inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 rounded-lg">
           <div className="bg-surface p-5 rounded-lg shadow-xl max-w-sm w-full space-y-3 border border-border-subtle">
             <h3 className="font-medium text-sm text-content-strong">Uji Coba Koneksi</h3>
             <div className="space-y-1">

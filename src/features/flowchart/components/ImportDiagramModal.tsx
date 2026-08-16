@@ -56,7 +56,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
   if (!isImportModalOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 select-none">
+    <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 select-none">
       <div className="bg-surface border border-border-subtle w-full max-w-xl rounded-xl shadow-xl overflow-hidden flex flex-col text-content-strong animate-in fade-in zoom-in-95 duration-150 max-h-[90vh]">
         {/* Modal Head */}
         <div className="px-5 py-4 bg-surface border-b border-border-subtle flex justify-between items-center shrink-0">
@@ -297,7 +297,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
               setIsImportModalOpen(false);
               setParsedImportData(null);
             }}
-            className="p-2 px-4 rounded-xl bg-slate-200/80 hover:bg-slate-300 font-medium border border-border-subtle text-content-secondary hover:text-content-strong transition-all text-xs sm:text-[11px] active:scale-95"
+            className="p-2 px-4 rounded-xl bg-surface-strong/80 hover:bg-surface-marker font-medium border border-border-subtle text-content-secondary hover:text-content-strong transition-all text-xs sm:text-[11px] active:scale-95"
           >
             Tutup
           </button>

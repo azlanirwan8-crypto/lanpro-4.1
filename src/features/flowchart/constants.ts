@@ -101,7 +101,7 @@ export const colorPalettes: Record<
     bg: "bg-slate-50/80 border-border-subtle",
     text: "text-content-strong",
     border: "border-border-subtle",
-    preview: "bg-slate-300",
+    preview: "bg-surface-marker",
   },
 };
 

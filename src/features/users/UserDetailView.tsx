@@ -542,14 +542,14 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
             <div className="relative group cursor-pointer shrink-0 z-10">
               <UserAvatar
                 user={{ ...user, photoURL: previewUrl || photoURL } as any}
-                className="w-20 h-20 text-2xl shadow-soft border-2 border-white ring-2 ring-indigo-50 shrink-0"
+                className="w-20 h-20 text-2xl shadow-soft border-2 border-surface ring-2 ring-indigo-50 shrink-0"
               />
               {previewUrl && (
                 <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
                   Pratinjau
                 </span>
               )}
-              <label className="absolute inset-0 bg-black/50 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity ring-2 ring-indigo-50 border-2 border-white ">
+              <label className="absolute inset-0 bg-black/50 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity ring-2 ring-indigo-50 border-2 border-surface ">
                 <span className="text-xs sm:text-[10px] font-medium uppercase tracking-wider">
                   {isUploading ? "..." : "Pilih Foto"}
                 </span>

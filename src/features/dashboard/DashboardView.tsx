@@ -1107,7 +1107,7 @@ export function DashboardView(props: DashboardViewProps) {
                           {epic.childCompleted}/{epic.childTotal} Child Tasks ({epic.progress}%)
                         </span>
                       </div>
-                      <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden">
+                      <div className="w-full h-2 bg-surface-strong/80 rounded-full overflow-hidden">
                         <div
                           className={cn(
                             "h-full rounded-full transition-all duration-500",

@@ -337,7 +337,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
 
       {/* REGISTRATION SUCCESS MODAL (VELZON SWEETALERT STYLE) */}
       {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 font-sans">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay/50 backdrop-blur-xs p-4 font-sans">
           <motion.div
             initial={{ scale: 0.85, opacity: 0, y: 15 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
