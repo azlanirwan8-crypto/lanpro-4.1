@@ -221,7 +221,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 77 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 78 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -288,6 +288,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 76  | Otorisasi tidak deny-by-default — akar 56% temuan F2 (14 dari 25 masuk OWASP A01)        |  **F7**  | 🔴  | Sedang        | Ya (blokir production)  | `MENUNGGU` keputusan     | §18.3  |
 | 77  | 4 kerentanan `moderate` di dependensi — hanya tertutup lewat kenaikan versi mayor      |  **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan     | §18.7  |
 | 78  | Kode menulis ke tabel `TaskAttachments` yang TIDAK ADA di DB — lampiran task selalu gagal |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.13 |
+| 79  | **Migrasi ≠ database hidup**: 12 tabel drift, 52 kolom tak akan dibuat migrasi           |  **F0**  | 🔴  | Sedang        | Ya (blokir production)  | `TERBUKA`                | §13.14 |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -319,7 +320,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 
 |  Fase   | Nama                               | Item                                 | Sesi | Risiko            | Status                    | TERTAHAN OLEH APA — dan siapa yang harus bergerak                                                                         |
 | :-----: | ---------------------------------- | ------------------------------------ | ---- | ----------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10, #38, #39               | 1–2  | Sangat rendah     | `SELESAI` 16 Agu          | — tidak ada                                                                                                                 |
+| **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10, #38, #39, **#79**      | 1–2  | Sangat rendah     | `JALAN` — gerbang dicabut | **DITEMUKAN 16 Agu:** gerbang keluar F0 ("`db:migrate` pada database bersih = schema production") ternyata TIDAK terpenuhi — 12 tabel drift, 52 kolom (§13.14). Status diturunkan dari SELESAI. Bisa dikerjakan tanpa pemilik |
 | **F1**  | Cabut kredensial lama              | #15 (#2 DITAHAN)                     | <1   | Sangat rendah     | `MENUNGGU`                | **PEMILIK.** Cabut 2 Google API key lama di Google Cloud Console. Kerja ±5 menit, tidak menyentuh kode. **#2 ditahan 16 Agu 2026** — storage beralih ke drive user (#30), jadi fase ini TIDAK lagi membuka jalan rilis; yang membukanya kini F11 |
 | **F2**  | Audit & perbaikan LOGIKA           | #16, #18–#20, #49–#75                | 3–5  | Rendah            | `JALAN` — audit SELESAI    | **PEMILIK, 9 keputusan.** Audit 9 area §13.1 tuntas & 15 item diperbaiki. Sisa murni keputusan peran/perilaku: #69 #70 #71 #72 #73 (penetapan peran), #74 (izin sentuh `AppContainer`), #18 #19 #20 (perilaku notebook-lm, penjaga read-only `db-query`, kode mati DB Explorer), #57 (dua endpoint health) |
 | **F3**  | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | `SIAP JALAN`              | **TIDAK LAGI TERTAHAN.** Syarat "login pemilik" sudah terpenuhi — sesi hidup dipakai sepanjang 16 Agu. Yang masih perlu Anda: izin membuat objek percobaan untuk alur TULIS (§14.2), dan sesi admin bila layar khusus admin ikut diperiksa |
@@ -417,6 +418,16 @@ berdiri di atas informasi keliru. Biayanya paling rendah di seluruh peta.
 
 **Gerbang keluar:** gerbang dasar + `npm run db:migrate` pada database bersih
 menghasilkan schema yang identik dengan production.
+
+⚠️ **GERBANG INI DICABUT 16 Agu 2026.** Diukur pada tanggal yang sama: 12 tabel
+drift dan 52 kolom ada di database hidup tetapi tidak akan dibuat migrasi
+(§13.14, item #79). Syarat gerbang **tidak terpenuhi**, dan besar kemungkinan
+tidak pernah benar-benar diuji pada database bersih. F0 karena itu dikembalikan
+ke `JALAN`.
+
+Pelajarannya melampaui F0: **gerbang bisa dinyatakan lulus tanpa dijalankan.**
+Untuk gerbang yang menuntut lingkungan bersih, tulis perintah pembuktiannya —
+jangan hanya kalimat syaratnya.
 
 ⚠️ **Jangan menghapus sistem migrasi apa pun sebelum membandingkan daftar tabel
 DAN kolomnya**, bukan hanya nama berkasnya. Ini operasi yang tidak bisa dibatalkan
@@ -2555,6 +2566,105 @@ Adaptor `src/lib/db.ts` **mencegat kueri `information_schema`** dan mengembalika
 bentuknya sendiri — `{ tableName, rowCount, sizeBytes }`, bukan `{ table_name }`.
 Memeriksa keberadaan tabel dengan `x.table_name` mengembalikan `undefined` untuk
 SEMUA baris, sehingga tampak seperti "tidak ada tabel apa pun". Pakai `tableName`.
+
+---
+
+
+### 13.14 Temuan #79 — migrasi tidak menghasilkan schema production
+
+Ditemukan 16 Agu 2026 sebagai lanjutan #78. Menyelidiki satu tabel membuka
+masalah yang jauh lebih luas.
+
+#### Angkanya
+
+Dibandingkan lewat klien `pg` mentah terhadap database hidup — bukan lewat
+adaptor, supaya tidak ada kueri yang dicegat:
+
+| Ukuran | Nilai |
+| ------ | ----- |
+| Tabel di `src/lib/pg-migrate.ts` | 27 |
+| Tabel di database hidup | 30 |
+| **Tabel yang drift** | **12** |
+| **Kolom ada di database, TIDAK dibuat migrasi** | **52** |
+| Kolom ada di migrasi, tidak ada di database | 0 |
+| Tabel di database yang tidak ada di migrasi | 3 — `meeting_details`, `discussion_point_comments`, `ai_learning_logs` |
+
+Arahnya satu: **database hidup selalu LEBIH LENGKAP daripada migrasi.** Tidak
+ada satu pun kolom migrasi yang hilang dari production. Artinya migrasi bukan
+tertinggal versi — ia **tidak pernah menjadi sumber kebenaran**.
+
+#### Kenapa ini 🔴
+
+Kolom yang hanya ada di database **dipakai kode secara aktif**. Diverifikasi:
+
+| Kolom | Rujukan di `server/routes` | Contoh |
+| ----- | :-----------------------: | ------ |
+| `description` | 80 | tersebar |
+| `content` | 26 | `Comments`, `Messages` |
+| `namaModul` | 8 | `QATestCases` |
+| `expectedResult` | 6 | `qa.routes.ts:273, 300, 504` |
+| `executionStatus` | 6 | jalur eksekusi QA |
+| `actionType` | 3 | `ActivityLogs` |
+| `environment` | 3 | `Tasks` |
+
+Jadi **deployment ke database baru akan rusak.** `npm run db:migrate` pada
+database bersih menghasilkan schema yang kekurangan 52 kolom yang dibutuhkan
+kode, dan fitur QA termasuk yang paling parah (9 kolom hilang).
+
+Selama ini tidak ketahuan karena semua pengembangan memakai **satu database
+yang sama** — yang sudah lengkap sejak lama, entah dari sistem migrasi lama atau
+perubahan manual.
+
+#### ⚠️ Gerbang keluar F0 ternyata TIDAK terpenuhi
+
+AUDIT.md baris 418–419 menetapkan gerbang keluar F0:
+
+> `npm run db:migrate` pada database bersih menghasilkan schema yang **identik
+> dengan production**.
+
+F0 dinyatakan `SELESAI` 16 Agu 2026 dengan gerbang LULUS. Berdasarkan
+pengukuran di atas, **syarat itu tidak terpenuhi** — dan kemungkinan besar tidak
+pernah benar-benar diuji pada database bersih, karena satu-satunya cara
+membuktikannya adalah membuat database kosong lalu membandingkannya.
+
+Ini bukan sekadar satu item yang meleset. Ini menunjukkan **gerbang bisa
+dinyatakan lulus tanpa dijalankan**, dan itu jenis kegagalan yang paling
+berbahaya di dokumen ini: ia membuat orang berhenti memeriksa.
+
+**Tindakan:** status F0 diturunkan dari `SELESAI` menjadi `JALAN`, dan gerbang
+keluarnya ditandai belum terverifikasi sampai perbandingan pada database bersih
+benar-benar dilakukan.
+
+#### Dampaknya ke #78
+
+#78 tidak bisa diperbaiki hanya dengan mengganti nama tabel:
+
+| Rencana | Hasilnya |
+| ------- | -------- |
+| Ganti `TaskAttachments` → `Attachments` | **Tetap gagal.** `filename` di database `NOT NULL` tanpa default, dan kode tidak menulisnya → galat `23502` |
+| Andalkan migrasi membuat `Attachments` | **Tetap gagal di database baru.** Migrasi tidak punya `fileType` dan `createdAt`, padahal kode menulis keduanya |
+
+Jadi #78 dan #79 harus diselesaikan bersama, bukan berurutan.
+
+Catatan tambahan: `Attachments` di database hidup punya **18 kolom dengan
+tumpang tindih berat** — `filename`/`fileName`/`name`/`originalName`,
+`mimetype`/`fileType`/`type`, `size`/`fileSize`,
+`uploadedBy`/`uploadedByUserId`/`uploadedByName`, `uploadedAt`/`createdAt`,
+`url`/`fileRef`. Penyakit yang sama dengan #47 pada
+`discussion_point_comments`. Tabel ini berisi **0 baris**, jadi ini kesempatan
+paling murah untuk membereskannya — tidak ada data yang perlu dimigrasikan.
+
+#### Yang perlu diputuskan
+
+1. **Migrasi jadi sumber kebenaran** — tambahkan 52 kolom + 3 tabel yang hilang
+   ke `pg-migrate.ts`, lalu buktikan pada database bersih. Melelahkan tapi lurus.
+2. **Atau hasilkan migrasi dari database hidup** — pakai `npm run db:schema`
+   yang sudah ada (#10) sebagai dasar, lalu rapikan manual.
+
+⚠️ Apa pun pilihannya, **jangan sentuh kolom kembar dulu**. Menyatukan schema
+dan merapikan kolom kembar dalam satu langkah membuat kegagalan sulit
+ditelusuri. Samakan dulu, rapikan belakangan — kecuali `Attachments`, yang
+kosong sehingga aman dirapikan sekalian.
 
 ---
 
