@@ -1,18 +1,25 @@
 import jwt from "jsonwebtoken";
 import db from "../../src/lib/db";
 import { getJwtSecret } from "./auth";
+import { catatPenjaga } from "./daftarPeranRute";
 
 export const verifyProjectAccess = (allowedRoles: string[]) => {
+  // Mendaftarkan diri saat penjaga DIBUAT — yaitu saat modul rute dimuat.
+  // Yang tercatat adalah penjaga yang benar-benar terpasang, bukan yang
+  // terbaca dari teks berkas. Lihat `daftarPeranRute.ts`. Nol pengaruh ke
+  // perilaku: fungsi ini hanya menyimpan salinan daftar perannya.
+  catatPenjaga(allowedRoles);
+
   return async (req: any, res: any, next: any) => {
     let connection;
     try {
       const { projectId, id } = req.params;
-      const targetProjectId = projectId || id; 
-      
+      const targetProjectId = projectId || id;
+
       if (!req.user) {
         const authHeader = req.headers?.authorization;
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-          const token = authHeader.split(' ')[1];
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+          const token = authHeader.split(" ")[1];
           if (token) {
             try {
               const decoded = jwt.verify(token, getJwtSecret()) as any;
@@ -24,10 +31,15 @@ export const verifyProjectAccess = (allowedRoles: string[]) => {
         }
       }
 
-      let userId = req.user?.id || req.user?.uid || req.headers['x-user-id'] || req.query.userId || req.body.userId;
+      let userId =
+        req.user?.id ||
+        req.user?.uid ||
+        req.headers["x-user-id"] ||
+        req.query.userId ||
+        req.body.userId;
 
       if (!userId) {
-        if (allowedRoles.includes('*')) {
+        if (allowedRoles.includes("*")) {
           return next();
         }
         return res.status(403).json({ status: "error", message: "Akses ditolak" });
@@ -35,10 +47,13 @@ export const verifyProjectAccess = (allowedRoles: string[]) => {
 
       connection = await db.getConnection();
 
-      const [uRows]: any = await connection.query("SELECT id, role FROM Users WHERE id = ? OR uid = ?", [userId, userId]);
+      const [uRows]: any = await connection.query(
+        "SELECT id, role FROM Users WHERE id = ? OR uid = ?",
+        [userId, userId]
+      );
       if (uRows.length > 0) {
         userId = uRows[0].id;
-        if (uRows[0].role === 'admin') {
+        if (uRows[0].role === "admin") {
           return next();
         }
       }
@@ -58,10 +73,12 @@ export const verifyProjectAccess = (allowedRoles: string[]) => {
       // keanggotaan di bawah, tempat ia memang sudah didaftarkan.
 
       if (!targetProjectId) return next();
-      
-      const [proj]: any = await connection.query("SELECT ownerId FROM Projects WHERE id = ?", [targetProjectId]);
+
+      const [proj]: any = await connection.query("SELECT ownerId FROM Projects WHERE id = ?", [
+        targetProjectId,
+      ]);
       if (proj.length > 0 && proj[0].ownerId === userId) {
-        return next(); 
+        return next();
       }
 
       const [member]: any = await connection.query(
@@ -70,8 +87,11 @@ export const verifyProjectAccess = (allowedRoles: string[]) => {
       );
 
       if (member.length > 0) {
-        const userRole = (member[0].role || 'viewer').toLowerCase();
-        if (allowedRoles.includes('*') || allowedRoles.map(r => r.toLowerCase()).includes(userRole)) {
+        const userRole = (member[0].role || "viewer").toLowerCase();
+        if (
+          allowedRoles.includes("*") ||
+          allowedRoles.map((r) => r.toLowerCase()).includes(userRole)
+        ) {
           return next();
         }
       }
