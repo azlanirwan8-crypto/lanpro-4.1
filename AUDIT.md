@@ -17,21 +17,25 @@ melanjutkan pekerjaan tanpa perlu menelusuri riwayat percakapan.
 
 **Diperbarui: 16 Agustus 2026, sesudah F7 Two-Tier RBAC TUTUP.** Seluruh pekerjaan ada
 di branch `main` lokal dan **BELUM di-push ke `origin/main`** — tertinggal
-sekitar 190 commit.
+sekitar **279 commit**.
 
-Bacaan tercepat untuk tahu keadaan hari ini: **§0.2 blok F7** (apa yang berubah),
-lalu **§0.4** (tiga keputusan yang menahan sisanya). Rinciannya §19.15–§19.23.
+Bacaan tercepat untuk tahu keadaan hari ini: **§0.2** (apa yang berubah), lalu
+**§0.4** (apa yang menahan sisanya). Rinciannya §19.15–§19.44.
+
+**Papan §1 dipecah tiga:** §1.1 BELUM · §1.2 SELESAI · §1.3 ditahan. Urutan
+kerjanya di **§1.4** — termurah lebih dulu, atas ketetapan pemilik proyek.
+Konsistensinya dijaga `npm run audit:papan`.
 
 ### 0.1 Kondisi aplikasi saat ini
 
-| Cek                 | Nilai                                                       | Perintah                                     |
-| ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
-| `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
-| ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **404 lulus / 43 suite**                                    | `npm test`                                   |
-| Build               | sukses                                                      | `npm run build`                              |
-| Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
-| Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
+| Cek                 | Nilai                                                             | Perintah                                     |
+| ------------------- | ----------------------------------------------------------------- | -------------------------------------------- |
+| `tsc --noEmit`      | 0 error                                                           | `npm run lint`                               |
+| ESLint              | 0 error, 449 warning                                              | `npx eslint src server`                      |
+| Test                | **404 lulus / 43 suite**                                          | `npm test`                                   |
+| Build               | sukses                                                            | `npm run build`                              |
+| Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`)       | `npm run doctor`                             |
+| Aplikasi di browser | layar Sign In tampil normal; 1 error `WebSocket` **belum diukur** | `npm run dev` → buka `http://localhost:3000` |
 
 ⚠️ Port di-hardcode **3000** (`server.ts:62`). Bila port terpakai, server keluar
 sendiri dengan pesan `Port 3000 is already in use`.
@@ -80,6 +84,39 @@ sistem migrasi menulis nama tabel tanpa kutip.
 | 22  | Penjadwal digest akhirnya menyala — sebelumnya di-import tapi tak pernah dipanggil                     |
 | 23  | Fallback token ter-hardcode dibuang; tanpa token, penjadwal melewat dengan pesan jelas                 |
 | 24  | Ditelusuri: **TIDAK ADA backend email sama sekali**. Form Settings hanya `useState` lokal tanpa simpan |
+
+**SESUDAH F7 TUTUP — 17 item lagi, sebagian besar tanpa keputusan pemilik.**
+
+Dikerjakan mengikuti §1.4 (termurah lebih dulu). Papan bergerak **40 → 30 BELUM**.
+
+| Kelompok          | Item                                                                                                                                     |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Lubang otorisasi  | **#94** 7 rute telanjang · **#54** identitas dari header · **#55** RBAC no-op · **#71** project-modules · **#53** logout lintas pengguna |
+| Pintu belakang    | **#91** kredensial admin ter-hardcode + peran diminta dari body                                                                          |
+| Kerapian data     | **#47** 11 kolom → 6 · **#81** `parentAdminId` dibuang · **#20** kode mati DB Explorer · **#57** endpoint health disatukan               |
+| Rantai pasok      | **#77** `react-router-dom` dicabut — 4 moderate → 2                                                                                      |
+| Sesi & kredensial | **#93** token ikut "Remember Me"                                                                                                         |
+| Perkakas          | **#56** crash `pg` saat Jest dibongkar                                                                                                   |
+
+**Temuan baru yang MASIH TERBUKA:** #87 (frontend abai peran proyek — bukan
+lubang keamanan sesudah server menegakkan sendiri) · #92 (peran dibaca dari
+token di 7 tempat, dari database di penjaga proyek; token 2 jam, jadi pencabutan
+hak tertunda).
+
+**Perintah baru sesi ini:**
+
+```bash
+npm run audit:papan            # integritas papan §1 — duplikat, nomor hilang, angka judul
+npm run db:migrasi-peran       # member -> developer, bawaannya uji-coba
+npm run db:hapus-kolom-kembar  # menjatuhkan kolom menganggur, bawaannya uji-coba
+```
+
+⚠️ **Satu regresi yang saya sebabkan dan pemilik proyek yang menemukannya:**
+menghentikan penulisan ganda #47 membuat komentar tampil **tanpa teks dan tanpa
+nama** — hanya jamnya. Sebabnya kolom `commenttext`/`username` terlipat huruf
+kecil sementara frontend membaca `commentText`. Diperbaiki dengan alias eksplisit
+di `SELECT` (§19.39). **Pelajarannya:** test yang memalsukan adaptor DB tidak
+bisa menangkap ketidakcocokan nama kolom nyata.
 
 ### 0.3 Perbaikan di luar fase yang sudah dikerjakan
 
@@ -160,23 +197,38 @@ F1 · F2 · F7 · F11.
 
 #### Yang bisa dikerjakan TANPA keputusan pemilik proyek
 
-Per 16 Agu 2026 sesudah F7: **hampir tidak ada tersisa di F7.** Tahap 1–4 sudah
-dikerjakan sampai batas yang tidak memerlukan keputusan. Yang tersisa di F7
-seluruhnya tertahan tiga pertanyaan di bawah.
+Diukur 16 Agu 2026 dari §1.1: **30 item belum selesai, dan hanya 2 di antaranya
+berstatus `TERBUKA`.** Sisanya `MENUNGGU` jawaban pemilik proyek.
 
-Yang masih bisa jalan tanpa pemilik: **F3** (audit UI), **F8** (jaring
-pengaman), **F12** (konsolidasi desain).
+| #      | Isi                                                                 | Biaya                                     |
+| ------ | ------------------------------------------------------------------- | ----------------------------------------- |
+| **21** | `authStore` & `uiStore` menganggur                                  | rendah                                    |
+| **92** | Peran dibaca dari token vs database — pencabutan hak tertunda 2 jam | rendah, tapi perbaikannya butuh keputusan |
 
-#### Tiga keputusan yang menahan penutupan F7
+Fase yang masih bisa jalan tanpa pemilik: **F3** (audit UI — tetapi butuh sesi
+login pemilik untuk alur TULIS), **F8** (jaring pengaman), **F12** (desain).
 
-| #      | Pertanyaan                                                                                                                                   | Menutup apa                                         |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| **89** | Siapa boleh menyunting proyek & mengubah setelannya? Atau: tata letak dashboard adalah preferensi per-pengguna sehingga keluar dari matriks? | 3 rute terakhir **dan** menaikkan `MODE` ke `TOLAK` |
-| **83** | Department Head — A / B / C                                                                                                                  | pencabutan `head` dari penjaga proyek               |
-| **88** | Bentuk pencatatan God Mode ke `AuditLogs`                                                                                                    | §19.6 aturan 2 secara penuh                         |
+⚠️ **F8 punya sasaran terukur sekarang** (§19.30–§19.31): bukan "tambah test",
+melainkan **naikkan cakupan CABANG `AppContainer`** — 8,26% saat ini. Empat test
+menaikkannya 0,07 poin, jadi §19.31 menyimpulkan komponennya perlu dipecah lebih
+dulu. **Itu menggeser sebagian F10 ke depan F8 dan perlu keputusan Anda.**
 
-**#89 paling murah dan paling membuka** — ia hanya butuh satu baris tambahan di
-§19.5.
+#### Yang menahan, berurutan dari yang paling murah bagi pemilik proyek
+
+| #      | Yang dibutuhkan                                                                    | Membuka                  |
+| ------ | ---------------------------------------------------------------------------------- | ------------------------ |
+| **15** | Cabut 2 Google API key di Google Cloud Console — ±5 menit                          | **menutup F1**           |
+| **46** | Nilai `SSO_ALLOWED_DOMAINS` (kini `gmail.com`)                                     | juga membuka **#30**/F11 |
+| **48** | Konvensi untuk 5 pasang TABEL kembar — sebaiknya ikut ketetapan camelCase (§19.38) | F9                       |
+| **92** | Daftar-cabut · token lebih pendek · baca DB tiap permintaan                        | F7 tutup penuh           |
+| **77** | exceljs: turunkan · ganti pustaka · terima risiko                                  | F8                       |
+| **30** | Konfirmasi D1b & D3b (§11.1)                                                       | **F11 — jalur rilis**    |
+
+**#15 paling murah dan satu-satunya yang menutup sebuah fase.**
+
+⚠️ **#15 TIDAK boleh ditandai selesai tanpa pernyataan pemilik proyek.**
+Ia hanya bisa dikerjakan di Google Cloud Console; menandainya atas dasar
+"sudah diminta" adalah persis kegagalan §13.14.
 
 #### F6 masih DITAHAN
 
@@ -233,16 +285,21 @@ Ini bukan preferensi gaya; semuanya lahir dari insiden nyata di repo ini.
 
 ### 0.6 Jebakan teknis khas repo ini
 
-| Jebakan                              | Akibat bila terlewat                                                                                                                                                        |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Cek rute lewat status **401**        | TIDAK VALID — auth berjalan sebelum handler 404, rute palsu pun menjawab 401. Pakai perbandingan **himpunan rute**                                                          |
-| Menghitung **total** error `tsc`     | Pakai `diff` baris-per-baris; sudah **5×** menangkap simbol terlewat                                                                                                        |
-| `tsconfig.json` **tanpa `strict`**   | Penyempitan tipe lewat diskriminan **boolean** tidak bekerja. Pakai diskriminan **string** (`{hasil: "berhasil"} \| {hasil: "gagal"}`)                                      |
-| Migrasi otomatis saat boot           | Hanya mencatat **warning** bila gagal. Pernah timeout dan tabel tidak terbentuk sementara server menyala seolah sehat — **verifikasi ke `information_schema`**              |
-| Kunci token localStorage             | **`lanpro_jwt_token`**, bukan `'token'`                                                                                                                                     |
-| Console peramban saat HMR            | Vite menyisakan error dari versi berkas yang sedang diedit. **Verifikasi di tab bersih**, bukan setelah hot-reload                                                          |
-| Menambah test                        | Periksa jumlahnya benar-benar bertambah — Prettier pernah membuat penyisipan gagal diam-diam                                                                                |
-| Cek tabel lewat `information_schema` | Adaptor MENCEGAT kueri itu dan mengembalikan `{tableName, rowCount, sizeBytes}` — BUKAN `table_name`. Memakai `table_name` menghasilkan `undefined` untuk SEMUA baris (#78) |
+| Jebakan                               | Akibat bila terlewat                                                                                                                                                                                                                             |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Cek rute lewat status **401**         | TIDAK VALID — auth berjalan sebelum handler 404, rute palsu pun menjawab 401. Pakai perbandingan **himpunan rute**                                                                                                                               |
+| Menghitung **total** error `tsc`      | Pakai `diff` baris-per-baris; sudah **5×** menangkap simbol terlewat                                                                                                                                                                             |
+| `tsconfig.json` **tanpa `strict`**    | Penyempitan tipe lewat diskriminan **boolean** tidak bekerja. Pakai diskriminan **string** (`{hasil: "berhasil"} \| {hasil: "gagal"}`)                                                                                                           |
+| Migrasi otomatis saat boot            | Hanya mencatat **warning** bila gagal. Pernah timeout dan tabel tidak terbentuk sementara server menyala seolah sehat — **verifikasi ke `information_schema`**                                                                                   |
+| Kunci token localStorage              | **`lanpro_jwt_token`**, bukan `'token'`                                                                                                                                                                                                          |
+| Console peramban saat HMR             | Vite menyisakan error dari versi berkas yang sedang diedit. **Verifikasi di tab bersih**, bukan setelah hot-reload                                                                                                                               |
+| Menambah test                         | Periksa jumlahnya benar-benar bertambah — Prettier pernah membuat penyisipan gagal diam-diam                                                                                                                                                     |
+| Nama kolom **terlipat huruf kecil**   | Identifier tanpa kutip dilipat PostgreSQL. Satu tabel bisa memuat TIGA gaya sekaligus (`pointid` · `"userId"` · `point_id`). `SELECT *` mengembalikannya apa adanya, dan frontend yang membaca camelCase diam-diam mendapat `undefined` (§19.39) |
+| SQL di dalam template literal         | **Backtick di dalam komentar SQL pun memecah berkasnya.** Tertangkap `tsc`, tetapi mudah membingungkan                                                                                                                                           |
+| Bukti NEGATIF dari keluaran tersaring | `grep` atas berkas yang SUDAH difilter selalu menemukan nol, dan nol itu terbaca seperti "bersih" (§19.35)                                                                                                                                       |
+| Item yang tampak gugur sendiri        | Kode lamanya pensiun ≠ cacatnya hilang. #54 sudah tersalin ke penjaga baru tanpa ada test yang menangkapnya (§19.32)                                                                                                                             |
+| Test himpunan dari daftar PENJAGA     | Ia tidak akan pernah menemukan rute yang **tidak punya** penjaga. Butuh pendataan dari daftar RUTE (§19.41)                                                                                                                                      |
+| Cek tabel lewat `information_schema`  | Adaptor MENCEGAT kueri itu dan mengembalikan `{tableName, rowCount, sizeBytes}` — BUKAN `table_name`. Memakai `table_name` menghasilkan `undefined` untuk SEMUA baris (#78)                                                                      |
 
 ### 0.7 Peta berkas SSO
 
