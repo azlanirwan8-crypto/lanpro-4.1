@@ -508,6 +508,8 @@ router.put(
   verifyProjectAccess(["admin", "manager", "head"]),
   async (req, res) => {
     let connection;
+    // #64 — penanda pemilik transaksi; lihat catatan di blok catch di bawah.
+    let transaksiTerbuka = false;
     try {
       const { projectId } = req.params;
       const { orderedIds } = req.body;
@@ -517,6 +519,7 @@ router.put(
 
       connection = await db.getConnection();
       await connection.beginTransaction();
+      transaksiTerbuka = true;
 
       for (let i = 0; i < orderedIds.length; i++) {
         await connection.query("UPDATE Tasks SET orderIndex = ? WHERE id = ? AND projectId = ?", [
@@ -527,7 +530,7 @@ router.put(
       }
 
       await connection.commit();
-      connection.release();
+      transaksiTerbuka = false;
 
       const io = req.app.get("io");
       if (io) {
@@ -535,12 +538,27 @@ router.put(
       }
       res.json({ status: "success", message: "Tasks reordered successfully" });
     } catch (error: any) {
-      if (connection) {
-        await connection.rollback();
-        connection.release();
+      // #64 — DULU `catch` memanggil rollback() DAN release() tanpa syarat,
+      // sementara jalur sukses sudah melepas koneksinya sendiri tepat setelah
+      // commit. Bila ada yang gagal SESUDAH commit — misalnya pemancaran socket
+      // di atas — koneksi yang sudah kembali ke pool akan di-rollback dan
+      // dilepas ulang, dan rollback itu bisa mengenai transaksi milik
+      // permintaan lain yang kebetulan sudah memakai koneksi tersebut.
+      //
+      // Sekarang rollback hanya berjalan bila transaksinya memang masih milik
+      // kita, dan pelepasan dipusatkan di satu tempat: `finally`.
+      if (connection && transaksiTerbuka) {
+        try {
+          await connection.rollback();
+        } catch {
+          /* rollback gagal pun koneksi tetap harus dilepas */
+        }
+        transaksiTerbuka = false;
       }
       console.error("Reorder tasks error:", error);
       res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    } finally {
+      if (connection) connection.release();
     }
   }
 );
