@@ -136,6 +136,9 @@ Ini bukan preferensi gaya; semuanya lahir dari insiden nyata di repo ini.
 5. **Jangan pernah memasukkan kredensial** — minta pemilik proyek yang login.
 6. **Satu branch per item**, merge ke `main`, lapor sebelum lanjut.
 7. **Laporkan apa adanya.** Yang belum diuji ditulis "belum terverifikasi".
+8. **Baca §18 sebelum mengklaim apa pun soal kepatuhan.** Audit ini BUKAN audit
+   ISO 27001 dan tidak akan menjadi ISO 27001 hanya dengan dirapikan. §18 memuat
+   pemetaan OWASP/CWE, rubrik keparahan, batas lingkup, dan klasifikasi data.
 
 ### 0.6 Jebakan teknis khas repo ini
 
@@ -217,7 +220,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 74 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 75 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -281,6 +284,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 73  | `PUT .../dashboard-layout` menyelipkan `"*"` di daftar peran sehingga penjaganya korslet |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §13.11 |
 | 74  | 7 pengambil data tanpa penjaga respons basi — data proyek lama menimpa proyek baru      |  **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §13.12 |
 | 75  | Angka §13.1 & ARCHITECTURE drift lagi: 21 `useState` aktualnya 11, 104 rute aktualnya 119 |  **F0**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §13.12 |
+| 76  | Otorisasi tidak deny-by-default — akar 56% temuan F2 (14 dari 25 masuk OWASP A01)        |  **F7**  | 🔴  | Sedang        | Ya (blokir production)  | `MENUNGGU` keputusan     | §18.3  |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -2667,5 +2671,219 @@ menahan commit.
 | Menambah test                    | **Periksa jumlahnya bertambah** — pernah gagal diam-diam karena Prettier                                               |
 | Berhenti di build hijau          | Build & test **bukan** bukti aplikasi jalan (§15.3)                                                                    |
 | Kunci token localStorage         | **`lanpro_jwt_token`**, bukan `'token'` (kesalahan notebook-lm, item #18)                                              |
+
+---
+
+## §18 STANDAR & KEPATUHAN — posisi audit ini terhadap acuan internasional
+
+Ditulis 16 Agu 2026 atas pertanyaan pemilik proyek: **apakah audit ini sudah
+mengikuti ISO 27001 atau standar internasional lain?**
+
+### 18.1 Jawaban jujurnya: BELUM — dan sebagian memang salah kategori
+
+**ISO/IEC 27001 bukan standar audit kode.** Ia standar **ISMS** (*Information
+Security Management System*) — sistem manajemen tingkat organisasi. Yang diaudit
+di sana adalah kebijakan, peran, manajemen risiko, pelatihan, kontrol pemasok,
+respons insiden, dan tinjauan manajemen. Sertifikasinya diterbitkan lembaga
+terakreditasi, bukan dihasilkan dari membaca kode.
+
+Jadi kalimat "AUDIT.md sudah ISO 27001" **tidak akan pernah benar**, sebaik apa
+pun dokumen ini ditulis. Yang bisa benar: temuan teknis di sini menjadi **bukti**
+untuk sebagian kontrol Annex A bila suatu hari ISMS dibangun.
+
+Yang sebenarnya paling mendekati isi dokumen ini:
+
+| Acuan | Apa itu | Posisi AUDIT.md |
+| ----- | ------- | --------------- |
+| **OWASP ASVS 4.0** | Standar verifikasi keamanan aplikasi — syarat yang bisa diuji per fitur | Paling relevan. Dokumen ini **belum** memetakan diri ke sana, dan belum menyatakan menargetkan Level berapa |
+| **OWASP Top 10 (2021)** | Sepuluh kategori risiko aplikasi web terlazim | Belum dipetakan. Pemetaannya di §18.3 memunculkan temuan sistemik yang tidak terlihat per item |
+| **CWE** | Taksonomi kelemahan perangkat lunak | Belum dipakai. Tanpa ini temuan sulit dibandingkan lintas proyek atau lintas alat |
+| **CVSS v3.1** | Skor keparahan baku 0–10 beserta vektornya | Belum dipakai. Skala 🔴/🟠/🟡 di sini buatan sendiri |
+| **NIST SSDF (SP 800-218)** | Praktik pengembangan perangkat lunak aman | Sebagian besar sudah dijalankan tanpa disebut namanya — lihat §18.2 |
+| **ISO 27001:2022 Annex A** | 93 kontrol organisasi & teknologi | Hanya sebagian kecil kontrol A.8 (teknologi) yang tersentuh |
+
+### 18.2 Yang SUDAH melampaui audit kebanyakan — jangan dibongkar
+
+Ini bukan pujian; ini catatan agar praktik berikut tidak hilang saat dokumen
+dirapikan mengikuti format standar. Banyak laporan audit formal justru **tidak**
+punya ini:
+
+| Praktik di sini | Padanan standarnya |
+| --------------- | ------------------ |
+| Tiap temuan menyertakan berkas & nomor baris | *Evidence traceability* — ASVS & ISO 27001 A.8.8 |
+| Perbaikan wajib disertai test yang **dibuktikan MERAH** terhadap kode lama | Melampaui ASVS. Menutup celah "perbaikan yang tidak memperbaiki apa pun" |
+| Pembuktian dijalankan terhadap sistem hidup, bukan disimpulkan | *Dynamic verification* (DAST) — disyaratkan ASVS untuk level tinggi |
+| Kolom "BELUM terbukti" ditulis eksplisit di tiap kartu verifikasi | *Scope limitation statement* — wajib di laporan audit formal, sering dilewat |
+| Larangan mengubah source untuk pembuktian (§0.5 no. 4) | *Audit integrity* — bukti tidak boleh lahir dari lingkungan yang dimanipulasi |
+| Riwayat per item tidak pernah dihapus, hanya diubah statusnya | *Audit trail* — ISO 27001 A.5.28 |
+| Angka diukur ulang dengan perintah yang ikut ditulis (§9) | *Repeatability* |
+
+### 18.3 Pemetaan temuan F2 ke OWASP Top 10 & CWE
+
+Dikerjakan 16 Agu 2026 atas 25 temuan F2 (#49–#74; #56 masuk F8, #75 masuk F0).
+
+| # | Kategori OWASP 2021 | CWE | Sev |
+| - | ------------------- | --- | :-: |
+| 49 | A01 Broken Access Control | CWE-284 Improper Access Control | 🔴 |
+| 50 | A07 Identification & Authentication Failures | CWE-306 Missing Authentication for Critical Function | 🔴 |
+| 51 | A02 Cryptographic Failures | CWE-200 Exposure of Sensitive Information | 🔴 |
+| 52 | A07 | CWE-307 Improper Restriction of Excessive Authentication Attempts | 🔴 |
+| 53 | A01 | CWE-639 Authorization Bypass Through User-Controlled Key | 🟠 |
+| 54 | A01 | CWE-290 Authentication Bypass by Spoofing | 🟠 |
+| 55 | A01 | CWE-284 | 🟡 |
+| 57 | — (operasional, bukan keamanan) | — | 🟡 |
+| 58 | A05 Security Misconfiguration | CWE-200 | 🟠 |
+| 59 | A01 | CWE-359 Exposure of Private Personal Information | 🔴 |
+| 60 | A04 Insecure Design | CWE-459 Incomplete Cleanup | 🔴 |
+| 61 | A04 | CWE-662 Improper Synchronization | 🟠 |
+| 62 | A04 | CWE-544 Missing Standardized Error Handling | 🟠 |
+| 63 | A04 | CWE-544 | 🟠 |
+| 64 | A04 | CWE-459 | 🟡 |
+| 65 | A04 | CWE-362 Race Condition | 🔴 |
+| 66 | A01 | CWE-285 Improper Authorization | 🔴 |
+| 67 | A01 | CWE-200 / CWE-548 | 🔴 |
+| 68 | A01 | CWE-306 | 🔴 |
+| 69 | A01 | CWE-639 (IDOR) | 🔴 |
+| 70 | A01 | CWE-639 | 🔴 |
+| 71 | A01 | CWE-285 | 🟠 |
+| 72 | A01 | CWE-285 | 🟠 |
+| 73 | A01 | CWE-284 | 🟡 |
+| 74 | A04 | CWE-362 | 🟠 |
+
+#### Temuan sistemik yang HANYA terlihat setelah dipetakan
+
+**14 dari 25 temuan (56%) jatuh ke A01 Broken Access Control.** Tidak satu pun
+item menyatakan ini, karena tiap item hanya melihat dirinya sendiri.
+
+Artinya masalah LanPro **bukan** dua puluh lima kekeliruan terpisah, melainkan
+**satu kelemahan struktural**: tidak ada satu tempat pun yang menjadi sumber
+kebenaran untuk otorisasi. Penjaga ditempelkan per rute, dengan tangan, dan
+karena itu bisa lupa ditempel (#68, #70, #71), ditempel terlalu longgar (#66,
+#72), atau ditulis benar tetapi korslet oleh satu karakter (#73).
+
+Selama pola itu bertahan, rute ke-120 akan mengulanginya. Perbaikan per item
+tidak menutupnya — yang menutupnya adalah **otorisasi yang menolak secara bawaan
+(deny-by-default)**, sehingga rute tanpa penjaga eksplisit otomatis DITOLAK alih-
+alih otomatis lolos. Diusulkan sebagai item baru **#76**.
+
+### 18.4 Kesenjangan terhadap standar — dan cara menutupnya
+
+| Kesenjangan | Akibatnya sekarang | Penutupnya |
+| ----------- | ------------------ | ---------- |
+| Skala 🔴/🟠/🟡 tidak punya rubrik | §1 mendefinisikan severity dari **biaya bisnis** ("menghambat production"), bukan dampak keamanan. Akibatnya #57 (operasional) dan #55 (kontrol akses) sama-sama 🟡 padahal beda total | Rubrik §18.5 |
+| Tidak ada pernyataan dampak C-I-A | Tidak terbaca mana yang membocorkan data, merusak data, atau mematikan layanan | Kolom C/I/A pada §18.5 |
+| Tidak ada CVSS | Tidak bisa dibandingkan dengan temuan alat lain atau vendor | Beri vektor CVSS v3.1 saat ada penilai yang kompeten. **Jangan dikarang** — skor tanpa dasar lebih buruk daripada tanpa skor |
+| Tidak ada definisi lingkup & aset | Tidak jelas apa yang TIDAK diaudit | §18.6 |
+| Tidak ada catatan penerimaan risiko | Item `MENUNGGU` menggantung tanpa siapa/kapan | §18.7 |
+| Tidak ada klasifikasi data | #59 membocorkan nomor telepon & email — tidak tercatat bahwa itu data pribadi | §18.8 |
+| Target ASVS tidak dinyatakan | Tidak ada tolok "kapan cukup" | Tetapkan ASVS Level 1 dulu, Level 2 sebelum production |
+
+### 18.5 Rubrik keparahan — menggantikan penilaian intuitif
+
+Severity ditetapkan dari **dampak** dan **keterjangkauan**, bukan dari perasaan
+maupun dari biaya perbaikannya.
+
+| Sev | Syarat | Contoh dari temuan nyata |
+| :-: | ------ | ------------------------ |
+| 🔴 **Kritis** | Bisa dieksploitasi **tanpa kredensial sah**, ATAU membocorkan data pribadi, ATAU menghilangkan/merusak data pengguna tanpa jejak | #50 socket anonim menerima PII admin · #65 suntingan hilang senyap · #67 berkas terbaca tanpa login |
+| 🟠 **Tinggi** | Butuh akun sah tetapi melampaui hak yang seharusnya, ATAU merusak keandalan pada kondisi yang wajar terjadi | #66 `viewer` menghapus data · #74 data proyek lain menimpa layar |
+| 🟡 **Sedang** | Belum bisa dieksploitasi hari ini, tetapi menghapus lapisan pertahanan atau menjadi ranjau bagi perubahan berikutnya | #55 RBAC mati senyap bila nama param berubah · #73 `"*"` terselip |
+
+**Dampak C-I-A** ditulis bersama severity mulai temuan #76 dan seterusnya:
+**C** kerahasiaan · **I** keutuhan · **A** ketersediaan.
+
+Bila severity dari rubrik ini berbeda dengan penilaian lama, **rubrik yang
+menang** — dan perubahannya dicatat, bukan diam-diam diganti.
+
+### 18.6 Lingkup audit — dan yang TEGAS di luarnya
+
+Wajib dibaca sebelum menyimpulkan "LanPro sudah aman".
+
+**Di dalam lingkup** (sudah dikerjakan): kode aplikasi di `server/`, `src/`,
+`api/`; 119 rute HTTP; handshake & event Socket.IO; alur unggah–simpan–tampil
+berkas; RBAC; transaksi basis data; schema DB dari database hidup.
+
+**DI LUAR lingkup — belum pernah diperiksa sama sekali:**
+
+| Area | Kenapa penting |
+| ---- | -------------- |
+| Konfigurasi & pengerasan Neon PostgreSQL | Enkripsi saat diam, retensi cadangan, pembatasan IP |
+| Konfigurasi platform Vercel | Variabel lingkungan, header, log |
+| Rantai pasok dependensi | `npm audit`, SBOM, dependensi tertinggal versi |
+| Keamanan pipeline CI/CD | Siapa boleh merge, siapa memegang rahasia |
+| Rotasi & penyimpanan rahasia | `JWT_SECRET` tidak pernah dirotasi; prosedurnya tidak ada |
+| Ketahanan cadangan & pemulihan | Belum pernah diuji pulih |
+| Pencatatan & pemantauan keamanan | `AuditLogs` ada, tetapi tidak ada yang membacanya |
+| Uji penetrasi pihak ketiga | Belum pernah |
+| Proses organisasi | Respons insiden, pelatihan, kontrol pemasok — seluruh wilayah ISO 27001 |
+
+⚠️ Audit ini memeriksa **kode**. Sistem yang kodenya bersih tetap bisa jebol
+lewat kredensial yang bocor, dependensi bermasalah, atau cadangan yang tidak
+pernah teruji.
+
+### 18.7 Catatan penerimaan risiko
+
+Item berstatus `MENUNGGU` berarti **risikonya masih hidup dan sedang ditanggung**
+— bukan berarti sudah beres. Mulai sekarang tiap item `MENUNGGU` mencatat siapa
+yang menanggung dan sejak kapan.
+
+| # | Risiko yang sedang ditanggung | Ditanggung oleh | Sejak |
+| - | ----------------------------- | --------------- | ----- |
+| 69 | Notifikasi palsu atas nama orang lain — jalur phishing di dalam aplikasi | Pemilik proyek | 16 Agu 2026 |
+| 70 | Rapat lintas proyek bisa dibaca, direkam-ulang, dibatalkan | Pemilik proyek | 16 Agu 2026 |
+| 71 | Modul proyek bisa di-CRUD lintas proyek | Pemilik proyek | 16 Agu 2026 |
+| 72 | `viewer` bisa membuat & mengubah data proyek | Pemilik proyek | 16 Agu 2026 |
+| 73 | Penjaga `dashboard-layout` korslet | Pemilik proyek | 16 Agu 2026 |
+| 74 | Data proyek lama menimpa layar proyek baru | Pemilik proyek | 16 Agu 2026 |
+| 2 | Berkas unggahan hilang tiap deploy (driver `s3` belum diuji) | Pemilik proyek | 15 Agu 2026 |
+| 15 | Dua Google API key lama belum dicabut | Pemilik proyek | 15 Agu 2026 |
+| 46 | `SSO_ALLOWED_DOMAINS=gmail.com` — siapa pun ber-Gmail bisa mendaftar | Pemilik proyek | 15 Agu 2026 |
+
+Kolom "sampai kapan" sengaja dikosongkan: **tidak boleh diisi oleh siapa pun
+selain pemilik proyek.**
+
+### 18.8 Klasifikasi data — dasar kepatuhan UU PDP
+
+LanPro menyimpan dan menampilkan data pribadi. Ini belum pernah dinyatakan di
+mana pun, padahal menentukan bobot beberapa temuan.
+
+| Data | Klasifikasi | Tersimpan di | Temuan terkait |
+| ---- | ----------- | ------------ | -------------- |
+| Nama, email, nomor telepon | **Data pribadi** | `Users` | **#59** — bocor ke socket anonim |
+| Jabatan, departemen | Data pribadi | `Users` | #59 |
+| Matriks permission | Internal sensitif | `Users` | #59 |
+| Foto profil | Data pribadi | `uploads/` | #67 — sengaja publik atas keputusan pemilik |
+| Isi rapat, rekaman, notulen | Rahasia bisnis | `Meetings` | **#70** |
+| Dokumen & bukti QA | Rahasia bisnis | `Documents`, `uploads/` | **#67** |
+| Kata sandi | Rahasia — di-hash | `Users` | #52 |
+
+⚠️ **Perlu perhatian pemilik proyek, bukan nasihat hukum.** Indonesia memiliki
+UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi. Temuan #59 adalah
+kebocoran data pribadi (nomor telepon & email) ke pihak tak terautentikasi, dan
+sudah diperbaiki 16 Agu 2026 sebelum rilis production. Bila kejadian serupa
+terjadi **setelah** rilis, ada kewajiban pemberitahuan yang berlaku. Silakan
+periksakan ke penasihat hukum — dokumen ini tidak berwenang menyimpulkannya.
+
+### 18.9 Yang harus dikerjakan supaya benar-benar bisa mengaku "berstandar"
+
+Urut dari yang paling murah dan paling berdampak. **Tidak satu pun ini membuat
+LanPro tersertifikasi ISO 27001** — itu menuntut ISMS dan lembaga terakreditasi.
+Yang ini membuat klaim "mengikuti praktik yang diakui" menjadi **jujur dan bisa
+dibuktikan**.
+
+| Langkah | Isi | Butuh pemilik? |
+| ------- | --- | :------------: |
+| 1 | Tetapkan target **OWASP ASVS Level 1**, lalu Level 2 sebelum production. Tanpa target, tidak ada definisi "cukup" | Ya — 1 keputusan |
+| 2 | Kerjakan **#76** (otorisasi deny-by-default). Menutup akar 56% temuan sekaligus | Ya — izin arsitektur |
+| 3 | Jalankan `npm audit` + hasilkan SBOM, masukkan ke gerbang CI | — |
+| 4 | Terapkan rubrik §18.5 ke seluruh temuan lama, catat yang berubah | — |
+| 5 | Prosedur rotasi rahasia — `JWT_SECRET` belum pernah dirotasi | Ya |
+| 6 | Uji pulih dari cadangan, sekali, dan catat hasilnya | Ya |
+| 7 | Tetapkan siapa membaca `AuditLogs` dan seberapa sering | Ya |
+| 8 | Baru setelah itu: pertimbangkan uji penetrasi pihak ketiga | Ya — biaya |
+
+**Jangan lakukan:** menempelkan kata "ISO 27001" di dokumen ini tanpa ISMS.
+Klaim kepatuhan yang tidak berdasar lebih berbahaya daripada mengaku belum
+patuh — ia membuat orang berhenti memeriksa.
 
 ---
