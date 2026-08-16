@@ -28,7 +28,7 @@ lalu **§0.4** (tiga keputusan yang menahan sisanya). Rinciannya §19.15–§19.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **367 lulus / 37 suite**                                    | `npm test`                                   |
+| Test                | **372 lulus / 38 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -289,7 +289,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 38 BELUM · 50 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 38 BELUM · 51 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -304,7 +304,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
 **Sebaran per fase:** F1 2 · F2 10 · F3 1 · F6 6 · F7 6 · F8 5 · F9 2 · F10 3 · F11 1 · F12 2
 
-**Masih menahan rilis production:** #30 · #46 · #87
+**Masih menahan rilis production:** #30 · #46
 
 | #   | Temuan                                                                                    |  Fase   | Sev | Biaya         |   Blokir modul baru?    | Status                  | Detail |
 | --- | ----------------------------------------------------------------------------------------- | :-----: | :-: | ------------- | :---------------------: | ----------------------- | ------ |
@@ -345,9 +345,9 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 83  | `Users.department` & `Users.position` TIDAK fungsional — rancangan §19.4 belum bisa jalan | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.13 |
 | 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)      | **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)      | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
-| 87  | `effectiveRole` membawa DUA kosakata peran — system role & project role dalam satu nilai  | **F7**  | 🔴  | Sedang        | Ya (blokir production)  | `TERBUKA`               | §19.15 |
+| 87  | `effectiveRole` DIKOREKSI — ia hanya bawa peran sistem; frontend abai peran proyek        | **F7**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §19.27 |
 
-### 1.2 SUDAH SELESAI — 50 item
+### 1.2 SUDAH SELESAI — 51 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -406,6 +406,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 70  | ~~Rute `/api/v1/meetings/:id*` tanpa penjaga proyek~~ dijaga lewat entitas rapat              |     **F2**     | 🔴  | Rendah        | Ya (blokir production) | `SELESAI` 16 Agu | §13.11 |
 | 69  | A01                                                                                           | CWE-639 (IDOR) | 🔴  |
 | 70  | A01                                                                                           |    CWE-639     | 🔴  |
+| 91  | Kredensial admin ter-hardcode di frontend + peran diminta dari body saat mendaftar            |     **F7**     | 🔴  | Rendah        | Ya (blokir production) | `SELESAI` 16 Agu | §19.27 |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -4878,3 +4879,76 @@ data kotor. Pengirim kini diambil dari token; nilai di body diabaikan.
 instruksi. #69 sudah tercatat sejak gelombang 5 dengan rumusan yang salah, dan
 menambalnya sesuai rumusan itu akan menghasilkan kerusakan yang tampak seperti
 perbaikan.
+
+### 19.27 #87 dikoreksi, dan #91 yang ditemukan karenanya
+
+#### Koreksi #87 — saya menyimpulkan tanpa menelusuri
+
+§19.15 mencatat `effectiveRole` membawa **dua kosakata peran**, dengan alasan
+`ProjectMembers.role` sampai ke `hasPermission`. Waktu itu kompilator menandai
+`normRole === 'manager'` sebagai mustahil, dan saya menyimpulkan perbandingan
+itu hidup lewat peran proyek.
+
+**Ditelusuri sekarang, dan itu keliru.** Keempat penetapan `setUserRole`
+(`AppContainer:489`, `AppContainer:526`, `useAuth:330`, `useAuth:495`) semuanya
+berasal dari `Users.role` — peran **sistem**. `effectiveRole` tidak pernah
+membawa peran proyek.
+
+Yang benar-benar salah karena itu **berbeda dari yang saya catat**: frontend
+sama sekali **tidak mempertimbangkan peran proyek** saat menggerbang antarmuka.
+Seorang Project Manager melihat UI yang digerbang oleh peran SISTEM-nya
+(`user`), bukan oleh perannya di proyek. Akibatnya UI bisa menyembunyikan yang
+sebenarnya diizinkan server, dan menampilkan yang sebenarnya ditolak.
+
+Sesudah tahap 4, ini **bukan lagi lubang keamanan** — server menegakkan sendiri
+dan tidak memercayai frontend. Severitasnya diturunkan 🔴 → 🟠 dan penanda
+"blokir production" dicabut. Perbaikan sesungguhnya adalah §19.8 **tahap 5b**:
+`can(action, modul, projectId)` membaca matriks yang sama dengan server.
+
+**Pelajaran, dan ini kedua kalinya hari ini** (lihat #69 di §19.26): catatan
+temuan adalah HIPOTESIS. Yang saya tulis sendiri pun harus ditelusuri sebelum
+ditindaklanjuti.
+
+#### #91 — dua pintu belakang yang ditemukan justru dari koreksi itu
+
+Keduanya muncul saat menelusuri klaim yang keliru di atas.
+
+**(a) Kredensial admin ter-hardcode di frontend.**
+
+```ts
+if (username === "admin" && (password === "admin" || password === "admin123"))
+```
+
+Mendaftarkan akun ber-`role: "admin"` dengan id tetap `admin-fixed-id`.
+Kredensialnya tertulis di berkas sumber, artinya **ikut terkirim ke setiap
+pengunjung lewat bundel** — siapa pun yang membuka devtools membacanya.
+
+**(b) Peran DIMINTA dari body pada endpoint pendaftaran PUBLIK.**
+
+```ts
+const insertRole = role || "user";
+```
+
+Endpoint pendaftaran sengaja berada di luar gerbang autentikasi `/api/*` —
+kalau tidak, tidak ada yang bisa mendaftar. Artinya siapa pun **tanpa akun**
+bisa mendaftar sambil meminta `role: "admin"`.
+
+Statusnya memang dipaksa `PENDING` sehingga ia belum bisa masuk. Tetapi yang
+menyetujui melihat **daftar tunggu**, bukan kolom peran — dan satu klik
+"approve" menjadikannya Administrator sistem, lengkap dengan **God Mode lintas
+proyek** (§19.6).
+
+Endpoint itu tetap dipakai panel admin untuk menambah pengguna berperan, jadi
+`role` **tidak dibuang**; ia hanya dihormati bila pemanggilnya terbukti
+Administrator. **Peran diberikan, tidak diminta.**
+
+Dicabut juga `usernameLower === "admin"`, yang memberi seluruh antarmuka admin
+berdasarkan **nama**, bukan peran. Identitas bukan otorisasi.
+
+#### Kenapa keduanya luput dari audit sebelumnya
+
+Keduanya ada di `useAuth.ts` dan `auth.routes.ts` — dua berkas yang sudah
+berkali-kali dibaca sepanjang F5 (SSO). Yang membuatnya luput bukan berkasnya
+tak tersentuh, melainkan **tidak ada yang mencarinya**: audit sebelumnya
+menelusuri rute dan penjaga, sedangkan keduanya bersembunyi di dalam alur
+masuk yang "sudah bekerja".
