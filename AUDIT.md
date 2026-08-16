@@ -355,7 +355,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend               | **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik      | §0.4   |
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — celah daftar, DAN membatalkan asumsi kuota F11           | **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik      | §0.4   |
-| 47  | `discussion_point_comments` punya KOLOM KEMBAR camelCase + snake_case                      | **F9**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
+| 47  | `discussion_point_comments` 5 pasang kolom kembar, KEDUANYA terisi — butuh keputusan       | **F9**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §0.3   |
 | 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401        | **F2**  | ⚪  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.6  |
 | 71  | `project-modules` POST/PUT/DELETE tanpa penjaga — CRUD modul lintas proyek                 | **F2**  | 🟠  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan    | §13.11 |
 | 74  | 7 pengambil data tanpa penjaga respons basi — data proyek lama menimpa proyek baru         | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §13.12 |
@@ -5461,3 +5461,55 @@ Tiga pilihan, dan ketiganya milik pemilik proyek:
 Ambang blokir gerbang tetap `high`, jadi `npm run audit:deps` tetap LULUS pada
 pilihan mana pun. Yang diputuskan di sini adalah sikap terhadap risiko, bukan
 kelulusan gerbang.
+
+### 19.37 #47 — divalidasi ke database hidup, dan hasilnya MENGHENTIKAN perbaikan
+
+Diukur langsung dari Neon, 16 Agu 2026. Item ini menyebut "kolom kembar";
+kenyataannya lebih spesifik dan lebih menentukan.
+
+#### Lima pasang, dan KEDUANYA terisi penuh
+
+| Pasangan                       | NOT NULL                 | Terisi (dari 4 baris) |
+| ------------------------------ | ------------------------ | --------------------- |
+| `pointid` / `point_id`         | camel: ya · snake: tidak | **4 / 4**             |
+| `userId` / `user_id`           | keduanya nullable        | **4 / 4**             |
+| `username` / `user_name`       | keduanya nullable        | **4 / 4**             |
+| `commenttext` / `comment_text` | camel: ya · snake: tidak | **4 / 4**             |
+| `createdAt` / `created_at`     | camel: ya · snake: tidak | **4 / 4**             |
+
+Sebabnya terlihat di `discussion-points.routes.ts:236` — `INSERT` menulis
+**kesebelas kolom sekaligus**, memasukkan nilai yang sama dua kali:
+
+```sql
+INSERT INTO discussion_point_comments
+  (id, pointId, point_id, userId, user_id, userName, user_name,
+   commentText, comment_text, createdAt, created_at)
+```
+
+#### Kenapa ini TIDAK boleh langsung diperbaiki
+
+Kode **membaca campuran keduanya**: `point_id`, `comment_text`, `user_name`,
+`created_at` dari sisi snake, dan `createdAt` **7 kali** dari sisi camel.
+
+Menjatuhkan salah satu sisi akan mematahkan pembacaan di sisi lain. Menjatuhkan
+sisi camel juga menabrak batasan `NOT NULL` yang justru ada di sisi itu.
+
+Ini bukan pekerjaan "hapus kolom duplikat", melainkan **penyeragaman pembacaan
+lebih dulu, baru penghapusan** — dan penghapusan kolom pada data produksi
+bersifat merusak dan tidak bisa dibatalkan.
+
+#### Yang dibutuhkan dari pemilik proyek
+
+Satu keputusan: **sisi mana yang menjadi sumber kebenaran.**
+
+| Pilihan        | Pertimbangan                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------- |
+| **snake_case** | Konvensi PostgreSQL; tetapi `NOT NULL` ada di sisi camel, jadi batasannya harus dipindahkan |
+| **camelCase**  | Sudah memegang `NOT NULL` dan dibaca 7 kali; tetapi menyimpang dari tabel lain              |
+
+Sesudah dijawab, urutan kerjanya: seragamkan pembacaan → seragamkan penulisan →
+verifikasi 4 baris utuh → baru jatuhkan kolom yang menganggur.
+
+⚠️ **Kaitan dengan #48.** §0.2 mencatat lima pasang TABEL kembar akibat satu
+sistem migrasi menulis nama tanpa kutip. Pola #47 serupa tetapi pada tingkat
+KOLOM. Keduanya sebaiknya diputuskan bersama supaya konvensinya satu.
