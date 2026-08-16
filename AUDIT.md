@@ -2058,6 +2058,22 @@ senyap. Ini juga mengisi area §13.1 **race condition** yang selama ini kosong.
 ⚠️ Perbaikannya **tidak boleh** lewat `src/lib/db.ts` (§0.5 aturan 3). Jalur yang
 benar adalah `RETURNING` di sisi pemanggil, sebagaimana terbukti di atas.
 
+#### Kartu verifikasi #65 — SELESAI 16 Agu 2026
+
+| Yang diperiksa | Hasil |
+| -------------- | ----- |
+| Perilaku jendela balapan | 6 test; **3 MERAH** terhadap `main` di worktree luar repo, 3 sisanya (pengunci perilaku yang sudah benar) tetap hijau di sana |
+| `RETURNING id` sah di Postgres | Dibuktikan langsung ke database: `RETURNING id -> jumlah baris: 1` |
+| Aplikasi berjalan | Sesi non-admin (`rido`), dashboard termuat penuh, 0 error console |
+| Log server | 0 "Akses ditolak" · 0 `RBAC Middleware error` · 0 `LOG ANOMALI` · 0 `query error` |
+
+⚠️ **BELUM terverifikasi: jalur login itu sendiri.** Dua dari tiga perbaikan #65
+berada di `auth.routes.ts` (login dan force-logout), dan sesi `rido` yang dipakai
+menguji sudah terbentuk SEBELUM perubahan itu — jadi query-nya belum pernah
+benar-benar dijalankan. Bentuk SQL-nya sudah dibuktikan sah terhadap database,
+tetapi alurnya belum. **Cukup satu kali logout lalu login ulang** untuk
+menutupnya; itu tidak dilakukan di sini karena menuntut kredensial.
+
 #### #66 🔴 Lima rute DELETE dijaga hanya `['*']`
 
 Sesudah #49, `['*']` berarti "anggota proyek dengan peran apa pun" — termasuk
