@@ -254,17 +254,17 @@ lepas. Catatan lepas selalu terlupakan.
 | 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — siapa pun ber-Gmail bisa mendaftar                     |  **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik       | §0.4   |
 | 47  | `discussion_point_comments` punya KOLOM KEMBAR camelCase + snake_case                    |  **F9**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`                | §0.3   |
 | 48  | ~~5 TABEL KEMBAR huruf kecil~~ dihapus, 35 tabel -> 30                                   |  **F0**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
-| 49  | `verifyProjectAccess(['*'])` lolos SEBELUM cek keanggotaan — bocor lintas proyek         |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `JALAN` `fix/F2-49-rbac-wildcard` | §13.5  |
-| 50  | Socket.IO **tanpa autentikasi sama sekali** — tak ada `io.use()` handshake               |  **F2**  | 🔴  | Sedang        | Ya (blokir production)  | `JALAN` `fix/F2-50-socket-auth` | §13.5  |
-| 51  | `FORCE_LOGOUT_EVENT` menyiarkan JWT sah ke SELURUH socket lewat `io.emit`                |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `JALAN` `fix/F2-51-force-logout-token` | §13.5  |
-| 52  | `/api/auth/force-logout` memeriksa password TANPA `loginLimiter` — jalur brute force     |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `JALAN` `fix/F2-52-force-logout-limiter` | §13.5  |
+| 49  | `verifyProjectAccess(['*'])` lolos SEBELUM cek keanggotaan — bocor lintas proyek         |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.5  |
+| 50  | Socket.IO **tanpa autentikasi sama sekali** — tak ada `io.use()` handshake               |  **F2**  | 🔴  | Sedang        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.5  |
+| 51  | `FORCE_LOGOUT_EVENT` menyiarkan JWT sah ke SELURUH socket lewat `io.emit`                |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.5  |
+| 52  | `/api/auth/force-logout` memeriksa password TANPA `loginLimiter` — jalur brute force     |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.5  |
 | 53  | `POST /api/auth/logout` tanpa auth, `userId` sembarang → NULL-kan sesi siapa pun         |  **F2**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`                | §13.5  |
 | 54  | `rbac.ts:27` identitas boleh datang dari `x-user-id`/query/body — ranjau impersonasi     |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.5  |
 | 55  | `rbac.ts:50` `!targetProjectId → next()` — RBAC no-op senyap bila nama param berbeda     |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.5  |
 | 56  | Proses Jest mencetak crash `pg` (`isIP` of undefined) saat dibongkar — exit code tetap 0 |  **F8**  | 🟡  | Rendah        |          Tidak          | `TERBUKA`                | §13.5  |
 | 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401      |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.6  |
 | 58  | `GET /metrics` terbuka TANPA autentikasi — di luar `/api/`, lolos gerbang global         |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.6  |
-| 59  | `presence_sync` menyiarkan profil LENGKAP + matriks permission ke klien mana pun         |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `JALAN` `fix/F2-50-socket-auth` | §13.6  |
+| 59  | `presence_sync` menyiarkan profil LENGKAP + matriks permission ke klien mana pun         |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.6  |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -298,7 +298,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 | :-----: | ---------------------------------- | ------------------------------------ | ---- | ----------------- | --------------------------------- | ----------------- |
 | **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10, #38, #39               | 1–2  | Sangat rendah     | —                                 | `SELESAI` 16 Agu  |
 | **F1**  | Storage minimal — buka jalan rilis | #2, #15                              | 1–2  | Rendah            | **Ya** — kredensial & 1 keputusan | `MENUNGGU`        |
-| **F2**  | Audit & perbaikan LOGIKA           | #16, #18, #19, #20, #49–#55          | 3–5  | Rendah            | **Ya** — 3 keputusan              | `JALAN` gel. 1    |
+| **F2**  | Audit & perbaikan LOGIKA           | #16, #18–#20, #49–#59                | 3–5  | Rendah            | **Ya** — 3 keputusan              | `JALAN` gel. 1 tutup |
 | **F3**  | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | **Ya** — login                    | `MENUNGGU`        |
 | **F4**  | Performa muat                      | #3                                   | 1    | Rendah–sedang     | —                                 | `SELESAI` 16 Agu  |
 | **F5**  | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | **Ya** — 5 keputusan + login uji  | `SELESAI` 16 Agu  |
@@ -1827,19 +1827,35 @@ hadir sebagai pengguna lain hanya dengan menyebut id-nya di payload.
 Dicatat terpisah supaya tidak ada yang menyimpulkan "sudah diperbaiki" sama
 dengan "sudah terbukti bekerja untuk pengguna sungguhan".
 
-| # | Branch | Terbukti | BELUM terbukti |
-| - | ------ | -------- | -------------- |
-| 49 | `fix/F2-49-rbac-wildcard` | 191 test/20 suite; test yang sama dibuktikan MERAH terhadap commit sebelum perbaikan lewat `git worktree` di luar repo; aplikasi jalan, Sign In tampil, 0 error console di tab bersih | Anggota sah masih melihat proyeknya normal — **butuh sesi login pemilik proyek** |
-| 52 | `fix/F2-52-force-logout-limiter` | 188 test/20 suite; regex penjaga dibuktikan tidak cocok pada `server.ts` sebelum perbaikan | Percobaan ke-11 benar-benar ditolak — penjaganya STATIS, bukan uji perilaku |
-| 50 + 59 | `fix/F2-50-socket-auth` | 198 test/20 suite; klien anonim yang sama kini dijawab `AUTENTIKASI_DIBUTUHKAN`, token palsu dijawab `TOKEN_TIDAK_VALID`; Sign In tampil, 0 error di tab bersih | Realtime (chat, presence, auto-refresh) bagi pengguna yang benar-benar login |
-| 51 | `fix/F2-51-force-logout-token` | 205 test/20 suite; sidik jari dicocokkan dengan nilai SHA-256 acuan yang dikenal, sehingga sisi server & peramban tidak sekadar sepakat pada implementasi yang sama | Pemicunya sendiri — memancing `FORCE_LOGOUT_EVENT` butuh username & password sungguhan |
+| # | Terbukti | Sisa |
+| - | -------- | ---- |
+| 49 | Test yang sama dibuktikan MERAH terhadap commit sebelum perbaikan (`git worktree` di luar repo). **Jalur anggota non-admin diuji sungguhan:** `rido` (peran `user`, anggota `2SGXiPUTwHnF8D576hfO`) login dan memakai aplikasi — 0 "Akses ditolak", 0 RBAC error | — |
+| 52 | Regex penjaga dibuktikan tidak cocok pada `server.ts` sebelum perbaikan; aplikasi normal dengan pembatas terpasang | Penolakan percobaan ke-11 belum diuji perilakunya — penjaganya STATIS |
+| 50 + 59 | Klien anonim yang sama kini dijawab `AUTENTIKASI_DIBUTUHKAN`, token palsu dijawab `TOKEN_TIDAK_VALID`. **Realtime terbukti tetap hidup** untuk dua pengguna sekaligus: socket lolos gerbang, `[CHAT_SOCKET] User rido`, `[GLOBAL PRESENCE] Total online: 2`, dan data pengguna lain muncul di layar tanpa muat ulang | — |
+| 51 | Sidik jari dicocokkan dengan nilai SHA-256 acuan yang dikenal, sehingga sisi server & peramban tidak sekadar sepakat pada implementasi yang sama | Pemicunya sendiri — memancing `FORCE_LOGOUT_EVENT` butuh username & password sungguhan |
 
-**Keempat branch sengaja BELUM di-merge.** Yang tersisa di semua baris "belum
-terbukti" bermuara pada satu hal yang sama: satu kali login oleh pemilik proyek.
-Sesudah itu keempatnya bisa ditutup sekaligus.
+**Verifikasi penentu, 16 Agu 2026.** Dua sesi berjalan bersamaan di Chrome —
+`admin` dan `rido`. Ini yang membuat #49 dan #50 benar-benar tertutup, sebab
+sesi admin saja TIDAK cukup: admin `return next()` di `rbac.ts:41`, sebelum baris
+yang diubah. Hanya sesi non-admin yang melewatinya.
 
-⚠️ Urutan merge wajib `#50` lebih dulu, baru `#51` — branch #51 dibangun di atas
-#50 dan memerlukan `roomPengguna` serta gerbang `penjagaSocket` dari sana.
+Bukti dari log server, empat layar (Dashboard, Documentation, Team, QA):
+
+```
+[CHAT_SOCKET] User rido terhubung dengan socket 82WX32KFkzegv5RZAAAL
+[PRESENCE] Rido bergabung di proyek 2SGXiPUTwHnF8D576hfO
+[GLOBAL PRESENCE] User Rido joined. Total online: 2
+```
+
+`Akses ditolak` 0 · `RBAC Middleware error` 0 · `LOG ANOMALI` 0 · error console 0.
+
+Keempatnya di-merge ke `main` dengan urutan #49 → #52 → #50 → #51 (#51 dibangun
+di atas #50 dan memerlukan `roomPengguna` serta `penjagaSocket` dari sana).
+Gerbang di `main` sesudah merge: tsc 0 · lint 0 · **216 test / 22 suite** ·
+build sukses · doctor SIAP JALAN.
+
+Dua sisa di kolom kanan sengaja tidak dipaksakan tertutup. Keduanya butuh
+memancing kejadian yang menuntut kredensial sungguhan, dan itu tidak dilakukan.
 
 ---
 
