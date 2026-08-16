@@ -221,7 +221,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 79 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 80 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -290,6 +290,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 78  | Kode menulis ke tabel `TaskAttachments` yang TIDAK ADA di DB — lampiran task selalu gagal |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `SELESAI` 16 Agu | §13.13 |
 | 79  | **Migrasi ≠ database hidup**: 13 tabel drift, 54 kolom tak akan dibuat migrasi           |  **F0**  | 🔴  | Sedang        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.14 |
 | 80  | `POST /api/projects/generate-bni-demo` membuat proyek TANPA penjaga admin — pintu kedua  |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.15 |
+| 81  | `ProjectMembers.parentAdminId` ditulis tapi TIDAK PERNAH dibaca — 6 baris, nol `SELECT`  |  **F7**  | 🟡  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §19.2  |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -328,7 +329,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 | **F4**  | Performa muat                      | #3                                   | 1    | Rendah–sedang     | `SELESAI` 16 Agu          | — tidak ada                                                                                                                 |
 | **F5**  | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | `SELESAI` 16 Agu          | — tidak ada                                                                                                                 |
 | **F6**  | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28 | 3–4  | Rendah–sedang     | `MENUNGGU` domain          | **PEMILIK.** Domain email belum terverifikasi (#44). Tanpa itu penyedia mana pun hanya mengirim ke alamat pemilik akun, jadi email tidak akan sampai ke user lain dan gagalnya SENYAP. F6.1 sudah beres; tinggal isi `RESEND_API_KEY` + `EMAIL_FROM` |
-| **F7**  | Kontrak & validasi                 | #4                                   | 3–5  | Sedang            | `TERBUKA`                 | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3: menulis skema untuk 119 rute di atas UI yang belum diaudit berarti mengunci bentuk data yang belum tentu benar |
+| **F7**  | **Two-Tier RBAC** & validasi       | **#76**, #4, #81                     | 5–8  | **Tinggi**        | `JALAN` — tahap 0 selesai | **PEMILIK, 4 keputusan (K1–K4 §19.9).** Rancangan lengkap di **§19**. Tahap 0 (katalog peran di MasterData) SELESAI 16 Agu. Tahap 1–2 bisa jalan tanpa pemilik. Menutup akar 56% temuan F2 |
 | **F8**  | Jaring pengaman                    | #9, #8                               | 4–6  | Rendah            | `TERBUKA`                 | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, karena F3 akan menambah kasus uji                                        |
 | **F9**  | Lapisan backend                    | #6                                   | 6–10 | Tinggi            | `TERBUKA`                 | — bisa jalan tanpa pemilik, tapi butuh F7 & F8 lebih dulu sebagai pengaman                                                  |
 | **F10** | Arsitektur frontend                | #5, #7, #21                          | 8–15 | **Sangat tinggi** | `TERBUKA`                 | — bisa jalan tanpa pemilik, tapi JANGAN sebelum F8. Merefactor 4.581 baris `AppContainer` dengan jaring pengaman sekarang adalah judi |
@@ -3439,5 +3440,265 @@ Menyusun vektor menuntut penilaian yang kompeten atas 8 metrik per temuan, dan
 angka 0–10 yang dikarang menciptakan presisi palsu — pembaca akan mengurutkan
 pekerjaan berdasarkan angka yang tidak punya dasar. Lebih jujur tidak punya skor
 daripada punya skor yang salah. Ini tetap terbuka di §18.4.
+
+---
+
+## §19 RANCANGAN TWO-TIER RBAC — isi kerja F7, item #76
+
+Ditetapkan 16 Agu 2026. Ini rancangan resmi untuk **#76 (otorisasi
+deny-by-default)**, yang lahir dari §18.3 ketika 25 temuan F2 dipetakan ke OWASP
+dan **14 di antaranya (56%) jatuh ke A01 Broken Access Control** — bukan 14
+kekeliruan terpisah, melainkan satu kelemahan struktural.
+
+### 19.1 Kenapa masuk F7, bukan F2
+
+F2 **menemukan** dan menambal lubangnya satu per satu (#49, #54, #55, #66, #68,
+#72, #73, #80). F7 **menutup akarnya**: satu sumber kebenaran untuk otorisasi,
+sehingga rute ke-120 tidak mengulangi kesalahan yang sama.
+
+Urutannya tidak boleh dibalik. Menulis skema validasi (#4) di atas otorisasi yang
+belum benar berarti mengunci bentuk data yang belum tentu boleh diakses.
+
+### 19.2 Kondisi awal: LIMA kosakata peran yang tidak pernah bertemu
+
+Diukur 16 Agu 2026 dari database hidup dan kode.
+
+| # | Sumber | Nilai | Punya data? |
+| - | ------ | ----- | ----------- |
+| 1 | `Users.role` | `user` (9) · `admin` (1) · `head` (1) | ✅ |
+| 2 | `ProjectMembers.role` | `member` (7) · `manager` (2) · `developer` (1) | ✅ |
+| 3 | `DEFAULT_PERMISSIONS` (kode) | `admin` · `head` · `manager` · `user` · `viewer` | sebagian |
+| 4 | Penjaga rute (kode) | + `developer` · `member` · `designer` · `*` | sebagian |
+| 5 | **`MasterData.project_role`** | Project Admin · Product Owner · Scrum Master · Lead Developer · Frontend Engineer · Backend Engineer · QA Engineer | ✅ 7 baris |
+| — | Cek `role ===` tersebar | + `superadmin` · `administrator` · `assistant` · `qa` · `lead` · `sadm` · `admn` · `system admin` · `super admin` | ❌ nol |
+
+**Gabungan 17 nama peran. Hanya 6 yang punya data. Tidak ada satu tempat pun
+yang mendefinisikannya.**
+
+⚠️ Sumber ke-5 adalah temuan yang paling mengejutkan: `MasterData` **sudah**
+punya katalog peran sejak 5 Agu 2026, lengkap dengan kolom `role_type`, dan
+**tidak satu pun cocok** dengan nilai di `ProjectMembers.role`. Katalognya ada,
+tidak pernah dipakai.
+
+Ditambah dua lapis lagi yang tidak terhitung di atas:
+
+| Lapis | Keadaan |
+| ----- | ------- |
+| `Users.permissions` — matriks 16 modul × CRUD per individu | Ditegakkan backend **hanya di 1 modul** (`list`), 2 aksi, di task routes. 15 modul lain: **kosmetik** |
+| `ProjectMembers.parentAdminId` | **Ditulis, tidak pernah dibaca.** 6 baris terisi, nol `SELECT` (item #81) |
+
+### 19.3 Prinsip: jabatan ≠ peran akses
+
+Diambil dari benchmark, dan inilah yang membedakan rancangan ini dari katalog
+lama:
+
+| Aplikasi | Jumlah project role | Dasar pembedaan |
+| -------- | :-----------------: | --------------- |
+| GitLab | 5 — Guest, Reporter, Developer, Maintainer, Owner | Tangga hak akses |
+| Jira Cloud (team-managed) | 3 — Administrator, Member, Viewer | Tangga hak akses |
+| Jira Server (company-managed) | 3 — Administrators, Developers, Users | Izin di Permission Scheme |
+| Azure DevOps | 3 — Readers, Contributors, Project Administrators | Tangga hak akses |
+
+**Tidak satu pun memakai profesi sebagai peran.** `Frontend Engineer` dan
+`Backend Engineer` membutuhkan hak akses yang identik — yang berbeda hanya
+pekerjaannya. Menjadikannya dua peran mengulang persis masalah `developer` vs
+`member`: dua nama, hak akses sama, tidak ada yang tahu bedanya.
+
+Tempat yang benar untuk itu sudah ada: `MasterData.type = 'jabatan'` (12 baris).
+
+### 19.4 SYSTEM ROLE — 4 peran
+
+Mengatur hal **di luar** proyek. Tidak menentukan apa pun di dalam proyek.
+
+| Nama Modul | Nama Role | Akses CRUD |
+| ---------- | --------- | :--------: |
+| `userManagement` | Administrator | CRUD |
+| `userManagement` | Department Head | R |
+| `userManagement` | Standard User · Observer | — |
+| `masterData` | Administrator | CRUD |
+| `masterData` | Department Head | R |
+| `masterData` | Standard User · Observer | — |
+| `auditLog` | Administrator | CRUD |
+| `auditLog` | Department Head | R |
+| `auditLog` | Standard User · Observer | — |
+| `dbExplorer` | Administrator | CRUD |
+| `dbExplorer` | Department Head · Standard User · Observer | — |
+| `settings` | Administrator | CRUD |
+| `settings` | Department Head | R |
+| `settings` | Standard User · Observer | — |
+| *(buat proyek)* | **Administrator** | **C** |
+| *(buat proyek)* | Department Head · Standard User · Observer | **—** |
+| *(lintas proyek)* | Administrator | **God Mode** |
+| *(daftar proyek terlihat)* | Administrator | semua |
+| *(daftar proyek terlihat)* | Department Head | se-departemen |
+| *(daftar proyek terlihat)* | Standard User · Observer | hanya yang ia anggotai |
+
+`Project Manager` **tidak ada** di system role atas ketetapan pemilik proyek
+16 Agu 2026. Sesudah pembuatan proyek dibatasi ke Administrator, peran itu tidak
+menyisakan pembeda apa pun dari Standard User.
+
+### 19.5 PROJECT ROLE — 6 peran
+
+Disusun sebagai **tangga** mengikuti GitLab: tiap tingkat mewarisi yang di
+bawahnya.
+
+| Nama Modul | Nama Role | Akses CRUD |
+| ---------- | --------- | :--------: |
+| `dashboard` | seluruh peran | R |
+| `access` (Team) | Project Owner · Project Admin | CRUD |
+| `access` | Project Manager | R + U |
+| `access` | Contributor · QA · Viewer | R |
+| `list` (Issue List) | Project Owner · Project Admin · Project Manager | CRUD |
+| `list` | Contributor · QA | CRU |
+| `list` | Viewer | R |
+| `board` (Kanban) | Project Owner · Project Admin · Project Manager | CRUD |
+| `board` | Contributor · QA | R + U |
+| `board` | Viewer | R |
+| `sprints` | Project Owner · Project Admin · Project Manager | CRUD |
+| `sprints` | Contributor · QA · Viewer | R |
+| `timeline` | Project Owner · Project Admin · Project Manager | CRUD |
+| `timeline` | Contributor · QA · Viewer | R |
+| `qa` | Project Owner · Project Admin · Project Manager | CRUD |
+| `qa` | **QA** | **CRUD** |
+| `qa` | Contributor | R + U |
+| `qa` | Viewer | R |
+| `meetingNotes` | Project Owner · Project Admin · Project Manager | CRUD |
+| `meetingNotes` | Contributor · QA | CRU |
+| `meetingNotes` | Viewer | R |
+| `wiki` | Project Owner · Project Admin · Project Manager | CRUD |
+| `wiki` | Contributor | CRU |
+| `wiki` | QA · Viewer | R |
+| `flowchart` | Project Owner · Project Admin · Project Manager | CRUD |
+| `flowchart` | Contributor | CRU |
+| `flowchart` | QA · Viewer | R |
+| `notebooklm` | Project Owner · Project Admin · Project Manager | CRUD |
+| `notebooklm` | Contributor | CRU |
+| `notebooklm` | QA · Viewer | R |
+| *(hapus proyek)* | **Project Owner** | **D** |
+| *(hapus proyek)* | selain itu | — |
+
+Padanannya: Project Owner ≈ GitLab Owner · Project Admin ≈ Maintainer ·
+Contributor ≈ Developer · Viewer ≈ Guest.
+
+`Contributor` dan `QA` sengaja **setara**, bukan bertingkat — keduanya
+pelaksana, hanya beda wilayah kuasa.
+
+### 19.6 ALUR OTORISASI — urutan pemeriksaan yang mengikat
+
+Inilah bagian yang menutup #76. Setiap permintaan menempuh urutan ini, **tanpa
+pengecualian**, dan langkah yang gagal langsung menghentikan permintaan.
+
+```
+                     Permintaan masuk
+                            │
+            ┌───────────────▼───────────────┐
+            │ 1. authenticateJWT             │  token sah? sesi tunggal?
+            └───────────────┬───────────────┘  gagal -> 401
+                            │
+            ┌───────────────▼───────────────┐
+            │ 2. Rute punya :projectId?      │
+            └───────┬───────────────┬───────┘
+                 ya │               │ tidak
+                    │               │
+                    │   ┌───────────▼──────────────┐
+                    │   │ 3a. SYSTEM ROLE saja      │  §19.4
+                    │   │     modul + aksi          │  gagal -> 403
+                    │   └───────────────────────────┘
+                    │
+    ┌───────────────▼──────────────┐
+    │ 3b. System role = Administrator? │  GOD MODE
+    └───────┬──────────────────┬───┘
+         ya │                  │ tidak
+            │                  │
+      LOLOS │      ┌───────────▼─────────────────┐
+            │      │ 4. Ambil PROJECT ROLE dari   │  ProjectMembers
+            │      │    (projectId, userId)       │  tidak ada -> 403
+            │      └───────────┬─────────────────┘
+            │                  │
+            │      ┌───────────▼─────────────────┐
+            │      │ 5. Cocokkan modul + aksi     │  §19.5
+            │      │    dengan matriks project    │  gagal -> 403
+            │      └───────────┬─────────────────┘
+            │                  │
+            └──────────────────┴──> LANJUT ke handler
+```
+
+**Empat aturan yang mengikat:**
+
+1. **Di dalam proyek, SYSTEM ROLE tidak dipakai** — kecuali Administrator.
+   Seorang `Department Head` yang bukan anggota proyek X **tidak bisa** menyentuh
+   isi proyek X.
+2. **God Mode hanya milik Administrator**, dan setiap pemakaiannya **wajib
+   tercatat** di `AuditLogs`. Tanpa pencatatan, tidak ada cara mengetahui
+   penyalahgunaannya.
+3. **Deny-by-default.** Rute tanpa penjaga eksplisit **DITOLAK**, bukan
+   diloloskan. Inilah pembalikan yang menutup #68, #70, #71, dan #80 sekaligus —
+   keempatnya lolos justru karena bawaannya "izinkan".
+4. **Bukan anggota = 403**, meskipun system role-nya tinggi. Menutup #49.
+
+### 19.7 Pemetaan CRUD ke operasi nyata
+
+Agar "CRUD" tidak ditafsirkan berbeda-beda antar modul:
+
+| Huruf | Arti | Contoh di `list` (Issue List) |
+| :---: | ---- | ----------------------------- |
+| **C** | Membuat entitas baru | `POST /tasks` |
+| **R** | Membaca daftar & detail | `GET /tasks`, `GET /tasks/:id` |
+| **U** | Mengubah isi, status, penugasan | `PUT /tasks/:id`, `PUT /tasks/reorder` |
+| **D** | Menghapus permanen | `DELETE /tasks/:id`, `bulk-delete` |
+
+**Ketetapan yang mengikat seluruh matriks:** `D` hanya dimiliki Project Owner,
+Project Admin, dan Project Manager — kecuali `QA` pada modul `qa`. Pelaksana
+(`Contributor`) **tidak pernah menghapus**. Ini yang menutup #66 dan #72 secara
+struktural, bukan per rute.
+
+`R + U` berarti boleh mengubah yang sudah ada tetapi tidak boleh membuat baru —
+dipakai pada `board` (memindahkan kartu) dan `access` (mengubah peran anggota).
+
+### 19.8 Keadaan pengerjaan
+
+| Tahap | Isi | Status |
+| :---: | --- | ------ |
+| 0 | Katalog peran di `MasterData` | ✅ **SELESAI 16 Agu** — `npm run db:seed-roles`, 8 baris ditambahkan (4 SYSTEM + 4 PROJECT), idempoten |
+| 1 | Satu enum peran, satu tempat. Hapus `\| string`, satukan dua `AppRole` | `TERBUKA` |
+| 2 | Penjaga saat boot — server menolak menyala bila rute memakai peran di luar enum | `TERBUKA` |
+| 3 | Migrasi data `ProjectMembers` (10 baris) & `Users` (11 baris) | `MENUNGGU` keputusan |
+| 4 | `verifyProjectAccess` baca matriks terpusat + deny-by-default | `TERBUKA` |
+| 5 | `can(action, module, projectId)` menggantikan 36 `hasPermission` di 13 berkas | `TERBUKA` |
+| 6 | Panel "Active System Permissions & Overrides" jadi **baca-saja** | `TERBUKA` |
+
+**Tahap 1 dan 2 tidak butuh keputusan apa pun** dan bisa dikerjakan kapan saja.
+Keduanya kecil, tidak mengubah perilaku, tetapi langsung membuat kompilator dan
+server menolak 11 nama peran hantu.
+
+⚠️ Sekarang adalah saat termurah: **10 baris `ProjectMembers`, 11 baris
+`Users`, 2 proyek**. Setahun lagi angka ini bisa ribuan.
+
+### 19.9 Empat keputusan yang menahan Tahap 3 ke atas
+
+| # | Keputusan | Rekomendasi |
+| - | --------- | ----------- |
+| K1 | 6 project role, atau 8 dengan System Analyst & Business Analyst terpisah? | **6** — keduanya butuh hak akses yang sama dengan Contributor; pembedanya jabatan |
+| K2 | Lead / Frontend / Backend Engineer pindah ke `jabatan`? | **Ya** — profesi, bukan izin |
+| K3 | Product Owner & Scrum Master dilebur ke Project Manager? | **Ya** — fungsinya beririsan |
+| K4 | Nasib `parentAdminId` | **Buang** — item #81, ditulis tapi tidak pernah dibaca |
+
+### 19.10 Yang SUDAH dikerjakan dan yang SENGAJA ditahan
+
+Sudah:
+
+- Katalog `MasterData` bertambah 8 peran lewat `npm run db:seed-roles`
+- `SYSTEM` role dari **0 menjadi 4** — sebelumnya `role_type` hanya berisi `PROJECT`
+
+Sengaja **tidak** dikerjakan, karena menghapus/memindahkan data dan bergantung
+pada K1–K4:
+
+- `Product Owner` & `Scrum Master` **tidak** dihapus
+- Lead/Frontend/Backend Engineer **tidak** dipindah ke `jabatan`
+- Typo `"Businnes Analyst"` **tidak** diperbaiki
+- `ProjectMembers.role` **tidak** dimigrasikan
+
+Karena itu katalog `PROJECT` kini berisi **11 peran**, bukan 6 — yang lama masih
+berdampingan dengan yang baru sampai K1–K4 terjawab.
 
 ---
