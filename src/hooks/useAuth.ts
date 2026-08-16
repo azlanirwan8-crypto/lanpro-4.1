@@ -253,7 +253,7 @@ export function useAuth(
       }
 
       if (data.token) {
-        setAuthToken(data.token);
+        setAuthToken(data.token, remember);
       }
 
       const userData = data.user as UserProfile;
