@@ -336,7 +336,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 6   | 222 query SQL di lapisan rute, repository tak ada                                          | **F9**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §3     |
 | 7   | 59% baris kode di 37 berkas > 500 baris                                                    | **F10** | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §2     |
 | 8   | **1.290** `any` melemahkan jaring tipe (diukur ulang 16 Agu)                               | **F8**  | 🟠  | Sedang        |           Ya            | `TERBUKA`               | §7     |
-| 9   | Rasio test **1 : 208** baris (diukur ulang 16 Agu; dulu tertulis 1:1.000)                  | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §7     |
+| 9   | Rasio test 1:208 — tetapi cakupan CABANG `AppContainer` hanya **8,2%** (§19.30)            | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §7     |
 | 13  | 28 berkas `dark:` + 48 hex di luar token                                                   | **F12** | 🟡  | Sedang        |          Tidak          | `TERBUKA`               | §8     |
 | 14  | Kontras sidebar & jarak target sentuh                                                      | **F12** | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §8     |
 | 15  | Dua Google API key lama belum dicabut                                                      | **F1**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` pemilik      | §6     |
@@ -1816,6 +1816,9 @@ grep -rc "React.lazy\|= lazy(" src/ --include=*.tsx | grep -v ":0" | wc -l
 grep -rhoE 'className="[^"]*#[0-9a-fA-F]{6}' src --include=*.tsx | wc -l
 grep -rhoE 'style=\{\{[^}]*#[0-9a-fA-F]{6}' src --include=*.tsx | wc -l
 grep -rl 'dark:' src --include=*.tsx | wc -l
+
+# Cakupan AppContainer (§19.30) — cabang adalah angka yang penting
+npx jest src/AppContainer.render.test.tsx src/AppContainer.loggedin.test.tsx   --coverage --collectCoverageFrom="src/AppContainer.tsx" --coverageReporters=text
 
 # Kesehatan menyeluruh
 npm run doctor && npm run lint && npm test && npm run build
@@ -5040,9 +5043,10 @@ berbahaya daripada kolom kosong_.
 
 ⚠️ **Yang TIDAK boleh disimpulkan dari perbaikan angka ini:** bahwa F8 boleh
 dilewati. Rasio mengukur JUMLAH, bukan CAKUPAN. 111 test baru itu hampir
-seluruhnya mengenai otorisasi — `AppContainer` 4.581 baris tetap tidak tersentuh
-uji. Jaringnya menebal tepat di tempat yang sudah aman, dan tetap tipis di
-tempat yang paling berbahaya.
+seluruhnya mengenai otorisasi. Klaim awal saya bahwa `AppContainer` "tidak
+tersentuh uji" **KELIRU dan sudah dikoreksi** — ia punya 6 test. Angka
+sebenarnya ada di §19.30, dan ia tetap mendukung kesimpulan yang sama lewat
+jalan yang berbeda.
 
 #### Test server untuk #91b
 
@@ -5059,3 +5063,57 @@ melapor "INSERT tidak pernah terjadi", yang terbaca seolah penjaganya menolak.
 Sebabnya data test saya sendiri melanggar aturan validasi username. Itu ketiga
 kalinya hari ini kegagalan pada perkakas uji menyamar sebagai kegagalan pada
 kode yang diuji (§19.19, §19.20, §19.22).
+
+### 19.30 Cakupan `AppContainer` — klaim saya dikoreksi, lalu diukur
+
+Saya menulis di §19.29 dan §0.4 bahwa `AppContainer` **"nol tersentuh uji"**.
+**Itu keliru.** Ia punya **6 test di 2 berkas** (219 baris):
+
+| Berkas                           | Isi                                                                                       |
+| -------------------------------- | ----------------------------------------------------------------------------------------- |
+| `AppContainer.render.test.tsx`   | ter-mount tanpa melempar · me-render layar login sungguhan · tidak memicu error boundary  |
+| `AppContainer.loggedin.test.tsx` | ter-mount pada jalur login · menampilkan kerangka aplikasi · memulihkan sesi dari storage |
+
+Ini **ketiga kalinya** dalam sesi ini saya menuliskan sesuatu tanpa
+mengukurnya lebih dulu (#69, #87, dan sekarang ini). Polanya sama setiap kali:
+kesimpulan yang terdengar masuk akal, ditulis sebagai fakta.
+
+#### Angka sebenarnya, diukur langsung
+
+```bash
+npx jest src/AppContainer.render.test.tsx src/AppContainer.loggedin.test.tsx \
+  --coverage --collectCoverageFrom="src/AppContainer.tsx" --coverageReporters=text
+```
+
+| Metrik     |      Nilai |
+| ---------- | ---------: |
+| Pernyataan | **23,74%** |
+| **Cabang** |  **8,19%** |
+| Fungsi     | **17,31%** |
+| Baris      | **24,60%** |
+
+#### Kenapa angka ini justru LEBIH mengkhawatirkan daripada nol
+
+Nol akan jujur — semua orang tahu artinya. Yang ada sekarang lebih licin:
+berkasnya **punya test**, namanya muncul di daftar, dan `npm test` hijau.
+
+Bedanya terlihat pada jarak antara dua angka:
+
+- **Pernyataan 23,7%** — cukup untuk membuktikan berkasnya bisa dimuat dan
+  dirender.
+- **Cabang 8,2%** — lebih dari **91 dari 100 percabangan keputusan** tidak
+  pernah dijalankan satu arah pun.
+
+Artinya test yang ada membuktikan `AppContainer` **BISA TAMPIL**, bukan bahwa ia
+**BEKERJA BENAR**. Untuk refactor F10, yang dibutuhkan justru yang kedua.
+
+Inilah bentuk konkret dari peringatan §1.5: _"28/28 test lolos tapi
+AppContainer crash"_. Test smoke akan tetap hijau sesudah refactor yang
+merusak logika, selama komponennya masih ter-mount.
+
+#### Sasaran F8 yang bisa diperiksa
+
+Bukan "tambah test", melainkan **naikkan cakupan CABANG** — itu satu-satunya
+angka yang mengukur apakah keputusan di dalam kode benar-benar diuji. Perintah
+di atas membuatnya bisa diulang kapan saja, jadi kemajuannya tidak perlu
+dipercaya, cukup dijalankan.
