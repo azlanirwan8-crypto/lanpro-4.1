@@ -192,12 +192,7 @@ proyek, bukan lagi lubang keamanan sesudah server menegakkan sendiri) · #92
 
 ### 0.4 Yang PALING MUNGKIN dikerjakan berikutnya
 
-**Prioritas fase ada di §1.5 kolom `Prio`.** P0 = menahan rilis production:
-F1 · F2 · F7 · F11.
-
-#### Yang bisa dikerjakan TANPA keputusan pemilik proyek
-
-Diukur 16 Agu 2026 dari §1.1: **30 item belum selesai, dan hanya 2 di antaranya
+Diukur 16 Agu 2026 dari §1.1: **29 item belum selesai, dan 5 di antaranya
 berstatus `TERBUKA`.** Sisanya `MENUNGGU` jawaban pemilik proyek.
 
 | #      | Isi                                                                 | Biaya                                     |
@@ -478,7 +473,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 70  | ~~Rute `/api/v1/meetings/:id*` tanpa penjaga proyek~~ dijaga lewat entitas rapat                     |  **F2**  | 🔴  | Rendah        | Ya (blokir production) | `SELESAI` 16 Agu | §13.11 |
 | 91  | Kredensial admin ter-hardcode di frontend + peran diminta dari body saat mendaftar                   |  **F7**  | 🔴  | Rendah        | Ya (blokir production) | `SELESAI` 16 Agu | §19.27 |
 | 54  | ~~identitas dari `x-user-id`/query/body~~ hanya dari token; cacat tersalin ke penjaga baru           |  **F2**  | 🟠  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §13.5  |
-| 53  | ~~logout tanpa auth, `userId` sembarang~~ identitas hanya dari token                                 |  **F2**  | 🔴  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.5  |
+| 53  | logout menggunakan JWT; `userId` diabaikan, hanya token yang dipakai                                 |  **F2**  | 🔴  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.5  |
 | 55  | ~~`rbac.ts:50` RBAC no-op senyap~~ divalidasi TIDAK tersalin ke penjaga baru bila nama param berbeda |  **F2**  | 🟡  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §13.5  |
 | 93  | ~~"Remember Me" hanya melupakan PROFIL~~ token kini ikut pilihan itu                                 |  **F7**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §19.31 |
 | 56  | ~~Jest mencetak crash `pg` saat dibongkar~~ fungsi murni dipisah ke helper                           |  **F8**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.5  |
@@ -527,24 +522,24 @@ tersalin ke penjaga baru.
 
 ### 1.4.2 Rendah — 16 item
 
-| #   | Sev | Fase | Isi                                             | Perlu pemilik? |
-| --- | :-: | ---- | ----------------------------------------------- | -------------- |
-| 15  | 🔴  | F1   | Cabut 2 Google API key — **±5 menit, nol kode** | **ya**         |
-| 19  | 🔴  | F2   | `POST /api/db-query` tanpa penjaga read-only    | **ya**         |
-| 53  | 🔴  | F2   | `POST /api/auth/logout` tanpa auth              | tidak          |
-| 44  | 🔴  | F6   | Domain email belum terverifikasi                | **ya**         |
-| 18  | 🟠  | F2   | notebook-lm rusak di dua sisi                   | **ya**         |
-| 74  | 🟠  | F2   | 7 pengambil data tanpa penjaga respons basi     | **ya**         |
-| 83  | 🟠  | F7   | `department` & `position` tidak fungsional      | **ya**         |
-| 86  | 🟠  | F7   | `modul_aplikasi` dua sumber                     | **ya**         |
-| 92  | 🟠  | F7   | Peran dari token vs database                    | **ya**         |
-| 93  | 🟠  | F7   | "Remember Me" tidak melupakan token             | tidak          |
-| 20  | 🟡  | F2   | Kode mati DB Explorer                           | **ya**         |
-| 21  | 🟡  | F10  | `authStore` & `uiStore` menganggur              | tidak          |
-| 56  | 🟡  | F8   | Jest mencetak crash `pg` saat dibongkar         | tidak          |
-| 85  | 🟡  | F7   | `category` memuat dua konsep                    | **ya**         |
-| 26  | 🟢  | F6   | Email selamat datang                            | tertahan #44   |
-| 28  | 🟢  | F6   | Digest task pending                             | tertahan #44   |
+| #   | Sev | Fase | Isi                                                    | Perlu pemilik? |
+| --- | :-: | ---- | ------------------------------------------------------ | -------------- |
+| 15  | 🔴  | F1   | Cabut 2 Google API key — **±5 menit, nol kode**        | **ya**         |
+| 19  | 🔴  | F2   | `POST /api/db-query` tanpa penjaga read-only           | **ya**         |
+| 53  | ✅  | F2   | `POST /api/auth/logout` tanpa auth (perbaikan selesai) | tidak          |
+| 44  | 🔴  | F6   | Domain email belum terverifikasi                       | **ya**         |
+| 18  | 🟠  | F2   | notebook-lm rusak di dua sisi                          | **ya**         |
+| 74  | 🟠  | F2   | 7 pengambil data tanpa penjaga respons basi            | **ya**         |
+| 83  | 🟠  | F7   | `department` & `position` tidak fungsional             | **ya**         |
+| 86  | 🟠  | F7   | `modul_aplikasi` dua sumber                            | **ya**         |
+| 92  | 🟠  | F7   | Peran dari token vs database                           | **ya**         |
+| 93  | 🟠  | F7   | "Remember Me" tidak melupakan token                    | tidak          |
+| 20  | 🟡  | F2   | Kode mati DB Explorer                                  | **ya**         |
+| 21  | 🟡  | F10  | `authStore` & `uiStore` menganggur                     | tidak          |
+| 56  | 🟡  | F8   | Jest mencetak crash `pg` saat dibongkar                | tidak          |
+| 85  | 🟡  | F7   | `category` memuat dua konsep                           | **ya**         |
+| 26  | 🟢  | F6   | Email selamat datang                                   | tertahan #44   |
+| 28  | 🟢  | F6   | Digest task pending                                    | tertahan #44   |
 
 **Bisa dikerjakan tanpa keputusan: #53, #93, #21, #56.** #53 yang paling
 mendesak — 🔴 dan tanpa penghalang.
