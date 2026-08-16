@@ -16,7 +16,7 @@ const router = Router();
 // Discussion Points API
 router.get(
   "/api/projects/:projectId/meetings/:id/discussionPoints",
-  verifyProjectAccess(["*"]),
+  jagaProyek("meetingNotes", "R"),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -36,7 +36,7 @@ router.get(
 
 router.post(
   "/api/projects/:projectId/meetings/:id/discussionPoints",
-  verifyProjectAccess(["*"]),
+  jagaProyek("meetingNotes", "C"),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -97,7 +97,7 @@ router.post(
 
 router.put(
   "/api/projects/:projectId/meetings/:id/discussionPoints/:pointId",
-  verifyProjectAccess(["*"]),
+  jagaProyek("meetingNotes", "U"),
   async (req, res) => {
     try {
       const { pointId } = req.params;

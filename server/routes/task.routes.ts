@@ -25,7 +25,7 @@ import { jagaProyek } from "../middleware/jagaProyek";
 
 const router = express.Router();
 
-router.get("/api/projects/:projectId/tasks", verifyProjectAccess(["*"]), async (req: any, res) => {
+router.get("/api/projects/:projectId/tasks", jagaProyek("list", "R"), async (req: any, res) => {
   let connection;
   try {
     const { projectId } = req.params;
@@ -192,7 +192,7 @@ router.get("/api/projects/:projectId/tasks", verifyProjectAccess(["*"]), async (
 
 router.get(
   "/api/projects/:projectId/team-tasks",
-  verifyProjectAccess(["*"]),
+  jagaProyek("list", "R"),
   async (req: any, res) => {
     let connection;
     try {
@@ -1392,7 +1392,7 @@ router.post(
 // Comments API
 router.get(
   "/api/projects/:projectId/tasks/:taskId/comments",
-  verifyProjectAccess(["*"]),
+  jagaProyek("list", "R"),
   async (req, res) => {
     let connection;
     try {
@@ -1417,7 +1417,7 @@ router.get(
 
 router.post(
   "/api/projects/:projectId/tasks/:taskId/comments",
-  verifyProjectAccess(["*"]),
+  jagaProyek("list", "C"),
   async (req, res) => {
     let connection;
     try {
@@ -1461,7 +1461,7 @@ router.post(
 );
 
 // ActivityLogs API
-router.get("/api/projects/:projectId/activity", verifyProjectAccess(["*"]), async (req, res) => {
+router.get("/api/projects/:projectId/activity", jagaProyek("list", "R"), async (req, res) => {
   let connection;
   try {
     const { projectId } = req.params;
@@ -1479,7 +1479,7 @@ router.get("/api/projects/:projectId/activity", verifyProjectAccess(["*"]), asyn
   }
 });
 
-router.post("/api/projects/:projectId/activity", verifyProjectAccess(["*"]), async (req, res) => {
+router.post("/api/projects/:projectId/activity", jagaProyek("list", "U"), async (req, res) => {
   let connection;
   try {
     const { projectId } = req.params;

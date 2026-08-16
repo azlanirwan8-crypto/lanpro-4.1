@@ -3,7 +3,7 @@ import crypto from "crypto";
 import db from "../../src/lib/db";
 import { buatProyekDemoBni } from "../services/demo-seed.service";
 import { authenticateJWT, verifyGlobalAdmin } from "../middleware/auth";
-import { jagaHapusProyek } from "../middleware/jagaProyek";
+import { jagaHapusProyek, jagaProyek } from "../middleware/jagaProyek";
 import { verifyProjectAccess } from "../middleware/rbac";
 import { createAuditLog } from "../services/audit.service";
 import { adalahTabelTidakAda } from "../helpers/pgErrors";
@@ -100,7 +100,7 @@ router.post(
     return buatProyekDemoBni(req, res);
   }
 );
-router.get("/api/projects/:id", verifyProjectAccess(["*"]), async (req, res) => {
+router.get("/api/projects/:id", jagaProyek("dashboard", "R"), async (req, res) => {
   try {
     const { id } = req.params;
     const connection = await db.getConnection();

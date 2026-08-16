@@ -294,12 +294,10 @@ router.post(
       }
     } catch (error: any) {
       console.error("POST /api/v1/meetings/:meetingId/upload-recording error:", error);
-      return res
-        .status(500)
-        .json({
-          status: "error",
-          message: error.message || "Gagal mengunggah dan menyimpan rekaman.",
-        });
+      return res.status(500).json({
+        status: "error",
+        message: error.message || "Gagal mengunggah dan menyimpan rekaman.",
+      });
     }
   }
 );
@@ -767,12 +765,10 @@ ${learningSection}`;
     });
   } catch (error: any) {
     console.error("[MULTIMODAL API ERROR] Error processing video analysis:", error);
-    return res
-      .status(500)
-      .json({
-        status: "error",
-        message: "Gagal memproses analisis video multimodal: " + error.message,
-      });
+    return res.status(500).json({
+      status: "error",
+      message: "Gagal memproses analisis video multimodal: " + error.message,
+    });
   }
 });
 
@@ -1042,66 +1038,74 @@ ATURAN KETAT (ANTI-HALUSINASI):
 });
 
 // Meetings API
-router.get("/api/projects/:projectId/meetings", verifyProjectAccess(["*"]), async (req, res) => {
-  try {
-    const { projectId } = req.params;
-    const connection = await db.getConnection();
-    const [rows] = await connection.query(
-      "SELECT id, projectId, title, description, meetingLink, authorId, createdAt, updatedAt, fileName, fileType, file_size FROM Meetings WHERE projectId = ? ORDER BY createdAt DESC",
-      [projectId]
-    );
-    connection.release();
-    res.json({ status: "success", data: rows });
-  } catch (error: any) {
-    console.error(error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+router.get(
+  "/api/projects/:projectId/meetings",
+  jagaProyek("meetingNotes", "R"),
+  async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      const connection = await db.getConnection();
+      const [rows] = await connection.query(
+        "SELECT id, projectId, title, description, meetingLink, authorId, createdAt, updatedAt, fileName, fileType, file_size FROM Meetings WHERE projectId = ? ORDER BY createdAt DESC",
+        [projectId]
+      );
+      connection.release();
+      res.json({ status: "success", data: rows });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    }
   }
-});
+);
 
-router.post("/api/projects/:projectId/meetings", verifyProjectAccess(["*"]), async (req, res) => {
-  try {
-    const { projectId } = req.params;
-    const { title, description, meetingLink, authorId, fileData, fileName, fileType } = req.body;
-    const effectiveAuthorId = authorId || req.headers["x-user-id"] || "guest";
-    const connection = await db.getConnection();
-    const newId = crypto.randomUUID();
-    await connection.query(
-      "INSERT INTO Meetings (id, projectId, title, description, meetingLink, authorId, fileData, fileName, fileType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        newId,
-        projectId,
-        title,
-        description || null,
-        meetingLink || null,
-        effectiveAuthorId,
-        fileData || null,
-        fileName || null,
-        fileType || null,
-      ]
-    );
-    connection.release();
-    res.json({
-      status: "success",
-      data: {
-        id: newId,
-        projectId,
-        title,
-        description,
-        meetingLink,
-        authorId: effectiveAuthorId,
-        fileName,
-        fileType,
-      },
-    });
-  } catch (error: any) {
-    console.error(error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+router.post(
+  "/api/projects/:projectId/meetings",
+  jagaProyek("meetingNotes", "C"),
+  async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      const { title, description, meetingLink, authorId, fileData, fileName, fileType } = req.body;
+      const effectiveAuthorId = authorId || req.headers["x-user-id"] || "guest";
+      const connection = await db.getConnection();
+      const newId = crypto.randomUUID();
+      await connection.query(
+        "INSERT INTO Meetings (id, projectId, title, description, meetingLink, authorId, fileData, fileName, fileType) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          newId,
+          projectId,
+          title,
+          description || null,
+          meetingLink || null,
+          effectiveAuthorId,
+          fileData || null,
+          fileName || null,
+          fileType || null,
+        ]
+      );
+      connection.release();
+      res.json({
+        status: "success",
+        data: {
+          id: newId,
+          projectId,
+          title,
+          description,
+          meetingLink,
+          authorId: effectiveAuthorId,
+          fileName,
+          fileType,
+        },
+      });
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    }
   }
-});
+);
 
 router.put(
   "/api/projects/:projectId/meetings/:id",
-  verifyProjectAccess(["*"]),
+  jagaProyek("meetingNotes", "U"),
   async (req: any, res) => {
     let connection;
     try {
@@ -1192,7 +1196,7 @@ router.put(
 
 router.get(
   "/api/projects/:projectId/meetings/:id/download",
-  verifyProjectAccess(["*"]),
+  jagaProyek("meetingNotes", "R"),
   async (req, res) => {
     let connection;
     try {

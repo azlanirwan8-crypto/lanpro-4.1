@@ -13,7 +13,7 @@ import { jagaProyek } from "../middleware/jagaProyek";
 
 const router = Router();
 
-router.get("/api/projects/:projectId/documents", verifyProjectAccess(["*"]), async (req, res) => {
+router.get("/api/projects/:projectId/documents", jagaProyek("wiki", "R"), async (req, res) => {
   let connection;
   try {
     const { projectId } = req.params;
@@ -33,7 +33,7 @@ router.get("/api/projects/:projectId/documents", verifyProjectAccess(["*"]), asy
 
 router.get(
   "/api/projects/:projectId/documents/:id/download",
-  verifyProjectAccess(["*"]),
+  jagaProyek("wiki", "R"),
   async (req, res) => {
     let connection;
     try {
@@ -52,12 +52,10 @@ router.get(
         res.json({ status: "success", data: (rows as any[])[0] });
       } else {
         const { getDbMode } = await import("../../src/lib/db");
-        res
-          .status(404)
-          .json({
-            status: "error",
-            message: "Document not found. id: " + id + ", mode: " + getDbMode(),
-          });
+        res.status(404).json({
+          status: "error",
+          message: "Document not found. id: " + id + ", mode: " + getDbMode(),
+        });
       }
     } catch (error: any) {
       console.error(error);
@@ -70,7 +68,7 @@ router.get(
 
 router.post(
   "/api/projects/:projectId/documents",
-  verifyProjectAccess(["*"]),
+  jagaProyek("wiki", "C"),
   async (req: any, res) => {
     try {
       const { projectId } = req.params;
@@ -117,7 +115,7 @@ router.post(
 
 router.put(
   "/api/projects/:projectId/documents/:id",
-  verifyProjectAccess(["*"]),
+  jagaProyek("wiki", "U"),
   async (req: any, res) => {
     let connection;
     try {
