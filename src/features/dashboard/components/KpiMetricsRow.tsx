@@ -34,7 +34,7 @@ export const KpiMetricsRow: React.FC<KpiMetricsRowProps> = ({
 
       {/* Card 2: In Progress */}
       <div className="bg-surface p-5 rounded-xl border border-border-subtle/60 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-soft group">
-        <div className="w-10 h-10 rounded-xl bg-info/10 text-info flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
+        <div className="w-10 h-10 rounded-xl bg-info/10 text-info-text flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
           <Activity className="w-5 h-5 animate-pulse" />
         </div>
         <span className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-subtle mb-1">
@@ -48,22 +48,22 @@ export const KpiMetricsRow: React.FC<KpiMetricsRowProps> = ({
 
       {/* Card 3: Overdue Alerts */}
       <div className="bg-surface p-5 rounded-xl border border-border-subtle/60 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-soft group">
-        <div className="w-10 h-10 rounded-xl bg-danger/10 text-danger flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
+        <div className="w-10 h-10 rounded-xl bg-danger/10 text-danger-text flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
           <AlertCircle className="w-5 h-5" />
         </div>
         <span className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-subtle mb-1">
           OVERDUE ALERTS
         </span>
         <div className="flex items-baseline gap-1.5 mt-auto">
-          <span className="text-3xl font-medium text-danger">{overdueTasks.length}</span>
-          <span className="text-xs font-medium text-danger">Stoppers</span>
+          <span className="text-3xl font-medium text-danger-text">{overdueTasks.length}</span>
+          <span className="text-xs font-medium text-danger-text">Stoppers</span>
         </div>
       </div>
 
       {/* Card 4: Weekly Velocity */}
       <div className="bg-surface p-5 rounded-xl border border-border-subtle/60 hover:shadow-md transition-all relative overflow-hidden flex flex-col h-full shadow-soft group">
-        <div className="w-10 h-10 rounded-xl bg-warning/10 text-warning flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
-          <Zap className="w-5 h-5 text-warning" />
+        <div className="w-10 h-10 rounded-xl bg-warning/10 text-warning-text flex items-center justify-center mb-4 transition-transform group-hover:scale-105">
+          <Zap className="w-5 h-5 text-warning-text" />
         </div>
         <span className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-subtle mb-1">
           WEEKLY VELOCITY

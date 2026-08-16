@@ -188,7 +188,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
                 <div className="flex items-center gap-2.5">
                   <div
                     className={`p-1.5 rounded-full transition-colors ${
-                      isWhatsApp ? "bg-success/10 text-success" : "bg-info/10 text-info"
+                      isWhatsApp ? "bg-success/10 text-success-text" : "bg-info/10 text-info-text"
                     }`}
                   >
                     {isWhatsApp ? <MessageSquare size={14} /> : <Mail size={14} />}
@@ -205,10 +205,10 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
                   <span
                     className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[11px] font-medium transition-all ${
                       item.status === "success"
-                        ? "bg-success/10 text-success"
+                        ? "bg-success/10 text-success-text"
                         : item.status === "pending"
-                          ? "bg-warning/10 text-warning"
-                          : "bg-danger/10 text-danger"
+                          ? "bg-warning/10 text-warning-text"
+                          : "bg-danger/10 text-danger-text"
                     }`}
                   >
                     {item.status === "success" ? (

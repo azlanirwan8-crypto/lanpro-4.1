@@ -75,6 +75,45 @@
   --color-primary-surface: #405189;
   --color-primary-surface-hover: #364473;
 
+  /* Hanya `-text` yang berganti; `-surface` sengaja sama seperti mode terang. */
+  --color-warning-text: #ffca6a;
+  --color-success-text: #2fd5bd;
+  --color-danger-text: #ff8071;
+  --color-info-text: #5b93f7;
+
+  --color-warning-surface: #b45309;
+  --color-success-surface: #047857;
+  --color-danger-surface: #b91c1c;
+  --color-info-surface: #1d4ed8;
+
+  /* ── Aksen: peran TEKS dipisah dari peran ISIAN ─────────────────────────
+   * §19.50. Token aksen (`warning`, `success`, `danger`, `info`) DITERANGKAN
+   * di mode gelap supaya terbaca sebagai TEKS di atas permukaan gelap — lalu
+   * warna yang sama dipakai sebagai teks di atas permukaan PUTIH di mode
+   * terang, dan amber di atas putih memang rasio ~1.
+   *
+   * Menggelapkannya agar terbaca di terang akan menenggelamkannya di gelap.
+   * Tidak ada satu nilai yang memuaskan keduanya — jadi perannya yang dipisah,
+   * bukan nilainya yang dicari-cari.
+   *
+   *   {aksen}-text     BERGANTI per mode. Dipakai di atas permukaan NETRAL,
+   *                    yang juga berganti per mode. Keduanya bergerak bersama.
+   *   {aksen}-surface  TETAP di kedua mode, cukup gelap untuk teks putih.
+   *                    Karena ia tidak berganti, teks di atasnya tidak perlu
+   *                    ikut berganti — dan di situlah jungkat-jungkitnya
+   *                    berhenti.
+   *
+   * Token lama TIDAK diubah, sehingga penambahan ini nol risiko. */
+  --color-warning-text: #92600a;
+  --color-success-text: #047857;
+  --color-danger-text: #b91c1c;
+  --color-info-text: #1d4ed8;
+
+  --color-warning-surface: #b45309;
+  --color-success-surface: #047857;
+  --color-danger-surface: #b91c1c;
+  --color-info-surface: #1d4ed8;
+
   /* Tiga token bernilai TETAP berikutnya, alasannya sama seperti
    * `surface-inverse`: elemennya duduk di atas permukaan yang tidak ikut
    * berganti (kartu aksen, lencana, titik penanda), sehingga warnanya memang

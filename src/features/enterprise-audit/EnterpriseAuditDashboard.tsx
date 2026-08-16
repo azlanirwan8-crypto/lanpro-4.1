@@ -162,11 +162,11 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
   const getActionStyles = (action: string) => {
     switch (action) {
       case "CREATE":
-        return "text-success bg-success/10 border-success/20";
+        return "text-success-text bg-success/10 border-success/20";
       case "UPDATE":
-        return "text-warning bg-warning/10 border-warning/20";
+        return "text-warning-text bg-warning/10 border-warning/20";
       case "DELETE":
-        return "text-danger bg-danger/10 border-danger/20";
+        return "text-danger-text bg-danger/10 border-danger/20";
       default:
         return "text-content-secondary bg-surface-sunken border-border-faint";
     }

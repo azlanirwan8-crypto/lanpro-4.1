@@ -146,9 +146,9 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                     ? "text-xs sm:text-[10px] sm:text-[8px] px-1 py-0.2"
                     : "text-xs sm:text-[11px] sm:text-[9px] px-1.5 py-0.2",
                   task.priority === "Highest" || task.priority === "High"
-                    ? "bg-danger/10 text-danger border-danger/20"
+                    ? "bg-danger/10 text-danger-text border-danger/20"
                     : task.priority === "Medium"
-                      ? "bg-warning/10 text-warning border-warning/20"
+                      ? "bg-warning/10 text-warning-text border-warning/20"
                       : "bg-surface-sunken text-content-secondary border-border-subtle"
                 )}
               >
@@ -158,7 +158,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
             {task.isBlocked && (
               <span
                 className={cn(
-                  "font-medium uppercase text-danger bg-danger/10 rounded tracking-widest animate-pulse border border-danger/20",
+                  "font-medium uppercase text-danger-text bg-danger/10 rounded tracking-widest animate-pulse border border-danger/20",
                   isCompact
                     ? "text-xs sm:text-[10px] sm:text-[8px] px-1 py-0.5"
                     : "text-xs sm:text-[11px] sm:text-[9px] px-1.5 py-0.5"
@@ -169,7 +169,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
             )}
             {hasUnfinishedSubtasks && (
               <div
-                className="text-danger cursor-help"
+                className="text-danger-text cursor-help"
                 title="Kartu terbelenggu: Selesaikan semua subtask sebelum memindahkan ke Done"
               >
                 <AlertTriangle className={cn(isCompact ? "w-3 h-3" : "w-3.5 h-3.5")} />
@@ -183,11 +183,11 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                     ? "text-xs sm:text-[10px] sm:text-[7.5px] px-1 py-0.5"
                     : "text-xs sm:text-[10px] sm:text-[8.5px] px-1.5 py-0.5",
                   qaStatus === "passed"
-                    ? "bg-success/10 text-success border border-success/20"
+                    ? "bg-success/10 text-success-text border border-success/20"
                     : qaStatus === "failed"
-                      ? "bg-danger/10 text-danger border border-danger/20 animate-pulse"
+                      ? "bg-danger/10 text-danger-text border border-danger/20 animate-pulse"
                       : qaStatus === "blocked"
-                        ? "bg-warning/10 text-warning border border-warning/20"
+                        ? "bg-warning/10 text-warning-text border border-warning/20"
                         : "bg-surface-muted text-content-muted border border-border-subtle"
                 )}
               >
@@ -209,8 +209,8 @@ export const KanbanCard = React.memo<KanbanCardProps>(
               className={cn(
                 "flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-tight select-none border animate-pulse shrink-0",
                 isOverdue
-                  ? "bg-danger/10 border-danger/20 text-danger"
-                  : "bg-warning/10 border-warning/20 text-warning"
+                  ? "bg-danger/10 border-danger/20 text-danger-text"
+                  : "bg-warning/10 border-warning/20 text-warning-text"
               )}
               title={
                 isOverdue
@@ -292,7 +292,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                 <span
                   className={cn(
                     "font-medium",
-                    percentage === 100 ? "text-success" : "text-content-secondary"
+                    percentage === 100 ? "text-success-text" : "text-content-secondary"
                   )}
                 >
                   {completedCount}/{totalCount} Subtasks ({Math.round(percentage)}%)
@@ -330,7 +330,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                     }}
                   >
                     {st.status === "Done" ? (
-                      <CheckSquare className="w-3 h-3 text-success" />
+                      <CheckSquare className="w-3 h-3 text-success-text" />
                     ) : (
                       <Square className="w-3 h-3 text-content-subtle" />
                     )}
