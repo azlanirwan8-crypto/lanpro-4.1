@@ -204,8 +204,12 @@ const getCommentsHandler = async (req: any, res: any) => {
     const pointId = req.params.pointId || req.params.id;
     const connection = await db.getConnection();
     const [rows] = await connection.query(
-      "SELECT * FROM discussion_point_comments WHERE pointId = ? OR point_id = ? ORDER BY createdAt ASC",
-      [pointId, pointId]
+      // #47 — dulu `WHERE pointId = ? OR point_id = ?`, membaca kedua sisi
+      // kolom kembar. Diukur 16 Agu 2026: keempat baris punya `pointId` terisi
+      // (4/4), jadi cabang `OR` tidak pernah menambah satu baris pun.
+      // camelCase ditetapkan sebagai sumber kebenaran — §19.38.
+      "SELECT * FROM discussion_point_comments WHERE pointId = ? ORDER BY createdAt ASC",
+      [pointId]
     );
     connection.release();
     res.json({ status: "success", data: rows });
@@ -233,20 +237,15 @@ const postCommentHandler = async (req: any, res: any) => {
     const createdAt = new Date().toISOString();
 
     await connection.query(
-      "INSERT INTO discussion_point_comments (id, pointId, point_id, userId, user_id, userName, user_name, commentText, comment_text, createdAt, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        commentId,
-        pointId,
-        pointId,
-        effectiveUserId,
-        effectiveUserId,
-        effectiveUserName,
-        effectiveUserName,
-        commentText.trim(),
-        commentText.trim(),
-        createdAt,
-        createdAt,
-      ]
+      // #47 — dulu menulis KESEBELAS kolom, memasukkan nilai yang sama dua kali
+      // ke sisi camel dan snake. Itulah yang membuat kedua sisi terisi penuh dan
+      // membuat kolom kembarnya terlihat "dipakai keduanya".
+      //
+      // Kolom snake seluruhnya nullable, dan frontend membaca camel lebih dulu
+      // (`comment.userName || comment.user_name`) — jadi berhenti menulisnya
+      // tidak mengubah apa pun yang terlihat pengguna.
+      "INSERT INTO discussion_point_comments (id, pointId, userId, userName, commentText, createdAt) VALUES (?, ?, ?, ?, ?, ?)",
+      [commentId, pointId, effectiveUserId, effectiveUserName, commentText.trim(), createdAt]
     );
     connection.release();
 
