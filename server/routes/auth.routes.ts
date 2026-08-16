@@ -4,6 +4,7 @@ import { UAParser } from "ua-parser-js";
 import db from "../../src/lib/db";
 import { authenticateJWT, activeUserSessions, generateToken } from "../middleware/auth";
 import { hashPassword } from "../helpers/hash";
+import { adalahDuplikat } from "../helpers/pgErrors";
 import { roomPengguna, sidikToken } from "../middleware/socketAuth";
 import { z } from "zod";
 import { formatUserForAuthResponse, handleUserAuthentication } from "../services/auth.service";
@@ -397,8 +398,16 @@ router.post("/api/auth/register", async (req, res) => {
         ]
       );
     } catch (insertError: any) {
-      if (insertError.code === "ER_DUP_ENTRY" || insertError.errno === 1062) {
-        console.log("User already exists (code " + insertError.code + "), ignoring insert:", email);
+      // #63 — dulu memeriksa `ER_DUP_ENTRY`/`errno 1062`, keduanya kode MySQL.
+      // PostgreSQL memakai SQLSTATE 23505, sehingga cabang penelan ini tidak
+      // pernah tercapai dan galatnya SELALU dilempar ke catch luar: pendaftaran
+      // dengan email yang sudah ada menjawab 500 "Terjadi kesalahan internal
+      // server", bukan pesan 201 yang dimaksud di bawah.
+      if (adalahDuplikat(insertError)) {
+        console.log(
+          "User sudah ada (SQLSTATE " + insertError.code + "), insert diabaikan:",
+          email
+        );
       } else {
         throw insertError;
       }

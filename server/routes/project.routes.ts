@@ -5,6 +5,7 @@ import { buatProyekDemoBni } from "../services/demo-seed.service";
 import { authenticateJWT, verifyGlobalAdmin } from "../middleware/auth";
 import { verifyProjectAccess } from "../middleware/rbac";
 import { createAuditLog } from "../services/audit.service";
+import { adalahTabelTidakAda } from "../helpers/pgErrors";
 const router = express.Router();
 
 router.get("/api/projects", async (req: any, res) => {
@@ -474,16 +475,30 @@ router.delete(
         ["DELETE FROM Projects WHERE id = ?", [projectId]],
       ];
 
+      // #62 — melewati tabel yang tidak ada, dengan cara yang benar-benar bisa
+      // bekerja di PostgreSQL.
+      //
+      // Versi sebelumnya memeriksa `ER_NO_SUCH_TABLE`/`ER_BAD_TABLE_ERROR`
+      // (kode MySQL, tidak pernah diterbitkan Postgres) lalu `continue`. Dua-duanya
+      // keliru: kodenya tak pernah cocok, DAN `continue` memang mustahil di sini —
+      // di Postgres satu galat membatalkan SELURUH transaksi, sehingga perintah
+      // berikutnya pasti gagal dengan "current transaction is aborted".
+      //
+      // SAVEPOINT menyelesaikan keduanya: tiap perintah dibatasi titik pulihnya
+      // sendiri, jadi melewati satu tabel yang hilang tidak ikut menjatuhkan
+      // 21 penghapusan lainnya.
       for (const [query, params] of cascadeQueries) {
+        await connection.query("SAVEPOINT hapus_bertingkat");
         try {
           await connection.query(query, params);
+          await connection.query("RELEASE SAVEPOINT hapus_bertingkat");
         } catch (execError: any) {
-          if (
-            execError.code === "ER_NO_SUCH_TABLE" ||
-            execError.code === "ER_BAD_TABLE_ERROR" ||
-            (execError.message && execError.message.toLowerCase().includes("exist"))
-          ) {
-            continue; // Ignore missing table errors during cascade
+          await connection.query("ROLLBACK TO SAVEPOINT hapus_bertingkat");
+          if (adalahTabelTidakAda(execError)) {
+            console.warn(
+              `[HAPUS PROYEK] Melewati tabel yang tidak ada: ${query.substring(0, 60)}`
+            );
+            continue;
           }
           throw execError;
         }
