@@ -6489,3 +6489,82 @@ Nomor item mengikuti §1 — jangan menomori ulang.
 
 Ketiga gerbang pertama **sudah terbukti bisa merah** — diuji terhadap salinan
 rusak di luar repo, bukan dengan menyabotase sumber (§0.5 aturan 4).
+
+### 19.50 Kenapa memperbaiki satu tema merusak tema lain — dan cara menghentikannya
+
+Pemilik proyek melihat teks di mode TERANG samar sampai hampir tak terbaca, lalu
+bertanya: bagaimana memperbaikinya tanpa merusak mode gelap?
+
+Pertanyaan itu menunjuk masalah struktur, bukan warna. Diukur pada layar login
+pemilik proyek, mode terang: **75 elemen di bawah rasio 4.5**, terburuk **1.0**.
+
+#### Akarnya: satu token, dua peran yang saling meniadakan
+
+| Token     | Nilai terang | Nilai gelap | Dipakai sebagai                     |
+| --------- | ------------ | ----------- | ----------------------------------- |
+| `warning` | `#f7b84b`    | `#ffca6a`   | **teks** "Medium" DAN isian lencana |
+| `success` | `#0ab39c`    | `#2fd5bd`   | **teks** DAN isian                  |
+| `danger`  | `#f06548`    | `#ff8071`   | **teks** DAN isian                  |
+
+Warna aksen **diterangkan** di mode gelap supaya terbaca sebagai TEKS di atas
+permukaan gelap. Konsekuensinya di mode terang: warna yang sama dipakai sebagai
+teks di atas permukaan **putih**, dan amber di atas putih memang rasio ~1.
+
+Menggelapkannya agar terbaca di mode terang akan membuatnya tenggelam di mode
+gelap. **Itulah jungkat-jungkitnya** — dan ia tidak bisa diselesaikan dengan
+memilih nilai yang "pas", sebab tidak ada satu nilai yang memuaskan keduanya.
+
+#### Ini bukan masalah baru — ia sudah pernah diselesaikan di repo ini
+
+`primary` mengalami hal yang sama persis: diterangkan untuk mode gelap, lalu
+dipakai sebagai latar sidebar, sehingga sidebar jadi biru muda dengan teks gelap
+di atasnya (§19.47). Penyelesaiannya **bukan** mengubah nilai `primary`,
+melainkan **memisahkan perannya**:
+
+    --color-primary          diterangkan di mode gelap   -> untuk TEKS
+    --color-primary-surface  tetap #405189 di kedua mode -> untuk ISIAN
+
+Sesudah dipisah, keduanya bisa benar sekaligus. Tidak ada lagi yang saling
+meniadakan.
+
+#### Pola yang sama, diterapkan ke seluruh aksen
+
+Yang perlu ditambahkan — tiga token per warna aksen:
+
+| Token             | Sifat                                                    | Untuk                            |
+| ----------------- | -------------------------------------------------------- | -------------------------------- |
+| `{aksen}`         | seperti sekarang                                         | tetap, agar tidak ada yang rusak |
+| `{aksen}-text`    | **berganti per mode** — gelap di terang, terang di gelap | teks di atas permukaan NETRAL    |
+| `{aksen}-surface` | **tetap** di kedua mode, cukup gelap untuk teks putih    | isian lencana dan tombol         |
+
+Contoh untuk `warning`:
+
+    :root      --color-warning-text: #92600a;   gelap, terbaca di atas putih
+    html.dark  --color-warning-text: #ffca6a;   terang, terbaca di atas gelap
+    keduanya   --color-warning-surface: #b45309; isian, dengan teks putih
+
+**Kunci mengapa ini menghentikan jungkat-jungkit:** yang berganti per mode hanya
+token yang dipakai di atas permukaan yang JUGA berganti per mode. Token untuk
+isian tidak pernah berganti, jadi teks di atasnya tidak pernah perlu ikut
+berganti.
+
+#### Urutan pengerjaan yang disarankan
+
+1. Tambahkan `{aksen}-text` dan `{aksen}-surface` untuk `warning`, `success`,
+   `danger`, `info` — **tanpa mengubah token lama**, sehingga nol risiko.
+2. Alihkan pemakaian TEKS ke `{aksen}-text`, ukur mode terang.
+3. Alihkan pemakaian ISIAN ke `{aksen}-surface`, ukur mode gelap.
+4. Baru sesudah keduanya bersih, pertimbangkan membuang token lama.
+
+Setiap langkah bisa diukur sendiri, dan **tidak ada langkah yang memperbaiki
+satu mode dengan mengorbankan mode lain.** Itu syarat yang diminta pemilik
+proyek, dan ia dipenuhi oleh urutannya — bukan oleh kehati-hatian.
+
+#### ⚠️ Catatan jujur tentang angka 75
+
+Alat ukur saya salah **empat kali** dalam sesi ini (§19.49), termasuk sekali
+mengarang 78 tabrakan palsu. Angka 75 di atas diukur ulang dengan pemindai yang
+sudah diperbaiki, dan **cocok dengan apa yang dilihat pemilik proyek di layar** —
+itu yang membuatnya bisa dipercaya, bukan alat ukurnya sendiri.
+
+Sebelum menindaklanjuti per elemen, tetap periksa beberapa kasus dengan mata.
