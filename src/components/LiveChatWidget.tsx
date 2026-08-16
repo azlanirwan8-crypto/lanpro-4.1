@@ -1201,7 +1201,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     onClick={() => setIsAttachmentMenuOpen(!isAttachmentMenuOpen)}
                     className={`p-2 rounded-xl transition-all border shrink-0 flex items-center justify-center ${
                       isAttachmentMenuOpen
-                        ? "bg-orange-500/10 border-orange-200 text-orange-600"
+                        ? "bg-orange-500/10 border-orange-500/30 text-orange-600"
                         : "bg-surface-sunken border-border-subtle text-content-muted hover:bg-surface-muted hover:text-content-strong"
                     }`}
                     title="Sisipkan file, gambar, atau mockup"

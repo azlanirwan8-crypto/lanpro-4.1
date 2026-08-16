@@ -896,7 +896,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               <div className="space-y-6">
                 {/* Header Info & Stats Bar */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2 p-5 bg-indigo-500/10 border border-indigo-100 rounded-xl flex flex-col justify-between">
+                  <div className="md:col-span-2 p-5 bg-indigo-500/10 border border-indigo-500/30 rounded-xl flex flex-col justify-between">
                     <div>
                       <span className="text-xs sm:text-[10px] text-indigo-800 font-medium uppercase tracking-widest bg-indigo-500/15 px-2.5 py-1 rounded-md">
                         Agenda Rapat Utama
@@ -974,7 +974,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           <FileText className="w-4 h-4 text-indigo-600" />
                           Hasil Speech-to-Text Mentah (Raw Transcript)
                         </h4>
-                        <span className="px-2.5 py-1 bg-indigo-500/10 border border-indigo-100 text-indigo-700 text-xs sm:text-[10px] font-medium rounded-lg">
+                        <span className="px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 text-xs sm:text-[10px] font-medium rounded-lg">
                           {transcript ? `${transcript.split(/\s+/).length} Kata` : "0 Kata"}
                         </span>
                       </div>
@@ -985,7 +985,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             setEditedTranscriptText(transcript);
                             setIsEditingTranscript(true);
                           }}
-                          className="px-3 py-1.5 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-700 text-content-body text-xs font-medium rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-xs border border-border-subtle/60 hover:border-indigo-200"
+                          className="px-3 py-1.5 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-700 text-content-body text-xs font-medium rounded-xl flex items-center gap-1.5 transition-all cursor-pointer shadow-xs border border-border-subtle/60 hover:border-indigo-500/30"
                         >
                           <Pencil className="w-3.5 h-3.5" />
                           Edit & Analisis Ulang
@@ -995,7 +995,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                     {isEditingTranscript ? (
                       <div className="space-y-4 text-left animate-fade-in">
-                        <div className="bg-amber-500/10 border border-amber-200 rounded-xl p-4 text-xs text-amber-800 leading-relaxed flex items-start gap-2.5">
+                        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-xs text-amber-800 leading-relaxed flex items-start gap-2.5">
                           <Sparkles className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5 animate-pulse" />
                           <div>
                             Mode Edit Aktif: Anda dapat menambah, mengoreksi, atau menempelkan
@@ -1099,7 +1099,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                   onClick={() => setSearchTerm(chip)}
                                   className={`px-2.5 py-1 text-xs sm:text-[10px]  rounded-lg transition-all cursor-pointer border ${
                                     searchTerm === chip
-                                      ? "bg-indigo-500/10 border-indigo-200 text-indigo-700 font-medium"
+                                      ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-700 font-medium"
                                       : "bg-surface  text-content-muted hover:text-content-body hover:bg-surface-sunken"
                                   }`}
                                 >
@@ -1109,7 +1109,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </div>
 
                             {searchTerm.trim() && (
-                              <div className="text-xs sm:text-[10px] font-medium uppercase tracking-wider px-2.5 py-1 bg-amber-500/10 border border-amber-200 text-amber-800 rounded-lg animate-pulse">
+                              <div className="text-xs sm:text-[10px] font-medium uppercase tracking-wider px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-800 rounded-lg animate-pulse">
                                 Ditemukan {getMatchCount()} kecocokan
                               </div>
                             )}
@@ -1367,7 +1367,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     Tidak ada kronologi terdeteksi.
                   </div>
                 ) : (
-                  <div className="relative border-l-2 border-indigo-100 pl-6 space-y-8 ml-3">
+                  <div className="relative border-l-2 border-indigo-500/30 pl-6 space-y-8 ml-3">
                     {activeMeetingData.tab_kronologi_rapat.map((item: any, index: number) => (
                       <div key={index} className="relative group">
                         <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-indigo-500 border-4 border-surface group-hover:scale-125 transition-transform shadow-soft" />
@@ -1379,7 +1379,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                 Topik {index + 1}
                               </span>
                               <div className="flex items-center gap-1.5">
-                                <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-100 text-indigo-700 font-mono text-xs sm:text-[10px] font-medium rounded">
+                                <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 font-mono text-xs sm:text-[10px] font-medium rounded">
                                   {item.timestamp}
                                 </span>
                                 <h4 className="text-sm font-medium text-content-strong tracking-tight leading-snug">
@@ -1422,9 +1422,9 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     {activeMeetingData.tab_kesimpulan.map((item: string, index: number) => (
                       <div
                         key={index}
-                        className="bg-surface p-4.5 rounded-xl border border-emerald-100/60 flex items-start gap-3 shadow-soft hover:border-emerald-200 transition-colors"
+                        className="bg-surface p-4.5 rounded-xl border border-emerald-500/30 flex items-start gap-3 shadow-soft hover:border-emerald-500/30 transition-colors"
                       >
-                        <span className="w-5 h-5 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 text-xs font-medium mt-0.5 border border-emerald-100">
+                        <span className="w-5 h-5 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 text-xs font-medium mt-0.5 border border-emerald-500/30">
                           {index + 1}
                         </span>
                         <p className="text-xs text-content-body leading-relaxed">{item}</p>
@@ -1452,10 +1452,10 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     {activeMeetingData.tab_saran_dan_ide.map((item: any, index: number) => (
                       <div
                         key={index}
-                        className="bg-surface p-4.5 rounded-xl border border-amber-100/60 flex flex-col gap-2 shadow-soft hover:border-amber-200 transition-colors"
+                        className="bg-surface p-4.5 rounded-xl border border-amber-500/30 flex flex-col gap-2 shadow-soft hover:border-amber-500/30 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 bg-amber-500/10 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded border border-amber-100">
+                          <span className="px-2 py-0.5 bg-amber-500/10 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded border border-amber-500/30">
                             Diusulkan Oleh: {item.diusulkan_oleh}
                           </span>
                         </div>
@@ -1507,11 +1507,11 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       return (
                         <div
                           key={index}
-                          className="bg-surface rounded-xl border border-border-subtle/80 p-5 shadow-soft flex flex-col md:flex-row justify-between items-start md:items-center gap-5 hover:border-indigo-200 transition-all"
+                          className="bg-surface rounded-xl border border-border-subtle/80 p-5 shadow-soft flex flex-col md:flex-row justify-between items-start md:items-center gap-5 hover:border-indigo-500/30 transition-all"
                         >
                           <div className="flex-1 space-y-3 min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="px-2 py-0.5 bg-rose-500/10 text-rose-600 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded border border-rose-100">
+                              <span className="px-2 py-0.5 bg-rose-500/10 text-rose-600 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded border border-rose-500/30">
                                 Concern Rapat {index + 1}
                               </span>
                             </div>
@@ -1540,7 +1540,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               onClick={() => handleConvertToTask(item, index)}
                               disabled={convertingTaskIds.includes(index)}
                               title="Buat sebagai Task Issue di Backlog"
-                              className="px-3.5 py-2.5 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-200 text-amber-700 disabled:opacity-50 text-xs font-medium rounded-xl transition-all flex items-center gap-1 cursor-pointer shadow-soft"
+                              className="px-3.5 py-2.5 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/30 text-amber-700 disabled:opacity-50 text-xs font-medium rounded-xl transition-all flex items-center gap-1 cursor-pointer shadow-soft"
                             >
                               {convertingTaskIds.includes(index) ? (
                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1551,7 +1551,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             <button
                               onClick={() => handleImportSingle(item, index)}
                               disabled={isImporting}
-                              className="px-3.5 py-2.5 bg-surface-sunken hover:bg-indigo-500/10 border border-border-subtle hover:border-indigo-100 text-content-body hover:text-indigo-700 disabled:opacity-50 text-xs font-medium rounded-xl transition-all flex items-center gap-1 cursor-pointer"
+                              className="px-3.5 py-2.5 bg-surface-sunken hover:bg-indigo-500/10 border border-border-subtle hover:border-indigo-500/30 text-content-body hover:text-indigo-700 disabled:opacity-50 text-xs font-medium rounded-xl transition-all flex items-center gap-1 cursor-pointer"
                             >
                               {isImporting ? (
                                 <>
@@ -1585,18 +1585,18 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     Tidak ada rencana lanjut khusus yang terdeteksi secara eksplisit dari rekaman.
                   </div>
                 ) : (
-                  <div className="relative border-l-2 border-pink-100 pl-6 space-y-8 ml-3">
+                  <div className="relative border-l-2 border-pink-500/30 pl-6 space-y-8 ml-3">
                     {activeMeetingData.tab_next_plan.map((item: any, index: number) => (
                       <div key={index} className="relative group">
                         <span className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full bg-pink-500 border-4 border-surface group-hover:scale-125 transition-transform shadow-soft" />
 
                         <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft hover:shadow-md transition-all">
                           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                            <span className="px-2 py-0.5 bg-pink-500/10 border border-pink-100 text-pink-700 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded">
+                            <span className="px-2 py-0.5 bg-pink-500/10 border border-pink-500/30 text-pink-700 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded">
                               Rencana Aksi {index + 1}
                             </span>
                             {item.due_date && (
-                              <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-100 text-indigo-700 text-xs sm:text-[10px] font-medium rounded-full">
+                              <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 text-xs sm:text-[10px] font-medium rounded-full">
                                 Target: {item.due_date}
                               </span>
                             )}
@@ -1643,7 +1643,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     </div>
 
                     {/* To-Be Card */}
-                    <div className="bg-indigo-500/10 border border-indigo-100 p-5 rounded-xl shadow-soft space-y-3">
+                    <div className="bg-indigo-500/10 border border-indigo-500/30 p-5 rounded-xl shadow-soft space-y-3">
                       <div className="flex items-center gap-2 text-indigo-700 font-medium text-xs sm:text-[10px] uppercase tracking-widest">
                         <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
                         Target Masa Depan (To-Be)
@@ -1671,7 +1671,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         {activeMeetingData.tab_target_to_be.langkah_transisi.map(
                           (step: string, idx: number) => (
                             <div key={idx} className="flex items-start gap-3 text-xs">
-                              <span className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-100 text-cyan-600 flex items-center justify-center font-medium shrink-0 mt-0.5">
+                              <span className="w-5 h-5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-600 flex items-center justify-center font-medium shrink-0 mt-0.5">
                                 {idx + 1}
                               </span>
                               <p className="text-content-secondary leading-relaxed mt-0.5">
@@ -1802,7 +1802,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
             {/* Modal Body */}
             <div className="p-6 space-y-4">
-              <div className="bg-indigo-500/10 border border-indigo-100 rounded-xl p-4 flex gap-3 text-left">
+              <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-4 flex gap-3 text-left">
                 <Info className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <h5 className="text-xs font-medium text-indigo-950">Bagaimana Cara Kerjanya?</h5>

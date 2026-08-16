@@ -240,7 +240,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               {passedPercent}%
             </span>
           </div>
-          <div className="bg-emerald-500/10 p-2 rounded-md border border-emerald-100 text-center">
+          <div className="bg-emerald-500/10 p-2 rounded-md border border-emerald-500/30 text-center">
             <span className="text-xs sm:text-[11px] sm:text-[9px] text-success font-medium uppercase tracking-wider block">
               PASSED
             </span>
@@ -248,7 +248,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               {passedCasesCount}
             </span>
           </div>
-          <div className="bg-rose-500/10 p-2 rounded-md border border-rose-100 text-center">
+          <div className="bg-rose-500/10 p-2 rounded-md border border-rose-500/30 text-center">
             <span className="text-xs sm:text-[11px] sm:text-[9px] text-danger font-medium uppercase tracking-wider block">
               FAILED
             </span>
@@ -256,7 +256,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               {failedCasesCount}
             </span>
           </div>
-          <div className="bg-amber-500/10 p-2 rounded-md border border-amber-100 text-center">
+          <div className="bg-amber-500/10 p-2 rounded-md border border-amber-500/30 text-center">
             <span className="text-xs sm:text-[11px] sm:text-[9px] text-warning font-medium uppercase tracking-wider block">
               BLOCKED
             </span>
@@ -509,7 +509,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                             {tc.title}
                           </span>
                           {tc.linkedBugKey && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 bg-rose-500/10 border border-rose-200/60 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium text-danger shrink-0">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 bg-rose-500/10 border border-rose-500/30 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium text-danger shrink-0">
                               <Bug className="w-2.5 h-2.5" />
                               {tc.linkedBugKey}
                             </span>
@@ -522,10 +522,10 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                         <span
                           className={`px-2 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider inline-block ${
                             tc.priority === "Critical" || tc.priority === "High"
-                              ? "bg-rose-500/10 text-danger border border-rose-200/60"
+                              ? "bg-rose-500/10 text-danger border border-rose-500/30"
                               : tc.priority === "Low"
                                 ? "bg-surface-muted text-content-secondary border border-border-subtle/60"
-                                : "bg-amber-500/10 text-warning border border-amber-200/60"
+                                : "bg-amber-500/10 text-warning border border-amber-500/30"
                           }`}
                         >
                           {tc.priority || "Medium"}
@@ -541,13 +541,13 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                             onChange={(e) => handleStatusChange(tc.id, e.target.value as any)}
                             className={`py-1 px-2.5 rounded-md text-xs sm:text-[10px] font-medium uppercase tracking-wider outline-none cursor-pointer transition-all border shadow-2xs ${
                               tc.status === "Passed"
-                                ? "bg-emerald-500/10 text-success border-emerald-200"
+                                ? "bg-emerald-500/10 text-success border-emerald-500/30"
                                 : tc.status === "Failed"
-                                  ? "bg-rose-500/10 text-danger border-rose-200"
+                                  ? "bg-rose-500/10 text-danger border-rose-500/30"
                                   : tc.status === "Blocked"
-                                    ? "bg-amber-500/10 text-warning border-amber-200"
+                                    ? "bg-amber-500/10 text-warning border-amber-500/30"
                                     : tc.status === "Retest"
-                                      ? "bg-indigo-500/10 text-indigo-700 border-indigo-200"
+                                      ? "bg-indigo-500/10 text-indigo-700 border-indigo-500/30"
                                       : "bg-surface-muted text-content-secondary border-border-subtle"
                             }`}
                           >

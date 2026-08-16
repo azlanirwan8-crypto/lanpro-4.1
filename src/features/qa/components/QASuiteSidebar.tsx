@@ -172,10 +172,10 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                     <span
                       className={`px-2 py-0.2 text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase rounded-full tracking-wider ${
                         suite.phase === "SIT"
-                          ? "bg-amber-500/10 text-amber-700 border border-amber-200/60"
+                          ? "bg-amber-500/10 text-amber-700 border border-amber-500/30"
                           : suite.phase === "UAT"
-                            ? "bg-emerald-500/10 text-emerald-700 border border-emerald-200/60"
-                            : "bg-purple-500/10 text-purple-700 border border-purple-200/60"
+                            ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"
+                            : "bg-purple-500/10 text-purple-700 border border-purple-500/30"
                       }`}
                     >
                       {suite.phase}

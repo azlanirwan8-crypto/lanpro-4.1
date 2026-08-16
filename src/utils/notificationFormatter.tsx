@@ -68,13 +68,13 @@ const renderStatusBadge = (status: string) => {
   if (s === "to do" || s === "backlog" || s === "none" || s === "unassigned") {
     colorClass = "bg-surface-muted text-content-secondary border-border-subtle/80";
   } else if (s === "in progress" || s === "dev" || s === "development" || s === "ready for dev") {
-    colorClass = "bg-blue-500/10 text-blue-700 border-blue-100";
+    colorClass = "bg-blue-500/10 text-blue-700 border-blue-500/30";
   } else if (s === "review" || s === "qa" || s === "testing" || s === "ready for qa") {
-    colorClass = "bg-amber-500/10 text-amber-700 border-amber-100";
+    colorClass = "bg-amber-500/10 text-amber-700 border-amber-500/30";
   } else if (s === "done" || s === "closed" || s === "resolved") {
-    colorClass = "bg-emerald-500/10 text-emerald-700 border-emerald-100";
+    colorClass = "bg-emerald-500/10 text-emerald-700 border-emerald-500/30";
   } else if (s === "blocked") {
-    colorClass = "bg-rose-500/10 text-rose-700 border-rose-100";
+    colorClass = "bg-rose-500/10 text-rose-700 border-rose-500/30";
   }
 
   return (
@@ -167,40 +167,40 @@ export const formatNotification = (
   switch (activityType) {
     case "bug_retest":
       icon = <Bug className="w-4 h-4 text-emerald-600" />;
-      iconBgClass = "bg-emerald-500/10 border border-emerald-100 text-emerald-600";
+      iconBgClass = "bg-emerald-500/10 border border-emerald-500/30 text-emerald-600";
       badgeText = "BUG RETEST";
-      badgeClass = "bg-emerald-500/10 text-emerald-700 border-emerald-200";
+      badgeClass = "bg-emerald-500/10 text-emerald-700 border-emerald-500/30";
       formattedTitleStr = "Bug Ready for Retest";
       break;
     case "create":
       icon = <PlusCircle className="w-4 h-4 text-emerald-600" />;
-      iconBgClass = "bg-emerald-500/10 border border-emerald-100 text-emerald-600";
+      iconBgClass = "bg-emerald-500/10 border border-emerald-500/30 text-emerald-600";
       badgeText = "TUGAS BARU";
-      badgeClass = "bg-emerald-500/10 text-emerald-700 border-emerald-200";
+      badgeClass = "bg-emerald-500/10 text-emerald-700 border-emerald-500/30";
       formattedTitleStr = "Tugas Baru Ditambahkan";
       break;
 
     case "status":
       icon = <ArrowRightLeft className="w-4 h-4 text-indigo-600" />;
-      iconBgClass = "bg-indigo-500/10 border border-indigo-100 text-indigo-600";
+      iconBgClass = "bg-indigo-500/10 border border-indigo-500/30 text-indigo-600";
       badgeText = "PERUBAHAN STATUS";
-      badgeClass = "bg-indigo-500/10 text-indigo-700 border-indigo-200";
+      badgeClass = "bg-indigo-500/10 text-indigo-700 border-indigo-500/30";
       formattedTitleStr = "Update Status Tugas";
       break;
 
     case "assignee":
       icon = <UserPlus className="w-4 h-4 text-sky-600" />;
-      iconBgClass = "bg-sky-500/10 border border-sky-100 text-sky-600";
+      iconBgClass = "bg-sky-500/10 border border-sky-500/30 text-sky-600";
       badgeText = "PENUGASAN";
-      badgeClass = "bg-sky-500/10 text-sky-700 border-sky-200";
+      badgeClass = "bg-sky-500/10 text-sky-700 border-sky-500/30";
       formattedTitleStr = "Penugasan Tugas";
       break;
 
     case "comment":
       icon = <MessageSquare className="w-4 h-4 text-violet-600" />;
-      iconBgClass = "bg-violet-500/10 border border-violet-100 text-violet-600";
+      iconBgClass = "bg-violet-500/10 border border-violet-500/30 text-violet-600";
       badgeText = "KOMENTAR";
-      badgeClass = "bg-violet-500/10 text-violet-700 border-violet-200";
+      badgeClass = "bg-violet-500/10 text-violet-700 border-violet-500/30";
       formattedTitleStr = "Komentar Baru";
       break;
 
@@ -214,17 +214,17 @@ export const formatNotification = (
 
     case "deadline":
       icon = <Clock className="w-4 h-4 text-amber-600" />;
-      iconBgClass = "bg-amber-500/10 border border-amber-100 text-amber-600 animate-pulse";
+      iconBgClass = "bg-amber-500/10 border border-amber-500/30 text-amber-600 animate-pulse";
       badgeText = "DEADLINE";
-      badgeClass = "bg-amber-500/10 text-amber-800 border-amber-200";
+      badgeClass = "bg-amber-500/10 text-amber-800 border-amber-500/30";
       formattedTitleStr = "Mendekati Tenggat Waktu";
       break;
 
     case "blocked":
       icon = <ShieldAlert className="w-4 h-4 text-rose-600" />;
-      iconBgClass = "bg-rose-500/10 border border-rose-100 text-rose-600";
+      iconBgClass = "bg-rose-500/10 border border-rose-500/30 text-rose-600";
       badgeText = "TERBLOKIR";
-      badgeClass = "bg-rose-500/10 text-rose-700 border-rose-200";
+      badgeClass = "bg-rose-500/10 text-rose-700 border-rose-500/30";
       formattedTitleStr = "Tugas Terblokir / Issue";
       break;
 

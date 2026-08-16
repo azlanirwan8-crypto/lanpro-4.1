@@ -210,18 +210,18 @@ export const ActivityLogPanel = ({
                               if (a.includes("create") || a.includes("add")) {
                                 Icon = PlusSquare;
                                 colorClass =
-                                  "text-blue-600 bg-blue-500/10 border-blue-200 group-hover:bg-blue-500/15 group-hover:text-blue-700";
-                                badgeClass = "bg-blue-500/15 text-blue-700 border-blue-200";
+                                  "text-blue-600 bg-blue-500/10 border-blue-500/30 group-hover:bg-blue-500/15 group-hover:text-blue-700";
+                                badgeClass = "bg-blue-500/15 text-blue-700 border-blue-500/30";
                               } else if (a.includes("delete") || a.includes("remove")) {
                                 Icon = Trash2;
                                 colorClass =
-                                  "text-rose-600 bg-rose-500/10 border-rose-200 group-hover:bg-rose-500/15 group-hover:text-rose-700";
-                                badgeClass = "bg-rose-500/15 text-rose-700 border-rose-200";
+                                  "text-rose-600 bg-rose-500/10 border-rose-500/30 group-hover:bg-rose-500/15 group-hover:text-rose-700";
+                                badgeClass = "bg-rose-500/15 text-rose-700 border-rose-500/30";
                               } else if (a.includes("update") || a.includes("edit")) {
                                 Icon = Edit3;
                                 colorClass =
-                                  "text-amber-600 bg-amber-500/10 border-amber-200 group-hover:bg-amber-500/15 group-hover:text-amber-700";
-                                badgeClass = "bg-amber-500/15 text-amber-700 border-amber-200";
+                                  "text-amber-600 bg-amber-500/10 border-amber-500/30 group-hover:bg-amber-500/15 group-hover:text-amber-700";
+                                badgeClass = "bg-amber-500/15 text-amber-700 border-amber-500/30";
                               } else if (
                                 a.includes("invite") ||
                                 a.includes("team") ||
@@ -229,14 +229,15 @@ export const ActivityLogPanel = ({
                               ) {
                                 Icon = Users;
                                 colorClass =
-                                  "text-emerald-600 bg-emerald-500/10 border-emerald-200 group-hover:bg-emerald-500/15 group-hover:text-emerald-700";
+                                  "text-emerald-600 bg-emerald-500/10 border-emerald-500/30 group-hover:bg-emerald-500/15 group-hover:text-emerald-700";
                                 badgeClass =
-                                  "bg-emerald-500/15 text-emerald-700 border-emerald-200";
+                                  "bg-emerald-500/15 text-emerald-700 border-emerald-500/30";
                               } else {
                                 Icon = Zap;
                                 colorClass =
-                                  "text-indigo-600 bg-indigo-500/10 border-indigo-200 group-hover:bg-indigo-500/15 group-hover:text-indigo-700";
-                                badgeClass = "bg-indigo-500/15 text-indigo-700 border-indigo-200";
+                                  "text-indigo-600 bg-indigo-500/10 border-indigo-500/30 group-hover:bg-indigo-500/15 group-hover:text-indigo-700";
+                                badgeClass =
+                                  "bg-indigo-500/15 text-indigo-700 border-indigo-500/30";
                               }
 
                               return (

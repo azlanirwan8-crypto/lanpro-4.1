@@ -141,7 +141,7 @@ export const SprintPhaseAnalysis: React.FC<SprintPhaseAnalysisProps> = ({
                         <div className="flex items-center gap-2 truncate">
                           <UserAvatar
                             user={member}
-                            className="w-5 h-5 text-xs sm:text-[10px] sm:text-[8px] border border-indigo-100 shrink-0"
+                            className="w-5 h-5 text-xs sm:text-[10px] sm:text-[8px] border border-indigo-500/30 shrink-0"
                           />
                           <span className="text-xs sm:text-[10px] font-medium text-content-body truncate uppercase tracking-tight">
                             {member?.displayName || member?.username || "Unknown"}

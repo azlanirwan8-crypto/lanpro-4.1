@@ -578,11 +578,11 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     className={cn(
                       "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium uppercase border shadow-xs",
                       editRole === "admin"
-                        ? "bg-rose-500/10 text-rose-700 border-rose-200 "
+                        ? "bg-rose-500/10 text-rose-700 border-rose-500/30 "
                         : editRole === "head"
-                          ? "bg-purple-500/10 text-purple-700 border-purple-200 "
+                          ? "bg-purple-500/10 text-purple-700 border-purple-500/30 "
                           : editRole === "user"
-                            ? "bg-indigo-500/10 text-indigo-700 border-indigo-200 "
+                            ? "bg-indigo-500/10 text-indigo-700 border-indigo-500/30 "
                             : "bg-surface-muted text-content-body border-border-subtle "
                     )}
                   >
@@ -597,10 +597,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     className={cn(
                       "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium uppercase border shadow-xs",
                       editStatus === "approved"
-                        ? "bg-emerald-500/10 text-emerald-700 border-emerald-200 "
+                        ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30 "
                         : editStatus === "pending"
-                          ? "bg-amber-500/10 text-amber-700 border-amber-200 "
-                          : "bg-rose-500/10 text-rose-700 border-rose-200 "
+                          ? "bg-amber-500/10 text-amber-700 border-amber-500/30 "
+                          : "bg-rose-500/10 text-rose-700 border-rose-500/30 "
                     )}
                   >
                     {editStatus === "approved" ? (
@@ -710,7 +710,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                       {/* Role Description Card */}
                       {editRole && ROLE_DESCRIPTIONS[editRole] && (
-                        <div className="p-2.5 rounded-md border text-xs leading-relaxed flex gap-2.5 bg-indigo-500/10 border-indigo-200 text-indigo-900 ">
+                        <div className="p-2.5 rounded-md border text-xs leading-relaxed flex gap-2.5 bg-indigo-500/10 border-indigo-500/30 text-indigo-900 ">
                           <div className="shrink-0 mt-0.5">{ROLE_DESCRIPTIONS[editRole].icon}</div>
                           <div className="space-y-0.5">
                             <p className="font-medium text-xs text-indigo-950 ">
@@ -869,7 +869,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   </div>
 
                   {editRole === "admin" && (
-                    <div className="flex items-center gap-2 text-amber-700 bg-amber-500/10 border border-amber-200 p-2.5 rounded-md text-xs">
+                    <div className="flex items-center gap-2 text-amber-700 bg-amber-500/10 border border-amber-500/30 p-2.5 rounded-md text-xs">
                       <ShieldAlert className="w-4 h-4 shrink-0 text-amber-500" />
                       <span>
                         Role <strong>Administrator</strong> memiliki akses penuh secara default,
@@ -998,7 +998,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
               {/* Form Delegasi Project Baru */}
               {isAdmin && (
-                <div className="bg-indigo-500/10 border border-indigo-100 rounded-lg p-4 shadow-xs space-y-3">
+                <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-lg p-4 shadow-xs space-y-3">
                   <div className="space-y-0.5">
                     <h4 className="font-medium text-indigo-950 text-xs uppercase tracking-wider flex items-center gap-1.5">
                       <UserPlus className="w-4 h-4 text-indigo-600 shrink-0" />
@@ -1072,7 +1072,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   {["admin", "manager", "lead"].includes(
                     selectedAssignProjectRole.toLowerCase()
                   ) && (
-                    <div className="pt-2 space-y-1.5 border-t border-indigo-100 ">
+                    <div className="pt-2 space-y-1.5 border-t border-indigo-500/30 ">
                       <label className="text-xs sm:text-[11px] font-medium text-indigo-950 uppercase tracking-wider block">
                         Pilih Sub-Tim / PIC Bawahan (Tim di bawah Project Admin ini):
                       </label>
@@ -1177,8 +1177,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 className={cn(
                                   "text-xs sm:text-[10px] font-medium uppercase px-2 py-0.5 rounded-md border",
                                   peranDikenal
-                                    ? "bg-indigo-500/15 text-indigo-700 border-indigo-200 "
-                                    : "bg-amber-500/15 text-amber-800 border-amber-300 "
+                                    ? "bg-indigo-500/15 text-indigo-700 border-indigo-500/30 "
+                                    : "bg-amber-500/15 text-amber-800 border-amber-500/30 "
                                 )}
                                 title={
                                   peranDikenal
@@ -1264,8 +1264,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           className={cn(
                             "text-xs sm:text-[10px] font-medium uppercase px-2 py-0.5 rounded-md border",
                             t.status === "completed" || t.status === "done"
-                              ? "bg-emerald-500/10 text-emerald-700 border-emerald-200 "
-                              : "bg-amber-500/10 text-amber-700 border-amber-200 "
+                              ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30 "
+                              : "bg-amber-500/10 text-amber-700 border-amber-500/30 "
                           )}
                         >
                           {t.status || "todo"}

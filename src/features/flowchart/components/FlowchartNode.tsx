@@ -384,9 +384,9 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
                 className={cn(
                   "flex items-center gap-1 text-xs sm:text-[10px] sm:text-[8.5px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded border shadow-soft cursor-pointer whitespace-nowrap",
                   linkedTask.status === "Done" || linkedTask.status === "Selesai"
-                    ? "bg-emerald-500/15 text-emerald-800 border-emerald-300"
+                    ? "bg-emerald-500/15 text-emerald-800 border-emerald-500/30"
                     : linkedTask.status === "In Progress" || linkedTask.status === "Dikerjakan"
-                      ? " text-indigo-800 border-indigo-300"
+                      ? " text-indigo-800 border-indigo-500/30"
                       : "bg-surface-muted text-content-strong "
                 )}
                 onClick={(e) => {

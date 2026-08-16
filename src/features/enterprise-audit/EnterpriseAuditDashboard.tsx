@@ -214,7 +214,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
       <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-100/60">
+            <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-500/30">
               System Audit
             </span>
             <span className="text-xs text-content-subtle font-medium">
@@ -333,7 +333,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
           {loading ? (
             <div className="flex flex-col items-center justify-center h-64 text-content-subtle">
               <div className="relative mb-4">
-                <div className="w-12 h-12 border-3 border-indigo-100 rounded-full animate-pulse" />
+                <div className="w-12 h-12 border-3 border-indigo-500/30 rounded-full animate-pulse" />
                 <div className="absolute inset-0 w-12 h-12 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin" />
               </div>
               <p className="text-xs font-medium animate-pulse uppercase tracking-wider text-content-secondary">
@@ -360,7 +360,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 >
                   {/* Log Unified Row Card */}
                   <div
-                    className="p-3.5 bg-surface border border-border-subtle/80 rounded-lg hover:border-indigo-300 shadow-2xs transition-all cursor-pointer group flex items-start gap-3.5"
+                    className="p-3.5 bg-surface border border-border-subtle/80 rounded-lg hover:border-indigo-500/30 shadow-2xs transition-all cursor-pointer group flex items-start gap-3.5"
                     onClick={() => setSelectedLog(log)}
                   >
                     {/* Action Type Icon Badge */}
@@ -368,10 +368,10 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                       className={cn(
                         "w-9 h-9 rounded-md border flex items-center justify-center shrink-0 shadow-2xs mt-0.5",
                         log.actionType === "CREATE"
-                          ? "bg-emerald-500/10 text-emerald-600 border-emerald-200"
+                          ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
                           : log.actionType === "UPDATE"
-                            ? "bg-amber-500/10 text-amber-600 border-amber-200"
-                            : "bg-rose-500/10 text-rose-600 border-rose-200"
+                            ? "bg-amber-500/10 text-amber-600 border-amber-500/30"
+                            : "bg-rose-500/10 text-rose-600 border-rose-500/30"
                       )}
                     >
                       {log.actionType === "CREATE" && <Zap className="w-4 h-4" />}
@@ -388,7 +388,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                           <span className="text-xs font-medium text-content-strong truncate">
                             {log.userName}
                           </span>
-                          <span className="text-xs sm:text-[10px] bg-indigo-500/10 text-indigo-700 font-medium px-2 py-0.2 rounded border border-indigo-100 uppercase flex items-center gap-1">
+                          <span className="text-xs sm:text-[10px] bg-indigo-500/10 text-indigo-700 font-medium px-2 py-0.2 rounded border border-indigo-500/30 uppercase flex items-center gap-1">
                             {getEntityIcon(log.entityName)}
                             {log.entityName}
                           </span>
@@ -416,7 +416,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                           </span>{" "}
                           pada entitas {log.entityName} dengan referensi ID:
                         </span>
-                        <span className="font-mono text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-1.5 py-0.2 rounded border border-indigo-100/60">
+                        <span className="font-mono text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-1.5 py-0.2 rounded border border-indigo-500/30">
                           {log.entityId}
                         </span>
                       </div>
@@ -424,12 +424,12 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                       <div className="mt-2.5 flex items-center justify-between pt-2 border-t border-border-faint">
                         <div className="flex items-center gap-2">
                           {log.oldValues && Object.keys(log.oldValues).length > 0 && (
-                            <span className="px-1.5 py-0.2 bg-rose-500/10 border border-rose-100 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium text-rose-600 uppercase">
+                            <span className="px-1.5 py-0.2 bg-rose-500/10 border border-rose-500/30 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium text-rose-600 uppercase">
                               Sebelum: {Object.keys(log.oldValues).length} keys
                             </span>
                           )}
                           {log.newValues && Object.keys(log.newValues).length > 0 && (
-                            <span className="px-1.5 py-0.2 bg-emerald-500/10 border border-emerald-100 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium text-emerald-600 uppercase">
+                            <span className="px-1.5 py-0.2 bg-emerald-500/10 border border-emerald-500/30 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium text-emerald-600 uppercase">
                               Sesudah: {Object.keys(log.newValues).length} keys
                             </span>
                           )}

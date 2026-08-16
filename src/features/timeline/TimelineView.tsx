@@ -223,7 +223,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                         setSelectedTaskForDetail(task);
                         setIsTaskDetailModalOpen(true);
                       }}
-                      className="text-xs sm:text-[11px] sm:text-[9px] font-semibold text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-200/60 rounded-md px-1.5 py-0.5 tracking-tight text-left uppercase transition-colors"
+                      className="text-xs sm:text-[11px] sm:text-[9px] font-semibold text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/30 rounded-md px-1.5 py-0.5 tracking-tight text-left uppercase transition-colors"
                     >
                       {task.key}
                     </button>
@@ -411,7 +411,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                     className="h-16 relative border-b border-border-subtle bg-transparent flex items-center"
                   >
                     <div
-                      className="absolute top-1/2 -translate-y-1/2 h-8 rounded-full shadow-soft flex items-center transition-all bg-blue-500/15 border border-blue-200/50 group/bar hover:shadow-md"
+                      className="absolute top-1/2 -translate-y-1/2 h-8 rounded-full shadow-soft flex items-center transition-all bg-blue-500/15 border border-blue-500/30 group/bar hover:shadow-md"
                       style={{ left: `${left}%`, width: `${width}%`, minWidth: "4px" }}
                     >
                       <div

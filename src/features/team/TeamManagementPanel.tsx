@@ -408,7 +408,7 @@ export const TeamManagementPanel = ({
               return (
                 <div
                   key={person.uid || i}
-                  className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col hover:border-indigo-300 transition-all duration-200 group"
+                  className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col hover:border-indigo-500/30 transition-all duration-200 group"
                 >
                   {/* Banner Header */}
                   <div className="h-16 bg-gradient-to-r from-slate-700 via-indigo-950 to-slate-900 relative p-2.5 flex items-start justify-end">
@@ -535,7 +535,7 @@ export const TeamManagementPanel = ({
                           </div>
                         </td>
                         <td className="px-5 py-3.5">
-                          <span className="inline-flex px-2.5 py-0.5 rounded-md text-xs font-medium bg-indigo-500/10 text-indigo-700 border border-indigo-100 capitalize">
+                          <span className="inline-flex px-2.5 py-0.5 rounded-md text-xs font-medium bg-indigo-500/10 text-indigo-700 border border-indigo-500/30 capitalize">
                             {isOwner ? "Project Owner" : roleName}
                           </span>
                         </td>
@@ -549,8 +549,8 @@ export const TeamManagementPanel = ({
                           <span
                             className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs sm:text-[10px] font-medium ${
                               person.isPending
-                                ? "bg-amber-500/10 text-amber-700 border border-amber-200"
-                                : "bg-emerald-500/10 text-emerald-700 border border-emerald-200"
+                                ? "bg-amber-500/10 text-amber-700 border border-amber-500/30"
+                                : "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"
                             }`}
                           >
                             <div
@@ -604,7 +604,7 @@ export const TeamManagementPanel = ({
                   user={selectedProfileUser}
                   className="w-20 h-20 border-4 border-surface shadow-md text-xl"
                 />
-                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
+                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-700 text-xs font-medium rounded-full border border-emerald-500/30">
                   Joined Project
                 </span>
               </div>

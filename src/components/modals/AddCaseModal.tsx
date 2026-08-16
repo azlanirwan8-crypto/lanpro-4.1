@@ -208,7 +208,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
             // Bulk Upload Tab
             <form onSubmit={onSubmitBulk} className="space-y-4">
               {/* Download Template Banner */}
-              <div className="flex items-center justify-between bg-indigo-500/10 border border-indigo-100 p-3 rounded-md">
+              <div className="flex items-center justify-between bg-indigo-500/10 border border-indigo-500/30 p-3 rounded-md">
                 <div>
                   <h4 className="text-xs font-medium text-primary">Butuh Berkas Template Excel?</h4>
                   <p className="text-xs sm:text-[10px] text-content-muted font-medium">

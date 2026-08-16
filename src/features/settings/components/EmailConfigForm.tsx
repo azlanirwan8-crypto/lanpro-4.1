@@ -105,7 +105,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
       <div className="flex flex-wrap gap-2.5 items-center mt-4 pt-3 border-t border-border-faint">
         <button
           onClick={() => setIsTemplateModalOpen(true)}
-          className="flex items-center gap-1.5 border border-indigo-200 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/15 px-3 py-1.5 rounded-md text-xs font-medium transition mr-auto shadow-2xs cursor-pointer active:scale-95"
+          className="flex items-center gap-1.5 border border-indigo-500/30 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/15 px-3 py-1.5 rounded-md text-xs font-medium transition mr-auto shadow-2xs cursor-pointer active:scale-95"
         >
           <FileEdit size={14} />
           Edit Broadcast Template
