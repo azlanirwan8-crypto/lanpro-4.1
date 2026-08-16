@@ -10,8 +10,8 @@ import jwt from "jsonwebtoken";
 import { getJwtSecret } from "../middleware/auth";
 import { validateFileBuffer } from "../../src/lib/fileSecurity";
 import { simpanBerkas, hapusBerkas } from "../services/storage.service";
-
-const AVATAR_ALLOWED_EXT = new Set(["png", "jpg", "jpeg", "webp", "gif"]);
+import { sanitizeAvatarValue, AVATAR_ALLOWED_EXT } from "../helpers/avatarValue";
+export { sanitizeAvatarValue };
 
 /**
  * Menyaring nilai avatar yang boleh masuk ke kolom Users.
@@ -30,24 +30,6 @@ const AVATAR_ALLOWED_EXT = new Set(["png", "jpg", "jpeg", "webp", "gif"]);
  * `/uploads/avatar-<sesuatu>.<ext>` tanpa query string. Nilai lain ditolak
  * menjadi null sehingga UI jatuh ke inisial nama, bukan ke gambar yang salah.
  */
-export function sanitizeAvatarValue(nilai: unknown): string | null {
-  if (nilai === null || nilai === undefined) return null;
-  if (typeof nilai !== "string") return null;
-  const v = nilai.trim();
-  if (v === "") return null;
-
-  // Tolak query string: di situlah presigned token menumpang.
-  if (v.includes("?") || v.includes("#")) return null;
-  // Tolak URL absolut dan protokol apa pun (termasuk data: dan javascript:).
-  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v) || v.startsWith("//")) return null;
-  // Tolak upaya keluar direktori.
-  if (v.includes("..")) return null;
-
-  const cocok = /^\/uploads\/(avatar-[A-Za-z0-9._-]+)\.([A-Za-z0-9]+)$/.exec(v);
-  if (!cocok) return null;
-  if (!AVATAR_ALLOWED_EXT.has(cocok[2].toLowerCase())) return null;
-  return v;
-}
 
 /**
  * Menghapus berkas avatar lama saat pengguna menggantinya.
