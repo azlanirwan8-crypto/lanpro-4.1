@@ -227,7 +227,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 82 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 85 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -299,6 +299,9 @@ lepas. Catatan lepas selalu terlupakan.
 | 81  | `ProjectMembers.parentAdminId` ditulis tapi TIDAK PERNAH dibaca — 6 baris, nol `SELECT`  |  **F7**  | 🟡  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §19.2  |
 | 82  | Dropdown peran HARDCODED, tidak membaca katalog `MasterData` — duplikat & nilai bentrok |  **F7**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §19.12 |
 | 83  | `Users.department` & `Users.position` TIDAK fungsional — rancangan §19.4 belum bisa jalan |  **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §19.13 |
+| 84  | ~~Master Data bolong & tanpa konvensi penyimpanan~~ dirapikan, semua bertipe `code`   |  **F7**  | 🟠  | Sedang        |          Tidak          | `SELESAI` 16 Agu         | §19.14 |
+| 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)     |  **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §19.14 |
+| 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)     |  **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §19.14 |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -3981,5 +3984,104 @@ Rancangan yang menyebut sebuah kolom **tidak otomatis berarti kolom itu bekerja*
 tersimpan. Sebelum sebuah atribut dipakai untuk otorisasi, periksa dulu apakah
 ada yang membacanya — persis pemeriksaan yang menemukan #81 (`parentAdminId`)
 dan #83 ini.
+
+---
+
+### 19.14 Perapian Master Data — #84 SELESAI, #85 & #86 menunggu
+
+Diminta pemilik proyek 16 Agu 2026: *"saya melihat data master kita masih data
+tidak sesuai, baru yang role ok, sisanya bolong-bolong"*, dengan izin hard
+update/hard delete. Dikerjakan lewat `npm run db:seed-master` — idempoten.
+
+#### 19.14.1 Masalah yang ditemukan
+
+Bukan sekadar data kurang. Yang terberat: **tidak ada konvensi apa yang
+disimpan**.
+
+| Kolom data hidup | Isinya | Masalah |
+| ---------------- | ------ | ------- |
+| `Users.department` | `dept-1` (9) · `Technology & IT` (1) | id dan label bercampur; labelnya bahkan tidak ada di master (master menyebut `IT & Technology`) |
+| `Users.position` | UUID (2) · `jab-2` (5) · `Project Manager` · `System Administrator` | **empat format berbeda** |
+| `Projects.category` | `Agile` | tidak ada di master mana pun |
+| `Projects.status` | `Active` | tidak ada master status proyek |
+| `Documents.type` | `flowchart` | tidak ada di `jenis_dokumen` |
+
+Ditambah data yang bolong: satu baris sampah berlabel `"n"` di `priority`,
+lima baris ber-`order=0` tanpa metadata, dan `environment` tidak punya **SIT**
+padahal `QATestCases.tipeTesting` sudah memakainya.
+
+#### 19.14.2 Yang dikerjakan
+
+Acuan: konvensi Jira, GitLab, dan Azure DevOps. Tipe khas domain LanPro —
+`fitur`, `modul_aplikasi`, `release`, `system`, `surrounding` — tidak
+diseragamkan ke benchmark mana pun karena memang milik domain ini.
+
+| Tipe | Hasil |
+| ---- | ----- |
+| `priority` | **5 tingkat** Jira: Highest · High · Medium · Low · Lowest. Baris `"n"` dihapus, `Urgent` digantikan `Highest` |
+| `status` | **8 keadaan**: Backlog · To Do · In Progress · In Review · Testing · **Blocked** · Done · **Cancelled**. Blocked & Cancelled sebelumnya tidak ada, padahal keduanya keadaan nyata |
+| `issue_type` | 5 jenis Jira; label sudah benar, tinggal kode & metadata |
+| `environment` | **SIT ditambahkan** di antara DEV dan STG |
+| `jenis_dokumen` | 5 → **8**, ditambah Test Plan, Flowchart, Meeting Minutes |
+| `project_status` | **TIPE BARU** — `Projects.status` sudah berisi `Active` tanpa master |
+| `methodology` | **TIPE BARU** — `Projects.category` berisi `Agile` tanpa master |
+| `department`, `jabatan`, `fitur`, `system`, `release`, `surrounding` | label dipertahankan, metadata & kode dilengkapi |
+
+**Aturan yang dipegang:** label yang SEDANG DIPAKAI data hidup tidak diubah.
+Mengubah `To Do` menjadi `Todo` akan membuat 27 task kehilangan statusnya.
+
+#### 19.14.3 Dedup dan migrasi rujukan
+
+Penyemaian pertama **menduplikasi** — baris lama memakai pola id beragam
+(`prio-2`, `stat-1`, `dept-1`, UUID), sehingga baris baru berdampingan alih-alih
+menimpa. Ditambahkan tahap dedup dengan aturan: bila satu label punya dua baris
+dan salah satunya sudah ber-kode, yang tanpa kode adalah duplikat.
+
+**21 duplikat dihapus**, dan sebelum dibuang rujukan data hidup dipindahkan:
+
+```
+Users.department : 9 baris  dept-1 -> ecd
+Users.position   : 9 baris  id/label -> kode
+```
+
+Hasil akhir: **16 tipe, seluruhnya 100% ber-kode.**
+
+⚠️ **Dua nilai yatim sengaja TIDAK ditebak**, hanya dilaporkan:
+`Users.department = "Technology & IT"` (1 baris) dan
+`Users.position = "System Administrator"` (1 baris). Menebak pemetaannya persis
+cara `Technology & IT` dulu tersimpan padahal master menyebutnya
+`IT & Technology`.
+
+#### 19.14.4 Daftar tipe di antarmuka juga hardcoded
+
+Ditemukan saat verifikasi: dua tipe baru **tidak muncul di layar**. Penyebabnya
+`MasterDataPanel.tsx` mencantumkan 14 tipe secara tetap, sehingga tipe baru di
+database tidak pernah terlihat sampai berkas itu ikut disunting.
+
+Diperbaiki sesuai aturan §0.5 nomor 9 — daftar tipe kini **diturunkan dari
+data**, dengan peta label hanya untuk memperindah nama yang dikenal. Menambah
+tipe baru cukup lewat database.
+
+#### 19.14.5 #85 — `category` memuat dua konsep
+
+`category` berisi campuran:
+
+| Isi | Sebenarnya |
+| --- | ---------- |
+| Backend · Frontend · DevOps | area teknis |
+| Bug · Enhancement · New Feature · Maintenance | jenis pekerjaan — **menduplikasi `issue_type`** |
+
+Kode dilengkapi agar konsisten, tetapi **pemisahannya menunggu keputusan**.
+Pilihan: pecah jadi `tech_area` + buang yang menduplikasi `issue_type`, atau
+biarkan sebagai kategori bebas.
+
+#### 19.14.6 #86 — `modul_aplikasi` punya dua sumber
+
+`MasterDataPanel.tsx:485` menghitung `modul_aplikasi` dari tabel
+**`ProjectModules`**, bukan dari `MasterData` — sementara `MasterData` punya 4
+baris bertipe `modul_aplikasi` yang tidak pernah ditampilkan.
+
+Jadi satu konsep punya dua sumber, dan yang di Master Data efektif **data mati**.
+Perlu diputuskan mana yang menjadi sumber kebenaran.
 
 ---
