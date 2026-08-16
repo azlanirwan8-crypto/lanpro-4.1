@@ -6252,3 +6252,57 @@ diganti token, dan `npm run audit:warna` menjaga agar tidak kembali.
 
 Yang tersisa adalah tujuh keputusan **desain**, dan semuanya sudah terukur
 angkanya sehingga bisa diputuskan tanpa menebak.
+
+### 19.48 Keputusan pemilik proyek atas tujuh item — 16 Agu 2026
+
+| #      | Keputusan                                                                  | Status     |
+| ------ | -------------------------------------------------------------------------- | ---------- |
+| **74** | **Kerjakan.** Penjaga respons basi dipasang                                | jalan      |
+| **77** | Turunkan **atau** ganti pustaka — ⚠️ **belum tegas mana**                  | menunggu   |
+| **83** | **Department Head = READ pada proyek yang ia ditugaskan**                  | ditetapkan |
+| **85** | belum dijawab                                                              | menunggu   |
+| **86** | **Setuju** — `ProjectModules` sumber kebenaran, 4 baris MasterData dibuang | jalan      |
+| **87** | **Lakukan**                                                                | jalan      |
+| **92** | belum dijawab                                                              | menunggu   |
+
+#### #83 — ketetapan yang akhirnya menjawab pertanyaan lama A/B/C
+
+Rumusan pemilik proyek: _"ketika admin assign atau memasukkan head ke dalam
+project sebagai head department, maka dia bisa Read saja."_
+
+Ini **bukan** salah satu dari tiga pilihan lama, melainkan yang keempat — dan
+lebih sederhana dari ketiganya:
+
+| Pilihan lama  | Isi                                                             | Nasib                                             |
+| ------------- | --------------------------------------------------------------- | ------------------------------------------------- |
+| A             | hanya proyek yang ia anggotai                                   | mendekati, tetapi tidak menyebut tingkat aksesnya |
+| B             | buat `department` fungsional, pakai kolom `Projects.department` | **tidak jadi**                                    |
+| C             | semua proyek                                                    | **tidak jadi**                                    |
+| **Ketetapan** | **anggota proyek seperti biasa, dengan akses R**                | **dipakai**                                       |
+
+Akibatnya penting dan menyederhanakan: **`Users.department` tidak perlu
+difungsikan sama sekali.** Department Head tidak memerlukan konsep departemen
+untuk bekerja — ia cukup ditambahkan ke proyek seperti anggota lain, dan
+tingkat aksesnya yang membedakan.
+
+Artinya `head` **bukan** peran sistem yang menembus proyek, melainkan **peran
+proyek** dengan matriks R di seluruh modul. Itu sejalan dengan §19.6 aturan 1
+("di dalam proyek, system role tidak dipakai kecuali Administrator") tanpa
+perlu pengecualian apa pun.
+
+⚠️ Yang perlu ditambahkan ke §19.5: baris peran proyek untuk Department Head
+dengan `R` di seluruh modul — mirip `Viewer`, tetapi dibedakan namanya karena
+maknanya organisasional.
+
+#### ⚠️ #77 belum bisa dikerjakan
+
+Jawabannya menyebut **dua** jalan sekaligus ("turunkan · ganti pustaka"), dan
+keduanya berlawanan akibatnya:
+
+| Jalan                         | Akibat                                                                  |
+| ----------------------------- | ----------------------------------------------------------------------- |
+| **Turunkan** ke `exceljs@3.x` | cepat, tetapi versi mayor MUNDUR — ekspor Excel yang ada berisiko rusak |
+| **Ganti pustaka**             | tidak mundur, tetapi menulis ulang satu-satunya berkas yang memakainya  |
+
+Menebak salah satunya berarti mempertaruhkan fitur ekspor atas dasar yang tidak
+pernah dinyatakan. Dibiarkan `MENUNGGU` sampai dipilih satu.
