@@ -151,6 +151,7 @@ Ini bukan preferensi gaya; semuanya lahir dari insiden nyata di repo ini.
 | Kunci token localStorage           | **`lanpro_jwt_token`**, bukan `'token'`                                                                                                                        |
 | Console peramban saat HMR          | Vite menyisakan error dari versi berkas yang sedang diedit. **Verifikasi di tab bersih**, bukan setelah hot-reload                                             |
 | Menambah test                      | Periksa jumlahnya benar-benar bertambah — Prettier pernah membuat penyisipan gagal diam-diam                                                                   |
+| Cek tabel lewat `information_schema` | Adaptor MENCEGAT kueri itu dan mengembalikan `{tableName, rowCount, sizeBytes}` — BUKAN `table_name`. Memakai `table_name` menghasilkan `undefined` untuk SEMUA baris (#78) |
 
 ### 0.7 Peta berkas SSO
 
@@ -220,7 +221,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 76 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 77 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -286,6 +287,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 75  | Angka §13.1 & ARCHITECTURE drift lagi: 21 `useState` aktualnya 11, 104 rute aktualnya 119 |  **F0**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §13.12 |
 | 76  | Otorisasi tidak deny-by-default — akar 56% temuan F2 (14 dari 25 masuk OWASP A01)        |  **F7**  | 🔴  | Sedang        | Ya (blokir production)  | `MENUNGGU` keputusan     | §18.3  |
 | 77  | 4 kerentanan `moderate` di dependensi — hanya tertutup lewat kenaikan versi mayor      |  **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan     | §18.7  |
+| 78  | Kode menulis ke tabel `TaskAttachments` yang TIDAK ADA di DB — lampiran task selalu gagal |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.13 |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -2491,6 +2493,71 @@ angka dokumen memburuk lagi begitu kode bergerak. Dicatat sebagai temuan
 tersendiri supaya polanya terlihat, bukan diperbaiki diam-diam.
 
 ---
+
+### 13.13 Temuan #78 — tabel `TaskAttachments` tidak ada di database
+
+Ditemukan 16 Agu 2026 saat mengukur volume berkas untuk memilih penyedia
+penyimpanan — bukan dari audit yang direncanakan. Dicatat karena cara
+menemukannya sendiri berguna: **pertanyaan sizing memaksa melihat data nyata**,
+dan data nyata membantah kode.
+
+#### Yang terjadi
+
+| Lokasi | Tabel yang dipakai | Ada di database? |
+| ------ | ------------------ | :--------------: |
+| `server/routes/task.routes.ts:419` — menyimpan lampiran task | `TaskAttachments` | ❌ **TIDAK ADA** |
+| `server/routes/project.routes.ts:439` — membersihkan saat proyek dihapus | `Attachments` | ✅ ada |
+
+Diverifikasi ke `information_schema` pada database hidup: **30 tabel**, tidak
+satu pun bernama `TaskAttachments`. Yang ada adalah `Attachments`.
+
+Akibatnya **membuat task dengan lampiran SELALU gagal** — `INSERT` melempar
+`42P01 relation does not exist`.
+
+#### Interaksinya dengan #61, dan kenapa itu penting
+
+Perilakunya berubah karena perbaikan #61, dan perubahan itu perlu dicatat supaya
+tidak disalahpahami sebagai regresi:
+
+| | Sebelum #61 | Sesudah #61 |
+| --- | --- | --- |
+| Penghitung task | Bertambah permanen | Dikembalikan |
+| Baris task | **Tercipta**, lalu yatim tanpa lampiran | Tidak tercipta |
+| Jawaban ke pengguna | 500 | 500 |
+
+Jadi #61 **tidak menyebabkan** kegagalan ini — jalur itu sudah gagal sebelumnya,
+hanya menyisakan task yatim. Sesudah #61 kegagalannya menjadi bersih: tidak ada
+task setengah jadi. Tetap 500, tetap harus diperbaiki.
+
+Bahwa bug ini bertahan sekian lama menunjukkan jalur lampiran task **belum
+pernah benar-benar dijalankan** — sejalan dengan §14.2 yang mencatat seluruh
+9 alur ujung-ke-ujung masih `TERBUKA`.
+
+#### Yang perlu diputuskan sebelum diperbaiki
+
+Bukan sekadar mengganti nama tabel. Perlu dipastikan lebih dulu:
+
+1. `Attachments` yang ada sekarang — apakah skemanya cocok dengan kolom yang
+   ditulis `task.routes.ts` (`id, taskId, name, url, fileType, uploadedByName,
+   createdAt`)?
+2. Bila cocok: cukup samakan nama, dan `project.routes.ts` sudah benar.
+3. Bila tidak cocok: `TaskAttachments` perlu dibuat lewat sistem migrasi tunggal
+   (#1), DAN `project.routes.ts:439` ikut diperbaiki agar membersihkannya —
+   kalau tidak, lampiran tertinggal saat proyek dihapus.
+
+⚠️ Jangan diperbaiki dengan `CREATE TABLE` manual di luar sistem migrasi. Item #1
+menyatukan tiga sistem migrasi jadi satu justru supaya keadaan seperti ini tidak
+lahir lagi.
+
+#### Jebakan yang ikut ditemukan
+
+Adaptor `src/lib/db.ts` **mencegat kueri `information_schema`** dan mengembalikan
+bentuknya sendiri — `{ tableName, rowCount, sizeBytes }`, bukan `{ table_name }`.
+Memeriksa keberadaan tabel dengan `x.table_name` mengembalikan `undefined` untuk
+SEMUA baris, sehingga tampak seperti "tidak ada tabel apa pun". Pakai `tableName`.
+
+---
+
 
 ## §14 Checklist audit UI (isi kerja F3, item #17)
 
