@@ -1003,7 +1003,7 @@ export const MasterDataPanel = ({
       >
         <div className="space-y-6">
           {/* Live Preview Badge Component */}
-          <div className="p-4 bg-surface-inverse text-content-inverse rounded-xl flex items-center justify-between shadow-soft-lg border border-border-inverse">
+          <div className="p-4 bg-surface-inverse-strong text-content-inverse rounded-xl flex items-center justify-between shadow-soft-lg border border-border-inverse">
             <div className="flex items-center gap-3.5">
               <div
                 className="w-11 h-11 rounded-xl flex items-center justify-center bg-surface/10 shadow-inner"
@@ -1296,7 +1296,7 @@ export const MasterDataPanel = ({
         {editingMaster && (
           <div className="space-y-6">
             {/* Live Preview Badge */}
-            <div className="p-4 bg-surface-inverse text-content-inverse rounded-xl flex items-center justify-between shadow-soft-lg border border-border-inverse">
+            <div className="p-4 bg-surface-inverse-strong text-content-inverse rounded-xl flex items-center justify-between shadow-soft-lg border border-border-inverse">
               <div className="flex items-center gap-3.5">
                 <div
                   className="w-11 h-11 rounded-xl flex items-center justify-center bg-surface/10 shadow-inner"

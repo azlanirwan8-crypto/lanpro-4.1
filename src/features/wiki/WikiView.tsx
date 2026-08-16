@@ -1035,7 +1035,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         className={cn(
                           "flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs border rounded-md transition-all cursor-pointer whitespace-nowrap shadow-2xs",
                           isFullscreenPreview
-                            ? "bg-surface-inverse border-slate-900 text-content-inverse hover:bg-surface-inverse"
+                            ? "bg-surface-inverse-strong border-slate-900 text-content-inverse hover:bg-surface-inverse-strong"
                             : "bg-surface border-border-subtle text-content-body hover:bg-surface-sunken"
                         )}
                         title={isFullscreenPreview ? "Keluar Layar Penuh" : "Pratinjau Layar Penuh"}

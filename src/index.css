@@ -43,6 +43,11 @@
    * SAMA di `:root` dan `html.dark`. Dengan begitu warna keras bisa dicabut
    * tanpa mengubah satu piksel pun di kedua mode. */
   --color-surface-inverse: #1e293b;
+  /* Setingkat lebih gelap. Ditambahkan sesudah pemilik proyek melihat kartu
+   * aksen terbaca "terlalu terang": 31 pemakaian `bg-slate-900` (#0f172a)
+   * sempat dipetakan ke `surface-inverse` (#1e293b) — lebih terang, dan itu
+   * satu-satunya konversi teks/latar yang TIDAK byte-identik. */
+  --color-surface-inverse-strong: #0f172a;
   --color-border-inverse: #334155;
   --color-content-inverse: #ffffff;
 
@@ -116,6 +121,7 @@ html.dark {
 
   /* Sengaja SAMA dengan mode terang — lihat catatan di `:root`. */
   --color-surface-inverse: #1e293b;
+  --color-surface-inverse-strong: #0f172a;
   --color-border-inverse: #334155;
   --color-content-inverse: #ffffff;
 

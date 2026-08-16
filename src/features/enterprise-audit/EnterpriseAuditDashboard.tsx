@@ -545,7 +545,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                   <summary className="text-xs sm:text-[10px] font-medium text-content-subtle cursor-pointer uppercase hover:text-content-secondary transition-colors">
                     Tampilkan Raw Technical Trace (JSON)
                   </summary>
-                  <div className="mt-4 p-4 rounded-xl bg-surface-inverse text-indigo-400 font-mono text-xs sm:text-[10px] overflow-x-auto border border-border-inverse">
+                  <div className="mt-4 p-4 rounded-xl bg-surface-inverse-strong text-indigo-400 font-mono text-xs sm:text-[10px] overflow-x-auto border border-border-inverse">
                     <pre>{JSON.stringify(selectedLog, null, 2)}</pre>
                   </div>
                 </details>
@@ -557,7 +557,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 </p>
                 <button
                   onClick={() => setSelectedLog(null)}
-                  className="px-8 py-3 bg-surface-inverse text-content-inverse text-xs font-medium rounded-xl hover:bg-surface-inverse transition-all shadow-xl hover:shadow-2xl shadow-slate-200 active:scale-95"
+                  className="px-8 py-3 bg-surface-inverse-strong text-content-inverse text-xs font-medium rounded-xl hover:bg-surface-inverse-strong transition-all shadow-xl hover:shadow-2xl shadow-slate-200 active:scale-95"
                 >
                   SELESAI MENINJAU
                 </button>

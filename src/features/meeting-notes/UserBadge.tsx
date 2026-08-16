@@ -68,10 +68,10 @@ export const UserBadge = ({
 
       {/* Floating Hover Tooltip (NAME ONLY) */}
       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/avatar:flex flex-col items-center z-50 pointer-events-none animate-in fade-in zoom-in-95 duration-150">
-        <div className="bg-surface-inverse text-content-inverse px-2.5 py-1 rounded-lg text-xs sm:text-[10px] font-medium whitespace-nowrap shadow-xl border border-border-inverse">
+        <div className="bg-surface-inverse-strong text-content-inverse px-2.5 py-1 rounded-lg text-xs sm:text-[10px] font-medium whitespace-nowrap shadow-xl border border-border-inverse">
           <span>{name}</span>
         </div>
-        <div className="w-2 h-2 bg-surface-inverse rotate-45 -mt-1"></div>
+        <div className="w-2 h-2 bg-surface-inverse-strong rotate-45 -mt-1"></div>
       </div>
     </div>
   );
