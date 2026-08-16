@@ -6077,3 +6077,89 @@ keadaan Dashboard sekarang.
 ⚠️ **Belum diverifikasi di layar.** Analisis ini statis terhadap kelas. Yang
 membuktikannya hanya menyalakan mode gelap lewat antarmuka dan membuka Dashboard
 — dan itu memerlukan sesi login pemilik proyek (§0.5 aturan 5).
+
+### 19.46 Saran menuntaskan tema gelap — berurutan, yang pertama paling menentukan
+
+Diminta pemilik proyek. Keadaan sesudah tiga gelombang: **606 kelas
+dikonversi**, sisa **336 di 70 berkas**, dan **569 `#hex`** belum disentuh.
+
+#### 1. Pasang gerbang DULU, sebelum mengonversi sisanya
+
+Ini yang paling menentukan, dan bukan karena rapi.
+
+606 kelas dikonversi **tanpa satu pun pemeriksaan otomatis yang bisa
+menggagalkannya.** `tsc`, 404 test, dan `build` semuanya hijau — dan ketiganya
+akan tetap hijau seandainya seluruh konversi itu salah, sebab kelas Tailwind
+hanyalah string bagi mereka.
+
+Artinya hari ini tidak ada apa pun yang mencegah warna keras kembali masuk
+besok. Tanpa gerbang, 606 konversi itu akan tergerus lagi satu demi satu,
+persis seperti `dark:` yang dulu tumbuh jadi 532.
+
+Yang perlu dibuat: `npm run audit:warna` — gagal bila muncul kelas warna keras
+BARU di luar daftar yang sengaja dikecualikan. Pola dan daftar kecualinya sudah
+ada di `scripts/fix/warna-ke-token.cjs`; tinggal dibalik menjadi pemeriksa.
+
+**Token sudah lengkap** — diperiksa: setiap token di `:root` punya nilai di
+`html.dark`, nol yang tertinggal. Itu prasyarat yang sudah aman.
+
+#### 2. Tiga token lagi menutup hampir seluruh sisa
+
+Sisa 336 bukan 336 masalah berbeda; ia empat kelompok:
+
+| Sisa                                                        | Jumlah | Yang dibutuhkan                                                          |
+| ----------------------------------------------------------- | -----: | ------------------------------------------------------------------------ |
+| Lapisan ber-opasitas (`bg-slate-900/60`, `bg-slate-200/60`) |     36 | `--color-overlay` — nilai TETAP di kedua mode, seperti `surface-inverse` |
+| `border-white`, `border-black/10`                           |     34 | `--color-border-inverse-subtle`                                          |
+| `bg-slate-300`, `text-slate-100/200`, `bg-slate-700`        |    ~46 | perluas `surface-strong` / `content-inverse` ke satu tingkat lagi        |
+
+Polanya sudah terbukti di gelombang 3: **token bernilai tetap membuat warna
+keras bisa dicabut tanpa mengubah satu piksel pun.** Yang tersisa hanya
+menerapkannya pada tiga kelompok di atas.
+
+#### 3. ⚠️ Temuan yang muncul saat mengukur: 22 kelas yang TIDAK ADA
+
+`text-slate-450` (12×) dan `text-slate-650` (10×) dipakai di
+`flowchart/components/CanvasContextMenu.tsx`. **Tailwind tidak punya tingkat
+450 maupun 650**, dan `src/index.css` tidak mendefinisikannya — nol kecocokan.
+
+Kelas-kelas itu **tidak menghasilkan apa pun**. Sebagian bahkan berdampingan
+dengan token yang benar pada elemen yang sama:
+
+```
+className="… text-slate-450 text-content-subtle"
+```
+
+Jadi selama ini warnanya datang dari token di sebelahnya, sementara
+`text-slate-450` hanya menumpang tanpa efek. Ia tidak berbahaya, tetapi ia
+membuat pengukuran warna keras melaporkan angka yang lebih besar dari kenyataan
+— dan menyesatkan siapa pun yang membacanya sebagai pekerjaan tersisa.
+
+**Saran: buang keduanya**, jangan dipetakan. Memetakan kelas yang tidak pernah
+berlaku berarti mengubah tampilan dengan menyamar sebagai kerapian.
+
+#### 4. `#hex` ditunda, dan alasannya
+
+569 hex di 27 berkas, **315 di antaranya di `flowchart/lib/shapes.tsx`**.
+Berdasarkan letaknya, itu kemungkinan besar **warna data diagram** — palet
+bentuk, bukan warna tema. Mengonversinya ke token justru akan membuat diagram
+kehilangan pembeda antar bentuk.
+
+Yang perlu dilakukan lebih dulu: **pisahkan mana hex yang tema dan mana yang
+data.** Sebelum pemisahan itu, angka 569 tidak boleh dibaca sebagai utang tema.
+
+#### 5. Verifikasi layar — sekali, tetapi terarah
+
+Konversi ini menyentuh 76 berkas tanpa satu pun bukti visual. Yang paling
+efisien bukan membuka semua layar, melainkan yang **paling banyak berubah**:
+
+1. Dashboard — permukaan kartu terbanyak
+2. Modal mana pun — `surface-inverse` dan `content-inverse` paling padat di sana
+3. Issue List — tabel, tempat garis dan latar bertumpuk
+4. Flowchart — satu-satunya yang memakai hex dalam jumlah besar
+
+Bila keempatnya benar dalam mode gelap DAN mode terang, sisanya kecil
+kemungkinannya salah — sebab semuanya memakai token yang sama.
+
+**Urutan yang saya sarankan: 1 → 3 → 2 → 5 → 4.** Gerbang lebih dulu, sebab
+tanpa itu setiap langkah berikutnya bisa tergerus tanpa ada yang tahu.
