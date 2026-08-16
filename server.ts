@@ -549,14 +549,8 @@ async function startServer() {
   // galatnya — pesan galat database bisa memuat detail koneksi, dan endpoint
   // ini bisa diakses tanpa autentikasi. Rinciannya ada di /api/health yang
   // terlindungi.
-  app.get("/api/health-check", (req, res) => {
-    const migrasi = statusMigrasi();
-    res.json({
-      status: migrasi.status === "gagal" ? "degraded" : "ok",
-      timestamp: new Date().toISOString(),
-      migrasi: migrasi.status,
-    });
-  });
+  // `/api/health-check` DIPINDAHKAN ke `server/routes/health.routes.ts` (#57).
+  // Jalurnya tidak berubah, jadi `publicRoutes` di atas tetap berlaku.
 
   const { default: fileRoutes } = await import('./server/routes/file.routes.ts');
   app.use(fileRoutes);

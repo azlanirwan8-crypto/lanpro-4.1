@@ -605,15 +605,21 @@ router.put("/api/projects/:id/members", authenticateJWT, verifyGlobalAdmin, asyn
                 [id, resolvedTmId]
               );
 
-              if ((tmExisting as any[]).length > 0) {
+              // #81 — `parentAdminId` TIDAK LAGI DITULIS, atas keputusan pemilik
+              // proyek 16 Agu 2026. Diukur: 4 kemunculan di seluruh repo, dan
+              // NOL `SELECT` yang membacanya — tidak ada satu pun keputusan yang
+              // bergantung padanya.
+              //
+              // Kolom yang ditulis tetapi tidak pernah dibaca lebih berbahaya
+              // daripada kolom kosong: ia terlihat seperti data yang bermakna,
+              // dan orang berikutnya akan membangun sesuatu di atasnya.
+              //
+              // Kolomnya sendiri BELUM dijatuhkan dari database — itu tindakan
+              // merusak yang dijalankan terpisah, bersama langkah 4 #47.
+              if ((tmExisting as any[]).length === 0) {
                 await connection.query(
-                  "UPDATE ProjectMembers SET parentAdminId = ? WHERE projectId = ? AND userId = ?",
-                  [resolvedUserId, id, resolvedTmId]
-                );
-              } else {
-                await connection.query(
-                  "INSERT INTO ProjectMembers (projectId, userId, role, parentAdminId) VALUES (?, ?, 'member', ?)",
-                  [id, resolvedTmId, resolvedUserId]
+                  "INSERT INTO ProjectMembers (projectId, userId, role) VALUES (?, ?, 'member')",
+                  [id, resolvedTmId]
                 );
               }
             }

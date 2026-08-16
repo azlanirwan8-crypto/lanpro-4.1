@@ -11,9 +11,7 @@ import {
   // fetchDbStatus/fetchSchema yang membungkus state loading dan toast.
   deleteRow as deleteRowApi,
   updateRow as updateRowApi,
-  fetchDbStatus as fetchDbStatusApi,
   fetchSchema as fetchSchemaApi,
-  toggleDbMode,
 } from "./services/explorer.service";
 
 export const DbExplorerPanel: React.FC<any> = ({
@@ -32,14 +30,15 @@ export const DbExplorerPanel: React.FC<any> = ({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTable, setActiveTable] = useState<string | null>(null);
-  // Tipe disesuaikan dengan kontrak backend yang sebenarnya: getDbMode() di
-  // src/lib/db.ts mengembalikan 'pg' | 'local' dan pada praktiknya selalu 'pg'.
-  // Sebelumnya dideklarasikan sebagai 'mysql' | 'local', sisa era MySQL —
-  // akibatnya perbandingan dbMode === 'mysql' di handleToggleDbMode tidak
-  // pernah benar. Lihat catatan kode mati di bawah.
-  const [dbMode, setDbMode] = useState<"pg" | "local">("pg");
-  const [dbHost, setDbHost] = useState("");
-  const [switching, setSwitching] = useState(false);
+  // #20 — state `dbMode`, `dbHost`, dan `switching` DIBUANG 16 Agu 2026 atas
+  // keputusan pemilik proyek, bersama `fetchDbStatus` dan `handleToggleDbMode`.
+  //
+  // Sesi sebelumnya sudah menandainya KODE MATI dan meninggalkan daftar hapus
+  // yang tepat; penghapusannya sengaja ditunda agar jadi keputusan sadar, bukan
+  // efek samping refactor. Keputusan itu kini diambil.
+  //
+  // Sejalan dengan ketetapan "Postgres saja": tidak ada MySQL di LanPro, jadi
+  // toggle antar mode database tidak punya alasan untuk ada.
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [editValues, setEditValues] = useState<any>({});
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
@@ -95,54 +94,9 @@ export const DbExplorerPanel: React.FC<any> = ({
 
   useEffect(() => {
     fetchSchema();
-    fetchDbStatus();
+    // `fetchDbStatus()` dibuang di sini (#20): ia menembak API pada SETIAP
+    // mount dan hasilnya tidak pernah ditampilkan di mana pun.
   }, []);
-
-  const fetchDbStatus = async () => {
-    try {
-      const data = await fetchDbStatusApi();
-      if (data.status === "success") {
-        setDbMode(data.mode);
-        setDbHost(data.host);
-      }
-    } catch (e) {
-      console.error("Failed to fetch database status:", e);
-    }
-  };
-
-  /**
-   * KODE MATI — tidak ada tombol yang memanggil fungsi ini.
-   *
-   * Peninggalan era MySQL, ketika aplikasi masih bisa berpindah antara MySQL
-   * dan penyimpanan lokal. src/lib/db.ts kini Neon PostgreSQL saja dan
-   * getDbMode() selalu mengembalikan 'pg', sehingga mode target di bawah tidak
-   * lagi bermakna.
-   *
-   * Sengaja dipertahankan agar penghapusan fitur menjadi keputusan sadar
-   * pemilik repo, bukan efek samping refactor. Bila dihapus, ikut hapus juga:
-   * state dbMode, dbHost, switching, fungsi fetchDbStatus beserta
-   * pemanggilannya di useEffect (yang saat ini menembak API tiap mount tanpa
-   * hasilnya pernah ditampilkan), dan toggleDbMode di explorer.service.ts.
-   */
-  const handleToggleDbMode = async () => {
-    setSwitching(true);
-    const targetMode = dbMode === "pg" ? "local" : "pg";
-    try {
-      const data = await toggleDbMode(targetMode);
-      if (data.status === "success") {
-        toast.success(data.message);
-        setTimeout(() => {
-          window.location.reload();
-        }, 1200);
-      } else {
-        throw new Error(data.message || "Gagal mengubah mode database");
-      }
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setSwitching(false);
-    }
-  };
 
   const fetchSchema = async () => {
     try {
