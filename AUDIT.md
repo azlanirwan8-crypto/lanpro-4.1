@@ -6183,3 +6183,72 @@ kemungkinannya salah — sebab semuanya memakai token yang sama.
 
 **Urutan yang saya sarankan: 1 → 3 → 2 → 5 → 4.** Gerbang lebih dulu, sebab
 tanpa itu setiap langkah berikutnya bisa tergerus tanpa ada yang tahu.
+
+### 19.47 Hasil audit tema gelap di layar — 47 → 7, dan sisanya bukan regresi
+
+Diukur pada **sesi login sungguhan dalam mode gelap**, bukan dari kode. Semua
+angka rasio kontras WCAG; ambang AA untuk teks normal adalah **4.5**.
+
+| Tahap                                    | Elemen di bawah 4.5 | Permukaan terang |
+| ---------------------------------------- | ------------------: | ---------------: |
+| Awal                                     |              **47** |               13 |
+| Sesudah `bg-primary` → `primary-surface` |                  45 |                — |
+| Sesudah teks sidebar → kosakata inverse  |                  25 |                — |
+| Sesudah `<body>` → token                 |               **7** |            **1** |
+
+`bodyBg` terukur **`8,12,21`** — latar utama gelap.
+
+#### Tiga akar yang ditemukan, semuanya bentuk yang sama
+
+Ketiganya bukan "warna yang kurang pas", melainkan **satu token dipaksa memikul
+dua peran yang berlawanan**:
+
+| Token               | Diterangkan untuk mode gelap agar terbaca sebagai… | Tetapi juga dipakai sebagai…                     |
+| ------------------- | -------------------------------------------------- | ------------------------------------------------ |
+| `primary`           | TEKS di atas permukaan gelap                       | LATAR sidebar → biru muda, teks gelap di atasnya |
+| `danger`, `success` | TEKS                                               | ISIAN lencana → putih di atas terang             |
+| —                   | —                                                  | `<body>` memakai `bg-slate-50` tanpa syarat      |
+
+Yang pertama dan ketiga sudah ditutup. Yang kedua **belum**, dan alasannya di
+bawah.
+
+#### ⚠️ Lencana aksen: BUKAN regresi mode gelap
+
+Godaannya besar untuk menambalnya sebagai bagian pekerjaan ini. Diukur lebih
+dulu, dan hasilnya membatalkan itu:
+
+| Lencana            | Mode terang | Mode gelap |
+| ------------------ | ----------: | ---------: |
+| Putih di `danger`  |    **3.15** |       2.45 |
+| Putih di `success` |    **2.64** |       1.85 |
+
+**Keduanya sudah di bawah 4.5 SEJAK MODE TERANG.** Mode gelap memperburuknya,
+tetapi tidak menciptakannya. Ini cacat kontras yang sudah ada sejak warna merek
+dipilih, bukan sesuatu yang lahir dari konversi token.
+
+Memperbaikinya berarti **mengubah warna merek atau warna teks lencana** — dan
+itu keputusan desain milik pemilik proyek, bukan kerapian yang boleh saya
+putuskan sendiri. Dicatat, tidak ditambal.
+
+#### Sisa 7, dikelompokkan jujur
+
+| Sisa                             |       Rasio | Sifat                                                  |
+| -------------------------------- | ----------: | ------------------------------------------------------ |
+| Lencana "Hot" / "New"            | 2.45 · 1.85 | cacat lama, ada di kedua mode                          |
+| Avatar "Administrator" / "admin" | 2.26 · 2.17 | isian abu-abu dengan teks putih — pola yang sama       |
+| `admin` pada kartu gelap         |        4.22 | tipis di bawah ambang                                  |
+| "Memuat…"                        |        2.84 | teks pemuatan sementara                                |
+| Toast "Selamat datang"           |        4.26 | hijau di atas hijau muda; toast memang berlatar terang |
+
+Tidak satu pun dari tujuh ini adalah permukaan terang yang bocor, dan tidak satu
+pun lahir dari konversi token. Yang tersisa adalah **pilihan warna**, bukan
+kesalahan tema.
+
+#### Kesimpulan
+
+Tema gelap LanPro **sudah bersih dari tabrakan struktural**: nol permukaan
+terang yang bocor, latar utama gelap, sidebar terbaca, 606+ kelas warna keras
+diganti token, dan `npm run audit:warna` menjaga agar tidak kembali.
+
+Yang tersisa adalah tujuh keputusan **desain**, dan semuanya sudah terukur
+angkanya sehingga bisa diputuskan tanpa menebak.
