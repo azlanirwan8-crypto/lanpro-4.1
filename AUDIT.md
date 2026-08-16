@@ -254,7 +254,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 43  | ~~Callback SSO tak menyetel `currentSessionToken`~~ — login gagal SENYAP                 |  **F5**  | 🔴  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
 | 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend             |  **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik       | §0.4   |
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan        |  **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`                | §0.3   |
-| 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — siapa pun ber-Gmail bisa mendaftar                     |  **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik       | §0.4   |
+| 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — celah daftar, DAN membatalkan asumsi kuota F11         |  **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik       | §0.4   |
 | 47  | `discussion_point_comments` punya KOLOM KEMBAR camelCase + snake_case                    |  **F9**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`                | §0.3   |
 | 48  | ~~5 TABEL KEMBAR huruf kecil~~ dihapus, 35 tabel -> 30                                   |  **F0**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
 | 49  | `verifyProjectAccess(['*'])` lolos SEBELUM cek keanggotaan — bocor lintas proyek         |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.5  |
@@ -328,7 +328,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 | **F8**  | Jaring pengaman                    | #9, #8                               | 4–6  | Rendah            | `TERBUKA`                 | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, karena F3 akan menambah kasus uji                                        |
 | **F9**  | Lapisan backend                    | #6                                   | 6–10 | Tinggi            | `TERBUKA`                 | — bisa jalan tanpa pemilik, tapi butuh F7 & F8 lebih dulu sebagai pengaman                                                  |
 | **F10** | Arsitektur frontend                | #5, #7, #21                          | 8–15 | **Sangat tinggi** | `TERBUKA`                 | — bisa jalan tanpa pemilik, tapi JANGAN sebelum F8. Merefactor 4.581 baris `AppContainer` dengan jaring pengaman sekarang adalah judi |
-| **F11** | **Drive-per-user — JALUR RILIS**   | #30                                  | 6–10 | **Tinggi**        | `MENUNGGU` desain         | **PEMILIK, 6 keputusan desain** (§11.1). Sejak 16 Agu 2026 ini ARAH RESMI storage, bukan lagi opsional. Selama belum ada, berkas unggahan tetap hilang tiap deploy — risiko #2 berjalan terus |
+| **F11** | **Drive-per-user — JALUR RILIS**   | #30 (prasyarat #46)                  | 6–10 | **Tinggi**        | `SIAP DIRANCANG`          | **PEMILIK, 3 hal.** 6 keputusan desain sudah DIJAWAB 16 Agu (§11.1). Sisa: konfirmasi D1b & D3b · perbaiki **#46** (`SSO_ALLOWED_DOMAINS=gmail.com` membatalkan asumsi kuota corporate, §11.1b) · setujui rancangan penyimpanan refresh token terenkripsi |
 | **F12** | Konsolidasi desain                 | #14, #13                             | 2–3  | Rendah            | `TERBUKA`                 | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, yang akan mendata sendiri layar mana yang kontras & jarak sentuhnya bermasalah |
 
 \*Perkiraan kasar dan **belum terverifikasi** — untuk membandingkan bobot antar
@@ -1041,20 +1041,84 @@ Selama F11 belum jadi, **risiko #2 berjalan terus**: berkas unggahan hilang
 setiap kali deploy di Vercel, sementara baris database tetap menunjuknya. Itu
 bukan alasan menolak keputusan ini — hanya harus tercatat, bukan terlupa.
 
-#### 11.1 Enam keputusan desain yang harus ada sebelum kode ditulis
+#### 11.1 Enam keputusan desain — DIPUTUSKAN 16 Agu 2026
 
-Belum satu pun bisa dijawab dari kode; semuanya milik pemilik proyek. Empat di
-antaranya sudah disebut sebagai risiko di catatan F11 lama, kini dijadikan
-pertanyaan yang bisa dijawab.
+Dijawab pemilik proyek 16 Agu 2026. Dua di antaranya dikembalikan sebagai
+pertanyaan balik dan dijawab dengan rekomendasi; keduanya menunggu konfirmasi
+akhir (ditandai ⏳).
 
-| # | Pertanyaan | Kenapa memblokir |
-| - | ---------- | ---------------- |
-| D1 | Drive **milik siapa** — pengunggah, atau pemilik proyek? | Bila milik pengunggah, dokumen proyek ikut pergi saat orang itu keluar. Bila milik pemilik proyek, tiap unggahan menuntut izin ke drive orang lain |
-| D2 | Bagaimana anggota lain **membaca** berkas itu? | Tiga jalur, beda konsekuensinya: tautan berbagi (bocor bila diteruskan), akun layanan (butuh Workspace), atau server sebagai perantara (kuota & biaya bandwidth balik ke server) |
-| D3 | Apa yang terjadi bila pemilik drive **mencabut akses** atau keluar? | Tanpa jawaban, proyek bisa kehilangan seluruh notulen dan bukti QA tanpa peringatan |
-| D4 | Rekaman rapat & bukti QA adalah **data bisnis** (§18.8). Pantaskah tinggal di drive pribadi? | Bercampurnya kepemilikan menyulitkan audit, penghapusan atas permintaan, dan pembuktian saat sengketa |
-| D5 | Google Drive saja, atau **OneDrive** juga? | SSO Microsoft sudah ada (F5), jadi sebagian pengguna wajar mengharapkannya. Dua penyedia berarti dua adaptor |
-| D6 | Kuota. Drive pribadi gratis 15 GB, **dibagi dengan Gmail & Foto** pengguna | Rekaman rapat cepat besar. Perlu ditetapkan batas dan perilaku saat penuh |
+| # | Keputusan | Status |
+| - | --------- | ------ |
+| **D1** | Berkas tinggal di drive milik **pengunggah**, mengikuti akun email yang dipakai login | ✅ |
+| **D1b** | Cara berbagi: **server sebagai perantara**, BUKAN tautan berbagi — lihat alasan di bawah | ⏳ rekomendasi |
+| **D2** | Anggota lain membaca dari dalam LanPro. **Izin LanPro yang berlaku**: punya akses view/download di LanPro berarti bisa | ✅ |
+| **D3** | Saat pemilik mencabut/mengganti: berkas tidak bisa diunduh | ✅ |
+| **D3b** | Perilakunya dibedakan jadi **tiga keadaan** + pemeriksa terjadwal, bukan satu "not found" | ⏳ rekomendasi |
+| **D4** | Data bisnis di drive pribadi **diterima untuk sekarang** | ✅ risiko diterima |
+| **D5** | Google Drive **dan** OneDrive — akun corporate punya kuota besar | ✅ |
+| **D6** | Kuota teratasi oleh D5 (drive corporate) | ✅ bersyarat |
+
+##### D1b — kenapa BUKAN tautan berbagi
+
+Konsekuensi langsung dari D2. Karena **LanPro yang memegang otoritas izin**,
+tautan berbagi merusaknya total: siapa pun pemegang URL bisa membaca tanpa
+LanPro pernah tahu, dan mencabut izin seseorang di LanPro tidak mencabut apa pun.
+
+Itu juga persis kebocoran yang baru ditutup di **#67** — berkas terbaca tanpa
+autentikasi. Memakai tautan berbagi berarti membukanya kembali, kali ini di
+drive orang lain dan di luar jangkauan penjaga LanPro.
+
+| | Tautan berbagi | Izin per-email | **Server perantara** |
+| --- | :-: | :-: | :-: |
+| Izin LanPro berlaku | ❌ | ❌ hanyut | ✅ |
+| Cabut di LanPro langsung berlaku | ❌ | ❌ | ✅ |
+| Anggota wajib punya akun provider | — | ❌ wajib | ✅ tidak |
+| Bandwidth lewat server | ✅ tidak | ✅ tidak | ⚠️ ya |
+
+⚠️ **Harga yang harus dibayar dan wajib ditangani:** LanPro menyimpan *refresh
+token* drive tiap pengguna. Itu rahasia bernilai tinggi — **wajib terenkripsi
+saat disimpan**, masuk daftar rotasi (§18.9 langkah 5), dan tercatat di §18.8
+sebagai data rahasia. Ini syarat, bukan detail teknis yang bisa ditunda.
+
+##### D3b — kenapa satu "not found" tidak cukup
+
+Masalahnya bukan kata-katanya, melainkan **kapan orang tahu**. Dengan satu
+pesan "not found", kehilangan berkas baru ketahuan **saat seseorang
+membutuhkannya** — biasanya di saat paling genting.
+
+| Keadaan | Yang dilihat pengguna | Yang terjadi di belakang |
+| ------- | --------------------- | ------------------------ |
+| Token dicabut / kedaluwarsa | "Pemilik berkas perlu menyambungkan ulang drive-nya" | Notifikasi ke **pemilik**, bukan ke yang mengunduh |
+| Berkas dihapus/dipindah di drive | "Berkas sudah tidak ada di drive pemilik" | Ditandai di DB, tidak dicoba berulang |
+| Pemilik keluar / akun nonaktif | Peringatan tingkat admin proyek | Daftar berkas terdampak |
+
+Ditambah **pemeriksa terjadwal** yang menandai berkas bermasalah sebelum ada
+yang membutuhkannya. Polanya sudah ada di repo ini — penjadwal digest (#22).
+
+Dan satu hal kecil berdampak besar: **beri tahu saat mengunggah** bahwa
+ketersediaan berkas bergantung pada akun pengunggah. Sekarang tidak ada yang
+mengetahuinya.
+
+#### 11.1b ⚠️ D5 & D6 bertabrakan dengan konfigurasi yang ada
+
+Jawaban D5/D6 bersandar pada asumsi akun **corporate** yang kuotanya besar.
+Konfigurasi sekarang menyatakan sebaliknya:
+
+```
+.env:26   SSO_ALLOWED_DOMAINS=gmail.com
+```
+
+Hanya akun **Gmail pribadi** yang bisa mendaftar, dan Gmail pribadi berbagi
+**15 GB dengan Gmail serta Google Foto** — persis masalah D6 yang dikira sudah
+teratasi oleh D5.
+
+**Akibatnya #46 naik status.** Selama ini ia tercatat sebagai item keamanan
+(siapa pun ber-Gmail bisa mendaftar); kini ia juga **prasyarat rencana storage**.
+F11 tidak bisa memenuhi asumsi kuotanya sebelum `SSO_ALLOWED_DOMAINS` diisi
+domain corporate.
+
+Untuk OneDrive, syarat setaranya: akun Microsoft yang dipakai harus akun
+organisasi (Microsoft 365), bukan akun Microsoft pribadi.
 
 #### 11.2 Yang berubah di kode — bukan sekadar menambah driver ketiga
 
@@ -1080,9 +1144,16 @@ Yang juga ikut terdampak dan mudah terlewat:
 
 #### 11.3 Syarat masuk
 
-1. Enam keputusan §11.1 terjawab.
+1. ~~Enam keputusan §11.1 terjawab~~ — **SELESAI 16 Agu 2026**. Sisa dua
+   konfirmasi akhir: D1b (server perantara) dan D3b (tiga keadaan).
 2. F5 lulus — **sudah**, fondasi OAuth ada sehingga biayanya turun.
-3. Keputusan tertulis soal cakupan OAuth tambahan dan persetujuan ulang pengguna lama.
+3. **#46 diperbaiki lebih dulu.** `SSO_ALLOWED_DOMAINS` harus berisi domain
+   corporate, bukan `gmail.com`. Tanpa itu asumsi kuota D5/D6 tidak berlaku dan
+   F11 dibangun di atas dasar yang salah — lihat §11.1b.
+4. Keputusan tertulis soal cakupan OAuth tambahan dan persetujuan ulang pengguna
+   lama (layar persetujuan Google & Microsoft berubah).
+5. Rancangan penyimpanan *refresh token* terenkripsi disetujui — konsekuensi
+   langsung D1b.
 
 #### 11.4 Gerbang keluar
 
@@ -2887,6 +2958,7 @@ yang menanggung dan sejak kapan.
 | 73 | Penjaga `dashboard-layout` korslet | Pemilik proyek | 16 Agu 2026 |
 | 74 | Data proyek lama menimpa layar proyek baru | Pemilik proyek | 16 Agu 2026 |
 | 77 | 4 kerentanan dependensi `moderate`: react-router & react-router-dom (open redirect → XSS), exceljs, uuid. Hanya tertutup lewat `npm audit fix --force` = kenaikan versi mayor | Pemilik proyek | 16 Agu 2026 |
+| 30 · D4 | Data bisnis (rekaman rapat, bukti QA, dokumen) tinggal di **drive pribadi** pengguna. Diterima "untuk sekarang" 16 Agu 2026 — menyulitkan audit, penghapusan atas permintaan, dan pembuktian saat sengketa | Pemilik proyek | 16 Agu 2026 |
 | 2 / 30 | Berkas unggahan hilang tiap deploy. **Alasannya berubah 16 Agu 2026**: driver `s3` DITAHAN atas keputusan pemilik, storage beralih ke drive user (F11). Risikonya tetap hidup, dan kini berjalan selama F11 belum jadi — 6–10 sesi, bukan 1–2 | Pemilik proyek | 15 Agu 2026 |
 | 15 | Dua Google API key lama belum dicabut | Pemilik proyek | 15 Agu 2026 |
 | 46 | `SSO_ALLOWED_DOMAINS=gmail.com` — siapa pun ber-Gmail bisa mendaftar | Pemilik proyek | 15 Agu 2026 |
@@ -2908,6 +2980,7 @@ mana pun, padahal menentukan bobot beberapa temuan.
 | Isi rapat, rekaman, notulen | Rahasia bisnis | `Meetings` | **#70** |
 | Dokumen & bukti QA | Rahasia bisnis | `Documents`, `uploads/` | **#67** |
 | Kata sandi | Rahasia — di-hash | `Users` | #52 |
+| **Refresh token drive** pengguna (Google/Microsoft) | **Rahasia bernilai tinggi** | belum ada — akan lahir dari F11 | #30 · wajib terenkripsi saat disimpan, lihat §11.1 D1b |
 
 ⚠️ **Perlu perhatian pemilik proyek, bukan nasihat hukum.** Indonesia memiliki
 UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi. Temuan #59 adalah
