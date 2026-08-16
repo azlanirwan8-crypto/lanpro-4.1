@@ -217,7 +217,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 57 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 58 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -255,8 +255,8 @@ lepas. Catatan lepas selalu terlupakan.
 | 47  | `discussion_point_comments` punya KOLOM KEMBAR camelCase + snake_case                    |  **F9**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`                | §0.3   |
 | 48  | ~~5 TABEL KEMBAR huruf kecil~~ dihapus, 35 tabel -> 30                                   |  **F0**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu         | §0.3   |
 | 49  | `verifyProjectAccess(['*'])` lolos SEBELUM cek keanggotaan — bocor lintas proyek         |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `JALAN` `fix/F2-49-rbac-wildcard` | §13.5  |
-| 50  | Socket.IO **tanpa autentikasi sama sekali** — tak ada `io.use()` handshake               |  **F2**  | 🔴  | Sedang        | Ya (blokir production)  | `TERBUKA`                | §13.5  |
-| 51  | `FORCE_LOGOUT_EVENT` menyiarkan JWT sah ke SELURUH socket lewat `io.emit`                |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.5  |
+| 50  | Socket.IO **tanpa autentikasi sama sekali** — tak ada `io.use()` handshake               |  **F2**  | 🔴  | Sedang        | Ya (blokir production)  | `JALAN` `fix/F2-50-socket-auth` | §13.5  |
+| 51  | `FORCE_LOGOUT_EVENT` menyiarkan JWT sah ke SELURUH socket lewat `io.emit`                |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `JALAN` `fix/F2-51-force-logout-token` | §13.5  |
 | 52  | `/api/auth/force-logout` memeriksa password TANPA `loginLimiter` — jalur brute force     |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `JALAN` `fix/F2-52-force-logout-limiter` | §13.5  |
 | 53  | `POST /api/auth/logout` tanpa auth, `userId` sembarang → NULL-kan sesi siapa pun         |  **F2**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`                | §13.5  |
 | 54  | `rbac.ts:27` identitas boleh datang dari `x-user-id`/query/body — ranjau impersonasi     |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.5  |
@@ -264,6 +264,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 56  | Proses Jest mencetak crash `pg` (`isIP` of undefined) saat dibongkar — exit code tetap 0 |  **F8**  | 🟡  | Rendah        |          Tidak          | `TERBUKA`                | §13.5  |
 | 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401      |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`                | §13.6  |
 | 58  | `GET /metrics` terbuka TANPA autentikasi — di luar `/api/`, lolos gerbang global         |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `TERBUKA`                | §13.6  |
+| 59  | `presence_sync` menyiarkan profil LENGKAP + matriks permission ke klien mana pun         |  **F2**  | 🔴  | Sangat rendah | Ya (blokir production)  | `JALAN` `fix/F2-50-socket-auth` | §13.6  |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -1804,6 +1805,41 @@ Isinya metrik Prometheus: waktu CPU proses, dan `httpRequestsTotal` yang
 berlabel **method, route, dan status** — artinya peta rute internal beserta pola
 lalu lintas dan tingkat errornya terbaca siapa pun. Bukan kebocoran data
 pengguna, tapi bahan pengintaian yang bagus, dan gratis untuk ditutup.
+
+#### #59 🔴 `presence_sync` menyiarkan profil lengkap beserta matriks permission
+
+Ditemukan saat membuktikan #50, dan lebih berat dari #50 itu sendiri.
+
+`server.ts` menyimpan objek user **apa adanya** dari payload klien ke
+`globalPresence`, lalu menyiarkan seluruh isinya lewat `io.emit("presence_sync",
+…)`. Karena `join_presence` dipanggil klien dengan profil pengguna yang sedang
+login, yang tersiar bukan sekadar "siapa yang online" melainkan:
+
+email · nomor telepon · departemen · jabatan · path avatar · **seluruh matriks
+permission** (16 modul × create/read/update/delete)
+
+Dibuktikan dengan klien anonim, tanpa token: profil lengkap akun `admin` yang
+sedang login diterima utuh. Juga terbukti bisa menyuntikkan identitas palsu —
+hadir sebagai pengguna lain hanya dengan menyebut id-nya di payload.
+
+### 13.7 Kartu verifikasi gelombang 1 — apa yang terbukti, apa yang belum
+
+Dicatat terpisah supaya tidak ada yang menyimpulkan "sudah diperbaiki" sama
+dengan "sudah terbukti bekerja untuk pengguna sungguhan".
+
+| # | Branch | Terbukti | BELUM terbukti |
+| - | ------ | -------- | -------------- |
+| 49 | `fix/F2-49-rbac-wildcard` | 191 test/20 suite; test yang sama dibuktikan MERAH terhadap commit sebelum perbaikan lewat `git worktree` di luar repo; aplikasi jalan, Sign In tampil, 0 error console di tab bersih | Anggota sah masih melihat proyeknya normal — **butuh sesi login pemilik proyek** |
+| 52 | `fix/F2-52-force-logout-limiter` | 188 test/20 suite; regex penjaga dibuktikan tidak cocok pada `server.ts` sebelum perbaikan | Percobaan ke-11 benar-benar ditolak — penjaganya STATIS, bukan uji perilaku |
+| 50 + 59 | `fix/F2-50-socket-auth` | 198 test/20 suite; klien anonim yang sama kini dijawab `AUTENTIKASI_DIBUTUHKAN`, token palsu dijawab `TOKEN_TIDAK_VALID`; Sign In tampil, 0 error di tab bersih | Realtime (chat, presence, auto-refresh) bagi pengguna yang benar-benar login |
+| 51 | `fix/F2-51-force-logout-token` | 205 test/20 suite; sidik jari dicocokkan dengan nilai SHA-256 acuan yang dikenal, sehingga sisi server & peramban tidak sekadar sepakat pada implementasi yang sama | Pemicunya sendiri — memancing `FORCE_LOGOUT_EVENT` butuh username & password sungguhan |
+
+**Keempat branch sengaja BELUM di-merge.** Yang tersisa di semua baris "belum
+terbukti" bermuara pada satu hal yang sama: satu kali login oleh pemilik proyek.
+Sesudah itu keempatnya bisa ditutup sekaligus.
+
+⚠️ Urutan merge wajib `#50` lebih dulu, baru `#51` — branch #51 dibangun di atas
+#50 dan memerlukan `roomPengguna` serta gerbang `penjagaSocket` dari sana.
 
 ---
 
