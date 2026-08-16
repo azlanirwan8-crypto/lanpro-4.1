@@ -1,11 +1,11 @@
-import { Project, AppRole, UserProfile } from '../../types';
+import { Project, AppRole, PeranEfektif, UserProfile } from "../../types";
 
 export interface SidebarProps {
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (open: boolean) => void;
   isSidebarCollapsed: boolean;
   setIsSidebarCollapsed: (collapsed: boolean) => void;
-  userRole: AppRole | null;
+  userRole: PeranEfektif | null;
   currentUserProfile: UserProfile | null;
   setIsNewProjectModalOpen: (open: boolean) => void;
   projects: Project[];
@@ -13,7 +13,13 @@ export interface SidebarProps {
   setSelectedProject: (project: Project) => void;
   currentView: string;
   setCurrentView: (view: any) => void;
-  hasPermission: (role: any, module: any, action: any, isOwner: boolean, permissions: any) => boolean;
+  hasPermission: (
+    role: any,
+    module: any,
+    action: any,
+    isOwner: boolean,
+    permissions: any
+  ) => boolean;
   currentUser: any;
   user: any;
   setIsProfileModalOpen: (open: boolean) => void;

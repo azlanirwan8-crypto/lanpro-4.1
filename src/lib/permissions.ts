@@ -1,11 +1,25 @@
-import { AppRole, UserPermissions, ModulePermission } from '../types';
+import { UserPermissions, ModulePermission, PeranEfektif } from "../types";
+import { normalkanPeran } from "../types/roles";
 
 const FULL_ACCESS: ModulePermission = { create: true, read: true, update: true, delete: true };
 const READ_DELETE: ModulePermission = { create: false, read: true, update: false, delete: true };
 const READ_ONLY: ModulePermission = { create: false, read: true, update: false, delete: false };
 const NO_ACCESS: ModulePermission = { create: false, read: false, update: false, delete: false };
 
-export const DEFAULT_PERMISSIONS: Record<AppRole, UserPermissions> = {
+/**
+ * Izin bawaan per peran.
+ *
+ * `Partial` bukan kelonggaran, melainkan pengukuran: hanya 5 dari 12 peran
+ * katalog yang punya baris di sini. Tujuh peran proyek — `owner`,
+ * `system_analyst`, `business_analyst`, `developer`, `qa`, dan seterusnya —
+ * BELUM punya izin bawaan sama sekali, sehingga semuanya jatuh ke `viewer`
+ * lewat cadangan di `getUserPermissions`. Itu tepat kesenjangan yang §19.8
+ * tahap 4 tutup dengan matriks terpusat.
+ *
+ * Ditulis `Record` penuh sebelumnya, dan itu berbohong: kompilator mengira
+ * seluruh peran tercakup padahal tidak.
+ */
+export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>> = {
   admin: {
     dashboard: FULL_ACCESS,
     meetingNotes: FULL_ACCESS,
@@ -99,23 +113,23 @@ export const DEFAULT_PERMISSIONS: Record<AppRole, UserPermissions> = {
 };
 
 export const KEY_MAP: Record<string, string> = {
-  flowchartEditor: 'flowchart',
-  issueList: 'list',
-  issues: 'list',
-  Kanban: 'board',
-  kanban: 'board',
-  planning: 'sprints',
-  qaTesting: 'qa',
-  roadmap: 'timeline',
-  team: 'access',
-  users: 'userManagement',
-  master: 'masterData',
-  explorer: 'dbExplorer',
-  'enterprise-audit': 'auditLog',
-  auditLogs: 'auditLog',
-  configuration: 'masterData',
-  'meeting-notes': 'meetingNotes',
-  'notebook-lm': 'notebooklm'
+  flowchartEditor: "flowchart",
+  issueList: "list",
+  issues: "list",
+  Kanban: "board",
+  kanban: "board",
+  planning: "sprints",
+  qaTesting: "qa",
+  roadmap: "timeline",
+  team: "access",
+  users: "userManagement",
+  master: "masterData",
+  explorer: "dbExplorer",
+  "enterprise-audit": "auditLog",
+  auditLogs: "auditLog",
+  configuration: "masterData",
+  "meeting-notes": "meetingNotes",
+  "notebook-lm": "notebooklm",
 };
 
 export function normalizeModuleKey(key: string): string {
@@ -125,14 +139,14 @@ export function normalizeModuleKey(key: string): string {
 export function cleanUserPermissions(custom: any): any {
   if (!custom) return {};
   let parsedCustom = custom;
-  if (typeof custom === 'string') {
+  if (typeof custom === "string") {
     try {
       parsedCustom = JSON.parse(custom);
     } catch {
       return {};
     }
   }
-  if (!parsedCustom || typeof parsedCustom !== 'object') return {};
+  if (!parsedCustom || typeof parsedCustom !== "object") return {};
   const cleaned: any = {};
   Object.keys(parsedCustom).forEach((key) => {
     const normKey = KEY_MAP[key] || key;
@@ -146,15 +160,22 @@ export function cleanUserPermissions(custom: any): any {
   return cleaned;
 }
 
-export function getUserPermissions(role: AppRole, custom?: Partial<UserPermissions>): UserPermissions {
-  const normRole = (role ? String(role).toLowerCase().trim() : 'viewer') as AppRole;
-  const isAdmin = normRole === 'admin' || normRole === 'administrator' || normRole === 'superadmin';
+export function getUserPermissions(
+  role: PeranEfektif,
+  custom?: Partial<UserPermissions>
+): UserPermissions {
+  // Sengaja `string`, bukan tipe peran: `administrator` dan `superadmin` BUKAN
+  // peran yang sah di katalog mana pun (§19.2 mengukur nol baris data untuk
+  // keduanya). Perbandingannya dipertahankan sebagai jaring pengaman terhadap
+  // data lama, tetapi tipenya tidak boleh berpura-pura keduanya sah.
+  const normRole: string = normalkanPeran(role) || "viewer";
+  const isAdmin = normRole === "admin" || normRole === "administrator" || normRole === "superadmin";
   if (isAdmin) {
     return DEFAULT_PERMISSIONS.admin;
   }
 
-  const defaults = DEFAULT_PERMISSIONS[normRole] || DEFAULT_PERMISSIONS.viewer;
-  
+  const defaults = DEFAULT_PERMISSIONS[normRole as PeranEfektif] || DEFAULT_PERMISSIONS.viewer!;
+
   // Deep copy and normalize defaults
   const merged: any = {};
   Object.keys(defaults).forEach((key) => {
@@ -163,7 +184,7 @@ export function getUserPermissions(role: AppRole, custom?: Partial<UserPermissio
   });
 
   let parsedCustom: any = custom;
-  if (typeof custom === 'string') {
+  if (typeof custom === "string") {
     try {
       parsedCustom = JSON.parse(custom);
     } catch {
@@ -171,16 +192,16 @@ export function getUserPermissions(role: AppRole, custom?: Partial<UserPermissio
     }
   }
 
-  if (parsedCustom && typeof parsedCustom === 'object') {
+  if (parsedCustom && typeof parsedCustom === "object") {
     Object.keys(parsedCustom).forEach((key) => {
       const normKey = KEY_MAP[key] || key;
       const customVal = parsedCustom[key as keyof UserPermissions];
       if (customVal) {
         let valToMerge: ModulePermission;
-        if (typeof customVal === 'string') {
+        if (typeof customVal === "string") {
           // Handle legacy data
-          if (customVal === 'full') valToMerge = FULL_ACCESS;
-          else if (customVal === 'view') valToMerge = READ_ONLY;
+          if (customVal === "full") valToMerge = FULL_ACCESS;
+          else if (customVal === "view") valToMerge = READ_ONLY;
           else valToMerge = NO_ACCESS;
         } else {
           valToMerge = { ...customVal };
@@ -194,7 +215,7 @@ export function getUserPermissions(role: AppRole, custom?: Partial<UserPermissio
 
         merged[normKey] = {
           ...(merged[normKey] || NO_ACCESS),
-          ...valToMerge
+          ...valToMerge,
         };
       }
     });
@@ -203,74 +224,87 @@ export function getUserPermissions(role: AppRole, custom?: Partial<UserPermissio
 }
 
 export function hasPermission(
-    userRole: AppRole,
-    module: keyof UserPermissions | string,
-    action: 'create' | 'read' | 'update' | 'delete' | string,
-    isOwner: boolean = false,
-    customPermissions?: Partial<UserPermissions>
+  userRole: PeranEfektif,
+  module: keyof UserPermissions | string,
+  action: "create" | "read" | "update" | "delete" | string,
+  isOwner: boolean = false,
+  customPermissions?: Partial<UserPermissions>
 ): boolean {
-    const normRole = (userRole ? String(userRole).toLowerCase().trim() : 'viewer') as AppRole;
-    const isAdmin = normRole === 'admin' || normRole === 'administrator' || normRole === 'superadmin';
-    if (isAdmin) {
-        return true;
-    }
-
-    const normModule = (KEY_MAP[module as string] || module) as keyof UserPermissions;
-    
-    // Normalize action: map add -> create
-    let normalizedAction = action.toLowerCase();
-    if (normalizedAction === 'add') normalizedAction = 'create';
-    
-    // Validate action
-    if (!['create', 'read', 'update', 'delete'].includes(normalizedAction)) {
-      console.warn(`[PERM_MISMATCH] Module: ${module}, Invalid Action: ${action}`);
-      return false;
-    }
-    
-    const actionKey = normalizedAction as 'create' | 'read' | 'update' | 'delete';
-    
-    const perms = getUserPermissions(userRole, customPermissions);
-    const modulePerm = perms[normModule];
-    
-    const hasActionPerm = Boolean(modulePerm?.[actionKey]);
-
-    // Logging if permission check fails in development
-    if (!hasActionPerm) {
-        console.warn(`[PERM_MISMATCH] Module: ${module}, Action: ${action} - Denied`);
-    }
-
-    // Owners have access if permission allows
-    if (isOwner && actionKey !== 'create' && hasActionPerm) {
-        return true;
-    }
-
-    if (!hasActionPerm) {
-        return false;
-    }
-
-    // Role-specific ownership logic (unless custom permissions explicitly grant access)
-    // Managers bypass ownership checks for project-related modules unless overridden
-    if (normRole === 'manager' && !customPermissions?.[normModule] && 
-        ['list', 'sprints', 'board', 'meetingNotes', 'qa', 'flowchart'].includes(normModule as string)) {
-        return true;
-    }
-
-    // General users can only update or delete data they own (Reporter or Assignee), unless custom permissions bypass it
-    const isProjectModuleUpdate = actionKey === "update" && ["list", "board", "sprints", "qa"].includes(normModule as string);
-    if (normRole === "user" && (actionKey === "delete" || (actionKey === "update" && !isProjectModuleUpdate)) && !isOwner) {
-        if (customPermissions && (customPermissions[normModule] || customPermissions[module as keyof UserPermissions])) {
-            const customVal = customPermissions[normModule] || customPermissions[module as keyof UserPermissions];
-            if (typeof customVal === 'string') {
-                if (customVal === 'full') return true;
-            } else {
-                const hasCustomAction = Boolean((customVal as any)?.[actionKey]);
-                if (hasCustomAction) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
+  // Lihat catatan tipe `string` di getUserPermissions.
+  const normRole: string = normalkanPeran(userRole) || "viewer";
+  const isAdmin = normRole === "admin" || normRole === "administrator" || normRole === "superadmin";
+  if (isAdmin) {
     return true;
+  }
+
+  const normModule = (KEY_MAP[module as string] || module) as keyof UserPermissions;
+
+  // Normalize action: map add -> create
+  let normalizedAction = action.toLowerCase();
+  if (normalizedAction === "add") normalizedAction = "create";
+
+  // Validate action
+  if (!["create", "read", "update", "delete"].includes(normalizedAction)) {
+    console.warn(`[PERM_MISMATCH] Module: ${module}, Invalid Action: ${action}`);
+    return false;
+  }
+
+  const actionKey = normalizedAction as "create" | "read" | "update" | "delete";
+
+  const perms = getUserPermissions(userRole, customPermissions);
+  const modulePerm = perms[normModule];
+
+  const hasActionPerm = Boolean(modulePerm?.[actionKey]);
+
+  // Logging if permission check fails in development
+  if (!hasActionPerm) {
+    console.warn(`[PERM_MISMATCH] Module: ${module}, Action: ${action} - Denied`);
+  }
+
+  // Owners have access if permission allows
+  if (isOwner && actionKey !== "create" && hasActionPerm) {
+    return true;
+  }
+
+  if (!hasActionPerm) {
+    return false;
+  }
+
+  // Role-specific ownership logic (unless custom permissions explicitly grant access)
+  // Managers bypass ownership checks for project-related modules unless overridden
+  if (
+    normRole === "manager" &&
+    !customPermissions?.[normModule] &&
+    ["list", "sprints", "board", "meetingNotes", "qa", "flowchart"].includes(normModule as string)
+  ) {
+    return true;
+  }
+
+  // General users can only update or delete data they own (Reporter or Assignee), unless custom permissions bypass it
+  const isProjectModuleUpdate =
+    actionKey === "update" && ["list", "board", "sprints", "qa"].includes(normModule as string);
+  if (
+    normRole === "user" &&
+    (actionKey === "delete" || (actionKey === "update" && !isProjectModuleUpdate)) &&
+    !isOwner
+  ) {
+    if (
+      customPermissions &&
+      (customPermissions[normModule] || customPermissions[module as keyof UserPermissions])
+    ) {
+      const customVal =
+        customPermissions[normModule] || customPermissions[module as keyof UserPermissions];
+      if (typeof customVal === "string") {
+        if (customVal === "full") return true;
+      } else {
+        const hasCustomAction = Boolean((customVal as any)?.[actionKey]);
+        if (hasCustomAction) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  return true;
 }

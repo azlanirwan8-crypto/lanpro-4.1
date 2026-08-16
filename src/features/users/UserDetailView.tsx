@@ -581,16 +581,13 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         ? "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800"
                         : editRole === "head"
                           ? "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800"
-                          : editRole === "manager"
-                            ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
-                            : editRole === "user"
-                              ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
-                              : "bg-surface-muted dark:bg-slate-800 text-content-body dark:text-slate-300 border-slate-300 dark:border-slate-700"
+                          : editRole === "user"
+                            ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
+                            : "bg-surface-muted dark:bg-slate-800 text-content-body dark:text-slate-300 border-slate-300 dark:border-slate-700"
                     )}
                   >
                     {editRole === "admin" && <ShieldCheck className="w-3.5 h-3.5 shrink-0" />}
                     {editRole === "head" && <Award className="w-3.5 h-3.5 shrink-0" />}
-                    {editRole === "manager" && <UserCog className="w-3.5 h-3.5 shrink-0" />}
                     {editRole === "user" && <Users className="w-3.5 h-3.5 shrink-0" />}
                     {editRole === "viewer" && <Eye className="w-3.5 h-3.5 shrink-0" />}
                     <span>{editRole}</span>

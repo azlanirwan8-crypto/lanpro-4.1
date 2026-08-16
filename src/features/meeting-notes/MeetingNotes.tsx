@@ -24,7 +24,13 @@ import {
   deleteMeeting,
   getUsers,
 } from "../../services/meetingService";
-import { type Meeting, type UserProfile, type AppRole, type UserPermissions } from "../../types";
+import {
+  type Meeting,
+  type UserProfile,
+  type AppRole,
+  type PeranEfektif,
+  type UserPermissions,
+} from "../../types";
 import { DiscussionPointsTable } from "./DiscussionPointsTable";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { hasPermission } from "../../lib/permissions";
@@ -33,7 +39,7 @@ import { ResponsiveTable } from "../../components/ResponsiveTable";
 
 interface MeetingNotesProps {
   projectId: string;
-  userRole: AppRole;
+  userRole: PeranEfektif;
   currentUser: UserProfile | null;
   permissions?: Partial<UserPermissions>;
   projectMembers?: UserProfile[];

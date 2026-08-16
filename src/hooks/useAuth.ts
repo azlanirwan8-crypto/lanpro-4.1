@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import type { AppView } from "../store/useAppStore";
 import { showErrorAlert } from "../lib/sweetalert";
-import { UserProfile, AppRole } from "../types";
+import { UserProfile, AppRole, PeranEfektif } from "../types";
 import { apiRequest, ApiError, setAuthToken, clearAuthToken, getAuthToken } from "../lib/api";
 import { safeLocalStorage, safeSessionStorage } from "../lib/safeStorage";
 
@@ -32,7 +32,12 @@ interface UseAuthReturn {
   isAuthLoading: boolean;
   loginStatusText: string;
   setLoginStatusText: (text: string) => void;
-  effectiveRole: AppRole;
+  /**
+   * Peran yang BERLAKU saat ini — bisa berasal dari `Users.role` (lingkup
+   * SYSTEM) atau dari `ProjectMembers.role` (lingkup PROJECT), tergantung
+   * apakah pengguna sedang berada di dalam proyek. Lihat `PeranEfektif`.
+   */
+  effectiveRole: PeranEfektif;
   handleLogout: (silent?: boolean) => Promise<void>;
   handleLogoutRequest: () => void;
   handleManualLogin: (
@@ -120,7 +125,7 @@ export function useAuth(
     )
       return "admin";
 
-    return (userRole || "user") as AppRole;
+    return (userRole || "user") as PeranEfektif;
   }, [
     userRole,
     currentUser?.uid,

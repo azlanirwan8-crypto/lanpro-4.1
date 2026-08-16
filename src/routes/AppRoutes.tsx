@@ -1,5 +1,6 @@
 import React, { Suspense } from "react";
 import { ShieldAlert, FolderKanban } from "lucide-react";
+import type { PeranEfektif } from "../types/roles";
 
 /**
  * Tiap tampilan dimuat SAAT DIBUTUHKAN, bukan sekaligus di awal.
@@ -92,7 +93,8 @@ export interface AppRoutesProps {
   currentView: string;
   setCurrentView: (view: any) => void;
   selectedProject: any;
-  effectiveRole: string;
+  /** Peran yang berlaku — lingkup SYSTEM atau PROJECT. Lihat `PeranEfektif`. */
+  effectiveRole: PeranEfektif;
   currentUser: any;
   currentUserProfile: any;
   projectMembers: any[];
