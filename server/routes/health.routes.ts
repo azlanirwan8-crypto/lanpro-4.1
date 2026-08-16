@@ -27,8 +27,7 @@ const penjagaMetrik = (req: any, res: any, next: any) => {
   if (!diharapkan) {
     return res.status(503).json({
       status: "error",
-      message:
-        "Endpoint metrik dinonaktifkan: METRIK_TOKEN belum diisi di environment.",
+      message: "Endpoint metrik dinonaktifkan: METRIK_TOKEN belum diisi di environment.",
     });
   }
 
@@ -66,13 +65,30 @@ router.get("/metrics", penjagaMetrik, async (req, res) => {
  * dibutuhkan fitur baru tidak pernah terbentuk. Menaruhnya di sini membuat
  * keadaan itu bisa diperiksa kapan saja tanpa membaca log boot.
  */
-router.get("/api/health", (req, res) => {
+// #57 — `GET /api/health` DIBUANG 16 Agu 2026 atas keputusan pemilik proyek.
+//
+// Ia menghitung hal yang sama persis dengan `/api/health-check` di
+// `server.ts:552` — keduanya dari `statusMigrasi()` — dan bedanya hanya field
+// `service` bernilai tetap "LanPro Backend".
+//
+// Yang menentukan: ia berada DI BALIK gerbang autentikasi `/api/*`, sementara
+// `/api/health-check` terdaftar di `publicRoutes` (`server.ts:409`). Probe
+// kesehatan tidak punya kredensial, jadi endpoint ini tidak bisa dipakai untuk
+// keperluan yang namanya sendiri janjikan — ia menduplikasi informasi sambil
+// tidak bisa diakses oleh yang membutuhkannya.
+//
+// Pemakai kesehatan backend memakai `/api/health-check`, yang DIPINDAHKAN ke
+// sini dari `server.ts:552`. Jalurnya TIDAK berubah, jadi pendaftarannya di
+// `publicRoutes` (`server.ts:409`) tetap berlaku. Yang berubah hanya letaknya:
+// endpoint kesehatan kini berkumpul di berkas yang namanya menjanjikan itu,
+// dan bisa diuji tanpa menyalakan seluruh server.
+router.get("/api/health-check", (req, res) => {
   const migrasi = statusMigrasi();
   res.json({
     status: migrasi.status === "gagal" ? "degraded" : "ok",
     timestamp: new Date().toISOString(),
     service: "LanPro Backend",
-    migrasi,
+    migrasi: migrasi.status,
   });
 });
 
