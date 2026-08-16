@@ -15,7 +15,7 @@ kebutuhan mengevaluasi ulang dari nol setiap kali memulai sesi kerja.
 Bagian ini ditulis agar siapa pun — manusia maupun agen AI lain — bisa
 melanjutkan pekerjaan tanpa perlu menelusuri riwayat percakapan.
 
-**Diperbarui: 16 Agustus 2026, sesudah F7 Two-Tier RBAC.** Seluruh pekerjaan ada
+**Diperbarui: 16 Agustus 2026, sesudah F7 Two-Tier RBAC TUTUP.** Seluruh pekerjaan ada
 di branch `main` lokal dan **BELUM di-push ke `origin/main`** — tertinggal
 sekitar 190 commit.
 
@@ -105,17 +105,19 @@ pengerjaannya §19.15–§19.23.
 | :---: | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 |   1   | Satu definisi peran, `\| string` dicabut | ✅ `src/types/roles.ts`. Jadi DUA enum, bukan satu — kode `admin` bertabrakan antar lingkup dan memicu God Mode (§19.15) |
 |   2   | Matriks otorisasi terpusat               | ✅ `src/lib/matriksAkses.ts`, diikat ke tabel §19.4/§19.5 lewat test yang MEMBACA AUDIT.md                               |
-|  2b   | Penjaga saat boot                        | ✅ `daftarPeranRute.ts`, masih mode `LAPOR`                                                                              |
+|  2b   | Penjaga saat boot                        | ✅ `daftarPeranRute.ts`, **`MODE = TOLAK`** — juga menolak modul asing & kombinasi mati (#90)                            |
 |   3   | Migrasi data                             | ✅ dijalankan ke Neon. 7 baris `member` → `developer`                                                                    |
-|   4   | `jagaProyek(modul, aksi)` + pemasangan   | 🟢 **51 dari 54 rute**. Sisa 3 menunggu #89                                                                              |
+|   4   | `jagaProyek(modul, aksi)` + pemasangan   | ✅ **54 dari 54 rute**. Penjaga lama NOL pemakai                                                                         |
 
 **Angka yang paling menjelaskan keadaan** — dari log boot server sungguhan:
 
-| Laporan boot                          |               Sebelum F7 |        Sekarang |
-| ------------------------------------- | -----------------------: | --------------: |
-| Penjaga lama `verifyProjectAccess`    |                       54 |           **3** |
-| Rute ber-`["*"]` (= anggota mana pun) |                 31 (57%) |           **0** |
-| Peran warisan terpakai                | member · designer · head | designer · head |
+| Laporan boot                          |               Sebelum F7 |  Sekarang |
+| ------------------------------------- | -----------------------: | --------: |
+| Penjaga lama `verifyProjectAccess`    |                       54 |     **0** |
+| Rute ber-`["*"]` (= anggota mana pun) |                 31 (57%) |     **0** |
+| Korslet `"*"` di daftar peran (#73)   |                        1 |     **0** |
+| Peran warisan terpakai                | member · designer · head | **nihil** |
+| Penjaga matriks aktif                 |                        0 |    **54** |
 
 **#66 dan #72 tertutup secara struktural.** `viewer` kini benar-benar hanya
 membaca. **#80 juga ditutup** — pintu kedua pembuatan proyek.
@@ -126,9 +128,30 @@ membaca. **#80 juga ditutup** — pintu kedua pembuatan proyek.
 2. `tasks/bulk-delete` kini hanya Owner/Admin/Manager. Dulu developer pun bisa —
    penghapusan massal justru lebih longgar daripada penghapusan satuan.
 
-**Temuan baru sesi ini:** #87 `effectiveRole` membawa dua kosakata peran ·
-#88 God Mode belum tercatat di `AuditLogs` · #89 tiga operasi tingkat proyek
-tidak punya modul di §19.5.
+**F7 TUTUP.** Tahap 1–4 seluruhnya selesai. `MODE = TOLAK`: server kini
+**menolak menyala** bila ada rute memakai peran di luar katalog, modul di luar
+matriks, atau kombinasi modul+aksi yang tidak mengizinkan siapa pun.
+
+```
+[RBAC] 54 penjaga matriks · 0 penjaga lama · 0 ber-["*"] polos · 0 korslet
+```
+
+**Selesai sesudah itu, masih di sesi yang sama:** #66 · #69 · #70 · #72 · #73 ·
+#76 · #80 · #82 · #84 · #89 · #90 · **#91**.
+
+⚠️ **#91 yang paling penting dibaca.** Dua pintu belakang admin (§19.27):
+kredensial `admin`/`admin123` ter-hardcode di frontend — **ikut terkirim ke
+setiap pengunjung lewat bundel** — dan peran yang bisa **diminta dari body**
+pada endpoint pendaftaran publik. Keduanya dicabut.
+
+Keduanya ditemukan bukan dari daftar temuan, melainkan saat **menelusuri #87
+yang ternyata saya tulis keliru**. Dua kali sesi ini catatan temuan salah rumus
+(#69, #87) — perlakukan §1 sebagai hipotesis, bukan instruksi.
+
+**Temuan baru yang MASIH TERBUKA:** #87 (dikoreksi — frontend abai peran
+proyek, bukan lagi lubang keamanan sesudah server menegakkan sendiri) · #92
+(peran dibaca dari token di 7 tempat, dari database di penjaga proyek; token
+2 jam, jadi pencabutan hak tertunda).
 
 ### 0.4 Yang PALING MUNGKIN dikerjakan berikutnya
 
