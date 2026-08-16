@@ -446,7 +446,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       type="checkbox"
                       checked={isAllSelected}
                       onChange={() => handleToggleSelectAll(searchedCases)}
-                      className="rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                      className="rounded border-border-subtle text-primary focus:ring-primary cursor-pointer"
                     />
                   )}
                 </th>
@@ -492,7 +492,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => handleToggleSelectCase(tc.id)}
-                            className="rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                            className="rounded border-border-subtle text-primary focus:ring-primary cursor-pointer"
                           />
                         )}
                       </td>

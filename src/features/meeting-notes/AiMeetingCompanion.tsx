@@ -1333,14 +1333,14 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     value={meetingLink}
                     onChange={(e) => setMeetingLink(e.target.value)}
                     placeholder="Tempel link rapat (Zoom/Teams/GMeet)..."
-                    className="w-full p-3 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-slate-300 "
+                    className="w-full p-3 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle "
                   />
 
                   <textarea
                     value={transcript}
                     onChange={(e) => setTranscript(e.target.value)}
                     placeholder="Tempel teks transkrip di sini..."
-                    className="w-full min-h-[160px] p-4 border border-border-subtle rounded-xl text-xs  outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-slate-300 font-mono leading-relaxed shadow-inner"
+                    className="w-full min-h-[160px] p-4 border border-border-subtle rounded-xl text-xs  outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle font-mono leading-relaxed shadow-inner"
                   />
                   <div className="flex justify-end">
                     <button
@@ -1787,7 +1787,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   <h4 className="text-sm font-medium tracking-tight text-white">
                     Continuous Learning Loop
                   </h4>
-                  <p className="text-xs sm:text-[10px] text-slate-300 ">
+                  <p className="text-xs sm:text-[10px] text-content-subtle ">
                     Latih AI agar belajar dari kesalahan & kritik Anda
                   </p>
                 </div>
@@ -1796,7 +1796,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 onClick={() => setShowFeedbackModal(false)}
                 className="p-1.5 hover:bg-surface/10 rounded-xl transition-all cursor-pointer"
               >
-                <X className="w-4 h-4 text-slate-300 hover:text-white" />
+                <X className="w-4 h-4 text-content-subtle hover:text-white" />
               </button>
             </div>
 

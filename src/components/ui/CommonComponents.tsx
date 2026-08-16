@@ -85,7 +85,7 @@ export const PriorityIcon = ({
   if (pLowerCase.includes("hold"))
     return <MinusCircle {...iconProps} className="text-content-subtle" />;
 
-  return <Equal {...iconProps} className="text-slate-300" />;
+  return <Equal {...iconProps} className="text-content-subtle" />;
 };
 
 export const TypeIcon = ({
@@ -324,7 +324,7 @@ export const StyledDropdown = ({
             </span>
           </div>
           {!disabled && (
-            <ChevronDown className="w-3 h-3 text-slate-300 group-hover/dd:text-content-muted flex-shrink-0" />
+            <ChevronDown className="w-3 h-3 text-content-subtle group-hover/dd:text-content-muted flex-shrink-0" />
           )}
         </button>
       )}

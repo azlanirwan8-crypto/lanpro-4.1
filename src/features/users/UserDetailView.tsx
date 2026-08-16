@@ -583,7 +583,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           ? "bg-purple-50 text-purple-700 border-purple-200 "
                           : editRole === "user"
                             ? "bg-indigo-50 text-indigo-700 border-indigo-200 "
-                            : "bg-surface-muted text-content-body border-slate-300 "
+                            : "bg-surface-muted text-content-body border-border-subtle "
                     )}
                   >
                     {editRole === "admin" && <ShieldCheck className="w-3.5 h-3.5 shrink-0" />}
@@ -895,7 +895,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 bg-surface ">
+                      <tbody className="divide-y divide-border-faint bg-surface ">
                         {(Object.keys(MODULE_DESCRIPTIONS) as Array<keyof UserPermissions>).map(
                           (module) => {
                             const moduleInfo = MODULE_DESCRIPTIONS[module] || {
@@ -930,7 +930,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                           "w-5 h-5 rounded-md flex items-center justify-center mx-auto transition-all cursor-pointer border relative",
                                           isChecked
                                             ? "bg-indigo-600 text-white border-indigo-500 shadow-xs"
-                                            : "bg-surface-sunken text-slate-300 border-border-subtle hover:bg-surface-muted ",
+                                            : "bg-surface-sunken text-content-subtle border-border-subtle hover:bg-surface-muted ",
                                           isOverride && "ring-2 ring-amber-400 ring-offset-1 "
                                         )}
                                         title={
@@ -1099,7 +1099,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                       setSelectedSubordinateIds([...selectedSubordinateIds, uId]);
                                     }
                                   }}
-                                  className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                  className="rounded border-border-subtle text-indigo-600 focus:ring-indigo-500"
                                 />
                                 <span className="font-medium">
                                   {u.displayName || u.username || u.email}

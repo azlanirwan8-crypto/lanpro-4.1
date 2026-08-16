@@ -187,7 +187,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                 </div>
               ) : executionLogs.length === 0 ? (
                 <div className="py-8 text-center bg-surface-sunken border border-border-faint rounded-md p-3">
-                  <History className="w-6 h-6 text-slate-300 mx-auto mb-1.5" />
+                  <History className="w-6 h-6 text-content-subtle mx-auto mb-1.5" />
                   <p className="text-xs font-medium text-content-secondary">
                     Belum Ada Catatan Run Eksekusi
                   </p>

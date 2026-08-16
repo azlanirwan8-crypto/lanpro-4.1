@@ -530,7 +530,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleExportCSV}
-                  className="bg-surface-sunken hover:bg-surface-muted text-content-body border border-border-subtle hover:border-slate-300 font-medium py-1.5 px-3 rounded text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98] shadow-2xs h-8.5"
+                  className="bg-surface-sunken hover:bg-surface-muted text-content-body border border-border-subtle hover:border-border-subtle font-medium py-1.5 px-3 rounded text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98] shadow-2xs h-8.5"
                 >
                   <Download className="w-3.5 h-3.5 text-content-muted" /> Export CSV
                 </button>
@@ -736,7 +736,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             );
                           }
                         }}
-                        className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                        className="w-4 h-4 rounded text-indigo-600 border-border-subtle focus:ring-indigo-500 cursor-pointer"
                       />
                     </th>
                     <th
@@ -819,7 +819,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 setSelectedUserIds(selectedUserIds.filter((id) => id !== user.id));
                               }
                             }}
-                            className="w-4 h-4 rounded text-indigo-650 border-slate-300 focus:ring-indigo-500 cursor-pointer"
+                            className="w-4 h-4 rounded text-indigo-650 border-border-subtle focus:ring-indigo-500 cursor-pointer"
                           />
                         </td>
                         <td

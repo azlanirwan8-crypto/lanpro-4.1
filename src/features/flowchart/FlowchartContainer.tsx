@@ -2598,7 +2598,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       </strong>
                     </span>
 
-                    <span className="text-slate-300">•</span>
+                    <span className="text-content-subtle">•</span>
 
                     {/* Date */}
                     <span className="text-xs sm:text-[10px] text-content-subtle font-medium flex items-center gap-1">
@@ -2608,7 +2608,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                     {linkedEpic && (
                       <>
-                        <span className="text-slate-300">•</span>
+                        <span className="text-content-subtle">•</span>
                         <span
                           className="text-xs sm:text-[10px] font-medium text-indigo-750 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full truncate max-w-[180px]"
                           title={linkedEpic.title}
@@ -3019,7 +3019,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                         {/* Miro Coordinate & Element Stats Hover HUD overlay (HIDDEN AS REQUESTED) */}
                         {/* <div className={cn(
-              "absolute bottom-16 z-30 p-1.5 px-3 bg-slate-900/95 backdrop-blur-sm border border-slate-800 text-slate-300 shadow-xl rounded-xl flex items-center gap-2 text-xs sm:text-[10px] font-mono select-none transition-all duration-300",
+              "absolute bottom-16 z-30 p-1.5 px-3 bg-slate-900/95 backdrop-blur-sm border border-slate-800 text-content-subtle shadow-xl rounded-xl flex items-center gap-2 text-xs sm:text-[10px] font-mono select-none transition-all duration-300",
               // HUD hidden coordinate info
               false ? "left-[356px]" : "left-4"
             )}>
@@ -3061,7 +3061,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className={cn(
                               "p-2 rounded-xl transition-all flex items-center justify-center",
                               historyIndex <= 0
-                                ? "text-slate-300 cursor-not-allowed"
+                                ? "text-content-subtle cursor-not-allowed"
                                 : "text-slate-750 hover:bg-surface-muted hover:text-violet-600 active:scale-95"
                             )}
                             title="Undo Gagal Langkah (Ctrl+Z)"
@@ -3076,7 +3076,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className={cn(
                               "p-2 rounded-xl transition-all flex items-center justify-center",
                               historyIndex >= historyStack.length - 1
-                                ? "text-slate-300 cursor-not-allowed"
+                                ? "text-content-subtle cursor-not-allowed"
                                 : "text-slate-750 hover:bg-surface-muted hover:text-violet-600 active:scale-95"
                             )}
                             title="Redo Langkah Batal (Ctrl+Shift+Z)"
@@ -3812,7 +3812,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 <label className="block text-xs sm:text-[11px] font-medium text-content-body mb-1.5">
                   Upload File (Max 5MB)
                 </label>
-                <div className="border border-dashed border-slate-300 rounded-md p-6 flex flex-col items-center justify-center bg-surface-sunken/50 relative overflow-hidden group hover:border-primary transition-colors">
+                <div className="border border-dashed border-border-subtle rounded-md p-6 flex flex-col items-center justify-center bg-surface-sunken/50 relative overflow-hidden group hover:border-primary transition-colors">
                   <input
                     type="file"
                     onChange={handleDocumentFileChange}

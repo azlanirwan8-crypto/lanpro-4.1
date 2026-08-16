@@ -986,7 +986,7 @@ export function DashboardView(props: DashboardViewProps) {
                       <th className="py-2.5 px-2 text-right">Progress</th>
                     </tr>
                   </thead>
-                  <tbody className="text-xs divide-y divide-slate-100 font-medium text-content-body ">
+                  <tbody className="text-xs divide-y divide-border-faint font-medium text-content-body ">
                     {workloadData.length > 0 ? (
                       workloadData.map((user, idx) => {
                         const totalUserTasks = user.Done + user.Active;

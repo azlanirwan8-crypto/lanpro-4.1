@@ -88,14 +88,14 @@ const getStatusColors = (status: string = "", isEpic: boolean) => {
   // Default (To Do / Backlog)
   return {
     bg: "bg-gradient-to-r from-slate-50 to-white",
-    border: "border-border-subtle/80 hover:border-slate-300",
+    border: "border-border-subtle/80 hover:border-border-subtle",
     text: "text-content",
     activeBg: "bg-slate-950 ring-2 ring-slate-400 border-slate-800",
     handle: "hover:bg-slate-600/15 active:bg-slate-600/25 group/l-handle",
     handleBar: "bg-slate-400/80 border-slate-400/20 group-hover/l-handle:bg-slate-600",
     handleR: "hover:bg-slate-600/15 active:bg-slate-600/25 group/r-handle",
     handleBarR: "bg-slate-400/80 border-slate-400/20 group-hover/r-handle:bg-slate-600",
-    tooltipText: "text-slate-300",
+    tooltipText: "text-content-subtle",
     tooltipBadge: "bg-slate-500/30 text-slate-200",
   };
 };
@@ -1388,7 +1388,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           >
                             {task.key}
                           </button>
-                          <span className="text-xs sm:text-[10px] sm:text-[7px] text-slate-300">
+                          <span className="text-xs sm:text-[10px] sm:text-[7px] text-content-subtle">
                             •
                           </span>
                           <span

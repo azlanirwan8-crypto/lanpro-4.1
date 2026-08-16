@@ -394,7 +394,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                           </span>
                         </div>
                         <div className="text-xs sm:text-[11px] font-medium text-content-subtle flex items-center gap-1 shrink-0">
-                          <Clock className="w-3 h-3 text-slate-300" />
+                          <Clock className="w-3 h-3 text-content-subtle" />
                           {formatDate(log.createdAt)}
                         </div>
                       </div>
@@ -481,7 +481,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                       <span className="text-xs font-medium text-content-muted uppercase tracking-widest">
                         {selectedLog.entityName}
                       </span>
-                      <span className="text-slate-300">•</span>
+                      <span className="text-content-subtle">•</span>
                       <code className="text-xs sm:text-[10px] font-medium bg-slate-200/50 text-content-secondary px-2 py-0.5 rounded">
                         {selectedLog.entityId}
                       </code>
