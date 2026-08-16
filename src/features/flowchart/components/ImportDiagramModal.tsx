@@ -250,7 +250,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
 
           {/* Analytical preview result of parser */}
           {parsedImportData && (
-            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 space-y-2 text-xs sm:text-[11px] animate-fade-in text-emerald-900 leading-relaxed font-sans font-medium">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 space-y-2 text-[10px] leading-none animate-fade-in text-emerald-900 leading-relaxed font-sans font-medium">
               <span className="font-medium uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-emerald-800 flex items-center gap-1.5 shadow-soft bg-surface p-1 px-2.5 w-fit rounded-full border border-emerald-500/30">
                 🔍 Ulasan Kesiapan Diagram
               </span>
@@ -307,7 +307,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
               <button
                 type="button"
                 onClick={handleApplyImportMerge}
-                className="p-2 px-3 bg-surface hover:bg-indigo-500/10 border border-indigo-500/30 hover:border-indigo-500/30 text-indigo-700 hover:text-indigo-900 font-medium rounded-xl transition-all text-xs sm:text-[11px] shadow-soft flex items-center gap-1 active:scale-95"
+                className="p-2 px-3 bg-surface hover:bg-indigo-500/10 border border-indigo-500/30 hover:border-indigo-500/30 text-indigo-700 hover:text-indigo-900 font-medium rounded-xl transition-all text-[10px] leading-none shadow-soft flex items-center gap-1 active:scale-95"
               >
                 <span>➕ Gabungkan ke Kanvas</span>
               </button>

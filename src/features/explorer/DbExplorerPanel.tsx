@@ -153,7 +153,7 @@ export const DbExplorerPanel: React.FC<any> = ({
       <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-500/30">
+            <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
               System Tools
             </span>
             <span className="text-xs text-content-subtle font-medium">

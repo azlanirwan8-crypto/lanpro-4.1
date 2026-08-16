@@ -590,7 +590,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       href={task.figmaUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-xs sm:text-[10px] font-medium text-purple-600 bg-purple-500/10 px-2 py-1 rounded-lg hover:bg-purple-500/15 transition-all flex items-center gap-1"
+                      className="text-[10px] leading-none font-medium text-purple-600 bg-purple-500/10 px-2 py-1 rounded-lg hover:bg-purple-500/15 transition-all flex items-center gap-1"
                     >
                       <ExternalLink className="w-3 h-3" />
                       Open Original
@@ -748,7 +748,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         className="p-3 bg-surface rounded-xl border border-border-faint shadow-soft space-y-2 group/link relative"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase text-indigo-500 bg-indigo-500/10 px-1.5 py-0.5 rounded tracking-widest">
+                          <span className="text-[10px] leading-none sm:text-[9px] font-medium uppercase text-indigo-500 bg-indigo-500/10 px-1.5 py-[3px] rounded tracking-widest">
                             {link.relationType.replace(/_/g, " ")}
                           </span>
                           <button

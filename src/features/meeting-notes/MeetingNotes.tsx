@@ -497,7 +497,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                                 }
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 text-primary hover:bg-indigo-500/15 rounded-md font-medium truncate max-w-[150px] transition-all text-xs sm:text-[11px] border border-indigo-500/30"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 text-primary hover:bg-indigo-500/15 rounded-md font-medium truncate max-w-[150px] transition-all text-[10px] leading-none border border-indigo-500/30"
                                 title={meeting.meetingLink}
                               >
                                 <Video className="w-3.5 h-3.5 shrink-0" />
@@ -896,7 +896,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             e.stopPropagation();
                             setShouldRemoveMeetingFile(true);
                           }}
-                          className="text-xs sm:text-[10px] bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 px-2 py-1 rounded font-medium transition-all"
+                          className="text-[10px] leading-none bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 px-2 py-1 rounded font-medium transition-all"
                         >
                           Hapus Berkas
                         </button>

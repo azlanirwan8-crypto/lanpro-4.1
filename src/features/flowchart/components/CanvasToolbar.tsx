@@ -127,13 +127,13 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
         <div className="bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1 rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.06)] flex items-center gap-1.5 transition-all duration-300">
           <button
             onClick={handleExportJPG}
-            className="flex items-center gap-1 px-2.5 py-1 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/15 border border-emerald-500/30 rounded-lg text-xs sm:text-[10px] font-medium transition-all cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-1 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/15 border border-emerald-500/30 rounded-lg text-[10px] leading-none font-medium transition-all cursor-pointer"
           >
             <Download className="w-3 h-3" /> Ekspor
           </button>
           <button
             onClick={handleExportJSON}
-            className="flex items-center gap-1 px-2.5 py-1 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/15 border border-indigo-500/30 rounded-lg text-xs sm:text-[10px] font-medium transition-all cursor-pointer"
+            className="flex items-center gap-1 px-2.5 py-1 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/15 border border-indigo-500/30 rounded-lg text-[10px] leading-none font-medium transition-all cursor-pointer"
           >
             <Database className="w-3 h-3" /> Backup
           </button>

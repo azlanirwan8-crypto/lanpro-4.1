@@ -315,13 +315,13 @@ export const BackupPanel = (_props: {
                         </div>
                       )}
                       {item.status === "completed" && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs sm:text-[11px] font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">
+                        <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded text-[10px] leading-none font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                           Selesai
                         </span>
                       )}
                       {item.status === "failed" && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs sm:text-[11px] font-medium bg-rose-500/10 text-rose-700 border border-rose-500/30">
+                        <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded text-[10px] leading-none font-medium bg-rose-500/10 text-rose-700 border border-rose-500/30">
                           <AlertTriangle className="w-3 h-3 text-rose-600" />
                           Gagal
                         </span>
@@ -340,7 +340,7 @@ export const BackupPanel = (_props: {
                       )}
                       <button
                         onClick={() => handleDeleteItem(item.id)}
-                        className="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 border border-rose-500/30 rounded font-medium text-xs sm:text-[11px] transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
+                        className="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 border border-rose-500/30 rounded font-medium text-[10px] leading-none transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
                         title="Hapus riwayat"
                       >
                         <Trash2 className="w-3 h-3" />

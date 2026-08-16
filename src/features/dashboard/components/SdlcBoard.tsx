@@ -78,7 +78,7 @@ export const SdlcBoard: React.FC<SdlcBoardProps> = ({
                   {isApproved ? "✓" : idx + 1}
                 </span>
                 {isApproved && (
-                  <span className="text-xs sm:text-[10px] sm:text-[8px] font-medium tracking-wider text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded leading-none border border-emerald-500/20">
+                  <span className="text-[10px] leading-none sm:text-[8px] font-medium tracking-wider text-emerald-400 bg-emerald-500/10 px-1.5 py-[3px] rounded leading-none border border-emerald-500/20">
                     SIGNED
                   </span>
                 )}

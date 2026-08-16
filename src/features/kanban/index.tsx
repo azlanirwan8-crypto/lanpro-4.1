@@ -202,7 +202,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                 <select
                   value={groupBy}
                   onChange={(e) => setGroupBy(e.target.value as any)}
-                  className="bg-primary-surface/10 text-primary border border-primary/20 rounded-md text-xs sm:text-[11px] font-semibold px-2 py-1 cursor-pointer outline-none focus:ring-1 focus:ring-primary/30 max-w-[110px]"
+                  className="bg-primary-surface/10 text-primary border border-primary/20 rounded-md text-[10px] leading-none font-semibold px-2 py-1 cursor-pointer outline-none focus:ring-1 focus:ring-primary/30 max-w-[110px]"
                 >
                   <option value="epic">By Epic</option>
                   <option value="assignee">By Assignee</option>
@@ -270,10 +270,10 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                         <div className="w-5 h-5 rounded bg-primary-surface/10 flex items-center justify-center text-primary shrink-0">
                           <Layers className="w-3 h-3" />
                         </div>
-                        <span className="text-xs sm:text-[10px] font-mono font-medium text-purple-600 bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-500/30">
+                        <span className="text-[10px] leading-none font-mono font-medium text-purple-600 bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-500/30">
                           {epic.key || "EPIC"}
                         </span>
-                        <span className="ml-auto bg-primary-surface/10 text-primary px-1.5 py-0.2 rounded text-xs sm:text-[10px] font-medium border border-purple-500/30">
+                        <span className="ml-auto bg-primary-surface/10 text-primary px-1.5 py-0.2 rounded text-[10px] leading-none font-medium border border-purple-500/30">
                           {boardStatuses.reduce(
                             (acc, status) =>
                               acc + (groupedTasks[`${epic.id}:${status.label}`]?.length || 0),

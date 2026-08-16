@@ -898,7 +898,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="md:col-span-2 p-5 bg-indigo-500/10 border border-indigo-500/30 rounded-xl flex flex-col justify-between">
                     <div>
-                      <span className="text-xs sm:text-[10px] text-indigo-800 font-medium uppercase tracking-widest bg-indigo-500/15 px-2.5 py-1 rounded-md">
+                      <span className="text-[10px] leading-none text-indigo-800 font-medium uppercase tracking-widest bg-indigo-500/15 px-2.5 py-1 rounded-md">
                         Agenda Rapat Utama
                       </span>
                       <h3 className="text-sm font-medium text-content-strong mt-2 flex items-center gap-2">
@@ -974,7 +974,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           <FileText className="w-4 h-4 text-indigo-600" />
                           Hasil Speech-to-Text Mentah (Raw Transcript)
                         </h4>
-                        <span className="px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 text-xs sm:text-[10px] font-medium rounded-lg">
+                        <span className="px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 text-[10px] leading-none font-medium rounded-lg">
                           {transcript ? `${transcript.split(/\s+/).length} Kata` : "0 Kata"}
                         </span>
                       </div>
@@ -1109,7 +1109,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </div>
 
                             {searchTerm.trim() && (
-                              <div className="text-xs sm:text-[10px] font-medium uppercase tracking-wider px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-800 rounded-lg animate-pulse">
+                              <div className="text-[10px] leading-none font-medium uppercase tracking-wider px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-800 rounded-lg animate-pulse">
                                 Ditemukan {getMatchCount()} kecocokan
                               </div>
                             )}
@@ -1379,7 +1379,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                 Topik {index + 1}
                               </span>
                               <div className="flex items-center gap-1.5">
-                                <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 font-mono text-xs sm:text-[10px] font-medium rounded">
+                                <span className="px-2 py-[3px] bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 font-mono text-[10px] leading-none font-medium rounded">
                                   {item.timestamp}
                                 </span>
                                 <h4 className="text-sm font-medium text-content-strong tracking-tight leading-snug">
@@ -1455,7 +1455,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         className="bg-surface p-4.5 rounded-xl border border-amber-500/30 flex flex-col gap-2 shadow-soft hover:border-amber-500/30 transition-colors"
                       >
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 bg-amber-500/10 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded border border-amber-500/30">
+                          <span className="px-2 py-[3px] bg-amber-500/10 text-[10px] leading-none sm:text-[9px] font-medium uppercase rounded border border-amber-500/30">
                             Diusulkan Oleh: {item.diusulkan_oleh}
                           </span>
                         </div>
@@ -1511,7 +1511,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         >
                           <div className="flex-1 space-y-3 min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="px-2 py-0.5 bg-rose-500/10 text-rose-600 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded border border-rose-500/30">
+                              <span className="px-2 py-[3px] bg-rose-500/10 text-rose-600 text-[10px] leading-none sm:text-[9px] font-medium uppercase rounded border border-rose-500/30">
                                 Concern Rapat {index + 1}
                               </span>
                             </div>
@@ -1596,7 +1596,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               Rencana Aksi {index + 1}
                             </span>
                             {item.due_date && (
-                              <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 text-xs sm:text-[10px] font-medium rounded-full">
+                              <span className="px-2 py-[3px] bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 text-[10px] leading-none font-medium rounded-full">
                                 Target: {item.due_date}
                               </span>
                             )}

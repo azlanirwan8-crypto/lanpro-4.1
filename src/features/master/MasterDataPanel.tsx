@@ -528,7 +528,7 @@ export const MasterDataPanel = ({
           <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 mb-4 flex justify-between items-center shadow-2xs shrink-0">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-500/30">
+                <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
                   System Master
                 </span>
                 <span className="text-xs text-content-subtle font-medium">
@@ -610,7 +610,7 @@ export const MasterDataPanel = ({
                               <span className="text-xs font-medium text-content-strong">
                                 {mod.namaModul}
                               </span>
-                              <span className="text-xs sm:text-[10px] bg-indigo-500/10 text-indigo-700 font-medium px-2 py-0.5 rounded-md border border-indigo-500/30">
+                              <span className="text-[10px] leading-none bg-indigo-500/10 text-indigo-700 font-medium px-2 py-[3px] rounded-md border border-indigo-500/30">
                                 {p ? p.name : mod.projectId}
                               </span>
                             </div>
@@ -904,11 +904,11 @@ export const MasterDataPanel = ({
                                               return (
                                                 <div className="flex items-center gap-1 shrink-0 select-none">
                                                   {rType === "PROJECT" ? (
-                                                    <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-blue-500/10 text-blue-700 border border-blue-500/30 uppercase">
+                                                    <span className="text-[10px] leading-none sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-blue-500/10 text-blue-700 border border-blue-500/30 uppercase">
                                                       PROJECT ROLE
                                                     </span>
                                                   ) : (
-                                                    <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-purple-500/10 text-purple-700 border border-purple-500/30 uppercase">
+                                                    <span className="text-[10px] leading-none sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-purple-500/10 text-purple-700 border border-purple-500/30 uppercase">
                                                       SYSTEM ROLE
                                                     </span>
                                                   )}
@@ -927,7 +927,7 @@ export const MasterDataPanel = ({
                                             })()}
 
                                           {usageCount > 0 && (
-                                            <span className="text-xs sm:text-[10px] font-medium px-2 py-0.2 rounded-md bg-indigo-500/10 text-indigo-700 border border-indigo-500/30 flex items-center gap-1">
+                                            <span className="text-[10px] leading-none font-medium px-2 py-0.2 rounded-md bg-indigo-500/10 text-indigo-700 border border-indigo-500/30 flex items-center gap-1">
                                               <Tag className="w-3 h-3" /> {usageCount} Task aktif
                                             </span>
                                           )}

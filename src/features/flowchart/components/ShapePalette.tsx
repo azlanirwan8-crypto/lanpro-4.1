@@ -170,7 +170,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                       {(group.title === "AWS" ||
                         group.title === "UML" ||
                         group.title === "My Shapes") && (
-                        <span className="text-xs sm:text-[10px] sm:text-[7.5px] bg-indigo-500/10 text-indigo-600 font-medium px-1 py-[1px] rounded border border-indigo-500/30 flex items-center gap-0.5 leading-none">
+                        <span className="text-[10px] leading-none sm:text-[7.5px] bg-indigo-500/10 text-indigo-600 font-medium px-1 py-[1px] rounded border border-indigo-500/30 flex items-center gap-0.5 leading-none">
                           FREE
                         </span>
                       )}

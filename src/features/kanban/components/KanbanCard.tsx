@@ -135,7 +135,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                 )}
               />
             )}
-            <span className="font-mono font-semibold text-xs sm:text-[11px] text-primary bg-primary-surface/10 px-1.5 py-0.5 rounded-md border border-primary/20">
+            <span className="font-mono font-semibold text-[10px] leading-none tracking-tight text-primary bg-primary-surface/10 px-1.5 py-[3px] rounded border border-primary/20">
               {task.key}
             </span>
             {task.priority && (

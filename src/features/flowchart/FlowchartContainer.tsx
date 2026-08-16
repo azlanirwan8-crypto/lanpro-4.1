@@ -2575,17 +2575,17 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       </span>
                     )}
                     {currentFlowMetadata?.category === "Panduan" && (
-                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-blue-500/10 text-blue-700 border border-blue-500/30 rounded-full">
+                      <span className="px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-blue-500/10 text-blue-700 border border-blue-500/30 rounded-full">
                         📖 Panduan
                       </span>
                     )}
                     {currentFlowMetadata?.category === "Laporan" && (
-                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 rounded-full">
+                      <span className="px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 rounded-full">
                         📊 Laporan
                       </span>
                     )}
                     {!currentFlowMetadata?.category && (
-                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-violet-500/10 text-violet-700 border border-violet-500/30 rounded-full">
+                      <span className="px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-violet-500/10 text-violet-700 border border-violet-500/30 rounded-full">
                         ⚙️ Umum
                       </span>
                     )}
@@ -2610,7 +2610,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       <>
                         <span className="text-content-subtle">•</span>
                         <span
-                          className="text-xs sm:text-[10px] font-medium bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-0.5 rounded-full truncate max-w-[180px]"
+                          className="text-[10px] leading-none font-medium bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-[3px] rounded-full truncate max-w-[180px]"
                           title={linkedEpic.title}
                         >
                           🎯 Epic: {linkedEpic.title}
@@ -3169,7 +3169,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               <Save className="w-3.5 h-3.5" />
                             </button>
                           ) : (
-                            <div className="px-2.5 py-1.5 bg-amber-500/10 text-amber-700 border border-amber-500/30 rounded-xl flex items-center gap-1 text-xs sm:text-[10px] font-medium shadow-2xs">
+                            <div className="px-2.5 py-1.5 bg-amber-500/10 text-amber-700 border border-amber-500/30 rounded-xl flex items-center gap-1 text-[10px] leading-none font-medium shadow-2xs">
                               <Eye className="w-3.5 h-3.5 text-amber-500" />
                               <span className="hidden sm:inline">Mode Baca Saja</span>
                             </div>

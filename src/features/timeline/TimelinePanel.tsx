@@ -1384,7 +1384,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               setSelectedTaskForDetail(task);
                               setIsTaskDetailModalOpen(true);
                             }}
-                            className="text-xs sm:text-[11px] sm:text-[9px] font-semibold text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/30 rounded-md px-1 py-0.2 tracking-tight text-left uppercase transition-colors"
+                            className="text-[10px] leading-none sm:text-[9px] font-semibold text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/30 rounded-md px-1 py-0.2 tracking-tight text-left uppercase transition-colors"
                           >
                             {task.key}
                           </button>

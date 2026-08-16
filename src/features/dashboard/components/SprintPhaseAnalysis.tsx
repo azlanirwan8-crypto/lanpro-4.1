@@ -43,7 +43,7 @@ export const SprintPhaseAnalysis: React.FC<SprintPhaseAnalysisProps> = ({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-[10px] font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-1 rounded-md uppercase tracking-tighter">
+            <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-1 rounded-md uppercase tracking-tighter">
               {sprintTotalTasks} Total Tasks
             </span>
           </div>

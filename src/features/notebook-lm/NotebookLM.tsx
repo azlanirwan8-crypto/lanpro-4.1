@@ -460,7 +460,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
       {/* Panel 2: Meta Context */}
       <div className="bg-surface border border-border-subtle rounded-lg p-5 md:p-6 shadow-soft shrink-0">
         <div className="flex flex-wrap items-center gap-2 select-none mb-2">
-          <span className="px-2 py-0.5 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-indigo-500/15 text-indigo-700 border border-indigo-500/30 rounded-full">
+          <span className="px-2 py-[3px] text-[10px] leading-none font-medium uppercase tracking-wider bg-indigo-500/15 text-indigo-700 border border-indigo-500/30 rounded-full">
             AI Grounded Workspace
           </span>
           <span className="text-xs sm:text-[10px] text-content-subtle font-medium flex items-center gap-1">
@@ -645,7 +645,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
                 </span>
 
                 {selectedSourceId && (
-                  <span className="text-xs sm:text-[11px] text-purple-600 font-medium flex items-center gap-1 bg-purple-500/10 px-2.5 py-0.5 rounded-full border border-purple-500/30 ">
+                  <span className="text-[10px] leading-none text-purple-600 font-medium flex items-center gap-1 bg-purple-500/10 px-2.5 py-[3px] rounded-full border border-purple-500/30 ">
                     <Sparkles className="w-3 h-3" />
                     Transisi Halus Aktif
                   </span>

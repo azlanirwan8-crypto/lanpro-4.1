@@ -997,19 +997,19 @@ export function DashboardView(props: DashboardViewProps) {
                         let capacityBadge = null;
                         if (user.Active >= 5) {
                           capacityBadge = (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-bold bg-rose-500/15 text-rose-700 border border-rose-500/30">
+                            <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-bold bg-rose-500/15 text-rose-700 border border-rose-500/30">
                               ⚠️ Overload ({user.Active})
                             </span>
                           );
                         } else if (user.Active >= 3) {
                           capacityBadge = (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-medium bg-amber-500/15 text-amber-800 border border-amber-500/30">
+                            <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-medium bg-amber-500/15 text-amber-800 border border-amber-500/30">
                               ⚡ Heavy ({user.Active})
                             </span>
                           );
                         } else if (user.Active >= 1) {
                           capacityBadge = (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-medium bg-emerald-500/15 text-emerald-800 border border-emerald-500/30">
+                            <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-medium bg-emerald-500/15 text-emerald-800 border border-emerald-500/30">
                               ✅ Balanced ({user.Active})
                             </span>
                           );
@@ -1096,7 +1096,7 @@ export function DashboardView(props: DashboardViewProps) {
                     >
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-xs sm:text-[10px] font-mono font-medium text-purple-600 bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-500/30">
+                          <span className="text-[10px] leading-none font-mono font-medium text-purple-600 bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-500/30">
                             {epic.key || "EPIC"}
                           </span>
                           <span className="font-medium text-content-strong truncate">
@@ -1139,7 +1139,7 @@ export function DashboardView(props: DashboardViewProps) {
                     Perbandingan estimasi jam pengerjaan vs jam terpakai
                   </p>
                 </div>
-                <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/30">
+                <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2 py-[3px] rounded border border-indigo-500/30">
                   {timeTrackingStats.accuracy}% Accuracy Rate
                 </span>
               </div>
@@ -1311,7 +1311,7 @@ export function DashboardView(props: DashboardViewProps) {
                   <ShieldAlert className="w-4 h-4 text-rose-500" />
                   Blocked & Overdue Issues
                 </h3>
-                <span className="text-xs sm:text-[10px] font-medium text-rose-600 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/30">
+                <span className="text-[10px] leading-none font-medium text-rose-600 bg-rose-500/10 px-2 py-[3px] rounded border border-rose-500/30">
                   {blockedTasks.length + overdueTasks.length} Need Action
                 </span>
               </div>
@@ -1332,7 +1332,7 @@ export function DashboardView(props: DashboardViewProps) {
                           {issue.key}
                         </span>
                         {issue.isBlocked && (
-                          <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-rose-600 bg-rose-500/10 px-1.5 py-0.2 rounded border border-rose-500/30">
+                          <span className="text-[10px] leading-none sm:text-[9px] font-medium text-rose-600 bg-rose-500/10 px-1.5 py-0.2 rounded border border-rose-500/30">
                             BLOCKED
                           </span>
                         )}

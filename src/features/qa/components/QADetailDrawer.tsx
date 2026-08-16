@@ -151,7 +151,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
             <History className="w-3.5 h-3.5" />
             Execution History
             {executionLogs.length > 0 && (
-              <span className="bg-primary-surface/10 text-primary text-xs sm:text-[11px] sm:text-[9px] px-1.5 py-0.2 rounded-full font-medium">
+              <span className="bg-primary-surface/10 text-primary text-[10px] leading-none sm:text-[9px] px-1.5 py-0.2 rounded-full font-medium">
                 {executionLogs.length}
               </span>
             )}
@@ -272,7 +272,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                   <h4 className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
                     Bukti Pengujian ({selectedTestCase.evidences?.length || 0})
                   </h4>
-                  <label className="px-2.5 py-1 bg-primary-surface/10 hover:bg-primary-surface/20 text-primary text-xs sm:text-[10px] font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1">
+                  <label className="px-2.5 py-1 bg-primary-surface/10 hover:bg-primary-surface/20 text-primary text-[10px] leading-none font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1">
                     <Paperclip className="w-3 h-3" />
                     <span>Upload Evidence</span>
                     <input

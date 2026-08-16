@@ -73,7 +73,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border-inverse pb-6 relative z-10">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs sm:text-[10px] font-medium uppercase tracking-widest">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] leading-none font-medium uppercase tracking-widest">
               <Radio className="w-3 h-3 animate-pulse" /> Live Team Lead Control
             </span>
             <span className="text-content-subtle text-xs font-medium">
@@ -323,11 +323,11 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                         </div>
                       </div>
                       {isOverloaded ? (
-                        <span className="px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider">
+                        <span className="px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] leading-none sm:text-[9px] font-medium uppercase tracking-wider">
                           Overloaded ⚠️
                         </span>
                       ) : (
-                        <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider">
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] leading-none sm:text-[9px] font-medium uppercase tracking-wider">
                           Optimal
                         </span>
                       )}
