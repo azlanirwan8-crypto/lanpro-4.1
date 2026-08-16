@@ -214,7 +214,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
   switch (currentView) {
     case "dashboard":
       return (
-        <div className="flex-1 flex flex-col overflow-auto bg-surface-sunken dark:bg-slate-950 min-h-screen pb-16 transition-colors duration-200">
+        <div className="flex-1 flex flex-col overflow-auto bg-surface-sunken min-h-screen pb-16 transition-colors duration-200">
           <DashboardView
             tasks={tasks || []}
             sprints={sprints || []}
@@ -260,7 +260,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
 
     case "notebooklm":
       return (
-        <div className="flex-1 flex flex-col min-h-0 p-4 bg-surface-sunken dark:bg-slate-950">
+        <div className="flex-1 flex flex-col min-h-0 p-4 bg-surface-sunken">
           {hasPermission(
             effectiveRole,
             "notebooklm",
@@ -274,12 +274,10 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
               currentUser={currentUserProfile}
             />
           ) : (
-            <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center bg-surface-sunken dark:bg-slate-900 rounded-xl min-h-[500px]">
+            <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center bg-surface-sunken rounded-xl min-h-[500px]">
               <ShieldAlert className="w-16 h-16 text-rose-500 mb-4 animate-bounce" />
-              <h2 className="text-2xl font-medium text-content-strong dark:text-slate-100 mb-2">
-                403 Forbidden
-              </h2>
-              <p className="text-content-muted dark:text-slate-400 max-w-md text-sm">
+              <h2 className="text-2xl font-medium text-content-strong mb-2">403 Forbidden</h2>
+              <p className="text-content-muted max-w-md text-sm">
                 Anda tidak memiliki izin untuk mengakses modul NotebookLM. Silakan hubungi
                 Administrator untuk memperbarui hak akses Anda.
               </p>
@@ -345,7 +343,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
 
     case "board":
       return (
-        <div className="flex-1 flex flex-col min-h-0 p-6 bg-surface-sunken dark:bg-slate-950">
+        <div className="flex-1 flex flex-col min-h-0 p-6 bg-surface-sunken">
           <BoardView
             tasks={tasks || []}
             masterData={masterData || []}

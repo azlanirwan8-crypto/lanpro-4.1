@@ -119,14 +119,14 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-[60]">
-      <div className="bg-surface dark:bg-slate-900 rounded-lg shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border border-border-subtle dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle dark:border-slate-800 bg-surface-sunken/50 dark:bg-slate-800/50 shrink-0">
-          <h3 className="font-medium text-content-strong dark:text-slate-100 text-sm">
+      <div className="bg-surface rounded-lg shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border border-border-subtle animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle bg-surface-sunken/50 shrink-0">
+          <h3 className="font-medium text-content-strong text-sm">
             Broadcast Message Template - {mode === "email" ? "Email" : "WhatsApp"}
           </h3>
           <button
             onClick={onClose}
-            className="p-1 text-content-subtle hover:text-content-secondary dark:hover:text-slate-200 hover:bg-surface-muted dark:hover:bg-slate-800 rounded-md transition-colors"
+            className="p-1 text-content-subtle hover:text-content-secondary hover:bg-surface-muted rounded-md transition-colors"
           >
             <X size={18} />
           </button>
@@ -134,9 +134,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
 
         <div className="p-5 overflow-y-auto space-y-4">
           <div className="space-y-2">
-            <label className="text-xs font-medium text-content-body dark:text-slate-300">
-              Available Variables
-            </label>
+            <label className="text-xs font-medium text-content-body">Available Variables</label>
             <div className="flex flex-wrap gap-1.5">
               {VARIABLES.map((variable) => (
                 <button
@@ -144,8 +142,8 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                   onClick={() => insertAtCursor(variable)}
                   className={`px-2.5 py-1 rounded-md text-xs sm:text-[11px] font-mono font-medium transition-all shadow-xs border ${
                     mode === "whatsapp"
-                      ? "bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800"
-                      : "bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800"
+                      ? "bg-success/10 hover:bg-success/15 text-success border-success/20"
+                      : "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
                   }`}
                   title={`Insert ${variable}`}
                 >
@@ -160,30 +158,28 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
 
           {mode === "email" && (
             <div className="space-y-1">
-              <label className="text-xs font-medium text-content-body dark:text-slate-300">
-                Email Subject
-              </label>
+              <label className="text-xs font-medium text-content-body">Email Subject</label>
               <input
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="w-full px-3 py-1.5 border border-border-subtle dark:border-slate-700 rounded-md shadow-xs outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono text-xs bg-surface dark:bg-slate-900 text-content-strong dark:text-slate-100"
+                className="w-full px-3 py-1.5 border border-border-subtle rounded-md shadow-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono text-xs bg-surface text-content-strong"
                 placeholder="Subject line..."
               />
             </div>
           )}
 
-          <div className="space-y-1 border border-border-subtle dark:border-slate-700 rounded-md overflow-hidden shadow-xs focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
-            <div className="flex items-center gap-1 p-1.5 bg-surface-sunken dark:bg-slate-800 border-b border-border-subtle dark:border-slate-700 flex-wrap">
+          <div className="space-y-1 border border-border-subtle rounded-md overflow-hidden shadow-xs focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
+            <div className="flex items-center gap-1 p-1.5 bg-surface-sunken border-b border-border-subtle flex-wrap">
               <button
                 onClick={() => handleFormat("bold")}
-                className="p-1 text-content-secondary dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
+                className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
                 title="Bold"
               >
                 <Bold size={14} />
               </button>
               <button
                 onClick={() => handleFormat("italic")}
-                className="p-1 text-content-secondary dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
+                className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
                 title="Italic"
               >
                 <Italic size={14} />
@@ -191,40 +187,40 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
               {mode === "email" && (
                 <button
                   onClick={() => handleFormat("underline")}
-                  className="p-1 text-content-secondary dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
+                  className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
                   title="Underline"
                 >
                   <Underline size={14} />
                 </button>
               )}
-              <div className="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-1"></div>
+              <div className="w-px h-4 bg-border-subtle mx-1"></div>
               {mode === "email" && (
                 <>
                   <button
                     onClick={() => handleFormat("align-left")}
-                    className="p-1 text-content-secondary dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
+                    className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
                     title="Align Left"
                   >
                     <AlignLeft size={14} />
                   </button>
                   <button
                     onClick={() => handleFormat("align-center")}
-                    className="p-1 text-content-secondary dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
+                    className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
                     title="Align Center"
                   >
                     <AlignCenter size={14} />
                   </button>
                   <button
                     onClick={() => handleFormat("align-right")}
-                    className="p-1 text-content-secondary dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
+                    className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
                     title="Align Right"
                   >
                     <AlignRight size={14} />
                   </button>
-                  <div className="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-1"></div>
+                  <div className="w-px h-4 bg-border-subtle mx-1"></div>
                   <button
                     onClick={() => handleFormat("list")}
-                    className="p-1 text-content-secondary dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
+                    className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
                     title="Bulleted List"
                   >
                     <List size={14} />
@@ -242,7 +238,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={7}
-              className="w-full p-3 outline-none resize-none font-mono text-xs leading-relaxed bg-surface dark:bg-slate-900 text-content-strong dark:text-slate-100"
+              className="w-full p-3 outline-none resize-none font-mono text-xs leading-relaxed bg-surface text-content-strong"
               placeholder={
                 mode === "email"
                   ? "Type your email content here (supports HTML)..."
@@ -252,10 +248,10 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border-subtle dark:border-slate-800 bg-surface-sunken/50 dark:bg-slate-800/50 shrink-0">
+        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border-subtle bg-surface-sunken/50 shrink-0">
           <button
             onClick={onClose}
-            className="px-3.5 py-1.5 rounded-md text-xs font-medium text-content-secondary dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            className="px-3.5 py-1.5 rounded-md text-xs font-medium text-content-secondary hover:bg-surface-muted transition-colors"
           >
             Batal
           </button>

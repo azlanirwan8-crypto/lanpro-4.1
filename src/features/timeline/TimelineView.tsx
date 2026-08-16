@@ -246,7 +246,7 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
             className="min-w-max relative"
             style={{ width: `${totalDays * pixelsPerDay}px`, minHeight: "100%" }}
           >
-            <div className="sticky top-0 z-30 h-[73px] bg-[#F4F5F7] border-b border-border-subtle shadow-soft box-border flex flex-col">
+            <div className="sticky top-0 z-30 h-[73px] bg-surface-muted border-b border-border-subtle shadow-soft box-border flex flex-col">
               <div className="flex h-8 border-b border-border-subtle/50">
                 {timelineZoom !== "months"
                   ? timelineMonths.map((m: any) => {

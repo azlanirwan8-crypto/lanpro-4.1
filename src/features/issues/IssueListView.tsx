@@ -419,7 +419,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           }}
           className={cn(
             styles.tableRow,
-            "hover:bg-indigo-50/30 hover:border-indigo-100 dark:hover:border-indigo-900/50 transition-all duration-200",
+            "hover:bg-primary/5 hover:border-primary/20 transition-all duration-200",
             isSelected && styles.selectedTableRow
           )}
         >
@@ -1895,7 +1895,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                   className={cn(
                     "w-6 h-6 rounded-lg flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-medium transition-all cursor-pointer active:scale-95 shrink-0",
                     listPage === i + 1
-                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none"
+                      ? "bg-primary text-white shadow-xs"
                       : "text-content-muted hover:bg-slate-200/80"
                   )}
                 >

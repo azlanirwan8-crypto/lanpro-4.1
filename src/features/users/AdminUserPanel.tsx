@@ -515,7 +515,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           <div className="bg-surface rounded-lg shadow-soft border border-border-subtle/80 p-4 shrink-0">
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-blue-50/80 dark:bg-blue-950/20 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center border border-blue-100/60 dark:border-blue-900/40 shrink-0">
+                <div className="w-9 h-9 bg-info/10 text-info rounded-lg flex items-center justify-center border border-info/20 shrink-0">
                   <Users className="w-4.5 h-4.5" />
                 </div>
                 <div>

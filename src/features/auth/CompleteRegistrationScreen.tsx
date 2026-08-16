@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { kirimLengkapiPendaftaran } from "./services/sso.service";
@@ -69,6 +69,28 @@ export const CompleteRegistrationScreen = ({
     setGalat(hasil.pesan);
   };
 
+  // -- Auto-redirect ke halaman login setelah 5 detik --
+  const [hitungMundur, setHitungMundur] = useState(5);
+
+  const kembali = useCallback(() => {
+    onSelesai();
+  }, [onSelesai]);
+
+  useEffect(() => {
+    if (!berhasil) return;
+
+    if (hitungMundur <= 0) {
+      kembali();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setHitungMundur((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [berhasil, hitungMundur, kembali]);
+
   if (berhasil) {
     return (
       <motion.div
@@ -83,12 +105,15 @@ export const CompleteRegistrationScreen = ({
         <p className="mt-2 text-sm text-content-secondary">{berhasil}</p>
         <button
           type="button"
-          onClick={onSelesai}
+          onClick={kembali}
           className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-6
                      text-sm font-medium text-white transition-colors duration-150 hover:bg-primary-hover"
         >
           Kembali ke Halaman Masuk
         </button>
+        <p className="mt-3 text-xs text-content-muted">
+          Otomatis kembali ke halaman masuk dalam {hitungMundur} detik…
+        </p>
       </motion.div>
     );
   }

@@ -198,7 +198,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-primary hover:bg-[#354473] text-white text-xs font-medium uppercase tracking-wider rounded-md shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  className="px-5 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-medium uppercase tracking-wider rounded-md shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
                 >
                   <Plus className="w-4 h-4" /> Simpan Test Case
                 </button>
@@ -218,7 +218,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 <button
                   type="button"
                   onClick={onDownloadTemplate}
-                  className="px-3.5 py-1.5 bg-primary hover:bg-[#354473] text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Download Template Excel</span>
@@ -261,7 +261,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 <button
                   type="submit"
                   disabled={!uploadFile}
-                  className="px-5 py-2 bg-primary hover:bg-[#354473] text-white text-xs font-medium uppercase tracking-wider rounded-md shadow-xs disabled:opacity-50 cursor-pointer active:scale-95"
+                  className="px-5 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-medium uppercase tracking-wider rounded-md shadow-xs disabled:opacity-50 cursor-pointer active:scale-95"
                 >
                   Proses Bulk Upload
                 </button>

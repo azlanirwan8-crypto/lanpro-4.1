@@ -179,7 +179,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                   setIsAddCaseOpen(true);
                   setActiveAddTab("single");
                 }}
-                className="px-3 py-1.5 bg-primary hover:bg-[#354473] text-white font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+                className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Tambah Task</span>
@@ -213,7 +213,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               canUpdate && (
                 <button
                   onClick={handleMigrateSuitePhase}
-                  className="px-3 py-1.5 bg-success hover:bg-[#089683] text-white font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+                  className="px-3 py-1.5 bg-success hover:bg-success-hover text-white font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>{activeSuite.phase === "SIT" ? "Migrate to UAT" : "Migrate to PTR"}</span>

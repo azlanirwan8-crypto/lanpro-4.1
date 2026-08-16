@@ -3723,7 +3723,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary hover:bg-[#364574] text-white font-medium rounded-lg text-xs shadow-xs transition-all"
+                  className="px-4 py-2 bg-primary hover:bg-primary-hover text-white font-medium rounded-lg text-xs shadow-xs transition-all"
                 >
                   {modalMode === "create" ? "Buat Dokumen" : "Simpan Perubahan"}
                 </button>

@@ -88,12 +88,12 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ type: "spring", duration: 0.3 }}
-              className="relative bg-surface dark:bg-slate-900 rounded-md shadow-2xl w-full max-w-sm border border-border-subtle/80 dark:border-slate-800 z-10 p-6 sm:p-8 text-center flex flex-col items-center"
+              className="relative bg-surface rounded-md shadow-2xl w-full max-w-sm border border-border-subtle/80 z-10 p-6 sm:p-8 text-center flex flex-col items-center"
             >
               {/* Top Right Close X Button */}
               <button
                 onClick={onClose}
-                className="absolute top-3.5 right-3.5 text-[#878a99] hover:text-[#495057] dark:hover:text-slate-200 transition-colors p-1 rounded cursor-pointer"
+                className="absolute top-3.5 right-3.5 text-content-muted hover:text-content-body transition-colors p-1 rounded cursor-pointer"
                 aria-label="Tutup"
               >
                 <X className="w-4 h-4" />
@@ -119,12 +119,12 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               </div>
 
               {/* Title */}
-              <h3 className="text-[1.21875rem] font-semibold text-[#495057] dark:text-[#e9ecef] mb-2 leading-[1.4] tracking-tight text-center">
+              <h3 className="text-[1.21875rem] font-semibold text-content-body mb-2 leading-[1.4] tracking-tight text-center">
                 {title || "Apakah Anda Yakin?"}
               </h3>
 
               {/* Message */}
-              <p className="text-[0.9375rem] text-[#878a99] dark:text-[#adb5bd] mb-6 max-w-xs mx-auto leading-relaxed text-center">
+              <p className="text-[0.9375rem] text-content-muted mb-6 max-w-xs mx-auto leading-relaxed text-center">
                 {message}
               </p>
 
@@ -134,7 +134,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                   type="button"
                   disabled={isLoading}
                   onClick={onConfirm}
-                  className="min-w-[5rem] px-4 py-2 bg-primary hover:bg-[#364574] text-white font-normal rounded text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  className="min-w-[5rem] px-4 py-2 bg-primary hover:bg-primary-hover text-white font-normal rounded text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
                   {isLoading && (
                     <svg
@@ -167,7 +167,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     type="button"
                     disabled={isLoading}
                     onClick={onClose}
-                    className="min-w-[5rem] px-4 py-2 bg-danger hover:bg-[#d95a40] text-white font-normal rounded text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                    className="min-w-[5rem] px-4 py-2 bg-danger hover:bg-danger-hover text-white font-normal rounded text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                   >
                     {cancelText}
                   </button>

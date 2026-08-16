@@ -44,7 +44,7 @@ class ErrorBoundary extends Component<Props, State> {
             textAlign: "left",
           }}
         >
-          <h1 style={{ color: "#dc2626", marginTop: 0, fontSize: "20px" }}>
+          <h1 style={{ color: "var(--color-danger, #dc2626)", marginTop: 0, fontSize: "20px" }}>
             🚨 React Render Crash detected
           </h1>
           <p style={{ fontWeight: "bold" }}>{this.state.error?.toString()}</p>

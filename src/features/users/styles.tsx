@@ -52,15 +52,13 @@ export const Modal = ({ isOpen, onClose, title, children, maxWidth = "max-w-md" 
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
-        className={`bg-surface dark:bg-slate-900 rounded-lg shadow-xl relative z-10 w-full ${maxWidth} max-h-[90vh] flex flex-col overflow-hidden border border-border-subtle dark:border-slate-800`}
+        className={`bg-surface rounded-lg shadow-xl relative z-10 w-full ${maxWidth} max-h-[90vh] flex flex-col overflow-hidden border border-border-subtle`}
       >
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle dark:border-slate-800 bg-surface-sunken/50 dark:bg-slate-800/50">
-          <h3 className="font-medium text-sm text-content-strong dark:text-slate-100 tracking-tight">
-            {title}
-          </h3>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle bg-surface-sunken/50">
+          <h3 className="font-medium text-sm text-content-strong tracking-tight">{title}</h3>
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md text-content-muted transition-colors"
+            className="p-1.5 hover:bg-surface-muted rounded-md text-content-muted transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
