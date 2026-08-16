@@ -4,7 +4,7 @@ import { getJwtSecret } from "./auth";
 import { catatPenjaga } from "./daftarPeranRute";
 
 /**
- * ⚠️ PENJAGA LAMA — JANGAN DIPAKAI UNTUK RUTE BARU. §19.8 tahap 4.
+ * ⚠️ PENJAGA LAMA — PENSIUN 16 Agu 2026. NOL rute memakainya. §19.8 tahap 4.
  *
  * Digantikan `jagaProyek(modul, aksi)` di `./jagaProyek.ts`.
  *
@@ -17,16 +17,13 @@ import { catatPenjaga } from "./daftarPeranRute";
  * Ia juga **izinkan-secara-bawaan**: rute tanpa `:projectId` diloloskan begitu
  * saja. Itu kebalikan dari §19.6 aturan 3.
  *
- * TERSISA 3 PEMAKAI, dan ketiganya menunggu keputusan pemilik proyek (#89) —
- * ketiganya operasi TINGKAT PROYEK yang §19.5 belum punya modulnya:
+ * TIGA pemakai terakhir dipindahkan ke `jagaSetelanProyek()` sesudah #89
+ * dijawab. Sekarang **nol** rute memakainya, dan
+ * `server/routes/penjaga-lama.test.ts` menguncinya di angka nol.
  *
- *   PUT  /api/projects/:projectId/dashboard-layout
- *   PUT  /api/projects/:id
- *   POST /api/projects/:projectId/methodology
- *
- * Jumlah itu DIKUNCI oleh `server/routes/penjaga-lama.test.ts`. Menambah
- * pemakai keempat akan memerahkan test — disengaja, supaya berkas ini menyusut
- * menuju nol alih-alih diam-diam terpakai lagi.
+ * Berkasnya belum dihapus karena `rbac.test.ts` masih menguji perilakunya, dan
+ * tiga berkas test rute masih memalsukannya. Menghapusnya adalah pekerjaan
+ * pembersihan tersendiri, bukan bagian dari penutupan #76.
  */
 export const verifyProjectAccess = (allowedRoles: string[]) => {
   // Mendaftarkan diri saat penjaga DIBUAT — yaitu saat modul rute dimuat.

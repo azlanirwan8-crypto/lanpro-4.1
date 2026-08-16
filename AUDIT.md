@@ -3683,6 +3683,8 @@ tersendiri, masing-masing **menguasai penuh satu modul**.
 | `notebooklm`              | Project Owner · Project Admin · Project Manager             |    CRUD    |
 | `notebooklm`              | System Analyst · Business Analyst                           |    CRU     |
 | `notebooklm`              | Developer · QA · Viewer                                     |     R      |
+| _(setelan proyek)_        | **Project Owner** · **Project Admin**                       |   **U**    |
+| _(setelan proyek)_        | selain itu                                                  |     —      |
 | _(hapus proyek)_          | **Project Owner**                                           |   **D**    |
 | _(hapus proyek)_          | selain itu                                                  |     —      |
 

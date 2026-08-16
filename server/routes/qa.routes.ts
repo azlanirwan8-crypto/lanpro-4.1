@@ -6,7 +6,6 @@ import crypto from "crypto";
 import multer from "multer";
 import { validateFileBuffer, sanitizeFilename } from "../../src/lib/fileSecurity";
 import db from "../../src/lib/db";
-import { verifyProjectAccess } from "../middleware/rbac";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { generateContentWithFallback } from "../services/ai.service";
 import { simpanBerkas } from "../services/storage.service";

@@ -28,11 +28,7 @@ import path from "path";
 const DIR = __dirname;
 
 /** Rute yang masih sah memakai penjaga lama, beserta alasannya. */
-const DIIZINKAN = [
-  "PUT /api/projects/:projectId/dashboard-layout",
-  "PUT /api/projects/:id",
-  "POST /api/projects/:projectId/methodology",
-].sort();
+const DIIZINKAN: string[] = [];
 
 function pemakaiPenjagaLama(): string[] {
   const hasil: string[] = [];
@@ -67,7 +63,7 @@ describe("penjaga lama `verifyProjectAccess` — daftar pemakainya dikunci", () 
     expect(total).toBeGreaterThan(50);
   });
 
-  it("TEPAT tiga pemakai, dan persis yang menunggu #89", () => {
+  it("NOL pemakai — #89 dijawab, ketiganya pindah ke `jagaSetelanProyek`", () => {
     // Bila ini merah karena BERTAMBAH: rute baru memakai penjaga lama. Pakai
     // `jagaProyek(modul, aksi)`.
     //

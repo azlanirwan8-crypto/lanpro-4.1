@@ -204,6 +204,33 @@ export const MATRIKS_SISTEM: Record<ModulSistem, Partial<Record<SystemRole, read
 export const bolehHapusProyek = (peran: unknown): boolean => normalkanPeran(peran) === "owner";
 
 /**
+ * SETELAN PROYEK — menyunting proyek, mengubah metodologi, menyimpan tata letak
+ * dashboard. §19.5 baris `(setelan proyek)`.
+ *
+ * Ditambahkan 16 Agu 2026 menjawab #89. Ketiganya operasi tingkat proyek yang
+ * dulu tidak punya modul, sehingga tiga rute terakhir tertahan.
+ *
+ * BENCHMARK JIRA yang diminta pemilik proyek, dan kenapa hasilnya TIDAK
+ * diterapkan mentah-mentah: di Jira, sebuah dashboard DIMILIKI pembuatnya —
+ * pemilik dan editor yang ditunjuk boleh menyuntingnya, dan Jira Administrator
+ * bisa mengambil alih kepemilikan. Artinya dashboard di sana adalah artefak
+ * PRIBADI.
+ *
+ * Di LanPro ia bukan. Rutenya menulis `Projects.dashboard_layout WHERE id = ?` —
+ * satu tata letak per PROYEK, dipakai bersama seluruh anggota. Padanan Jira yang
+ * benar karena itu bukan "dashboard", melainkan KONFIGURASI BOARD/PROYEK, yang
+ * di Jira memang dibatasi ke project administrator.
+ *
+ * Jadi ketetapan pemilik proyek ("hanya admin") sejalan dengan benchmark begitu
+ * padanannya diluruskan. Project Owner ikut disertakan karena ia pemilik proyek;
+ * Administrator sistem tetap menembus lewat God Mode.
+ */
+export const bolehUbahSetelanProyek = (peran: unknown): boolean => {
+  const n = normalkanPeran(peran);
+  return n === "owner" || n === "admin";
+};
+
+/**
  * Membuat PROYEK — hanya Administrator sistem. §19.4
  *
  * Inilah yang menutup #80: `POST /api/projects/generate-bni-demo` membuat proyek

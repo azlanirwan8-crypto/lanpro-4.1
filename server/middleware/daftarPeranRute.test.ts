@@ -73,18 +73,26 @@ describe("peran di luar katalog", () => {
   });
 });
 
-describe("mode LAPOR — belum menolak apa pun", () => {
-  it("MODE masih LAPOR; menaikkannya ke TOLAK adalah keputusan tersendiri", () => {
-    // Bila baris ini merah, seseorang menaikkan mode. Pastikan `member` sudah
-    // dipetakan dan `designer` dibuang lebih dulu, kalau tidak server MATI.
-    expect(MODE).toBe("LAPOR");
+describe("mode TOLAK — server menolak menyala bila peran tak dikenal", () => {
+  it("MODE sudah TOLAK sejak 16 Agu 2026", () => {
+    // Menurunkannya kembali ke LAPOR mengembalikan keadaan di mana salah ketik
+    // nama peran jadi lubang senyap alih-alih kegagalan boot yang keras.
+    expect(MODE).toBe("TOLAK");
   });
 
-  it("peran tak dikenal TIDAK melempar selama mode LAPOR", () => {
+  it("peran tak dikenal MELEMPAR — inilah penolakan bootnya", () => {
     catatPenjaga(["superadmin"]);
-    const pesan: string[] = [];
-    expect(() => laporkanPenjaga((p) => pesan.push(p))).not.toThrow();
-    expect(pesan.join("\n")).toContain("superadmin");
+    expect(() => laporkanPenjaga(() => {})).toThrow(/superadmin/);
+  });
+
+  it("peran warisan TIDAK menjatuhkan boot — ia terdaftar, bukan tak dikenal", () => {
+    catatPenjaga(["member", "designer", "head"]);
+    expect(() => laporkanPenjaga(() => {})).not.toThrow();
+  });
+
+  it("peran katalog dan `*` tidak menjatuhkan boot", () => {
+    catatPenjaga(["owner", "developer", "qa", "*"]);
+    expect(() => laporkanPenjaga(() => {})).not.toThrow();
   });
 
   it("laporannya menyebut jumlah penjaga dan kedua bentuk `*`", () => {

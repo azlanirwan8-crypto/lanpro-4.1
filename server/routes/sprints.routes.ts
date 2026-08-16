@@ -1,7 +1,6 @@
 import { Express } from "express";
 import crypto from "crypto";
 import db from "../../src/lib/db";
-import { verifyProjectAccess } from "../middleware/rbac";
 import { jagaProyek } from "../middleware/jagaProyek";
 
 export function setupSprintsRoutes(

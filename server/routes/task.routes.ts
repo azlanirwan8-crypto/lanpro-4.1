@@ -2,7 +2,6 @@ import express from "express";
 import crypto from "crypto";
 import db from "../../src/lib/db";
 import { authenticateJWT } from "../middleware/auth";
-import { verifyProjectAccess } from "../middleware/rbac";
 import { createAuditLog } from "../services/audit.service";
 import {
   broadcastProjectNotification,

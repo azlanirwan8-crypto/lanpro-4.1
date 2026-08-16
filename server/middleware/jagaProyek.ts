@@ -34,10 +34,12 @@
  */
 
 import db from "../../src/lib/db";
+import { createAuditLog } from "../services/audit.service";
 import { normalkanPeran } from "../../src/types/roles";
 import {
   bolehDiProyek,
   bolehHapusProyek,
+  bolehUbahSetelanProyek,
   punyaGodMode,
   type Aksi,
   type ModulProyek,
@@ -62,25 +64,42 @@ export const peranProyekEfektif = (mentah: unknown): string => {
 };
 
 /**
- * Dipanggil ketika Administrator menembus proyek yang bukan miliknya.
+ * Mencatat pemakaian God Mode. §19.6 aturan 2, item #88.
  *
- * §19.6 aturan 2 mewajibkan setiap pemakaian God Mode tercatat di `AuditLogs` —
- * tanpa pencatatan, tidak ada cara mengetahui penyalahgunaannya.
+ * Tanpa pencatatan, tidak ada cara mengetahui penyalahgunaannya — itu sebabnya
+ * §19.6 mewajibkannya, bukan menyarankannya.
  *
- * ⚠️ SEKARANG BARU MENCATAT KE LOG SERVER, BELUM KE TABEL `AuditLogs`.
- * Itu utang yang disengaja dan bernomor (#88), bukan kelalaian: menulis ke
- * `AuditLogs` di dalam penjaga berarti satu INSERT pada setiap permintaan
- * admin, dan bentuk tulisannya perlu disepakati lebih dulu supaya tidak
- * menenggelamkan log yang sudah ada.
+ * HANYA AKSI TULIS YANG DICATAT (`C`, `U`, `D`). Membaca tidak.
+ *
+ * Itu bukan kelonggaran, melainkan syarat agar catatannya tetap BISA DIBACA.
+ * Administrator membuka satu layar proyek saja memicu belasan `GET`; mencatat
+ * semuanya akan menenggelamkan penghapusan tunggal yang justru ingin ditemukan
+ * di antara ribuan baris "admin melihat daftar task". Log yang tidak bisa
+ * ditelusuri sama tidak bergunanya dengan log yang tidak ada.
+ *
+ * Pencatatannya lewat `createAuditLog`, yang menjalankan tulisannya di
+ * `setImmediate` — jadi ia TIDAK menahan permintaan, dan kegagalan mencatat
+ * tidak pernah menggagalkan permintaan yang sah.
  */
 export const catatGodMode = (
   userId: string,
   projectId: string,
   modul: string,
-  aksi: Aksi,
-  cetak: (p: string) => void = console.warn
+  aksi: Aksi
 ): void => {
-  cetak(`[RBAC][GOD-MODE] admin=${userId} proyek=${projectId} modul=${modul} aksi=${aksi}`);
+  console.warn(`[RBAC][GOD-MODE] admin=${userId} proyek=${projectId} modul=${modul} aksi=${aksi}`);
+
+  if (aksi === "R") return;
+
+  void createAuditLog({
+    userId,
+    projectId: projectId === "-" ? null : projectId,
+    actionType: "GOD_MODE_ACCESS",
+    entityName: "Otorisasi",
+    entityId: `${modul}:${aksi}`,
+    oldValues: null,
+    newValues: { modul, aksi, alasan: "Administrator sistem menembus proyek (§19.6 aturan 2)" },
+  } as any);
 };
 
 const tolak = (res: any) => res.status(403).json({ status: "error", message: "Akses ditolak" });
@@ -192,6 +211,61 @@ export const jagaHapusProyek = () => {
       return tolak(res);
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: jagaHapusProyek error:", error);
+      return res.status(500).json({ status: "error", message: "Gagal memverifikasi hak akses." });
+    } finally {
+      if (connection) connection.release();
+    }
+  };
+};
+
+/**
+ * Penjaga SETELAN PROYEK — menyunting proyek, metodologi, tata letak dashboard.
+ * §19.5 baris `(setelan proyek)`, menjawab #89.
+ *
+ * Ketiganya operasi tingkat proyek, bukan operasi pada sebuah modul, sehingga
+ * tidak lewat `MATRIKS_PROYEK`. Hanya Project Owner dan Project Admin;
+ * Administrator sistem menembus lewat God Mode.
+ *
+ * ⚠️ PENGETATAN NYATA. Penjaga sebelumnya mengizinkan `manager` dan `head`, dan
+ * pada `dashboard-layout` bahkan menyelipkan `"*"` sehingga siapa pun anggota
+ * bisa mengubah tata letak yang dipakai SELURUH tim (#73).
+ */
+export const jagaSetelanProyek = () => {
+  return async (req: any, res: any, next: any) => {
+    let connection;
+    try {
+      const projectId = req.params?.projectId || req.params?.id;
+      const userIdMentah =
+        req.user?.id || req.user?.uid || req.headers?.["x-user-id"] || req.query?.userId;
+      if (!userIdMentah || !projectId) return tolak(res);
+
+      connection = await db.getConnection();
+
+      const [uRows]: any = await connection.query(
+        "SELECT id, role FROM Users WHERE id = ? OR uid = ?",
+        [userIdMentah, userIdMentah]
+      );
+      if (uRows.length === 0) return tolak(res);
+
+      if (punyaGodMode(uRows[0].role)) {
+        catatGodMode(String(uRows[0].id), String(projectId), "(setelan proyek)", "U");
+        return next();
+      }
+
+      const [proj]: any = await connection.query("SELECT ownerId FROM Projects WHERE id = ?", [
+        projectId,
+      ]);
+      if (proj.length > 0 && proj[0].ownerId === uRows[0].id) return next();
+
+      const [member]: any = await connection.query(
+        "SELECT role FROM ProjectMembers WHERE projectId = ? AND userId = ?",
+        [projectId, uRows[0].id]
+      );
+      if (member.length === 0) return tolak(res);
+
+      return bolehUbahSetelanProyek(peranProyekEfektif(member[0].role)) ? next() : tolak(res);
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: jagaSetelanProyek error:", error);
       return res.status(500).json({ status: "error", message: "Gagal memverifikasi hak akses." });
     } finally {
       if (connection) connection.release();

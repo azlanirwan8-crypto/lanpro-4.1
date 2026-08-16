@@ -6,7 +6,6 @@
  * sebaris pun; yang berpindah hanya tempatnya.
  */
 import { Router } from "express";
-import { verifyProjectAccess } from "../middleware/rbac";
 import db from "../../src/lib/db";
 import crypto from "crypto";
 import { jagaProyek } from "../middleware/jagaProyek";
