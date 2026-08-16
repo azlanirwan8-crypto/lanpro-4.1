@@ -740,6 +740,7 @@ Gerbang dasar berlaku di **SEMUA** fase:
 
 ```bash
 npm run doctor && npm run lint && npm test && npm run build
+npm run audit:papan && npm run audit:warna   # integritas papan §1 & warna keras
 # lalu WAJIB: npm run dev -> buka browser -> pastikan UI benar-benar tampil
 ```
 
@@ -6083,7 +6084,24 @@ membuktikannya hanya menyalakan mode gelap lewat antarmuka dan membuka Dashboard
 Diminta pemilik proyek. Keadaan sesudah tiga gelombang: **606 kelas
 dikonversi**, sisa **336 di 70 berkas**, dan **569 `#hex`** belum disentuh.
 
-#### 1. Pasang gerbang DULU, sebelum mengonversi sisanya
+#### 1. ✅ SELESAI — gerbang dipasang lebih dulu
+
+`npm run audit:warna`, garis dasar **336 kelas di 70 berkas**.
+
+Bentuknya **ratchet, bukan ambang**: batas dicatat PER BERKAS. Turun lulus,
+naik gagal sekecil apa pun, berkas baru gagal. Gerbang berambang tunggal
+("maksimal 336") punya cacat halus — ia mengizinkan satu berkas memburuk selama
+berkas lain membaik.
+
+Dibuktikan bisa merah tanpa menyabotase sumber: skrip dan garis dasarnya
+disalin ke luar repo, ditambah satu berkas ber-`bg-slate-700`, dan gerbangnya
+melaporkan `BARU … 2 kelas` lalu GAGAL.
+
+`--perbarui` disediakan sebagai tindakan **sadar**, dan skripnya sendiri
+mencetak peringatan bahwa memakainya untuk membuat gerbang hijau berarti
+mematikan gerbangnya.
+
+<details><summary>Alasan langkah ini didahulukan (arsip)</summary>
 
 Ini yang paling menentukan, dan bukan karena rapi.
 
@@ -6101,7 +6119,9 @@ BARU di luar daftar yang sengaja dikecualikan. Pola dan daftar kecualinya sudah
 ada di `scripts/fix/warna-ke-token.cjs`; tinggal dibalik menjadi pemeriksa.
 
 **Token sudah lengkap** — diperiksa: setiap token di `:root` punya nilai di
-`html.dark`, nol yang tertinggal. Itu prasyarat yang sudah aman.
+`html.dark`, nol yang tertinggal.
+
+</details>
 
 #### 2. Tiga token lagi menutup hampir seluruh sisa
 
