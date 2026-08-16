@@ -24,7 +24,7 @@ melanjutkan pekerjaan tanpa perlu menelusuri riwayat percakapan.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **353 lulus / 36 suite**                                    | `npm test`                                   |
+| Test                | **356 lulus / 37 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -4583,3 +4583,38 @@ Aturan metode-vs-aksi di `tanpa-wildcard.test.ts` juga dilonggarkan, tetapi
 **tepat sasaran**: `POST` boleh `D` hanya bila jalurnya memang operasi hapus.
 Melonggarkannya seluruhnya akan membuat `POST` apa pun lolos sebagai penghapus —
 persis cara sebuah penjaga berhenti menjaga.
+
+### 19.23 Penjaga lama dikunci pada 3 pemakai
+
+`verifyProjectAccess` ditandai **JANGAN DIPAKAI UNTUK RUTE BARU**, dan daftar
+pemakainya dikunci `server/routes/penjaga-lama.test.ts`.
+
+Yang paling mungkin menghidupkannya kembali bukan keputusan sadar, melainkan
+seseorang **menyalin baris rute yang sudah ada** saat menambah rute baru.
+Penjaga lama itu izinkan-secara-bawaan; satu salinan mengembalikan lubang yang
+baru ditutup, dan tidak akan disadari karena rutenya "bekerja".
+
+Testnya **tidak melarang secara mutlak**. Melarang sesuatu yang masih dipakai
+hanya membuat orang mematikan testnya. Ia mengunci daftarnya — pemakai keempat
+harus dibicarakan lebih dulu. **Arahnya satu: boleh menyusut, tidak boleh
+bertambah.** Bila #89 dijawab dan ketiganya pindah, hapus test itu bersama
+`verifyProjectAccess`.
+
+Satu test menjaga agar ketiganya tetap operasi **tingkat proyek**. Bila suatu
+saat ada rute ber-modul masuk daftar, itu tanda ia sebenarnya BISA dipetakan
+dan hanya terlewat — bukan tertahan #89.
+
+#### Keadaan F7 saat serah terima
+
+| Hal                         | Keadaan                                     |
+| --------------------------- | ------------------------------------------- |
+| Rute dijaga matriks         | **51 dari 54**                              |
+| Penjaga lama tersisa        | **3**, semuanya menunggu #89                |
+| Rute ber-`["*"]`            | **0**                                       |
+| `member` di kode & database | **hilang**                                  |
+| `MODE` penjaga boot         | `LAPOR` — naik ke `TOLAK` sesudah #83 & #89 |
+
+Tahap 4 **belum boleh dinyatakan tutup**: tiga rute masih memakai penjaga lama,
+dan `MODE` belum `TOLAK`. Yang sudah bisa dinyatakan: #66 dan #72 tertutup
+secara struktural, dan tidak ada lagi rute proyek yang meloloskan anggota
+berperan apa pun.
