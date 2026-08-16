@@ -28,7 +28,7 @@ lalu **§0.4** (tiga keputusan yang menahan sisanya). Rinciannya §19.15–§19.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **372 lulus / 38 suite**                                    | `npm test`                                   |
+| Test                | **375 lulus / 39 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -312,8 +312,8 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 5   | Routing palsu + 47 props di satu persimpangan                                              | **F10** | 🔴  | Tinggi        |           Ya            | `TERBUKA`               | §5     |
 | 6   | 222 query SQL di lapisan rute, repository tak ada                                          | **F9**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §3     |
 | 7   | 59% baris kode di 37 berkas > 500 baris                                                    | **F10** | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §2     |
-| 8   | 1.313 `any` melemahkan seluruh jaring tipe                                                 | **F8**  | 🟠  | Sedang        |           Ya            | `TERBUKA`               | §7     |
-| 9   | Rasio test ±1 : 1.000 baris                                                                | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §7     |
+| 8   | **1.290** `any` melemahkan jaring tipe (diukur ulang 16 Agu)                               | **F8**  | 🟠  | Sedang        |           Ya            | `TERBUKA`               | §7     |
+| 9   | Rasio test **1 : 208** baris (diukur ulang 16 Agu; dulu tertulis 1:1.000)                  | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §7     |
 | 13  | 28 berkas `dark:` + 48 hex di luar token                                                   | **F12** | 🟡  | Sedang        |          Tidak          | `TERBUKA`               | §8     |
 | 14  | Kontras sidebar & jarak target sentuh                                                      | **F12** | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §8     |
 | 15  | Dua Google API key lama belum dicabut                                                      | **F1**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` pemilik      | §6     |
@@ -4996,3 +4996,43 @@ Catatan sampingan: pemeriksa admin di `PUT /api/users/:id` masih menerima nama
 peran hantu `sadm`, `admn`, `system admin`, `super admin` — keempatnya nol baris
 data menurut §19.2. Tidak berbahaya, tetapi ia sisa kosakata yang enum peran
 (§19.15) dibuat untuk menghabiskan.
+
+### 19.29 Angka F8 diukur ulang — dan kenapa itu mengubah prioritasnya
+
+Diukur 16 Agu 2026, sesudah seluruh pekerjaan F7:
+
+| Item          | Tertulis di §1   | Sebenarnya        | Perintah                                     |
+| ------------- | ---------------- | ----------------- | -------------------------------------------- |
+| #8 `any`      | 1.313            | **1.290**         | `grep -rn ": any\|<any>\|as any" src server` |
+| #9 rasio test | ±1 : 1.000 baris | **1 : 208** baris | 375 test / 77.487 baris                      |
+
+Selisih #9 hampir **lima kali lipat**, dan itu mengubah artinya: F8 dicatat
+sebagai "jaring pengaman nyaris tidak ada" — dasar dari peringatan berulang
+bahwa merefactor `AppContainer` (F10) adalah judi. Rasio 1:208 masih jauh dari
+ideal, tetapi ia bukan lagi angka yang membuat F10 mustahil.
+
+Angka lamanya bukan salah saat ditulis; ia basi karena **kerja sesi ini sendiri
+menambah 111 test** (264 → 375). Persis pola §1.5: _kolom yang basi lebih
+berbahaya daripada kolom kosong_.
+
+⚠️ **Yang TIDAK boleh disimpulkan dari perbaikan angka ini:** bahwa F8 boleh
+dilewati. Rasio mengukur JUMLAH, bukan CAKUPAN. 111 test baru itu hampir
+seluruhnya mengenai otorisasi — `AppContainer` 4.581 baris tetap tidak tersentuh
+uji. Jaringnya menebal tepat di tempat yang sudah aman, dan tetap tipis di
+tempat yang paling berbahaya.
+
+#### Test server untuk #91b
+
+`useAuth.pintu-belakang.test.ts` mengunci pola berbahaya di berkas frontend.
+Itu menjaga **satu jalan masuk**, bukan aturannya — endpoint pendaftaran ini
+publik, dan siapa pun bisa memanggilnya dengan `curl` tanpa menyentuh frontend.
+
+Ditambahkan 3 test perilaku sisi server. Salah satunya menegaskan **arah
+kegagalan**: token yang tidak sah harus berarti "bukan admin", bukan "lewati
+pemeriksaan" — arah yang salah di situ justru membuka pintunya.
+
+Dua di antaranya sempat merah dengan sebab yang **menyesatkan**: keduanya
+melapor "INSERT tidak pernah terjadi", yang terbaca seolah penjaganya menolak.
+Sebabnya data test saya sendiri melanggar aturan validasi username. Itu ketiga
+kalinya hari ini kegagalan pada perkakas uji menyamar sebagai kegagalan pada
+kode yang diuji (§19.19, §19.20, §19.22).
