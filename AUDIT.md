@@ -217,7 +217,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 63 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 65 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -270,6 +270,8 @@ lepas. Catatan lepas selalu terlupakan.
 | 62  | Hapus proyek memakai kode galat MySQL; di Postgres `continue` dalam transaksi mustahil   |  **F2**  | 🟠  | Rendah        |          Tidak          | `SELESAI` 16 Agu | §13.8  |
 | 63  | Register menelan `ER_DUP_ENTRY` (MySQL) — di Postgres jadi 500, bukan pesan yang benar   |  **F2**  | 🟠  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu | §13.8  |
 | 64  | `tasks/reorder` melepas koneksi dua kali bila galat terjadi setelah `commit`             |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu | §13.8  |
+| 65  | `affectedRows` selalu `undefined` — 3 pemeriksaan mati; optimistic locking gagal SENYAP  |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `TERBUKA`                | §13.9  |
+| 66  | 5 rute DELETE dijaga hanya `['*']` — anggota berperan `viewer` bisa menghapus data        |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.9  |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -1597,7 +1599,7 @@ Tabel ini adalah daftar kerja F2. Isi kolom `Status` sambil jalan.
 | Perhitungan (progress, sprint, KPI, timeline) | Salah hitung tidak melempar error — ia hanya menampilkan angka keliru                                      | `TERBUKA`                                                                                           |
 | Alur state antar view                         | 21 `useState` + 21 `useEffect` di `AppContainer`, dioper 47 props                                          | `TERBUKA`                                                                                           |
 | Socket.IO realtime                            | Pemancaran event sebagian di `runAIPipeline()` yang jalan **setelah** response terkirim                    | `JALAN` — autentikasi handshake ditelaah, temuan #50/#51 (§13.5); urutan emit `runAIPipeline` belum |
-| Race condition / concurrency                  | Ada 1 test, belum ditelaah cakupannya                                                                      | `TERBUKA`                                                                                           |
+| Race condition / concurrency                  | Ada 1 test, belum ditelaah cakupannya                                                                      | `JALAN` — #65 optimistic locking terbukti mati senyap (§13.9); pola lain belum |
 | Alur unggah–simpan–tampil berkas              | Baru dibaca kodenya (§6.1), belum dijalankan                                                               | `TERBUKA`                                                                                           |
 | Penanganan error & rollback transaksi         | Belum ditelaah                                                                                             | `JALAN` — gelombang 2 menutup #60–#64 di rute task/project/auth (§13.8); 100+ endpoint lain belum |
 | Kedaluwarsa & refresh JWT                     | Belum ditelaah                                                                                             | `JALAN` — penegakan sesi tunggal ditelaah, temuan #52/#53 (§13.5); alur refresh belum               |
@@ -2006,6 +2008,65 @@ lain belum ditelusuri satu per satu.
 Masih `TERBUKA` penuh: 104 endpoint, perhitungan (progress/sprint/KPI/timeline —
 baru diperiksa sekilas, pembagiannya sudah dijaga `=== 0`), alur state antar
 view, race condition, alur unggah–simpan–tampil. Berikutnya `qa` (33 query).
+
+### 13.9 Temuan audit F2 — gelombang 3 (qa · race condition), 16 Agu 2026
+
+#### #65 🔴 `affectedRows` selalu `undefined` — optimistic locking gagal SENYAP
+
+Adapter mengembalikan `[result.rows, result.fields]` (`src/lib/db.ts:228`).
+`result.rowCount` **dibuang**, dan `affectedRows` adalah properti MySQL yang
+tidak pernah ada di node-postgres. Jadi setiap `affectedRows === 0` berbunyi
+`undefined === 0`, yang selalu `false`.
+
+Dibuktikan dengan UPDATE nyata memakai adapter repo apa adanya, seluruhnya di
+dalam transaksi yang di-ROLLBACK:
+
+```
+UPDATE 0 baris  -> []   .affectedRows: undefined   `=== 0` bernilai: false
+UPDATE 1 baris  -> []   .affectedRows: undefined      <- tak terbedakan
+RETURNING id    -> jumlah baris: 1                    <- cara yang bekerja
+```
+
+Tiga tempat terdampak, dan yang pertama jauh lebih berat dari dua lainnya:
+
+| Lokasi | Akibat |
+| ------ | ------ |
+| `server/routes/task.routes.ts:959` | **Optimistic locking mati.** SQL-nya memakai `AND version = ?`, jadi saat terjadi konflik UPDATE tidak menulis apa pun — tetapi API tetap menjawab 200 dan memancarkan `task_updated`. Suntingan pengguna **hilang tanpa pesan apa pun**; 409 yang dirancang untuk ini tidak pernah terkirim |
+| `server/routes/auth.routes.ts:146` | Login: 404 "User tidak ditemukan" tidak pernah terkirim |
+| `server/routes/auth.routes.ts:242` | force-logout: sama |
+
+Ini menjawab satu area §13.1 yang selama ini kosong — **race condition**.
+Bukan sekadar teori: dua orang menyunting task yang sama, yang kalah menerima
+"berhasil disimpan" padahal perubahannya tidak pernah masuk.
+
+⚠️ Perbaikannya **tidak boleh** lewat `src/lib/db.ts` (§0.5 aturan 3). Jalur yang
+benar adalah `RETURNING` di sisi pemanggil, sebagaimana terbukti di atas.
+
+#### #66 🔴 Lima rute DELETE dijaga hanya `['*']`
+
+Sesudah #49, `['*']` berarti "anggota proyek dengan peran apa pun" — termasuk
+`viewer`. Lima operasi merusak berada di bawah penjaga itu:
+
+```
+DELETE /api/projects/:projectId/documents/:id
+DELETE /api/projects/:projectId/meetings/:id
+DELETE /api/projects/:projectId/meetings/:id/discussionPoints/:pointId
+DELETE /api/projects/:projectId/qa-test-cases/:id
+DELETE /api/projects/:projectId/qa-test-suites/:id
+```
+
+Yang terakhir menghapus berjenjang: seluruh test case di dalam suite ikut
+terhapus (`qa.routes.ts:405-418`).
+
+Bandingkan dengan `milestones` dan `sprints`, yang penghapusannya sudah dibatasi
+`['admin','head']` dan `['admin','manager','head']`. Jadi pembatasannya memang
+sudah menjadi kebiasaan di repo ini — lima rute ini tertinggal.
+
+**`MENUNGGU` keputusan pemilik proyek**, bukan diperbaiki sepihak: menaikkan
+penjaganya akan MENOLAK pengguna yang selama ini bisa menghapus. Yang perlu
+diputuskan cuma satu — peran mana yang boleh menghapus tiap jenis data.
+Rekomendasi, mengikuti pola yang sudah ada: `['admin','manager','head']` untuk
+dokumen/rapat/QA, dan poin diskusi mengikuti pembuatnya.
 
 ---
 
