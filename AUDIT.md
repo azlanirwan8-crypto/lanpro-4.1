@@ -24,7 +24,7 @@ melanjutkan pekerjaan tanpa perlu menelusuri riwayat percakapan.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **320 lulus / 33 suite**                                    | `npm test`                                   |
+| Test                | **338 lulus / 35 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -227,7 +227,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 87 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 88 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -303,6 +303,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)       |  **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §19.14 |
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       |  **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §19.14 |
 | 87  | `effectiveRole` membawa DUA kosakata peran — system role & project role dalam satu nilai   |  **F7**  | 🔴  | Sedang        | Ya (blokir production)  | `TERBUKA`                | §19.15 |
+| 88  | God Mode Administrator belum tercatat di `AuditLogs` — §19.6 aturan 2 belum penuh          |  **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`                | §19.19 |
 | 31  | ~~Login dengan email di kolom form~~                                                       |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                              | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                           | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -3719,8 +3720,8 @@ dipakai pada `board` (memindahkan kartu) dan `access` (mengubah peran anggota).
 |   0   | Katalog peran di `MasterData`                                                   | ✅ **SELESAI 16 Agu** — `npm run db:seed-roles`. Katalog final: **4 SYSTEM + 8 PROJECT**, terverifikasi tampil di layar Master Data                  |
 |   1   | Satu enum peran, satu tempat. Hapus `\| string`, satukan dua `AppRole`          | ✅ **SELESAI 16 Agu** — `src/types/roles.ts`. Jadi **DUA** enum, bukan satu; alasan & temuan #87 di §19.15. 13 test mengikat enum ke penyemai        |
 |   2   | Penjaga saat boot — server menolak menyala bila rute memakai peran di luar enum | 🟡 **SEBAGIAN 16 Agu** — matriks terpusat + penjaga boot SELESAI, tetapi masih **mode LAPOR**. Menaikkan ke TOLAK menunggu pemetaan `member`. §19.16 |
-|   3   | Migrasi data `ProjectMembers` (10 baris) & `Users` (11 baris)                   | `MENUNGGU` keputusan                                                                                                                                 |
-|   4   | `verifyProjectAccess` baca matriks terpusat + deny-by-default                   | `TERBUKA`                                                                                                                                            |
+|   3   | Migrasi data `ProjectMembers` (10 baris) & `Users` (11 baris)                   | ✅ **SELESAI 16 Agu** — `npm run db:migrasi-peran`. 7 baris `member` -> `developer`. Sesudahnya 8 developer + 2 manager, semua kode katalog          |
+|   4   | `verifyProjectAccess` baca matriks terpusat + deny-by-default                   | 🟡 **SEBAGIAN 16 Agu** — `jagaProyek(modul, aksi)` + 18 test SELESAI, tetapi **belum dipasang di 54 rute**. §19.19                                   |
 |  5a   | **Dropdown & tampilan peran dari katalog** (#82)                                | ✅ **SELESAI 16 Agu** — 6 dropdown + 4 tampilan, nol hardcode, kolom `code` di MasterData                                                            |
 |  5b   | `can(action, module, projectId)` menggantikan 36 `hasPermission` di 13 berkas   | `TERBUKA`                                                                                                                                            |
 |   6   | Panel "Active System Permissions & Overrides" jadi **baca-saja**                | `TERBUKA`                                                                                                                                            |
@@ -4338,3 +4339,65 @@ kontributor umum, bukan pengelola.
 **Yang perlu Anda lakukan:** cukup jawab setuju atau tidak. Bila setuju, tahap 3
 (migrasi data 10 baris `ProjectMembers`) dan tahap 4 bisa dikerjakan berurutan
 tanpa pertanyaan lain.
+
+### 19.19 Tahap 3 & 4 — migrasi data dan penjaga berbasis matriks
+
+Dikerjakan 16 Agu 2026, sesudah pemilik proyek menyetujui `member` → `developer`.
+
+#### Tahap 3 — SELESAI, sudah dijalankan ke Neon
+
+`npm run db:migrasi-peran` — **bawaannya uji-coba**, tidak menyentuh satu baris
+pun tanpa `--tulis`. Idempoten, dibuktikan dengan menjalankannya ulang.
+
+| Tabel                 | Sebelum                            | Sesudah                     |
+| --------------------- | ---------------------------------- | --------------------------- |
+| `ProjectMembers.role` | 7 member · 2 manager · 1 developer | **8 developer · 2 manager** |
+| `Users.role`          | 8 user · 1 admin · 1 head          | tidak berubah — sudah sah   |
+
+**Nol perubahan perilaku.** Di seluruh 6 penjaga tempat `member` muncul, ia
+selalu berdampingan dengan `developer`, dan keduanya sama-sama tidak punya baris
+di `DEFAULT_PERMISSIONS`. Yang berubah hanya namanya jadi kode katalog.
+
+Catatan pengukuran: §19.2 menulis `Users` 11 baris; yang terbaca hari ini 10.
+Selisih 1 belum ditelusuri.
+
+#### Tahap 4 — SEBAGIAN. Penjaganya jadi, pemasangannya belum
+
+`server/middleware/jagaProyek.ts` — `jagaProyek(modul, aksi)` menggantikan
+`verifyProjectAccess(daftarPeran)`. Rute tidak lagi punya pendapat tentang
+peran; ia menyebut modul + aksi, dan matriks yang menjawab.
+
+18 test perilaku menegakkan urutan §19.6: God Mode hanya Administrator · `head`
+BUKAN God Mode · bukan anggota = 403 · `viewer` tidak boleh `D` (#66) ·
+`developer` tidak boleh `D` di luar wilayahnya (#72) · `QA` boleh `D` hanya di
+modul `qa` · peran tak dikenal ditolak · **galat DB jadi 500, tidak pernah
+lolos**.
+
+⚠️ **BELUM DIPASANG DI 54 RUTE.** Itu batas yang harus dinyatakan terang-terangan:
+selama pemasangan belum dilakukan, **#66, #68, #70, #71, #72, dan #73 BELUM
+tertutup** di jalur permintaan nyata. Yang sudah ada adalah alatnya, teruji dan
+siap. Pemasangannya pekerjaan tersendiri karena tiap rute harus dipetakan ke
+modul + aksi yang benar, dan salah petakan = pengguna nyata terkunci.
+
+Urutan yang disarankan saat memasangnya: mulai dari rute `DELETE` (#66, paling
+berbahaya dan paling sedikit), lalu rute ber-`["*"]` polos (31 rute), terakhir
+cabut `head` dan `designer` — sesudah itu `MODE` di `daftarPeranRute.ts` bisa
+dinaikkan ke `TOLAK`.
+
+#### Item #88 — God Mode belum tercatat di `AuditLogs`
+
+§19.6 aturan 2 mewajibkan setiap pemakaian God Mode tercatat, sebab tanpa
+pencatatan tidak ada cara mengetahui penyalahgunaannya. `catatGodMode()` saat
+ini baru menulis ke log server, **belum ke tabel `AuditLogs`**.
+
+Ini utang yang disengaja dan bernomor, bukan kelalaian: menulis ke `AuditLogs`
+di dalam penjaga berarti satu `INSERT` pada setiap permintaan admin, dan bentuk
+tulisannya perlu disepakati supaya tidak menenggelamkan log yang sudah ada.
+
+#### Kekeliruan yang layak dicatat
+
+Seluruh 18 test sempat merah dengan pesan yang **menyesatkan** — "next tidak
+dipanggil" — padahal sebabnya `resetMocks: true` di `jest.config.cjs` menghapus
+implementasi `jest.fn` di dalam factory `jest.mock`, sehingga `getConnection()`
+mengembalikan `undefined`. Pesan gagalnya menunjuk ke logika otorisasi, bukan ke
+koneksi. Sudah dicatat di kepala berkas testnya.
