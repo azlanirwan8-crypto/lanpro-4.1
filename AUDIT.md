@@ -6306,3 +6306,63 @@ keduanya berlawanan akibatnya:
 
 Menebak salah satunya berarti mempertaruhkan fitur ekspor atas dasar yang tidak
 pernah dinyatakan. Dibiarkan `MENUNGGU` sampai dipilih satu.
+
+### 19.49 ⚠️ Dampak ke mode TERANG — klaim saya belum pernah diukur
+
+Pemilik proyek bertanya apakah pekerjaan tema gelap merusak tema terang.
+Pertanyaan itu tepat sasaran: sepanjang lima gelombang saya **berulang kali
+menulis "identik di mode terang"** — dan tidak satu kali pun mengukurnya.
+
+Diukur 16 Agu 2026 pada sesi login yang sama, hanya berganti tema:
+
+| Tema       | Elemen di bawah rasio 4.5 |
+| ---------- | ------------------------: |
+| Gelap      |                     **7** |
+| **Terang** |                    **78** |
+
+Selisihnya terlalu besar untuk diabaikan. Mode terang **lebih buruk** daripada
+mode gelap — kebalikan dari yang seharusnya terjadi bila konversinya benar-benar
+netral.
+
+#### Kenapa klaim "identik" bisa benar per token tetapi salah secara keseluruhan
+
+Pemetaan nilai memang identik — `surface` = `#ffffff` = `white`, `content` =
+`#0f172a` = `slate-900`, dan seterusnya. Yang TIDAK identik adalah **token
+bernilai TETAP** yang saya tambahkan:
+
+| Token                   | Nilai                   | Akibat di mode terang                           |
+| ----------------------- | ----------------------- | ----------------------------------------------- |
+| `content-inverse`       | `#ffffff` di kedua mode | teks putih; **benar hanya bila latarnya gelap** |
+| `content-inverse-muted` | `#e2e8f0` di kedua mode | idem                                            |
+| `surface-inverse`       | `#1e293b` di kedua mode | kartu gelap                                     |
+
+Selama pasangannya tetap utuh (teks inverse di atas permukaan inverse), keduanya
+benar. Tetapi konversi dilakukan **per kelas, bukan per pasangan** — dan di
+tempat mana pun pasangan itu terpisah, mode terang mendapat teks terang di atas
+permukaan terang.
+
+Itu bukan kesalahan nilai tokennya. Itu kesalahan **cara mengonversinya**:
+mengubah `text-white` menjadi token tanpa memeriksa apa yang ada di belakangnya.
+
+#### ⚠️ Batas yang harus dinyatakan: angka 78 belum ditelusuri satu per satu
+
+Alat ukur saya sudah **tiga kali** salah hari ini — `oklch` yang tidak terbaca,
+saringan ukuran yang membuang lencana, dan induk transparan yang dilaporkan
+sebagai latar putih. Dua pengukuran atas elemen yang sama pun memberi latar
+berbeda (`243,246,249` versus `255,255,255`).
+
+Jadi **78 adalah sinyal, bukan daftar cacat.** Menindaklanjutinya dengan
+mengganti kelas satu per satu berdasarkan angka itu berisiko memperbaiki yang
+tidak rusak sambil melewatkan yang rusak.
+
+#### Langkah yang benar berikutnya
+
+1. **Tangkapan layar mode TERANG** dari pemilik proyek — layar yang sama dengan
+   yang dulu dilaporkan (Roadmap, QA, dialog hapus). Mata manusia menyelesaikan
+   pertanyaan "apakah ini rusak" lebih cepat dan lebih andal daripada alat ukur
+   yang sudah terbukti keliru.
+2. Baru sesudah itu: telusuri pasangan `content-inverse*` yang latarnya BUKAN
+   `surface-inverse`, dan kembalikan yang salah pasangan.
+
+**Sampai itu dilakukan, #13 tidak boleh dianggap selesai.** Tema gelap membaik
+secara terukur, tetapi biayanya terhadap tema terang belum diketahui.
