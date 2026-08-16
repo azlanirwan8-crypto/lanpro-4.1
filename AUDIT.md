@@ -3537,51 +3537,67 @@ Mengatur hal **di luar** proyek. Tidak menentukan apa pun di dalam proyek.
 16 Agu 2026. Sesudah pembuatan proyek dibatasi ke Administrator, peran itu tidak
 menyisakan pembeda apa pun dari Standard User.
 
-### 19.5 PROJECT ROLE — 6 peran
+### 19.5 PROJECT ROLE — 8 peran
 
-Disusun sebagai **tangga** mengikuti GitLab: tiap tingkat mewarisi yang di
-bawahnya.
+Mengatur hal **di dalam** satu proyek. Tiga peran fungsional — System Analyst,
+Business Analyst, dan QA — ditetapkan pemilik proyek sebagai project role
+tersendiri, masing-masing **menguasai penuh satu modul**.
 
 | Nama Modul | Nama Role | Akses CRUD |
 | ---------- | --------- | :--------: |
 | `dashboard` | seluruh peran | R |
 | `access` (Team) | Project Owner · Project Admin | CRUD |
 | `access` | Project Manager | R + U |
-| `access` | Contributor · QA · Viewer | R |
+| `access` | System Analyst · Business Analyst · Developer · QA · Viewer | R |
 | `list` (Issue List) | Project Owner · Project Admin · Project Manager | CRUD |
-| `list` | Contributor · QA | CRU |
+| `list` | System Analyst · Business Analyst · Developer · QA | CRU |
 | `list` | Viewer | R |
 | `board` (Kanban) | Project Owner · Project Admin · Project Manager | CRUD |
-| `board` | Contributor · QA | R + U |
+| `board` | System Analyst · Business Analyst · Developer · QA | R + U |
 | `board` | Viewer | R |
 | `sprints` | Project Owner · Project Admin · Project Manager | CRUD |
-| `sprints` | Contributor · QA · Viewer | R |
+| `sprints` | System Analyst · Business Analyst · Developer · QA · Viewer | R |
 | `timeline` | Project Owner · Project Admin · Project Manager | CRUD |
-| `timeline` | Contributor · QA · Viewer | R |
-| `qa` | Project Owner · Project Admin · Project Manager | CRUD |
-| `qa` | **QA** | **CRUD** |
-| `qa` | Contributor | R + U |
-| `qa` | Viewer | R |
-| `meetingNotes` | Project Owner · Project Admin · Project Manager | CRUD |
-| `meetingNotes` | Contributor · QA | CRU |
-| `meetingNotes` | Viewer | R |
-| `wiki` | Project Owner · Project Admin · Project Manager | CRUD |
-| `wiki` | Contributor | CRU |
-| `wiki` | QA · Viewer | R |
+| `timeline` | System Analyst · Business Analyst · Developer · QA · Viewer | R |
+| `wiki` (Documentation) | Project Owner · Project Admin · Project Manager | CRUD |
+| `wiki` | **System Analyst** | **CRUD** |
+| `wiki` | Business Analyst | CRU |
+| `wiki` | Developer · QA · Viewer | R |
 | `flowchart` | Project Owner · Project Admin · Project Manager | CRUD |
-| `flowchart` | Contributor | CRU |
-| `flowchart` | QA · Viewer | R |
+| `flowchart` | **System Analyst** | **CRUD** |
+| `flowchart` | Business Analyst | CRU |
+| `flowchart` | Developer · QA · Viewer | R |
+| `meetingNotes` | Project Owner · Project Admin · Project Manager | CRUD |
+| `meetingNotes` | **Business Analyst** | **CRUD** |
+| `meetingNotes` | System Analyst · QA | CRU |
+| `meetingNotes` | Developer · Viewer | R |
+| `qa` (Quality Assessment) | Project Owner · Project Admin · Project Manager | CRUD |
+| `qa` | **QA** | **CRUD** |
+| `qa` | System Analyst · Business Analyst · Developer | R + U |
+| `qa` | Viewer | R |
 | `notebooklm` | Project Owner · Project Admin · Project Manager | CRUD |
-| `notebooklm` | Contributor | CRU |
-| `notebooklm` | QA · Viewer | R |
+| `notebooklm` | System Analyst · Business Analyst | CRU |
+| `notebooklm` | Developer · QA · Viewer | R |
 | *(hapus proyek)* | **Project Owner** | **D** |
 | *(hapus proyek)* | selain itu | — |
 
-Padanannya: Project Owner ≈ GitLab Owner · Project Admin ≈ Maintainer ·
-Contributor ≈ Developer · Viewer ≈ Guest.
+#### Wilayah kuasa tiap peran fungsional
 
-`Contributor` dan `QA` sengaja **setara**, bukan bertingkat — keduanya
-pelaksana, hanya beda wilayah kuasa.
+| Peran | Modul yang dikuasai penuh | Alasan |
+| ----- | ------------------------- | ------ |
+| **System Analyst** | `wiki` · `flowchart` | Pemilik dokumentasi sistem & alur proses |
+| **Business Analyst** | `meetingNotes` | Pemilik requirement & notulen |
+| **QA** | `qa` | Pemilik test case & bukti pengujian |
+| **Developer** | — | Pelaksana teknis; boleh ditugasi dan mengubah task, tidak menghapus |
+
+Keempatnya **setara**, bukan bertingkat — hanya berbeda wilayah kuasa. Padanan
+benchmark: keempatnya setara `Developer` di GitLab, dan yang membedakan hanyalah
+modul tempat mereka memegang `D`.
+
+⚠️ **Catatan penting soal `D`.** Di luar modul yang dikuasainya, tiga peran
+fungsional **tidak pernah menghapus**. Penghapusan lintas modul tetap milik
+Project Owner, Project Admin, dan Project Manager. Inilah yang menutup #66 dan
+#72 secara struktural.
 
 ### 19.6 ALUR OTORISASI — urutan pemeriksaan yang mengikat
 
@@ -3659,7 +3675,7 @@ dipakai pada `board` (memindahkan kartu) dan `access` (mengubah peran anggota).
 
 | Tahap | Isi | Status |
 | :---: | --- | ------ |
-| 0 | Katalog peran di `MasterData` | ✅ **SELESAI 16 Agu** — `npm run db:seed-roles`. Katalog final: **4 SYSTEM + 6 PROJECT**, terverifikasi tampil di layar Master Data |
+| 0 | Katalog peran di `MasterData` | ✅ **SELESAI 16 Agu** — `npm run db:seed-roles`. Katalog final: **4 SYSTEM + 8 PROJECT**, terverifikasi tampil di layar Master Data |
 | 1 | Satu enum peran, satu tempat. Hapus `\| string`, satukan dua `AppRole` | `TERBUKA` |
 | 2 | Penjaga saat boot — server menolak menyala bila rute memakai peran di luar enum | `TERBUKA` |
 | 3 | Migrasi data `ProjectMembers` (10 baris) & `Users` (11 baris) | `MENUNGGU` keputusan |
@@ -3678,7 +3694,7 @@ server menolak 11 nama peran hantu.
 
 | # | Keputusan | Rekomendasi |
 | - | --------- | ----------- |
-| K1 | 6 project role, atau 8 dengan System Analyst & Business Analyst terpisah? | **6** — keduanya butuh hak akses yang sama dengan Contributor; pembedanya jabatan |
+| K1 | 6 project role, atau 8 dengan System Analyst & Business Analyst terpisah? | ✅ **DIJAWAB: 8.** Pemilik proyek menetapkan System Analyst, Business Analyst, dan QA sebagai project role tersendiri, masing-masing menguasai penuh satu modul |
 | K2 | Lead / Frontend / Backend Engineer pindah ke `jabatan`? | **Ya** — profesi, bukan izin |
 | K3 | Product Owner & Scrum Master dilebur ke Project Manager? | **Ya** — fungsinya beririsan |
 | K4 | Nasib `parentAdminId` | **Buang** — item #81, ditulis tapi tidak pernah dibaca |
@@ -3711,22 +3727,39 @@ saudara kandung §13.14: gerbang yang dinyatakan lulus tanpa dijalankan.
 LanPro masih tahap pengembangan dan katalog lama belum dirujuk satu pun baris
 `ProjectMembers`.
 
+⚠️ **KOREKSI — asumsi yang sempat saya catat sebagai keputusan.** Versi pertama
+bagian ini menulis *"K1 terjawab implisit: 6 project role"*. Itu **keliru**.
+Pemilik proyek sudah menyatakan sejak awal bahwa System Analyst, Business
+Analyst, dan QA adalah **project role**; kalimat *"ganti yang anda rekomendasikan
+tadi"* menjawab soal **membersihkan katalog**, bukan membatalkan pernyataan itu.
+
+Kekeliruannya ditemukan pemilik proyek sendiri: *"project role bukannya ada
+banyak tadi, SA, BA, QA aja tidak ada"*. Katalog dikembalikan ke **8 peran**,
+`Contributor` dihapus dan dipecah menjadi System Analyst, Business Analyst, dan
+Developer.
+
+**Pelajarannya:** rekomendasi tidak boleh menimpa pernyataan pemilik proyek, dan
+sebuah pertanyaan yang belum dijawab tidak boleh dicatat sebagai "terjawab
+implisit". Bila jawabannya tidak eksplisit, statusnya tetap `MENUNGGU`.
+
 Sudah dikerjakan lewat `npm run db:seed-roles`:
 
 | Aksi | Isi |
 | ---- | --- |
 | **Dihapus** (9) | `Product Owner`, `Scrum Master` (K3 — dilebur ke Project Manager) · `Lead Developer`, `Frontend Engineer`, `Backend Engineer` (K2 — profesi, bukan izin) · 4 baris `system_role` keliru dari versi pertama |
 | **SYSTEM** (4) | Administrator · Department Head · Standard User · Observer |
-| **PROJECT** (6) | Project Owner · Project Admin · Project Manager · Contributor · QA · Viewer |
-| **Jabatan** (+3) | System Analyst · Frontend Engineer · Backend Engineer |
+| **PROJECT** (8) | Project Owner · Project Admin · Project Manager · System Analyst · Business Analyst · Developer · QA · Viewer |
+| **Jabatan** (+2) | Frontend Engineer · Backend Engineer |
 | **Typo diperbaiki** | `"Businnes Analyst"` → `"Business Analyst"` |
 
-Hasil akhir: `MasterData` 84 → **82 baris** · Project Role **10** (4 SYSTEM +
-6 PROJECT) · Position **15**. Diverifikasi tampil benar di layar Master Data
+Hasil akhir: `MasterData` **84 baris** · Project Role **12** (4 SYSTEM +
+8 PROJECT) · Position **15**. Diverifikasi tampil benar di layar Master Data
 dengan sesi Administrator, 0 error console.
 
-**K1 terjawab implisit: 6 project role, bukan 8.** System Analyst dan Business
-Analyst menjadi *jabatan*, hak aksesnya Contributor.
+`System Analyst` sengaja ada di DUA tempat: sebagai **project role** (hak akses)
+dan sebagai **jabatan** (profesi). Itu bukan duplikasi — seseorang berjabatan
+System Analyst memang wajar memegang project role bernama sama, tetapi keduanya
+dipakai untuk hal yang berbeda dan boleh tidak sama.
 
 Sengaja **masih ditahan**:
 
