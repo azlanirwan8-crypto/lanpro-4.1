@@ -363,15 +363,33 @@ async function startServer() {
       }
     }
 
-    // 3. For public image assets like user profile avatars, allow rendering if filename starts with avatar- or is an image
-    if (!isAuthorized && (safeName.startsWith('avatar-') || /\.(png|jpe?g|webp|gif)$/i.test(safeName))) {
+    // 3. Foto profil boleh dirender tanpa token — HANYA foto profil.
+    //
+    // #67 — syarat ini DULU berbunyi:
+    //
+    //   safeName.startsWith('avatar-') || /\.(png|jpe?g|webp|gif)$/i.test(safeName)
+    //
+    // Klausa kedua membuat SETIAP berkas berekstensi gambar ikut publik, bukan
+    // hanya avatar. Padahal `POST /api/v1/upload-document` memang menerima
+    // png/jpg, jadi tangkapan layar bukti QA, dokumen hasil pindai, dan foto
+    // papan tulis rapat semuanya bisa dibaca tanpa token dan tanpa login.
+    // Dibuktikan terhadap server berjalan: berkas gambar dijawab 200 tanpa
+    // kredensial apa pun.
+    //
+    // Nama berkas memang memuat 6 byte acak, tapi "sulit ditebak" bukan kendali
+    // akses: URL bocor lewat riwayat peramban, header referrer, tautan yang
+    // diteruskan, dan presignedUrl yang tampil apa adanya di respons API.
+    //
+    // Ketetapan pemilik proyek 16 Agu 2026: avatar tetap publik supaya sisi
+    // antarmuka tidak perlu berubah; selain avatar, semuanya lewat token.
+    if (!isAuthorized && safeName.startsWith('avatar-')) {
       isAuthorized = true;
     }
 
     if (!isAuthorized) {
       return res.status(403).json({
         status: "error",
-        message: "Akses Ditolak: Storage Bucket bersifat PRIVATE. Akses file membutuhkan Presigned URL yang sah atau Autentikasi JWT."
+        message: "Akses Ditolak: Berkas ini bersifat privat. Akses membutuhkan Presigned URL yang sah atau Autentikasi JWT."
       });
     }
 
