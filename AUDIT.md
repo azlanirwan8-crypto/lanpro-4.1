@@ -217,7 +217,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 65 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 66 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -272,6 +272,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 64  | `tasks/reorder` melepas koneksi dua kali bila galat terjadi setelah `commit`             |  **F2**  | 🟡  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu | §13.8  |
 | 65  | `affectedRows` selalu `undefined` — 3 pemeriksaan mati; penjaga jendela balapan mati    |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §13.9  |
 | 66  | 5 rute DELETE dijaga hanya `['*']` — anggota berperan `viewer` bisa menghapus data        |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.9  |
+| 67  | `/uploads` menyajikan SEMUA berkas gambar tanpa autentikasi — bukan hanya avatar        |  **F2**  | 🔴  | Rendah        | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.10 |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -1600,7 +1601,7 @@ Tabel ini adalah daftar kerja F2. Isi kolom `Status` sambil jalan.
 | Alur state antar view                         | 21 `useState` + 21 `useEffect` di `AppContainer`, dioper 47 props                                          | `TERBUKA`                                                                                           |
 | Socket.IO realtime                            | Pemancaran event sebagian di `runAIPipeline()` yang jalan **setelah** response terkirim                    | `JALAN` — autentikasi handshake ditelaah, temuan #50/#51 (§13.5); urutan emit `runAIPipeline` belum |
 | Race condition / concurrency                  | Ada 1 test, belum ditelaah cakupannya                                                                      | `JALAN` — #65 optimistic locking terbukti mati senyap (§13.9); pola lain belum |
-| Alur unggah–simpan–tampil berkas              | Baru dibaca kodenya (§6.1), belum dijalankan                                                               | `TERBUKA`                                                                                           |
+| Alur unggah–simpan–tampil berkas              | Baru dibaca kodenya (§6.1), belum dijalankan                                                               | `JALAN` — sisi unggah diuji & bersih; sisi tampil menghasilkan #67 (§13.10) |
 | Penanganan error & rollback transaksi         | Belum ditelaah                                                                                             | `JALAN` — gelombang 2 menutup #60–#64 di rute task/project/auth (§13.8); 100+ endpoint lain belum |
 | Kedaluwarsa & refresh JWT                     | Belum ditelaah                                                                                             | `JALAN` — penegakan sesi tunggal ditelaah, temuan #52/#53 (§13.5); alur refresh belum               |
 
@@ -2099,6 +2100,61 @@ penjaganya akan MENOLAK pengguna yang selama ini bisa menghapus. Yang perlu
 diputuskan cuma satu — peran mana yang boleh menghapus tiap jenis data.
 Rekomendasi, mengikuti pola yang sudah ada: `['admin','manager','head']` untuk
 dokumen/rapat/QA, dan poin diskusi mengikuti pembuatnya.
+
+### 13.10 Temuan audit F2 — gelombang 4 (alur unggah–simpan–tampil), 16 Agu 2026
+
+Area §13.1 "alur unggah–simpan–tampil" sebelumnya berstatus "baru dibaca kodenya,
+belum dijalankan". Kini dijalankan.
+
+**Sisi UNGGAH ternyata solid** — tidak ada temuan, dan itu layak dicatat supaya
+tidak diperiksa ulang tanpa alasan. `validateFileBuffer` (`src/lib/fileSecurity.ts:81`)
+menegakkan whitelist ekstensi, menolak header executable (MZ/ELF/Java/shebang),
+mencocokkan magic bytes per tipe, membatasi ukuran, memindai `<script>` /
+`javascript:` / `onerror=` pada 2 KB pertama, lalu memberi nama berkas
+`nama_<timestamp>_<6 byte acak>.<ext>` sehingga tidak mungkin bertabrakan.
+
+Yang bermasalah adalah sisi **TAMPIL**.
+
+#### #67 🔴 `/uploads` menyajikan semua berkas gambar tanpa autentikasi
+
+`server.ts:338`:
+
+```ts
+// 3. For public image assets like user profile avatars, allow rendering if
+//    filename starts with avatar- or is an image
+if (!isAuthorized && (safeName.startsWith('avatar-') || /\.(png|jpe?g|webp|gif)$/i.test(safeName))) {
+  isAuthorized = true;
+}
+```
+
+Klausa keduanya yang jadi soal. Niatnya "avatar boleh publik", tetapi
+`/\.(png|jpe?g|webp|gif)$/` membuat **setiap berkas berekstensi gambar** ikut
+publik — termasuk yang diunggah lewat `POST /api/v1/upload-document`, yang
+memang menerima `png`/`jpg`. Artinya tangkapan layar bukti QA, dokumen hasil
+pindai, dan foto papan tulis rapat bisa dibaca siapa pun yang tahu namanya,
+tanpa token dan tanpa login.
+
+Dibuktikan terhadap server yang sedang berjalan, tanpa kredensial apa pun:
+
+```
+avatar-1-1786840166479.jpg   -> 200
+avatar-rido-1786779498126.png -> 200
+```
+
+Nama berkas memang memuat 6 byte acak sehingga sulit ditebak, tetapi "sulit
+ditebak" bukan kendali akses — URL bocor lewat riwayat peramban, header
+referrer, tautan yang diteruskan, dan `presignedUrl` yang tampil apa adanya di
+respons API.
+
+Yang membuatnya lebih buruk: pesan penolakan di `server.ts:345` menyatakan
+"Storage Bucket bersifat PRIVATE. Akses file membutuhkan Presigned URL yang sah
+atau Autentikasi JWT" — dan untuk berkas gambar itu **tidak benar**.
+
+**`MENUNGGU` keputusan pemilik proyek.** Yang perlu diputuskan satu hal:
+apakah avatar memang disengaja publik? Bila ya, perbaikannya cukup membuang
+klausa ekstensi dan menyisakan `startsWith('avatar-')`. Bila tidak, keduanya
+dibuang dan avatar ikut lewat token — tetapi itu menuntut penyesuaian di sisi
+antarmuka pada setiap tempat avatar dirender.
 
 ---
 
