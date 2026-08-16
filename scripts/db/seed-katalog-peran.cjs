@@ -61,6 +61,9 @@ const DIHAPUS = [
   "md-system_role-department-head",
   "md-system_role-standard-user",
   "md-system_role-observer",
+  // Sempat dipakai saat katalog keliru diringkas jadi 6 peran; digantikan
+  // Developer, System Analyst, dan Business Analyst.
+  "md-project_role-contributor",
 ];
 
 /** SYSTEM ROLE — mengatur hal DI LUAR proyek. Empat peran (§19.4). */
@@ -136,27 +139,45 @@ const PROJECT_ROLES = [
       "Mengelola sprint, milestone, dan timeline. Menggantikan Product Owner dan Scrum Master yang fungsinya beririsan.",
   },
   {
-    slug: "contributor",
-    label: "Contributor",
+    slug: "system-analyst",
+    label: "System Analyst",
     order: 4,
+    color: "#7C3AED",
+    icon: "Workflow",
+    description:
+      "Pemilik penuh dokumentasi sistem: Wiki dan Flowchart (CRUD). Membuat dan mengubah task, notulen, serta NotebookLM. Tidak menghapus di modul yang bukan miliknya.",
+  },
+  {
+    slug: "business-analyst",
+    label: "Business Analyst",
+    order: 5,
+    color: "#DB2777",
+    icon: "FileText",
+    description:
+      "Pemilik penuh Meeting Notes dan kebutuhan bisnis (CRUD). Membuat dan mengubah task, Wiki, serta Flowchart. Tidak menghapus di modul yang bukan miliknya.",
+  },
+  {
+    slug: "developer",
+    label: "Developer",
+    order: 6,
     color: "#059669",
     icon: "Code2",
     description:
-      "Pelaksana pekerjaan: membuat dan mengubah task, dokumentasi, flowchart, dan notulen. TIDAK menghapus. Mencakup developer, system analyst, dan business analyst — pembedanya di jabatan, bukan hak akses.",
+      "Pelaksana pekerjaan teknis. Boleh ditugasi, membuat dan mengubah task serta memindahkan kartu di Kanban. Membaca dokumentasi. TIDAK menghapus apa pun.",
   },
   {
     slug: "qa-engineer",
     label: "QA",
-    order: 5,
+    order: 7,
     color: "#F59E0B",
     icon: "CheckCircle",
     description:
-      "Pemilik penuh modul Quality Assessment: membuat, mengubah, dan menghapus test case serta bukti pengujian. Setara Contributor di modul lain.",
+      "Pemilik penuh modul Quality Assessment: membuat, mengubah, dan menghapus test case serta bukti pengujian. Setara Developer di modul lain.",
   },
   {
     slug: "viewer",
     label: "Viewer",
-    order: 6,
+    order: 8,
     color: "#94A3B8",
     icon: "Eye",
     description:
@@ -169,7 +190,6 @@ const PROJECT_ROLES = [
  * `slug` dipakai untuk id; bila jabatan dengan label sama sudah ada, dilewati.
  */
 const JABATAN_BARU = [
-  { slug: "system-analyst", label: "System Analyst", order: 8, description: "Analis sistem dan perancang alur proses" },
   { slug: "frontend-engineer", label: "Frontend Engineer", order: 9, description: "Pengembang antarmuka pengguna" },
   { slug: "backend-engineer", label: "Backend Engineer", order: 10, description: "Pengembang logika bisnis dan layanan API" },
 ];
