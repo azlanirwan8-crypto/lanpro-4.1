@@ -28,7 +28,7 @@ lalu **§0.4** (tiga keputusan yang menahan sisanya). Rinciannya §19.15–§19.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **381 lulus / 40 suite**                                    | `npm test`                                   |
+| Test                | **385 lulus / 41 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -312,7 +312,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 39 BELUM · 52 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 38 BELUM · 53 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -323,9 +323,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 39 item
+### 1.1 BELUM SELESAI — 38 item
 
-**Sebaran per fase:** F1 2 · F2 9 · F3 1 · F6 6 · F7 8 · F8 5 · F9 2 · F10 3 · F11 1 · F12 2
+**Sebaran per fase:** F1 2 · F2 8 · F3 1 · F6 6 · F7 8 · F8 5 · F9 2 · F10 3 · F11 1 · F12 2
 
 **Masih menahan rilis production:** #30 · #46
 
@@ -356,7 +356,6 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — celah daftar, DAN membatalkan asumsi kuota F11           | **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik      | §0.4   |
 | 47  | `discussion_point_comments` punya KOLOM KEMBAR camelCase + snake_case                      | **F9**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
-| 53  | `POST /api/auth/logout` tanpa auth, `userId` sembarang → NULL-kan sesi siapa pun           | **F2**  | 🔴  | Rendah        |          Tidak          | `TERBUKA`               | §13.5  |
 | 55  | `rbac.ts:50` `!targetProjectId → next()` — RBAC no-op senyap bila nama param berbeda       | **F2**  | 🟡  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.5  |
 | 56  | Proses Jest mencetak crash `pg` (`isIP` of undefined) saat dibongkar — exit code tetap 0   | **F8**  | 🟡  | Rendah        |          Tidak          | `TERBUKA`               | §13.5  |
 | 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401        | **F2**  | ⚪  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.6  |
@@ -371,7 +370,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 92  | Peran dibaca dari TOKEN di 7 tempat, dari DATABASE di penjaga proyek — pencabutan tertunda | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.28 |
 | 93  | "Remember Me" hanya melupakan PROFIL — token tetap di localStorage lintas sesi peramban    | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.31 |
 
-### 1.2 SUDAH SELESAI — 52 item
+### 1.2 SUDAH SELESAI — 53 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -432,6 +431,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 70  | A01                                                                                           |    CWE-639     | 🔴  |
 | 91  | Kredensial admin ter-hardcode di frontend + peran diminta dari body saat mendaftar            |     **F7**     | 🔴  | Rendah        | Ya (blokir production) | `SELESAI` 16 Agu | §19.27 |
 | 54  | ~~identitas dari `x-user-id`/query/body~~ hanya dari token; cacat tersalin ke penjaga baru    |     **F2**     | 🟠  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §13.5  |
+| 53  | ~~logout tanpa auth, `userId` sembarang~~ identitas hanya dari token                          |     **F2**     | 🔴  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.5  |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -5241,3 +5241,47 @@ membersihkannya lewat `clearAuthToken`.
 Di komputer bersama, menutup peramban tidak mengakhiri sesi pada tingkat yang
 penting. Belum diperbaiki — perbaikannya menyentuh alur masuk, dan sesudah #91
 alur itu layak disentuh dengan hati-hati.
+
+### 19.32 #54 dan #53 — dua item murah, satu di antaranya kesalahan saya sendiri
+
+Dikerjakan 16 Agu 2026 mengikuti urutan §1.4 (termurah lebih dulu).
+
+#### #54 — item yang TAMPAK gugur sendiri, ternyata tidak
+
+`rbac.ts` pensiun dengan nol pemakai (§19.23), jadi #54 — "identitas boleh
+datang dari `x-user-id`/query/body" — sekilas ikut gugur.
+
+**Ia tidak gugur.** Cadangan identitas itu **sudah tersalin** ke ketiga penjaga
+baru saat saya menulisnya, karena saya menyalin pola penjaga lama tanpa
+memeriksa apa yang ikut terbawa. Baru ketahuan ketika itemnya dibaca untuk
+disusun ke §1.4 — bukan saat penjaganya ditulis, dan bukan oleh test mana pun.
+
+Tidak bisa ditembus hari ini: seluruh rute berlingkup proyek berada di balik
+gerbang `/api/*` yang mengisi `req.user`. **Itu justru masalahnya.** Penjaganya
+bersandar pada lapisan lain untuk keselamatannya — bentuk asumsi yang sama
+persis dengan yang melahirkan #49 dan #68.
+
+> **Aturan yang lahir dari sini:** item yang tampak gugur karena kode lamanya
+> pensiun **wajib divalidasi di kode BARU**, bukan dicoret. Yang pensiun
+> berkasnya, bukan cacatnya.
+
+#### #53 — logout yang bisa mengakhiri sesi orang lain
+
+`POST /api/auth/logout` mengambil `userId` dari body, pada rute yang berada di
+prefix **publik**. Siapa pun tanpa kredensial bisa memanggilnya dengan id orang
+lain dan meng-`NULL`-kan `currentSessionToken` korban — memaksanya keluar
+berulang kali.
+
+Rutenya **memang harus publik**, dan itu divalidasi lebih dulu: pengguna yang
+tokennya sudah kedaluwarsa tetap perlu bisa keluar. Karena itu perbaikannya
+bukan menambahkan `authenticateJWT` — itu akan mengunci orang yang paling
+membutuhkannya. Identitas diambil dari token bila ada; bila tidak ada, tidak
+ada yang perlu dibersihkan di server, dan jawabannya tetap `success`.
+
+Divalidasi juga sesudahnya: `apiRequest` melampirkan `Authorization` selama
+token masih ada, dan logout dipanggil **sebelum** token dibersihkan — perilaku
+klien tetap utuh.
+
+**Testnya menegaskan SIAPA yang sesinya tersentuh, bukan status jawabannya.**
+Rutenya selalu menjawab `success`; test yang memeriksa status akan lulus baik
+lubangnya ada maupun tidak.
