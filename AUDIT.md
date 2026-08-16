@@ -24,7 +24,7 @@ melanjutkan pekerjaan tanpa perlu menelusuri riwayat percakapan.
 | ------------------- | ----------------------------------------------------------- | -------------------------------------------- |
 | `tsc --noEmit`      | 0 error                                                     | `npm run lint`                               |
 | ESLint              | 0 error, 449 warning                                        | `npx eslint src server`                      |
-| Test                | **338 lulus / 35 suite**                                    | `npm test`                                   |
+| Test                | **349 lulus / 35 suite**                                    | `npm test`                                   |
 | Build               | sukses                                                      | `npm run build`                              |
 | Doctor              | SIAP JALAN (1 peringatan disengaja: `STORAGE_DRIVER=local`) | `npm run doctor`                             |
 | Aplikasi di browser | tampil normal, 0 error console                              | `npm run dev` → buka `http://localhost:3000` |
@@ -3721,7 +3721,7 @@ dipakai pada `board` (memindahkan kartu) dan `access` (mengubah peran anggota).
 |   1   | Satu enum peran, satu tempat. Hapus `\| string`, satukan dua `AppRole`          | ✅ **SELESAI 16 Agu** — `src/types/roles.ts`. Jadi **DUA** enum, bukan satu; alasan & temuan #87 di §19.15. 13 test mengikat enum ke penyemai        |
 |   2   | Penjaga saat boot — server menolak menyala bila rute memakai peran di luar enum | 🟡 **SEBAGIAN 16 Agu** — matriks terpusat + penjaga boot SELESAI, tetapi masih **mode LAPOR**. Menaikkan ke TOLAK menunggu pemetaan `member`. §19.16 |
 |   3   | Migrasi data `ProjectMembers` (10 baris) & `Users` (11 baris)                   | ✅ **SELESAI 16 Agu** — `npm run db:migrasi-peran`. 7 baris `member` -> `developer`. Sesudahnya 8 developer + 2 manager, semua kode katalog          |
-|   4   | `verifyProjectAccess` baca matriks terpusat + deny-by-default                   | 🟡 **SEBAGIAN 16 Agu** — `jagaProyek(modul, aksi)` + 18 test SELESAI, tetapi **belum dipasang di 54 rute**. §19.19                                   |
+|   4   | `verifyProjectAccess` baca matriks terpusat + deny-by-default                   | 🟡 **BERJALAN** — `jagaProyek` + `jagaHapusProyek` terpasang di **10 rute DELETE**. Sisa 44 penjaga lama. §19.20                                     |
 |  5a   | **Dropdown & tampilan peran dari katalog** (#82)                                | ✅ **SELESAI 16 Agu** — 6 dropdown + 4 tampilan, nol hardcode, kolom `code` di MasterData                                                            |
 |  5b   | `can(action, module, projectId)` menggantikan 36 `hasPermission` di 13 berkas   | `TERBUKA`                                                                                                                                            |
 |   6   | Panel "Active System Permissions & Overrides" jadi **baca-saja**                | `TERBUKA`                                                                                                                                            |
@@ -4401,3 +4401,63 @@ dipanggil" — padahal sebabnya `resetMocks: true` di `jest.config.cjs` menghapu
 implementasi `jest.fn` di dalam factory `jest.mock`, sehingga `getConnection()`
 mengembalikan `undefined`. Pesan gagalnya menunjuk ke logika otorisasi, bukan ke
 koneksi. Sudah dicatat di kepala berkas testnya.
+
+### 19.20 Pemasangan tahap 4 gelombang 1 — seluruh rute DELETE
+
+Dikerjakan 16 Agu 2026. Gelombang pertama sengaja `DELETE`: paling berbahaya,
+dan paling sedikit.
+
+**10 rute dialihkan.** Laporan boot turun `54 → 44` penjaga lama — cocok persis
+dengan jumlah yang dipindahkan, jadi tidak ada yang tercecer.
+
+| Berkas              | Rute                                    | Penjaga baru                     |
+| ------------------- | --------------------------------------- | -------------------------------- |
+| `discussion-points` | discussionPoints/:pointId               | `jagaProyek("meetingNotes","D")` |
+| `documents`         | documents/:id                           | `jagaProyek("wiki","D")`         |
+| `meetings`          | meetings/:id                            | `jagaProyek("meetingNotes","D")` |
+| `milestones`        | milestones/:id                          | `jagaProyek("timeline","D")`     |
+| `sprints`           | sprints/:id                             | `jagaProyek("sprints","D")`      |
+| `qa`                | qa-test-suites/:id · qa-test-cases/:id  | `jagaProyek("qa","D")`           |
+| `task`              | tasks/:id · tasks/:taskId/links/:linkId | `jagaProyek("list","D")`         |
+| `project`           | **/api/projects/:projectId**            | `jagaHapusProyek()`              |
+
+#### Pengetatan nyata pada penghapusan proyek
+
+Penjaganya dulu `verifyProjectAccess(["admin", "head"])`, sehingga anggota
+proyek berperan `admin` — **Project Admin, bukan pemilik** — bisa menghapus
+seluruh proyek. §19.5 memberi `D` atas proyek hanya kepada **Project Owner**.
+Administrator sistem tetap menembus lewat God Mode.
+
+Ini satu-satunya perubahan di gelombang ini yang bisa dirasakan pengguna. Bila
+ada yang melaporkan tidak bisa lagi menghapus proyek, inilah sebabnya, dan itu
+disengaja.
+
+#### Tiga kekeliruan saya, semuanya ditangkap testnya sendiri
+
+1. **Pendata rute hanya mengenali `router.delete`.** Dua rute DELETE QA dan satu
+   di `sprints` memakai `app.delete` — ketiganya **tidak pernah terhitung**.
+   Bukan dilaporkan longgar; hilang sama sekali dari himpunan. Diperlebar ke
+   `(?:app|router)`.
+2. **Penggantian di `sprints.routes.ts` mendarat di rute POST**, bukan DELETE,
+   sehingga pembuatan sprint sempat dijaga sebagai aksi `D`. Dikembalikan.
+3. **Pendata menilai teks KOMENTAR sebagai penjaga.** Catatan sejarah yang
+   menyebut `["*"]` pada rute yang sudah benar memicu alarm palsu. Komentar kini
+   dibuang lebih dulu — alarm palsu menumpulkan test secepat lubang menumpulkannya.
+
+Ketiganya sejenis: **pengukur yang salah lebih berbahaya daripada tidak
+mengukur.** Nomor 1 dan 3 keduanya membuat sesuatu yang salah terbaca benar.
+
+`hak-hapus.test.ts` **diperbarui, bukan dihapus** — maksudnya masih berlaku,
+yang usang hanya bentuk penjaga yang dikuncinya. Jendela pemindaiannya juga
+diperlebar 400 → 900 karakter, sebab komentar yang diperpanjang diam-diam
+menjatuhkan dua rute QA dari himpunan.
+
+#### Sisa pekerjaan tahap 4
+
+44 penjaga lama, di antaranya **31 ber-`["*"]` polos** dan **1 korslet (#73)**.
+Gelombang berikutnya: rute `["*"]` polos, lalu cabut `head` dan `designer`,
+baru `MODE` di `daftarPeranRute.ts` dinaikkan ke `TOLAK`.
+
+⚠️ **#66 masih belum boleh ditutup sepenuhnya.** Rute DELETE-nya sudah aman,
+tetapi #72 (16 rute POST/PUT/PATCH ber-`["*"]`) masih terbuka — dan keduanya
+lahir dari lubang yang sama.
