@@ -227,7 +227,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 81 item aktif + 1 dibatalkan
+## §1 PAPAN PRIORITAS — 82 item aktif + 1 dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -298,6 +298,7 @@ lepas. Catatan lepas selalu terlupakan.
 | 80  | `POST /api/projects/generate-bni-demo` membuat proyek TANPA penjaga admin — pintu kedua  |  **F2**  | 🟠  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` keputusan     | §13.15 |
 | 81  | `ProjectMembers.parentAdminId` ditulis tapi TIDAK PERNAH dibaca — 6 baris, nol `SELECT`  |  **F7**  | 🟡  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan     | §19.2  |
 | 82  | Dropdown peran HARDCODED, tidak membaca katalog `MasterData` — duplikat & nilai bentrok |  **F7**  | 🔴  | Rendah        | Ya (blokir production)  | `SELESAI` 16 Agu | §19.12 |
+| 83  | `Users.department` & `Users.position` TIDAK fungsional — rancangan §19.4 belum bisa jalan |  **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan     | §19.13 |
 | 31  | ~~Login dengan email di kolom form~~                                                     |  **—**   |  —  | —             |          Tidak          | `DIBATALKAN` 15 Agu 2026 | §1.5   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                            | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                         | **F6.1** | 🔴  | Sangat rendah |          Tidak          | `SELESAI` 16 Agu         | §1.5   |
@@ -336,7 +337,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 | **F4**  | Performa muat                      | #3                                   | 1    | Rendah–sedang     | `SELESAI` 16 Agu          | — tidak ada                                                                                                                 |
 | **F5**  | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | `SELESAI` 16 Agu          | — tidak ada                                                                                                                 |
 | **F6**  | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28 | 3–4  | Rendah–sedang     | `MENUNGGU` domain          | **PEMILIK.** Domain email belum terverifikasi (#44). Tanpa itu penyedia mana pun hanya mengirim ke alamat pemilik akun, jadi email tidak akan sampai ke user lain dan gagalnya SENYAP. F6.1 sudah beres; tinggal isi `RESEND_API_KEY` + `EMAIL_FROM` |
-| **F7**  | **Two-Tier RBAC** & validasi       | **#76**, #4, #81                     | 5–8  | **Tinggi**        | `JALAN` — tahap 0 selesai | **PEMILIK, 4 keputusan (K1–K4 §19.9).** Rancangan lengkap di **§19**. Tahap 0 (katalog peran di MasterData) SELESAI 16 Agu. Tahap 1–2 bisa jalan tanpa pemilik. Menutup akar 56% temuan F2 |
+| **F7**  | **Two-Tier RBAC** & validasi       | **#76**, #4, #81, #82, #83           | 5–8  | **Tinggi**        | `JALAN` — tahap 0 & 5a ✅ | **PEMILIK, 3 keputusan.** Rancangan di **§19**. SELESAI: katalog peran (tahap 0) & nol hardcode (#82, tahap 5a). Tahap 1–2–4 bisa jalan TANPA pemilik. Sisa keputusan: pemetaan `member` → peran apa (7 baris) · Department Head A/B/C (#83) · Business Owner ada atau tidak |
 | **F8**  | Jaring pengaman                    | #9, #8                               | 4–6  | Rendah            | `TERBUKA`                 | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, karena F3 akan menambah kasus uji                                        |
 | **F9**  | Lapisan backend                    | #6                                   | 6–10 | Tinggi            | `TERBUKA`                 | — bisa jalan tanpa pemilik, tapi butuh F7 & F8 lebih dulu sebagai pengaman                                                  |
 | **F10** | Arsitektur frontend                | #5, #7, #21                          | 8–15 | **Sangat tinggi** | `TERBUKA`                 | — bisa jalan tanpa pemilik, tapi JANGAN sebelum F8. Merefactor 4.581 baris `AppContainer` dengan jaring pengaman sekarang adalah judi |
@@ -3687,7 +3688,8 @@ dipakai pada `board` (memindahkan kartu) dan `access` (mengubah peran anggota).
 | 2 | Penjaga saat boot — server menolak menyala bila rute memakai peran di luar enum | `TERBUKA` |
 | 3 | Migrasi data `ProjectMembers` (10 baris) & `Users` (11 baris) | `MENUNGGU` keputusan |
 | 4 | `verifyProjectAccess` baca matriks terpusat + deny-by-default | `TERBUKA` |
-| 5 | `can(action, module, projectId)` menggantikan 36 `hasPermission` di 13 berkas | `TERBUKA` |
+| 5a | **Dropdown & tampilan peran dari katalog** (#82) | ✅ **SELESAI 16 Agu** — 6 dropdown + 4 tampilan, nol hardcode, kolom `code` di MasterData |
+| 5b | `can(action, module, projectId)` menggantikan 36 `hasPermission` di 13 berkas | `TERBUKA` |
 | 6 | Panel "Active System Permissions & Overrides" jadi **baca-saja** | `TERBUKA` |
 
 **Tahap 1 dan 2 tidak butuh keputusan apa pun** dan bisa dikerjakan kapan saja.
@@ -3930,5 +3932,54 @@ Business Analyst, Developer, QA) kini **bisa dipilih**, tetapi penjaga rute
 belum mengenalinya — `verifyProjectAccess` masih memakai daftar peran lama.
 Pengguna yang diberi peran itu hanya akan lolos rute ber-`['*']`. Ini ditutup
 **Tahap 4** (§19.8), dan sebaiknya dikerjakan segera sesudah ini.
+
+---
+
+### 19.13 Temuan #83 — `position` dan `department` tidak fungsional
+
+Muncul dari pertanyaan pemilik proyek 16 Agu 2026: *"berarti position ini tidak
+ada fungsi ya, cuma sekadar data aja? yang penting itu system role dan project
+role ya"*. Diperiksa, dan **benar**.
+
+#### Bukti
+
+| Kolom | Dipakai untuk logika? | Ditemukan di |
+| ----- | :-------------------: | ------------ |
+| `Users.position` | **Tidak** | Hanya diteruskan di respons (`auth.service.ts:36`); di frontend hanya ditampilkan dan ikut CSV export |
+| `Users.department` | **Tidak** | Hanya `SELECT` dan `UPDATE`; tidak ada satu pun `if`, filter, atau penjaga yang membacanya |
+
+Tidak ada satu pun percabangan otorisasi yang menyentuh keduanya. Murni data
+deskriptif — setara nomor telepon.
+
+**Yang benar-benar menentukan hak akses hanya dua:**
+
+```
+System Role  -> hak DI LUAR proyek    (Users.role)
+Project Role -> hak DI DALAM proyek   (ProjectMembers.role)
+```
+
+#### ⚠️ Akibatnya: satu baris di §19.4 belum bisa dijalankan
+
+§19.4 menetapkan **Department Head** *"melihat seluruh proyek di
+departemennya"*. Itu **tidak mungkin** selama `department` tidak fungsional.
+Cacat ini ada di rancangan, bukan di kode — dan baru ketahuan karena pemilik
+proyek menanyakan hal lain.
+
+| | Pilihan | Konsekuensi |
+| - | ------- | ----------- |
+| **A** | Department Head hanya melihat proyek yang ia jadi anggota | Paling sederhana. Pembeda dengan Standard User tinggal akses baca Master Data & audit log |
+| **B** | Buat `department` fungsional — proyek ikut berdepartemen, lalu disaring | Sesuai maksud awal. Kolom `Projects.department` **sudah ada** (hasil #79), tinggal diisi dan dipakai |
+| **C** | Department Head melihat semua proyek | Paling longgar; nyaris menyamai Administrator |
+
+**Rekomendasi: B** — kolomnya sudah ada, jadi biayanya hanya mengisi dan
+menyaring. Menambah satu langkah kecil di Tahap 4.
+
+#### Pelajarannya
+
+Rancangan yang menyebut sebuah kolom **tidak otomatis berarti kolom itu bekerja**.
+§19.4 ditulis dari asumsi bahwa `department` sudah dipakai, padahal ia hanya
+tersimpan. Sebelum sebuah atribut dipakai untuk otorisasi, periksa dulu apakah
+ada yang membacanya — persis pemeriksaan yang menemukan #81 (`parentAdminId`)
+dan #83 ini.
 
 ---
