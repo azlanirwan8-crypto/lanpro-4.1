@@ -7,9 +7,9 @@ export const styles = {
   searchInput:
     "pl-9 pr-4 py-2 bg-surface dark:bg-slate-950 border border-border-subtle dark:border-border-inverse rounded-md text-xs font-medium text-content-body dark:text-content-inverse-muted w-full sm:w-64 placeholder:font-normal placeholder:text-content-subtle focus:ring-1 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-2xs",
   filterPill:
-    "px-2.5 py-1 bg-indigo-50/80 dark:bg-indigo-950/20 text-primary dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-900 rounded-md text-[10px] font-medium uppercase tracking-tight shadow-2xs",
+    "px-2.5 py-1 bg-indigo-500/10 dark:bg-indigo-950/20 text-primary dark:text-indigo-400 border border-indigo-200/80 dark:border-indigo-900 rounded-md text-[10px] font-medium uppercase tracking-tight shadow-2xs",
   filterPillAmber:
-    "px-2.5 py-1 bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900 rounded-md text-[10px] font-medium uppercase tracking-tight shadow-2xs",
+    "px-2.5 py-1 bg-amber-500/10 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900 rounded-md text-[10px] font-medium uppercase tracking-tight shadow-2xs",
   tableWrapper:
     "overflow-auto w-full custom-scrollbar relative flex-1 min-h-0 max-h-[calc(100vh-220px)]",
   table: "w-full text-left border-collapse flex-none",

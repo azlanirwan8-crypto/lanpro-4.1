@@ -185,7 +185,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
         <div className="absolute inset-0 pointer-events-none z-30">
           {/* TOP PORT */}
           <div
-            className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-50 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
+            className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-500/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
             onMouseDown={(e) => {
               e.stopPropagation();
               handleConnectPortClick(node.id, "top");
@@ -197,7 +197,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
 
           {/* RIGHT PORT */}
           <div
-            className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-50 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
+            className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-500/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
             onMouseDown={(e) => {
               e.stopPropagation();
               handleConnectPortClick(node.id, "right");
@@ -209,7 +209,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
 
           {/* BOTTOM PORT */}
           <div
-            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-50 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
+            className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-500/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
             onMouseDown={(e) => {
               e.stopPropagation();
               handleConnectPortClick(node.id, "bottom");
@@ -221,7 +221,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
 
           {/* LEFT PORT */}
           <div
-            className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-50 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
+            className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-500/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
             onMouseDown={(e) => {
               e.stopPropagation();
               handleConnectPortClick(node.id, "left");
@@ -384,7 +384,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
                 className={cn(
                   "flex items-center gap-1 text-xs sm:text-[10px] sm:text-[8.5px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded border shadow-soft cursor-pointer whitespace-nowrap",
                   linkedTask.status === "Done" || linkedTask.status === "Selesai"
-                    ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                    ? "bg-emerald-500/15 text-emerald-800 border-emerald-300"
                     : linkedTask.status === "In Progress" || linkedTask.status === "Dikerjakan"
                       ? " text-indigo-800 border-indigo-300"
                       : "bg-surface-muted text-content-strong "

@@ -631,7 +631,7 @@ export function DashboardView(props: DashboardViewProps) {
               </button>
             )}
 
-            <div className="flex items-center gap-2 bg-indigo-50/70 px-3 py-2 rounded-lg border border-indigo-100 text-xs font-medium text-indigo-700 ">
+            <div className="flex items-center gap-2 bg-indigo-500/10 px-3 py-2 rounded-lg border border-indigo-100 text-xs font-medium text-indigo-700 ">
               <Zap className="w-3.5 h-3.5 text-indigo-500" />
               <span>
                 Aktif: {activeSprint?.name || "Tidak ada Sprint Aktif"} ({sprintDaysLeft} hari
@@ -652,7 +652,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </span>
                 <h3 className="text-2xl font-medium text-content-strong mt-1">{totalTasks}</h3>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
+              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-100">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
             </div>
@@ -680,7 +680,7 @@ export function DashboardView(props: DashboardViewProps) {
                   {nonEpicTasks.filter((t) => t.status !== "Done" && t.status !== "Selesai").length}
                 </h3>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100">
+              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 border border-blue-100">
                 <Activity className="w-5 h-5 animate-pulse" />
               </div>
             </div>
@@ -708,7 +708,7 @@ export function DashboardView(props: DashboardViewProps) {
                   {completedTasks.length}
                 </h3>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600 border border-indigo-100">
+              <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 border border-indigo-100">
                 <PackageOpen className="w-5 h-5" />
               </div>
             </div>
@@ -736,7 +736,7 @@ export function DashboardView(props: DashboardViewProps) {
                   {blockedTasks.length + overdueTasks.length}
                 </h3>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600 border border-rose-100">
+              <div className="w-10 h-10 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-600 border border-rose-100">
                 <ShieldAlert className="w-5 h-5" />
               </div>
             </div>
@@ -997,19 +997,19 @@ export function DashboardView(props: DashboardViewProps) {
                         let capacityBadge = null;
                         if (user.Active >= 5) {
                           capacityBadge = (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-bold bg-rose-500/15 text-rose-700 border border-rose-200">
                               ⚠️ Overload ({user.Active})
                             </span>
                           );
                         } else if (user.Active >= 3) {
                           capacityBadge = (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-medium bg-amber-500/15 text-amber-800 border border-amber-200">
                               ⚡ Heavy ({user.Active})
                             </span>
                           );
                         } else if (user.Active >= 1) {
                           capacityBadge = (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-medium bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-medium bg-emerald-500/15 text-emerald-800 border border-emerald-200">
                               ✅ Balanced ({user.Active})
                             </span>
                           );
@@ -1025,7 +1025,7 @@ export function DashboardView(props: DashboardViewProps) {
                           <tr key={idx} className="hover:bg-surface-sunken transition">
                             <td className="py-3 px-2">
                               <div className="flex items-center gap-2.5">
-                                <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-medium text-xs">
+                                <div className="w-7 h-7 rounded-full bg-indigo-500/15 text-indigo-700 flex items-center justify-center font-medium text-xs">
                                   {user.name.slice(0, 2).toUpperCase()}
                                 </div>
                                 <span className="font-medium text-content-strong ">
@@ -1096,7 +1096,7 @@ export function DashboardView(props: DashboardViewProps) {
                     >
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-xs sm:text-[10px] font-mono font-medium text-purple-600 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-100">
+                          <span className="text-xs sm:text-[10px] font-mono font-medium text-purple-600 bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-100">
                             {epic.key || "EPIC"}
                           </span>
                           <span className="font-medium text-content-strong truncate">
@@ -1139,7 +1139,7 @@ export function DashboardView(props: DashboardViewProps) {
                     Perbandingan estimasi jam pengerjaan vs jam terpakai
                   </p>
                 </div>
-                <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-100">
                   {timeTrackingStats.accuracy}% Accuracy Rate
                 </span>
               </div>
@@ -1311,7 +1311,7 @@ export function DashboardView(props: DashboardViewProps) {
                   <ShieldAlert className="w-4 h-4 text-rose-500" />
                   Blocked & Overdue Issues
                 </h3>
-                <span className="text-xs sm:text-[10px] font-medium text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">
+                <span className="text-xs sm:text-[10px] font-medium text-rose-600 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-100">
                   {blockedTasks.length + overdueTasks.length} Need Action
                 </span>
               </div>
@@ -1332,7 +1332,7 @@ export function DashboardView(props: DashboardViewProps) {
                           {issue.key}
                         </span>
                         {issue.isBlocked && (
-                          <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-rose-600 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-100">
+                          <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-rose-600 bg-rose-500/10 px-1.5 py-0.2 rounded border border-rose-100">
                             BLOCKED
                           </span>
                         )}

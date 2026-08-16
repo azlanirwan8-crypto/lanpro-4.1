@@ -26,17 +26,17 @@ export const HeaderNetworkStatus: React.FC<{
           {latencyText}
         </span>
         {latencyStatus === "good" && (
-          <span className="text-xs sm:text-[11px] sm:text-[9px] bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded font-medium tracking-wider">
+          <span className="text-xs sm:text-[11px] sm:text-[9px] bg-emerald-500/10 text-emerald-600 px-1.5 py-0.5 rounded font-medium tracking-wider">
             Cepat
           </span>
         )}
         {latencyStatus === "warning" && (
-          <span className="text-xs sm:text-[11px] sm:text-[9px] bg-amber-50 text-amber-600 px-1.5 py-0.5 rounded font-medium tracking-wider">
+          <span className="text-xs sm:text-[11px] sm:text-[9px] bg-amber-500/10 text-amber-600 px-1.5 py-0.5 rounded font-medium tracking-wider">
             Sedang
           </span>
         )}
         {latencyStatus === "poor" && (
-          <span className="text-xs sm:text-[11px] sm:text-[9px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded font-medium tracking-wider">
+          <span className="text-xs sm:text-[11px] sm:text-[9px] bg-rose-500/10 text-rose-600 px-1.5 py-0.5 rounded font-medium tracking-wider">
             Lambat
           </span>
         )}

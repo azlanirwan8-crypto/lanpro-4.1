@@ -3509,7 +3509,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               <div className="relative" ref={notificationsRef}>
                 <button
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                  className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-violet-600 hover:bg-violet-50 rounded-full transition-all relative"
+                  className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-violet-600 hover:bg-violet-500/10 rounded-full transition-all relative"
                   title="Notifikasi"
                 >
                   <Bell className="w-5 h-5" />
@@ -3593,7 +3593,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => setIsTaskDetailModalOpen(false)}
-                              className="h-8 w-8 rounded-md bg-surface-sunken border border-border-subtle/80 text-content-secondary hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-100 flex items-center justify-center transition-all shadow-2xs"
+                              className="h-8 w-8 rounded-md bg-surface-sunken border border-border-subtle/80 text-content-secondary hover:bg-indigo-500/10 hover:text-indigo-600 hover:border-indigo-100 flex items-center justify-center transition-all shadow-2xs"
                               title="Back"
                             >
                               <ArrowLeft className="w-4 h-4" />
@@ -3602,7 +3602,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                               <h3 className="text-sm font-medium text-content-strong tracking-tight">
                                 Issue Details
                               </h3>
-                              <span className="text-xs font-medium text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100/70">
+                              <span className="text-xs font-medium text-indigo-700 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-100/70">
                                 {selectedTaskForDetail?.key || "TASK"}
                               </span>
                             </div>
@@ -3723,7 +3723,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
             </React.Fragment>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8 text-center">
-              <div className="w-16 h-16 rounded-xl bg-indigo-100/80 border border-indigo-200 flex items-center justify-center text-indigo-600 mb-4 shadow-soft">
+              <div className="w-16 h-16 rounded-xl bg-indigo-500/15 border border-indigo-200 flex items-center justify-center text-indigo-600 mb-4 shadow-soft">
                 <FolderKanban className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-medium text-content-strong mb-2">

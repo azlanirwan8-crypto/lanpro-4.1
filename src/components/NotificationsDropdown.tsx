@@ -59,7 +59,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
             <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-surface">
               <h3 className="font-medium text-content text-[16px]">Notification</h3>
               <div className="flex items-center gap-2.5">
-                <span className="bg-violet-100 text-violet-700 text-xs font-medium px-2.5 py-1 rounded-md">
+                <span className="bg-violet-500/15 text-violet-700 text-xs font-medium px-2.5 py-1 rounded-md">
                   {notifications.filter((n) => !n.read).length} New
                 </span>
                 <button
@@ -157,7 +157,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                       >
                         {/* Left Icon - Compact & circular */}
                         <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${parsed.iconBgClass || "bg-violet-50 text-violet-600"}`}
+                          className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${parsed.iconBgClass || "bg-violet-500/10 text-violet-600"}`}
                         >
                           {parsed.icon}
                         </div>

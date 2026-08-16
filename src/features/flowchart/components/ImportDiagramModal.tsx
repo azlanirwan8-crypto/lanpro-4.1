@@ -90,7 +90,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
               className={cn(
                 "p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5",
                 importType === "drawio"
-                  ? "bg-orange-50/70 border-orange-200 text-orange-800 ring-2 ring-orange-500/20 font-medium"
+                  ? "bg-orange-500/10 border-orange-200 text-orange-800 ring-2 ring-orange-500/20 font-medium"
                   : "border-border-subtle hover:bg-surface-sunken  hover:border-border-subtle font-medium"
               )}
             >
@@ -113,7 +113,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
               className={cn(
                 "p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5",
                 importType === "miro"
-                  ? "bg-amber-50/70 border-amber-200 text-amber-800 ring-2 ring-amber-500/20 font-medium"
+                  ? "bg-amber-500/10 border-amber-200 text-amber-800 ring-2 ring-amber-500/20 font-medium"
                   : "border-border-subtle hover:bg-surface-sunken  hover:border-border-subtle font-medium"
               )}
             >
@@ -136,7 +136,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
               className={cn(
                 "p-3 rounded-xl border text-center transition-all flex flex-col items-center gap-1.5",
                 importType === "native"
-                  ? "bg-indigo-50/70 border-indigo-200 text-indigo-800 ring-2 ring-indigo-500/20 font-medium"
+                  ? "bg-indigo-500/10 border-indigo-200 text-indigo-800 ring-2 ring-indigo-500/20 font-medium"
                   : "border-border-subtle hover:bg-surface-sunken  hover:border-border-subtle font-medium"
               )}
             >
@@ -209,9 +209,9 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             className={cn(
               "border-2 border-dashed rounded-xl p-6 transition-all cursor-pointer flex flex-col items-center justify-center gap-3 min-h-[140px]",
               dragOverImport
-                ? "border-violet-500 bg-violet-50 text-violet-700"
+                ? "border-violet-500 bg-violet-500/10 text-violet-700"
                 : parsedImportData
-                  ? "border-emerald-300 bg-emerald-50/10 text-emerald-800 animate-pulse"
+                  ? "border-emerald-300 bg-emerald-500/10 text-emerald-800 animate-pulse"
                   : "border-border-subtle hover:border-indigo-400 hover:bg-surface-sunken text-content-muted font-medium"
             )}
           >
@@ -250,7 +250,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
 
           {/* Analytical preview result of parser */}
           {parsedImportData && (
-            <div className="bg-emerald-50/60 border border-emerald-200 rounded-xl p-4 space-y-2 text-xs sm:text-[11px] animate-fade-in text-emerald-900 leading-relaxed font-sans font-medium">
+            <div className="bg-emerald-500/10 border border-emerald-200 rounded-xl p-4 space-y-2 text-xs sm:text-[11px] animate-fade-in text-emerald-900 leading-relaxed font-sans font-medium">
               <span className="font-medium uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-emerald-800 flex items-center gap-1.5 shadow-soft bg-surface p-1 px-2.5 w-fit rounded-full border border-emerald-100">
                 🔍 Ulasan Kesiapan Diagram
               </span>
@@ -307,7 +307,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
               <button
                 type="button"
                 onClick={handleApplyImportMerge}
-                className="p-2 px-3 bg-surface hover:bg-indigo-50 border border-indigo-200 hover:border-indigo-300 text-indigo-700 hover:text-indigo-900 font-medium rounded-xl transition-all text-xs sm:text-[11px] shadow-soft flex items-center gap-1 active:scale-95"
+                className="p-2 px-3 bg-surface hover:bg-indigo-500/10 border border-indigo-200 hover:border-indigo-300 text-indigo-700 hover:text-indigo-900 font-medium rounded-xl transition-all text-xs sm:text-[11px] shadow-soft flex items-center gap-1 active:scale-95"
               >
                 <span>➕ Gabungkan ke Kanvas</span>
               </button>

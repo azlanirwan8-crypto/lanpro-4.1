@@ -1088,7 +1088,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       onClick={() => setSimulationEnabled(!simulationEnabled)}
                       className={`px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider transition-colors ${
                         simulationEnabled
-                          ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                          ? "bg-emerald-500/15 text-emerald-700 hover:bg-emerald-200"
                           : "bg-surface-strong text-content-secondary hover:bg-surface-marker"
                       }`}
                     >
@@ -1129,9 +1129,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                               "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?auto=format&fit=crop&w=600&q=85"
                             )
                           }
-                          className="flex items-center gap-2 p-2 bg-surface border border-border-subtle rounded-xl text-left hover:border-orange-500 hover:bg-orange-50/10 transition-all group"
+                          className="flex items-center gap-2 p-2 bg-surface border border-border-subtle rounded-xl text-left hover:border-orange-500 hover:bg-orange-500/10 transition-all group"
                         >
-                          <span className="p-1.5 bg-orange-100 text-orange-600 rounded-lg group-hover:bg-orange-600 group-hover:text-content-inverse transition-all shrink-0">
+                          <span className="p-1.5 bg-orange-500/15 text-orange-600 rounded-lg group-hover:bg-orange-600 group-hover:text-content-inverse transition-all shrink-0">
                             <Image className="w-3.5 h-3.5" />
                           </span>
                           <div className="min-w-0">
@@ -1154,9 +1154,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                               "data:text/plain;base64,U0RMQyBEYXRhYmFzZSBBcmNoaXRlY3R1cmUgQmx1ZXByaW50OiAxLiBVc2VycyAyLiBUYXNrcyAzLiBTcHJpbnRzIDQuIEF1ZGl0TG9ncyA1LiBNZXNzYWdlcy4gR2VtaW5pIEFJIEFzc2lzdGFudCBjb25maWd1cmVkLg=="
                             )
                           }
-                          className="flex items-center gap-2 p-2 bg-surface border border-border-subtle rounded-xl text-left hover:border-orange-500 hover:bg-orange-50/10 transition-all group"
+                          className="flex items-center gap-2 p-2 bg-surface border border-border-subtle rounded-xl text-left hover:border-orange-500 hover:bg-orange-500/10 transition-all group"
                         >
-                          <span className="p-1.5 bg-amber-100 text-amber-600 rounded-lg group-hover:bg-amber-600 group-hover:text-content-inverse transition-all shrink-0">
+                          <span className="p-1.5 bg-amber-500/15 text-amber-600 rounded-lg group-hover:bg-amber-600 group-hover:text-content-inverse transition-all shrink-0">
                             <FileText className="w-3.5 h-3.5" />
                           </span>
                           <div className="min-w-0">
@@ -1201,7 +1201,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     onClick={() => setIsAttachmentMenuOpen(!isAttachmentMenuOpen)}
                     className={`p-2 rounded-xl transition-all border shrink-0 flex items-center justify-center ${
                       isAttachmentMenuOpen
-                        ? "bg-orange-50 border-orange-200 text-orange-600"
+                        ? "bg-orange-500/10 border-orange-200 text-orange-600"
                         : "bg-surface-sunken border-border-subtle text-content-muted hover:bg-surface-muted hover:text-content-strong"
                     }`}
                     title="Sisipkan file, gambar, atau mockup"

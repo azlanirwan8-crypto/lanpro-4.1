@@ -146,7 +146,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                             setSuiteEditName(cleanTitle);
                             setSuiteEditAssignedTo(suite.assignedTo || "");
                           }}
-                          className="text-content-subtle hover:text-primary transition-all p-1 bg-surface-sunken hover:bg-indigo-50 rounded-md border border-border-faint"
+                          className="text-content-subtle hover:text-primary transition-all p-1 bg-surface-sunken hover:bg-indigo-500/10 rounded-md border border-border-faint"
                           title="Ubah Dokumen"
                         >
                           <Edit3 className="w-3 h-3" />
@@ -158,7 +158,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                             e.stopPropagation();
                             setSuiteToDelete(suite);
                           }}
-                          className="text-content-subtle hover:text-rose-500 transition-all p-1 bg-surface-sunken hover:bg-rose-50 rounded-md border border-border-faint"
+                          className="text-content-subtle hover:text-rose-500 transition-all p-1 bg-surface-sunken hover:bg-rose-500/10 rounded-md border border-border-faint"
                           title="Hapus Dokumen"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -172,10 +172,10 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                     <span
                       className={`px-2 py-0.2 text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase rounded-full tracking-wider ${
                         suite.phase === "SIT"
-                          ? "bg-amber-50 text-amber-700 border border-amber-200/60"
+                          ? "bg-amber-500/10 text-amber-700 border border-amber-200/60"
                           : suite.phase === "UAT"
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
-                            : "bg-purple-50 text-purple-700 border border-purple-200/60"
+                            ? "bg-emerald-500/10 text-emerald-700 border border-emerald-200/60"
+                            : "bg-purple-500/10 text-purple-700 border border-purple-200/60"
                       }`}
                     >
                       {suite.phase}
@@ -210,7 +210,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                         }}
                         className={`flex items-center gap-1 px-2 py-0.5 bg-surface-sunken rounded-md border border-border-subtle/80 transition-all ${
                           canUpdate
-                            ? "cursor-pointer hover:bg-indigo-50/80 hover:border-primary/50"
+                            ? "cursor-pointer hover:bg-indigo-500/10 hover:border-primary/50"
                             : "cursor-default"
                         }`}
                         title={canUpdate ? "Assign / Ubah PIC Modul" : "PIC Modul Terdaftar"}
@@ -258,9 +258,9 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                                 e.stopPropagation();
                                 handleUpdateSuitePic(suite.id, "");
                               }}
-                              className={`w-full text-left px-3 py-1.5 text-xs font-medium hover:bg-indigo-50 hover:text-primary transition-colors flex items-center justify-between ${
+                              className={`w-full text-left px-3 py-1.5 text-xs font-medium hover:bg-indigo-500/10 hover:text-primary transition-colors flex items-center justify-between ${
                                 !suite.assignedTo
-                                  ? "bg-indigo-50/60 text-primary"
+                                  ? "bg-indigo-500/10 text-primary"
                                   : "text-content-body"
                               }`}
                             >
@@ -280,9 +280,9 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                                       e.stopPropagation();
                                       handleUpdateSuitePic(suite.id, mId);
                                     }}
-                                    className={`w-full text-left px-3 py-1.5 text-xs font-medium hover:bg-indigo-50 hover:text-primary transition-colors flex items-center justify-between gap-2 ${
+                                    className={`w-full text-left px-3 py-1.5 text-xs font-medium hover:bg-indigo-500/10 hover:text-primary transition-colors flex items-center justify-between gap-2 ${
                                       isSelected
-                                        ? "bg-indigo-50/60 text-primary"
+                                        ? "bg-indigo-500/10 text-primary"
                                         : "text-content-body"
                                     }`}
                                   >

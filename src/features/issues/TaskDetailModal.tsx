@@ -53,7 +53,7 @@ const Button = ({
     secondary:
       "bg-surface text-content-body border-border-subtle/80 hover:bg-surface-sunken shadow-xs",
     ghost: "bg-transparent text-content-muted hover:bg-surface-muted border-transparent",
-    danger: "bg-red-50 text-red-600 border-red-100 hover:bg-red-100 shadow-xs",
+    danger: "bg-red-500/10 text-red-600 border-red-100 hover:bg-red-500/15 shadow-xs",
   };
 
   const sizes = {
@@ -400,7 +400,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       new Date(task.endDate).getTime() > new Date(parentEpic.endDate).getTime()));
                 if (!isEpicExceeded) return null;
                 return (
-                  <div className="p-3.5 bg-amber-50/80 border border-amber-200 rounded-lg flex items-start gap-2.5 shadow-2xs">
+                  <div className="p-3.5 bg-amber-500/10 border border-amber-200 rounded-lg flex items-start gap-2.5 shadow-2xs">
                     <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                     <div className="text-xs text-amber-900 space-y-0.5">
                       <p className="font-medium uppercase tracking-wider text-amber-800 text-xs sm:text-[11px]">
@@ -590,7 +590,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       href={task.figmaUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-xs sm:text-[10px] font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded-lg hover:bg-purple-100 transition-all flex items-center gap-1"
+                      className="text-xs sm:text-[10px] font-medium text-purple-600 bg-purple-500/10 px-2 py-1 rounded-lg hover:bg-purple-500/15 transition-all flex items-center gap-1"
                     >
                       <ExternalLink className="w-3 h-3" />
                       Open Original
@@ -643,8 +643,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                           className={cn(
                             "p-2 rounded-xl shrink-0",
                             att.type === "link"
-                              ? "bg-blue-50 text-blue-500"
-                              : "bg-emerald-50 text-emerald-500"
+                              ? "bg-blue-500/10 text-blue-500"
+                              : "bg-emerald-500/10 text-emerald-500"
                           )}
                         >
                           {att.type === "link" ? (
@@ -666,7 +666,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       {isEditable && (
                         <button
                           onClick={() => handleRemoveAttachment?.(att.id)}
-                          className="p-1.5 text-content-subtle hover:text-red-500 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                          className="p-1.5 text-content-subtle hover:text-red-500 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all shrink-0"
                           title="Delete"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -685,7 +685,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="p-4 bg-indigo-50/30 rounded-xl border border-indigo-100/50 space-y-3"
+                    className="p-4 bg-indigo-500/10 rounded-xl border border-indigo-100/50 space-y-3"
                   >
                     <input
                       placeholder="Resource Title"
@@ -748,12 +748,12 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         className="p-3 bg-surface rounded-xl border border-border-faint shadow-soft space-y-2 group/link relative"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase text-indigo-500 bg-indigo-50 px-1.5 py-0.5 rounded tracking-widest">
+                          <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase text-indigo-500 bg-indigo-500/10 px-1.5 py-0.5 rounded tracking-widest">
                             {link.relationType.replace(/_/g, " ")}
                           </span>
                           <button
                             onClick={() => handleRemoveLinkedTask(task.id, link.id)}
-                            className="text-content-subtle hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors opacity-0 group-hover/link:opacity-100"
+                            className="text-content-subtle hover:text-red-500 hover:bg-red-500/10 p-1.5 rounded-lg transition-colors opacity-0 group-hover/link:opacity-100"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -775,7 +775,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="p-4 bg-indigo-50/30 rounded-xl border border-indigo-100/50 space-y-3"
+                    className="p-4 bg-indigo-500/10 rounded-xl border border-indigo-100/50 space-y-3"
                   >
                     <StyledDropdown
                       value={taskLinkRelation}
@@ -843,7 +843,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       <div
                         key={st.id ? `${st.id}-${stIdx}` : `sub-${stIdx}`}
                         className={cn(
-                          "flex items-center gap-4 p-3 bg-surface hover:bg-indigo-50/30 rounded-xl group border border-border-faint transition-all shadow-soft",
+                          "flex items-center gap-4 p-3 bg-surface hover:bg-indigo-500/10 rounded-xl group border border-border-faint transition-all shadow-soft",
                           isUpdatingTask?.[st.id]
                             ? "opacity-50 pointer-events-none"
                             : "hover:border-indigo-100"
@@ -1035,7 +1035,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                 .map((member) => (
                                   <button
                                     key={member.uid}
-                                    className="w-full text-left px-4 py-3 hover:bg-indigo-50 flex items-center gap-3 focus:outline-none focus:bg-indigo-50 transition-all font-medium text-content-secondary"
+                                    className="w-full text-left px-4 py-3 hover:bg-indigo-500/10 flex items-center gap-3 focus:outline-none focus:bg-indigo-500/10 transition-all font-medium text-content-secondary"
                                     onClick={() => handleSelectMention(member?.username ?? "")}
                                   >
                                     <UserAvatar
@@ -1105,7 +1105,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                                   part.startsWith("@") ? (
                                     <span
                                       key={i}
-                                      className="text-indigo-600 font-medium bg-indigo-50 px-1 rounded shadow-2xs border border-indigo-100"
+                                      className="text-indigo-600 font-medium bg-indigo-500/10 px-1 rounded shadow-2xs border border-indigo-100"
                                     >
                                       {part}
                                     </span>
@@ -1336,7 +1336,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     className={cn(
                       "h-[38px] w-full flex items-center justify-between px-3 rounded-md border transition-all text-xs font-medium uppercase tracking-wider shadow-2xs",
                       task.isBlocked
-                        ? "bg-red-50 border-red-200 text-red-600 shadow-xs"
+                        ? "bg-red-500/10 border-red-200 text-red-600 shadow-xs"
                         : "bg-surface border-border-subtle/80 text-content-muted hover:border-red-200 hover:text-red-500",
                       blockMember && "pointer-events-none opacity-80"
                     )}
@@ -1526,7 +1526,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       onSave={(val: any) =>
                         updateTaskField(task.id, "loggedHours", parseFloat(val) || 0)
                       }
-                      className="h-[38px] w-full text-xs font-medium bg-indigo-50/50 border border-indigo-100/80 hover:border-indigo-200 rounded-md px-3 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-indigo-700"
+                      className="h-[38px] w-full text-xs font-medium bg-indigo-500/10 border border-indigo-100/80 hover:border-indigo-200 rounded-md px-3 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-indigo-700"
                       disabled={!isEditable}
                       placeholder="e.g. 2.5"
                     />
@@ -1553,7 +1553,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 {canDelete && (
                   <div className="pt-3">
                     <button
-                      className="w-full h-9 text-xs font-medium text-red-600 bg-red-50/70 hover:bg-red-100/80 border border-red-200/80 rounded-md transition-all flex items-center justify-center gap-1.5 shadow-2xs"
+                      className="w-full h-9 text-xs font-medium text-red-600 bg-red-500/10 hover:bg-red-500/15 border border-red-200/80 rounded-md transition-all flex items-center justify-center gap-1.5 shadow-2xs"
                       onClick={async () => {
                         const isConfirmed = await confirmDeleteAlert(
                           "Hapus Task / Issue Permanen?",

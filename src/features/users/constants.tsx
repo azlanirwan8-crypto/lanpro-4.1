@@ -91,25 +91,25 @@ export const ROLE_DESCRIPTIONS: Partial<
 > = {
   admin: {
     label: "Administrator",
-    badgeColor: "bg-rose-50 border-rose-200 text-rose-700",
+    badgeColor: "bg-rose-500/10 border-rose-200 text-rose-700",
     icon: <ShieldCheck className="w-4 h-4 text-rose-600 shrink-0" />,
     desc: "Bypasses all control gates. Granted complete read, create, update, and delete access in all modules, settings, and team workspaces.",
   },
   head: {
     label: "Department Head",
-    badgeColor: "bg-purple-50 border-purple-200 text-purple-700",
+    badgeColor: "bg-purple-500/10 border-purple-200 text-purple-700",
     icon: <Award className="w-4 h-4 text-purple-600 shrink-0" />,
     desc: "Supervises whole business units. Can browse metrics, collaborate on documentation, review audit screens, and inspect operations.",
   },
   manager: {
     label: "Project Manager",
-    badgeColor: "bg-blue-50 border-blue-200 text-blue-700",
+    badgeColor: "bg-blue-500/10 border-blue-200 text-blue-700",
     icon: <UserCog className="w-4 h-4 text-blue-600 shrink-0" />,
     desc: "Orchestrated to run specific project fields, draft task specs, spin up sprints, review PR checklists, and direct developer assignments.",
   },
   user: {
     label: "Standard User",
-    badgeColor: "bg-indigo-50 border-indigo-200 text-indigo-700",
+    badgeColor: "bg-indigo-500/10 border-indigo-200 text-indigo-700",
     icon: <Users className="w-4 h-4 text-indigo-600 shrink-0" />,
     desc: "The core collaborator. Empowered to write issues, move card lanes, collaborate on discussion points, and assign items to their plate.",
   },

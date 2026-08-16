@@ -2555,7 +2555,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         </button>
                         <button
                           onClick={(e) => handleDeleteFlowchart(currentFlowMetadata.id, e)}
-                          className="p-1.5 bg-surface hover:bg-rose-50 text-content-secondary hover:text-rose-600 rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"
+                          className="p-1.5 bg-surface hover:bg-rose-500/10 text-content-secondary hover:text-rose-600 rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"
                           title="Delete document"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -2575,17 +2575,17 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       </span>
                     )}
                     {currentFlowMetadata?.category === "Panduan" && (
-                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200/80 rounded-full">
+                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-blue-500/10 text-blue-700 border border-blue-200/80 rounded-full">
                         📖 Panduan
                       </span>
                     )}
                     {currentFlowMetadata?.category === "Laporan" && (
-                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-full">
+                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-200/80 rounded-full">
                         📊 Laporan
                       </span>
                     )}
                     {!currentFlowMetadata?.category && (
-                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-violet-50 text-violet-700 border border-violet-200/80 rounded-full">
+                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-violet-500/10 text-violet-700 border border-violet-200/80 rounded-full">
                         ⚙️ Umum
                       </span>
                     )}
@@ -2610,7 +2610,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       <>
                         <span className="text-content-subtle">•</span>
                         <span
-                          className="text-xs sm:text-[10px] font-medium bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full truncate max-w-[180px]"
+                          className="text-xs sm:text-[10px] font-medium bg-indigo-500/10 border border-indigo-100 px-2.5 py-0.5 rounded-full truncate max-w-[180px]"
                           title={linkedEpic.title}
                         >
                           🎯 Epic: {linkedEpic.title}
@@ -2663,7 +2663,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                   className="p-4 rounded-xl border border-border-subtle bg-surface flex flex-col gap-4 shadow-soft hover:shadow hover:border-violet-300 transition-all group"
                                 >
                                   <div className="flex items-start justify-between gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+                                    <div className="w-10 h-10 rounded-lg bg-violet-500/10 text-violet-600 flex items-center justify-center shrink-0">
                                       <FileText className="w-5 h-5" />
                                     </div>
                                     <div className="flex flex-col flex-1 min-w-0">
@@ -2684,7 +2684,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                     <a
                                       href={doc.fileData}
                                       download={doc.fileName}
-                                      className="flex items-center gap-2 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors"
+                                      className="flex items-center gap-2 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-500/10 hover:bg-indigo-500/15 px-3 py-1.5 rounded-lg transition-colors"
                                     >
                                       <Download className="w-3.5 h-3.5" /> Download
                                     </a>
@@ -2769,7 +2769,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         {/* Quick Sticky Note Adder */}
                         <button
                           onClick={() => handleAddNewNode("sticky", "yellow")}
-                          className="p-2 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-lg transition-all flex flex-col items-center shrink-0 w-10"
+                          className="p-2 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-200 text-amber-700 rounded-lg transition-all flex flex-col items-center shrink-0 w-10"
                           title="Quick Yellow Sticky Note"
                         >
                           <StickyNote className="w-4 h-4 text-amber-500 fill-amber-300" />
@@ -3102,7 +3102,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className={cn(
                               "p-1 px-2 rounded-xl transition-all flex items-center gap-1 active:scale-95 text-xs sm:text-[10px] font-medium",
                               isSimulating
-                                ? "bg-red-50 text-red-600 hover:bg-red-100 border  shadow-soft"
+                                ? "bg-red-500/10 text-red-600 hover:bg-red-500/15 border  shadow-soft"
                                 : "text-content-body hover:bg-surface-muted hover:text-emerald-600"
                             )}
                             title={
@@ -3169,7 +3169,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               <Save className="w-3.5 h-3.5" />
                             </button>
                           ) : (
-                            <div className="px-2.5 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl flex items-center gap-1 text-xs sm:text-[10px] font-medium shadow-2xs">
+                            <div className="px-2.5 py-1.5 bg-amber-500/10 text-amber-700 border border-amber-200 rounded-xl flex items-center gap-1 text-xs sm:text-[10px] font-medium shadow-2xs">
                               <Eye className="w-3.5 h-3.5 text-amber-500" />
                               <span className="hidden sm:inline">Mode Baca Saja</span>
                             </div>
@@ -3180,7 +3180,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           {/* Clear Canvas */}
                           <button
                             onClick={handleClearWhiteboard}
-                            className="p-2 text-content-subtle hover:bg-rose-50 hover:text-rose-600 rounded-xl transition-all flex items-center justify-center active:scale-95"
+                            className="p-2 text-content-subtle hover:bg-rose-500/10 hover:text-rose-600 rounded-xl transition-all flex items-center justify-center active:scale-95"
                             title="Bersihkan Semua Bentuk dan Garis Kanvas"
                           >
                             <RefreshCw className="w-3.5 h-3.5 text-rose-500" />
@@ -3221,7 +3221,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className={cn(
                               "p-2 rounded-xl transition-all flex items-center justify-center",
                               isKeyboardHelpOpen
-                                ? "bg-amber-50 text-amber-600 border "
+                                ? "bg-amber-500/10 text-amber-600 border "
                                 : "text-content-muted hover:bg-surface-muted"
                             )}
                             title="Bantuan Navigasi & Pintasan Keyboard"
@@ -3335,7 +3335,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               </div>
                               <button
                                 onClick={handleDeleteSelected}
-                                className="p-2 bg-rose-50 rounded-lg hover:bg-rose-100 text-rose-600 transition-all active:scale-95 shadow-soft border"
+                                className="p-2 bg-rose-500/10 rounded-lg hover:bg-rose-500/15 text-rose-600 transition-all active:scale-95 shadow-soft border"
                                 title="Hapus shape"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -3443,7 +3443,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                       className={cn(
                                         "p-1 rounded font-medium text-xs sm:text-[10px] text-center border capitalize transition-all",
                                         currentVal === st.val
-                                          ? "bg-violet-50 text-violet-700 border-violet-200"
+                                          ? "bg-violet-500/10 text-violet-700 border-violet-200"
                                           : "bg-surface-sunken text-content-secondary border-border-subtle hover:bg-surface-muted"
                                       )}
                                     >
@@ -3559,7 +3559,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             <button
                               onClick={handleDeleteSelected}
-                              className="w-full p-2 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
+                              className="w-full p-2 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-200 text-rose-700 font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
                             >
                               <Trash2 className="w-3.5 h-3.5" /> Putuskan Alur
                             </button>
@@ -3830,7 +3830,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   </p>
 
                   {uploadDocFile && (
-                    <div className="mt-3 p-2.5 bg-indigo-50/80 border border-indigo-100 rounded-md w-full flex items-center justify-between">
+                    <div className="mt-3 p-2.5 bg-indigo-500/10 border border-indigo-100 rounded-md w-full flex items-center justify-between">
                       <div className="flex flex-col min-w-0">
                         <span className="text-xs font-medium text-primary truncate">
                           {uploadDocFile.name}

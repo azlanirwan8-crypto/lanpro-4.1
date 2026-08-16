@@ -93,7 +93,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                 variant === "card"
                   ? "group bg-surface p-3 rounded-md border border-border-subtle/80 shadow-2xs cursor-pointer hover:border-primary/40 hover:shadow-xs"
                   : "group bg-surface flex items-center justify-between p-2.5 px-3 rounded-md border border-border-subtle/80 shadow-2xs cursor-pointer hover:bg-surface-sunken/70 hover:border-primary/40",
-                task.isBlocked && "ring-1 ring-red-500/50 bg-red-50/10 border-red-200",
+                task.isBlocked && "ring-1 ring-red-500/50 bg-red-500/10 border-red-200",
                 snapshot.isDragging &&
                   "shadow-xl ring-2 ring-primary/20 scale-[1.02] z-50 bg-surface border-primary"
               )}
@@ -102,7 +102,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                 <div className="flex flex-col gap-1.5">
                   <div className="flex justify-between items-center">
                     <div className="flex gap-2 items-center">
-                      <span className="text-xs sm:text-[11px] font-mono font-semibold text-primary bg-indigo-50/80 px-1.5 py-0.5 rounded-md border border-indigo-200/60">
+                      <span className="text-xs sm:text-[11px] font-mono font-semibold text-primary bg-indigo-500/10 px-1.5 py-0.5 rounded-md border border-indigo-200/60">
                         {task.key}
                       </span>
                       {task.priority && (
@@ -146,7 +146,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                           className={cn(
                             "flex items-center gap-1 text-xs sm:text-[10px] font-medium px-1.5 py-0.5 rounded-md",
                             ensureDate(task.dueDate) < new Date(new Date().setHours(0, 0, 0, 0))
-                              ? "bg-red-50 text-red-600 border border-red-100"
+                              ? "bg-red-500/10 text-red-600 border border-red-100"
                               : "bg-surface-sunken text-content-muted border border-border-subtle/60"
                           )}
                         >
@@ -155,7 +155,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                         </div>
                       )}
                     </div>
-                    <span className="text-xs sm:text-[10px] font-medium text-primary bg-indigo-50/80 px-2 py-0.5 rounded-md border border-indigo-200/60">
+                    <span className="text-xs sm:text-[10px] font-medium text-primary bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-200/60">
                       {task.status}
                     </span>
                   </div>
@@ -163,7 +163,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
               ) : (
                 <div className="flex items-center gap-3 w-full">
                   <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                    <span className="text-xs sm:text-[11px] font-mono font-semibold text-primary bg-indigo-50/80 px-1.5 py-0.5 rounded-md border border-indigo-200/60 shrink-0">
+                    <span className="text-xs sm:text-[11px] font-mono font-semibold text-primary bg-indigo-500/10 px-1.5 py-0.5 rounded-md border border-indigo-200/60 shrink-0">
                       {task.key}
                     </span>
                     <h4 className="text-xs font-medium text-content-strong truncate">
@@ -176,7 +176,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                         className={cn(
                           "flex items-center gap-1 text-xs sm:text-[10px] font-medium px-1.5 py-0.5 rounded-md border",
                           ensureDate(task.dueDate) < new Date(new Date().setHours(0, 0, 0, 0))
-                            ? "bg-red-50 text-red-600 border-red-100"
+                            ? "bg-red-500/10 text-red-600 border-red-100"
                             : "bg-surface-sunken text-content-muted border-border-subtle/60"
                         )}
                       >

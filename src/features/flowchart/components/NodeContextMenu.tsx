@@ -97,7 +97,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
           onEditProperties(nodeId);
           onClose();
         }}
-        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-content-body hover:text-violet-600 hover:bg-violet-50 transition-colors text-left"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-content-body hover:text-violet-600 hover:bg-violet-500/10 transition-colors text-left"
       >
         <Edit3 className="w-3.5 h-3.5 text-content-subtle group-hover:text-violet-500" />
         <span>Sunting Properti</span>
@@ -109,7 +109,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
           onDuplicate(nodeId);
           onClose();
         }}
-        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-content-body hover:text-indigo-600 hover:bg-indigo-50 transition-colors text-left"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-content-body hover:text-indigo-600 hover:bg-indigo-500/10 transition-colors text-left"
       >
         <Copy className="w-3.5 h-3.5 text-content-subtle" />
         <span>Duplikat Komponen</span>
@@ -159,7 +159,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
           onDelete(nodeId);
           onClose();
         }}
-        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-rose-600 hover:bg-rose-50 transition-colors text-left"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-rose-600 hover:bg-rose-500/10 transition-colors text-left"
       >
         <Trash2 className="w-3.5 h-3.5 text-rose-500" />
         <span>Hapus Komponen</span>

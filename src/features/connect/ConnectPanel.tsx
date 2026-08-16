@@ -93,7 +93,7 @@ export const ConnectPanel = () => {
       <div className="flex-1 overflow-auto p-4 md:p-5 relative z-10 w-full space-y-4">
         {/* Help Banner - Velzon Style */}
         <div className="bg-surface p-4 rounded-lg border border-emerald-200/80 shadow-2xs flex items-start gap-3">
-          <div className="bg-emerald-100 text-emerald-700 p-2 rounded-md mt-0.5 shrink-0">
+          <div className="bg-emerald-500/15 text-emerald-700 p-2 rounded-md mt-0.5 shrink-0">
             <CheckCircle2 className="w-4 h-4" />
           </div>
           <div>
@@ -153,7 +153,7 @@ export const ConnectPanel = () => {
                 onChange={handleChange}
                 className="w-full bg-surface border border-border-subtle rounded-md px-3 py-2 text-xs text-content-body font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
-              <div className="bg-amber-50/80 rounded-md p-3 border border-amber-200 mt-2 flex gap-2.5 text-amber-800 text-xs">
+              <div className="bg-amber-500/10 rounded-md p-3 border border-amber-200 mt-2 flex gap-2.5 text-amber-800 text-xs">
                 <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <p className="font-medium text-amber-900">
@@ -162,7 +162,7 @@ export const ConnectPanel = () => {
                   <p className="leading-relaxed">
                     Error ini terjadi karena salah ketik (typo) nama database. Konfigurasi default
                     MySQL di Google Cloud / Aiven biasanya menggunakan nama database{" "}
-                    <strong className="font-medium underline text-amber-900 bg-amber-100 px-1 py-0.5 rounded">
+                    <strong className="font-medium underline text-amber-900 bg-amber-500/15 px-1 py-0.5 rounded">
                       defaultdb
                     </strong>
                     .
@@ -206,7 +206,7 @@ export const ConnectPanel = () => {
 
             {testResult.status !== "idle" && (
               <div
-                className={`p-3 rounded-md text-xs font-medium border ${testResult.status === "success" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-red-50 text-red-700 border-red-200"}`}
+                className={`p-3 rounded-md text-xs font-medium border ${testResult.status === "success" ? "bg-emerald-500/10 text-emerald-700 border-emerald-200" : "bg-red-500/10 text-red-700 border-red-200"}`}
               >
                 {testResult.message}
               </div>

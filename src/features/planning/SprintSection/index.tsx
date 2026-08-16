@@ -97,11 +97,11 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                         "text-xs sm:text-[10px] font-bold uppercase px-2 py-0.5 rounded-md border shrink-0 whitespace-nowrap",
                         sprint.status === "active"
                           ? isOverdue
-                            ? "bg-red-50 text-red-700 border-red-200"
-                            : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                            ? "bg-red-500/10 text-red-700 border-red-200"
+                            : "bg-emerald-500/10 text-emerald-700 border-emerald-200"
                           : sprint.status === "planned"
                             ? "bg-surface-muted text-content-secondary border-border-subtle/60"
-                            : "bg-blue-50 text-blue-700 border-blue-100"
+                            : "bg-blue-500/10 text-blue-700 border-blue-100"
                       )}
                     >
                       {sprint.status === "active"
@@ -210,7 +210,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                             e.stopPropagation();
                             handleDeleteSprint(sprint.id);
                           }}
-                          className="p-1.5 text-content-subtle hover:text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
+                          className="p-1.5 text-content-subtle hover:text-red-600 hover:bg-red-500/10 rounded-md transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -287,7 +287,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                     return [
                                       <div
                                         key={`sprint-header-${epic.id}`}
-                                        className="flex items-center justify-between px-3 py-1.5 bg-purple-50/50 border border-purple-100 rounded-md mb-2 mt-2 first:mt-0"
+                                        className="flex items-center justify-between px-3 py-1.5 bg-purple-500/10 border border-purple-100 rounded-md mb-2 mt-2 first:mt-0"
                                       >
                                         <div className="flex items-center gap-2">
                                           <Zap className="w-3.5 h-3.5 text-purple-600" />

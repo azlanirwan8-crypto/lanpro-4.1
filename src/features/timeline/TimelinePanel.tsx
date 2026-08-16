@@ -1298,7 +1298,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         isChild
                           ? "bg-surface-sunken/40 hover:bg-surface-sunken/80 pr-3"
                           : isEpic
-                            ? "bg-purple-50/10 hover:bg-purple-50/40 px-3"
+                            ? "bg-purple-500/10 hover:bg-purple-500/10 px-3"
                             : "hover:bg-surface-sunken px-3"
                       )}
                       style={{
@@ -1356,11 +1356,11 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       {/* Task type icon */}
                       <div className="shrink-0 flex items-center justify-center">
                         {isEpic ? (
-                          <div className="p-1 rounded-md bg-purple-50 text-purple-600 shadow-soft border border-purple-100">
+                          <div className="p-1 rounded-md bg-purple-500/10 text-purple-600 shadow-soft border border-purple-100">
                             <Zap className="w-3.5 h-3.5" />
                           </div>
                         ) : (
-                          <div className="p-1 rounded-md bg-indigo-50 text-indigo-500 border border-indigo-100/40">
+                          <div className="p-1 rounded-md bg-indigo-500/10 text-indigo-500 border border-indigo-100/40">
                             <ListTodo className="w-3.5 h-3.5" />
                           </div>
                         )}
@@ -1384,7 +1384,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               setSelectedTaskForDetail(task);
                               setIsTaskDetailModalOpen(true);
                             }}
-                            className="text-xs sm:text-[11px] sm:text-[9px] font-semibold text-primary bg-indigo-50/80 hover:bg-indigo-100 border border-indigo-200/60 rounded-md px-1 py-0.2 tracking-tight text-left uppercase transition-colors"
+                            className="text-xs sm:text-[11px] sm:text-[9px] font-semibold text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-200/60 rounded-md px-1 py-0.2 tracking-tight text-left uppercase transition-colors"
                           >
                             {task.key}
                           </button>

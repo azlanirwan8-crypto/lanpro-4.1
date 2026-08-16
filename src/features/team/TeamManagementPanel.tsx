@@ -257,7 +257,7 @@ export const TeamManagementPanel = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-surface p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 bg-blue-500/10 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
                 <Users className="w-5 h-5" />
               </div>
               <div>
@@ -273,7 +273,7 @@ export const TeamManagementPanel = ({
 
           <div className="bg-surface p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 bg-emerald-500/10 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
@@ -289,7 +289,7 @@ export const TeamManagementPanel = ({
 
           <div className="bg-surface p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 rounded-lg flex items-center justify-center shrink-0">
                 <Clock className="w-5 h-5" />
               </div>
               <div>
@@ -305,7 +305,7 @@ export const TeamManagementPanel = ({
 
           <div className="bg-surface p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 bg-indigo-500/10 text-indigo-600 rounded-lg flex items-center justify-center shrink-0">
                 <Briefcase className="w-5 h-5" />
               </div>
               <div>
@@ -461,7 +461,7 @@ export const TeamManagementPanel = ({
                     {/* View Profile Button Only */}
                     <button
                       onClick={() => setSelectedProfileUser(person)}
-                      className="w-full py-2 bg-surface-muted hover:bg-indigo-50 hover:text-indigo-600 text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
+                      className="w-full py-2 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
                     >
                       View Profile
                     </button>
@@ -535,7 +535,7 @@ export const TeamManagementPanel = ({
                           </div>
                         </td>
                         <td className="px-5 py-3.5">
-                          <span className="inline-flex px-2.5 py-0.5 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 capitalize">
+                          <span className="inline-flex px-2.5 py-0.5 rounded-md text-xs font-medium bg-indigo-500/10 text-indigo-700 border border-indigo-100 capitalize">
                             {isOwner ? "Project Owner" : roleName}
                           </span>
                         </td>
@@ -549,8 +549,8 @@ export const TeamManagementPanel = ({
                           <span
                             className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs sm:text-[10px] font-medium ${
                               person.isPending
-                                ? "bg-amber-50 text-amber-700 border border-amber-200"
-                                : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                ? "bg-amber-500/10 text-amber-700 border border-amber-200"
+                                : "bg-emerald-500/10 text-emerald-700 border border-emerald-200"
                             }`}
                           >
                             <div
@@ -562,7 +562,7 @@ export const TeamManagementPanel = ({
                         <td className="px-5 py-3.5 text-right">
                           <button
                             onClick={() => setSelectedProfileUser(person)}
-                            className="px-3 py-1 bg-surface-muted hover:bg-indigo-50 hover:text-indigo-600 text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
+                            className="px-3 py-1 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
                           >
                             View Profile
                           </button>
@@ -604,7 +604,7 @@ export const TeamManagementPanel = ({
                   user={selectedProfileUser}
                   className="w-20 h-20 border-4 border-surface shadow-md text-xl"
                 />
-                <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
+                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-700 text-xs font-medium rounded-full border border-emerald-200">
                   Joined Project
                 </span>
               </div>
@@ -648,7 +648,7 @@ export const TeamManagementPanel = ({
                       className="p-2 bg-surface rounded border border-border-subtle/80 text-xs flex items-center justify-between"
                     >
                       <div className="flex items-center gap-2 truncate">
-                        <span className="font-mono text-xs sm:text-[10px] font-medium text-indigo-600 bg-indigo-50 px-1 rounded">
+                        <span className="font-mono text-xs sm:text-[10px] font-medium text-indigo-600 bg-indigo-500/10 px-1 rounded">
                           {t.key}
                         </span>
                         <span className="truncate text-content-body font-medium">{t.title}</span>

@@ -60,7 +60,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
               key={key}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className={`grid grid-cols-12 gap-0 py-3 px-3 items-center transition-colors hover:bg-surface-sunken/50 ${isDifferent ? "bg-indigo-50/10" : ""}`}
+              className={`grid grid-cols-12 gap-0 py-3 px-3 items-center transition-colors hover:bg-surface-sunken/50 ${isDifferent ? "bg-indigo-500/10" : ""}`}
             >
               <div className="col-span-4 px-2">
                 <span className="text-xs font-medium text-content-body bg-surface-muted px-2 py-1 rounded-md break-all">
