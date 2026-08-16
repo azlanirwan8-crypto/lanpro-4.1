@@ -311,9 +311,37 @@ router.post("/api/auth/force-logout", async (req, res) => {
   }
 });
 
+/**
+ * Id pengguna dari token yang sudah diverifikasi. `null` bila tidak ada/tidak sah.
+ *
+ * Dipisah dari `peraminta` karena keperluannya berbeda: yang satu menanyakan
+ * PERAN untuk memutuskan hak, yang ini menanyakan SIAPA.
+ */
+function idDariToken(req: any): string | null {
+  const header = req.headers?.authorization;
+  if (!header || !header.startsWith("Bearer ")) return null;
+  try {
+    const decoded: any = jwt.verify(header.split(" ")[1], getJwtSecret());
+    const id = decoded?.id || decoded?.uid;
+    return id ? String(id) : null;
+  } catch {
+    return null;
+  }
+}
+
 router.post("/api/auth/logout", async (req, res) => {
   try {
-    const userId = req.body?.userId;
+    // #53 — `userId` DULU diambil dari body pada rute yang berada di prefix
+    // PUBLIK, tanpa autentikasi apa pun. Siapa pun, tanpa kredensial, bisa
+    // memanggilnya dengan id orang lain dan meng-NULL-kan `currentSessionToken`
+    // korban — memaksanya keluar dari aplikasi berulang kali.
+    //
+    // Identitas kini HANYA dari token. Bila tokennya tidak ada atau sudah
+    // kedaluwarsa, tidak ada yang perlu dibersihkan di server: sesi yang
+    // ditunjuknya sudah tidak berlaku, dan klien tetap membersihkan
+    // penyimpanannya sendiri. Karena itu jawabannya tetap `success` — logout
+    // tidak boleh pernah gagal dari sisi pengguna.
+    const userId = idDariToken(req);
     if (userId) {
       activeUserSessions.delete(userId.toString());
       await db.query("UPDATE Users SET currentSessionToken = NULL WHERE id = ?", [
