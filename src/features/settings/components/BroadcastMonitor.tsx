@@ -267,7 +267,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
             <div className="p-5 overflow-y-auto space-y-6 text-left">
               <div className="space-y-3">
                 <div className="text-xs font-medium text-content-subtle uppercase tracking-wider flex items-center gap-2">
-                  <div className="p-1 bg-blue-50 text-blue-500 rounded">
+                  <div className="p-1 bg-blue-500/10 text-blue-500 rounded">
                     <Mail size={14} />
                   </div>
                   Email Preview
@@ -282,12 +282,12 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
 
               <div className="space-y-3">
                 <div className="text-xs font-medium text-content-subtle uppercase tracking-wider flex items-center gap-2">
-                  <div className="p-1 bg-emerald-50 text-emerald-500 rounded">
+                  <div className="p-1 bg-emerald-500/10 text-emerald-500 rounded">
                     <MessageSquare size={14} />
                   </div>
                   WhatsApp Preview
                 </div>
-                <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4 text-sm font-mono text-emerald-800 whitespace-pre-wrap leading-relaxed shadow-soft">
+                <div className="bg-emerald-500/10 border border-emerald-100 rounded-xl p-4 text-sm font-mono text-emerald-800 whitespace-pre-wrap leading-relaxed shadow-soft">
                   {replaceMockData(waTemplate)}
                 </div>
               </div>

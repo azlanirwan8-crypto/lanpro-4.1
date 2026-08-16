@@ -82,7 +82,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                 className={cn(
                   "group p-3 rounded-xl border transition-all cursor-pointer",
                   isDueSoon24h(task.endDate)
-                    ? "border-amber-400 bg-amber-50/20 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-amber-500 hover:bg-amber-50/30"
+                    ? "border-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-amber-500 hover:bg-amber-500/10"
                     : "border-indigo-100/50 hover:border-indigo-300 hover:shadow-2xs bg-surface"
                 )}
                 onClick={() => {
@@ -92,7 +92,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
               >
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1.5">
-                    <div className="text-xs sm:text-[10px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                    <div className="text-xs sm:text-[10px] font-medium text-indigo-600 bg-indigo-500/10 px-2 py-0.5 rounded-full">
                       {task.key}
                     </div>
                     {isDueSoon24h(task.endDate) && (
@@ -145,7 +145,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                 className={cn(
                   "group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
                   isDueSoon24h(task.endDate)
-                    ? "border-amber-400 bg-amber-50/20 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-amber-500 hover:bg-amber-50/30"
+                    ? "border-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-amber-500 hover:bg-amber-500/10"
                     : "border-rose-100 hover:border-rose-300 hover:shadow-2xs"
                 )}
                 onClick={() => {
@@ -155,7 +155,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
               >
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1.5">
-                    <div className="text-xs sm:text-[10px] font-medium text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
+                    <div className="text-xs sm:text-[10px] font-medium text-rose-600 bg-rose-500/10 px-2 py-0.5 rounded-full">
                       {task.key}
                     </div>
                     {isDueSoon24h(task.endDate) && (
@@ -239,7 +239,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                 className={cn(
                   "group p-3 rounded-xl border transition-all cursor-pointer",
                   isDueSoon24h(task.endDate)
-                    ? "border-amber-400 bg-amber-50/20 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-amber-500 hover:bg-amber-50/30"
+                    ? "border-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-amber-500 hover:bg-amber-500/10"
                     : "border-border-faint hover:border-indigo-200 hover:shadow-2xs bg-surface"
                 )}
                 onClick={() => {
@@ -332,7 +332,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                   {doc.title}
                 </div>
                 <div className="text-xs sm:text-[10px] font-medium text-content-subtle flex justify-between">
-                  <span className="uppercase tracking-wider text-teal-600 bg-teal-50 px-1 py-0.5 rounded font-mono">
+                  <span className="uppercase tracking-wider text-teal-600 bg-teal-500/10 px-1 py-0.5 rounded font-mono">
                     {doc.type || "DOC"}
                   </span>
                   <span className="text-teal-500 flex items-center gap-1 font-medium">

@@ -1,6 +1,15 @@
 import React from "react";
 import { Zap, LayoutGrid, UserCircle } from "lucide-react";
-import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, Cell } from "recharts";
+import {
+  ResponsiveContainer,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Bar,
+  Cell,
+} from "recharts";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
 
 interface SprintPhaseAnalysisProps {
@@ -34,7 +43,7 @@ export const SprintPhaseAnalysis: React.FC<SprintPhaseAnalysisProps> = ({
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-[10px] font-medium text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md uppercase tracking-tighter">
+            <span className="text-xs sm:text-[10px] font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-1 rounded-md uppercase tracking-tighter">
               {sprintTotalTasks} Total Tasks
             </span>
           </div>
@@ -48,7 +57,9 @@ export const SprintPhaseAnalysis: React.FC<SprintPhaseAnalysisProps> = ({
             </h4>
             <div className="space-y-4">
               {sprintTotalTasks === 0 ? (
-                <div className="text-xs text-content-subtle italic">No categories in active sprint.</div>
+                <div className="text-xs text-content-subtle italic">
+                  No categories in active sprint.
+                </div>
               ) : (
                 Array.from(
                   new Set(
@@ -58,7 +69,8 @@ export const SprintPhaseAnalysis: React.FC<SprintPhaseAnalysisProps> = ({
                   )
                 ).map((catName, idx) => {
                   const catTasks = tasks.filter(
-                    (t) => t.sprintId === activeSprint?.id && (t.category || "Uncategorized") === catName
+                    (t) =>
+                      t.sprintId === activeSprint?.id && (t.category || "Uncategorized") === catName
                   );
                   const done = catTasks.filter(
                     (t) => t.status === "Done" || t.status === "Selesai"
@@ -70,7 +82,10 @@ export const SprintPhaseAnalysis: React.FC<SprintPhaseAnalysisProps> = ({
                     <div key={idx} className="group/cat px-1">
                       <div className="flex justify-between items-center mb-1.5">
                         <span className="text-xs sm:text-[10px] font-medium text-content-body tracking-tight flex items-center gap-2 uppercase">
-                          <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
+                          <div
+                            className="w-1.5 h-1.5 rounded-full"
+                            style={{ backgroundColor: color }}
+                          />
                           {catName}
                         </span>
                         <span className="text-xs sm:text-[10px] font-medium text-content-subtle">
@@ -84,7 +99,9 @@ export const SprintPhaseAnalysis: React.FC<SprintPhaseAnalysisProps> = ({
                             style={{ width: `${progress}%`, backgroundColor: color }}
                           />
                         </div>
-                        <span className="text-xs sm:text-[10px] font-medium text-content-muted min-w-[30px]">{progress}%</span>
+                        <span className="text-xs sm:text-[10px] font-medium text-content-muted min-w-[30px]">
+                          {progress}%
+                        </span>
                       </div>
                     </div>
                   );
@@ -99,8 +116,9 @@ export const SprintPhaseAnalysis: React.FC<SprintPhaseAnalysisProps> = ({
               <UserCircle className="w-3 h-3" /> EXECUTION BY MEMBER
             </h4>
             <div className="space-y-4">
-              {projectMembers.filter((m) =>
-                m && tasks.some((t) => t.sprintId === activeSprint?.id && t.assigneeId === m.uid)
+              {projectMembers.filter(
+                (m) =>
+                  m && tasks.some((t) => t.sprintId === activeSprint?.id && t.assigneeId === m.uid)
               ).length === 0 ? (
                 <div className="text-xs text-content-subtle italic">
                   No member contributions in current active sprint.
@@ -121,7 +139,10 @@ export const SprintPhaseAnalysis: React.FC<SprintPhaseAnalysisProps> = ({
                     <div key={member.uid} className="group/user px-1">
                       <div className="flex justify-between items-center mb-1.5">
                         <div className="flex items-center gap-2 truncate">
-                          <UserAvatar user={member} className="w-5 h-5 text-xs sm:text-[10px] sm:text-[8px] border border-indigo-100 shrink-0" />
+                          <UserAvatar
+                            user={member}
+                            className="w-5 h-5 text-xs sm:text-[10px] sm:text-[8px] border border-indigo-100 shrink-0"
+                          />
                           <span className="text-xs sm:text-[10px] font-medium text-content-body truncate uppercase tracking-tight">
                             {member?.displayName || member?.username || "Unknown"}
                           </span>
@@ -137,7 +158,9 @@ export const SprintPhaseAnalysis: React.FC<SprintPhaseAnalysisProps> = ({
                             style={{ width: `${progress}%` }}
                           />
                         </div>
-                        <span className="text-xs sm:text-[10px] font-medium text-content-muted min-w-[30px]">{progress}%</span>
+                        <span className="text-xs sm:text-[10px] font-medium text-content-muted min-w-[30px]">
+                          {progress}%
+                        </span>
                       </div>
                     </div>
                   );
@@ -154,14 +177,27 @@ export const SprintPhaseAnalysis: React.FC<SprintPhaseAnalysisProps> = ({
         </h4>
         <div className="h-44 min-h-[150px]">
           {statusData.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-content-subtle italic text-xs">No status data found.</div>
+            <div className="flex items-center justify-center h-full text-content-subtle italic text-xs">
+              No status data found.
+            </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={statusData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 10, fontWeight: 700 }} />
+                <XAxis
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "#64748b", fontSize: 10, fontWeight: 700 }}
+                />
                 <YAxis hide />
-                <Tooltip contentStyle={{ borderRadius: "0.75rem", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }} />
+                <Tooltip
+                  contentStyle={{
+                    borderRadius: "0.75rem",
+                    border: "none",
+                    boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+                  }}
+                />
                 <Bar dataKey="value" fill="#4f46e5" radius={[4, 4, 0, 0]}>
                   {statusData.map((_entry: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

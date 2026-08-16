@@ -70,7 +70,7 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                   isCompact ? "gap-1.5" : "gap-2",
                   snapshot.isDraggingOver &&
                     (TERMINAL_STATUSES.some((s) => status.label.toLowerCase().includes(s))
-                      ? "bg-red-50/40 border-2 border-dashed border-red-400 cursor-not-allowed"
+                      ? "bg-red-500/10 border-2 border-dashed border-red-400 cursor-not-allowed"
                       : "bg-primary-surface/10 border-2 border-dashed border-primary")
                 )}
               >

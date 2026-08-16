@@ -214,7 +214,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
       <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100/60">
+            <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-100/60">
               System Audit
             </span>
             <span className="text-xs text-content-subtle font-medium">
@@ -368,10 +368,10 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                       className={cn(
                         "w-9 h-9 rounded-md border flex items-center justify-center shrink-0 shadow-2xs mt-0.5",
                         log.actionType === "CREATE"
-                          ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                          ? "bg-emerald-500/10 text-emerald-600 border-emerald-200"
                           : log.actionType === "UPDATE"
-                            ? "bg-amber-50 text-amber-600 border-amber-200"
-                            : "bg-rose-50 text-rose-600 border-rose-200"
+                            ? "bg-amber-500/10 text-amber-600 border-amber-200"
+                            : "bg-rose-500/10 text-rose-600 border-rose-200"
                       )}
                     >
                       {log.actionType === "CREATE" && <Zap className="w-4 h-4" />}
@@ -382,13 +382,13 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-1">
                         <div className="flex items-center gap-2 flex-wrap min-w-0">
-                          <div className="w-5 h-5 bg-indigo-50 rounded flex items-center justify-center text-indigo-600 shrink-0">
+                          <div className="w-5 h-5 bg-indigo-500/10 rounded flex items-center justify-center text-indigo-600 shrink-0">
                             <UserIcon className="w-3 h-3" />
                           </div>
                           <span className="text-xs font-medium text-content-strong truncate">
                             {log.userName}
                           </span>
-                          <span className="text-xs sm:text-[10px] bg-indigo-50 text-indigo-700 font-medium px-2 py-0.2 rounded border border-indigo-100 uppercase flex items-center gap-1">
+                          <span className="text-xs sm:text-[10px] bg-indigo-500/10 text-indigo-700 font-medium px-2 py-0.2 rounded border border-indigo-100 uppercase flex items-center gap-1">
                             {getEntityIcon(log.entityName)}
                             {log.entityName}
                           </span>
@@ -406,17 +406,17 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                             className={cn(
                               "font-medium uppercase px-1.5 py-0.2 rounded text-xs sm:text-[10px]",
                               log.actionType === "CREATE"
-                                ? "bg-emerald-50 text-emerald-700"
+                                ? "bg-emerald-500/10 text-emerald-700"
                                 : log.actionType === "UPDATE"
-                                  ? "bg-amber-50 text-amber-700"
-                                  : "bg-rose-50 text-rose-700"
+                                  ? "bg-amber-500/10 text-amber-700"
+                                  : "bg-rose-500/10 text-rose-700"
                             )}
                           >
                             {log.actionType}
                           </span>{" "}
                           pada entitas {log.entityName} dengan referensi ID:
                         </span>
-                        <span className="font-mono text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-100/60">
+                        <span className="font-mono text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-1.5 py-0.2 rounded border border-indigo-100/60">
                           {log.entityId}
                         </span>
                       </div>
@@ -424,12 +424,12 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                       <div className="mt-2.5 flex items-center justify-between pt-2 border-t border-border-faint">
                         <div className="flex items-center gap-2">
                           {log.oldValues && Object.keys(log.oldValues).length > 0 && (
-                            <span className="px-1.5 py-0.2 bg-rose-50 border border-rose-100 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium text-rose-600 uppercase">
+                            <span className="px-1.5 py-0.2 bg-rose-500/10 border border-rose-100 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium text-rose-600 uppercase">
                               Sebelum: {Object.keys(log.oldValues).length} keys
                             </span>
                           )}
                           {log.newValues && Object.keys(log.newValues).length > 0 && (
-                            <span className="px-1.5 py-0.2 bg-emerald-50 border border-emerald-100 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium text-emerald-600 uppercase">
+                            <span className="px-1.5 py-0.2 bg-emerald-500/10 border border-emerald-100 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium text-emerald-600 uppercase">
                               Sesudah: {Object.keys(log.newValues).length} keys
                             </span>
                           )}
@@ -490,7 +490,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 </div>
                 <button
                   onClick={() => setSelectedLog(null)}
-                  className="p-3 bg-surface rounded-xl text-content-subtle hover:text-rose-500 hover:bg-rose-50 transition-all border border-border-subtle"
+                  className="p-3 bg-surface rounded-xl text-content-subtle hover:text-rose-500 hover:bg-rose-500/10 transition-all border border-border-subtle"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -502,7 +502,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                     Aktivitas Penulis
                   </p>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-medium">
+                    <div className="w-10 h-10 bg-indigo-500/15 rounded-full flex items-center justify-center text-indigo-600 font-medium">
                       {(selectedLog.userName || "U")[0]}
                     </div>
                     <div>

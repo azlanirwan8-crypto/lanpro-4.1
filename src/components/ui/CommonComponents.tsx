@@ -362,7 +362,7 @@ export const StyledDropdown = ({
                       className={cn(
                         "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition-all text-left group/opt",
                         isActive
-                          ? "bg-indigo-50 text-indigo-700"
+                          ? "bg-indigo-500/10 text-indigo-700"
                           : "hover:bg-surface-sunken text-content-secondary"
                       )}
                     >

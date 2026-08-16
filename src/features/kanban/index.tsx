@@ -22,7 +22,7 @@ const getStatusStyle = (label: string) => {
       border: "border-t-[#10B981]",
       borderColor: "#10B981",
       text: "text-emerald-700",
-      indicatorBg: "bg-emerald-100",
+      indicatorBg: "bg-emerald-500/15",
       indicatorText: "text-emerald-700",
     };
   }
@@ -32,7 +32,7 @@ const getStatusStyle = (label: string) => {
       border: "border-t-[#8B5CF6]",
       borderColor: "#8B5CF6",
       text: "text-purple-700",
-      indicatorBg: "bg-purple-100",
+      indicatorBg: "bg-purple-500/15",
       indicatorText: "text-purple-700",
     };
   }
@@ -47,7 +47,7 @@ const getStatusStyle = (label: string) => {
       border: "border-t-[#F59E0B]",
       borderColor: "#F59E0B",
       text: "text-amber-700",
-      indicatorBg: "bg-amber-100",
+      indicatorBg: "bg-amber-500/15",
       indicatorText: "text-amber-700",
     };
   }
@@ -57,7 +57,7 @@ const getStatusStyle = (label: string) => {
     border: "border-t-[#3B82F6]",
     borderColor: "#3B82F6",
     text: "text-blue-700",
-    indicatorBg: "bg-blue-100",
+    indicatorBg: "bg-blue-500/15",
     indicatorText: "text-blue-700",
   };
 };
@@ -270,7 +270,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                         <div className="w-5 h-5 rounded bg-primary-surface/10 flex items-center justify-center text-primary shrink-0">
                           <Layers className="w-3 h-3" />
                         </div>
-                        <span className="text-xs sm:text-[10px] font-mono font-medium text-purple-600 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-100">
+                        <span className="text-xs sm:text-[10px] font-mono font-medium text-purple-600 bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-100">
                           {epic.key || "EPIC"}
                         </span>
                         <span className="ml-auto bg-primary-surface/10 text-primary px-1.5 py-0.2 rounded text-xs sm:text-[10px] font-medium border border-purple-100/60">

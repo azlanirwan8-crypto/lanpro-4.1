@@ -48,7 +48,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
         className={cn(
           "p-2 rounded-lg transition-all flex flex-col items-center w-10 border border-border-faint",
           isShapeDropdownOpen
-            ? "bg-indigo-50 border-indigo-200 text-indigo-700"
+            ? "bg-indigo-500/10 border-indigo-200 text-indigo-700"
             : " hover:bg-surface-muted"
         )}
         title="Buka Koleksi Simbol"
@@ -64,7 +64,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
           {/* Panel Header */}
           <div className="p-3.5 border-b border-border-faint flex items-center justify-between shrink-0 bg-surface-sunken/50">
             <div className="flex items-center gap-2">
-              <div className="p-1 px-1.5 bg-indigo-100 rounded text-indigo-700">
+              <div className="p-1 px-1.5 bg-indigo-500/15 rounded text-indigo-700">
                 <Layers className="w-3.5 h-3.5" />
               </div>
               <span className="text-xs font-medium text-content-strong uppercase tracking-tight">
@@ -170,7 +170,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                       {(group.title === "AWS" ||
                         group.title === "UML" ||
                         group.title === "My Shapes") && (
-                        <span className="text-xs sm:text-[10px] sm:text-[7.5px] bg-indigo-50 text-indigo-600 font-medium px-1 py-[1px] rounded border border-indigo-100 flex items-center gap-0.5 leading-none">
+                        <span className="text-xs sm:text-[10px] sm:text-[7.5px] bg-indigo-500/10 text-indigo-600 font-medium px-1 py-[1px] rounded border border-indigo-100 flex items-center gap-0.5 leading-none">
                           FREE
                         </span>
                       )}
@@ -205,10 +205,10 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                           onClick={() =>
                             handleAddNewNode(item.type as FlowNode["type"], selectedAddColor)
                           }
-                          className="flex items-center gap-2 p-1.5 bg-surface hover:bg-indigo-50/5 border border-border-faint hover:border-indigo-200 hover:shadow-[0_2px_8px_rgba(99,102,241,0.06)] text-left rounded-xl transition-all group pointer-events-auto w-full"
+                          className="flex items-center gap-2 p-1.5 bg-surface hover:bg-indigo-500/10 border border-border-faint hover:border-indigo-200 hover:shadow-[0_2px_8px_rgba(99,102,241,0.06)] text-left rounded-xl transition-all group pointer-events-auto w-full"
                           title={`Tambahkan ${item.name} ke canvas`}
                         >
-                          <div className="w-8 h-8 flex items-center justify-center shrink-0 border border-border-faint rounded-lg bg-surface-sunken/30 group-hover:bg-indigo-50/30 group-hover:border-indigo-300/40 transition-all duration-150">
+                          <div className="w-8 h-8 flex items-center justify-center shrink-0 border border-border-faint rounded-lg bg-surface-sunken/30 group-hover:bg-indigo-500/10 group-hover:border-indigo-300/40 transition-all duration-150">
                             {renderMiniPreviewIcon(item.type)}
                           </div>
                           <div className="min-w-0 flex-1">

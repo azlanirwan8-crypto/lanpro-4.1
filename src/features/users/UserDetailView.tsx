@@ -537,7 +537,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
         <div className="w-full space-y-5 flex-1">
           {/* Profile Card Header */}
           <div className="bg-surface p-5 rounded-lg shadow-xs border border-border-subtle flex flex-col md:flex-row items-center md:items-start gap-5 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-50 rounded-bl-full pointer-events-none opacity-60" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-bl-full pointer-events-none opacity-60" />
 
             <div className="relative group cursor-pointer shrink-0 z-10">
               <UserAvatar
@@ -578,11 +578,11 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     className={cn(
                       "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium uppercase border shadow-xs",
                       editRole === "admin"
-                        ? "bg-rose-50 text-rose-700 border-rose-200 "
+                        ? "bg-rose-500/10 text-rose-700 border-rose-200 "
                         : editRole === "head"
-                          ? "bg-purple-50 text-purple-700 border-purple-200 "
+                          ? "bg-purple-500/10 text-purple-700 border-purple-200 "
                           : editRole === "user"
-                            ? "bg-indigo-50 text-indigo-700 border-indigo-200 "
+                            ? "bg-indigo-500/10 text-indigo-700 border-indigo-200 "
                             : "bg-surface-muted text-content-body border-border-subtle "
                     )}
                   >
@@ -597,10 +597,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     className={cn(
                       "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium uppercase border shadow-xs",
                       editStatus === "approved"
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200 "
+                        ? "bg-emerald-500/10 text-emerald-700 border-emerald-200 "
                         : editStatus === "pending"
-                          ? "bg-amber-50 text-amber-700 border-amber-200 "
-                          : "bg-rose-50 text-rose-700 border-rose-200 "
+                          ? "bg-amber-500/10 text-amber-700 border-amber-200 "
+                          : "bg-rose-500/10 text-rose-700 border-rose-200 "
                     )}
                   >
                     {editStatus === "approved" ? (
@@ -615,7 +615,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-3 border-t border-border-faint ">
                 <div className="flex items-center gap-2.5 text-xs text-content-secondary ">
-                  <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-md">
+                  <div className="p-1.5 bg-indigo-500/10 text-indigo-600 rounded-md">
                     <Mail className="w-3.5 h-3.5" />
                   </div>
                   <div>
@@ -629,7 +629,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2.5 text-xs text-content-secondary ">
-                  <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded-md">
+                  <div className="p-1.5 bg-emerald-500/10 text-emerald-600 rounded-md">
                     <Phone className="w-3.5 h-3.5" />
                   </div>
                   <div>
@@ -643,7 +643,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2.5 text-xs text-content-secondary ">
-                  <div className="p-1.5 bg-purple-50 text-purple-600 rounded-md">
+                  <div className="p-1.5 bg-purple-500/10 text-purple-600 rounded-md">
                     <Building className="w-3.5 h-3.5" />
                   </div>
                   <div>
@@ -710,7 +710,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                       {/* Role Description Card */}
                       {editRole && ROLE_DESCRIPTIONS[editRole] && (
-                        <div className="p-2.5 rounded-md border text-xs leading-relaxed flex gap-2.5 bg-indigo-50/50 border-indigo-200 text-indigo-900 ">
+                        <div className="p-2.5 rounded-md border text-xs leading-relaxed flex gap-2.5 bg-indigo-500/10 border-indigo-200 text-indigo-900 ">
                           <div className="shrink-0 mt-0.5">{ROLE_DESCRIPTIONS[editRole].icon}</div>
                           <div className="space-y-0.5">
                             <p className="font-medium text-xs text-indigo-950 ">
@@ -869,7 +869,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   </div>
 
                   {editRole === "admin" && (
-                    <div className="flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 p-2.5 rounded-md text-xs">
+                    <div className="flex items-center gap-2 text-amber-700 bg-amber-500/10 border border-amber-200 p-2.5 rounded-md text-xs">
                       <ShieldAlert className="w-4 h-4 shrink-0 text-amber-500" />
                       <span>
                         Role <strong>Administrator</strong> memiliki akses penuh secara default,
@@ -968,7 +968,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               {/* Work Overview Stats */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-surface border border-border-subtle p-4 rounded-lg flex items-center gap-3 shadow-xs">
-                  <div className="w-9 h-9 rounded-md bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                  <div className="w-9 h-9 rounded-md bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
                     <Server className="w-4 h-4" />
                   </div>
                   <div>
@@ -982,7 +982,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 </div>
 
                 <div className="bg-surface border border-border-subtle p-4 rounded-lg flex items-center gap-3 shadow-xs">
-                  <div className="w-9 h-9 rounded-md bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+                  <div className="w-9 h-9 rounded-md bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
                     <CheckCircle className="w-4 h-4" />
                   </div>
                   <div>
@@ -998,7 +998,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
               {/* Form Delegasi Project Baru */}
               {isAdmin && (
-                <div className="bg-indigo-50/60 border border-indigo-100 rounded-lg p-4 shadow-xs space-y-3">
+                <div className="bg-indigo-500/10 border border-indigo-100 rounded-lg p-4 shadow-xs space-y-3">
                   <div className="space-y-0.5">
                     <h4 className="font-medium text-indigo-950 text-xs uppercase tracking-wider flex items-center gap-1.5">
                       <UserPlus className="w-4 h-4 text-indigo-600 shrink-0" />
@@ -1177,8 +1177,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 className={cn(
                                   "text-xs sm:text-[10px] font-medium uppercase px-2 py-0.5 rounded-md border",
                                   peranDikenal
-                                    ? "bg-indigo-100 text-indigo-700 border-indigo-200 "
-                                    : "bg-amber-100 text-amber-800 border-amber-300 "
+                                    ? "bg-indigo-500/15 text-indigo-700 border-indigo-200 "
+                                    : "bg-amber-500/15 text-amber-800 border-amber-300 "
                                 )}
                                 title={
                                   peranDikenal
@@ -1192,7 +1192,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveFromProject(p.id)}
-                                  className="p-1 text-content-subtle hover:text-rose-500 hover:bg-rose-50 rounded-md transition-colors"
+                                  className="p-1 text-content-subtle hover:text-rose-500 hover:bg-rose-500/10 rounded-md transition-colors"
                                   title="Keluarkan dari project"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
@@ -1264,8 +1264,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           className={cn(
                             "text-xs sm:text-[10px] font-medium uppercase px-2 py-0.5 rounded-md border",
                             t.status === "completed" || t.status === "done"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200 "
-                              : "bg-amber-50 text-amber-700 border-amber-200 "
+                              ? "bg-emerald-500/10 text-emerald-700 border-emerald-200 "
+                              : "bg-amber-500/10 text-amber-700 border-amber-200 "
                           )}
                         >
                           {t.status || "todo"}

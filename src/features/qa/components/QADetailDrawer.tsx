@@ -71,7 +71,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
               <span
                 className={`px-2 py-0.5 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded-md ${
                   selectedTestCase.priority === "Critical" || selectedTestCase.priority === "High"
-                    ? "bg-rose-50 text-danger border border-rose-200/60"
+                    ? "bg-rose-500/10 text-danger border border-rose-200/60"
                     : "bg-surface-muted text-content-body border border-border-subtle/60"
                 }`}
               >
@@ -90,13 +90,13 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                 }}
                 className={`py-1 px-2.5 rounded-md text-xs sm:text-[11px] font-medium uppercase tracking-wider outline-none cursor-pointer border shadow-2xs ${
                   selectedTestCase.status === "Passed"
-                    ? "bg-emerald-50 text-success border-emerald-200"
+                    ? "bg-emerald-500/10 text-success border-emerald-200"
                     : selectedTestCase.status === "Failed"
-                      ? "bg-rose-50 text-danger border-rose-200"
+                      ? "bg-rose-500/10 text-danger border-rose-200"
                       : selectedTestCase.status === "Blocked"
-                        ? "bg-amber-50 text-warning border-amber-200"
+                        ? "bg-amber-500/10 text-warning border-amber-200"
                         : selectedTestCase.status === "Retest"
-                          ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                          ? "bg-indigo-500/10 text-indigo-700 border-indigo-200"
                           : "bg-surface-muted text-content-secondary border-border-subtle"
                 }`}
               >
@@ -224,9 +224,9 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                           <span
                             className={`px-2 py-0.5 text-xs sm:text-[11px] sm:text-[9px] font-medium rounded ${
                               st === "PASSED"
-                                ? "bg-emerald-100 text-success"
+                                ? "bg-emerald-500/15 text-success"
                                 : st === "FAILED"
-                                  ? "bg-rose-100 text-danger"
+                                  ? "bg-rose-500/15 text-danger"
                                   : "bg-surface-strong text-content-body"
                             }`}
                           >
@@ -261,7 +261,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                 <h4 className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider mb-1">
                   Hasil yang Diharapkan (Expected Result)
                 </h4>
-                <div className="bg-emerald-50/40 p-3 rounded-md border border-emerald-100 text-xs font-medium text-success leading-relaxed">
+                <div className="bg-emerald-500/10 p-3 rounded-md border border-emerald-100 text-xs font-medium text-success leading-relaxed">
                   {selectedTestCase.expectedResult}
                 </div>
               </div>

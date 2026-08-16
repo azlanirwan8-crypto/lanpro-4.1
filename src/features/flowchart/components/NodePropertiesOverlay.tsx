@@ -90,11 +90,11 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
       <div className="flex items-center gap-1">
         {["yellow", "blue", "green", "purple", "rose", "slate"].map((colName) => {
           const colorClassMap: Record<string, string> = {
-            yellow: "bg-amber-100 hover:bg-amber-200",
+            yellow: "bg-amber-500/15 hover:bg-amber-200",
             blue: " hover:bg-blue-200",
-            green: "bg-emerald-100 hover:bg-emerald-200",
-            purple: "bg-purple-100 hover:bg-purple-200",
-            rose: "bg-rose-100 hover:bg-rose-200",
+            green: "bg-emerald-500/15 hover:bg-emerald-200",
+            purple: "bg-purple-500/15 hover:bg-purple-200",
+            rose: "bg-rose-500/15 hover:bg-rose-200",
             slate: "bg-surface-muted hover:bg-surface-strong",
           };
           return (
@@ -204,7 +204,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
       {/* Duplicate */}
       <button
         onClick={() => handleDuplicateNode(node)}
-        className="p-1 text-content-muted hover:text-indigo-600 rounded hover:bg-indigo-50"
+        className="p-1 text-content-muted hover:text-indigo-600 rounded hover:bg-indigo-500/10"
         title="Duplikat Bentuk (Ctrl+D)"
       >
         <Copy className="w-3.5 h-3.5" />
@@ -217,7 +217,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
           setConnectSourceId(node.id);
           toast.info(`Sambungkan alur dari "${node.label}" ke shape berikutnya.`);
         }}
-        className="p-1 text-content-muted hover:text-amber-500 rounded hover:bg-amber-50"
+        className="p-1 text-content-muted hover:text-amber-500 rounded hover:bg-amber-500/10"
         title="Mulai tarik panah hubungan"
       >
         <ArrowRight className="w-3.5 h-3.5" />
@@ -228,7 +228,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
       {/* Delete shape */}
       <button
         onClick={handleDeleteSelected}
-        className="p-1 hover:text-rose-600 rounded hover:bg-rose-50"
+        className="p-1 hover:text-rose-600 rounded hover:bg-rose-500/10"
         title="Hapus shape"
       >
         <Trash2 className="w-3.5 h-3.5" />

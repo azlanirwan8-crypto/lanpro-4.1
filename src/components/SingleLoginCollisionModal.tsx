@@ -27,7 +27,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-overlay/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-surface w-full max-w-md rounded-xl shadow-2xl overflow-hidden border border-border-faint flex flex-col animate-in zoom-in-95 duration-200">
-        <div className="bg-rose-50/50 p-6 flex flex-col items-center justify-center border-b border-border-faint relative">
+        <div className="bg-rose-500/10 p-6 flex flex-col items-center justify-center border-b border-border-faint relative">
           <button
             onClick={onClose}
             disabled={isLoading}

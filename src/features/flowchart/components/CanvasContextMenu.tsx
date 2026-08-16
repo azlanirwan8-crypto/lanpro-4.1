@@ -234,7 +234,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
           onClear();
           onClose();
         }}
-        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-rose-600 hover:bg-rose-50 transition-colors text-left"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-rose-600 hover:bg-rose-500/10 transition-colors text-left"
       >
         <Trash2 className="w-3.5 h-3.5 text-rose-500" />
         <span>Bersihkan Kanvas</span>
