@@ -6307,62 +6307,69 @@ keduanya berlawanan akibatnya:
 Menebak salah satunya berarti mempertaruhkan fitur ekspor atas dasar yang tidak
 pernah dinyatakan. Dibiarkan `MENUNGGU` sampai dipilih satu.
 
-### 19.49 ⚠️ Dampak ke mode TERANG — klaim saya belum pernah diukur
+### 19.49 Dampak ke mode TERANG — alarm saya SALAH, dan koreksinya
 
 Pemilik proyek bertanya apakah pekerjaan tema gelap merusak tema terang.
-Pertanyaan itu tepat sasaran: sepanjang lima gelombang saya **berulang kali
-menulis "identik di mode terang"** — dan tidak satu kali pun mengukurnya.
+Pertanyaannya tepat, dan jawaban pertama saya **keliru**.
 
-Diukur 16 Agu 2026 pada sesi login yang sama, hanya berganti tema:
+#### Yang saya laporkan mula-mula
 
-| Tema       | Elemen di bawah rasio 4.5 |
-| ---------- | ------------------------: |
-| Gelap      |                     **7** |
-| **Terang** |                    **78** |
+> "Mode terang 78 elemen di bawah rasio 4.5, gelap hanya 7. Mode terang lebih
+> buruk daripada mode gelap."
 
-Selisihnya terlalu besar untuk diabaikan. Mode terang **lebih buruk** daripada
-mode gelap — kebalikan dari yang seharusnya terjadi bila konversinya benar-benar
-netral.
+Angka itu **artefak alat ukur**, bukan keadaan aplikasi.
 
-#### Kenapa klaim "identik" bisa benar per token tetapi salah secara keseluruhan
+#### Sebabnya
 
-Pemetaan nilai memang identik — `surface` = `#ffffff` = `white`, `content` =
-`#0f172a` = `slate-900`, dan seterusnya. Yang TIDAK identik adalah **token
-bernilai TETAP** yang saya tambahkan:
+Fungsi pencari latar saya menelusuri induk sampai menemukan `backgroundColor`
+yang bukan `rgba(0,0,0,0)` — tetapi **cadangannya mengembalikan putih**, dan
+sebagian induk transparan lolos pemeriksaan alpha. Ratusan elemen karena itu
+dinilai "teks terang di atas latar putih" padahal latarnya sama sekali bukan
+putih.
 
-| Token                   | Nilai                   | Akibat di mode terang                           |
-| ----------------------- | ----------------------- | ----------------------------------------------- |
-| `content-inverse`       | `#ffffff` di kedua mode | teks putih; **benar hanya bila latarnya gelap** |
-| `content-inverse-muted` | `#e2e8f0` di kedua mode | idem                                            |
-| `surface-inverse`       | `#1e293b` di kedua mode | kartu gelap                                     |
+Diperbaiki dengan menuntut `alpha > 200` dan melewati `transparent` secara
+eksplisit. Hasilnya pada layar yang sama, tema yang sama:
 
-Selama pasangannya tetap utuh (teks inverse di atas permukaan inverse), keduanya
-benar. Tetapi konversi dilakukan **per kelas, bukan per pasangan** — dan di
-tempat mana pun pasangan itu terpisah, mode terang mendapat teks terang di atas
-permukaan terang.
+| Pengukuran              | Hasil |
+| ----------------------- | ----: |
+| Pemindai lama           |    78 |
+| **Pemindai diperbaiki** | **2** |
 
-Itu bukan kesalahan nilai tokennya. Itu kesalahan **cara mengonversinya**:
-mengubah `text-white` menjadi token tanpa memeriksa apa yang ada di belakangnya.
+Dua sisanya pun bukan cacat konversi: satu `text-amber-400` pada logo — aksen
+merek — dan satu lagi memakai token inverse.
 
-#### ⚠️ Batas yang harus dinyatakan: angka 78 belum ditelusuri satu per satu
+#### Kenapa hasil ini memang yang SEHARUSNYA terjadi
 
-Alat ukur saya sudah **tiga kali** salah hari ini — `oklch` yang tidak terbaca,
-saringan ukuran yang membuang lencana, dan induk transparan yang dilaporkan
-sebagai latar putih. Dua pengukuran atas elemen yang sama pun memberi latar
-berbeda (`243,246,249` versus `255,255,255`).
+Pemetaan teks yang saya lakukan **byte-identik**, dan itu bisa diperiksa tanpa
+menjalankan apa pun:
 
-Jadi **78 adalah sinyal, bukan daftar cacat.** Menindaklanjutinya dengan
-mengganti kelas satu per satu berdasarkan angka itu berisiko memperbaiki yang
-tidak rusak sambil melewatkan yang rusak.
+| Konversi                                    | Nilai lama | Nilai baru | Selisih |
+| ------------------------------------------- | ---------- | ---------- | ------- |
+| `text-white` → `content-inverse`            | `#ffffff`  | `#ffffff`  | **nol** |
+| `text-slate-100` → `content-inverse-strong` | `#f1f5f9`  | `#f1f5f9`  | **nol** |
+| `text-slate-200` → `content-inverse-muted`  | `#e2e8f0`  | `#e2e8f0`  | **nol** |
+| `bg-primary` → `bg-primary-surface`         | `#405189`  | `#405189`  | **nol** |
 
-#### Langkah yang benar berikutnya
+Konversi bernilai nol tidak mungkin mengubah kontras. Seandainya saya membaca
+tabel ini sebelum mempercayai angka 78, alarmnya tidak akan pernah naik.
 
-1. **Tangkapan layar mode TERANG** dari pemilik proyek — layar yang sama dengan
-   yang dulu dilaporkan (Roadmap, QA, dialog hapus). Mata manusia menyelesaikan
-   pertanyaan "apakah ini rusak" lebih cepat dan lebih andal daripada alat ukur
-   yang sudah terbukti keliru.
-2. Baru sesudah itu: telusuri pasangan `content-inverse*` yang latarnya BUKAN
-   `surface-inverse`, dan kembalikan yang salah pasangan.
+#### ⚠️ Pelajaran — ini kesalahan alat ukur KEEMPAT hari ini
 
-**Sampai itu dilakukan, #13 tidak boleh dianggap selesai.** Tema gelap membaik
-secara terukur, tetapi biayanya terhadap tema terang belum diketahui.
+| #   | Kesalahan                                 | Akibat bila dipercaya                                         |
+| --- | ----------------------------------------- | ------------------------------------------------------------- |
+| 1   | `oklch()` tidak terbaca sebagai warna     | 3 tabrakan palsu                                              |
+| 2   | Saringan ukuran 80×30 membuang lencana    | belasan permukaan terang terlewat                             |
+| 3   | Induk transparan dilaporkan sebagai latar | elemen dinilai salah                                          |
+| 4   | Cadangan latar putih                      | **78 tabrakan palsu, hampir memicu penambalan besar-besaran** |
+
+Yang ketiga dan keempat berbahaya dengan cara berlawanan: satu **menyembunyikan**
+cacat, satu **mengarang** cacat. Keduanya sama meyakinkannya.
+
+> **Aturan:** sebelum bertindak atas angka dari alat ukur buatan sendiri,
+> periksa satu kasusnya dengan tangan. Empat kali hari ini angka itu salah, dan
+> tiap kali ia terbaca persis seperti temuan sungguhan.
+
+Yang menyelamatkan bukan kehati-hatian, melainkan **tabel nilai token** — bukti
+statis yang tidak bergantung pada alat ukur mana pun.
+
+**Kesimpulan: tema terang TIDAK rusak oleh pekerjaan tema gelap.**
