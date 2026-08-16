@@ -355,7 +355,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend               | **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik      | §0.4   |
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — celah daftar, DAN membatalkan asumsi kuota F11           | **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik      | §0.4   |
-| 47  | `discussion_point_comments` 5 pasang kolom kembar, KEDUANYA terisi — butuh keputusan       | **F9**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §0.3   |
+| 47  | `discussion_point_comments` kolom kembar — baca & tulis SUDAH camelCase; sisa hapus kolom  | **F9**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §0.3   |
 | 57  | Dua endpoint health; `/api/health` terkunci auth sehingga probe eksternal dapat 401        | **F2**  | ⚪  | Sangat rendah |          Tidak          | `TERBUKA`               | §13.6  |
 | 71  | `project-modules` POST/PUT/DELETE tanpa penjaga — CRUD modul lintas proyek                 | **F2**  | 🟠  | Sangat rendah |          Tidak          | `MENUNGGU` keputusan    | §13.11 |
 | 74  | 7 pengambil data tanpa penjaga respons basi — data proyek lama menimpa proyek baru         | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §13.12 |
@@ -5572,3 +5572,58 @@ Langkah 4 merusak dan tidak bisa dibatalkan; ia dijalankan terpisah, sesudah 1�
 terbukti aman.
 
 ⚠️ #48 sebaiknya mengikuti ketetapan yang sama supaya konvensinya tidak jadi dua.
+
+### 19.39 #47 langkah 1–3 dikerjakan — dan tabelnya ternyata punya TIGA gaya
+
+Ketetapan pemilik proyek 16 Agu 2026: **camelCase sumber kebenaran**.
+
+| Langkah | Isi                                                                           | Status                                                      |
+| :-----: | ----------------------------------------------------------------------------- | ----------------------------------------------------------- |
+|    1    | Baca diseragamkan — `WHERE pointId = ? OR point_id = ?` → `WHERE pointId = ?` | ✅                                                          |
+|    2    | Tulis diseragamkan — `INSERT` dari **11 kolom jadi 6**                        | ✅                                                          |
+|    3    | Verifikasi 4 baris utuh                                                       | ✅ `{n:4, pointid:4, commenttext:4, createdAt:4, userId:4}` |
+|    4    | Jatuhkan 5 kolom snake                                                        | **TIDAK dikerjakan** — lihat di bawah                       |
+
+Divalidasi **sebelum** diubah: kolom snake seluruhnya nullable, dan frontend
+membaca camel lebih dulu (`comment.userName || comment.user_name`) — snake hanya
+cadangan. Diukur juga bahwa cabang `OR point_id` tidak pernah menambah satu
+baris pun, sebab keempat baris punya sisi camel terisi.
+
+#### ⚠️ Temuan: tabel ini punya TIGA gaya penamaan, bukan dua
+
+Ketahuan karena kueri verifikasi saya memakai `"pointId"` dan **ditolak**:
+
+```
+GAGAL=column "pointId" does not exist
+```
+
+Nama kolom yang sebenarnya:
+
+| Gaya                | Kolom                                                                | Sebabnya                                                  |
+| ------------------- | -------------------------------------------------------------------- | --------------------------------------------------------- |
+| huruf kecil semua   | `pointid` · `username` · `commenttext`                               | identifier ditulis **tanpa kutip**, PostgreSQL melipatnya |
+| camelCase sungguhan | `userId` · `createdAt`                                               | ditulis **dengan kutip** saat dibuat                      |
+| snake_case          | `point_id` · `user_id` · `user_name` · `comment_text` · `created_at` | sistem migrasi lain                                       |
+
+**Ini mekanisme #48 pada tingkat KOLOM** — dan ia memperkuat §19.38: yang
+berbahaya bukan camelCase-nya, melainkan **kutip yang tidak konsisten**. Satu
+tabel yang sama bisa melahirkan tiga gaya sekaligus hanya karena sebagian
+pernyataan mengutip dan sebagian tidak.
+
+Catatan untuk §19.38: angka 183 camelCase di sana **tidak terpengaruh** — kolom
+yang terlipat seperti `pointid` masuk hitungan "satu kata" (149), bukan
+camelCase. Rekomendasinya tetap berdiri.
+
+#### Yang BELUM terverifikasi, dan kenapa
+
+**Jalur TULIS belum dijalankan sungguhan.** Memposting komentar memerlukan sesi
+login, dan §0.5 aturan 5 melarang penerus memakai kredensial sendiri.
+
+Dasar keyakinan saat ini **argumentatif, bukan hasil pengukuran**: gaya
+identifier yang dipakai `INSERT` **tidak berubah** dari versi lama yang terbukti
+menghasilkan 4 baris — hanya jumlah kolomnya yang berkurang. Itu alasan yang
+kuat, tetapi ia bukan pengamatan.
+
+**Langkah 4 menunggu dua hal:** pemilik proyek memposting satu komentar untuk
+membuktikan jalur tulis, lalu penghapusan kolom dijalankan terpisah — ia merusak
+dan tidak bisa dibatalkan.
