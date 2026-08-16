@@ -312,8 +312,16 @@ router.post(
         ]);
         taskKey = `${proj.projectKey}-${newCounter}`;
       }
-      await connection.commit();
-      transaksiTerbuka = false;
+      // #61 — `commit()` DULU berada tepat di sini, sehingga transaksinya hanya
+      // melingkupi penghitung dan bukan task yang memakainya. Penghitung sudah
+      // bertambah permanen sebelum task-nya ada, jadi setiap kegagalan
+      // sesudahnya — validasi timeline yang menolak, INSERT yang gagal —
+      // memakan satu nomor dan membuat penomoran PROJECTKEY-n berlubang.
+      //
+      // Commit kini dipindah ke SESUDAH task dan lampirannya tersimpan, agar
+      // "ambil nomor" dan "pakai nomor" benar-benar satu kesatuan. Kunci baris
+      // Projects otomatis tertahan lebih lama; itu memang harganya, dan itulah
+      // yang membuat penomoran tidak bisa berlubang maupun kembar.
 
       // Extract active authenticated user
       const authenticatedUserStr =
@@ -369,6 +377,10 @@ router.post(
         endDate
       );
       if (validationError) {
+        // #61 — keluar lebih awal SAAT transaksi masih terbuka. Nomor yang
+        // sudah diambil di atas harus dikembalikan, bukan ditinggalkan.
+        await connection.rollback();
+        transaksiTerbuka = false;
         return res.status(400).json({
           status: "error",
           code: validationError.code,
@@ -416,6 +428,14 @@ router.post(
           );
         }
       }
+
+      // #61 — titik tutup transaksi: penghitung, task, dan lampirannya sudah
+      // tersimpan sebagai satu kesatuan. Yang di bawah ini — pengambilan data
+      // reporter, catatan audit, notifikasi — sengaja DI LUAR transaksi: tak
+      // satu pun boleh menahan kunci baris Projects, dan kegagalan notifikasi
+      // tidak boleh membatalkan task yang sudah sah dibuat.
+      await connection.commit();
+      transaksiTerbuka = false;
 
       // Populate reporter object
       let reporterObj: any = null;
