@@ -310,24 +310,47 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 
 ### Indeks cepat
 
-|  Fase   | Nama                               | Item                                 | Sesi | Risiko            | Perlu pemilik?                    | Status            |
-| :-----: | ---------------------------------- | ------------------------------------ | ---- | ----------------- | --------------------------------- | ----------------- |
-| **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10, #38, #39               | 1–2  | Sangat rendah     | —                                 | `SELESAI` 16 Agu  |
-| **F1**  | Storage minimal — buka jalan rilis | #2, #15                              | 1–2  | Rendah            | **Ya** — kredensial & 1 keputusan | `MENUNGGU`        |
-| **F2**  | Audit & perbaikan LOGIKA           | #16, #18–#20, #49–#64                | 3–5  | Rendah            | **Ya** — 3 keputusan              | `JALAN` gel. 2 tutup |
-| **F3**  | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | **Ya** — login                    | `MENUNGGU`        |
-| **F4**  | Performa muat                      | #3                                   | 1    | Rendah–sedang     | —                                 | `SELESAI` 16 Agu  |
-| **F5**  | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | **Ya** — 5 keputusan + login uji  | `SELESAI` 16 Agu  |
-| **F6**  | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28 | 3–4  | Rendah–sedang     | **Ya** — 2 keputusan              | `MENUNGGU` domain |
-| **F7**  | Kontrak & validasi                 | #4                                   | 3–5  | Sedang            | —                                 | `TERBUKA`         |
-| **F8**  | Jaring pengaman                    | #9, #8                               | 4–6  | Rendah            | —                                 | `TERBUKA`         |
-| **F9**  | Lapisan backend                    | #6                                   | 6–10 | Tinggi            | —                                 | `TERBUKA`         |
-| **F10** | Arsitektur frontend                | #5, #7, #21                          | 8–15 | **Sangat tinggi** | —                                 | `TERBUKA`         |
-| **F11** | Drive-per-user (OPSIONAL)          | #30                                  | 6–10 | Tinggi            | **Ya** — keputusan ulang          | `DITUNDA`         |
-| **F12** | Konsolidasi desain                 | #14, #13                             | 2–3  | Rendah            | —                                 | `TERBUKA`         |
+|  Fase   | Nama                               | Item                                 | Sesi | Risiko            | Status                    | TERTAHAN OLEH APA — dan siapa yang harus bergerak                                                                         |
+| :-----: | ---------------------------------- | ------------------------------------ | ---- | ----------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| **F0**  | Kejelasan & fondasi dokumen        | #1, #12, #10, #38, #39               | 1–2  | Sangat rendah     | `SELESAI` 16 Agu          | — tidak ada                                                                                                                 |
+| **F1**  | Storage minimal — buka jalan rilis | #2, #15                              | 1–2  | Rendah            | `MENUNGGU`                | **PEMILIK.** Isi 6 variabel `STORAGE_*` di `.env`; cabut 2 Google API key lama di Console; jawab: berkas QA & rekaman tetap lewat penjaga auth server (rekomendasi: ya) atau boleh dari bucket publik |
+| **F2**  | Audit & perbaikan LOGIKA           | #16, #18–#20, #49–#75                | 3–5  | Rendah            | `JALAN` — audit SELESAI    | **PEMILIK, 9 keputusan.** Audit 9 area §13.1 tuntas & 15 item diperbaiki. Sisa murni keputusan peran/perilaku: #69 #70 #71 #72 #73 (penetapan peran), #74 (izin sentuh `AppContainer`), #18 #19 #20 (perilaku notebook-lm, penjaga read-only `db-query`, kode mati DB Explorer), #57 (dua endpoint health) |
+| **F3**  | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | `SIAP JALAN`              | **TIDAK LAGI TERTAHAN.** Syarat "login pemilik" sudah terpenuhi — sesi hidup dipakai sepanjang 16 Agu. Yang masih perlu Anda: izin membuat objek percobaan untuk alur TULIS (§14.2), dan sesi admin bila layar khusus admin ikut diperiksa |
+| **F4**  | Performa muat                      | #3                                   | 1    | Rendah–sedang     | `SELESAI` 16 Agu          | — tidak ada                                                                                                                 |
+| **F5**  | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | `SELESAI` 16 Agu          | — tidak ada                                                                                                                 |
+| **F6**  | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28 | 3–4  | Rendah–sedang     | `MENUNGGU` domain          | **PEMILIK.** Domain email belum terverifikasi (#44). Tanpa itu penyedia mana pun hanya mengirim ke alamat pemilik akun, jadi email tidak akan sampai ke user lain dan gagalnya SENYAP. F6.1 sudah beres; tinggal isi `RESEND_API_KEY` + `EMAIL_FROM` |
+| **F7**  | Kontrak & validasi                 | #4                                   | 3–5  | Sedang            | `TERBUKA`                 | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3: menulis skema untuk 119 rute di atas UI yang belum diaudit berarti mengunci bentuk data yang belum tentu benar |
+| **F8**  | Jaring pengaman                    | #9, #8                               | 4–6  | Rendah            | `TERBUKA`                 | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, karena F3 akan menambah kasus uji                                        |
+| **F9**  | Lapisan backend                    | #6                                   | 6–10 | Tinggi            | `TERBUKA`                 | — bisa jalan tanpa pemilik, tapi butuh F7 & F8 lebih dulu sebagai pengaman                                                  |
+| **F10** | Arsitektur frontend                | #5, #7, #21                          | 8–15 | **Sangat tinggi** | `TERBUKA`                 | — bisa jalan tanpa pemilik, tapi JANGAN sebelum F8. Merefactor 4.581 baris `AppContainer` dengan jaring pengaman sekarang adalah judi |
+| **F11** | Drive-per-user (OPSIONAL)          | #30                                  | 6–10 | Tinggi            | `DITUNDA`                 | **PEMILIK.** Sengaja ditunda; perlu keputusan ulang apakah masih diinginkan setelah F5 selesai                              |
+| **F12** | Konsolidasi desain                 | #14, #13                             | 2–3  | Rendah            | `TERBUKA`                 | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, yang akan mendata sendiri layar mana yang kontras & jarak sentuhnya bermasalah |
 
 \*Perkiraan kasar dan **belum terverifikasi** — untuk membandingkan bobot antar
 fase, bukan janji jadwal. Perbarui dengan angka nyata setelah fase pertama tutup.
+
+### Cara membaca kolom "TERTAHAN OLEH APA"
+
+Kolom ini menggantikan kolom lama "Perlu pemilik?", yang hanya menjawab **ya/tidak**
+dan karena itu tidak pernah cukup: ia tidak memberi tahu apa yang sebenarnya
+harus dilakukan, sehingga tiap sesi harus menggali ulang.
+
+| Isi kolom | Artinya |
+| --------- | ------- |
+| `— tidak ada` | Fase tutup, atau tidak ada penghalang sama sekali |
+| `— bisa jalan tanpa pemilik` | Boleh dimulai kapan saja. Catatan sesudahnya menerangkan **urutan yang disarankan**, bukan penghalang |
+| **PEMILIK** | Benar-benar berhenti sampai pemilik proyek bertindak. Tindakannya ditulis persis, bukan "menunggu keputusan" |
+
+**Aturan mengisinya:** tulis TINDAKAN yang menutup penghalang, bukan perasaan
+tentangnya. "Menunggu keputusan" tidak berguna; "tetapkan peran mana yang boleh
+menghapus dokumen" bisa langsung dikerjakan. Bila sebuah fase tertahan lebih dari
+satu hal, sebut semuanya beserta nomor itemnya — supaya sekali duduk bisa
+diselesaikan sekaligus.
+
+**Perbarui kolom ini setiap kali status fase berubah.** Kolom yang basi lebih
+berbahaya daripada kolom kosong: F2 sempat tertulis `JALAN gel. 2 tutup` padahal
+audit sudah sampai gelombang 6 — dan itu baru ketahuan karena pemilik proyek
+menanyakannya.
 
 ### Prinsip urutan
 
