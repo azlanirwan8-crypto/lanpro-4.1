@@ -11,6 +11,7 @@
     "db:schema": "node scripts/dump-schema.cjs",
     "db:verify-schema": "node scripts/verifikasi-schema.cjs",
     "db:seed-roles": "node scripts/db/seed-katalog-peran.cjs",
+    "db:migrasi-peran": "node scripts/db/migrasi-peran.cjs",
     "db:seed-master": "node scripts/db/seed-master-data.cjs",
     "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "start": "node dist/server.cjs",
