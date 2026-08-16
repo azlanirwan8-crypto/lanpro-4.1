@@ -954,7 +954,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                           onClick={() =>
                             setIsInlineTypeOpen(isInlineTypeOpen === "inline" ? null : "inline")
                           }
-                          className="flex items-center gap-1.5 p-1 bg-surface-sunken border border-border-subtle rounded text-content-secondary hover:border-blue-500/30 hover:bg-blue-500/10 transition-all font-medium text-xs sm:text-[10px]"
+                          className="flex items-center gap-1.5 p-1 bg-surface-sunken border border-border-subtle rounded text-content-secondary hover:border-blue-500/30 hover:bg-blue-500/10 transition-all font-medium text-[10px] leading-none"
                         >
                           {(() => {
                             const typeData = mArr.find(
@@ -1184,7 +1184,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                 </span>
               )}
               {listFilterAssignee !== "All" && (
-                <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/30 flex items-center gap-1 shadow-soft">
+                <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/30 flex items-center gap-1 shadow-soft">
                   Assignee:{" "}
                   {projectMembers.find((m) => m.uid === listFilterAssignee)?.displayName ||
                     "Unassigned"}
@@ -1214,7 +1214,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                 </span>
               )}
               {listFilterCategory !== "All" && (
-                <span className="text-xs sm:text-[11px] font-medium text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1 shadow-soft">
+                <span className="text-[10px] leading-none font-medium text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1 shadow-soft">
                   Category: {listFilterCategory}
                   <button
                     type="button"
@@ -1250,7 +1250,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                 </span>
               )}
               {listFilterProjectRisk !== "All" && (
-                <span className="text-xs sm:text-[11px] font-medium text-rose-600 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/30 flex items-center gap-1 shadow-soft">
+                <span className="text-[10px] leading-none font-medium text-rose-600 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/30 flex items-center gap-1 shadow-soft">
                   Risk: {listFilterProjectRisk}
                   <button
                     type="button"
@@ -1274,7 +1274,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                 </span>
               )}
               {listFilterResolution !== "All" && (
-                <span className="text-xs sm:text-[11px] font-medium text-violet-600 bg-violet-500/10 px-2.5 py-1 rounded-full border border-violet-500/30 flex items-center gap-1 shadow-soft">
+                <span className="text-[10px] leading-none font-medium text-violet-600 bg-violet-500/10 px-2.5 py-1 rounded-full border border-violet-500/30 flex items-center gap-1 shadow-soft">
                   Resolution: {listFilterResolution}
                   <button
                     type="button"
@@ -1286,7 +1286,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                 </span>
               )}
               {(listFilterStartDate || listFilterEndDate) && (
-                <span className="text-xs sm:text-[11px] font-medium text-amber-700 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30 flex items-center gap-1 shadow-soft">
+                <span className="text-[10px] leading-none font-medium text-amber-700 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30 flex items-center gap-1 shadow-soft">
                   <Calendar className="w-3 h-3 text-amber-600 shrink-0" />
                   Date (
                   {listFilterDateType === "dueDate"

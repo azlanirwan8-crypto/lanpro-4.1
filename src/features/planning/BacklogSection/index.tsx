@@ -50,7 +50,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               Backlog Tasks
             </h3>
           </div>
-          <div className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/30 rounded-md text-xs font-semibold text-primary">
+          <div className="px-2 py-[3px] bg-indigo-500/10 border border-indigo-500/30 rounded-md text-xs font-semibold text-primary">
             {filteredBacklogTasks.length} Issues
           </div>
         </div>
@@ -98,7 +98,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               <span className="text-xs sm:text-[10px] font-medium text-purple-700 uppercase tracking-wider leading-none">
                 {epic.title}
               </span>
-              <div className="ml-auto text-xs sm:text-[10px] font-medium text-purple-600 bg-purple-500/10 px-2 py-0.2 rounded-md border border-purple-500/30">
+              <div className="ml-auto text-[10px] leading-none font-medium text-purple-600 bg-purple-500/10 px-2 py-0.2 rounded-md border border-purple-500/30">
                 {items.length}
               </div>
             </div>,

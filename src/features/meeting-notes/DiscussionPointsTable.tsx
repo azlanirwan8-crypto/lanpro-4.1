@@ -622,17 +622,17 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                         <td className="py-3 px-4 align-middle">
                           <div className="flex flex-wrap gap-1">
                             {p.fitur && (
-                              <span className="px-2 py-0.5 bg-indigo-500/10 text-primary border border-indigo-500/30 rounded-md text-xs sm:text-[10px] font-medium">
+                              <span className="px-2 py-[3px] bg-indigo-500/10 text-primary border border-indigo-500/30 rounded-md text-[10px] leading-none font-medium">
                                 {p.fitur}
                               </span>
                             )}
                             {p.system && (
-                              <span className="px-2 py-0.5 bg-purple-500/10 text-purple-700 border border-purple-500/30 rounded-md text-xs sm:text-[10px] font-medium">
+                              <span className="px-2 py-[3px] bg-purple-500/10 text-purple-700 border border-purple-500/30 rounded-md text-[10px] leading-none font-medium">
                                 {p.system}
                               </span>
                             )}
                             {p.surrounding && (
-                              <span className="px-2 py-0.5 bg-amber-500/10 text-amber-700 border border-amber-500/30 rounded-md text-xs sm:text-[10px] font-medium">
+                              <span className="px-2 py-[3px] bg-amber-500/10 text-amber-700 border border-amber-500/30 rounded-md text-[10px] leading-none font-medium">
                                 {p.surrounding}
                               </span>
                             )}
@@ -698,12 +698,12 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                             title="Klik untuk ubah status PENDING / DONE"
                           >
                             {isCompleted ? (
-                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 shadow-2xs hover:bg-emerald-500/15">
+                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-medium uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 shadow-2xs hover:bg-emerald-500/15">
                                 <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                                 DONE
                               </span>
                             ) : (
-                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-amber-500/10 text-amber-700 border border-amber-500/30 shadow-2xs hover:bg-amber-500/15">
+                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-medium uppercase tracking-wider bg-amber-500/10 text-amber-700 border border-amber-500/30 shadow-2xs hover:bg-amber-500/15">
                                 <Clock className="w-3 h-3 text-amber-600" />
                                 PENDING
                               </span>
@@ -834,7 +834,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
                       {/* Status */}
                       <td className="py-2.5 px-4 text-center align-middle">
-                        <span className="px-2.5 py-1 rounded-md text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-amber-500/10 text-amber-700 border border-amber-500/30">
+                        <span className="px-2.5 py-1 rounded-md text-[10px] leading-none font-medium uppercase tracking-wider bg-amber-500/10 text-amber-700 border border-amber-500/30">
                           PENDING
                         </span>
                       </td>

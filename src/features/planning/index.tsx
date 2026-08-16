@@ -102,7 +102,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                 <div className="flex flex-col gap-1.5">
                   <div className="flex justify-between items-center">
                     <div className="flex gap-2 items-center">
-                      <span className="text-xs sm:text-[11px] font-mono font-semibold text-primary bg-indigo-500/10 px-1.5 py-0.5 rounded-md border border-indigo-500/30">
+                      <span className="text-[10px] leading-none tracking-tight font-mono font-semibold text-primary bg-indigo-500/10 px-1.5 py-[3px] rounded border border-indigo-500/30">
                         {task.key}
                       </span>
                       {task.priority && (
@@ -155,7 +155,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                         </div>
                       )}
                     </div>
-                    <span className="text-xs sm:text-[10px] font-medium text-primary bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/30">
+                    <span className="text-[10px] leading-none font-medium text-primary bg-indigo-500/10 px-1.5 py-[3px] rounded border border-indigo-500/30">
                       {task.status}
                     </span>
                   </div>
@@ -163,7 +163,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
               ) : (
                 <div className="flex items-center gap-3 w-full">
                   <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                    <span className="text-xs sm:text-[11px] font-mono font-semibold text-primary bg-indigo-500/10 px-1.5 py-0.5 rounded-md border border-indigo-500/30 shrink-0">
+                    <span className="text-[10px] leading-none tracking-tight font-mono font-semibold text-primary bg-indigo-500/10 px-1.5 py-[3px] rounded border border-indigo-500/30 shrink-0">
                       {task.key}
                     </span>
                     <h4 className="text-xs font-medium text-content-strong truncate">

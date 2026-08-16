@@ -172,7 +172,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                           {fw.name}
                         </td>
                         <td className="py-3 px-4 whitespace-nowrap">
-                          <span className="inline-block px-2.5 py-1 bg-indigo-500/10 text-primary border border-indigo-500/30 text-xs sm:text-[10px] font-medium rounded-md uppercase">
+                          <span className="inline-block px-2.5 py-1 bg-indigo-500/10 text-primary border border-indigo-500/30 text-[10px] leading-none font-medium rounded-md uppercase">
                             {fw.category || "Panduan"}
                           </span>
                         </td>
@@ -186,7 +186,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         <td className="py-3 px-4 whitespace-nowrap">
                           {linkedEpic ? (
                             <span
-                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-violet-500/10 text-violet-700 border border-violet-500/30 text-xs sm:text-[10px] font-medium rounded-md max-w-[180px] truncate"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-violet-500/10 text-violet-700 border border-violet-500/30 text-[10px] leading-none font-medium rounded-md max-w-[180px] truncate"
                               title={linkedEpic.title}
                             >
                               🎯 {linkedEpic.title}
@@ -197,7 +197,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                         </td>
                         <td className="py-3 px-4 text-content-body font-medium whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-primary-surface/10 text-primary flex items-center justify-center text-xs sm:text-[10px] font-medium shrink-0">
+                            <div className="w-6 h-6 rounded-full bg-primary-surface/10 text-primary flex items-center justify-center text-[10px] leading-none font-medium shrink-0">
                               {initials}
                             </div>
                             <span className="truncate max-w-[120px]">{createdBy}</span>

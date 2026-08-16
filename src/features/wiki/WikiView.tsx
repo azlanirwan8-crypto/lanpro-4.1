@@ -707,28 +707,28 @@ export const WikiView: React.FC<WikiViewProps> = ({
         return {
           bg: "bg-indigo-500/10 border-indigo-500/30 text-primary hover:bg-indigo-500/15",
           badge:
-            "bg-indigo-500/10 text-primary border border-indigo-500/30 text-xs sm:text-[10px] font-medium px-2.5 py-0.5 rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
+            "bg-indigo-500/10 text-primary border border-indigo-500/30 text-[10px] leading-none font-medium px-2.5 py-[3px] rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
           accent: "border-primary",
         };
       case "PANDUAN":
         return {
           bg: "bg-blue-500/10 border-blue-500/30 text-blue-700 hover:bg-blue-500/15",
           badge:
-            "bg-blue-500/10 text-blue-700 border border-blue-500/30 text-xs sm:text-[10px] font-medium px-2.5 py-0.5 rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
+            "bg-blue-500/10 text-blue-700 border border-blue-500/30 text-[10px] leading-none font-medium px-2.5 py-[3px] rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
           accent: "border-blue-500",
         };
       case "LAPORAN":
         return {
           bg: "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 hover:bg-emerald-500/15",
           badge:
-            "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 text-xs sm:text-[10px] font-medium px-2.5 py-0.5 rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
+            "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 text-[10px] leading-none font-medium px-2.5 py-[3px] rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
           accent: "border-emerald-500",
         };
       case "SPESIFIKASI":
         return {
           bg: "bg-purple-500/10 border-purple-500/30 text-purple-700 hover:bg-purple-500/15",
           badge:
-            "bg-purple-500/10 text-purple-700 border border-purple-500/30 text-xs sm:text-[10px] font-medium px-2.5 py-0.5 rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
+            "bg-purple-500/10 text-purple-700 border border-purple-500/30 text-[10px] leading-none font-medium px-2.5 py-[3px] rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
           accent: "border-purple-500",
         };
       default:
@@ -1111,7 +1111,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         Pratinjau Dokumen Utama
                       </span>
                       {activeDoc.fileName && (
-                        <span className="text-xs sm:text-[10px] sm:text-[8px] font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                        <span className="text-[10px] leading-none sm:text-[8px] font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 px-2 py-[3px] rounded-md uppercase tracking-wider">
                           Disematkan: {activeDoc.fileType.split("/")[1]?.toUpperCase() || "FILE"}
                         </span>
                       )}
@@ -1531,7 +1531,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
                     {editFile ? (
                       <div>
-                        <p className="text-xs sm:text-[11px] font-medium text-primary bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-1 rounded-md inline-flex items-center gap-1">
+                        <p className="text-[10px] leading-none font-medium text-primary bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-1 rounded-md inline-flex items-center gap-1">
                           <Paperclip className="w-3 h-3" />
                           {editFile.name}
                         </p>
@@ -1561,7 +1561,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               setShouldRemoveFile(true);
                               toast.info("Lampiran lama akan terhapus setelah disimpan");
                             }}
-                            className="text-xs sm:text-[10px] sm:text-[8px] font-medium text-rose-600 bg-rose-500/10 border border-rose-500/30 p-0.5 px-1.5 rounded hover:bg-rose-500/15 transition-colors"
+                            className="text-[10px] leading-none sm:text-[8px] font-medium text-rose-600 bg-rose-500/10 border border-rose-500/30 p-0.5 px-1.5 rounded hover:bg-rose-500/15 transition-colors"
                           >
                             Hapus
                           </button>
@@ -1579,7 +1579,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     )}
 
                     {shouldRemoveFile && !editFile && (
-                      <div className="p-0.5 px-2 bg-rose-500/10 text-rose-700 border border-rose-500/30 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium">
+                      <div className="p-0.5 px-2 bg-rose-500/10 text-rose-700 border border-rose-500/30 rounded text-[10px] leading-none sm:text-[8px] font-medium">
                         Lampiran lama akan terhapus
                       </div>
                     )}

@@ -214,7 +214,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
       <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-500/30">
+            <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
               System Audit
             </span>
             <span className="text-xs text-content-subtle font-medium">
@@ -388,7 +388,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                           <span className="text-xs font-medium text-content-strong truncate">
                             {log.userName}
                           </span>
-                          <span className="text-xs sm:text-[10px] bg-indigo-500/10 text-indigo-700 font-medium px-2 py-0.2 rounded border border-indigo-500/30 uppercase flex items-center gap-1">
+                          <span className="text-[10px] leading-none bg-indigo-500/10 text-indigo-700 font-medium px-2 py-0.2 rounded border border-indigo-500/30 uppercase flex items-center gap-1">
                             {getEntityIcon(log.entityName)}
                             {log.entityName}
                           </span>
@@ -416,7 +416,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                           </span>{" "}
                           pada entitas {log.entityName} dengan referensi ID:
                         </span>
-                        <span className="font-mono text-xs sm:text-[11px] font-medium text-indigo-600 bg-indigo-500/10 px-1.5 py-0.2 rounded border border-indigo-500/30">
+                        <span className="font-mono text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-1.5 py-0.2 rounded border border-indigo-500/30">
                           {log.entityId}
                         </span>
                       </div>
@@ -424,12 +424,12 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                       <div className="mt-2.5 flex items-center justify-between pt-2 border-t border-border-faint">
                         <div className="flex items-center gap-2">
                           {log.oldValues && Object.keys(log.oldValues).length > 0 && (
-                            <span className="px-1.5 py-0.2 bg-rose-500/10 border border-rose-500/30 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium text-rose-600 uppercase">
+                            <span className="px-1.5 py-0.2 bg-rose-500/10 border border-rose-500/30 rounded text-[10px] leading-none sm:text-[9px] font-medium text-rose-600 uppercase">
                               Sebelum: {Object.keys(log.oldValues).length} keys
                             </span>
                           )}
                           {log.newValues && Object.keys(log.newValues).length > 0 && (
-                            <span className="px-1.5 py-0.2 bg-emerald-500/10 border border-emerald-500/30 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium text-emerald-600 uppercase">
+                            <span className="px-1.5 py-0.2 bg-emerald-500/10 border border-emerald-500/30 rounded text-[10px] leading-none sm:text-[9px] font-medium text-emerald-600 uppercase">
                               Sesudah: {Object.keys(log.newValues).length} keys
                             </span>
                           )}

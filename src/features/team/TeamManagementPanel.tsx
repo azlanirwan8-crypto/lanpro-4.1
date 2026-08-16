@@ -535,7 +535,7 @@ export const TeamManagementPanel = ({
                           </div>
                         </td>
                         <td className="px-5 py-3.5">
-                          <span className="inline-flex px-2.5 py-0.5 rounded-md text-xs font-medium bg-indigo-500/10 text-indigo-700 border border-indigo-500/30 capitalize">
+                          <span className="inline-flex px-2.5 py-[3px] rounded-md text-xs font-medium bg-indigo-500/10 text-indigo-700 border border-indigo-500/30 capitalize">
                             {isOwner ? "Project Owner" : roleName}
                           </span>
                         </td>
@@ -648,7 +648,7 @@ export const TeamManagementPanel = ({
                       className="p-2 bg-surface rounded border border-border-subtle/80 text-xs flex items-center justify-between"
                     >
                       <div className="flex items-center gap-2 truncate">
-                        <span className="font-mono text-xs sm:text-[10px] font-medium text-indigo-600 bg-indigo-500/10 px-1 rounded">
+                        <span className="font-mono text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-1 rounded">
                           {t.key}
                         </span>
                         <span className="truncate text-content-body font-medium">{t.title}</span>

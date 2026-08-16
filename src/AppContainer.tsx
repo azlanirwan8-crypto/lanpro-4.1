@@ -3602,7 +3602,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                               <h3 className="text-sm font-medium text-content-strong tracking-tight">
                                 Issue Details
                               </h3>
-                              <span className="text-xs font-medium text-indigo-700 bg-indigo-500/10 px-2.5 py-0.5 rounded-md border border-indigo-500/30">
+                              <span className="text-xs font-medium text-indigo-700 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
                                 {selectedTaskForDetail?.key || "TASK"}
                               </span>
                             </div>

@@ -88,7 +88,7 @@ export const QATopBar: React.FC<QATopBarProps> = ({
                     <span className="text-xs sm:text-[10px] text-success font-bold uppercase tracking-wider">
                       Anda Memegang Lock
                     </span>
-                    <span className="px-2 py-0.5 bg-primary-surface/10 text-primary text-xs sm:text-[10px] font-bold rounded-md">
+                    <span className="px-2 py-[3px] bg-primary-surface/10 text-primary text-[10px] leading-none font-bold rounded-md">
                       {formatTime(remainingTime)}
                     </span>
                   </div>

@@ -92,7 +92,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
               >
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1.5">
-                    <div className="text-xs sm:text-[10px] font-medium text-indigo-600 bg-indigo-500/10 px-2 py-0.5 rounded-full">
+                    <div className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2 py-[3px] rounded-full">
                       {task.key}
                     </div>
                     {isDueSoon24h(task.endDate) && (
@@ -155,7 +155,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
               >
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1.5">
-                    <div className="text-xs sm:text-[10px] font-medium text-rose-600 bg-rose-500/10 px-2 py-0.5 rounded-full">
+                    <div className="text-[10px] leading-none font-medium text-rose-600 bg-rose-500/10 px-2 py-[3px] rounded-full">
                       {task.key}
                     </div>
                     {isDueSoon24h(task.endDate) && (

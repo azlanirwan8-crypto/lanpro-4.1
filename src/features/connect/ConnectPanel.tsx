@@ -162,7 +162,7 @@ export const ConnectPanel = () => {
                   <p className="leading-relaxed">
                     Error ini terjadi karena salah ketik (typo) nama database. Konfigurasi default
                     MySQL di Google Cloud / Aiven biasanya menggunakan nama database{" "}
-                    <strong className="font-medium underline text-amber-900 bg-amber-500/15 px-1 py-0.5 rounded">
+                    <strong className="font-medium underline text-amber-900 bg-amber-500/15 px-1 py-[3px] rounded">
                       defaultdb
                     </strong>
                     .
