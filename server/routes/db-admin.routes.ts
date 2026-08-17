@@ -38,26 +38,10 @@ router.get("/api/test-db", verifyGlobalAdmin, async (req, res) => {
  * POST /api/db-query
  * Body: { query: "SELECT * FROM table" }
  *
- * ┌─────────────────────────────────────────────────────────────────────────┐
- * │ PERINGATAN: HANDLER INI TIDAK PERNAH DIEKSEKUSI.                        │
- * │                                                                         │
- * │ server.ts me-mount systemRoutes SEBELUM dbAdminRoutes, dan              │
- * │ system.routes.ts mendaftarkan POST /api/db-query lebih dulu. Express    │
- * │ memakai yang pertama cocok, sehingga versi inilah yang menang:          │
- * │ server/routes/system.routes.ts                                          │
- * │                                                                         │
- * │ Perbedaannya BUKAN kosmetik. Versi di bawah menerapkan penjaga          │
- * │ read-only (hanya satu statement SELECT/SHOW/DESCRIBE, memblokir         │
- * │ INSERT/UPDATE/DELETE/DROP dan sejenisnya). Versi yang benar-benar       │
- * │ berjalan TIDAK punya penjaga itu sama sekali.                           │
- * │                                                                         │
- * │ Jadi pengerasan keamanan yang ditulis di sini tidak pernah berlaku.     │
- * │                                                                         │
- * │ Mengaktifkannya bukan sekadar memindahkan urutan mount: fitur ubah dan  │
- * │ hapus baris di DB Explorer mengirim UPDATE dan DELETE lewat endpoint    │
- * │ yang sama, sehingga penjaga read-only akan mematikan fitur itu.         │
- * │ Perlu keputusan sadar pemilik repo — lihat catatan di ARCHITECTURE.md.  │
- * └─────────────────────────────────────────────────────────────────────────┘
+ * Enforces strict read-only execution:
+ * - Single SELECT, SHOW, or DESCRIBE statement only
+ * - Disallows statement chaining (no semicolons in query body)
+ * - Blocks mutation keywords (INSERT, UPDATE, DELETE, DROP, TRUNCATE, ALTER, CREATE, etc.)
  */
 router.post("/api/db-query", verifyGlobalAdmin, async (req, res) => {
   let connection;

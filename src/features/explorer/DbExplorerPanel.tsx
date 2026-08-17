@@ -7,10 +7,6 @@ import { toast } from "sonner";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import {
   runQuery,
-  // Diberi alias: komponen sudah punya handler lokal deleteRow dan
-  // fetchDbStatus/fetchSchema yang membungkus state loading dan toast.
-  deleteRow as deleteRowApi,
-  updateRow as updateRowApi,
   fetchSchema as fetchSchemaApi,
 } from "./services/explorer.service";
 
@@ -39,58 +35,8 @@ export const DbExplorerPanel: React.FC<any> = ({
   //
   // Sejalan dengan ketetapan "Postgres saja": tidak ada MySQL di LanPro, jadi
   // toggle antar mode database tidak punya alasan untuk ada.
-  const [editingRow, setEditingRow] = useState<number | null>(null);
-  const [editValues, setEditValues] = useState<any>({});
-  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-  const deleteRow = async (pkField: string, pkValue: any) => {
-    if (!activeTable) return;
-
-    setLoading(true);
-    try {
-      const data = await deleteRowApi(activeTable, pkField, pkValue);
-      if (data.status === "success") {
-        toast.success("Baris berhasil dihapus");
-        loadTable(activeTable); // refresh
-      } else {
-        toast.error(data.message || "Gagal menghapus baris");
-      }
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const saveRowEdit = async (pkField: string, pkValue: any, index: number) => {
-    if (!activeTable) return;
-    setLoading(true);
-    try {
-      const updates = Object.keys(editValues)
-        .filter((key) => key !== pkField)
-        .map((key) => {
-          const val = editValues[key];
-          if (val === null || val === "") return `\`${key}\` = NULL`;
-          return `\`${key}\` = '${String(val).replace(/'/g, "''")}'`;
-        })
-        .join(", ");
-
-      const data = await updateRowApi(activeTable, updates, pkField, pkValue);
-      if (data.status === "success") {
-        toast.success("Baris berhasil diupdate");
-        setEditingRow(null);
-        loadTable(activeTable); // refresh
-      } else {
-        toast.error(data.message || "Gagal mengupdate baris");
-      }
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     fetchSchema();
@@ -346,11 +292,6 @@ export const DbExplorerPanel: React.FC<any> = ({
                     <ResponsiveTable className="w-full text-left border-collapse text-sm">
                       <thead className="bg-primary-surface/5 text-primary font-medium uppercase tracking-wider">
                         <tr>
-                          {result.length > 0 && (
-                            <th className="p-3 border-b border-border-subtle font-medium w-32">
-                              Actions
-                            </th>
-                          )}
                           {result.length > 0 ? (
                             Object.keys(result[0]).map((key) => (
                               <th
@@ -369,103 +310,27 @@ export const DbExplorerPanel: React.FC<any> = ({
                       </thead>
                       <tbody className="divide-y divide-border-faint">
                         {result.length > 0 ? (
-                          result.map((row: any, i: number) => {
-                            const isEditing = editingRow === i;
-                            const pkField = Object.keys(row)[0];
-                            const hasId = pkField !== undefined;
-                            return (
-                              <tr key={i} className="hover:bg-surface-sunken">
-                                <td className="p-3">
-                                  {hasId && activeTable && (
-                                    <div className="flex items-center gap-2">
-                                      {isEditing ? (
-                                        <>
-                                          <button
-                                            onClick={() => saveRowEdit(pkField, row[pkField], i)}
-                                            className="text-emerald-600 hover:text-emerald-700 font-medium"
-                                          >
-                                            Save
-                                          </button>
-                                          <button
-                                            onClick={() => setEditingRow(null)}
-                                            className="text-content-muted hover:text-content-body font-medium"
-                                          >
-                                            Cancel
-                                          </button>
-                                        </>
-                                      ) : confirmDelete === i ? (
-                                        <>
-                                          <span className="text-xs text-red-500 mr-1">Yakin?</span>
-                                          <button
-                                            onClick={() => {
-                                              deleteRow(pkField, row[pkField]);
-                                              setConfirmDelete(null);
-                                            }}
-                                            className="text-red-600 hover:text-red-700 font-medium"
-                                          >
-                                            Ya
-                                          </button>
-                                          <button
-                                            onClick={() => setConfirmDelete(null)}
-                                            className="text-content-muted hover:text-content-body font-medium"
-                                          >
-                                            Batal
-                                          </button>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <button
-                                            onClick={() => {
-                                              setEditingRow(i);
-                                              setEditValues({ ...row });
-                                            }}
-                                            className="text-indigo-600 hover:text-indigo-700 font-medium"
-                                          >
-                                            Edit
-                                          </button>
-                                          <button
-                                            onClick={() => setConfirmDelete(i)}
-                                            className="text-red-500 hover:text-red-700 font-medium"
-                                          >
-                                            Del
-                                          </button>
-                                        </>
-                                      )}
-                                    </div>
-                                  )}
-                                </td>
-                                {Object.keys(row).map((key: string, j: number) => (
-                                  <td key={j} className="p-3 max-w-[300px]">
-                                    {isEditing ? (
-                                      <input
-                                        type="text"
-                                        value={editValues[key] !== null ? editValues[key] : ""}
-                                        onChange={(e) =>
-                                          setEditValues({ ...editValues, [key]: e.target.value })
-                                        }
-                                        className="w-full border border-border-subtle rounded px-2 py-1 text-sm bg-surface"
-                                        disabled={key === pkField}
-                                      />
+                          result.map((row: any, i: number) => (
+                            <tr key={i} className="hover:bg-surface-sunken">
+                              {Object.keys(row).map((key: string, j: number) => (
+                                <td key={j} className="p-3 max-w-[300px]">
+                                  <div className="truncate w-full text-content-secondary font-mono text-xs">
+                                    {row[key] === null ? (
+                                      <span className="text-content-subtle italic">null</span>
+                                    ) : typeof row[key] === "object" ? (
+                                      JSON.stringify(row[key])
                                     ) : (
-                                      <div className="truncate w-full text-content-secondary">
-                                        {row[key] === null ? (
-                                          <span className="text-content-subtle italic">null</span>
-                                        ) : typeof row[key] === "object" ? (
-                                          JSON.stringify(row[key])
-                                        ) : (
-                                          String(row[key])
-                                        )}
-                                      </div>
+                                      String(row[key])
                                     )}
-                                  </td>
-                                ))}
-                              </tr>
-                            );
-                          })
+                                  </div>
+                                </td>
+                              ))}
+                            </tr>
+                          ))
                         ) : (
                           <tr>
-                            <td className="p-4 text-center text-content-subtle italic">
-                              No rows found.
+                            <td className="p-8 text-center text-content-subtle">
+                              Tidak ada data ditemukan
                             </td>
                           </tr>
                         )}

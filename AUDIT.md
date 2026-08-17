@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 21 BELUM · 71 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 20 BELUM · 72 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 21 item
+### 1.1 BELUM SELESAI — 20 item
 
-**Sebaran per fase:** F1 0 · F2 6 · F3 1 · F6 6 · F7 4 · F8 4 · F9 2 · F10 3 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 5 · F3 1 · F6 6 · F7 4 · F8 4 · F9 2 · F10 3 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
@@ -503,7 +503,6 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 16  | **Logika aplikasi belum pernah diaudit**                                                   | **F2**  | 🔴  | Sedang        |           Ya            | `TERBUKA`               | §13    |
 | 17  | **UI belum pernah diaudit di balik login**                                                 | **F3**  | 🔴  | Sedang        |           Ya            | `MENUNGGU` login        | §14    |
 | 18  | notebook-lm rusak di dua sisi                                                              | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
-| 19  | `POST /api/db-query` tanpa penjaga read-only                                               | **F2**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
 | 25  | Fondasi `email.service.ts`                                                                 | **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email | §1.5   |
 | 26  | **Email selamat datang** (poin 2)                                                          | **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email | §1.5   |
 | 27  | **Lupa password → password random** (poin 3)                                               | **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email | §1.5   |
@@ -516,7 +515,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)       | **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 
-### 1.2 SUDAH SELESAI — 71 item
+### 1.2 SUDAH SELESAI — 72 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -531,6 +530,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 13  | ~~28 berkas `dark:` + 48 hex di luar token~~ dimigrasikan ke token semantik CSS                      | **F12**  | 🟡  | Sedang        |         Tidak          | `SELESAI` 16 Agu | §8     |
 | 14  | ~~Kontras sidebar & jarak target sentuh~~ migrasi token inverse & target sentuh standar min 36-44px  | **F12**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 17 Agu | §8     |
 | 15  | ~~Dua Google API key lama belum dicabut~~ terverifikasi 0 API key di Google Cloud Console            |  **F1**  | 🔴  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §6     |
+| 19  | ~~`POST /api/db-query` tanpa penjaga read-only~~ ditegakkan read-only (SELECT/SHOW/DESCRIBE)         |  **F2**  | 🔴  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §6.3   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                                        | **F6.1** | 🔴  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                                     | **F6.1** | 🔴  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §1.5   |
 | 24  | ~~`EmailConfigForm` nol panggilan API~~ ditelusuri: TIDAK ada backend email                          | **F6.1** | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §1.5   |

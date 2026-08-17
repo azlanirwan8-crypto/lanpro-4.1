@@ -52,37 +52,7 @@ export async function runQuery(sql: string): Promise<ExplorerApiResponse> {
  * aslinya. Perilaku itu sengaja dipertahankan agar ekstraksi ini tetap murni
  * refactor. Risikonya terbatas karena endpoint-nya sudah membutuhkan admin
  * global yang toh bisa menjalankan SQL apa pun — tetapi bila suatu saat
- * dibenahi, di sinilah tempatnya.
- */
-function quoteValue(value: any): string {
-  return String(value).replace(/'/g, "''");
-}
-
-/** Menghapus satu baris berdasarkan kolom kunci primernya. */
-export async function deleteRow(
-  table: string,
-  pkField: string,
-  pkValue: any
-): Promise<ExplorerApiResponse> {
-  const sql = `DELETE FROM ${table} WHERE \`${pkField}\` = '${quoteValue(pkValue)}'`;
-  return runQuery(sql);
-}
-
-/**
- * Memperbarui satu baris.
- *
- * `assignments` sudah dalam bentuk potongan SQL `kolom = 'nilai'` yang
- * digabung koma, sama seperti sebelum diekstrak.
- */
-export async function updateRow(
-  table: string,
-  assignments: string,
-  pkField: string,
-  pkValue: any
-): Promise<ExplorerApiResponse> {
-  const sql = `UPDATE ${table} SET ${assignments} WHERE \`${pkField}\` = '${quoteValue(pkValue)}'`;
-  return runQuery(sql);
-}
+// Note: DB Explorer is strictly read-only per Item #19. Direct row deletion and update queries have been retired.
 
 /** Mengambil status koneksi database (mode dan host). */
 export async function fetchDbStatus(): Promise<ExplorerApiResponse> {

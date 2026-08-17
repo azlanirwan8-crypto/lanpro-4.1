@@ -6,26 +6,7 @@ import { verifyGlobalAdmin } from "../middleware/auth";
 
 const router = Router();
 
-// DB Explorer Endpoint
-router.post("/api/db-query", verifyGlobalAdmin, async (req, res) => {
-  let connection;
-  try {
-    const { query: sqlString } = req.body;
-    if (!sqlString) {
-      return res.status(400).json({ status: "error", message: "Query SQL tidak boleh kosong." });
-    }
-    
-    connection = await db.getConnection();
-    const [rows] = await connection.query(sqlString);
-    
-    res.json({ status: "success", data: rows });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: Database query error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
-  }
-});
+// DB Explorer endpoints are securely maintained in server/routes/db-admin.routes.ts with read-only enforcement (Item #19).
 
 // Database Schema Stats
 router.get("/api/db-schema", verifyGlobalAdmin, async (req, res) => {
