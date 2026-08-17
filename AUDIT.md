@@ -44,6 +44,8 @@ bagian ini, berurutan. Sisanya rujukan, bukan bacaan awal.
 | §18     | Standar & kepatuhan — pemetaan OWASP/CWE, rubrik keparahan                                         |
 | §19     | **Two-Tier RBAC (F7)** dan seluruh catatan pengerjaannya, §19.1–§19.49                             |
 | §20     | **Serah terima untuk perkakas lain**                                                               |
+| §21     | Pekerjaan yang ditahan 17 Agu 2026 — keadaan persis saat berhenti, dan pemindai kontras            |
+| §22     | **Aturan menyentuh TEMA** — wajib dibaca sebelum mengubah warna apa pun                            |
 
 ---
 
@@ -6761,3 +6763,139 @@ rilis. **Tidak.**
 Yang masih menahan rilis production tercatat di §1.1 dan §20.3 — terutama
 **#30** (storage drive-per-user) dan **#46** (`SSO_ALLOWED_DOMAINS=gmail.com`).
 Keduanya menunggu keputusan pemilik proyek dan **tidak boleh ditebak**.
+
+## §22 ATURAN MENYENTUH TEMA — baca SEBELUM mengubah warna apa pun
+
+Bagian ini ada karena tema repo ini **pernah dirusak** oleh perkakas AI yang
+mengerjakannya tanpa mengetahui kosakata tokennya, lalu butuh satu sesi penuh
+untuk dipulihkan. Aturannya sekarang tertulis, dan ditegakkan
+`npm run audit:tema`.
+
+**Berlaku untuk siapa pun — manusia maupun AI.**
+
+### 22.1 Prinsipnya
+
+Warna di LanPro **tidak ditulis di komponen**. Komponen memakai **token**, dan
+token itulah yang punya dua nilai: satu untuk mode terang, satu untuk mode
+gelap. Keduanya didefinisikan di `src/index.css`.
+
+Konsekuensinya, dan ini yang paling sering disalahpahami:
+
+> Untuk memperbaiki mode gelap, Anda **tidak** menambahkan aturan gelap.
+> Anda memakai token yang benar, dan mode gelapnya mengikuti sendiri.
+
+Mode gelap memakai kelas (`@variant dark (&:where(.dark, .dark *))`), bukan
+`prefers-color-scheme`. Kelas `dark` dipasang di elemen akar.
+
+### 22.2 Empat kosakata — TIDAK BOLEH BERSILANGAN
+
+| Kosakata                  | Untuk         | Contoh benar                            |
+| ------------------------- | ------------- | --------------------------------------- |
+| `surface-*`               | LATAR         | `bg-surface`, `bg-surface-sunken`       |
+| `content-*`               | TEKS dan ikon | `text-content`, `text-content-muted`    |
+| `border-*`                | GARIS         | `border-border-subtle`                  |
+| `primary-*` · `{aksen}-*` | AKSEN         | `text-danger-text`, `bg-danger-surface` |
+
+**Menyilangkannya adalah cacat, bukan gaya penulisan alternatif:**
+
+    SALAH  bg-content-muted      latar memakai kosakata teks
+    SALAH  text-surface-sunken   teks memakai kosakata latar
+    SALAH  text-border-subtle    teks memakai kosakata garis
+
+Kenapa fatal: nilai `content-*` dan `surface-*` **berkebalikan** antar mode.
+`content` bernilai `#0f172a` (nyaris hitam) di terang dan `#f1f5f9` (nyaris
+putih) di gelap. Latar yang memakai `content-*` karena itu ikut membalik, dan
+teks di atasnya menjadi terang-di-atas-terang alias hilang. Kesalahan ini nyata:
+`text-slate-300` sempat menjadi `text-border-subtle` oleh pemetaan otomatis.
+
+Sisa 20 kemunculan bersilangan **tidak seluruhnya cacat** — `bg-border-subtle`
+dipakai untuk garis pemisah yang digambar sebagai `div`, dan warnanya memang
+warna garis. Karena itu `audit:tema` meratchetnya: yang ada dibiarkan, yang baru
+ditolak.
+
+### 22.3 Aksen punya DUA peran — jangan tertukar
+
+Ini pemisahan terbaru (§19.50) dan paling mudah salah:
+
+| Token             | Untuk                             | Terang    | Gelap     |
+| ----------------- | --------------------------------- | --------- | --------- |
+| `{aksen}-text`    | TEKS berwarna di atas latar biasa | gelap     | terang    |
+| `{aksen}-surface` | LATAR berwarna, teksnya putih     | sama saja | sama saja |
+
+    text-danger-text     benar   teks merah di atas kartu putih/gelap
+    bg-danger-surface    benar   lencana merah, teksnya putih
+    text-danger          lama    ikut mode, kontrasnya buruk di terang
+    bg-danger-text       SALAH   latar memakai token teks
+
+`{aksen}` = `warning` · `success` · `danger` · `info`.
+
+**Kenapa `-surface` bernilai sama di kedua mode:** ia latar berwarna pekat yang
+selalu bersanding dengan teks putih. Bila ia ikut membalik menjadi terang di
+mode gelap, teks putih di atasnya hilang.
+
+Varian opasitas seperti `bg-danger/10` **sengaja dibiarkan** — itu warna semu
+(tint), bukan latar pekat, dan perilakunya memang harus mengikuti mode.
+
+### 22.4 Yang TIDAK boleh diubah
+
+**1. Nilai token di `src/index.css`.**
+82 token dikunci garis dasar; berubah satu digit hex pun membuat `audit:tema`
+merah. Satu token dipakai ratusan tempat — mengubah nilainya untuk memperbaiki
+SATU layar akan mengubah seluruh aplikasi, dan kerusakannya muncul di layar yang
+bahkan tidak dibuka orang yang mengubahnya.
+
+Bila token memang harus berubah, itu keputusan sadar: laporkan lebih dulu, lalu
+`npm run audit:tema -- --perbarui`, lalu **buktikan di peramban**.
+
+**2. Menambah `dark:`.**
+Tersisa 21 kemunculan di **satu** berkas (`src/features/issues/styles.ts`),
+turun dari puncak **532**. Itu utang yang dikunci, bukan izin menambah yang
+ke-22. Bila Anda merasa butuh `dark:`, hampir selalu artinya tokennya yang
+salah pilih.
+
+**3. Menambah kelas warna keras.**
+`bg-slate-800`, `text-gray-500`, dan sejenisnya diratchet `audit:warna`
+(garis dasar 144, dari 942). Bila belum ada token yang cocok, **tambahkan
+tokennya lebih dulu** — jangan memperbarui garis dasar.
+
+### 22.5 Yang memang SENGAJA warna keras — jangan "diperbaiki"
+
+Menambal daftar ini akan merusak, bukan memperbaiki:
+
+| Bentuk                                                  | Alasan                                                                                             |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Gradasi `from-` `via-` `to-`                            | keputusan desain, bukan tema; memetakannya meratakan gradasinya                                    |
+| `bg-white/10`, `border-white/20`                        | lapisan di atas kartu yang memang gelap di KEDUA mode                                              |
+| Palet bentuk flowchart (`nodeTheme.ts`, `constants.ts`) | itu **warna DATA diagram**, bukan tema. Pernah dikonversi keliru dan ditangkap test                |
+| Lencana "Hot" / "New", logo amber                       | **warna merek**. Kontrasnya di bawah 4.5 sejak mode terang; mengubahnya = keputusan pemilik proyek |
+| Tombol nonaktif                                         | kontrol nonaktif dikecualikan WCAG — **bukan cacat**                                               |
+
+### 22.6 Cara mengerjakan perbaikan tema — urutannya
+
+1. **Ukur dulu.** Pakai pemindai kontras §21.3 apa adanya; jangan menulis ulang
+   (ia sudah lewat empat kali koreksi, §19.49). Pastikan `masuk: true`.
+2. **Tentukan nomor item** di §1.1. Tanpa nomor, jangan mulai.
+3. **Ganti tokennya**, bukan nilainya. Satu berkas selesai, baru berkas
+   berikutnya.
+4. **Gerbang:** `npm run lint && npm test && npm run build && npm run audit:warna && npm run audit:tema`.
+5. **Buka tab peramban BERSIH**, periksa mode terang DAN gelap. Ganti tema
+   dengan memasang/mencabut kelas `dark` di tempat — **jangan me-reload**,
+   reload mengeluarkan sesi.
+6. **Ukur ulang**, dan bandingkan dengan layar yang SAMA. Angka dari layar
+   login tidak sebanding dengan angka dari layar yang sudah login.
+7. **Perbarui `AUDIT.md`.**
+
+### 22.7 Kesalahan nyata yang sudah pernah terjadi — jangan diulang
+
+| Kesalahan                                               | Akibat                                                                                                                                 |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `bg-slate-900` → `surface-inverse`                      | dikira identik, ternyata `#0f172a` vs `#1e293b`. Tampilan **lebih terang**, ketahuan mata pemilik proyek, 22 tempat harus dikembalikan |
+| Regex `\b` sesudah `]` tidak pernah cocok               | melaporkan 40 perubahan sambil melewatkan 89                                                                                           |
+| Pemindai kontras memakai putih sebagai cadangan latar   | **mengarang 78 tabrakan palsu**, nyaris memicu penambalan massal kode yang sehat                                                       |
+| Saringan ukuran `>80×30` pada pemindai                  | seluruh lencana hilang dari hitungan                                                                                                   |
+| `.dark` di `sweetalert.css` hanya mengatur TEKS         | popup tetap putih → teks terang di atas putih                                                                                          |
+| Mengukur "sebelum" saat login, "sesudah" di layar login | terjadi **tiga kali**; angkanya tidak sebanding                                                                                        |
+
+Benang merahnya satu: **alat ukur yang salah lebih berbahaya daripada tidak
+mengukur**, karena hasilnya terlihat meyakinkan. Bila sebuah angka mengejutkan,
+periksa alat ukurnya lebih dulu — bukan kodenya.
