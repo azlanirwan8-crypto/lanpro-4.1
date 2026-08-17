@@ -54,6 +54,30 @@ describe("authenticateJWT - Sinkronisasi Peran & Status Real-time (§19.28 / Ite
     expect(req.user.status).toBe("active");
   });
 
+  it("menerima akses jika status akun di database adalah 'approved'", async () => {
+    const token = jwt.sign(
+      { id: "user-123", uid: "user-123", username: "admin", role: "admin" },
+      secret,
+      { expiresIn: "2h" }
+    );
+
+    (db.query as jest.Mock).mockResolvedValueOnce([
+      [{ currentSessionToken: token, role: "admin", status: "approved" }],
+    ]);
+
+    const req = createMockRequest({
+      headers: { authorization: `Bearer ${token}` },
+    });
+    const res = createMockResponse();
+    const next = jest.fn();
+
+    await authenticateJWT(req as any, res as any, next);
+
+    expect(next).toHaveBeenCalled();
+    expect(req.user.role).toBe("admin");
+    expect(req.user.status).toBe("approved");
+  });
+
   it("menolak akses (HTTP 403) jika status akun di database tidak aktif / suspended", async () => {
     const token = jwt.sign(
       { id: "user-123", uid: "user-123", username: "budi", role: "user" },

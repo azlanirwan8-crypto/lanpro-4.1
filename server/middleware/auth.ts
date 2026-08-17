@@ -91,8 +91,9 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
                 });
               }
 
-              // Tolak akun yang dinonaktifkan atau belum aktif
-              if (dbUser.status && dbUser.status.toLowerCase() !== "active") {
+              // Tolak akun yang dinonaktifkan atau belum aktif (status sah: 'approved' atau 'active')
+              const statusLower = dbUser.status ? String(dbUser.status).toLowerCase() : "";
+              if (statusLower && statusLower !== "active" && statusLower !== "approved") {
                 return res.status(403).json({
                   status: "error",
                   message: "Akses ditolak: Akun Anda dinonaktifkan atau belum aktif.",
