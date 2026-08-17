@@ -41,11 +41,16 @@ export const masterDataService = {
         order: 3,
       },
     ];
+    // Fallback category — area teknis murni (item #85).
+    // Nilai duplikat issue_type (Bug/Enhancement/New Feature/Maintenance)
+    // telah dihapus dari Master Data.
     const categories = [
-      { type: "category", label: "Security", color: "#000000", order: 0 },
-      { type: "category", label: "Backend API", color: "#2563EB", order: 1 },
-      { type: "category", label: "Frontend UI", color: "#DB2777", order: 2 },
-      { type: "category", label: "Testing", color: "#059669", order: 3 },
+      { type: "category", label: "Backend",        color: "#3B82F6", order: 1 },
+      { type: "category", label: "Frontend",       color: "#EC4899", order: 2 },
+      { type: "category", label: "DevOps",         color: "#8B5CF6", order: 3 },
+      { type: "category", label: "Security",       color: "#DC2626", order: 4 },
+      { type: "category", label: "Infrastructure", color: "#0EA5E9", order: 5 },
+      { type: "category", label: "Database",       color: "#F59E0B", order: 6 },
     ];
 
     const releases = [
