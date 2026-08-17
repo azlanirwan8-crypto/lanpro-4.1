@@ -296,8 +296,13 @@ export const MasterDataPanel = ({
       .join(" ");
 
   const masterDataTypes = React.useMemo(() => {
+    // modul_aplikasi bersumber dari tabel ProjectModules (item #86),
+    // bukan dari tabel MasterData, sehingga disertakan secara eksplisit.
     const dariData = Array.from(
-      new Set((localMasterData || []).map((d) => d.type).filter(Boolean) as string[])
+      new Set([
+        ...((localMasterData || []).map((d) => d.type).filter(Boolean) as string[]),
+        "modul_aplikasi",
+      ])
     );
     // Tipe yang dikenal tampil lebih dulu sesuai urutan LABEL_TIPE; sisanya
     // menyusul menurut abjad supaya tetap dapat ditebak.

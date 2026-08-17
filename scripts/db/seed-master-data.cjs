@@ -191,12 +191,6 @@ const KODE_SAJA = {
     "Master Data Settings": "master_data",
     "Reporting & Analytics": "reporting",
   },
-  modul_aplikasi: {
-    "LanPro Web Portal": "lanpro_web",
-    "Wondr Merchant Mobile App": "wondr_mobile",
-    "Admin Control Center": "admin_center",
-    "Merchant Portal": "merchant_portal",
-  },
   system: {
     "Core Backend API": "core_api",
     "Database Storage": "db_storage",
@@ -289,6 +283,17 @@ const KODE_SAJA = {
         dihapus++;
         console.log(`    ${warna.merah("HAPUS  ")} ${d.id} ${warna.redup("— " + d.alasan)}`);
       }
+    }
+    // Item #86 — bersihkan seluruh baris MasterData bertipe modul_aplikasi
+    // Sumber kebenaran resmi untuk modul/aplikasi adalah tabel ProjectModules.
+    const { rowCount: modulHapus } = await client.query(
+      `DELETE FROM "MasterData" WHERE type = 'modul_aplikasi'`
+    );
+    if (modulHapus > 0) {
+      dihapus += modulHapus;
+      console.log(
+        `    ${warna.merah("HAPUS  ")} ${modulHapus} baris type='modul_aplikasi' ${warna.redup("— sumber kebenaran: ProjectModules (#86)")}`
+      );
     }
     if (dihapus === 0) console.log(warna.redup("    (tidak ada yang perlu dihapus)"));
 
