@@ -1,5 +1,16 @@
 # AUDIT LanPro — Papan Rekap Kendala & Perbaikan
 
+> ## ⚠️ PERKAKAS AI — BERHENTI DI SINI DULU
+>
+> Bila Anda perkakas AI (Antigravity, Claude Code, Cursor, dan sejenisnya):
+> baca **`AGENTS.md` di akar repositori** lebih dulu, lalu **§23** di dokumen
+> ini. Keduanya wajib, dan keduanya pendek.
+>
+> Ringkasnya: **pekerjaan berasal dari nomor item di §1.1, bukan dari tebakan
+> Anda.** Sebutkan nomor itu kepada pemilik proyek sebelum menyentuh kode. Bila
+> pekerjaannya menyangkut warna atau tema, **§22 wajib dibaca** — tema repo ini
+> pernah dirusak persis karena langkah itu dilewati.
+
 **Dokumen ini adalah SATU-SATUNYA pedoman perbaikan.** Tujuannya menghapus
 kebutuhan mengevaluasi ulang dari nol setiap kali memulai sesi kerja.
 
@@ -6914,7 +6925,7 @@ sebelum meminta pekerjaan apa pun.
 
 Sebelum menyentuh kode apa pun, lakukan ini berurutan dan laporkan hasilnya:
 
-1. Baca `.agents/AGENTS.md` seluruhnya. Isinya wajib.
+1. Baca `AGENTS.md` di akar repositori seluruhnya. Isinya wajib.
 2. Baca `AUDIT.md` bagian **MULAI DARI SINI**, lalu **§20**, lalu **§21**.
    Bila pekerjaannya menyangkut warna atau tema, baca juga **§22** — wajib.
 3. Jalankan `npm run audit:papan && npm run audit:warna && npm run audit:tema`
