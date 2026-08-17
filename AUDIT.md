@@ -486,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 19 item
+### 1.1 BELUM SELESAI — 18 item
 
-**Sebaran per fase:** F1 0 · F2 5 · F3 1 · F6 6 · F7 3 · F8 4 · F9 2 · F10 3 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 5 · F3 1 · F6 6 · F7 2 · F8 4 · F9 2 · F10 3 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
@@ -512,9 +512,8 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend               | **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik      | §0.4   |
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
-| 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 
-### 1.2 SUDAH SELESAI — 73 item
+### 1.2 SUDAH SELESAI — 74 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -594,6 +593,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 87  | ~~`effectiveRole` abai peran proyek~~ diselaraskan via `resolveProjectRole` & `can()`               |  **F7**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 17 Agu | §19.27 |
 | 83  | ~~Department Head & position tak fungsional~~ peran proyek `head` (akses R) diselaraskan ke matriks |  **F7**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §19.48 |
 | 85  | ~~`category` memuat dua konsep~~ — duplikat `issue_type` dihapus, `category` murni area teknis      |  **F7**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §19.14 |
+| 86  | ~~`modul_aplikasi` punya dua sumber~~ — `ProjectModules` jadi sumber kebenaran, 4 baris dibuang      |  **F7**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §19.14 |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -4477,8 +4477,12 @@ Setelah seed dijalankan, `category` di Master Data hanya mengandung area teknis.
 **`ProjectModules`**, bukan dari `MasterData` — sementara `MasterData` punya 4
 baris bertipe `modul_aplikasi` yang tidak pernah ditampilkan.
 
-Jadi satu konsep punya dua sumber, dan yang di Master Data efektif **data mati**.
-Perlu diputuskan mana yang menjadi sumber kebenaran.
+**SELESAI 17 Agu 2026 — `ProjectModules` ditetapkan sebagai sumber kebenaran tunggal.**
+
+1. `scripts/db/seed-master-data.cjs`: `modul_aplikasi` dicabut dari `KODE_SAJA` dan
+   ditambahkan query pembersihan seluruh baris bertipe `modul_aplikasi` dari tabel `MasterData`.
+2. `MasterDataPanel.tsx`: `masterDataTypes` menyertakan `modul_aplikasi` secara eksplisit
+   agar tab Modul / Aplikasi tetap tampil di antarmuka dengan membaca tabel `ProjectModules`.
 
 ---
 
@@ -6483,7 +6487,7 @@ Nomor item mengikuti §1 — jangan menomori ulang.
 | **30**             | konfirmasi D1b dan D3b (§11.1)                                | Jalur rilis storage. Salah arah = 6–10 sesi terbuang                                                           |
 | **77**             | pemilik memilih **SheetJS `xlsx`** — belum dikerjakan         | Status kerentanan SheetJS BELUM diukur. Jalankan `npm audit` dulu                                              |
 | **83**             | **SELESAI 17 Agu** (§19.48): Head di-assign, akses **R saja** | Sudah diterapkan di `roles.ts`, `matriksAkses.ts`, `permissions.ts`, seed & test |
-| **86**             | **SUDAH DIJAWAB** (§19.48): `ProjectModules` sumber kebenaran | 4 baris `modul_aplikasi` di MasterData dibuang                                                                 |
+| **86**             | **SELESAI 17 Agu** (§19.48): `ProjectModules` sumber kebenaran | 4 baris `modul_aplikasi` di MasterData dibuang, UI tetap baca `ProjectModules` |
 | **85**             | `category` dua konsep — pisah atau biarkan                    | Rekomendasi: pisah; `issue_type` sudah jadi rumahnya                                                           |
 | **17**             | izin objek percobaan + sesi admin                             | Audit UI di balik login                                                                                        |
 | **18 · 19**        | notebook-lm, penjaga read-only `db-query`                     | Keduanya MENGUBAH PERILAKU; #19 mematikan fitur ubah/hapus di DB Explorer                                      |
