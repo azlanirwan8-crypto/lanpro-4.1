@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 23 BELUM · 69 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 22 BELUM · 70 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 23 item
+### 1.1 BELUM SELESAI — 22 item
 
-**Sebaran per fase:** F1 1 · F2 6 · F3 1 · F6 6 · F7 4 · F8 4 · F9 2 · F10 3 · F11 1 · F12 1
+**Sebaran per fase:** F1 1 · F2 6 · F3 1 · F6 6 · F7 4 · F8 4 · F9 2 · F10 3 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
@@ -500,7 +500,6 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 7   | 59% baris kode di 37 berkas > 500 baris                                                    | **F10** | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §2     |
 | 8   | **1.290** `any` melemahkan jaring tipe (diukur ulang 16 Agu)                               | **F8**  | 🟠  | Sedang        |           Ya            | `TERBUKA`               | §7     |
 | 9   | Rasio test 1:208 — tetapi cakupan CABANG `AppContainer` hanya **8,2%** (§19.30)            | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §7     |
-| 14  | Kontras sidebar & jarak target sentuh                                                      | **F12** | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §8     |
 | 15  | Dua Google API key lama belum dicabut                                                      | **F1**  | 🔴  | Rendah        |          Tidak          | `MENUNGGU` pemilik      | §6     |
 | 16  | **Logika aplikasi belum pernah diaudit**                                                   | **F2**  | 🔴  | Sedang        |           Ya            | `TERBUKA`               | §13    |
 | 17  | **UI belum pernah diaudit di balik login**                                                 | **F3**  | 🔴  | Sedang        |           Ya            | `MENUNGGU` login        | §14    |
@@ -518,7 +517,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)       | **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 
-### 1.2 SUDAH SELESAI — 69 item
+### 1.2 SUDAH SELESAI — 70 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -531,6 +530,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 11  | ~~`auth` 762 baris tanpa lapisan~~ dipecah                                                           | **F5.2** | 🟠  | Rendah        |         Tidak          | `SELESAI` 15 Agu | §2     |
 | 12  | ~~ARCHITECTURE.md drift~~ angka diukur ulang                                                         |  **F0**  | 🟡  | Rendah        |    Ya (menyesatkan)    | `SELESAI` 16 Agu | §8     |
 | 13  | ~~28 berkas `dark:` + 48 hex di luar token~~ dimigrasikan ke token semantik CSS                      | **F12**  | 🟡  | Sedang        |         Tidak          | `SELESAI` 16 Agu | §8     |
+| 14  | ~~Kontras sidebar & jarak target sentuh~~ migrasi token inverse & target sentuh standar min 36-44px  | **F12**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 17 Agu | §8     |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                                        | **F6.1** | 🔴  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                                     | **F6.1** | 🔴  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §1.5   |
 | 24  | ~~`EmailConfigForm` nol panggilan API~~ ditelusuri: TIDAK ada backend email                          | **F6.1** | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §1.5   |

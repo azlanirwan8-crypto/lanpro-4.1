@@ -246,7 +246,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                       className={cn(
                         "w-full flex items-center gap-3 px-3 py-2.5 min-h-11 rounded-md transition-all text-xs relative overflow-hidden group",
                         isActive
-                          ? "bg-[#364574] text-content-inverse font-medium border-l-3 border-amber-400 shadow-soft"
+                          ? "bg-surface-inverse text-content-inverse font-medium border-l-3 border-amber-400 shadow-soft"
                           : "text-content-inverse-muted hover:bg-content-inverse/5 hover:text-content-inverse"
                       )}
                       title={isSidebarCollapsed ? item.label : undefined}
@@ -315,26 +315,26 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
       </nav>
 
       {/* Velzon Bottom User Profile Footer */}
-      <div className="p-3 border-t border-border-subtle bg-border-subtle/40 mt-auto relative">
+      <div className="p-3 border-t border-inverse bg-surface-inverse-strong/30 mt-auto relative">
         {isUserMenuOpen && (
-          <div className="absolute bottom-full left-3 right-3 mb-2 bg-surface-raised border border-border-subtle rounded-xl shadow-2xl py-1.5 z-50 text-content-inverse animate-in fade-in zoom-in-95 duration-150">
+          <div className="absolute bottom-full left-3 right-3 mb-2 bg-surface-inverse border border-border-inverse rounded-xl shadow-2xl py-1.5 z-50 text-content-inverse animate-in fade-in zoom-in-95 duration-150">
             <button
               onClick={() => {
                 setIsUserMenuOpen(false);
                 if (onOpenProfile) onOpenProfile();
               }}
-              className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-surface/10 flex items-center gap-2.5 transition-colors text-content-inverse-muted hover:text-content-inverse cursor-pointer"
+              className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-content-inverse/10 flex items-center gap-2.5 transition-colors text-content-inverse-muted hover:text-content-inverse cursor-pointer"
             >
               <User className="w-4 h-4 text-amber-400" />
               <span>Profil Anda</span>
             </button>
-            <div className="h-px bg-border-subtle my-1" />
+            <div className="h-px bg-border-inverse my-1" />
             <button
               onClick={() => {
                 setIsUserMenuOpen(false);
                 handleLogout();
               }}
-              className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-red-500/20 flex items-center gap-2.5 transition-colors text-red-400 hover:text-red-300 cursor-pointer"
+              className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-danger-surface/20 flex items-center gap-2.5 transition-colors text-danger-hover hover:text-danger cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               <span>Keluar</span>

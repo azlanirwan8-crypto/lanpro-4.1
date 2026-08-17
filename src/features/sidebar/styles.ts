@@ -30,7 +30,7 @@ export const styles = {
     "p-2 min-w-9 min-h-9 justify-center text-xs text-content-inverse-muted hover:text-content-inverse hover:bg-content-inverse/10 rounded transition-all flex items-center gap-1",
   projectButton: "w-full flex items-center py-2.5 min-h-11 rounded-md transition-all text-sm",
   projectButtonSelected:
-    "bg-border-inverse text-content-inverse font-medium shadow-sm border-l-3 border-amber-400",
+    "bg-surface-inverse text-content-inverse font-medium shadow-sm border-l-3 border-amber-400",
   projectButtonDefault:
     "text-content-inverse-muted hover:bg-content-inverse/5 hover:text-content-inverse",
   indicator: "w-2 h-2 rounded-full shrink-0",
