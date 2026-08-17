@@ -325,11 +325,12 @@ dulu. **Itu menggeser sebagian F10 ke depan F8 dan perlu keputusan Anda.**
 | #      | Yang dibutuhkan                                                                    | Membuka                  |
 | ------ | ---------------------------------------------------------------------------------- | ------------------------ |
 | **15** | Cabut 2 Google API key di Google Cloud Console — ±5 menit                          | **menutup F1**           |
-| **46** | Nilai `SSO_ALLOWED_DOMAINS` (kini `gmail.com`)                                     | juga membuka **#30**/F11 |
 | **48** | Konvensi untuk 5 pasang TABEL kembar — sebaiknya ikut ketetapan camelCase (§19.38) | F9                       |
 | **92** | Daftar-cabut · token lebih pendek · baca DB tiap permintaan                        | F7 tutup penuh           |
 | **77** | exceljs: turunkan · ganti pustaka · terima risiko                                  | F8                       |
 | **30** | Konfirmasi D1b & D3b (§11.1)                                                       | **F11 — jalur rilis**    |
+
+*(Catatan: #46 telah diselesaikan pada 17 Agu 2026 dengan penetapan domain `rajonet.com`)*
 
 **#15 paling murah dan satu-satunya yang menutup sebuah fase.**
 
@@ -358,14 +359,13 @@ Yang sudah disiapkan supaya tinggal lanjut:
 Urutan saran setelah domain siap: **F6.2** fondasi `email.service.ts` →
 **F6.3** email selamat datang (#26).
 
-⚠️ **Tiga hal yang WAJIB beres sebelum production**, semuanya menunggu
+⚠️ **Dua hal yang WAJIB beres sebelum production** (sesudah #46 selesai 17 Agu 2026), semuanya menunggu
 keputusan pemilik proyek:
 
 | #   | Hal                                   | Akibat bila terlewat                                                                                            |
 | --- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | 30  | Storage drive-per-user (F11)          | Berkas unggahan hilang tiap deploy di Vercel. Driver `s3` (#2) DITAHAN 16 Agu 2026 — jalan rilis kini lewat F11 |
 | 44  | Domain email belum terverifikasi      | Email tidak sampai ke user, gagal senyap                                                                        |
-| 46  | `SSO_ALLOWED_DOMAINS=gmail.com`       | Siapa pun ber-Gmail bisa mendaftar                                                                              |
 | 15  | Dua Google API key lama belum dicabut | **±5 menit kerja Anda, nol kode.** ROI tertinggi di seluruh papan (F1)                                          |
 
 ### 0.5 Aturan yang WAJIB dipatuhi penerus
@@ -476,7 +476,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 27 BELUM · 65 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 26 BELUM · 66 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -487,11 +487,11 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 27 item
+### 1.1 BELUM SELESAI — 26 item
 
-**Sebaran per fase:** F1 2 · F2 6 · F3 1 · F6 6 · F7 7 · F8 4 · F9 2 · F10 3 · F11 1 · F12 1
+**Sebaran per fase:** F1 1 · F2 6 · F3 1 · F6 6 · F7 7 · F8 4 · F9 2 · F10 3 · F11 1 · F12 1
 
-**Masih menahan rilis production:** #30 · #46
+**Masih menahan rilis production:** #30
 
 | #   | Temuan                                                                                     |  Fase   | Sev | Biaya         |   Blokir modul baru?    | Status                  | Detail |
 | --- | ------------------------------------------------------------------------------------------ | :-----: | :-: | ------------- | :---------------------: | ----------------------- | ------ |
@@ -515,7 +515,6 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 40  | `tsconfig.json` tanpa `strict` — penyempitan diskriminan boolean tidak bekerja             | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §0.6   |
 | 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend               | **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik      | §0.4   |
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
-| 46  | `SSO_ALLOWED_DOMAINS=gmail.com` — celah daftar, DAN membatalkan asumsi kuota F11           | **F1**  | 🔴  | Sangat rendah | Ya (blokir production)  | `MENUNGGU` pemilik      | §0.4   |
 | 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
 | 83  | `Users.department` & `Users.position` TIDAK fungsional — rancangan §19.4 belum bisa jalan  | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.13 |
 | 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)       | **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
@@ -523,7 +522,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 87  | `effectiveRole` DIKOREKSI — ia hanya bawa peran sistem; frontend abai peran proyek         | **F7**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §19.27 |
 | 92  | Peran dibaca dari TOKEN di 7 tempat, dari DATABASE di penjaga proyek — pencabutan tertunda | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.28 |
 
-### 1.2 SUDAH SELESAI — 65 item
+### 1.2 SUDAH SELESAI — 66 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -595,6 +594,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 47  | ~~kolom kembar `discussion_point_comments`~~ 11 kolom -> 6, camelCase sumber kebenaran               |  **F9**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
 | 21  | ~~`authStore` & `uiStore` menganggur~~ dibuang; hook-nya ikut                                        | **F10**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §5.3   |
 | 74  | ~~7 pengambil data tanpa penjaga respons basi~~ 4 pengambil proyek dijaga                            |  **F2**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.12 |
+| 46  | ~~`SSO_ALLOWED_DOMAINS=gmail.com`~~ ditetapkan `rajonet.com`                                         |  **F1**  | 🔴  | Sangat rendah | Ya (blokir production) | `SELESAI` 17 Agu | §0.4   |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -615,22 +615,11 @@ satuan usaha.
 ⚠️ Severity TIDAK diabaikan; ia tetap tercantum. Bila sebuah item 🔴 muncul di
 kelompok murah, ia dikerjakan lebih dulu di dalam kelompoknya.
 
-### 1.4.1 Sangat rendah — 3 item tersisa
+### 1.4.1 Sangat rendah — 0 item tersisa
 
-**#54, #55, dan #71 SELESAI 16 Agu** (§19.32, §19.33). Sisa:
+**#54, #55, #71, #57, #81 SELESAI 16 Agu, #46 SELESAI 17 Agu** (`rajonet.com`).
 
-| #   | Sev | Fase | Isi                                                          | Perlu pemilik? |
-| --- | :-: | ---- | ------------------------------------------------------------ | -------------- |
-| 46  | 🔴  | F1   | `SSO_ALLOWED_DOMAINS=gmail.com` **(blokir production)**      | **ya**         |
-| 55  | 🟡  | F2   | `rbac.ts:50` `!targetProjectId → next()` — RBAC no-op senyap | tidak          |
-| 57  | ⚪  | F2   | Dua endpoint health                                          | **ya**         |
-| 71  | 🟠  | F2   | `project-modules` POST/PUT/DELETE tanpa penjaga              | tidak          |
-| 81  | 🟡  | F7   | `parentAdminId` ditulis, tidak pernah dibaca                 | **ya**         |
-
-**#55 dan #71 bisa langsung dikerjakan.** #55 kemungkinan besar sudah gugur
-sendiri — `rbac.ts` nol pemakai — tetapi itu **wajib divalidasi**, bukan
-diasumsikan: #54 tampak gugur dengan alasan yang sama, ternyata cacatnya sudah
-tersalin ke penjaga baru.
+Seluruh item di kelompok sangat rendah telah selesai. Kelompok berikutnya: **§1.4.2 Rendah**.
 
 ### 1.4.2 Rendah — 16 item
 
