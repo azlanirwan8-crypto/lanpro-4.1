@@ -330,7 +330,7 @@ dulu. **Itu menggeser sebagian F10 ke depan F8 dan perlu keputusan Anda.**
 | **77** | exceljs: turunkan · ganti pustaka · terima risiko                                  | F8                       |
 | **30** | Konfirmasi D1b & D3b (§11.1)                                                       | **F11 — jalur rilis**    |
 
-*(Catatan: #46 telah diselesaikan pada 17 Agu 2026 dengan penetapan domain `rajonet.com`)*
+*(Catatan: #46 telah diselesaikan pada 17 Agu 2026 dengan penetapan domain `rajonet.com,bni.co.id,gmail.com,outlook.com`)*
 
 **#15 paling murah dan satu-satunya yang menutup sebuah fase.**
 
@@ -594,7 +594,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 47  | ~~kolom kembar `discussion_point_comments`~~ 11 kolom -> 6, camelCase sumber kebenaran               |  **F9**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
 | 21  | ~~`authStore` & `uiStore` menganggur~~ dibuang; hook-nya ikut                                        | **F10**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §5.3   |
 | 74  | ~~7 pengambil data tanpa penjaga respons basi~~ 4 pengambil proyek dijaga                            |  **F2**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.12 |
-| 46  | ~~`SSO_ALLOWED_DOMAINS=gmail.com`~~ ditetapkan `rajonet.com`                                         |  **F1**  | 🔴  | Sangat rendah | Ya (blokir production) | `SELESAI` 17 Agu | §0.4   |
+| 46  | ~~`SSO_ALLOWED_DOMAINS=gmail.com`~~ ditetapkan `rajonet.com,bni.co.id,gmail.com,outlook.com`        |  **F1**  | 🔴  | Sangat rendah | Ya (blokir production) | `SELESAI` 17 Agu | §0.4   |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
