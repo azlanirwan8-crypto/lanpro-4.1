@@ -1790,7 +1790,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   className="absolute top-0 bottom-0 z-20 border-l-2 border-danger border-dashed pointer-events-none"
                   style={{ left: `${todayLeft}%` }}
                 >
-                  <div className="bg-danger text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-md absolute top-1.5 -translate-x-1/2 shadow-soft flex items-center gap-1 z-30 tracking-wider">
+                  <div className="bg-danger-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-md absolute top-1.5 -translate-x-1/2 shadow-soft flex items-center gap-1 z-30 tracking-wider">
                     <span className="relative flex h-1.5 w-1.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-surface opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-surface"></span>
@@ -1800,7 +1800,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   {/* Glowing pulsing indicator dot right below sticky header */}
                   <div className="absolute top-[73px] -translate-x-1/2 flex items-center justify-center w-4 h-4 z-30">
                     <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-danger/60 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-danger shadow-2xs"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-danger-surface shadow-2xs"></span>
                   </div>
                 </div>
               )}
