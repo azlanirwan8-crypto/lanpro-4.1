@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Penyemai Master Data menyeluruh — item #84.
+ * Penyemai Master Data menyeluruh — item #84, diperbaiki lanjut item #85.
  *
  * KENAPA ADA. Review 16 Agu 2026 menemukan Master Data bolong dan tidak
  * konsisten: satu baris sampah berlabel `"n"` di `priority`, lima baris
@@ -53,6 +53,14 @@ const DIHAPUS = [
   // Digantikan `Highest` agar tangga prioritas utuh (Highest..Lowest).
   // Aman dihapus: tidak ada satu pun Task yang memakainya.
   { id: "md-priority-urgent", alasan: "digantikan Highest" },
+  // Item #85 — entry yang menduplikasi `issue_type`. `category` kini murni area
+  // teknis; jenis pekerjaan (Bug/Enhancement/dll) sudah tersedia di `issue_type`.
+  // Sebelum dihapus, Tasks.category yang menyimpan nilai ini disiapkan di
+  // blok migrasi di bawah (lihat MIGRASI_CATEGORY).
+  { id: "md-category-bug", alasan: "duplikat issue_type — pindah ke issue_type" },
+  { id: "md-category-enhancement", alasan: "duplikat issue_type — pindah ke issue_type" },
+  { id: "md-category-new_feature", alasan: "duplikat issue_type — pindah ke issue_type" },
+  { id: "md-category-maintenance", alasan: "duplikat issue_type — tidak ada padanan, dikosongkan" },
 ];
 
 /**
@@ -154,6 +162,26 @@ const METHODOLOGY = [
   { slug: "hybrid", code: "hybrid", label: "Hybrid", order: 5, color: "#F59E0B", icon: "Shuffle", description: "Gabungan; perencanaan berurutan, pengerjaan iteratif." },
 ];
 
+/**
+ * category — area teknis murni (item #85).
+ *
+ * Entri yang menduplikasi `issue_type` (Bug/Enhancement/New Feature/
+ * Maintenance) telah dipindahkan ke DIHAPUS. Nilai `Tasks.category` yang
+ * masih menyimpan kode-kode itu akan dinolkan lewat blok MIGRASI_CATEGORY
+ * di bawah agar tidak meninggalkan data yatim.
+ *
+ * Catatan: label yang SUDAH DIPAKAI DATA HIDUP (Backend/Frontend/DevOps)
+ * tidak diubah agar tidak merusak tampilan yang sudah ada.
+ */
+const CATEGORY = [
+  { slug: "backend",        code: "backend",        label: "Backend",         order: 1, color: "#3B82F6", icon: "Server",        description: "Pengerjaan di sisi server, API, dan lapisan data." },
+  { slug: "frontend",       code: "frontend",       label: "Frontend",        order: 2, color: "#EC4899", icon: "Monitor",       description: "Pengerjaan di sisi antarmuka pengguna." },
+  { slug: "devops",         code: "devops",         label: "DevOps",          order: 3, color: "#8B5CF6", icon: "Workflow",      description: "Infrastruktur, CI/CD, dan otomasi operasional." },
+  { slug: "security",       code: "security",       label: "Security",        order: 4, color: "#DC2626", icon: "ShieldCheck",   description: "Keamanan sistem, enkripsi, dan kontrol akses." },
+  { slug: "infrastructure", code: "infrastructure", label: "Infrastructure",   order: 5, color: "#0EA5E9", icon: "HardDrive",    description: "Server, jaringan, dan layanan cloud." },
+  { slug: "database",       code: "database",       label: "Database",        order: 6, color: "#F59E0B", icon: "Database",      description: "Skema, kueri, migrasi, dan optimasi basis data." },
+];
+
 /** Tipe khas domain LanPro — labelnya tidak diubah, hanya dilengkapi kode. */
 const KODE_SAJA = {
   fitur: {
@@ -205,19 +233,6 @@ const KODE_SAJA = {
     "Product Owner": "product_owner",
     "Project Manager": "project_manager",
     "Department Head": "department_head",
-  },
-  category: {
-    // `category` memuat DUA konsep tercampur: area teknis (Backend/Frontend/
-    // DevOps) dan jenis pekerjaan (Bug/Enhancement/...) yang menduplikasi
-    // `issue_type`. Kodenya dilengkapi agar konsisten, tetapi PEMISAHANNYA
-    // menunggu keputusan pemilik proyek — lihat item #85.
-    "Backend": "backend",
-    "Frontend": "frontend",
-    "DevOps": "devops",
-    "Bug": "bug",
-    "Enhancement": "enhancement",
-    "New Feature": "new_feature",
-    "Maintenance": "maintenance",
   },
 };
 
@@ -285,6 +300,50 @@ const KODE_SAJA = {
     await semai(JENIS_DOKUMEN, "jenis_dokumen");
     await semai(PROJECT_STATUS, "project_status");
     await semai(METHODOLOGY, "methodology");
+    await semai(CATEGORY, "category");
+
+    // ── MIGRASI category #85 ───────────────────────────────────────────────
+    // Tasks yang menyimpan kode duplikat (bug/enhancement/new_feature) di
+    // kolom category dipindah ke issue_type bila cocok, atau dikosongkan
+    // (maintenance) karena tidak ada padanan di issue_type.
+    //
+    // Dilakukan SEBELUM penghapusan baris MasterData agar tidak terjadi
+    // window di mana data tasks merujuk ke baris yang sudah dihapus.
+    console.log("");
+    console.log(warna.tebal("  Migrasi Tasks.category (item #85)"));
+
+    const PETA_CATEGORY_KE_ISSUETYPE = [
+      { dari: "bug",         ke: "bug"   },
+      { dari: "enhancement", ke: "story" },  // Enhancement paling dekat Story
+      { dari: "new_feature", ke: "story" },  // New Feature paling dekat Story
+    ];
+
+    let migrasiCategory = 0;
+    for (const p of PETA_CATEGORY_KE_ISSUETYPE) {
+      const { rowCount } = await client.query(
+        `UPDATE "Tasks"
+         SET issue_type = COALESCE(issue_type, $1), category = NULL
+         WHERE category = $2 AND issue_type IS NULL`,
+        [p.ke, p.dari]
+      );
+      if (rowCount > 0) {
+        migrasiCategory += rowCount;
+        console.log(warna.kuning(`    PINDAH  ${rowCount} Tasks: category='${p.dari}' -> issue_type='${p.ke}', category=NULL`));
+      }
+    }
+    // Kosongkan sisanya (maintenance dan semua yang tersisa dari kode lama)
+    const kode_dihapus = ["bug", "enhancement", "new_feature", "maintenance"];
+    for (const k of kode_dihapus) {
+      const { rowCount } = await client.query(
+        `UPDATE "Tasks" SET category = NULL WHERE category = $1`,
+        [k]
+      );
+      if (rowCount > 0) {
+        migrasiCategory += rowCount;
+        console.log(warna.kuning(`    KOSONG  ${rowCount} Tasks: category='${k}' -> NULL (tidak ada padanan)`));
+      }
+    }
+    if (migrasiCategory === 0) console.log(warna.redup("    (tidak ada Tasks yang perlu dimigrasikan)"));
 
     // Melengkapi kode pada tipe khas domain, tanpa mengubah labelnya
     console.log("");

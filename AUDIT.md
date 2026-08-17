@@ -486,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 20 item
+### 1.1 BELUM SELESAI — 19 item
 
-**Sebaran per fase:** F1 0 · F2 5 · F3 1 · F6 6 · F7 4 · F8 4 · F9 2 · F10 3 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 5 · F3 1 · F6 6 · F7 3 · F8 4 · F9 2 · F10 3 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
@@ -512,10 +512,9 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend               | **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik      | §0.4   |
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
-| 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)       | **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 
-### 1.2 SUDAH SELESAI — 72 item
+### 1.2 SUDAH SELESAI — 73 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -594,6 +593,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 92  | ~~Peran dibaca dari token vs DB~~ disinkronkan real-time di `authenticateJWT`                       |  **F7**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §19.28 |
 | 87  | ~~`effectiveRole` abai peran proyek~~ diselaraskan via `resolveProjectRole` & `can()`               |  **F7**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 17 Agu | §19.27 |
 | 83  | ~~Department Head & position tak fungsional~~ peran proyek `head` (akses R) diselaraskan ke matriks |  **F7**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §19.48 |
+| 85  | ~~`category` memuat dua konsep~~ — duplikat `issue_type` dihapus, `category` murni area teknis      |  **F7**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §19.14 |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -4450,6 +4450,26 @@ tipe baru cukup lewat database.
 Kode dilengkapi agar konsisten, tetapi **pemisahannya menunggu keputusan**.
 Pilihan: pecah jadi `tech_area` + buang yang menduplikasi `issue_type`, atau
 biarkan sebagai kategori bebas.
+
+**SELESAI 17 Agu 2026 — Opsi B (bersihkan duplikat, pertahankan nama `category`).**
+
+Keputusan pemilik proyek: `category` tetap menjadi area teknis; entri yang
+menduplikasi `issue_type` dihapus dari Master Data.
+
+Yang dikerjakan di `scripts/db/seed-master-data.cjs`:
+
+1. **Hapus 4 entry duplikat** dari tipe `category`: `md-category-bug`,
+   `md-category-enhancement`, `md-category-new_feature`,
+   `md-category-maintenance`.
+2. **Pindah jadi array `CATEGORY` terstruktur** — area teknis murni:
+   Backend · Frontend · DevOps · Security · Infrastructure · Database.
+3. **Migrasi data** — `Tasks.category` yang berisi kode lama:
+   - `bug` → `issue_type = 'bug'`, `category = NULL`
+   - `enhancement` / `new_feature` → `issue_type = 'story'`, `category = NULL`
+   - `maintenance` → `category = NULL` (tidak ada padanan `issue_type`)
+4. **Fallback `masterDataService.ts`** diselaraskan ke nilai baru.
+
+Setelah seed dijalankan, `category` di Master Data hanya mengandung area teknis.
 
 #### 19.14.6 #86 — `modul_aplikasi` punya dua sumber
 
