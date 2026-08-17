@@ -106,5 +106,16 @@ describe("Permissions Matrix Alignment (§19.8 Tahap 5b / Item #87)", () => {
       expect(can("update", "list", { user: dummyUser, project })).toBe(false);
       expect(can("delete", "list", { user: dummyUser, project })).toBe(false);
     });
+
+    it("Department Head memiliki izin baca (R) di seluruh modul proyek saat ditugaskan (§19.48 / #83)", () => {
+      const project = { id: "proj-1", memberRoles: { "user-1": "head" } };
+      expect(can("read", "list", { user: dummyUser, project })).toBe(true);
+      expect(can("read", "sprints", { user: dummyUser, project })).toBe(true);
+      expect(can("read", "wiki", { user: dummyUser, project })).toBe(true);
+      expect(can("read", "qa", { user: dummyUser, project })).toBe(true);
+      expect(can("create", "list", { user: dummyUser, project })).toBe(false);
+      expect(can("update", "sprints", { user: dummyUser, project })).toBe(false);
+      expect(can("delete", "meetingNotes", { user: dummyUser, project })).toBe(false);
+    });
   });
 });

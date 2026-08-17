@@ -63,9 +63,9 @@ describe("enum peran vs penyemai katalog", () => {
     expect([...PROJECT_ROLES].sort()).toEqual(kodeDariPenyemai("PROJECT_ROLES").sort());
   });
 
-  it("jumlahnya 4 SYSTEM + 8 PROJECT seperti §19.8 tahap 0", () => {
+  it("jumlahnya 4 SYSTEM + 9 PROJECT seperti §19.5 (sesudah #83)", () => {
     expect(SYSTEM_ROLES).toHaveLength(4);
-    expect(PROJECT_ROLES).toHaveLength(8);
+    expect(PROJECT_ROLES).toHaveLength(9);
   });
 });
 
@@ -76,11 +76,11 @@ describe("tabrakan kode antar lingkup — alasan enum dipisah", () => {
    * dua enum jadi satu bisa dipertimbangkan ulang — dan test ini yang akan
    * memberi tahu.
    */
-  it("`admin` dan `viewer` ada di KEDUA lingkup", () => {
+  it("`admin`, `head`, dan `viewer` ada di KEDUA lingkup", () => {
     const bertabrakan = SYSTEM_ROLES.filter((r) =>
       (PROJECT_ROLES as readonly string[]).includes(r)
     );
-    expect(bertabrakan.sort()).toEqual(["admin", "viewer"]);
+    expect(bertabrakan.sort()).toEqual(["admin", "head", "viewer"]);
   });
 
   it("`admin` sistem tidak sama artinya dengan `admin` proyek", () => {

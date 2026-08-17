@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 24 BELUM · 68 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 23 BELUM · 69 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 24 item
+### 1.1 BELUM SELESAI — 23 item
 
-**Sebaran per fase:** F1 1 · F2 6 · F3 1 · F6 6 · F7 5 · F8 4 · F9 2 · F10 3 · F11 1 · F12 1
+**Sebaran per fase:** F1 1 · F2 6 · F3 1 · F6 6 · F7 4 · F8 4 · F9 2 · F10 3 · F11 1 · F12 1
 
 **Masih menahan rilis production:** #30
 
@@ -515,11 +515,10 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend               | **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik      | §0.4   |
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
-| 83  | `Users.department` & `Users.position` TIDAK fungsional — rancangan §19.4 belum bisa jalan  | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.13 |
 | 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)       | **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 
-### 1.2 SUDAH SELESAI — 68 item
+### 1.2 SUDAH SELESAI — 69 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -594,6 +593,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 46  | ~~`SSO_ALLOWED_DOMAINS=gmail.com`~~ ditetapkan `rajonet.com,bni.co.id,gmail.com,outlook.com`        |  **F1**  | 🔴  | Sangat rendah | Ya (blokir production) | `SELESAI` 17 Agu | §0.4   |
 | 92  | ~~Peran dibaca dari token vs DB~~ disinkronkan real-time di `authenticateJWT`                       |  **F7**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §19.28 |
 | 87  | ~~`effectiveRole` abai peran proyek~~ diselaraskan via `resolveProjectRole` & `can()`               |  **F7**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 17 Agu | §19.27 |
+| 83  | ~~Department Head & position tak fungsional~~ peran proyek `head` (akses R) diselaraskan ke matriks |  **F7**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §19.48 |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -630,7 +630,7 @@ Seluruh item di kelompok sangat rendah telah selesai. Kelompok berikutnya: **§1
 | 44  | 🔴  | F6   | Domain email belum terverifikasi                       | **ya**         |
 | 18  | 🟠  | F2   | notebook-lm rusak di dua sisi                          | **ya**         |
 | 74  | 🟠  | F2   | 7 pengambil data tanpa penjaga respons basi            | **ya**         |
-| 83  | 🟠  | F7   | `department` & `position` tidak fungsional             | **ya**         |
+| 83  | ✅  | F7   | `head` (akses R) diselaraskan ke matriks (SELESAI 17 Agu) | tidak          |
 | 86  | 🟠  | F7   | `modul_aplikasi` dua sumber                            | **ya**         |
 | 92  | ✅  | F7   | Peran dari token vs database (SELESAI 17 Agu)          | tidak          |
 | 93  | 🟠  | F7   | "Remember Me" tidak melupakan token                    | tidak          |
@@ -3921,51 +3921,52 @@ Mengatur hal **di luar** proyek. Tidak menentukan apa pun di dalam proyek.
 16 Agu 2026. Sesudah pembuatan proyek dibatasi ke Administrator, peran itu tidak
 menyisakan pembeda apa pun dari Standard User.
 
-### 19.5 PROJECT ROLE — 8 peran
+### 19.5 PROJECT ROLE — 9 peran
 
 Mengatur hal **di dalam** satu proyek. Tiga peran fungsional — System Analyst,
 Business Analyst, dan QA — ditetapkan pemilik proyek sebagai project role
-tersendiri, masing-masing **menguasai penuh satu modul**.
+tersendiri, masing-masing **menguasai penuh satu modul**. `Department Head`
+memiliki akses baca (`R`) di seluruh modul pada proyek yang ia ikuti (§19.48).
 
-| Nama Modul                | Nama Role                                                   | Akses CRUD |
-| ------------------------- | ----------------------------------------------------------- | :--------: |
-| `dashboard`               | seluruh peran                                               |     R      |
-| `access` (Team)           | Project Owner · Project Admin                               |    CRUD    |
-| `access`                  | Project Manager                                             |   R + U    |
-| `access`                  | System Analyst · Business Analyst · Developer · QA · Viewer |     R      |
-| `list` (Issue List)       | Project Owner · Project Admin · Project Manager             |    CRUD    |
-| `list`                    | System Analyst · Business Analyst · Developer · QA          |    CRU     |
-| `list`                    | Viewer                                                      |     R      |
-| `board` (Kanban)          | Project Owner · Project Admin · Project Manager             |    CRUD    |
-| `board`                   | System Analyst · Business Analyst · Developer · QA          |   R + U    |
-| `board`                   | Viewer                                                      |     R      |
-| `sprints`                 | Project Owner · Project Admin · Project Manager             |    CRUD    |
-| `sprints`                 | System Analyst · Business Analyst · Developer · QA · Viewer |     R      |
-| `timeline`                | Project Owner · Project Admin · Project Manager             |    CRUD    |
-| `timeline`                | System Analyst · Business Analyst · Developer · QA · Viewer |     R      |
-| `wiki` (Documentation)    | Project Owner · Project Admin · Project Manager             |    CRUD    |
-| `wiki`                    | **System Analyst**                                          |  **CRUD**  |
-| `wiki`                    | Business Analyst                                            |    CRU     |
-| `wiki`                    | Developer · QA · Viewer                                     |     R      |
-| `flowchart`               | Project Owner · Project Admin · Project Manager             |    CRUD    |
-| `flowchart`               | **System Analyst**                                          |  **CRUD**  |
-| `flowchart`               | Business Analyst                                            |    CRU     |
-| `flowchart`               | Developer · QA · Viewer                                     |     R      |
-| `meetingNotes`            | Project Owner · Project Admin · Project Manager             |    CRUD    |
-| `meetingNotes`            | **Business Analyst**                                        |  **CRUD**  |
-| `meetingNotes`            | System Analyst · QA                                         |    CRU     |
-| `meetingNotes`            | Developer · Viewer                                          |     R      |
-| `qa` (Quality Assessment) | Project Owner · Project Admin · Project Manager             |    CRUD    |
-| `qa`                      | **QA**                                                      |  **CRUD**  |
-| `qa`                      | System Analyst · Business Analyst · Developer               |   R + U    |
-| `qa`                      | Viewer                                                      |     R      |
-| `notebooklm`              | Project Owner · Project Admin · Project Manager             |    CRUD    |
-| `notebooklm`              | System Analyst · Business Analyst                           |    CRU     |
-| `notebooklm`              | Developer · QA · Viewer                                     |     R      |
-| _(setelan proyek)_        | **Project Owner** · **Project Admin**                       |   **U**    |
-| _(setelan proyek)_        | selain itu                                                  |     —      |
-| _(hapus proyek)_          | **Project Owner**                                           |   **D**    |
-| _(hapus proyek)_          | selain itu                                                  |     —      |
+| Nama Modul                | Nama Role                                                                     | Akses CRUD |
+| ------------------------- | ----------------------------------------------------------------------------- | :--------: |
+| `dashboard`               | seluruh peran                                                                 |     R      |
+| `access` (Team)           | Project Owner · Project Admin                                                 |    CRUD    |
+| `access`                  | Project Manager                                                               |   R + U    |
+| `access`                  | System Analyst · Business Analyst · Developer · QA · Department Head · Viewer |     R      |
+| `list` (Issue List)       | Project Owner · Project Admin · Project Manager                               |    CRUD    |
+| `list`                    | System Analyst · Business Analyst · Developer · QA                            |    CRU     |
+| `list`                    | Department Head · Viewer                                                      |     R      |
+| `board` (Kanban)          | Project Owner · Project Admin · Project Manager                               |    CRUD    |
+| `board`                   | System Analyst · Business Analyst · Developer · QA                            |   R + U    |
+| `board`                   | Department Head · Viewer                                                      |     R      |
+| `sprints`                 | Project Owner · Project Admin · Project Manager                               |    CRUD    |
+| `sprints`                 | System Analyst · Business Analyst · Developer · QA · Department Head · Viewer |     R      |
+| `timeline`                | Project Owner · Project Admin · Project Manager                               |    CRUD    |
+| `timeline`                | System Analyst · Business Analyst · Developer · QA · Department Head · Viewer |     R      |
+| `wiki` (Documentation)    | Project Owner · Project Admin · Project Manager                               |    CRUD    |
+| `wiki`                    | **System Analyst**                                                            |  **CRUD**  |
+| `wiki`                    | Business Analyst                                                              |    CRU     |
+| `wiki`                    | Developer · QA · Department Head · Viewer                                     |     R      |
+| `flowchart`               | Project Owner · Project Admin · Project Manager                               |    CRUD    |
+| `flowchart`               | **System Analyst**                                                            |  **CRUD**  |
+| `flowchart`               | Business Analyst                                                              |    CRU     |
+| `flowchart`               | Developer · QA · Department Head · Viewer                                     |     R      |
+| `meetingNotes`            | Project Owner · Project Admin · Project Manager                               |    CRUD    |
+| `meetingNotes`            | **Business Analyst**                                                          |  **CRUD**  |
+| `meetingNotes`            | System Analyst · QA                                                           |    CRU     |
+| `meetingNotes`            | Developer · Department Head · Viewer                                          |     R      |
+| `qa` (Quality Assessment) | Project Owner · Project Admin · Project Manager                               |    CRUD    |
+| `qa`                      | **QA**                                                                        |  **CRUD**  |
+| `qa`                      | System Analyst · Business Analyst · Developer                                 |   R + U    |
+| `qa`                      | Department Head · Viewer                                                      |     R      |
+| `notebooklm`              | Project Owner · Project Admin · Project Manager                               |    CRUD    |
+| `notebooklm`              | System Analyst · Business Analyst                                             |    CRU     |
+| `notebooklm`              | Developer · QA · Department Head · Viewer                                     |     R      |
+| _(setelan proyek)_        | **Project Owner** · **Project Admin**                                         |   **U**    |
+| _(setelan proyek)_        | selain itu                                                                    |     —      |
+| _(hapus proyek)_          | **Project Owner**                                                             |   **D**    |
+| _(hapus proyek)_          | selain itu                                                                    |     —      |
 
 #### Wilayah kuasa tiap peran fungsional
 
@@ -6461,7 +6462,7 @@ Nomor item mengikuti §1 — jangan menomori ulang.
 | **46**             | nilai `SSO_ALLOWED_DOMAINS`                                   | Menebak domain berarti menentukan siapa boleh masuk. Juga menahan #30                                          |
 | **30**             | konfirmasi D1b dan D3b (§11.1)                                | Jalur rilis storage. Salah arah = 6–10 sesi terbuang                                                           |
 | **77**             | pemilik memilih **SheetJS `xlsx`** — belum dikerjakan         | Status kerentanan SheetJS BELUM diukur. Jalankan `npm audit` dulu                                              |
-| **83**             | **SUDAH DIJAWAB** (§19.48): Head di-assign, akses **R saja**  | Tinggal menambah baris `head` ke §19.5 dengan `R` di seluruh modul. `Users.department` TIDAK perlu difungsikan |
+| **83**             | **SELESAI 17 Agu** (§19.48): Head di-assign, akses **R saja** | Sudah diterapkan di `roles.ts`, `matriksAkses.ts`, `permissions.ts`, seed & test |
 | **86**             | **SUDAH DIJAWAB** (§19.48): `ProjectModules` sumber kebenaran | 4 baris `modul_aplikasi` di MasterData dibuang                                                                 |
 | **85**             | `category` dua konsep — pisah atau biarkan                    | Rekomendasi: pisah; `issue_type` sudah jadi rumahnya                                                           |
 | **17**             | izin objek percobaan + sesi admin                             | Audit UI di balik login                                                                                        |
@@ -6751,7 +6752,7 @@ cara memasukkan cacat baru.
 | **74** | 4 pengambil berlingkup proyek dijaga respons basi                           | Ulangan 429 pada `fetchSprints`, `fetchActivityLogs`, `fetchProjects` masih memakai closure basi — **cacat berbeda**, §13.12                    |
 | **21** | `authStore` & `uiStore` dibuang                                             | `useProjectState` & `useNotificationState` juga menganggur — **belum bernomor**, perlu item sendiri                                             |
 | **13** | 606+ kelas warna keras jadi token; gerbang `audit:warna` dipasang           | Langkah 4 & 5 §19.50                                                                                                                            |
-| **83** | Keputusan diambil (§19.48): Head = akses `R` pada proyek yang ia ditugaskan | **Belum diterapkan.** Perlu baris `head` di §19.5 dengan `R` di seluruh modul. `Users.department` TIDAK perlu difungsikan                       |
+| **83** | Peran proyek `head` akses `R` di seluruh modul (§19.48)                     | **SELESAI 17 Agu.** Diterapkan di `roles.ts`, `matriksAkses.ts`, `permissions.ts`, seed & test |
 | **86** | Keputusan diambil: `ProjectModules` sumber kebenaran                        | **Belum diterapkan.** 4 baris `modul_aplikasi` di MasterData belum dibuang                                                                      |
 | **77** | Pemilik memilih SheetJS `xlsx`                                              | **Belum dikerjakan.** Ukur `npm audit` SheetJS lebih dulu — statusnya belum pernah diperiksa, dan rekomendasi tanpa angka tidak boleh dipercaya |
 

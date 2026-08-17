@@ -246,10 +246,11 @@ describe("deny-by-default — §19.6 aturan 3", () => {
     }
   });
 
-  it("`head` adalah peran SISTEM — ia tidak punya akses lewat matriks PROYEK", () => {
-    // §19.6 aturan 1: di dalam proyek, system role tidak dipakai kecuali
-    // Administrator. Padahal 15 penjaga rute hari ini masih menyebut `head`.
-    expect(bolehDiProyek("head", "list", "R")).toBe(false);
+  it("`head` (Department Head) memiliki akses R di proyek tetapi ditolak untuk aksi tulis (C, U, D)", () => {
+    expect(bolehDiProyek("head", "list", "R")).toBe(true);
+    expect(bolehDiProyek("head", "list", "C")).toBe(false);
+    expect(bolehDiProyek("head", "list", "U")).toBe(false);
+    expect(bolehDiProyek("head", "list", "D")).toBe(false);
   });
 });
 

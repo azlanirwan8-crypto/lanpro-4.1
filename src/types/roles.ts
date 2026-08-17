@@ -50,6 +50,7 @@ export const PROJECT_ROLES = [
   "owner",
   "admin",
   "manager",
+  "head",
   "system_analyst",
   "business_analyst",
   "developer",
@@ -98,13 +99,10 @@ export type PeranEfektif = SystemRole | ProjectRole | PeranWarisan;
  *   `member`    7 dari 10 baris ProjectMembers + 6 penjaga rute. Pemetaannya ke
  *               peran katalog MENUNGGU keputusan pemilik proyek.
  *   `designer`  1 penjaga rute, NOL baris data.
- *   `head`      dipakai 15 penjaga rute proyek, padahal `head` adalah peran
- *               SISTEM. §19.6 aturan 1: di dalam proyek, system role tidak
- *               dipakai kecuali Administrator.
  *
  * Daftar ini harus MENYUSUT menuju kosong. Bila ia bertambah, ada yang salah.
  */
-export const PERAN_WARISAN = ["member", "designer", "head"] as const;
+export const PERAN_WARISAN = ["member", "designer"] as const;
 export type PeranWarisan = (typeof PERAN_WARISAN)[number];
 
 const setSistem: ReadonlySet<string> = new Set(SYSTEM_ROLES);

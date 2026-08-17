@@ -146,10 +146,20 @@ const PROJECT_ROLES = [
       "Mengelola sprint, milestone, dan timeline. Menggantikan Product Owner dan Scrum Master yang fungsinya beririsan.",
   },
   {
+    slug: "department-head",
+    code: "head",
+    label: "Department Head",
+    order: 4,
+    color: "#7C3AED",
+    icon: "Building2",
+    description:
+      "Pimpinan departemen. Hanya membaca seluruh modul proyek tempat ia ditugaskan (§19.48).",
+  },
+  {
     slug: "system-analyst",
     code: "system_analyst",
     label: "System Analyst",
-    order: 4,
+    order: 5,
     color: "#7C3AED",
     icon: "Workflow",
     description:
@@ -159,7 +169,7 @@ const PROJECT_ROLES = [
     slug: "business-analyst",
     code: "business_analyst",
     label: "Business Analyst",
-    order: 5,
+    order: 6,
     color: "#DB2777",
     icon: "FileText",
     description:
@@ -169,7 +179,7 @@ const PROJECT_ROLES = [
     slug: "developer",
     code: "developer",
     label: "Developer",
-    order: 6,
+    order: 7,
     color: "#059669",
     icon: "Code2",
     description:
@@ -179,7 +189,7 @@ const PROJECT_ROLES = [
     slug: "qa-engineer",
     code: "qa",
     label: "QA",
-    order: 7,
+    order: 8,
     color: "#F59E0B",
     icon: "CheckCircle",
     description:
@@ -189,7 +199,7 @@ const PROJECT_ROLES = [
     slug: "viewer",
     code: "viewer",
     label: "Viewer",
-    order: 8,
+    order: 9,
     color: "#94A3B8",
     icon: "Eye",
     description:
