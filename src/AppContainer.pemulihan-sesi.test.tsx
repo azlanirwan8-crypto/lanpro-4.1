@@ -86,15 +86,21 @@ afterEach(() => {
 });
 
 describe("pemulihan sesi dari sessionStorage — jalur 'jangan ingat saya'", () => {
+  it("memulihkan sesi saat token dan profil sama-sama di sessionStorage (localStorage benar-benar kosong)", async () => {
+    sessionStorage.setItem("lanpro_jwt_token", "token-uji");
+    sessionStorage.setItem("sessionUser", JSON.stringify(PENGGUNA_UJI));
+    expect(localStorage.getItem("lanpro_jwt_token")).toBeNull();
+    expect(localStorage.getItem("sessionUser")).toBeNull();
+
+    tampilkan();
+
+    await waitFor(() => expect(screen.getByText("Dashboard")).toBeInTheDocument(), {
+      timeout: 12000,
+    });
+    expect(screen.queryByText(/Sign in to continue to LanPro Workspace/i)).not.toBeInTheDocument();
+  }, 20000);
+
   it("memulihkan sesi walau localStorage KOSONG", async () => {
-    // Sisi kiri `||`. Bila urutan pembacaannya suatu saat dibalik menjadi
-    // localStorage lebih dulu, pengguna yang tidak mencentang "Remember Me"
-    // akan terlempar ke layar login setiap kali me-refresh — dan test yang
-    // hanya mengisi localStorage tidak akan menangkapnya.
-    // TOKEN sengaja di localStorage, PROFIL di sessionStorage — itulah keadaan
-    // produksi yang sebenarnya, dan #93 lahir dari sini: `setAuthToken`
-    // (`src/lib/api.ts:50`) SELALU menulis ke localStorage, tidak peduli
-    // "Remember Me" dicentang atau tidak, sementara profilnya session-scoped.
     localStorage.setItem("lanpro_jwt_token", "token-uji");
     sessionStorage.setItem("sessionUser", JSON.stringify(PENGGUNA_UJI));
     expect(localStorage.getItem("sessionUser")).toBeNull();

@@ -1,4 +1,5 @@
 import { safeLocalStorage } from "../../lib/safeStorage";
+import { getAuthToken } from "../../lib/api";
 import { showSuccessAlert } from "../../lib/sweetalert";
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
@@ -361,7 +362,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
         formData.append("totalChunks", totalChunks.toString());
         formData.append("fileSize", file.size.toString());
 
-        const token = safeLocalStorage.getItem("lanpro_jwt_token");
+        const token = getAuthToken();
         lastResponse = await axios.post(
           `/api/v1/meetings/${meeting.id}/upload-recording`,
           formData,
@@ -424,7 +425,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
   const handleCancelProcessing = async () => {
     try {
-      const token = safeLocalStorage.getItem("lanpro_jwt_token");
+      const token = getAuthToken();
       await axios.post(
         `/api/v1/meetings/${meeting.id}/cancel`,
         {},
@@ -552,7 +553,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     if (isProcessingState) {
       pollInterval = setInterval(async () => {
         try {
-          const token = safeLocalStorage.getItem("lanpro_jwt_token");
+          const token = getAuthToken();
           const response = await axios.get(`/api/v1/meetings/${meeting.id}/status`, {
             headers: token ? { Authorization: `Bearer ${token}` } : {},
           });

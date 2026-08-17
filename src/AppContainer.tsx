@@ -462,10 +462,7 @@ function AppContainer() {
 
   useEffect(() => {
     // Initial Auth Restoration (LanPro v1.3)
-    let token = null;
-    try {
-      token = safeLocalStorage.getItem("lanpro_jwt_token");
-    } catch (e) {}
+    const token = getAuthToken();
 
     if (!token) {
       setIsLoggedIn(false);
@@ -495,7 +492,7 @@ function AppContainer() {
 
     // Verify token with backend to prevent expired/invalid session and parallel error toasts
     const verifySession = async () => {
-      const token = safeLocalStorage.getItem("lanpro_jwt_token");
+      const token = getAuthToken();
       if (!token) {
         setLoading(false);
 
@@ -1061,7 +1058,7 @@ function AppContainer() {
     // server, dependensi kosong itu akan mematikan seluruh realtime bagi
     // pengguna sah. Karena itu efek ini sekarang bergantung pada token dan
     // dijalankan ulang begitu token berubah (login, force-logout, keluar).
-    const jwtToken = safeLocalStorage.getItem("lanpro_jwt_token");
+    const jwtToken = getAuthToken();
 
     // Tanpa token, jangan menyambung sama sekali. Menyambung lalu ditolak hanya
     // menghasilkan percobaan ulang dan kebisingan di console layar login.
@@ -1128,7 +1125,7 @@ function AppContainer() {
         }
       }
       const currentUserId = activeUser?.id || activeUser?.uid;
-      const currentToken = safeLocalStorage.getItem("lanpro_jwt_token");
+      const currentToken = getAuthToken();
 
       if (!currentUserId || currentUserId.toString() !== data.userId || !currentToken) {
         return;

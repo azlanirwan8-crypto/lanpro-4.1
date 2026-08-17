@@ -140,8 +140,7 @@ export function useAuth(
 
   // Logout handler
   const handleLogout = async (silent = false) => {
-    const wasLoggedIn =
-      isLoggedIn || !!currentUser || !!safeLocalStorage.getItem("lanpro_jwt_token");
+    const wasLoggedIn = isLoggedIn || !!currentUser || !!getAuthToken();
     const activeUserId = currentUser?.id || currentUser?.uid;
 
     if (activeUserId) {

@@ -22,17 +22,15 @@
  */
 
 import { safeLocalStorage } from '../../../lib/safeStorage';
-import { apiRequest } from '../../../lib/api';
+import { apiRequest, getAuthToken } from '../../../lib/api';
 
 /**
  * Transport mentah dengan token terlampir.
  *
- * Membaca kunci `lanpro_jwt_token` — kunci yang sama dipakai `src/lib/api.ts`.
- * Jangan menebak nama kunci lain di sini: fitur NotebookLM pernah membaca
- * `'token'` yang tidak pernah ada, sehingga seluruh requestnya dibalas 401.
+ * Membaca token terpusat lewat `getAuthToken()` dari `src/lib/api.ts` (#93).
  */
 async function qaFetch(url: string, options: any = {}): Promise<Response> {
-  const token = safeLocalStorage.getItem('lanpro_jwt_token');
+  const token = getAuthToken();
   const headers = new Headers(options.headers || {});
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);
