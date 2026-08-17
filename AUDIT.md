@@ -326,11 +326,10 @@ dulu. **Itu menggeser sebagian F10 ke depan F8 dan perlu keputusan Anda.**
 | ------ | ---------------------------------------------------------------------------------- | ------------------------ |
 | **15** | Cabut 2 Google API key di Google Cloud Console — ±5 menit                          | **menutup F1**           |
 | **48** | Konvensi untuk 5 pasang TABEL kembar — sebaiknya ikut ketetapan camelCase (§19.38) | F9                       |
-| **92** | Daftar-cabut · token lebih pendek · baca DB tiap permintaan                        | F7 tutup penuh           |
 | **77** | exceljs: turunkan · ganti pustaka · terima risiko                                  | F8                       |
 | **30** | Konfirmasi D1b & D3b (§11.1)                                                       | **F11 — jalur rilis**    |
 
-*(Catatan: #46 telah diselesaikan pada 17 Agu 2026 dengan penetapan domain `rajonet.com,bni.co.id,gmail.com,outlook.com`)*
+*(Catatan: #46 dan #92 telah diselesaikan pada 17 Agu 2026)*
 
 **#15 paling murah dan satu-satunya yang menutup sebuah fase.**
 
@@ -476,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 26 BELUM · 66 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 25 BELUM · 67 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -487,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 26 item
+### 1.1 BELUM SELESAI — 25 item
 
-**Sebaran per fase:** F1 1 · F2 6 · F3 1 · F6 6 · F7 7 · F8 4 · F9 2 · F10 3 · F11 1 · F12 1
+**Sebaran per fase:** F1 1 · F2 6 · F3 1 · F6 6 · F7 6 · F8 4 · F9 2 · F10 3 · F11 1 · F12 1
 
 **Masih menahan rilis production:** #30
 
@@ -520,9 +519,8 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)       | **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 87  | `effectiveRole` DIKOREKSI — ia hanya bawa peran sistem; frontend abai peran proyek         | **F7**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §19.27 |
-| 92  | Peran dibaca dari TOKEN di 7 tempat, dari DATABASE di penjaga proyek — pencabutan tertunda | **F7**  | 🟠  | Rendah        |          Tidak          | `TERBUKA`               | §19.28 |
 
-### 1.2 SUDAH SELESAI — 66 item
+### 1.2 SUDAH SELESAI — 67 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -595,6 +593,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 21  | ~~`authStore` & `uiStore` menganggur~~ dibuang; hook-nya ikut                                        | **F10**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §5.3   |
 | 74  | ~~7 pengambil data tanpa penjaga respons basi~~ 4 pengambil proyek dijaga                            |  **F2**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.12 |
 | 46  | ~~`SSO_ALLOWED_DOMAINS=gmail.com`~~ ditetapkan `rajonet.com,bni.co.id,gmail.com,outlook.com`        |  **F1**  | 🔴  | Sangat rendah | Ya (blokir production) | `SELESAI` 17 Agu | §0.4   |
+| 92  | ~~Peran dibaca dari token vs DB~~ disinkronkan real-time di `authenticateJWT`                       |  **F7**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §19.28 |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -633,7 +632,7 @@ Seluruh item di kelompok sangat rendah telah selesai. Kelompok berikutnya: **§1
 | 74  | 🟠  | F2   | 7 pengambil data tanpa penjaga respons basi            | **ya**         |
 | 83  | 🟠  | F7   | `department` & `position` tidak fungsional             | **ya**         |
 | 86  | 🟠  | F7   | `modul_aplikasi` dua sumber                            | **ya**         |
-| 92  | 🟠  | F7   | Peran dari token vs database                           | **ya**         |
+| 92  | ✅  | F7   | Peran dari token vs database (SELESAI 17 Agu)          | tidak          |
 | 93  | 🟠  | F7   | "Remember Me" tidak melupakan token                    | tidak          |
 | 20  | 🟡  | F2   | Kode mati DB Explorer                                  | **ya**         |
 | 21  | 🟡  | F10  | `authStore` & `uiStore` menganggur                     | tidak          |

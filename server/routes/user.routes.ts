@@ -303,9 +303,7 @@ router.post(
       const { id } = req.params;
       const currentUserId = req.user?.id || req.user?.uid;
       const currentUserRole = String(req.user?.role || req.user?.system_role || "").toLowerCase();
-      const isAdmin = ["sadm", "admn", "admin", "system admin", "super admin"].includes(
-        currentUserRole
-      );
+      const isAdmin = currentUserRole === "admin";
 
       if (!isAdmin && String(id) !== String(currentUserId)) {
         return res.status(403).json({
@@ -412,9 +410,7 @@ router.put("/api/users/:id", authenticateJWT, async (req: any, res) => {
     const { id } = req.params;
     const currentUserId = req.user?.id || req.user?.uid;
     const currentUserRole = String(req.user?.role || req.user?.system_role || "").toLowerCase();
-    const isAdmin =
-      ["sadm", "admn", "admin", "system admin", "super admin"].includes(currentUserRole) ||
-      ["SADM", "ADMN"].includes(req.user?.role);
+    const isAdmin = currentUserRole === "admin";
 
     // If user is not admin and trying to update someone else:
     if (!isAdmin && String(id) !== String(currentUserId)) {

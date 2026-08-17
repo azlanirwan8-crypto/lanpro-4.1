@@ -130,7 +130,7 @@ router.put(
 
       const currentUserId = req.user?.id || req.user?.uid || req.headers["x-user-id"];
       const userRole = (req.user?.role || req.user?.system_role || "").toUpperCase();
-      const isAdmin = ["SADM", "ADMN", "ADMIN"].includes(userRole);
+      const isAdmin = userRole === "ADMIN";
       const authorId = item.createdBy || item.author_id || item.authorId;
       const isAuthor = authorId === currentUserId;
 
@@ -211,7 +211,7 @@ router.delete(
 
       const currentUserId = req.user?.id || req.user?.uid || req.headers["x-user-id"];
       const userRole = (req.user?.role || req.user?.system_role || "").toUpperCase();
-      const isAdmin = ["SADM", "ADMN", "ADMIN"].includes(userRole);
+      const isAdmin = userRole === "ADMIN";
       const authorId = item.createdBy || item.author_id || item.authorId;
       const isAuthor = authorId === currentUserId;
 

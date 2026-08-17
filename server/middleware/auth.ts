@@ -75,10 +75,14 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
       const userId = user.id || user.uid;
 
       if (userId) {
-        db.query("SELECT currentSessionToken FROM Users WHERE id = ?", [userId.toString()])
+        db.query(
+          'SELECT "currentSessionToken", role, status FROM Users WHERE id = ? OR uid = ?',
+          [userId.toString(), userId.toString()]
+        )
           .then(([rows]: any) => {
             if (rows && rows.length > 0) {
-              const currentToken = rows[0].currentSessionToken;
+              const dbUser = rows[0];
+              const currentToken = dbUser.currentSessionToken;
               if (currentToken && currentToken !== token) {
                 return res.status(401).json({
                   status: "error",
@@ -86,9 +90,28 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
                     "Sesi Anda telah diakhiri karena akun Anda telah masuk di perangkat/browser lain.",
                 });
               }
+
+              // Tolak akun yang dinonaktifkan atau belum aktif
+              if (dbUser.status && dbUser.status.toLowerCase() !== "active") {
+                return res.status(403).json({
+                  status: "error",
+                  message: "Akses ditolak: Akun Anda dinonaktifkan atau belum aktif.",
+                });
+              }
+
+              // Sinkronisasi peran real-time dari database ke req.user (§19.28 / #92)
+              req.user = {
+                ...user,
+                role: dbUser.role || user.role,
+                status: dbUser.status || user.status,
+              };
+              return next();
             }
-            req.user = user;
-            next();
+
+            return res.status(401).json({
+              status: "error",
+              message: "Akses ditolak: Pengguna tidak ditemukan.",
+            });
           })
           .catch((dbErr: any) => {
             console.error(
