@@ -46,6 +46,7 @@ bagian ini, berurutan. Sisanya rujukan, bukan bacaan awal.
 | §20     | **Serah terima untuk perkakas lain**                                                               |
 | §21     | Pekerjaan yang ditahan 17 Agu 2026 — keadaan persis saat berhenti, dan pemindai kontras            |
 | §22     | **Aturan menyentuh TEMA** — wajib dibaca sebelum mengubah warna apa pun                            |
+| §23     | **Prompt awal sesi** — teks siap salin-tempel untuk Antigravity/perkakas AI lain                   |
 
 ---
 
@@ -6899,3 +6900,87 @@ Menambal daftar ini akan merusak, bukan memperbaiki:
 Benang merahnya satu: **alat ukur yang salah lebih berbahaya daripada tidak
 mengukur**, karena hasilnya terlihat meyakinkan. Bila sebuah angka mengejutkan,
 periksa alat ukurnya lebih dulu — bukan kodenya.
+
+## §23 PROMPT AWAL SESI — untuk Antigravity atau perkakas AI lain
+
+Perkakas AI tidak otomatis membaca `AUDIT.md`. Bila sesi dimulai dengan
+"perbaiki tema gelap", peta jalannya datang dari tebakannya sendiri — dan itulah
+yang terjadi sebelumnya. Salin-tempel teks di bawah **sebagai pesan pertama**,
+sebelum meminta pekerjaan apa pun.
+
+### 23.1 Teks untuk disalin
+
+---
+
+Sebelum menyentuh kode apa pun, lakukan ini berurutan dan laporkan hasilnya:
+
+1. Baca `.agents/AGENTS.md` seluruhnya. Isinya wajib.
+2. Baca `AUDIT.md` bagian **MULAI DARI SINI**, lalu **§20**, lalu **§21**.
+   Bila pekerjaannya menyangkut warna atau tema, baca juga **§22** — wajib.
+3. Jalankan `npm run audit:papan && npm run audit:warna && npm run audit:tema`
+   dan laporkan hasilnya apa adanya. Ketiganya harus hijau SEBELUM Anda mulai;
+   bila ada yang merah, itu bukan pekerjaan Anda dan harus dilaporkan dulu.
+4. Sebutkan **nomor item** dari `AUDIT.md` §1.1 untuk pekerjaan yang saya minta.
+   Bila tidak ada nomornya, katakan begitu dan usulkan nomor baru — **jangan
+   mulai mengerjakan**.
+5. Laporkan rencana Anda dan **tunggu persetujuan saya** sebelum mengubah kode.
+
+Aturan yang mengikat selama sesi:
+
+- Kerjakan **satu item saja**. Selesai, lapor, tunggu, baru item berikutnya.
+- Satu branch per item; merge ke `main` hanya setelah gerbang lulus.
+- Item berstatus `MENUNGGU` **tidak boleh dikerjakan** — itu menunggu keputusan
+  saya, bukan menunggu pengerjaan.
+- **Jangan sentuh `src/lib/db.ts`.**
+- **Jangan ubah nilai token di `src/index.css`** dan **jangan tambah `dark:`**.
+  Aturannya §22.
+- **Jangan pakai kredensial saya.** Bila verifikasi butuh login, minta saya yang
+  login.
+- **Jangan sabotase kode untuk membuktikan test bisa merah.** Pakai
+  `git worktree` di luar repo.
+- Jangan hardcode peran/status/prioritas/departemen — semuanya dari MasterData,
+  dan yang disimpan ke database adalah `code`, bukan `label`.
+- Jangan melewati hook git (`--no-verify`).
+
+Sebelum menyatakan apa pun selesai:
+
+`npm run doctor && npm run lint && npm test && npm run build && npm run audit:papan && npm run audit:warna && npm run audit:tema`
+
+lalu **buka aplikasi di tab peramban yang BERSIH** dan pastikan UI benar-benar
+tampil. Build hijau BUKAN bukti — kelas Tailwind hanyalah string bagi
+kompilator, seluruh tema bisa rusak sementara semua perintah di atas hijau.
+
+Terakhir: perbarui `AUDIT.md`. Temuan baru menjadi item bernomor, dan jangan
+menomori ulang item yang sudah ada. Apa pun yang belum Anda verifikasi, tulis
+apa adanya: **"belum terverifikasi"**.
+
+---
+
+### 23.2 Kenapa bentuknya seperti ini
+
+Tiap baris di atas menutup kegagalan yang **sudah pernah terjadi**, bukan
+kegagalan yang dibayangkan:
+
+| Baris                              | Menutup                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------ |
+| Baca `AGENTS.md` + `AUDIT.md` dulu | perkakas sebelumnya tidak tahu papan kerja ini ada                       |
+| Jalankan gerbang SEBELUM mulai     | tanpa titik awal, kerusakan orang lain tercatat sebagai kerusakan Anda   |
+| Sebutkan nomor item                | pekerjaan di luar papan adalah cara paling umum repo ini rusak           |
+| Satu item, lalu berhenti           | perubahan bertumpuk membuat penyebabnya tidak bisa ditelusuri            |
+| Larangan `dark:` dan nilai token   | dua cara tercepat merusak tema sambil semua perkakas tetap hijau         |
+| Tab peramban bersih                | konsol menyimpan galat hot-reload lama; build hijau bukan bukti          |
+| "belum terverifikasi"              | laporan yang terdengar yakin lebih berbahaya daripada laporan yang jujur |
+
+### 23.3 Bila perkakasnya tetap melenceng
+
+Gerbangnya akan menangkapnya, bukan Anda:
+
+- `pre-commit` menjalankan `audit:papan` + `audit:warna` + `audit:tema`.
+  Perubahan yang merusak tema secara struktural **tidak bisa ter-commit**.
+- `npm run audit:tema` menyebutkan berkas dan angkanya, jadi kerusakannya bisa
+  ditunjuk dengan tepat.
+- Pemulihannya: `git log --oneline` cari commit-nya, lalu `git revert <sha>`.
+
+Yang **tidak** ditangkap gerbang mana pun: tema yang jelek secara rasa, dan
+halaman yang gagal tampil. Untuk keduanya tidak ada gantinya selain membuka
+aplikasinya sendiri.
