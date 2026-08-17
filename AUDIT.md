@@ -6568,3 +6568,196 @@ sudah diperbaiki, dan **cocok dengan apa yang dilihat pemilik proyek di layar** 
 itu yang membuatnya bisa dipercaya, bukan alat ukurnya sendiri.
 
 Sebelum menindaklanjuti per elemen, tetap periksa beberapa kasus dengan mata.
+
+## §21 PEKERJAAN DITAHAN 17 Agu 2026 — keadaan persis saat berhenti
+
+Pemilik proyek menghentikan sesi karena batas anggaran. Bagian ini menulis
+keadaan **apa adanya**, supaya siapa pun yang melanjutkan — manusia maupun AI —
+tidak perlu menebak apa pun.
+
+**Baca §20 lebih dulu** untuk aturan yang mengikat. Bagian ini melengkapinya
+dengan pekerjaan yang berhenti SETENGAH JALAN.
+
+### 21.1 Keadaan repo saat ditahan
+
+| Hal            | Nilai                             | Cara memeriksa                        |
+| -------------- | --------------------------------- | ------------------------------------- |
+| Branch         | `main`                            | `git branch --show-current`           |
+| Working tree   | **bersih**, semua ter-commit      | `git status --porcelain`              |
+| Belum di-push  | ya, seluruhnya lokal              | `git log --oneline main ^origin/main` |
+| `tsc --noEmit` | 0 error                           | `npm run lint`                        |
+| Test           | 404 lulus / 43 suite              | `npm test`                            |
+| Build          | sukses                            | `npm run build`                       |
+| Papan §1       | 27 BELUM · 65 SELESAI · 2 ditahan | `npm run audit:papan`                 |
+| Warna keras    | garis dasar terkunci              | `npm run audit:warna`                 |
+
+**Tidak ada pekerjaan yang tertinggal di working tree.** Bila `git status`
+menunjukkan perubahan, itu dari sesi lain — bukan dari sesi ini.
+
+### 21.2 Tema terang/gelap — SETENGAH JALAN
+
+Satu-satunya pekerjaan yang berhenti di tengah. Rencananya **§19.50**.
+
+| Langkah | Isi                                               | Status    |
+| :-----: | ------------------------------------------------- | --------- |
+|    1    | Tambah token `{aksen}-text` dan `{aksen}-surface` | SELESAI   |
+|    2    | Alihkan 71 pemakaian TEKS ke `{aksen}-text`       | SELESAI   |
+|    3    | Alihkan 16 pemakaian ISIAN ke `{aksen}-surface`   | SELESAI   |
+|    4    | Ukur ulang pada layar yang SUDAH LOGIN            | **BELUM** |
+|    5    | Buang token aksen lama bila sudah tidak dipakai   | **BELUM** |
+
+#### Angka terakhir yang diketahui, dan batasnya
+
+| Layar           | Terang |  Gelap | Kapan diukur                             |
+| --------------- | -----: | -----: | ---------------------------------------- |
+| **Sudah login** | **41** | **29** | sesudah langkah 2, **SEBELUM** langkah 3 |
+| Layar login     |      3 |      2 | sesudah langkah 3                        |
+
+**Keduanya TIDAK BISA dibandingkan.** Layar login punya jauh lebih sedikit
+elemen. Angka 41/29 belum diukur ulang sesudah langkah 3, jadi **tidak
+diketahui** apakah langkah 3 memperbaikinya dan seberapa.
+
+Langkah 4 adalah **satu perintah**, bukan pekerjaan besar: minta pemilik proyek
+login, jalankan pemindai §21.3. **Jangan menambal apa pun sebelum angka itu ada.**
+
+#### Kenapa mode gelap tidak mungkin rusak oleh langkah 1–3
+
+Bisa diperiksa dari tabel token tanpa menjalankan apa pun. Nilai `-text` di mode
+gelap sama persis dengan nilai token lama di mode gelap:
+
+    warning-text  gelap #ffca6a  = nilai lama warning di gelap
+    success-text  gelap #2fd5bd  = nilai lama success di gelap
+    danger-text   gelap #ff8071  = nilai lama danger di gelap
+    info-text     gelap #5b93f7  = nilai lama info di gelap
+
+Yang berubah **hanya sisi terangnya**. Token lama juga tidak disentuh.
+
+### 21.3 Pemindai kontras — PAKAI INI, jangan menulis ulang
+
+Pemindai ini sudah melewati **empat kali koreksi** (§19.49). Menulis ulang dari
+nol berarti mengulang keempat kesalahan itu. Tempel di konsol peramban, pada
+layar yang **sudah login**:
+
+```js
+(function () {
+  var cv = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
+  function rgb(c) {
+    cv.fillStyle = "#000";
+    cv.fillStyle = c;
+    cv.fillRect(0, 0, 1, 1);
+    var d = cv.getImageData(0, 0, 1, 1).data;
+    return [d[0], d[1], d[2], d[3]];
+  }
+  function lum(r, g, b) {
+    var a = [r, g, b].map(function (v) {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+  }
+  function bgOf(el) {
+    var e = el;
+    while (e) {
+      var c = getComputedStyle(e).backgroundColor;
+      if (c && c !== "rgba(0, 0, 0, 0)" && c !== "transparent") {
+        var m = rgb(c);
+        if (m[3] > 200) return m;
+      }
+      e = e.parentElement;
+    }
+    return [255, 255, 255, 255];
+  }
+  function ukur() {
+    var r = [];
+    document.querySelectorAll("*").forEach(function (el) {
+      var t = (el.textContent || "").trim();
+      if (!t || t.length > 32 || el.children.length > 0) return;
+      var b = el.getBoundingClientRect();
+      if (b.width < 8 || b.height < 6) return;
+      var s = getComputedStyle(el);
+      if (s.display === "none" || parseFloat(s.opacity) < 0.3) return;
+      var fg = rgb(s.color),
+        bg = bgOf(el);
+      var ra =
+        (Math.max(lum(fg[0], fg[1], fg[2]), lum(bg[0], bg[1], bg[2])) + 0.05) /
+        (Math.min(lum(fg[0], fg[1], fg[2]), lum(bg[0], bg[1], bg[2])) + 0.05);
+      if (ra < 4.5)
+        r.push({
+          t: t.slice(0, 16),
+          r: +ra.toFixed(2),
+          cls: (el.className || "").toString().slice(0, 42),
+        });
+    });
+    return r.sort(function (a, b) {
+      return a.r - b.r;
+    });
+  }
+  var d = document.documentElement;
+  d.classList.add("dark");
+  var gelap = ukur();
+  d.classList.remove("dark");
+  var terang = ukur();
+  d.classList.add("dark");
+  return JSON.stringify(
+    {
+      masuk: !/Sign in to continue/i.test(document.body.innerText),
+      gelap: gelap.length,
+      terang: terang.length,
+      terburukTerang: terang.slice(0, 6),
+      terburukGelap: gelap.slice(0, 6),
+    },
+    null,
+    1
+  );
+})();
+```
+
+**Empat hal yang WAJIB diperhatikan:**
+
+1. **Periksa `masuk` pada hasilnya.** Bila `false`, itu layar login dan angkanya
+   TIDAK sebanding dengan layar yang sudah login. Kesalahan ini terjadi **tiga
+   kali** dalam sesi ini.
+2. **Jangan me-reload untuk berganti tema.** Reload mengeluarkan sesi (login
+   per-tab, "Remember Me" tidak dicentang). Pemindai di atas berganti tema
+   dengan memasang/mencabut kelas `dark` DI TEMPAT — itu sebabnya ia bisa
+   mengukur keduanya sekaligus.
+3. **Jangan tambahkan saringan ukuran** seperti `width>80 && height>30`. Lencana
+   lebih kecil dari itu dan akan hilang dari hitungan (§19.49 kesalahan #2).
+4. **`bgOf` HARUS menolak latar transparan.** Cadangan yang mengembalikan putih
+   pernah MENGARANG 78 tabrakan palsu (§19.49 kesalahan #4).
+
+### 21.4 Sisa pekerjaan tema, sejauh yang diketahui
+
+Diukur **sebelum** langkah 3, pada layar yang sudah login. **Belum diukur ulang.**
+
+| Sisa                       |       Rasio | Sifat                                                                                                                                        |
+| -------------------------- | ----------: | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Teks sidebar tertentu      |        ~1.0 | perlu ditelusuri; kemungkinan pasangan token inverse yang latarnya bukan permukaan inverse                                                   |
+| Lencana kecil              |    ~1.0–1.2 | idem                                                                                                                                         |
+| Lencana "Hot" / "New"      | 2.45 · 1.85 | **BUKAN regresi** — sudah di bawah 4.5 sejak mode terang (§19.47). Memperbaikinya berarti mengubah warna merek: **keputusan pemilik proyek** |
+| Tombol nonaktif            |         2.9 | **BUKAN cacat** — kontrol nonaktif dikecualikan WCAG                                                                                         |
+| `text-amber-400` pada logo |        1.65 | aksen merek                                                                                                                                  |
+
+**Jangan menambal daftar ini satu per satu sebelum langkah 4 dijalankan.**
+Sebagian mungkin sudah tertutup langkah 3, dan menambal yang sudah benar adalah
+cara memasukkan cacat baru.
+
+### 21.5 Item lain yang tersentuh sesi ini tetapi belum tuntas
+
+| #      | Sudah dikerjakan                                                            | Yang BELUM                                                                                                                                      |
+| ------ | --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **74** | 4 pengambil berlingkup proyek dijaga respons basi                           | Ulangan 429 pada `fetchSprints`, `fetchActivityLogs`, `fetchProjects` masih memakai closure basi — **cacat berbeda**, §13.12                    |
+| **21** | `authStore` & `uiStore` dibuang                                             | `useProjectState` & `useNotificationState` juga menganggur — **belum bernomor**, perlu item sendiri                                             |
+| **13** | 606+ kelas warna keras jadi token; gerbang `audit:warna` dipasang           | Langkah 4 & 5 §19.50                                                                                                                            |
+| **83** | Keputusan diambil (§19.48): Head = akses `R` pada proyek yang ia ditugaskan | **Belum diterapkan.** Perlu baris `head` di §19.5 dengan `R` di seluruh modul. `Users.department` TIDAK perlu difungsikan                       |
+| **86** | Keputusan diambil: `ProjectModules` sumber kebenaran                        | **Belum diterapkan.** 4 baris `modul_aplikasi` di MasterData belum dibuang                                                                      |
+| **77** | Pemilik memilih SheetJS `xlsx`                                              | **Belum dikerjakan.** Ukur `npm audit` SheetJS lebih dulu — statusnya belum pernah diperiksa, dan rekomendasi tanpa angka tidak boleh dipercaya |
+
+### 21.6 Yang TIDAK boleh disimpulkan dari dokumen ini
+
+Sesi ini menutup banyak item, dan itu bisa terbaca seolah aplikasinya siap
+rilis. **Tidak.**
+
+Yang masih menahan rilis production tercatat di §1.1 dan §20.3 — terutama
+**#30** (storage drive-per-user) dan **#46** (`SSO_ALLOWED_DOMAINS=gmail.com`).
+Keduanya menunggu keputusan pemilik proyek dan **tidak boleh ditebak**.
