@@ -8,7 +8,7 @@ import { createAuditLog } from "../services/audit.service";
 import { adalahTabelTidakAda } from "../helpers/pgErrors";
 const router = express.Router();
 
-router.get("/api/projects", async (req: any, res) => {
+router.get("/api/projects", authenticateJWT, async (req: any, res) => {
   let connection;
   try {
     connection = await db.getConnection();
