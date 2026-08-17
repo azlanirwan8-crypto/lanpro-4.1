@@ -14,8 +14,9 @@ import {
   ActivityLog,
   LinkedTask,
   AppNotification,
+  PeranEfektif,
 } from "./types";
-import { hasPermission } from "./lib/permissions";
+import { hasPermission, resolveProjectRole } from "./lib/permissions";
 import { validateFileClient } from "./lib/fileSecurity";
 import { confirmDeleteAlert, showSuccessAlert, showErrorAlert } from "./lib/sweetalert";
 import { useAppStore } from "./store/useAppStore";
@@ -244,6 +245,16 @@ function AppContainer() {
   // Alias currentUser. Harus tepat setelah useAuthHook karena useAppNotifications
   // di bawah membacanya saat render.
   const user: any = currentUser;
+
+  // Resolusi peran proyek anggota di dalam proyek aktif (§19.27 / #87)
+  const effectiveProjectRole = useMemo(() => {
+    if (!selectedProject || !currentUser) return null;
+    return resolveProjectRole(currentUser, selectedProject);
+  }, [selectedProject, currentUser]);
+
+  const userRoleForProject = useMemo(() => {
+    return (effectiveProjectRole || effectiveRole) as PeranEfektif;
+  }, [effectiveProjectRole, effectiveRole]);
 
   // Kembalian SSO. Dibaca sekali saat mount; token sudah ditangani lebih awal di
   // main.tsx, jadi yang tersisa di sini hanya dua keadaan yang butuh tampilan:
@@ -1609,7 +1620,7 @@ function AppContainer() {
   const handleStartSprint = async (sprintId: string) => {
     if (!selectedProject) return;
     if (
-      !hasPermission(effectiveRole, "planning", "update", false, currentUserProfile?.permissions)
+      !hasPermission(userRoleForProject, "planning", "update", false, currentUserProfile?.permissions)
     ) {
       toast.error("Anda tidak memiliki izin untuk memulai sprint.");
       return;
@@ -1630,7 +1641,7 @@ function AppContainer() {
   const handleCompleteSprint = async (sprintId: string) => {
     if (!selectedProject) return;
     if (
-      !hasPermission(effectiveRole, "planning", "update", false, currentUserProfile?.permissions)
+      !hasPermission(userRoleForProject, "planning", "update", false, currentUserProfile?.permissions)
     ) {
       toast.error("Anda tidak memiliki izin untuk menyelesaikan sprint.");
       return;
@@ -1744,7 +1755,7 @@ function AppContainer() {
       const isParentReporter = parentTask && isUserMatch(parentTask.reporterId);
 
       const isDirectReporter = isUserMatch(task.reporterId);
-      const isAdmin = ["admin", "manager"].includes(effectiveRole);
+      const isAdmin = ["admin", "manager", "owner"].includes(userRoleForProject);
 
       const isAuthorizedSprint = isDirectReporter || isParentReporter || isAdmin;
 
@@ -1826,7 +1837,7 @@ function AppContainer() {
     if (!selectedProject) return;
 
     if (
-      !hasPermission(effectiveRole, "planning", "update", false, currentUserProfile?.permissions)
+      !hasPermission(userRoleForProject, "planning", "update", false, currentUserProfile?.permissions)
     ) {
       toast.error("Failed: You do not have permission to perform this action.");
       return;
@@ -1929,7 +1940,7 @@ function AppContainer() {
     if (!selectedProject || !newTaskTitle.trim() || !activeUid) return;
 
     if (
-      !hasPermission(effectiveRole, "issueList", "create", false, currentUserProfile?.permissions)
+      !hasPermission(userRoleForProject, "issueList", "create", false, currentUserProfile?.permissions)
     ) {
       toast.error("Anda tidak memiliki izin untuk menambahkan tugas baru.");
       return;
@@ -2542,7 +2553,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
     const isOwner = taskToUpdate.assigneeId === user?.uid || taskToUpdate.reporterId === user?.uid;
     if (
-      !hasPermission(effectiveRole, "issueList", "update", isOwner, currentUserProfile?.permissions)
+      !hasPermission(userRoleForProject, "issueList", "update", isOwner, currentUserProfile?.permissions)
     ) {
       toast.error("Failed: You do not have permission to edit this task.");
       return;
@@ -3030,9 +3041,9 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       return options.includes(f);
     };
 
-    // Permission Check: Admin & Manager always allowed, otherwise only Task Creator (Reporter) or Epic Creator (Parent Reporter)
+    // Permission Check: Admin, Owner & Manager always allowed, otherwise only Task Creator (Reporter) or Epic Creator (Parent Reporter)
     const taskToMove = tasks.find((t) => t.id === draggableId);
-    if (taskToMove && !["admin", "manager"].includes(effectiveRole)) {
+    if (taskToMove && !["admin", "manager", "owner"].includes(userRoleForProject)) {
       const parentTask = taskToMove.parentId
         ? tasks.find((t) => t.id === taskToMove.parentId)
         : null;
@@ -3442,7 +3453,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               {/* Tombol Pengaturan Proyek */}
               {selectedProject &&
                 hasPermission(
-                  effectiveRole,
+                  userRoleForProject,
                   "configuration",
                   "read",
                   selectedProject?.ownerId === (currentUser?.uid || user?.uid),
@@ -3711,7 +3722,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                     currentView={currentView}
                     setCurrentView={setCurrentView}
                     selectedProject={selectedProject}
-                    effectiveRole={effectiveRole}
+                    effectiveRole={userRoleForProject}
                     currentUser={currentUser}
                     currentUserProfile={currentUserProfile}
                     projectMembers={projectMembers || []}

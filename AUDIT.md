@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 25 BELUM · 67 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 24 BELUM · 68 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 25 item
+### 1.1 BELUM SELESAI — 24 item
 
-**Sebaran per fase:** F1 1 · F2 6 · F3 1 · F6 6 · F7 6 · F8 4 · F9 2 · F10 3 · F11 1 · F12 1
+**Sebaran per fase:** F1 1 · F2 6 · F3 1 · F6 6 · F7 5 · F8 4 · F9 2 · F10 3 · F11 1 · F12 1
 
 **Masih menahan rilis production:** #30
 
@@ -518,9 +518,8 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 83  | `Users.department` & `Users.position` TIDAK fungsional — rancangan §19.4 belum bisa jalan  | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.13 |
 | 85  | `category` memuat DUA konsep — area teknis + jenis pekerjaan (duplikat `issue_type`)       | **F7**  | 🟡  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
 | 86  | `modul_aplikasi` punya DUA sumber — `MasterData` (4) dan tabel `ProjectModules` (UI)       | **F7**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §19.14 |
-| 87  | `effectiveRole` DIKOREKSI — ia hanya bawa peran sistem; frontend abai peran proyek         | **F7**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §19.27 |
 
-### 1.2 SUDAH SELESAI — 67 item
+### 1.2 SUDAH SELESAI — 68 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -594,6 +593,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 74  | ~~7 pengambil data tanpa penjaga respons basi~~ 4 pengambil proyek dijaga                            |  **F2**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §13.12 |
 | 46  | ~~`SSO_ALLOWED_DOMAINS=gmail.com`~~ ditetapkan `rajonet.com,bni.co.id,gmail.com,outlook.com`        |  **F1**  | 🔴  | Sangat rendah | Ya (blokir production) | `SELESAI` 17 Agu | §0.4   |
 | 92  | ~~Peran dibaca dari token vs DB~~ disinkronkan real-time di `authenticateJWT`                       |  **F7**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §19.28 |
+| 87  | ~~`effectiveRole` abai peran proyek~~ diselaraskan via `resolveProjectRole` & `can()`               |  **F7**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 17 Agu | §19.27 |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 
@@ -648,7 +648,7 @@ mendesak — 🔴 dan tanpa penghalang.
 
 Didahului yang tidak menunggu pemilik: **#8**
 (1.290 `any`), **#47** (kolom kembar `discussion_point_comments`), **#87**
-(frontend abai peran proyek), **#13**/**#14** (F12 desain).
+(frontend abai peran proyek — `SELESAI` 17 Agu), **#13**/**#14** (F12 desain).
 
 Menunggu pemilik: #4, #16, #17, #25, #27, #45, **#77** (sisa exceljs — §1.4 sempat salah
 menempatkannya di kelompok tanpa keputusan; papan §1 yang benar).

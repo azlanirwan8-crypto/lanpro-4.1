@@ -1,25 +1,42 @@
 import { UserPermissions, ModulePermission, PeranEfektif } from "../types";
 import { normalkanPeran } from "../types/roles";
+import {
+  bolehDiProyek,
+  bolehDiSistem,
+  punyaGodMode,
+  type ModulProyek,
+  type ModulSistem,
+  type Aksi,
+} from "./matriksAkses";
 
 const FULL_ACCESS: ModulePermission = { create: true, read: true, update: true, delete: true };
-const READ_DELETE: ModulePermission = { create: false, read: true, update: false, delete: true };
+const CRU_ACCESS: ModulePermission = { create: true, read: true, update: true, delete: false };
+const RU_ACCESS: ModulePermission = { create: false, read: true, update: true, delete: false };
 const READ_ONLY: ModulePermission = { create: false, read: true, update: false, delete: false };
 const NO_ACCESS: ModulePermission = { create: false, read: false, update: false, delete: false };
 
 /**
- * Izin bawaan per peran.
- *
- * `Partial` bukan kelonggaran, melainkan pengukuran: hanya 5 dari 12 peran
- * katalog yang punya baris di sini. Tujuh peran proyek — `owner`,
- * `system_analyst`, `business_analyst`, `developer`, `qa`, dan seterusnya —
- * BELUM punya izin bawaan sama sekali, sehingga semuanya jatuh ke `viewer`
- * lewat cadangan di `getUserPermissions`. Itu tepat kesenjangan yang §19.8
- * tahap 4 tutup dengan matriks terpusat.
- *
- * Ditulis `Record` penuh sebelumnya, dan itu berbohong: kompilator mengira
- * seluruh peran tercakup padahal tidak.
+ * Izin bawaan per peran — diselaraskan penuh dengan MATRIKS_PROYEK dan MATRIKS_SISTEM (§19.4 & §19.5).
  */
 export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>> = {
+  owner: {
+    dashboard: READ_ONLY,
+    access: FULL_ACCESS,
+    list: FULL_ACCESS,
+    board: FULL_ACCESS,
+    sprints: FULL_ACCESS,
+    timeline: FULL_ACCESS,
+    wiki: FULL_ACCESS,
+    flowchart: FULL_ACCESS,
+    meetingNotes: FULL_ACCESS,
+    qa: FULL_ACCESS,
+    notebooklm: FULL_ACCESS,
+    userManagement: NO_ACCESS,
+    masterData: NO_ACCESS,
+    auditLog: NO_ACCESS,
+    dbExplorer: NO_ACCESS,
+    settings: NO_ACCESS,
+  },
   admin: {
     dashboard: FULL_ACCESS,
     meetingNotes: FULL_ACCESS,
@@ -37,6 +54,114 @@ export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>>
     dbExplorer: FULL_ACCESS,
     settings: FULL_ACCESS,
     flowchart: FULL_ACCESS,
+  },
+  manager: {
+    dashboard: READ_ONLY,
+    meetingNotes: FULL_ACCESS,
+    wiki: FULL_ACCESS,
+    notebooklm: FULL_ACCESS,
+    list: FULL_ACCESS,
+    sprints: FULL_ACCESS,
+    board: FULL_ACCESS,
+    qa: FULL_ACCESS,
+    timeline: FULL_ACCESS,
+    access: RU_ACCESS,
+    userManagement: NO_ACCESS,
+    masterData: NO_ACCESS,
+    auditLog: NO_ACCESS,
+    dbExplorer: NO_ACCESS,
+    settings: NO_ACCESS,
+    flowchart: FULL_ACCESS,
+  },
+  system_analyst: {
+    dashboard: READ_ONLY,
+    access: READ_ONLY,
+    list: CRU_ACCESS,
+    board: RU_ACCESS,
+    sprints: READ_ONLY,
+    timeline: READ_ONLY,
+    wiki: FULL_ACCESS,
+    flowchart: FULL_ACCESS,
+    meetingNotes: CRU_ACCESS,
+    qa: RU_ACCESS,
+    notebooklm: CRU_ACCESS,
+    userManagement: NO_ACCESS,
+    masterData: NO_ACCESS,
+    auditLog: NO_ACCESS,
+    dbExplorer: NO_ACCESS,
+    settings: NO_ACCESS,
+  },
+  business_analyst: {
+    dashboard: READ_ONLY,
+    access: READ_ONLY,
+    list: CRU_ACCESS,
+    board: RU_ACCESS,
+    sprints: READ_ONLY,
+    timeline: READ_ONLY,
+    wiki: CRU_ACCESS,
+    flowchart: CRU_ACCESS,
+    meetingNotes: FULL_ACCESS,
+    qa: RU_ACCESS,
+    notebooklm: CRU_ACCESS,
+    userManagement: NO_ACCESS,
+    masterData: NO_ACCESS,
+    auditLog: NO_ACCESS,
+    dbExplorer: NO_ACCESS,
+    settings: NO_ACCESS,
+  },
+  developer: {
+    dashboard: READ_ONLY,
+    access: READ_ONLY,
+    list: CRU_ACCESS,
+    board: RU_ACCESS,
+    sprints: READ_ONLY,
+    timeline: READ_ONLY,
+    wiki: READ_ONLY,
+    flowchart: READ_ONLY,
+    meetingNotes: READ_ONLY,
+    qa: RU_ACCESS,
+    notebooklm: READ_ONLY,
+    userManagement: NO_ACCESS,
+    masterData: NO_ACCESS,
+    auditLog: NO_ACCESS,
+    dbExplorer: NO_ACCESS,
+    settings: NO_ACCESS,
+  },
+  qa: {
+    dashboard: READ_ONLY,
+    access: READ_ONLY,
+    list: CRU_ACCESS,
+    board: RU_ACCESS,
+    sprints: READ_ONLY,
+    timeline: READ_ONLY,
+    wiki: READ_ONLY,
+    flowchart: READ_ONLY,
+    meetingNotes: CRU_ACCESS,
+    qa: FULL_ACCESS,
+    notebooklm: READ_ONLY,
+    userManagement: NO_ACCESS,
+    masterData: NO_ACCESS,
+    auditLog: NO_ACCESS,
+    dbExplorer: NO_ACCESS,
+    settings: NO_ACCESS,
+  },
+  user: {
+    dashboard: READ_ONLY,
+    meetingNotes: CRU_ACCESS,
+    wiki: READ_ONLY,
+    notebooklm: CRU_ACCESS,
+    list: CRU_ACCESS,
+    sprints: READ_ONLY,
+    board: RU_ACCESS,
+    qa: READ_ONLY,
+    timeline: READ_ONLY,
+    access: NO_ACCESS,
+    userManagement: NO_ACCESS,
+    masterData: NO_ACCESS,
+    auditLog: NO_ACCESS,
+    dbExplorer: NO_ACCESS,
+    settings: NO_ACCESS,
+    flowchart: READ_ONLY,
   },
   head: {
     dashboard: READ_ONLY,
@@ -56,53 +181,17 @@ export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>>
     settings: READ_ONLY,
     flowchart: READ_ONLY,
   },
-  manager: {
-    dashboard: READ_ONLY,
-    meetingNotes: FULL_ACCESS,
-    wiki: FULL_ACCESS,
-    notebooklm: FULL_ACCESS,
-    list: FULL_ACCESS,
-    sprints: FULL_ACCESS,
-    board: FULL_ACCESS,
-    qa: FULL_ACCESS,
-    timeline: READ_ONLY,
-    access: READ_ONLY,
-    userManagement: NO_ACCESS,
-    masterData: NO_ACCESS,
-    auditLog: READ_ONLY,
-    dbExplorer: NO_ACCESS,
-    settings: READ_ONLY,
-    flowchart: FULL_ACCESS,
-  },
-  user: {
-    dashboard: READ_ONLY,
-    meetingNotes: { create: true, read: true, update: true, delete: false },
-    wiki: READ_ONLY,
-    notebooklm: { create: true, read: true, update: true, delete: false },
-    list: { create: true, read: true, update: true, delete: false },
-    sprints: READ_ONLY,
-    board: { create: false, read: true, update: true, delete: false },
-    qa: READ_ONLY,
-    timeline: READ_ONLY,
-    access: NO_ACCESS,
-    userManagement: NO_ACCESS,
-    masterData: NO_ACCESS,
-    auditLog: NO_ACCESS,
-    dbExplorer: NO_ACCESS,
-    settings: NO_ACCESS,
-    flowchart: READ_ONLY,
-  },
   viewer: {
     dashboard: READ_ONLY,
-    meetingNotes: NO_ACCESS,
+    meetingNotes: READ_ONLY,
     wiki: READ_ONLY,
     notebooklm: READ_ONLY,
-    list: NO_ACCESS,
+    list: READ_ONLY,
     sprints: READ_ONLY,
     board: READ_ONLY,
     qa: READ_ONLY,
     timeline: READ_ONLY,
-    access: NO_ACCESS,
+    access: READ_ONLY,
     userManagement: NO_ACCESS,
     masterData: NO_ACCESS,
     auditLog: NO_ACCESS,
@@ -307,4 +396,101 @@ export function hasPermission(
   }
 
   return true;
+}
+
+/**
+ * Mengekstrak peran proyek dari pengguna di dalam konteks proyek. (§19.27 / #87)
+ */
+export function resolveProjectRole(user: any, project: any): string | null {
+  if (!user || !project) return null;
+  const userId = user.id || user.uid;
+  if (!userId) return null;
+
+  // Project Owner
+  if (
+    project.ownerId &&
+    (String(project.ownerId) === String(user.id) || String(project.ownerId) === String(user.uid))
+  ) {
+    return "owner";
+  }
+
+  // Project Members lookup in memberRoles map
+  if (project.memberRoles && typeof project.memberRoles === "object") {
+    const role = project.memberRoles[user.id] || project.memberRoles[user.uid];
+    if (role) return normalkanPeran(role);
+  }
+
+  // Project members array lookup
+  if (Array.isArray(project.members)) {
+    const member = project.members.find(
+      (m: any) =>
+        String(m.id || m.uid || m.userId) === String(user.id) ||
+        String(m.id || m.uid || m.userId) === String(user.uid)
+    );
+    if (member && member.role) return normalkanPeran(member.role);
+  }
+
+  return null;
+}
+
+/**
+ * Pemeriksa izin Two-Tier terpadu — membaca matriks terpusat yang sama dengan server. (§19.8 Tahap 5b)
+ */
+export function can(
+  action: "create" | "read" | "update" | "delete" | Aksi | string,
+  module: ModulProyek | ModulSistem | string,
+  context?: {
+    user?: any;
+    project?: any;
+    role?: PeranEfektif | string;
+    isOwner?: boolean;
+    customPermissions?: Partial<UserPermissions>;
+  }
+): boolean {
+  const user = context?.user;
+  const project = context?.project;
+  const systemRole = user?.role || (typeof context?.role === "string" ? context.role : "user");
+
+  // Global Administrator memiliki God Mode penuh
+  if (punyaGodMode(systemRole)) return true;
+
+  let normalizedAction = action.toUpperCase();
+  if (normalizedAction === "ADD") normalizedAction = "CREATE";
+  const actionLetter: Aksi =
+    normalizedAction === "CREATE" || normalizedAction === "C"
+      ? "C"
+      : normalizedAction === "READ" || normalizedAction === "R"
+      ? "R"
+      : normalizedAction === "UPDATE" || normalizedAction === "U"
+      ? "U"
+      : normalizedAction === "DELETE" || normalizedAction === "D"
+      ? "D"
+      : "R";
+
+  const normModule = normalizeModuleKey(module);
+
+  // Modul Sistem (DI LUAR proyek)
+  if (["userManagement", "masterData", "auditLog", "dbExplorer", "settings"].includes(normModule)) {
+    return bolehDiSistem(systemRole, normModule, actionLetter);
+  }
+
+  // Modul Proyek (DI DALAM proyek)
+  let projectRole: string | null = null;
+  if (user && project) {
+    projectRole = resolveProjectRole(user, project);
+  } else if (context?.role) {
+    projectRole = normalkanPeran(context.role);
+  }
+
+  if (projectRole) {
+    return bolehDiProyek(projectRole, normModule, actionLetter);
+  }
+
+  return hasPermission(
+    (context?.role || systemRole) as PeranEfektif,
+    module,
+    action,
+    context?.isOwner,
+    context?.customPermissions
+  );
 }
