@@ -71,7 +71,7 @@ export const QATopBar: React.FC<QATopBarProps> = ({
                   currentUserRole === "manager") && (
                   <button
                     onClick={handleForceUnlock}
-                    className="ml-auto md:ml-2 px-2.5 py-1.5 bg-danger hover:bg-danger-hover text-content-inverse text-xs sm:text-[10px] font-semibold uppercase tracking-wider rounded-md transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+                    className="ml-auto md:ml-2 px-2.5 py-1.5 bg-danger-surface hover:bg-danger-hover text-content-inverse text-xs sm:text-[10px] font-semibold uppercase tracking-wider rounded-md transition-all shadow-xs flex items-center gap-1 cursor-pointer"
                   >
                     <ShieldAlert className="w-3.5 h-3.5" />
                     Force Unlock

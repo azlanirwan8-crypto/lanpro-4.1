@@ -167,7 +167,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     type="button"
                     disabled={isLoading}
                     onClick={onClose}
-                    className="min-w-[5rem] px-4 py-2 bg-danger hover:bg-danger-hover text-content-inverse font-normal rounded text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                    className="min-w-[5rem] px-4 py-2 bg-danger-surface hover:bg-danger-hover text-content-inverse font-normal rounded text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                   >
                     {cancelText}
                   </button>

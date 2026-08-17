@@ -46,7 +46,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
             </button>
             <button
               onClick={onConfirm}
-              className="flex-1 py-2.5 bg-danger hover:bg-danger-hover text-content-inverse text-xs font-medium rounded-md cursor-pointer shadow-xs transition-colors"
+              className="flex-1 py-2.5 bg-danger-surface hover:bg-danger-hover text-content-inverse text-xs font-medium rounded-md cursor-pointer shadow-xs transition-colors"
             >
               Ya, Hapus
             </button>

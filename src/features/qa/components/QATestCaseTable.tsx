@@ -213,7 +213,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               canUpdate && (
                 <button
                   onClick={handleMigrateSuitePhase}
-                  className="px-3 py-1.5 bg-success hover:bg-success-hover text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+                  className="px-3 py-1.5 bg-success-surface hover:bg-success-hover text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>{activeSuite.phase === "SIT" ? "Migrate to UAT" : "Migrate to PTR"}</span>

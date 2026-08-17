@@ -311,7 +311,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                   percentage === 0
                     ? "bg-border-subtle"
                     : percentage === 100
-                      ? "bg-success"
+                      ? "bg-success-surface"
                       : "bg-primary-surface"
                 )}
                 style={{ width: `${percentage}%` }}

@@ -103,7 +103,7 @@ export const Button = ({
       "bg-primary-surface text-content-inverse hover:bg-primary-surface-hover active:bg-primary-active shadow-soft",
     secondary:
       "bg-surface-muted text-content-body hover:bg-border-subtle border border-border-subtle",
-    danger: "bg-danger text-content-inverse hover:opacity-90 shadow-soft",
+    danger: "bg-danger-surface text-content-inverse hover:opacity-90 shadow-soft",
     ghost: "text-content-secondary hover:bg-surface-muted",
   };
   return (

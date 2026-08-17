@@ -204,9 +204,9 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                         <div
                           className={`absolute -left-[19px] top-1.5 w-2.5 h-2.5 rounded-full border-2 ${
                             st === "PASSED"
-                              ? "border-success bg-success"
+                              ? "border-success bg-success-surface"
                               : st === "FAILED"
-                                ? "border-danger bg-danger"
+                                ? "border-danger bg-danger-surface"
                                 : "border-slate-400 bg-slate-400"
                           }`}
                         />
@@ -299,7 +299,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                         )}
                         <button
                           onClick={() => handleRemoveSpecificEvidenceFromDrawer(ev.id)}
-                          className="absolute top-1 right-1 p-1 bg-danger text-content-inverse rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-1 right-1 p-1 bg-danger-surface text-content-inverse rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
                           title="Hapus Bukti"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -361,7 +361,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                 <div className="pt-2 border-t border-border-faint">
                   <button
                     onClick={() => handleOpenCreateBugModal(selectedTestCase)}
-                    className="w-full py-2 bg-danger hover:bg-danger-hover text-content-inverse font-medium rounded-md text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
+                    className="w-full py-2 bg-danger-surface hover:bg-danger-hover text-content-inverse font-medium rounded-md text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
                   >
                     <Bug className="w-4 h-4" />
                     <span>Buat Tiket Bug dari Test Case Ini</span>

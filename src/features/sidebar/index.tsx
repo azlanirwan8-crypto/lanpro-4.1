@@ -40,10 +40,10 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
 
   const renderBadge = (badge?: string, badgeColor?: string) => {
     if (!badge) return null;
-    let colorClasses = "bg-danger text-content-inverse"; // default Hot orange-red
+    let colorClasses = "bg-danger-surface text-content-inverse"; // default Hot orange-red
     if (badgeColor === "emerald" || badge === "New")
-      colorClasses = "bg-success text-content-inverse";
-    if (badgeColor === "blue") colorClasses = "bg-info text-content-inverse";
+      colorClasses = "bg-success-surface text-content-inverse";
+    if (badgeColor === "blue") colorClasses = "bg-info-surface text-content-inverse";
     if (badgeColor === "purple") colorClasses = "bg-content-inverse-muted/20 text-content-inverse";
 
     return (
