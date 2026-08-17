@@ -14,15 +14,28 @@ npm run doctor    # periksa environment, kredensial, konfigurasi keamanan
 npm run dev       # http://localhost:3000
 ```
 
+## Sebelum mengerjakan apa pun
+
+| Berkas                               | Isi                                                                                                                                             |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[`AUDIT.md`](AUDIT.md)**           | **Papan kerja resmi.** Seluruh pekerjaan berasal dari nomor item di §1.1 — bukan dari daftar tugas sendiri. Mulai dari bagian `MULAI DARI SINI` |
+| **[`AGENTS.md`](AGENTS.md)**         | Aturan wajib bagi perkakas AI **dan** manusia: gerbang sebelum menyatakan selesai, larangan keras, struktur direktori                           |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Struktur nyata repo beserta utang teknis yang masih terbuka, lengkap dengan angkanya                                                            |
+
+Menyentuh warna atau tema? **`AUDIT.md` §22 wajib dibaca lebih dulu.**
+
 ## Perintah
 
-| Perintah | Kegunaan |
-|---|---|
-| `npm run dev` | Jalankan aplikasi (Vite + Express dalam satu proses) |
-| `npm run doctor` | Periksa `.env`, koneksi database, dan konfigurasi keamanan |
-| `npm run build` | Build produksi (vite build + bundle server) |
-| `npm test` | Jest — proyek `node` dan `jsdom` |
-| `npm run lint` | `tsc --noEmit` + validasi permission |
+| Perintah              | Kegunaan                                                   |
+| --------------------- | ---------------------------------------------------------- |
+| `npm run dev`         | Jalankan aplikasi (Vite + Express dalam satu proses)       |
+| `npm run doctor`      | Periksa `.env`, koneksi database, dan konfigurasi keamanan |
+| `npm run build`       | Build produksi (vite build + bundle server)                |
+| `npm test`            | Jest — proyek `node` dan `jsdom`                           |
+| `npm run lint`        | `tsc --noEmit` + validasi permission                       |
+| `npm run audit:papan` | Papan §1 konsisten dengan dirinya sendiri                  |
+| `npm run audit:warna` | Kelas warna keras tidak bertambah                          |
+| `npm run audit:tema`  | Nilai token, `dark:`, dan kosakata token tidak bergeser    |
 
 ## Struktur
 
