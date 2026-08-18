@@ -21,6 +21,8 @@
 | 8 | [Vercel Rate Limit Crash — ERR_ERL_UNEXPECTED_X_FORWARDED_FOR](#8-vercel-rate-limit-crash--err_erl_unexpected_x_forwarded_for) | Vercel | Login/API crash: `ValidationError: The 'X-Forwarded-For' header is set` | Express `trust proxy` bernilai `false` di belakang reverse proxy Vercel | ✅ Selesai |
 | 9 | [Tombol SSO Google Tidak Muncul di Deployment Vercel](#9-tombol-sso-google-tidak-muncul-di-deployment-vercel) | Vercel | Halaman login di domain Vercel tidak menampilkan tombol Google | Environment Variables OIDC belum diset di Vercel Dashboard | ✅ Selesai |
 | 10 | [Vercel Login Crash / Gagal Token — JWT_SECRET Kosong](#10-vercel-login-crash--gagal-token--jwt_secret-kosong) | Vercel | Login gagal di Vercel, token JWT tidak dapat ditandatangani | Integrasi database menginjeksi DB env, namun `JWT_SECRET` belum ditambahkan di Vercel | ✅ Selesai |
+| 11 | [Google SSO Error 400: redirect_uri_mismatch Persisten](#11-google-sso-error-400-redirect_uri_mismatch-persisten-vercel) | Vercel | Google OAuth Error 400: `redirect_uri_mismatch` | Client ID berbeda antara Google Cloud Console dengan Vercel Env, atau Redirect URI belum disimpan di OAuth Client yang tepat | ✅ Selesai |
+| 12 | [Vercel 504 Gateway Timeout pada OAuth Callback](#12-vercel-504-gateway-timeout-function_invocation_timeout-pada-oauth-callback) | Vercel | Layar putih bertuliskan `504: GATEWAY_TIMEOUT (FUNCTION_INVOCATION_TIMEOUT)` di `/api/auth/oidc/callback` | Lambda wrapper `api/index.ts` menggantung karena `res.redirect` tidak memanggil callback `next()` Express | ✅ Selesai |
 
 ---
 
@@ -367,8 +369,81 @@ URI yang tercetak di log **harus sama persis** dengan yang terdaftar di Google C
 - `server/routes/auth-oidc.routes.ts` — endpoint `/api/auth/oidc/callback`
 
 ### Status
-✅ Perbaikan kode: auto-deteksi Vercel domain & log diagnostik ditambahkan (commit `089c6cd`)
-⚠️ Masih membutuhkan konfigurasi manual di Google Cloud Console dan Vercel env vars
+✅ Selesai — URL Redirect dan Client ID telah disinkronkan antara Google Cloud Console dan Vercel Environment Variables.
+
+---
+
+## 12. Vercel 504 Gateway Timeout (`FUNCTION_INVOCATION_TIMEOUT`) pada OAuth Callback
+
+### Gejala
+Setelah pengguna berhasil memilih akun Google dan memberikan persetujuan, Google me-redirect pengguna ke `https://lanpro-mu.vercel.app/api/auth/oidc/callback?state=...`.
+Namun, browser menampilkan layar putih error dari Vercel:
+
+```
+504: GATEWAY_TIMEOUT
+Code: FUNCTION_INVOCATION_TIMEOUT
+ID: sin1::mlv4m-...
+This Serverless Function has timed out.
+```
+
+### Lingkup
+- Vercel Serverless Function runtime (`api/index.ts`).
+- Terjadi saat callback OAuth mengembalikan HTTP 302 Redirect (`res.redirect`) ke frontend.
+
+### Akar Penyebab
+Pada [api/index.ts](file:///D:/lanpro-4.1/api/index.ts), wrapper handler Serverless menjalankan Express melalui Promise:
+```ts
+return await new Promise((resolve) => {
+  app(req, res, (err: any) => {
+    // Callback ini HANYA dipanggil jika Express memanggil next(err) atau rute tidak ditemukan (404)
+    resolve(null);
+  });
+});
+```
+
+Pada Express.js:
+1. Saat endpoint menjalankan `res.redirect(...)` atau `res.end()`, Express langsung menulis response header/body dan mengakhiri socket HTTP stream.
+2. Express **TIDAK** memanggil callback akhir `(err) => ...` jika rute sudah berhasil menangani request dan mengakhiri response.
+3. Akibatnya, `new Promise` pada handler Vercel **tidak pernah melakukan `resolve()`**.
+4. Runtime Serverless Function Vercel terus menunggu Promise selesai hingga mencapai batas `maxDuration: 30s` dan mematikan fungsi Lambda dengan `504: FUNCTION_INVOCATION_TIMEOUT`.
+
+### Cara Mengatasi
+Tambahkan event listener lifecycle response stream pada `res.once('finish')` dan `res.once('close')` di dalam `api/index.ts` agar Promise segera di-resolve saat response selesai dikirim:
+
+```diff
+     return await new Promise((resolve) => {
++      let resolved = false;
++      const done = () => {
++        if (!resolved) {
++          resolved = true;
++          resolve(null);
++        }
++      };
++
++      res.once("finish", done);
++      res.once("close", done);
++
+       app(req, res, (err: any) => {
+         if (err) {
+           console.error("[VERCEL] App error:", err);
+           if (!res.headersSent) {
+             res.status(500).json({ status: "error", message: "Server error: " + (err.message || String(err)) });
+           }
+         }
+-        resolve(null);
++        done();
+       });
+     });
+```
+
+Dengan perubahan ini, begitu `res.redirect()` selesai mengirim header `302 Found`, event `finish` terpicu seketika dan Lambda function selesai dalam waktu < 20ms tanpa menggantung.
+
+### Berkas Terkait
+- [api/index.ts](file:///D:/lanpro-4.1/api/index.ts) — Serverless Function Lambda entry point untuk Vercel.
+- [server/routes/auth-oidc.routes.ts](file:///D:/lanpro-4.1/server/routes/auth-oidc.routes.ts) — endpoint callback OIDC yang memicu `res.redirect()`.
+
+### Status
+✅ Selesai — Commit `07b5e38` telah diuji, dibangun, dan di-push ke branch `main`.
 
 ---
 
