@@ -60,6 +60,7 @@ import { initWhatsAppScheduler, sendDailyTaskDigest } from "./server/services/wh
 import { jalankanMigrasiDenganUlangan, statusMigrasi } from "./server/services/migrasi-status";
 
 export const app = express();
+app.set('trust proxy', 1);
 
 async function startServer() {
   const PORT = 3000;
@@ -265,6 +266,7 @@ async function startServer() {
     message: "Terlalu banyak request dari IP ini, silakan coba lagi setelah 5 menit",
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
     skip: (req) => {
       // Bebaskan limitasi untuk localhost/Vite saat development
       const ip = req.ip || req.connection.remoteAddress;
@@ -292,6 +294,7 @@ async function startServer() {
     },
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
     // Login yang berhasil tidak ikut dihitung, sehingga pengguna sah yang
     // sesekali salah ketik tidak ikut terkunci.
     skipSuccessfulRequests: true,
@@ -325,6 +328,7 @@ async function startServer() {
     },
     standardHeaders: true,
     legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
   });
   app.use("/api/auth/register", registerLimiter);
 
