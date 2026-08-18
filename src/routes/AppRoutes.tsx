@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { ShieldAlert, FolderKanban } from "lucide-react";
 import type { PeranEfektif } from "../types/roles";
+import type { Project, Sprint, Task, User } from "../types";
 
 /**
  * Tiap tampilan dimuat SAAT DIBUTUHKAN, bukan sekaligus di awal.
@@ -92,18 +93,18 @@ const MemuatTampilan = () => (
 export interface AppRoutesProps {
   currentView: string;
   setCurrentView: (view: any) => void;
-  selectedProject: any;
+  selectedProject: Project | null;
   /** Peran yang berlaku — lingkup SYSTEM atau PROJECT. Lihat `PeranEfektif`. */
   effectiveRole: PeranEfektif;
-  currentUser: any;
-  currentUserProfile: any;
-  projectMembers: any[];
+  currentUser: User | null;
+  currentUserProfile: User | null;
+  projectMembers: User[];
   masterData: any[];
-  tasks: any[];
-  sprints: any[];
-  allUsers: any[];
+  tasks: Task[];
+  sprints: Sprint[];
+  allUsers: User[];
   activityLogs: any[];
-  selectedTaskForDetail: any;
+  selectedTaskForDetail: Task | null;
   expandedSprintId: string | null;
   hasPermission: (
     role: string,
@@ -115,7 +116,7 @@ export interface AppRoutesProps {
   updateTaskField: (id: string, field: string, value: any) => any;
   updateTaskStatus?: (id: string, status: string) => void;
   handleQuickCreate: (title: string, parentId?: string) => void;
-  setSelectedTaskForDetail: (task: any) => void;
+  setSelectedTaskForDetail: (task: Task | null) => void;
   setIsTaskDetailModalOpen: (open: boolean) => void;
   setIsNewTaskModalOpen: (open: boolean) => void;
   deleteTask: (id: string) => void;
@@ -124,14 +125,14 @@ export interface AppRoutesProps {
   setExpandedSprintId: (id: string | null) => void;
   setIsNewSprintModalOpen: (open: boolean) => void;
   setIsEditSprintModalOpen: (open: boolean) => void;
-  setEditingSprint: (sprint: any) => void;
+  setEditingSprint: (sprint: Sprint | null) => void;
   handleStartSprint: (sprintId: string) => void;
   handleCompleteSprint: (sprintId: string) => void;
   handleDeleteSprint: (sprintId: string) => void;
   handleDragEndPlanning: (result: any) => void;
   fetchMasterData: () => void;
   fetchProjects: () => void;
-  setTasks: (tasks: any[]) => void;
+  setTasks: (tasks: Task[]) => void;
   socket?: any;
   qaInitialStatusFilter?: "ALL" | "Pending" | "Failed" | "Passed" | "Retest" | "Blocked";
   exportTasksToCSV: () => void;

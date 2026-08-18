@@ -77,3 +77,5 @@ export interface UserProfile {
   permissions?: Partial<UserPermissions>;
   passwordHash: string;
 }
+
+export type User = UserProfile;

@@ -27,10 +27,11 @@ import {
   updateTaskSchema,
   reorderTaskIdsSchema,
 } from "../schemas/task.schema";
+import { AuthenticatedRequest } from "../types/express";
 
 const router = express.Router();
 
-router.get("/api/projects/:projectId/tasks", jagaProyek("list", "R"), async (req: any, res) => {
+router.get("/api/projects/:projectId/tasks", jagaProyek("list", "R"), async (req: AuthenticatedRequest, res) => {
   let connection;
   try {
     const { projectId } = req.params;

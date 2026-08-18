@@ -13,6 +13,7 @@ import { simpanBerkas, hapusBerkas } from "../services/storage.service";
 import { sanitizeAvatarValue, AVATAR_ALLOWED_EXT } from "../helpers/avatarValue";
 import { validasiBody } from "../middleware/validate";
 import { updateUserSchema, updateProfileSchema } from "../schemas/user.schema";
+import { AuthenticatedRequest } from "../types/express";
 export { sanitizeAvatarValue };
 
 /**
@@ -100,10 +101,10 @@ router.post("/api/users/heartbeat", async (req, res) => {
 });
 
 // Resilient Presence Ping API (Fallback for Vercel Serverless)
-router.post("/api/presence/ping", authenticateJWT, async (req: any, res) => {
+router.post("/api/presence/ping", authenticateJWT, async (req: AuthenticatedRequest, res) => {
   let connection;
   try {
-    const userId = req.user.id || req.user.uid;
+    const userId = req.user?.id || req.user?.uid;
     const nowStr = new Date().toISOString();
     connection = await db.getConnection();
 
@@ -407,7 +408,7 @@ router.post(
   }
 );
 
-router.put("/api/users/:id", authenticateJWT, validasiBody(updateUserSchema), async (req: any, res) => {
+router.put("/api/users/:id", authenticateJWT, validasiBody(updateUserSchema), async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const currentUserId = req.user?.id || req.user?.uid;
@@ -523,7 +524,7 @@ router.put("/api/users/:id", authenticateJWT, validasiBody(updateUserSchema), as
   }
 });
 
-router.delete("/api/users/:id", authenticateJWT, verifyGlobalAdmin, async (req: any, res) => {
+router.delete("/api/users/:id", authenticateJWT, verifyGlobalAdmin, async (req: AuthenticatedRequest, res) => {
   try {
     const { id } = req.params;
     const connection = await db.getConnection();
@@ -538,9 +539,13 @@ router.delete("/api/users/:id", authenticateJWT, verifyGlobalAdmin, async (req: 
   }
 });
 
-router.put("/api/profile/update", authenticateJWT, validasiBody(updateProfileSchema), async (req: any, res: any) => {
+router.put("/api/profile/update", authenticateJWT, validasiBody(updateProfileSchema), async (req: AuthenticatedRequest, res: any) => {
   try {
-    const { id } = req.user;
+    const userId = req.user?.id || req.user?.uid;
+    if (!userId) {
+      return res.status(401).json({ status: "error", message: "Sesi tidak valid." });
+    }
+    const id = userId;
     const {
       displayName,
       username,

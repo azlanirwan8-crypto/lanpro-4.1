@@ -12,9 +12,11 @@ import {
   updateProjectSchema,
   updateDashboardLayoutSchema,
 } from "../schemas/project.schema";
+import { AuthenticatedRequest } from "../types/express";
+
 const router = express.Router();
 
-router.get("/api/projects", authenticateJWT, async (req: any, res) => {
+router.get("/api/projects", authenticateJWT, async (req: AuthenticatedRequest, res) => {
   let connection;
   try {
     connection = await db.getConnection();
