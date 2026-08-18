@@ -6,6 +6,12 @@ import { authenticateJWT, verifyGlobalAdmin } from "../middleware/auth";
 import { jagaHapusProyek, jagaProyek, jagaSetelanProyek } from "../middleware/jagaProyek";
 import { createAuditLog } from "../services/audit.service";
 import { adalahTabelTidakAda } from "../helpers/pgErrors";
+import { validasiBody } from "../middleware/validate";
+import {
+  createProjectSchema,
+  updateProjectSchema,
+  updateDashboardLayoutSchema,
+} from "../schemas/project.schema";
 const router = express.Router();
 
 router.get("/api/projects", authenticateJWT, async (req: any, res) => {
@@ -150,8 +156,13 @@ router.get("/api/projects/:id", jagaProyek("dashboard", "R"), async (req, res) =
  * Ketetapan pemilik proyek: pembuatan proyek dibatasi ke administrator demi
  * menjaga kestabilan data.
  */
-router.post("/api/projects", authenticateJWT, verifyGlobalAdmin, async (req, res) => {
-  let connection;
+router.post(
+  "/api/projects",
+  authenticateJWT,
+  verifyGlobalAdmin,
+  validasiBody(createProjectSchema),
+  async (req, res) => {
+    let connection;
   try {
     const { name, description, ownerId, status, projectKey, category } = req.body;
     connection = await db.getConnection();
@@ -208,41 +219,43 @@ router.post("/api/projects", authenticateJWT, verifyGlobalAdmin, async (req, res
   }
 });
 
-router.put("/api/projects/:projectId/dashboard-layout", jagaSetelanProyek(), async (req, res) => {
-  let connection;
-  try {
-    const { projectId } = req.params;
-    const { layout } = req.body;
+router.put(
+  "/api/projects/:projectId/dashboard-layout",
+  jagaSetelanProyek(),
+  validasiBody(updateDashboardLayoutSchema),
+  async (req, res) => {
+    let connection;
+    try {
+      const { projectId } = req.params;
+      const { layout } = req.body;
 
-    // Validasi tipe data array
-    if (!Array.isArray(layout)) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "Layout harus berupa tipe data array." });
+      connection = await db.getConnection();
+      const jsonLayout = JSON.stringify(layout);
+
+      // Simpan ke dashboard_layout dan dashboardLayout untuk kompatibilitas penuh
+      await connection.query(
+        "UPDATE Projects SET dashboard_layout = ?, dashboardLayout = ? WHERE id = ?",
+        [jsonLayout, jsonLayout, projectId]
+      );
+
+      res.json({ status: "success", message: "Layout updated" });
+    } catch (error: any) {
+      console.error(
+        "LOG ANOMALI CRITICAL: PUT /api/projects/:projectId/dashboard-layout error:",
+        error
+      );
+      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    } finally {
+      if (connection) connection.release();
     }
-
-    connection = await db.getConnection();
-    const jsonLayout = JSON.stringify(layout);
-
-    // Simpan ke dashboard_layout dan dashboardLayout untuk kompatibilitas penuh
-    await connection.query(
-      "UPDATE Projects SET dashboard_layout = ?, dashboardLayout = ? WHERE id = ?",
-      [jsonLayout, jsonLayout, projectId]
-    );
-
-    res.json({ status: "success", message: "Layout updated" });
-  } catch (error: any) {
-    console.error(
-      "LOG ANOMALI CRITICAL: PUT /api/projects/:projectId/dashboard-layout error:",
-      error
-    );
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
   }
-});
+);
 
-router.put("/api/projects/:id", jagaSetelanProyek(), async (req, res) => {
+router.put(
+  "/api/projects/:id",
+  jagaSetelanProyek(),
+  validasiBody(updateProjectSchema),
+  async (req, res) => {
   let connection;
   try {
     const { id } = req.params;

@@ -13,6 +13,12 @@ import {
   QA_SCENARIO_REFINEMENT_SCHEMA,
   QA_TEST_CASE_SUGGESTION_SCHEMA,
 } from "../services/qa-ai.schema";
+import { validasiBody } from "../middleware/validate";
+import {
+  createQATestCaseSchema,
+  updateQATestCaseSchema,
+  updateQASuiteSchema,
+} from "../schemas/qa.schema";
 
 export function setupQARoutes(
   app: Express,
@@ -357,6 +363,7 @@ export function setupQARoutes(
   app.put(
     "/api/projects/:projectId/qa-test-suites/:id",
     jagaProyek("qa", "U"),
+    validasiBody(updateQASuiteSchema),
     async (req, res) => {
       let connection;
       try {
@@ -390,13 +397,6 @@ export function setupQARoutes(
   // DELETE: Remove QA Test Suite and related Test Cases
   app.delete(
     "/api/projects/:projectId/qa-test-suites/:id",
-    // #66 — dulu wildcard, yang sesudah #49 berarti anggota proyek dengan peran
-    // APA PUN, termasuk Viewer, bisa menghapus. Penghapusan suite bahkan
-    // berjenjang: seluruh test case di dalamnya ikut terhapus.
-    //
-    // Sekarang dijaga matriks (§19.8 tahap 4): modul `qa`, aksi `D`. Menurut
-    // §19.5 itu berarti Owner, Project Admin, Project Manager, dan QA — QA
-    // karena `qa` adalah wilayah kuasanya.
     jagaProyek("qa", "D"),
     async (req, res) => {
       let connection;
@@ -450,20 +450,43 @@ export function setupQARoutes(
         if (typeof str !== "string") return str || fallback;
         try {
           return JSON.parse(str);
-        } catch (e) {
+        } catch {
           return fallback;
         }
       };
 
-      const parsed = rows.map((row: any) => ({
-        ...row,
+      const cases = (rows as any[]).map((row) => ({
+        id: row.id,
+        projectId: row.projectId,
+        title: row.judul,
+        judul: row.judul,
         steps: safeParse(row.steps, []),
+        expectedResult: row.expected,
+        expected: row.expected,
+        status: row.status,
+        priority: row.prioritas,
+        prioritas: row.prioritas,
+        phase: row.tipeTesting,
+        tipeTesting: row.tipeTesting,
+        suiteId: row.suiteId,
+        rowNum: row.rowNum,
+        modulId: row.modulId,
         history: safeParse(row.history, []),
+        comment: row.comment,
+        evidenceUrl: row.evidenceUrl,
+        evidenceType: row.evidenceType,
+        evidenceName: row.evidenceName,
+        linkedBugKey: row.linkedBugKey,
         commentsList: safeParse(row.commentsList, []),
         evidences: safeParse(row.evidences, []),
+        assignedTo: row.assignedTo,
+        activeTesterId: row.activeTesterId,
+        activeTesterName: row.activeTesterName,
+        lockedAt: row.lockedAt,
+        createdAt: row.createdAt,
       }));
 
-      res.json({ status: "success", data: parsed });
+      res.json({ status: "success", data: cases });
     } catch (error: any) {
       console.error("GET /api/projects/:projectId/qa-test-cases error:", error);
       res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
@@ -473,67 +496,76 @@ export function setupQARoutes(
   });
 
   // POST: Create QA Test Case
-  app.post("/api/projects/:projectId/qa-test-cases", jagaProyek("qa", "C"), async (req, res) => {
-    let connection;
-    try {
-      const { projectId } = req.params;
-      const tc = req.body;
-      connection = await db.getConnection();
+  app.post(
+    "/api/projects/:projectId/qa-test-cases",
+    jagaProyek("qa", "C"),
+    validasiBody(createQATestCaseSchema),
+    async (req, res) => {
+      let connection;
+      try {
+        const { projectId } = req.params;
+        const tc = req.body;
+        connection = await db.getConnection();
 
-      await connection.query(
-        `INSERT INTO QATestCases (
+        await connection.query(
+          `INSERT INTO QATestCases (
           id, projectId, judul, deskripsi, tipeTesting, prioritas, caseId, expected, status, steps, history, createdAt, activeTesterId, activeTesterName, lockedAt, modulId,
           suiteId, rowNum, comment, evidenceUrl, evidenceType, evidenceName, linkedBugKey, commentsList, evidences, assignedTo
          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          tc.id,
-          projectId,
-          tc.judul || tc.title,
-          tc.deskripsi || tc.comment || null,
-          tc.tipeTesting || tc.phase || "SIT",
-          tc.prioritas || tc.priority || "Medium",
-          tc.caseId || null,
-          tc.expected || tc.expectedResult || null,
-          tc.status || "untested",
-          JSON.stringify(tc.steps || []),
-          JSON.stringify(tc.history || []),
-          tc.createdAt || new Date().toISOString(),
-          tc.activeTesterId || null,
-          tc.activeTesterName || null,
-          tc.lockedAt || null,
-          tc.modulId || tc.suiteId || null,
-          tc.suiteId || null,
-          tc.rowNum || null,
-          tc.comment || null,
-          tc.evidenceUrl || null,
-          tc.evidenceType || null,
-          tc.evidenceName || null,
-          tc.linkedBugKey || null,
-          JSON.stringify(tc.commentsList || []),
-          JSON.stringify(tc.evidences || []),
-          tc.assignedTo || null,
-        ]
-      );
+          [
+            tc.id,
+            projectId,
+            tc.judul || tc.title,
+            tc.deskripsi || tc.comment || null,
+            tc.tipeTesting || tc.phase || "SIT",
+            tc.prioritas || tc.priority || "Medium",
+            tc.caseId || null,
+            tc.expected || tc.expectedResult || null,
+            tc.status || "untested",
+            JSON.stringify(tc.steps || []),
+            JSON.stringify(tc.history || []),
+            tc.createdAt || new Date().toISOString(),
+            tc.activeTesterId || null,
+            tc.activeTesterName || null,
+            tc.lockedAt || null,
+            tc.modulId || tc.suiteId || null,
+            tc.suiteId || null,
+            tc.rowNum || null,
+            tc.comment || null,
+            tc.evidenceUrl || null,
+            tc.evidenceType || null,
+            tc.evidenceName || null,
+            tc.linkedBugKey || null,
+            JSON.stringify(tc.commentsList || []),
+            JSON.stringify(tc.evidences || []),
+            tc.assignedTo || null,
+          ]
+        );
 
-      res.json({ status: "success", message: "Test Case created" });
-    } catch (error: any) {
-      console.error("POST /api/projects/:projectId/qa-test-cases error:", error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-    } finally {
-      if (connection) connection.release();
+        res.json({ status: "success", message: "Test Case created" });
+      } catch (error: any) {
+        console.error("POST /api/projects/:projectId/qa-test-cases error:", error);
+        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      } finally {
+        if (connection) connection.release();
+      }
     }
-  });
+  );
 
   // PUT: Update QA Test Case
-  app.put("/api/projects/:projectId/qa-test-cases/:id", jagaProyek("qa", "U"), async (req, res) => {
-    let connection;
-    try {
-      const { projectId, id } = req.params;
-      const tc = req.body;
-      connection = await db.getConnection();
+  app.put(
+    "/api/projects/:projectId/qa-test-cases/:id",
+    jagaProyek("qa", "U"),
+    validasiBody(updateQATestCaseSchema),
+    async (req, res) => {
+      let connection;
+      try {
+        const { projectId, id } = req.params;
+        const tc = req.body;
+        connection = await db.getConnection();
 
-      await connection.query(
-        `UPDATE QATestCases SET
+        await connection.query(
+          `UPDATE QATestCases SET
           judul = ?,
           deskripsi = ?,
           tipeTesting = ?,

@@ -11,6 +11,8 @@ import { roomPengguna, sidikToken } from "../middleware/socketAuth";
 import { z } from "zod";
 import { formatUserForAuthResponse, handleUserAuthentication } from "../services/auth.service";
 import { kirimEmailSelamatDatang } from "../services/email.service";
+import { validasiBody } from "../middleware/validate";
+import { loginSchema, forceLogoutSchema, registerSchema } from "../schemas/auth.schema";
 
 const router = express.Router();
 
@@ -100,15 +102,9 @@ router.post("/api/auth/refresh", authenticateJWT, async (req: any, res) => {
   }
 });
 
-router.post("/api/auth/login", async (req, res) => {
+router.post("/api/auth/login", validasiBody(loginSchema), async (req, res) => {
   try {
     const { username, password, force } = req.body;
-
-    if (!username || !password) {
-      return res
-        .status(400)
-        .json({ status: "error", message: "Username/Email dan Password wajib diisi." });
-    }
 
     const authResult = await handleUserAuthentication(username, password);
     if (authResult.success === false) {
@@ -220,10 +216,9 @@ router.post("/api/auth/login", async (req, res) => {
   }
 });
 
-router.post("/api/auth/force-logout", async (req, res) => {
+router.post("/api/auth/force-logout", validasiBody(forceLogoutSchema), async (req, res) => {
   try {
     const { username, password } = req.body;
-    if (!username || !password) return res.status(400).json({ status: "error" });
 
     const authResult = await handleUserAuthentication(username, password);
     if (authResult.success === false) {

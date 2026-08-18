@@ -11,6 +11,8 @@ import { getJwtSecret } from "../middleware/auth";
 import { validateFileBuffer } from "../../src/lib/fileSecurity";
 import { simpanBerkas, hapusBerkas } from "../services/storage.service";
 import { sanitizeAvatarValue, AVATAR_ALLOWED_EXT } from "../helpers/avatarValue";
+import { validasiBody } from "../middleware/validate";
+import { updateUserSchema, updateProfileSchema } from "../schemas/user.schema";
 export { sanitizeAvatarValue };
 
 /**
@@ -405,7 +407,7 @@ router.post(
   }
 );
 
-router.put("/api/users/:id", authenticateJWT, async (req: any, res) => {
+router.put("/api/users/:id", authenticateJWT, validasiBody(updateUserSchema), async (req: any, res) => {
   try {
     const { id } = req.params;
     const currentUserId = req.user?.id || req.user?.uid;
@@ -536,7 +538,7 @@ router.delete("/api/users/:id", authenticateJWT, verifyGlobalAdmin, async (req: 
   }
 });
 
-router.put("/api/profile/update", authenticateJWT, async (req: any, res: any) => {
+router.put("/api/profile/update", authenticateJWT, validasiBody(updateProfileSchema), async (req: any, res: any) => {
   try {
     const { id } = req.user;
     const {

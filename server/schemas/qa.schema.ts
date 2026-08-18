@@ -1,0 +1,58 @@
+import { z } from "zod";
+
+export const createQATestCaseSchema = z.object({
+  judul: z.string().optional(),
+  title: z.string().optional(),
+  deskripsi: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  steps: z.any().optional(),
+  expected: z.string().optional().nullable(),
+  expectedResult: z.string().optional().nullable(),
+  tipeTesting: z.string().optional(),
+  phase: z.string().optional(),
+  prioritas: z.string().optional(),
+  priority: z.string().optional(),
+  status: z.string().optional(),
+  modulId: z.string().optional().nullable(),
+  suiteId: z.string().optional().nullable(),
+  assignedTo: z.string().optional().nullable(),
+});
+
+export const updateQATestCaseSchema = z.object({
+  judul: z.string().optional(),
+  title: z.string().optional(),
+  deskripsi: z.string().optional().nullable(),
+  comment: z.string().optional().nullable(),
+  tipeTesting: z.string().optional(),
+  phase: z.string().optional(),
+  prioritas: z.string().optional(),
+  priority: z.string().optional(),
+  status: z.string().optional(),
+  expected: z.string().optional().nullable(),
+  expectedResult: z.string().optional().nullable(),
+  steps: z.any().optional(),
+  history: z.any().optional(),
+  commentsList: z.any().optional(),
+  evidences: z.any().optional(),
+  assignedTo: z.string().optional().nullable(),
+  activeTesterId: z.string().optional().nullable(),
+  activeTesterName: z.string().optional().nullable(),
+  lockedAt: z.string().optional().nullable(),
+  evidenceUrl: z.string().optional().nullable(),
+  evidenceType: z.string().optional().nullable(),
+  evidenceName: z.string().optional().nullable(),
+  linkedBugKey: z.string().optional().nullable(),
+  caseId: z.string().optional().nullable(),
+  rowNum: z.number().optional().nullable(),
+  modulId: z.string().optional().nullable(),
+  suiteId: z.string().optional().nullable(),
+});
+
+export const updateQASuiteSchema = z.object({
+  name: z.string().min(1, "Nama test suite tidak boleh kosong"),
+  phase: z.string().optional(),
+  uploadedBy: z.string().optional(),
+  uploadedAt: z.string().optional(),
+  fileName: z.string().optional().nullable(),
+  assignedTo: z.string().optional().nullable(),
+});

@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 15 BELUM · 77 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 14 BELUM · 78 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,15 +486,14 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 15 item
+### 1.1 BELUM SELESAI — 14 item
 
-**Sebaran per fase:** F1 0 · F2 5 · F3 1 · F6 3 · F7 2 · F8 4 · F9 2 · F10 3 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 5 · F3 1 · F6 3 · F7 1 · F8 4 · F9 2 · F10 3 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
 | #   | Temuan                                                                                     |  Fase   | Sev | Biaya         |   Blokir modul baru?    | Status                  | Detail |
 | --- | ------------------------------------------------------------------------------------------ | :-----: | :-: | ------------- | :---------------------: | ----------------------- | ------ |
-| 4   | ±100 endpoint tanpa validasi skema                                                         | **F7**  | 🔴  | Sedang        |      Ya (keamanan)      | `TERBUKA`               | §3     |
 | 5   | Routing palsu + 47 props di satu persimpangan                                              | **F10** | 🔴  | Tinggi        |           Ya            | `TERBUKA`               | §5     |
 | 6   | 222 query SQL di lapisan rute, repository tak ada                                          | **F9**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §3     |
 | 7   | 59% baris kode di 37 berkas > 500 baris                                                    | **F10** | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §2     |
@@ -510,7 +509,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
 
-### 1.2 SUDAH SELESAI — 77 item
+### 1.2 SUDAH SELESAI — 78 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -519,6 +518,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | --- | ---------------------------------------------------------------------------------------------------- | :------: | :-: | ------------- | :--------------------: | ---------------- | ------ |
 | 1   | ~~Tiga sistem migrasi DB~~ disatukan jadi satu                                                       |  **F0**  | 🔴  | Rendah        |           Ya           | `SELESAI` 16 Agu | §4     |
 | 3   | ~~Nol code splitting~~ 901 -> 420 KB gzip, 29 chunk                                                  |  **F4**  | 🔴  | Rendah        |           Ya           | `SELESAI` 16 Agu | §5     |
+| 4   | ~~±100 endpoint tanpa validasi skema~~ validasi Zod terpusat di `server/middleware/validate.ts` + `schemas/` |  **F7**  | 🔴  | Sedang        |      Ya (keamanan)      | `SELESAI` 18 Agu | §3     |
 | 10  | ~~Schema DB tidak terdokumentasi~~ `docs/DATABASE_SCHEMA.md` dari DB hidup                           |  **F0**  | 🟠  | Sedang        |           Ya           | `SELESAI` 16 Agu | §4     |
 | 11  | ~~`auth` 762 baris tanpa lapisan~~ dipecah                                                           | **F5.2** | 🟠  | Rendah        |         Tidak          | `SELESAI` 15 Agu | §2     |
 | 12  | ~~ARCHITECTURE.md drift~~ angka diukur ulang                                                         |  **F0**  | 🟡  | Rendah        |    Ya (menyesatkan)    | `SELESAI` 16 Agu | §8     |

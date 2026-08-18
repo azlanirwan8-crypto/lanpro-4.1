@@ -21,6 +21,12 @@ import {
   checkUserPermissionBackend,
 } from "../services/task.service";
 import { jagaProyek } from "../middleware/jagaProyek";
+import { validasiBody } from "../middleware/validate";
+import {
+  createTaskSchema,
+  updateTaskSchema,
+  reorderTaskIdsSchema,
+} from "../schemas/task.schema";
 
 const router = express.Router();
 
@@ -260,6 +266,7 @@ router.post(
   "/api/projects/:projectId/tasks",
   authenticateJWT,
   jagaProyek("list", "C"),
+  validasiBody(createTaskSchema),
   async (req, res) => {
     let connection;
     // #60 — penanda apakah masih ada transaksi yang belum ditutup. Diperlukan
@@ -543,6 +550,7 @@ router.put(
   "/api/projects/:projectId/tasks/reorder",
   authenticateJWT,
   jagaProyek("list", "U"),
+  validasiBody(reorderTaskIdsSchema),
   async (req, res) => {
     let connection;
     // #64 — penanda pemilik transaksi; lihat catatan di blok catch di bawah.
@@ -550,9 +558,6 @@ router.put(
     try {
       const { projectId } = req.params;
       const { orderedIds } = req.body;
-      if (!Array.isArray(orderedIds)) {
-        return res.status(400).json({ status: "error", message: "orderedIds must be an array" });
-      }
 
       connection = await db.getConnection();
       await connection.beginTransaction();
@@ -575,15 +580,6 @@ router.put(
       }
       res.json({ status: "success", message: "Tasks reordered successfully" });
     } catch (error: any) {
-      // #64 — DULU `catch` memanggil rollback() DAN release() tanpa syarat,
-      // sementara jalur sukses sudah melepas koneksinya sendiri tepat setelah
-      // commit. Bila ada yang gagal SESUDAH commit — misalnya pemancaran socket
-      // di atas — koneksi yang sudah kembali ke pool akan di-rollback dan
-      // dilepas ulang, dan rollback itu bisa mengenai transaksi milik
-      // permintaan lain yang kebetulan sudah memakai koneksi tersebut.
-      //
-      // Sekarang rollback hanya berjalan bila transaksinya memang masih milik
-      // kita, dan pelepasan dipusatkan di satu tempat: `finally`.
       if (connection && transaksiTerbuka) {
         try {
           await connection.rollback();
@@ -604,6 +600,7 @@ router.put(
   "/api/projects/:projectId/tasks/:id",
   authenticateJWT,
   jagaProyek("list", "U"),
+  validasiBody(updateTaskSchema),
   async (req, res) => {
     let connection;
     try {
