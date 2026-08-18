@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 20 BELUM · 72 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 16 BELUM · 76 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 18 item
+### 1.1 BELUM SELESAI — 16 item
 
-**Sebaran per fase:** F1 0 · F2 5 · F3 1 · F6 6 · F7 2 · F8 4 · F9 2 · F10 3 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 5 · F3 1 · F6 4 · F7 2 · F8 4 · F9 2 · F10 3 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
@@ -503,17 +503,15 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 16  | **Logika aplikasi belum pernah diaudit**                                                   | **F2**  | 🔴  | Sedang        |           Ya            | `TERBUKA`               | §13    |
 | 17  | **UI belum pernah diaudit di balik login**                                                 | **F3**  | 🔴  | Sedang        |           Ya            | `MENUNGGU` login        | §14    |
 | 18  | notebook-lm rusak di dua sisi                                                              | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
-| 25  | Fondasi `email.service.ts`                                                                 | **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email | §1.5   |
-| 26  | **Email selamat datang** (poin 2)                                                          | **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email | §1.5   |
-| 27  | **Lupa password → password random** (poin 3)                                               | **F6**  | 🟢  | Sedang        |          Tidak          | `MENUNGGU` domain email | §1.5   |
-| 28  | **Digest task pending + jumlah** (poin 4)                                                  | **F6**  | 🟢  | Rendah        |          Tidak          | `MENUNGGU` domain email | §1.5   |
+| 26  | **Email selamat datang** (poin 2)                                                          | **F6**  | 🟢  | Rendah        |          Tidak          | `TERBUKA`               | §1.5   |
+| 27  | **Lupa password → password random** (poin 3)                                               | **F6**  | 🟢  | Sedang        |          Tidak          | `TERBUKA`               | §1.5   |
+| 28  | **Digest task pending + jumlah** (poin 4)                                                  | **F6**  | 🟢  | Rendah        |          Tidak          | `TERBUKA`               | §1.5   |
 | 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)                | **F11** | 🔴  | Tinggi        |    Blokir production    | `MENUNGGU` desain       | §1.5   |
 | 40  | `tsconfig.json` tanpa `strict` — penyempitan diskriminan boolean tidak bekerja             | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §0.6   |
-| 44  | Domain email belum terverifikasi — email HANYA sampai ke pemilik akun Resend               | **F6**  | 🔴  | Rendah        | Ya (blokir rilis email) | `MENUNGGU` pemilik      | §0.4   |
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
 
-### 1.2 SUDAH SELESAI — 74 item
+### 1.2 SUDAH SELESAI — 76 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -532,6 +530,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                                        | **F6.1** | 🔴  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                                     | **F6.1** | 🔴  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §1.5   |
 | 24  | ~~`EmailConfigForm` nol panggilan API~~ ditelusuri: TIDAK ada backend email                          | **F6.1** | 🟡  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §1.5   |
+| 25  | ~~Fondasi `email.service.ts`~~ dibangun berbasis Resend REST API + 15 unit test                      | **F6.2** | 🟢  | Sedang        |         Tidak          | `SELESAI` 18 Agu | §1.5   |
 | 29  | **SSO Google/Microsoft** (poin 1)                                                                    |  **F5**  | 🟢  | Tinggi        |         Tidak          | `SELESAI` 15 Agu | §1.5   |
 | 32  | **Daftar dengan Google/Microsoft** — akun otomatis, status `pending`                                 |  **F5**  | 🟢  | Sedang        |         Tidak          | `SELESAI` 15 Agu | §1.5   |
 | 33  | ~~`getJwtSecret` di `middleware/auth.ts` menarik adapter DB~~ dipindah ke `helpers/`                 | **F5.3** | 🟠  | Sangat rendah |         Tidak          | `SELESAI` 15 Agu | §1.5   |
@@ -544,6 +543,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 41  | ~~Identitas yatim mengunci email selamanya~~ dibersihkan + FK `ON DELETE CASCADE`                    |  **F5**  | 🔴  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
 | 42  | ~~Pembuatan akun SSO menulis 2 tabel tanpa transaksi~~ kini transaksional                            |  **F5**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
 | 43  | ~~Callback SSO tak menyetel `currentSessionToken`~~ — login gagal SENYAP                             |  **F5**  | 🔴  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
+| 44  | ~~Domain email belum terverifikasi~~ domain `rajonet.com` & pengirim disiapkan dan diverifikasi       | **F6**   | 🔴  | Rendah        |         Tidak          | `SELESAI` 18 Agu | §0.4   |
 | 48  | ~~5 TABEL KEMBAR huruf kecil~~ dihapus, 35 tabel -> 30                                               |  **F0**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
 | 49  | `verifyProjectAccess(['*'])` lolos SEBELUM cek keanggotaan — bocor lintas proyek                     |  **F2**  | 🔴  | Rendah        | Ya (blokir production) | `SELESAI` 16 Agu | §13.5  |
 | 50  | Socket.IO **tanpa autentikasi sama sekali** — tak ada `io.use()` handshake                           |  **F2**  | 🔴  | Sedang        | Ya (blokir production) | `SELESAI` 16 Agu | §13.5  |
@@ -627,7 +627,7 @@ Seluruh item di kelompok sangat rendah telah selesai. Kelompok berikutnya: **§1
 | 15  | 🔴  | F1   | Cabut 2 Google API key — **±5 menit, nol kode**        | **ya**         |
 | 19  | 🔴  | F2   | `POST /api/db-query` tanpa penjaga read-only           | **ya**         |
 | 53  | ✅  | F2   | `POST /api/auth/logout` tanpa auth (perbaikan selesai) | tidak          |
-| 44  | 🔴  | F6   | Domain email belum terverifikasi                       | **ya**         |
+| 44  | ✅  | F6   | Domain email verifikasi (`rajonet.com`, SELESAI 18 Agu) | tidak          |
 | 18  | 🟠  | F2   | notebook-lm rusak di dua sisi                          | **ya**         |
 | 74  | 🟠  | F2   | 7 pengambil data tanpa penjaga respons basi            | **ya**         |
 | 83  | ✅  | F7   | `head` (akses R) diselaraskan ke matriks (SELESAI 17 Agu) | tidak          |
@@ -638,19 +638,19 @@ Seluruh item di kelompok sangat rendah telah selesai. Kelompok berikutnya: **§1
 | 21  | 🟡  | F10  | `authStore` & `uiStore` menganggur                     | tidak          |
 | 56  | 🟡  | F8   | Jest mencetak crash `pg` saat dibongkar                | tidak          |
 | 85  | 🟡  | F7   | `category` memuat dua konsep                           | **ya**         |
-| 26  | 🟢  | F6   | Email selamat datang                                   | tertahan #44   |
-| 28  | 🟢  | F6   | Digest task pending                                    | tertahan #44   |
+| 26  | 🟢  | F6   | Email selamat datang (siap jalan, #44 & #25 selesai)   | tidak          |
+| 28  | 🟢  | F6   | Digest task pending (siap jalan, #44 & #25 selesai)    | tidak          |
 
-**Bisa dikerjakan tanpa keputusan: #53, #93, #21, #56.** #53 yang paling
+**Bisa dikerjakan tanpa keputusan: #53, #93, #21, #56, #26, #28.** #53 yang paling
 mendesak — 🔴 dan tanpa penghalang.
 
 ### 1.4.3 Sedang — 12 item
 
 Didahului yang tidak menunggu pemilik: **#8**
 (1.290 `any`), **#47** (kolom kembar `discussion_point_comments`), **#87**
-(frontend abai peran proyek — `SELESAI` 17 Agu), **#13**/**#14** (F12 desain).
+(frontend abai peran proyek — `SELESAI` 17 Agu), **#25** (fondasi `email.service.ts` — `SELESAI` 18 Agu), **#13**/**#14** (F12 desain).
 
-Menunggu pemilik: #4, #16, #17, #25, #27, #45, **#77** (sisa exceljs — §1.4 sempat salah
+Menunggu pemilik: #4, #16, #17, #27, #45, **#77** (sisa exceljs — §1.4 sempat salah
 menempatkannya di kelompok tanpa keputusan; papan §1 yang benar).
 
 ### 1.4.4 Tinggi — 6 item, TUNDA
@@ -662,7 +662,7 @@ jaring pengaman `AppContainer` tidak bisa dibangun sebelum komponennya dipecah.
 ### Urutan yang disarankan
 
 1. **#53** 🔴 tanpa penghalang · **#55** & **#71** sangat murah
-2. **#93**, **#56**, **#21** — murah, tanpa keputusan
+2. **#93**, **#56**, **#21**, **#26** — murah, tanpa keputusan
 3. **#77** → **#47** — sedang, tanpa keputusan
 4. Sisanya menunggu jawaban Anda; **#15** paling murah dan menutup F1
 
@@ -681,7 +681,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 | **F3**  |   P1   | Audit UI menyeluruh                | #17                                  | 2–4  | Sangat rendah     | `SIAP JALAN`                        | **TIDAK LAGI TERTAHAN.** Syarat "login pemilik" sudah terpenuhi — sesi hidup dipakai sepanjang 16 Agu. Yang masih perlu Anda: izin membuat objek percobaan untuk alur TULIS (§14.2), dan sesi admin bila layar khusus admin ikut diperiksa                                                                 |
 | **F4**  |   —    | Performa muat                      | #3                                   | 1    | Rendah–sedang     | `SELESAI` 16 Agu                    | — tidak ada                                                                                                                                                                                                                                                                                                |
 | **F5**  |   —    | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                      | 4–6  | Tinggi            | `SELESAI` 16 Agu                    | — tidak ada                                                                                                                                                                                                                                                                                                |
-| **F6**  |   P1   | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28 | 3–4  | Rendah–sedang     | `MENUNGGU` domain                   | **PEMILIK.** Domain email belum terverifikasi (#44). Tanpa itu penyedia mana pun hanya mengirim ke alamat pemilik akun, jadi email tidak akan sampai ke user lain dan gagalnya SENYAP. F6.1 sudah beres; tinggal isi `RESEND_API_KEY` + `EMAIL_FROM`                                                       |
+| **F6**  |   P1   | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28 | 3–4  | Rendah–sedang     | `JALAN` — F6.1 & F6.2 (#25) ✅       | **SIAP JALAN.** Domain `rajonet.com` & email pengirim sudah diverifikasi (#44), fondasi `email.service.ts` (#25) selesai. Langkah berikutnya: #26 (email selamat datang).                                                                                                                                 |
 | **F7**  | **P0** | **Two-Tier RBAC** & validasi       | **#76**, #4, #81, #82, #83           | 5–8  | **Tinggi**        | `JALAN` — tahap 0, 1, 2, 3ᵖ & 5a ✅ | **PEMILIK, 3 keputusan.** Rancangan di **§19**. SELESAI: katalog peran (tahap 0) & nol hardcode (#82, tahap 5a). Tahap 1–2–4 bisa jalan TANPA pemilik. Sisa keputusan: pemetaan `member` → peran apa (7 baris) · Department Head A/B/C (#83) · Business Owner ada atau tidak                               |
 | **F8**  |   P2   | Jaring pengaman                    | #9, #8                               | 4–6  | Rendah            | `TERBUKA`                           | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, karena F3 akan menambah kasus uji                                                                                                                                                                                                                        |
 | **F9**  |   P3   | Lapisan backend                    | #6                                   | 6–10 | Tinggi            | `TERBUKA`                           | — bisa jalan tanpa pemilik, tapi butuh F7 & F8 lebih dulu sebagai pengaman                                                                                                                                                                                                                                 |
