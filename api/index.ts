@@ -33,10 +33,17 @@ export default async function handler(req: any, res: any) {
   // CORS: only echo back the app's own known origin — never wildcard "*" on an
   // API authenticated via Authorization header (wildcard + credentials = any
   // external site can call this API if it obtains a token).
-  const allowedOrigin = process.env.APP_URL;
+  const allowedOrigins = [
+    process.env.APP_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+  ].filter(Boolean) as string[];
+
   const requestOrigin = req.headers?.origin;
-  if (allowedOrigin && requestOrigin === allowedOrigin) {
-    res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+  if (requestOrigin && (allowedOrigins.length === 0 || allowedOrigins.includes(requestOrigin))) {
+    res.setHeader("Access-Control-Allow-Origin", requestOrigin);
+  } else if (allowedOrigins.length > 0) {
+    res.setHeader("Access-Control-Allow-Origin", allowedOrigins[0]);
   }
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,PATCH,DELETE,POST,PUT");
   res.setHeader("Access-Control-Allow-Headers", "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization, x-user-id");

@@ -98,14 +98,21 @@ async function startServer() {
   // production hanya ALLOWED_ORIGINS / APP_URL yang diterima; bila keduanya
   // kosong, koneksi lintas-origin ditolak seluruhnya (aman secara bawaan).
   const isProduction = process.env.NODE_ENV === "production";
+  const vercelOrigins = [
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : null,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+  ].filter(Boolean) as string[];
+
   const configuredOrigins = (process.env.ALLOWED_ORIGINS || process.env.APP_URL || "")
     .split(",")
     .map((o) => o.trim())
     .filter((o) => o && o !== "MY_APP_URL");
 
+  const combinedOrigins = Array.from(new Set([...configuredOrigins, ...vercelOrigins]));
+
   const allowedOrigins = isProduction
-    ? configuredOrigins
-    : [...configuredOrigins, "http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173"];
+    ? combinedOrigins
+    : [...combinedOrigins, "http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173"];
 
   // Gagal saat startup, bukan diam-diam saat runtime.
   //
