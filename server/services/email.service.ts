@@ -144,3 +144,62 @@ export async function kirimEmail(input: KirimEmailInput): Promise<KirimEmailResu
     };
   }
 }
+
+export interface WelcomeEmailData {
+  email: string;
+  nama?: string;
+  username: string;
+}
+
+/**
+ * Mengirim email selamat datang kepada pengguna yang baru mendaftar (F6.3).
+ */
+export async function kirimEmailSelamatDatang(data: WelcomeEmailData): Promise<KirimEmailResult> {
+  const { email, nama, username } = data;
+  const namaPanggilan = (nama || username || "").trim();
+  const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+
+  const subject = "Selamat Datang di LanPro - Akun Anda Telah Terdaftar";
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1e293b; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+      <div style="margin-bottom: 24px; text-align: center;">
+        <h1 style="color: #0f172a; font-size: 24px; margin: 0 0 8px 0; font-weight: 700;">Selamat Datang di LanPro</h1>
+        <p style="color: #64748b; font-size: 14px; margin: 0;">Sistem Manajemen Proyek & Kolaborasi Tim</p>
+      </div>
+
+      <div style="background-color: #f8fafc; border-radius: 6px; padding: 16px; margin-bottom: 20px;">
+        <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">Halo, ${namaPanggilan}!</p>
+        <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #334155;">
+          Akun Anda telah berhasil dibuat dengan informasi sebagai berikut:
+        </p>
+        <ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 13px; color: #334155; line-height: 1.6;">
+          <li><strong>Username:</strong> ${username}</li>
+          <li><strong>Email:</strong> ${email}</li>
+          <li><strong>Status:</strong> Menunggu Persetujuan Admin (Pending)</li>
+        </ul>
+      </div>
+
+      <p style="font-size: 13px; line-height: 1.6; color: #475569; margin-bottom: 20px;">
+        Akun Anda saat ini berstatus <strong>Pending</strong>. Administrator sistem akan meninjau dan mengaktifkan akun Anda sebelum Anda dapat masuk ke sistem.
+      </p>
+
+      <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+        <a href="${appUrl}" style="display: inline-block; background-color: #405189; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 600; padding: 10px 20px; border-radius: 6px;">Buka LanPro</a>
+      </div>
+
+      <p style="font-size: 11px; color: #94a3b8; text-align: center; margin-top: 24px;">
+        Email ini dikirim secara otomatis oleh sistem LanPro. Jangan membalas email ini.
+      </p>
+    </div>
+  `;
+
+  const text = `Halo ${namaPanggilan},\n\nAkun LanPro Anda berhasil didaftarkan.\nUsername: ${username}\nEmail: ${email}\nStatus: Menunggu Persetujuan Admin (Pending)\n\nKunjungi aplikasi: ${appUrl}`;
+
+  return kirimEmail({
+    to: email,
+    subject,
+    html,
+    text,
+  });
+}
+

@@ -10,6 +10,7 @@ import { adalahDuplikat } from "../helpers/pgErrors";
 import { roomPengguna, sidikToken } from "../middleware/socketAuth";
 import { z } from "zod";
 import { formatUserForAuthResponse, handleUserAuthentication } from "../services/auth.service";
+import { kirimEmailSelamatDatang } from "../services/email.service";
 
 const router = express.Router();
 
@@ -488,6 +489,15 @@ router.post("/api/auth/register", async (req, res) => {
         throw insertError;
       }
     }
+
+    // #26 (F6.3) Pengiriman email selamat datang secara asinkron (non-blocking)
+    kirimEmailSelamatDatang({
+      email,
+      nama: fullName || insertDisplayName,
+      username,
+    }).catch((emailErr) => {
+      console.error("[EMAIL] Gagal mengirim email selamat datang pendaftaran:", emailErr?.message || emailErr);
+    });
 
     return res.status(201).json({
       status: "success",

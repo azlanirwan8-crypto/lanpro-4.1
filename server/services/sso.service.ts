@@ -23,6 +23,7 @@ import crypto from "crypto";
 import db from "../../src/lib/db";
 import { activeUserSessions } from "../middleware/auth";
 import type { IdentitasOidc } from "./oidc.service";
+import { kirimEmailSelamatDatang } from "./email.service";
 import { domainDiizinkan } from "./oidc.service";
 
 /** Alasan penolakan. Dipakai UI untuk memilih pesan yang tepat. */
@@ -233,6 +234,15 @@ export async function buatAkunDariSso(
     );
 
     await connection.commit();
+
+    // #26 (F6.3) Pengiriman email selamat datang pendaftaran SSO secara non-blocking
+    kirimEmailSelamatDatang({
+      email: identitas.email,
+      nama: identitas.nama,
+      username,
+    }).catch((emailErr) => {
+      console.error("[EMAIL] Gagal mengirim email selamat datang pendaftaran SSO:", emailErr?.message || emailErr);
+    });
   } catch (err: any) {
     if (connection) {
       try {

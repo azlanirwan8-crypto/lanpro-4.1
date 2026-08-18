@@ -201,4 +201,46 @@ describe("email.service - F6.2 Fondasi Layanan Email", () => {
       expect(res.error).toBe("Connection refused to api.resend.com");
     });
   });
+
+  describe("kirimEmailSelamatDatang (F6.3)", () => {
+    it("mengirim email selamat datang dengan data akun yang lengkap", async () => {
+      delete process.env.RESEND_API_KEY; // mock mode
+      const { kirimEmailSelamatDatang } = await import("./email.service");
+
+      const res = await kirimEmailSelamatDatang({
+        email: "budi@rajonet.com",
+        nama: "Budi Santoso",
+        username: "budis",
+      });
+
+      expect(res.success).toBe(true);
+      expect(res.messageId).toMatch(/^mock-/);
+    });
+
+    it("menggunakan username bila nama tidak diisi", async () => {
+      delete process.env.RESEND_API_KEY;
+      const { kirimEmailSelamatDatang } = await import("./email.service");
+
+      const res = await kirimEmailSelamatDatang({
+        email: "userbaru@rajonet.com",
+        username: "userbaru",
+      });
+
+      expect(res.success).toBe(true);
+    });
+
+    it("menolak bila format email tidak valid", async () => {
+      const { kirimEmailSelamatDatang } = await import("./email.service");
+
+      const res = await kirimEmailSelamatDatang({
+        email: "bukan-email-valid",
+        nama: "Budi",
+        username: "budi",
+      });
+
+      expect(res.success).toBe(false);
+      expect(res.error).toContain("Format alamat email tidak valid");
+    });
+  });
 });
+
