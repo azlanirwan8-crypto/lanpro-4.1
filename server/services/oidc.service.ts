@@ -218,10 +218,18 @@ export async function siapkanOtorisasi(
   const codeVerifier = buatCodeVerifier();
   const stateToken = tandaTanganiState({ provider, nonce, codeVerifier, mode });
 
+  const redirectUri = ambilRedirectUri();
+  console.info(
+    `[OIDC] Memulai otorisasi provider=${provider} mode=${mode} redirect_uri=${redirectUri} ` +
+      `(OIDC_REDIRECT_URI=${process.env.OIDC_REDIRECT_URI || "(kosong)"} ` +
+      `VERCEL_URL=${process.env.VERCEL_URL || "(kosong)"} ` +
+      `VERCEL_PROJECT_PRODUCTION_URL=${process.env.VERCEL_PROJECT_PRODUCTION_URL || "(kosong)"})`
+  );
+
   const params = new URLSearchParams({
     client_id: clientId,
     response_type: "code",
-    redirect_uri: ambilRedirectUri(),
+    redirect_uri: redirectUri,
     scope: "openid email profile",
     state: stateToken,
     nonce,

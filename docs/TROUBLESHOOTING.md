@@ -294,10 +294,81 @@ Untuk memastikan deployment Vercel langsung berjalan lancar tanpa kendala:
 - [ ] Hubungkan Neon PostgreSQL Integration di Vercel (otomatis mengisi `POSTGRES_URL`)
 - [ ] Tambahkan `JWT_SECRET` di Vercel Environment Variables
 - [ ] (Opsional SSO) Tambahkan `OIDC_GOOGLE_CLIENT_ID` dan `OIDC_GOOGLE_CLIENT_SECRET`
-- [ ] (Opsional SSO) Tambahkan `OIDC_REDIRECT_URI=https://<domain-anda>.vercel.app/api/auth/oidc/callback`
+- [ ] (Opsional SSO) Tambahkan `OIDC_REDIRECT_URI=https://lanpro-mu.vercel.app/api/auth/oidc/callback`
 - [ ] (Opsional SSO) Tambahkan `SSO_ALLOWED_DOMAINS=rajonet.com,gmail.com`
-- [ ] Daftarkan URL redirect tersebut di Google Cloud Console
+- [ ] Daftarkan URL redirect di Google Cloud Console → Authorized redirect URIs
+- [ ] Pastikan nilai `OIDC_REDIRECT_URI` di Vercel **SAMA PERSIS** dengan yang di Google Console
 - [ ] Trigger deploy / push ke branch `main`
+
+---
+
+## 11. Google SSO Error 400: redirect_uri_mismatch Persisten (Vercel)
+
+### Gejala
+Setelah klik "Daftar dengan Google" atau "Masuk dengan Google" pada deployment Vercel, browser diarahkan ke halaman Google dengan pesan:
+
+```
+Access blocked: This app's request is invalid
+Error 400: redirect_uri_mismatch
+```
+
+Muncul setelah pengguna memilih akun Google mereka, sebelum kembali ke aplikasi.
+
+### Lingkup
+- Vercel production
+- Terjadi meskipun tombol SSO sudah muncul di UI
+
+### Akar Penyebab
+
+Ada **dua sisi** yang harus cocok, dan kedua-duanya harus diperbarui:
+
+1. **Sisi server (Vercel env var)**: Nilai `OIDC_REDIRECT_URI` yang dikirim server ke Google
+2. **Sisi Google Cloud Console**: Daftar URI yang diizinkan oleh Google
+
+Jika salah satu tidak diperbarui, Google menolak permintaan dengan `redirect_uri_mismatch`.
+
+Contoh skenario yang paling sering terjadi:
+- `OIDC_REDIRECT_URI` di Vercel masih berisi nilai localhost (`http://localhost:3000/api/auth/oidc/callback`) → Google menerima URI localhost namun tidak cocok dengan `https://lanpro-mu.vercel.app/...`
+- Google Cloud Console belum didaftarkan URL Vercel sama sekali
+
+### Diagnosis
+
+Cek Vercel Logs saat klik tombol Google. Akan muncul baris:
+
+```
+[OIDC] Memulai otorisasi provider=google mode=... redirect_uri=<URI yang dikirim>
+```
+
+URI yang tercetak di log **harus sama persis** dengan yang terdaftar di Google Cloud Console.
+
+### Cara Penanganan
+
+**Langkah 1: Google Cloud Console**
+1. Buka https://console.cloud.google.com/apis/credentials
+2. Klik OAuth 2.0 Client ID project LanPro
+3. Di bagian **Authorized redirect URIs** → **+ ADD URI**
+4. Masukkan: `https://lanpro-mu.vercel.app/api/auth/oidc/callback`
+5. Klik **SAVE**
+
+**Langkah 2: Vercel Environment Variables**
+1. Buka Vercel → Project lanpro-mu → Settings → Environment Variables
+2. Set atau perbarui `OIDC_REDIRECT_URI` menjadi:
+   ```
+   https://lanpro-mu.vercel.app/api/auth/oidc/callback
+   ```
+3. Klik **Save**
+
+**Langkah 3: Redeploy**
+- Pergi ke Vercel → Deployments → klik **Redeploy** pada deployment terbaru
+- Tunggu hingga deployment selesai
+
+### Berkas Terkait
+- `server/services/oidc.service.ts` — fungsi `ambilRedirectUri()`, `siapkanOtorisasi()`
+- `server/routes/auth-oidc.routes.ts` — endpoint `/api/auth/oidc/callback`
+
+### Status
+✅ Perbaikan kode: auto-deteksi Vercel domain & log diagnostik ditambahkan (commit `089c6cd`)
+⚠️ Masih membutuhkan konfigurasi manual di Google Cloud Console dan Vercel env vars
 
 ---
 
