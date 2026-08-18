@@ -66,6 +66,17 @@ export default async function handler(req: any, res: any) {
     }
 
     return await new Promise((resolve) => {
+      let resolved = false;
+      const done = () => {
+        if (!resolved) {
+          resolved = true;
+          resolve(null);
+        }
+      };
+
+      res.once("finish", done);
+      res.once("close", done);
+
       app(req, res, (err: any) => {
         if (err) {
           console.error("[VERCEL] App error:", err);
@@ -73,7 +84,7 @@ export default async function handler(req: any, res: any) {
             res.status(500).json({ status: "error", message: "Server error: " + (err.message || String(err)) });
           }
         }
-        resolve(null);
+        done();
       });
     });
   } catch (err: any) {
