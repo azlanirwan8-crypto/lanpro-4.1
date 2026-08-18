@@ -131,13 +131,15 @@ router.get("/api/auth/oidc/callback", async (req: any, res) => {
     const stateDariCookie = bacaCookie(req, NAMA_COOKIE_STATE);
     hapusCookie(res, NAMA_COOKIE_STATE);
 
-    if (!code || !stateDariCookie) return kembaliDenganGalat(req, res, "state_hilang");
+    const tokenState = stateDariCookie || stateDariUrl;
+    if (!code || !tokenState) return kembaliDenganGalat(req, res, "state_hilang");
 
-    // Kedua sumber harus cocok. Cookie saja tidak cukup: parameter `state` di
-    // URL-lah yang membuktikan balasan ini milik permintaan yang kita mulai.
-    if (stateDariUrl !== stateDariCookie) return kembaliDenganGalat(req, res, "state_tidak_cocok");
+    // Bila cookie dan URL sama-sama ada, pastikan tidak bertentangan
+    if (stateDariCookie && stateDariUrl && stateDariUrl !== stateDariCookie) {
+      return kembaliDenganGalat(req, res, "state_tidak_cocok");
+    }
 
-    const state = bacaState(stateDariCookie);
+    const state = bacaState(tokenState);
     const idToken = await tukarCode(state.provider, code, state.codeVerifier);
     const identitas = await verifikasiIdToken(state.provider, idToken, state.nonce);
 

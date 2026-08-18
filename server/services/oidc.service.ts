@@ -97,13 +97,22 @@ function ambilKonfigWajib(provider: ProviderOidc): KonfigProvider {
 
 function ambilRedirectUri(): string {
   const uri = process.env.OIDC_REDIRECT_URI;
-  if (!uri) {
-    throw new Error(
-      "[OIDC] OIDC_REDIRECT_URI belum diisi. Nilai ini harus sama persis dengan " +
-        "yang didaftarkan di Google Cloud Console / Azure Portal."
-    );
+  if (uri && /^https?:\/\//i.test(uri)) {
+    return uri;
   }
-  return uri;
+  const hostVercel =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+    process.env.VERCEL_URL ||
+    (process.env.APP_URL ? process.env.APP_URL.replace(/^https?:\/\//, "") : "");
+  if (hostVercel) {
+    const proto = hostVercel.startsWith("localhost") ? "http" : "https";
+    return `${proto}://${hostVercel.replace(/\/$/, "")}/api/auth/oidc/callback`;
+  }
+  if (uri) return uri;
+  throw new Error(
+    "[OIDC] OIDC_REDIRECT_URI belum diisi. Nilai ini harus sama persis dengan " +
+      "yang didaftarkan di Google Cloud Console / Azure Portal."
+  );
 }
 
 // ── Discovery & JWKS ─────────────────────────────────────────────────────────

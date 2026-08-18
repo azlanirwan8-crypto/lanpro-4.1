@@ -299,7 +299,7 @@ export async function daftarkanSesi(
 }
 
 /** Pesan yang ditampilkan ke pengguna. Spesifik, supaya tidak terkesan aplikasi rusak. */
-export const PESAN_TOLAK: Record<AlasanTolak | "username_tidak_sah", string> = {
+export const PESAN_TOLAK: Record<string, string> = {
   // Pesan ini muncul saat pengguna menekan tombol MASUK dengan email yang belum
   // punya akun. Versi sebelumnya menyuruh menghubungi admin — itu menyesatkan,
   // karena pengguna sebenarnya bisa mendaftar sendiri lewat tombol di layar
@@ -310,8 +310,14 @@ export const PESAN_TOLAK: Record<AlasanTolak | "username_tidak_sah", string> = {
   email_belum_terverifikasi:
     "Email Google/Microsoft Anda belum terverifikasi, sehingga tidak dapat dipakai untuk masuk.",
   akun_belum_aktif: "Akun Anda belum aktif. Menunggu persetujuan admin.",
-  domain_tidak_diizinkan: "Domain email Anda tidak diizinkan untuk masuk ke LanPro.",
+  domain_tidak_diizinkan:
+    "Domain email Anda tidak diizinkan untuk masuk ke LanPro. Pastikan domain email Anda terdaftar pada SSO_ALLOWED_DOMAINS.",
   identitas_milik_akun_lain: "Akun Google/Microsoft ini sudah tertaut ke pengguna lain.",
   email_sudah_terdaftar: "Email ini sudah terdaftar. Silakan gunakan tombol masuk.",
   username_tidak_sah: "Username hanya boleh berupa huruf, maksimal 10 karakter, dan belum dipakai.",
+  gagal_mulai: "Gagal memulai otorisasi SSO. Pastikan kredensial OIDC dan JWT_SECRET telah dikonfigurasi di server.",
+  dibatalkan: "Proses otorisasi Google/Microsoft dibatalkan.",
+  state_hilang: "Sesi otorisasi kedaluwarsa atau state tidak ditemukan. Silakan coba lagi.",
+  state_tidak_cocok: "Validasi keamanan state tidak cocok. Silakan coba lagi.",
+  verifikasi_gagal: "Verifikasi identitas akun gagal. Silakan coba lagi.",
 };
