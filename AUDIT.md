@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 13 BELUM · 79 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 12 BELUM · 80 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 13 item
+### 1.1 BELUM SELESAI — 12 item
 
-**Sebaran per fase:** F1 0 · F2 2 · F3 1 · F6 3 · F7 0 · F8 3 · F9 1 · F10 2 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 1 · F3 1 · F6 3 · F7 0 · F8 3 · F9 1 · F10 2 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
@@ -498,7 +498,6 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 6   | 222 query SQL di lapisan rute, repository tak ada                                          | **F9**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §3     |
 | 7   | 59% baris kode di 37 berkas > 500 baris                                                    | **F10** | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §2     |
 | 9   | Rasio test 1:208 — tetapi cakupan CABANG `AppContainer` hanya **8,2%** (§19.30)            | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §7     |
-| 16  | **Logika aplikasi belum pernah diaudit**                                                   | **F2**  | 🔴  | Sedang        |           Ya            | `TERBUKA`               | §13    |
 | 17  | **UI belum pernah diaudit di balik login**                                                 | **F3**  | 🔴  | Sedang        |           Ya            | `MENUNGGU` login        | §14    |
 | 18  | notebook-lm rusak di dua sisi                                                              | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
 | 27  | **Lupa password → password random** (poin 3)                                               | **F6**  | 🟢  | Sedang        |          Tidak          | `TERBUKA`               | §1.5   |
@@ -508,7 +507,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
 
-### 1.2 SUDAH SELESAI — 79 item
+### 1.2 SUDAH SELESAI — 80 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -525,6 +524,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 13  | ~~28 berkas `dark:` + 48 hex di luar token~~ dimigrasikan ke token semantik CSS                      | **F12**  | 🟡  | Sedang        |         Tidak          | `SELESAI` 16 Agu | §8     |
 | 14  | ~~Kontras sidebar & jarak target sentuh~~ migrasi token inverse & target sentuh standar min 36-44px  | **F12**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 17 Agu | §8     |
 | 15  | ~~Dua Google API key lama belum dicabut~~ terverifikasi 0 API key di Google Cloud Console            |  **F1**  | 🔴  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §6     |
+| 16  | ~~Logika aplikasi belum pernah diaudit~~ audit logika kalkulasi analitik, KPI, workload, burndown + unit test | **F2** | 🔴 | Sedang | Ya | `SELESAI` 18 Agu | §13 |
 | 19  | ~~`POST /api/db-query` tanpa penjaga read-only~~ ditegakkan read-only (SELECT/SHOW/DESCRIBE)         |  **F2**  | 🔴  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §6.3   |
 | 22  | ~~`initWhatsAppScheduler` tak pernah dipanggil~~ kini menyala                                        | **F6.1** | 🔴  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §1.5   |
 | 23  | ~~Fallback token WhatsApp ter-hardcode~~ dibuang                                                     | **F6.1** | 🔴  | Sangat rendah |         Tidak          | `SELESAI` 16 Agu | §1.5   |
@@ -2166,7 +2166,7 @@ Tabel ini adalah daftar kerja F2. Isi kolom `Status` sambil jalan.
 | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | RBAC / permission per peran                   | `hasPermission` dioper sebagai prop ke seluruh view; satu kekeliruan membocorkan fitur ke peran yang salah | `JALAN` — sisi server ditelaah, temuan #49/#54/#55 (§13.5); sisi klien belum                        |
 | 119 rute (tertulis 104)                       | Tak satu pun diuji perilakunya                                                                             | `JALAN` — 119 rute dipetakan menyeluruh; 5 temuan #69–#73 (§13.11)                                  |
-| Perhitungan (progress, sprint, KPI, timeline) | Salah hitung tidak melempar error — ia hanya menampilkan angka keliru                                      | `TERBUKA`                                                                                           |
+| Perhitungan (progress, sprint, KPI, timeline) | Salah hitung tidak melempar error — ia hanya menampilkan angka keliru                                      | `SELESAI` 18 Agu — 7 unit test `hooks.test.tsx` mengunci kalkulasi |
 | Alur state antar view                         | 21 `useState` + 21 `useEffect` di `AppContainer`, dioper 47 props                                          | `JALAN` — ditelusuri, menghasilkan #74 (§13.12). Angka 21 useState dikoreksi jadi 11                |
 | Socket.IO realtime                            | Pemancaran event sebagian di `runAIPipeline()` yang jalan **setelah** response terkirim                    | `JALAN` — autentikasi handshake ditelaah, temuan #50/#51 (§13.5); urutan emit `runAIPipeline` belum |
 | Race condition / concurrency                  | Ada 1 test, belum ditelaah cakupannya                                                                      | `JALAN` — #65 optimistic locking terbukti mati senyap (§13.9); pola lain belum                      |
