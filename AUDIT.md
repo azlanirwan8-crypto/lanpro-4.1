@@ -488,7 +488,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
 ### 1.1 BELUM SELESAI — 13 item
 
-**Sebaran per fase:** F1 0 · F2 5 · F3 1 · F6 3 · F7 1 · F8 3 · F9 2 · F10 3 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 2 · F3 1 · F6 3 · F7 0 · F8 3 · F9 1 · F10 2 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
