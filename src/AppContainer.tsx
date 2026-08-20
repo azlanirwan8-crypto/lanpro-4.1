@@ -34,6 +34,7 @@ import { useNewSprintForm } from "./hooks/useNewSprintForm";
 import { useNewProjectForm } from "./hooks/useNewProjectForm";
 import { useTaskSelection } from "./hooks/useTaskSelection";
 import { useAppSync } from "./hooks/useAppSync";
+import { useAppNavigation } from "./hooks/useAppNavigation";
 import { TaskDetailModal } from "./features/issues";
 import { UserDetailView } from "./features/users/UserDetailView";
 import { Sidebar } from "./features/sidebar";
@@ -170,6 +171,7 @@ function AppContainer() {
     setDensity,
   } = useAppStore();
   const { handleAuthApiResponse, triggerNotification } = useAuthNotification();
+  useAppNavigation();
 
   // Dideklarasikan sebelum useAuthHook karena hook itu menerimanya sebagai argumen.
   // Bila dideklarasikan di bawah, pemanggilan useAuthHook mengaksesnya dalam
@@ -3719,18 +3721,9 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                     </div>
                   )}
                   <AppRoutes
-                    currentView={currentView}
-                    setCurrentView={setCurrentView}
-                    selectedProject={selectedProject}
                     effectiveRole={userRoleForProject}
                     currentUser={currentUser}
                     currentUserProfile={currentUserProfile}
-                    projectMembers={projectMembers || []}
-                    masterData={masterData || []}
-                    tasks={tasks || []}
-                    sprints={sprints || []}
-                    allUsers={allUsers || []}
-                    activityLogs={activityLogs || []}
                     selectedTaskForDetail={selectedTaskForDetail}
                     expandedSprintId={expandedSprintId}
                     hasPermission={hasPermission}
@@ -3753,7 +3746,6 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                     handleDragEndPlanning={handleDragEndPlanning}
                     fetchMasterData={fetchMasterData}
                     fetchProjects={fetchProjects}
-                    setTasks={setTasks}
                     socket={socket}
                     qaInitialStatusFilter={qaInitialStatusFilter}
                     exportTasksToCSV={exportTasksToCSV}

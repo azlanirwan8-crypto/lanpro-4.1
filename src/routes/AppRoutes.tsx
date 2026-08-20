@@ -2,6 +2,8 @@ import React, { Suspense } from "react";
 import { ShieldAlert, FolderKanban } from "lucide-react";
 import type { PeranEfektif } from "../types/roles";
 import type { Project, Sprint, Task, User } from "../types";
+import { useAppStore } from "../store/useAppStore";
+import { useProjectStore } from "../store";
 
 /**
  * Tiap tampilan dimuat SAAT DIBUTUHKAN, bukan sekaligus di awal.
@@ -91,21 +93,21 @@ const MemuatTampilan = () => (
 );
 
 export interface AppRoutesProps {
-  currentView: string;
-  setCurrentView: (view: any) => void;
-  selectedProject: Project | null;
+  currentView?: string;
+  setCurrentView?: (view: any) => void;
+  selectedProject?: Project | null;
   /** Peran yang berlaku — lingkup SYSTEM atau PROJECT. Lihat `PeranEfektif`. */
   effectiveRole: PeranEfektif;
   currentUser: User | null;
   currentUserProfile: User | null;
-  projectMembers: User[];
-  masterData: any[];
-  tasks: Task[];
-  sprints: Sprint[];
-  allUsers: User[];
-  activityLogs: any[];
-  selectedTaskForDetail: Task | null;
-  expandedSprintId: string | null;
+  projectMembers?: User[];
+  masterData?: any[];
+  tasks?: Task[];
+  sprints?: Sprint[];
+  allUsers?: User[];
+  activityLogs?: any[];
+  selectedTaskForDetail?: Task | null;
+  expandedSprintId?: string | null;
   hasPermission: (
     role: any,
     feature: string,
@@ -113,30 +115,30 @@ export interface AppRoutesProps {
     isOwner?: boolean,
     permissions?: any
   ) => boolean;
-  updateTaskField: (id: string, field: string, value: any) => any;
+  updateTaskField?: (id: string, field: string, value: any) => any;
   updateTaskStatus?: (id: string, status: string) => void;
-  handleQuickCreate: (title: string, type?: string) => void | Promise<void>;
-  setSelectedTaskForDetail: (task: Task | null) => void;
-  setIsTaskDetailModalOpen: (open: boolean) => void;
-  setIsNewTaskModalOpen: (open: boolean) => void;
-  deleteTask: (id: string) => void;
-  bulkDeleteTasks: (ids: string[]) => void;
-  fetchTasks: () => Promise<void>;
-  setExpandedSprintId: (id: string | null) => void;
-  setIsNewSprintModalOpen: (open: boolean) => void;
-  setIsEditSprintModalOpen: (open: boolean) => void;
-  setEditingSprint: (sprint: Sprint | null) => void;
-  handleStartSprint: (sprintId: string) => void;
-  handleCompleteSprint: (sprintId: string) => void;
-  handleDeleteSprint: (sprintId: string) => void;
-  handleDragEndPlanning: (result: any) => void;
-  fetchMasterData: () => void;
-  fetchProjects: () => void;
-  setTasks: (tasks: Task[]) => void;
+  handleQuickCreate?: (title: string, type?: string) => void | Promise<void>;
+  setSelectedTaskForDetail?: (task: Task | null) => void;
+  setIsTaskDetailModalOpen?: (open: boolean) => void;
+  setIsNewTaskModalOpen?: (open: boolean) => void;
+  deleteTask?: (id: string) => void;
+  bulkDeleteTasks?: (ids: string[]) => void;
+  fetchTasks?: () => Promise<void>;
+  setExpandedSprintId?: (id: string | null) => void;
+  setIsNewSprintModalOpen?: (open: boolean) => void;
+  setIsEditSprintModalOpen?: (open: boolean) => void;
+  setEditingSprint?: (sprint: Sprint | null) => void;
+  handleStartSprint?: (sprintId: string) => void;
+  handleCompleteSprint?: (sprintId: string) => void;
+  handleDeleteSprint?: (sprintId: string) => void;
+  handleDragEndPlanning?: (result: any) => void;
+  fetchMasterData?: () => void;
+  fetchProjects?: () => void;
+  setTasks?: (tasks: Task[]) => void;
   socket?: any;
   qaInitialStatusFilter?: "ALL" | "Pending" | "Failed" | "Passed" | "Retest" | "Blocked";
-  exportTasksToCSV: () => void;
-  safeFormat: (date: any, formatStr: string) => string;
+  exportTasksToCSV?: () => void;
+  safeFormat?: (date: any, formatStr: string) => string;
   StyledDropdown?: any;
   updateProjectRole?: (memberId: string, newRole: string) => void;
   removeProjectMember?: (memberId: string) => any;
@@ -148,45 +150,49 @@ export interface AppRoutesProps {
  * komponen lazy tanpa fallback.
  */
 const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
+  const store = useAppStore();
+  const projectStore = useProjectStore();
+
+  const currentView = props.currentView ?? store.currentView;
+  const setCurrentView = props.setCurrentView ?? store.setCurrentView;
+  const selectedProject = props.selectedProject !== undefined ? props.selectedProject : store.selectedProject;
+  const tasks = props.tasks ?? store.tasks ?? [];
+  const sprints = props.sprints ?? store.sprints ?? [];
+  const masterData = props.masterData ?? store.masterData ?? [];
+  const activityLogs = props.activityLogs ?? store.activityLogs ?? [];
+  const allUsers = props.allUsers ?? (store.allUsers as any[]) ?? [];
+  const projectMembers = props.projectMembers ?? projectStore.projectMembers ?? [];
+  const setTasks = props.setTasks ?? store.setTasks;
+
   const {
-    currentView,
-    setCurrentView,
-    selectedProject,
     effectiveRole,
     currentUser,
     currentUserProfile,
-    projectMembers,
-    masterData,
-    tasks,
-    sprints,
-    allUsers,
-    activityLogs,
     hasPermission,
-    updateTaskField,
-    updateTaskStatus,
-    handleQuickCreate,
-    setSelectedTaskForDetail,
-    setIsTaskDetailModalOpen,
-    setIsNewTaskModalOpen,
-    deleteTask,
-    bulkDeleteTasks,
-    fetchTasks,
-    expandedSprintId,
-    setExpandedSprintId,
-    setIsNewSprintModalOpen,
-    setIsEditSprintModalOpen,
-    setEditingSprint,
-    handleStartSprint,
-    handleCompleteSprint,
-    handleDeleteSprint,
-    handleDragEndPlanning,
-    setTasks,
+    updateTaskField = async (_id: string, _field: string, _value: any): Promise<any> => {},
+    updateTaskStatus = (_id: string, _status: string) => {},
+    handleQuickCreate = (_title: string, _type?: string) => {},
+    setSelectedTaskForDetail = (_task: any) => {},
+    setIsTaskDetailModalOpen = (_open: boolean) => {},
+    setIsNewTaskModalOpen = (_open: boolean) => {},
+    deleteTask = (_id: string) => {},
+    bulkDeleteTasks = (_ids: string[]) => {},
+    fetchTasks = async () => {},
+    expandedSprintId = null,
+    setExpandedSprintId = (_id: string | null) => {},
+    setIsNewSprintModalOpen = (_open: boolean) => {},
+    setIsEditSprintModalOpen = (_open: boolean) => {},
+    setEditingSprint = (_sprint: Sprint | null) => {},
+    handleStartSprint = (_sprintId: string) => {},
+    handleCompleteSprint = (_sprintId: string) => {},
+    handleDeleteSprint = (_sprintId: string) => {},
+    handleDragEndPlanning = (_result: any) => {},
     socket,
     qaInitialStatusFilter,
-    exportTasksToCSV,
-    safeFormat,
-    fetchMasterData,
-    fetchProjects,
+    exportTasksToCSV = () => {},
+    safeFormat = (d: any) => String(d || ""),
+    fetchMasterData = () => {},
+    fetchProjects = () => {},
     StyledDropdown,
     updateProjectRole,
     removeProjectMember,
