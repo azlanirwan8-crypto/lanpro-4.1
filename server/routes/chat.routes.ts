@@ -1,22 +1,18 @@
 /**
  * Rute obrolan antar pengguna, termasuk simulasi balasan berbantuan AI.
  *
- * Diekstrak dari task.routes.ts. Berkas itu bukan berkas task saja: ia juga
- * menampung seluruh endpoint chat dan notifikasi — pola grab-bag yang sama
- * seperti meetings.routes.ts sebelum dipecah. Isi handler tidak diubah
- * sebaris pun; yang berpindah hanya tempatnya.
+ * Menggunakan chatRepository untuk operasi data.
  */
 import express from "express";
 import crypto from "crypto";
-import db from "../../src/lib/db";
 import { GoogleGenAI } from "@google/genai";
 import { generateContentWithFallback } from "../services/ai.service";
 import { matchesCaller } from "../services/task.service";
+import { chatRepository } from "../repositories/chat.repository";
 
 const router = express.Router();
 
 router.get("/api/chat/last-messages", async (req: any, res) => {
-  let connection;
   try {
     const { userId } = req.query;
     if (!userId) {
@@ -28,62 +24,16 @@ router.get("/api/chat/last-messages", async (req: any, res) => {
         message: "Akses ditolak: Anda hanya dapat melihat percakapan Anda sendiri.",
       });
     }
-    connection = await db.getConnection();
 
-    const [rows]: any = await connection.query(
-      `SELECT m1.*, 
-                CASE WHEN m1.senderId = ? THEN m1.receiverId ELSE m1.senderId END AS partnerId
-         FROM Messages m1
-         INNER JOIN (
-             SELECT 
-                 CASE WHEN senderId = ? THEN receiverId ELSE senderId END AS partnerId,
-                 MAX(timestamp) as max_ts
-             FROM Messages
-             WHERE (senderId = ? OR receiverId = ?) AND receiverId != 'group'
-             GROUP BY partnerId
-         ) m2 ON (
-             (m1.senderId = ? AND m1.receiverId = m2.partnerId) OR 
-             (m1.receiverId = ? AND m1.senderId = m2.partnerId)
-         ) AND m1.timestamp = m2.max_ts`,
-      [userId, userId, userId, userId, userId, userId]
-    );
-
-    // Fetch last message for Group Chat
-    const [groupRows]: any = await connection.query(
-      "SELECT * FROM Messages WHERE receiverId = 'group' ORDER BY timestamp DESC LIMIT 1"
-    );
-
-    // Fetch last message for AI Assistant (lanpro-ai)
-    const [aiRows]: any = await connection.query(
-      "SELECT * FROM Messages WHERE (senderId = ? AND receiverId = 'lanpro-ai') OR (senderId = 'lanpro-ai' AND receiverId = ?) ORDER BY timestamp DESC LIMIT 1",
-      [userId, userId]
-    );
-
-    const allRows = [...rows];
-    if (groupRows && groupRows.length > 0) {
-      allRows.push({
-        ...groupRows[0],
-        partnerId: "group",
-      });
-    }
-    if (aiRows && aiRows.length > 0) {
-      allRows.push({
-        ...aiRows[0],
-        partnerId: "lanpro-ai",
-      });
-    }
-
+    const allRows = await chatRepository.findLastMessages(userId);
     res.json({ status: "success", data: allRows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/chat/last-messages error:", error);
     res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
   }
 });
 
 router.get("/api/chat/messages", async (req: any, res) => {
-  let connection;
   try {
     const { senderId, receiverId } = req.query;
     if (!senderId || !receiverId) {
@@ -98,29 +48,15 @@ router.get("/api/chat/messages", async (req: any, res) => {
       });
     }
 
-    connection = await db.getConnection();
-    let rows;
-    if (receiverId === "group") {
-      [rows] = await connection.query(
-        "SELECT * FROM Messages WHERE receiverId = 'group' ORDER BY timestamp ASC"
-      );
-    } else {
-      [rows] = await connection.query(
-        "SELECT * FROM Messages WHERE (senderId = ? AND receiverId = ?) OR (senderId = ? AND receiverId = ?) ORDER BY timestamp ASC",
-        [senderId, receiverId, receiverId, senderId]
-      );
-    }
+    const rows = await chatRepository.findConversationMessages(senderId, receiverId);
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/chat/messages error:", error);
     res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
   }
 });
 
 router.post("/api/chat/messages", async (req: any, res) => {
-  let connection;
   try {
     const { senderId, receiverId, message, timestamp } = req.body;
     if (!senderId || !receiverId || !message) {
@@ -136,26 +72,28 @@ router.post("/api/chat/messages", async (req: any, res) => {
     }
 
     const id = crypto.randomUUID();
-    connection = await db.getConnection();
-    await connection.query(
-      "INSERT INTO Messages (id, senderId, receiverId, message, timestamp, `read`) VALUES (?, ?, ?, ?, ?, ?)",
-      [id, senderId, receiverId, message, timestamp || new Date().toISOString(), false]
-    );
+    const finalTs = timestamp || new Date().toISOString();
+
+    await chatRepository.createMessage({
+      id,
+      senderId,
+      receiverId,
+      message,
+      timestamp: finalTs,
+      read: false,
+    });
 
     res.json({
       status: "success",
-      data: { id, senderId, receiverId, message, timestamp, read: false },
+      data: { id, senderId, receiverId, message, timestamp: finalTs, read: false },
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: POST /api/chat/messages error:", error);
     res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
   }
 });
 
 router.put("/api/chat/messages/read", async (req: any, res) => {
-  let connection;
   try {
     const { senderId, receiverId } = req.body;
     if (!senderId || !receiverId) {
@@ -170,24 +108,15 @@ router.put("/api/chat/messages/read", async (req: any, res) => {
       });
     }
 
-    connection = await db.getConnection();
-    await connection.query("UPDATE Messages SET `read` = ? WHERE senderId = ? AND receiverId = ?", [
-      1,
-      senderId,
-      receiverId,
-    ]);
-
+    await chatRepository.markAsRead(senderId, receiverId);
     res.json({ status: "success", message: "Pesan berhasil ditandai sebagai dibaca." });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: PUT /api/chat/messages/read error:", error);
     res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
   }
 });
 
 router.get("/api/chat/unread-counts", async (req: any, res) => {
-  let connection;
   try {
     const { userId } = req.query;
     if (!userId) {
@@ -200,17 +129,11 @@ router.get("/api/chat/unread-counts", async (req: any, res) => {
       });
     }
 
-    connection = await db.getConnection();
-    const [rows] = await connection.query(
-      "SELECT senderId, COUNT(*) as count FROM Messages WHERE receiverId = ? AND `read` = false GROUP BY senderId",
-      [userId]
-    );
+    const rows = await chatRepository.getUnreadCounts(userId);
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/chat/unread-counts error:", error);
     res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
   }
 });
 
@@ -223,11 +146,9 @@ router.post("/api/chat/simulate-reply", async (req, res) => {
         .json({ status: "error", message: "senderId, receiverId, dan message diperlukan." });
     }
 
-    // 1. Get sender info (who is replying)
     const replySenderName = senderName || "Rekan Tim";
     const replySenderRole = senderRole || "user";
 
-    // 2. Try using Gemini API first
     let replyText = "";
     const apiKey = process.env.GEMINI_API_KEY;
 
@@ -282,7 +203,6 @@ Balasan Anda harus singkat (1-3 kalimat saja) layaknya pesan instan di Slack ata
       }
     }
 
-    // 3. Fallback smart responses if Gemini is not available or failed
     if (!replyText) {
       const role = String(replySenderRole).toLowerCase();
       let options = [
@@ -337,15 +257,17 @@ Balasan Anda harus singkat (1-3 kalimat saja) layaknya pesan instan di Slack ata
       replyText = options[randomIndex];
     }
 
-    // 4. Save simulated reply to Database
     const id = crypto.randomUUID();
     const timestamp = new Date().toISOString();
-    const connection = await db.getConnection();
-    await connection.query(
-      "INSERT INTO Messages (id, senderId, receiverId, message, timestamp, `read`) VALUES (?, ?, ?, ?, ?, ?)",
-      [id, senderId, receiverId, replyText, timestamp, false]
-    );
-    connection.release();
+
+    await chatRepository.createMessage({
+      id,
+      senderId,
+      receiverId,
+      message: replyText,
+      timestamp,
+      read: false,
+    });
 
     res.json({
       status: "success",

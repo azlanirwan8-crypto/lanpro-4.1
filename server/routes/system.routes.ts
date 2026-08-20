@@ -1,7 +1,6 @@
 import { Router } from "express";
 import path from "path";
 import fs from "fs";
-import db from "../../src/lib/db";
 import { verifyGlobalAdmin } from "../middleware/auth";
 import {
   statusEmailService,
@@ -9,62 +8,32 @@ import {
   validasiFormatEmail,
   ambilApiKey,
 } from "../services/email.service";
+import { systemRepository } from "../repositories/system.repository";
 
 const router = Router();
 
-// DB Explorer endpoints are securely maintained in server/routes/db-admin.routes.ts with read-only enforcement (Item #19).
-
 // Database Schema Stats
 router.get("/api/db-schema", verifyGlobalAdmin, async (req, res) => {
-  let connection;
   try {
-    connection = await db.getConnection();
-    const [tablesRow] = await connection.query("SHOW TABLES");
-    const tables = (tablesRow as any[]).map(row => Object.values(row)[0] as string);
-    
-    const schema: Record<string, any> = {};
-    for (const table of tables) {
-      const [columns] = await connection.query(`DESCRIBE \`${table}\``);
-      schema[table] = columns;
-    }
-
-    let tableStats: any[] = [];
-    try {
-      const [stats] = await connection.query(`
-        SELECT 
-          table_name AS 'tableName', 
-          table_rows AS 'rowCount',
-          data_length + index_length AS 'sizeBytes'
-        FROM information_schema.TABLES 
-        WHERE table_schema = DATABASE();
-      `);
-      tableStats = stats as any[];
-    } catch (e) {
-       console.warn("Could not fetch table stats", e);
-    }
-    
-    res.json({ status: "success", tables: schema, stats: tableStats });
+    const { schema, stats } = await systemRepository.getDbSchema();
+    res.json({ status: "success", tables: schema, stats });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Database query error:", error);
     res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
   }
 });
 
 // Database Migration Endpoint
 router.post("/api/migrate-db", verifyGlobalAdmin, async (req, res) => {
   try {
-    const schemaPath = path.join(process.cwd(), 'database', 'schema.sql');
-    const schemaSql = fs.readFileSync(schemaPath, 'utf8');
+    const schemaPath = path.join(process.cwd(), "database", "schema.sql");
+    const schemaSql = fs.readFileSync(schemaPath, "utf8");
 
     const cleanSql = schemaSql
-      .replace(/CREATE DATABASE IF NOT EXISTS.*?;/i, '')
-      .replace(/USE .*?;/i, '');
+      .replace(/CREATE DATABASE IF NOT EXISTS.*?;/i, "")
+      .replace(/USE .*?;/i, "");
 
-    const connection = await db.getConnection();
-    await connection.query(cleanSql);
-    connection.release();
+    await systemRepository.executeRawMigration(cleanSql);
 
     res.json({ status: "success", message: "Migrasi database berhasil dijalankan! Tabel sudah terbuat." });
   } catch (error: any) {
@@ -149,4 +118,3 @@ router.post("/api/settings/email/test", verifyGlobalAdmin, async (req, res) => {
 });
 
 export default router;
-

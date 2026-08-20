@@ -1,7 +1,8 @@
 import { Express } from "express";
 import crypto from "crypto";
-import db from "../../src/lib/db";
 import { jagaProyek } from "../middleware/jagaProyek";
+import { sprintRepository } from "../repositories/sprint.repository";
+import { projectRepository } from "../repositories/project.repository";
 
 export function setupSprintsRoutes(
   app: Express,
@@ -17,20 +18,13 @@ export function setupSprintsRoutes(
 ) {
   // GET: List Sprints for a project
   app.get("/api/projects/:projectId/sprints", jagaProyek("sprints", "R"), async (req, res) => {
-    let connection;
     try {
       const { projectId } = req.params;
-      connection = await db.getConnection();
-      const [rows] = await connection.query(
-        "SELECT * FROM Sprints WHERE projectId = ? ORDER BY startDate ASC",
-        [projectId]
-      );
+      const rows = await sprintRepository.findByProjectId(projectId);
       res.json({ status: "success", data: rows });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/sprints error:", error);
       res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-    } finally {
-      if (connection) connection.release();
     }
   });
 
@@ -39,16 +33,12 @@ export function setupSprintsRoutes(
     "/api/projects/:projectId/sprints",
     jagaProyek("sprints", "C"),
     async (req: any, res) => {
-      let connection;
       try {
         const { projectId } = req.params;
         const { name, goal, startDate, endDate, status } = req.body;
-        connection = await db.getConnection();
 
-        const [proj]: any = await connection.query("SELECT category FROM Projects WHERE id = ?", [
-          projectId,
-        ]);
-        if (proj.length > 0 && proj[0].category === "Waterfall") {
+        const category = await projectRepository.getCategory(projectId);
+        if (category === "Waterfall") {
           return res.status(400).json({
             status: "error",
             message:
@@ -57,19 +47,15 @@ export function setupSprintsRoutes(
         }
 
         const newId = crypto.randomUUID();
-
-        await connection.query(
-          "INSERT INTO Sprints (id, projectId, name, goal, startDate, endDate, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
-          [
-            newId,
-            projectId,
-            name,
-            goal || "",
-            startDate || null,
-            endDate || null,
-            status || "planned",
-          ]
-        );
+        const created = await sprintRepository.create({
+          id: newId,
+          projectId,
+          name,
+          goal: goal || "",
+          startDate: startDate || null,
+          endDate: endDate || null,
+          status: status || "planned",
+        });
 
         const userIdStr = req.headers["x-user-id"] || "guest";
         await createAuditLog(
@@ -84,40 +70,24 @@ export function setupSprintsRoutes(
 
         res.json({
           status: "success",
-          data: {
-            id: newId,
-            projectId,
-            name,
-            goal,
-            startDate,
-            endDate,
-            status: status || "planned",
-          },
+          data: created,
         });
       } catch (error: any) {
         console.error("LOG ANOMALI CRITICAL: POST /api/projects/:projectId/sprints error:", error);
         res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-      } finally {
-        if (connection) connection.release();
       }
     }
   );
 
   // PUT: Update Sprint
   app.put("/api/projects/:projectId/sprints/:id", jagaProyek("sprints", "U"), async (req, res) => {
-    let connection;
     try {
       const { id } = req.params;
-      connection = await db.getConnection();
-
-      const [existingSprints]: any = await connection.query("SELECT * FROM Sprints WHERE id = ?", [
-        id,
-      ]);
-      if (existingSprints.length === 0) {
+      const existing = await sprintRepository.findById(id);
+      if (!existing) {
         return res.status(404).json({ status: "error", message: "Sprint tidak ditemukan" });
       }
 
-      const existing = existingSprints[0];
       const finalName = req.body.hasOwnProperty("name") ? req.body.name : existing.name;
       const finalGoal = req.body.hasOwnProperty("goal") ? req.body.goal : existing.goal;
       const finalStartDate = req.body.hasOwnProperty("startDate")
@@ -126,17 +96,18 @@ export function setupSprintsRoutes(
       const finalEndDate = req.body.hasOwnProperty("endDate") ? req.body.endDate : existing.endDate;
       const finalStatus = req.body.hasOwnProperty("status") ? req.body.status : existing.status;
 
-      await connection.query(
-        "UPDATE Sprints SET name=?, goal=?, startDate=?, endDate=?, status=? WHERE id=?",
-        [finalName, finalGoal, finalStartDate || null, finalEndDate || null, finalStatus, id]
-      );
+      await sprintRepository.update(id, {
+        name: finalName,
+        goal: finalGoal,
+        startDate: finalStartDate,
+        endDate: finalEndDate,
+        status: finalStatus,
+      });
 
       res.json({ status: "success", message: "Sprint updated" });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: PUT /api/projects/:projectId/sprints/:id error:", error);
       res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-    } finally {
-      if (connection) connection.release();
     }
   });
 
@@ -147,12 +118,7 @@ export function setupSprintsRoutes(
     async (req, res) => {
       try {
         const { id, projectId } = req.params;
-        const connection = await db.getConnection();
-        await connection.query("DELETE FROM Sprints WHERE id = ? AND projectId = ?", [
-          id,
-          projectId,
-        ]);
-        connection.release();
+        await sprintRepository.delete(id, projectId);
         res.json({ status: "success", message: "Sprint deleted" });
       } catch (error: any) {
         console.error(

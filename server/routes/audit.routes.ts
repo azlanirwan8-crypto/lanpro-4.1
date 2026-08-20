@@ -1,36 +1,22 @@
 import { Router } from "express";
-import db from "../../src/lib/db";
 import { authenticateJWT } from "../middleware/auth";
+import { auditRepository } from "../repositories/audit.repository";
 
 const router = Router();
 
 router.get("/api/audit-logs", authenticateJWT, async (req, res) => {
-  let connection;
   try {
     const { projectId, entityName, entityId, limit } = req.query;
-    connection = await db.getConnection();
-    
-    let sql = "SELECT a.*, u.displayName as userName FROM AuditLogs a JOIN Users u ON a.userId = u.id";
-    const params: any[] = [];
-    const filters = [];
-
-    if (projectId) { filters.push("a.projectId = ?"); params.push(projectId); }
-    if (entityName) { filters.push("a.entityName = ?"); params.push(entityName); }
-    if (entityId) { filters.push("a.entityId = ?"); params.push(entityId); }
-
-    if (filters.length > 0) sql += " WHERE " + filters.join(" AND ");
-
-    sql += " ORDER BY a.createdAt DESC LIMIT ?";
-    const limitValue = Math.min(Math.max(parseInt(limit as string) || 50, 1), 500);
-    params.push(limitValue);
-
-    const [rows] = await connection.query(sql, params);
+    const rows = await auditRepository.findLogs({
+      projectId: projectId as string | undefined,
+      entityName: entityName as string | undefined,
+      entityId: entityId as string | undefined,
+      limit: limit ? parseInt(limit as string) : undefined,
+    });
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("[AUDIT] Error:", error);
     res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
   }
 });
 

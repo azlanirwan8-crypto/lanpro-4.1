@@ -1,9 +1,7 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import { getJwtSecret } from "../helpers/jwtSecret";
-import crypto from "crypto";
 import { UAParser } from "ua-parser-js";
-import db from "../../src/lib/db";
 import { authenticateJWT, activeUserSessions, generateToken } from "../middleware/auth";
 import { hashPassword } from "../helpers/hash";
 import { adalahDuplikat } from "../helpers/pgErrors";
@@ -12,73 +10,45 @@ import { z } from "zod";
 import { formatUserForAuthResponse, handleUserAuthentication } from "../services/auth.service";
 import { kirimEmailSelamatDatang } from "../services/email.service";
 import { validasiBody } from "../middleware/validate";
-import { loginSchema, forceLogoutSchema, registerSchema } from "../schemas/auth.schema";
+import { loginSchema, forceLogoutSchema } from "../schemas/auth.schema";
+import { authRepository } from "../repositories/auth.repository";
 
 const router = express.Router();
 
-/**
- * Peran sistem pemanggil, bila ia membawa token yang sah. `null` bila tidak.
- *
- * Rute pendaftaran sengaja berada DI LUAR gerbang autentikasi `/api/*` — kalau
- * tidak, tidak ada yang bisa mendaftar. Karena itu `req.user` tidak terisi di
- * sini dan tokennya harus dibaca sendiri.
- *
- * Kegagalan apa pun mengembalikan `null`, yang berarti "bukan admin". Itu arah
- * yang benar: token rusak tidak boleh menghasilkan hak lebih.
- */
 async function peraminta(req: any): Promise<string | null> {
   const header = req.headers?.authorization;
   if (!header || !header.startsWith("Bearer ")) return null;
-  let connection;
   try {
     const decoded: any = jwt.verify(header.split(" ")[1], getJwtSecret());
     const id = decoded?.id || decoded?.uid;
     if (!id) return null;
-    connection = await db.getConnection();
-    const [rows]: any = await connection.query("SELECT role FROM Users WHERE id = ? OR uid = ?", [
-      id,
-      id,
-    ]);
-    return rows.length > 0 ? String(rows[0].role || "").toLowerCase() : null;
+    return await authRepository.findUserRoleById(id);
   } catch {
     return null;
-  } finally {
-    if (connection) connection.release();
   }
 }
 
 router.get("/api/auth/verify", authenticateJWT, async (req: any, res) => {
-  let connection;
   try {
-    connection = await db.getConnection();
-    const [rows]: any = await connection.query("SELECT * FROM Users WHERE id = ? OR uid = ?", [
-      req.user.id || req.user.uid,
-      req.user.uid || req.user.id,
-    ]);
-    if (rows.length === 0) {
+    const userId = req.user.id || req.user.uid;
+    const user = await authRepository.findUserByIdOrUid(userId);
+    if (!user) {
       return res.json({ status: "success", user: formatUserForAuthResponse(req.user) });
     }
-    res.json({ status: "success", user: formatUserForAuthResponse(rows[0]) });
+    res.json({ status: "success", user: formatUserForAuthResponse(user) });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Verify token error:", error);
     res.json({ status: "success", user: formatUserForAuthResponse(req.user) });
-  } finally {
-    if (connection) connection.release();
   }
 });
 
 router.post("/api/auth/refresh", authenticateJWT, async (req: any, res) => {
-  let connection;
   try {
-    connection = await db.getConnection();
-    const [rows]: any = await connection.query("SELECT * FROM Users WHERE id = ? OR uid = ?", [
-      req.user.id || req.user.uid,
-      req.user.uid || req.user.id,
-    ]);
-    if (rows.length === 0) {
+    const userId = req.user.id || req.user.uid;
+    const user = await authRepository.findUserByIdOrUid(userId);
+    if (!user) {
       return res.status(404).json({ status: "error", message: "Pengguna tidak ditemukan." });
     }
-    const user = rows[0];
     if (user.status === "rejected") {
       return res.status(403).json({ status: "error", message: "Akun Anda ditolak oleh admin." });
     }
@@ -97,8 +67,6 @@ router.post("/api/auth/refresh", authenticateJWT, async (req: any, res) => {
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Refresh token error:", error);
     return res.status(500).json({ status: "error", message: "Gagal memperpanjang sesi." });
-  } finally {
-    if (connection) connection.release();
   }
 });
 
@@ -128,14 +96,9 @@ router.post("/api/auth/login", validasiBody(loginSchema), async (req, res) => {
       return res.status(403).json({ error: "Pendaftaran akun Anda ditolak." });
     }
 
-    // --- SESSION COLLISION CHECK (Database-backed, no bypass) ---
-    const [dbUsers]: any = await db.query(
-      "SELECT currentSessionToken, lastSeen FROM Users WHERE id = ?",
-      [userId.toString()]
-    );
-    const dbUser = dbUsers && dbUsers[0];
+    // SESSION COLLISION CHECK
+    const dbUser = await authRepository.findSessionData(userId.toString());
     if (dbUser && dbUser.currentSessionToken && !force) {
-      // Cek jika sesi aktif belum expired (misal asumsi aktif jika lastActive < 24 jam)
       const lastActiveTime = dbUser.lastSeen ? Number(dbUser.lastSeen) : 0;
       const ONE_DAY = 24 * 60 * 60 * 1000;
       if (lastActiveTime && Date.now() - lastActiveTime < ONE_DAY) {
@@ -154,7 +117,6 @@ router.post("/api/auth/login", validasiBody(loginSchema), async (req, res) => {
 
     const token = generateToken(user);
 
-    // --- STORE SESSION METADATA ---
     const parser = new UAParser(req.headers["user-agent"]);
     const browserInfo = parser.getBrowser();
     const osInfo = parser.getOS();
@@ -167,16 +129,8 @@ router.post("/api/auth/login", validasiBody(loginSchema), async (req, res) => {
       device += ` (${deviceInfo.vendor || ""} ${deviceInfo.model || ""})`.trim();
     }
 
-    // Update database session
-    // #65 — `RETURNING id`, bukan `affectedRows`. Properti itu milik MySQL dan
-    // selalu `undefined` di sini, sehingga penjaga di bawah tidak pernah aktif
-    // dan sesi tetap dianggap tersimpan walau barisnya tidak ada.
-    const [barisTersentuh]: any = await db.query(
-      "UPDATE Users SET currentSessionToken = ?, lastSeen = ? WHERE id = ? RETURNING id",
-      [token, String(Date.now()), userId.toString()]
-    );
-
-    if (!Array.isArray(barisTersentuh) || barisTersentuh.length === 0) {
+    const updated = await authRepository.updateSessionToken(userId.toString(), token, String(Date.now()));
+    if (!updated) {
       return res.status(404).json({ status: "error", message: "User tidak ditemukan." });
     }
 
@@ -190,12 +144,6 @@ router.post("/api/auth/login", validasiBody(loginSchema), async (req, res) => {
     });
 
     if (force) {
-      // #51 — dikirim HANYA ke room milik pengguna ini, dan TANPA token.
-      //
-      // Dulu barisnya `io.emit(... newToken: token ...)`: JWT yang baru terbit
-      // dan berlaku dua jam disiarkan ke SELURUH klien yang terhubung. Klien
-      // sebenarnya tidak pernah memakai token itu — ia hanya membandingkannya
-      // untuk tahu "apakah sesi baru itu aku?" — jadi sidik jarinya sudah cukup.
       const io = req.app.get("io") || (req as any).io;
       if (io) {
         io.to(roomPengguna(userId.toString())).emit("FORCE_LOGOUT_EVENT", {
@@ -231,28 +179,11 @@ router.post("/api/auth/force-logout", validasiBody(forceLogoutSchema), async (re
 
     const user = authResult.user;
     const userId = user.id || user.uid;
-
     const token = generateToken(user);
 
-    // Log force logout
     setImmediate(async () => {
       try {
-        const logConn = await db.getConnection();
-        await logConn.query(
-          `INSERT INTO AuditLogs (id, userId, projectId, actionType, entityName, entityId, oldValues, newValues)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            crypto.randomUUID(),
-            userId,
-            null,
-            "FORCE_LOGOUT",
-            "Authentication",
-            userId,
-            null,
-            JSON.stringify({ action: "User initiated force logout from another device" }),
-          ]
-        );
-        logConn.release();
+        await authRepository.logForceLogout(userId);
       } catch (logErr) {
         console.error("Failed to log force logout:", logErr);
       }
@@ -265,16 +196,8 @@ router.post("/api/auth/force-logout", validasiBody(forceLogoutSchema), async (re
     const browser = `${browserInfo.name || "Unknown"} ${browserInfo.version || ""}`.trim();
     const device = `${osInfo.name || "Unknown"} ${osInfo.version || ""}`.trim();
 
-    // Update database session
-    // #65 — `RETURNING id`, bukan `affectedRows`. Properti itu milik MySQL dan
-    // selalu `undefined` di sini, sehingga penjaga di bawah tidak pernah aktif
-    // dan sesi tetap dianggap tersimpan walau barisnya tidak ada.
-    const [barisTersentuh]: any = await db.query(
-      "UPDATE Users SET currentSessionToken = ?, lastSeen = ? WHERE id = ? RETURNING id",
-      [token, String(Date.now()), userId.toString()]
-    );
-
-    if (!Array.isArray(barisTersentuh) || barisTersentuh.length === 0) {
+    const updated = await authRepository.updateSessionToken(userId.toString(), token, String(Date.now()));
+    if (!updated) {
       return res.status(404).json({ status: "error", message: "User tidak ditemukan." });
     }
 
@@ -287,7 +210,6 @@ router.post("/api/auth/force-logout", validasiBody(forceLogoutSchema), async (re
       browserSessionId: req.body.browserSessionId || "",
     });
 
-    // #51 — lihat catatan di jalur login: hanya ke room pemilik akun, tanpa token.
     const io = req.app.get("io") || (req as any).io;
     if (io) {
       io.to(roomPengguna(userId.toString())).emit("FORCE_LOGOUT_EVENT", {
@@ -307,12 +229,6 @@ router.post("/api/auth/force-logout", validasiBody(forceLogoutSchema), async (re
   }
 });
 
-/**
- * Id pengguna dari token yang sudah diverifikasi. `null` bila tidak ada/tidak sah.
- *
- * Dipisah dari `peraminta` karena keperluannya berbeda: yang satu menanyakan
- * PERAN untuk memutuskan hak, yang ini menanyakan SIAPA.
- */
 function idDariToken(req: any): string | null {
   const header = req.headers?.authorization;
   if (!header || !header.startsWith("Bearer ")) return null;
@@ -327,22 +243,10 @@ function idDariToken(req: any): string | null {
 
 router.post("/api/auth/logout", async (req, res) => {
   try {
-    // #53 — `userId` DULU diambil dari body pada rute yang berada di prefix
-    // PUBLIK, tanpa autentikasi apa pun. Siapa pun, tanpa kredensial, bisa
-    // memanggilnya dengan id orang lain dan meng-NULL-kan `currentSessionToken`
-    // korban — memaksanya keluar dari aplikasi berulang kali.
-    //
-    // Identitas kini HANYA dari token. Bila tokennya tidak ada atau sudah
-    // kedaluwarsa, tidak ada yang perlu dibersihkan di server: sesi yang
-    // ditunjuknya sudah tidak berlaku, dan klien tetap membersihkan
-    // penyimpanannya sendiri. Karena itu jawabannya tetap `success` — logout
-    // tidak boleh pernah gagal dari sisi pengguna.
     const userId = idDariToken(req);
     if (userId) {
       activeUserSessions.delete(userId.toString());
-      await db.query("UPDATE Users SET currentSessionToken = NULL WHERE id = ?", [
-        userId.toString(),
-      ]);
+      await authRepository.clearSessionToken(userId.toString());
     }
     return res.json({ status: "success" });
   } catch (e) {
@@ -351,7 +255,6 @@ router.post("/api/auth/logout", async (req, res) => {
 });
 
 router.post("/api/auth/register", async (req, res) => {
-  let connection;
   try {
     const {
       username,
@@ -361,7 +264,6 @@ router.post("/api/auth/register", async (req, res) => {
       displayName,
       email,
       role,
-      status,
       department,
       position,
       permissions,
@@ -369,7 +271,6 @@ router.post("/api/auth/register", async (req, res) => {
     } = req.body;
     const fullName = nama_lengkap || name || displayName || "";
 
-    // Server-side Zod Schema Validation
     const serverSchema = z.object({
       name: z.string().min(3, "Nama minimal 3 karakter").max(25, "Nama maksimal 25 karakter"),
       email: z.string().email("Format email tidak valid (contoh: user@gmail.com)"),
@@ -402,23 +303,15 @@ router.post("/api/auth/register", async (req, res) => {
       });
     }
 
-    connection = await db.getConnection();
-
-    // Check if username is already in use
-    const [usernameCheck]: any = await connection.query("SELECT id FROM Users WHERE username = ?", [
-      username,
-    ]);
-    if (usernameCheck.length > 0) {
+    const usernameInUse = await authRepository.checkUserExistsByUsername(username);
+    if (usernameInUse) {
       return res
         .status(400)
         .json({ status: "error", message: "Username sudah digunakan oleh akun lain." });
     }
 
-    // Check if email is already in use
-    const [emailCheck]: any = await connection.query("SELECT id FROM Users WHERE email = ?", [
-      email,
-    ]);
-    if (emailCheck.length > 0) {
+    const emailInUse = await authRepository.checkUserExistsByEmail(email);
+    if (emailInUse) {
       return res
         .status(400)
         .json({ status: "error", message: "Email sudah digunakan oleh akun lain." });
@@ -433,18 +326,6 @@ router.post("/api/auth/register", async (req, res) => {
       .trim();
 
     const insertDisplayName = displayName || nama_lengkap || name || username;
-    // #91 — `role` DULU diambil mentah dari body pada endpoint pendaftaran yang
-    // PUBLIK (tidak lewat gerbang autentikasi `/api/*`). Artinya siapa pun,
-    // tanpa akun, bisa mendaftar sambil meminta `role: "admin"`.
-    //
-    // Statusnya memang dipaksa PENDING sehingga ia belum bisa masuk — tetapi
-    // yang menyetujui melihat daftar tunggu, bukan kolom peran, dan satu klik
-    // "approve" menjadikannya Administrator sistem lengkap dengan God Mode
-    // lintas proyek (§19.6).
-    //
-    // Endpoint ini tetap dipakai panel admin untuk menambah pengguna berperan,
-    // jadi `role` tidak dibuang — ia hanya dihormati bila PEMANGGILNYA terbukti
-    // Administrator. Peran diberikan, tidak diminta.
     const insertRole = (await peraminta(req)) === "admin" ? role || "user" : "user";
     const insertStatus = "PENDING";
     const insertDepartment = department || null;
@@ -452,32 +333,21 @@ router.post("/api/auth/register", async (req, res) => {
     const insertPermissions = permissions ? JSON.stringify(permissions) : null;
 
     try {
-      await connection.query(
-        `INSERT INTO Users (id, uid, username, nama_lengkap, email, displayName, photoURL, role, status, passwordHash, department, position, permissions, phone) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          uid,
-          uid,
-          username,
-          fullName,
-          email,
-          insertDisplayName,
-          null,
-          insertRole,
-          insertStatus,
-          hashPassword(password),
-          insertDepartment,
-          insertPosition,
-          insertPermissions,
-          phone || null,
-        ]
-      );
+      await authRepository.registerUser({
+        uid,
+        username,
+        fullName,
+        email,
+        displayName: insertDisplayName,
+        role: insertRole,
+        status: insertStatus,
+        passwordHash: hashPassword(password),
+        department: insertDepartment,
+        position: insertPosition,
+        permissions: insertPermissions,
+        phone,
+      });
     } catch (insertError: any) {
-      // #63 — dulu memeriksa `ER_DUP_ENTRY`/`errno 1062`, keduanya kode MySQL.
-      // PostgreSQL memakai SQLSTATE 23505, sehingga cabang penelan ini tidak
-      // pernah tercapai dan galatnya SELALU dilempar ke catch luar: pendaftaran
-      // dengan email yang sudah ada menjawab 500 "Terjadi kesalahan internal
-      // server", bukan pesan 201 yang dimaksud di bawah.
       if (adalahDuplikat(insertError)) {
         console.log("User sudah ada (SQLSTATE " + insertError.code + "), insert diabaikan:", email);
       } else {
@@ -485,7 +355,6 @@ router.post("/api/auth/register", async (req, res) => {
       }
     }
 
-    // #26 (F6.3) Pengiriman email selamat datang secara asinkron (non-blocking)
     kirimEmailSelamatDatang({
       email,
       nama: fullName || insertDisplayName,
@@ -502,11 +371,7 @@ router.post("/api/auth/register", async (req, res) => {
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Register error:", error);
     res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-  } finally {
-    if (connection) connection.release();
   }
 });
-
-// Users Heartbeat API (Fallback for Vercel Serverless)
 
 export default router;
