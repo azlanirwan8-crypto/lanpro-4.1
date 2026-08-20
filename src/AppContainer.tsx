@@ -93,6 +93,11 @@ import { KeyboardShortcutsModal } from "./components/KeyboardShortcutsModal";
 import { RateLimitIndicator } from "./components/RateLimitIndicator";
 import { AppRoutes } from "./routes/AppRoutes";
 import { StyledDropdown } from "./components/ui/CommonComponents";
+import { NewSprintModal } from "./components/modals/NewSprintModal";
+import { EditSprintModal } from "./components/modals/EditSprintModal";
+import { NewProjectModal } from "./components/modals/NewProjectModal";
+import { EditProjectModal } from "./components/modals/EditProjectModal";
+import { NewTaskModal } from "./components/modals/NewTaskModal";
 
 import {
   Trash2,
@@ -3801,252 +3806,45 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           {/* </main> */}
 
           {/* Modals */}
-          <Modal
+          <NewSprintModal
             isOpen={isNewSprintModalOpen}
             onClose={() => {
               setIsNewSprintModalOpen(false);
               setSelectedSprintBacklog(new Set());
             }}
-            title="Buat Fase Baru"
-          >
-            <div className="space-y-4 max-h-[80vh] overflow-y-auto pr-2">
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Nama Fase
-                </label>
-                <Input
-                  value={newSprintName}
-                  onChange={(e: any) => setNewSprintName(e.target.value)}
-                  placeholder="contoh: Fase 1 - Fondasi"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Tujuan Fase
-                </label>
-                <Textarea
-                  value={newSprintGoal}
-                  onChange={(e: any) => setNewSprintGoal(e.target.value)}
-                  placeholder="Apa yang ingin dicapai dalam sprint ini?"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-content-body mb-1">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    value={newSprintStartDate}
-                    onChange={(e: any) => setNewSprintStartDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-border-subtle rounded-md text-xs focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-content-body mb-1">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    value={newSprintEndDate}
-                    onChange={(e: any) => setNewSprintEndDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-border-subtle rounded-md text-xs focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none"
-                  />
-                </div>
-              </div>
+            newSprintName={newSprintName}
+            setNewSprintName={setNewSprintName}
+            newSprintGoal={newSprintGoal}
+            setNewSprintGoal={setNewSprintGoal}
+            newSprintStartDate={newSprintStartDate}
+            setNewSprintStartDate={setNewSprintStartDate}
+            newSprintEndDate={newSprintEndDate}
+            setNewSprintEndDate={setNewSprintEndDate}
+            onSubmit={wrapAppSubmit("createSprint", handleCreateSprint)}
+            isSubmitting={!!isSubmitting["createSprint"]}
+          />
 
-              <Button
-                onClick={wrapAppSubmit("createSprint", handleCreateSprint)}
-                disabled={isSubmitting["createSprint"]}
-                className="w-full justify-center bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse shadow-xs py-2.5 rounded-md font-medium text-xs cursor-pointer"
-              >
-                Create Phase & Assign Tasks
-              </Button>
-            </div>
-          </Modal>
-
-          <Modal
+          <EditSprintModal
             isOpen={isEditSprintModalOpen}
             onClose={() => setIsEditSprintModalOpen(false)}
-            title="Edit Phase"
-            maxWidth="max-w-xl"
-          >
-            {editingSprint && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                    Name
-                  </label>
-                  <Input
-                    value={editingSprint.name}
-                    onChange={(e: any) =>
-                      setEditingSprint({ ...editingSprint, name: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                    Goal
-                  </label>
-                  <Textarea
-                    value={editingSprint.goal}
-                    onChange={(e: any) =>
-                      setEditingSprint({ ...editingSprint, goal: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={editingSprint.status}
-                    onChange={(e: any) =>
-                      setEditingSprint({
-                        ...editingSprint,
-                        status: e.target.value as "planned" | "active" | "completed",
-                      })
-                    }
-                    className="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface"
-                  >
-                    <option value="planned">Planned</option>
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                      Start Date
-                    </label>
-                    <input
-                      type="date"
-                      value={
-                        editingSprint.startDate
-                          ? typeof editingSprint.startDate === "string"
-                            ? editingSprint.startDate
-                            : format(ensureDate(editingSprint.startDate), "yyyy-MM-dd")
-                          : ""
-                      }
-                      onChange={(e: any) =>
-                        setEditingSprint({
-                          ...editingSprint,
-                          startDate: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                      End Date
-                    </label>
-                    <input
-                      type="date"
-                      value={
-                        editingSprint.endDate
-                          ? typeof editingSprint.endDate === "string"
-                            ? editingSprint.endDate
-                            : format(ensureDate(editingSprint.endDate), "yyyy-MM-dd")
-                          : ""
-                      }
-                      onChange={(e: any) =>
-                        setEditingSprint({
-                          ...editingSprint,
-                          endDate: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={editingSprint.status}
-                    onChange={(e: any) =>
-                      setEditingSprint({
-                        ...editingSprint,
-                        status: e.target.value as any,
-                      })
-                    }
-                    className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium outline-none"
-                  >
-                    <option value="planned">Planned</option>
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                </div>
+            editingSprint={editingSprint}
+            setEditingSprint={setEditingSprint}
+            onSubmit={wrapAppSubmit("updateSprint", handleUpdateSprint)}
+            isSubmitting={!!isSubmitting["updateSprint"]}
+          />
 
-                <div className="flex gap-3 pt-4 border-t border-gray-50">
-                  <Button
-                    variant="secondary"
-                    onClick={() => setIsEditSprintModalOpen(false)}
-                    className="flex-1 justify-center"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={wrapAppSubmit("updateSprint", handleUpdateSprint)}
-                    disabled={isSubmitting["updateSprint"]}
-                    className="flex-1 justify-center bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse shadow-xs rounded-md text-xs font-medium py-2 cursor-pointer"
-                  >
-                    Save Changes
-                  </Button>
-                </div>
-              </div>
-            )}
-          </Modal>
-
-          <Modal
+          <NewProjectModal
             isOpen={isNewProjectModalOpen}
             onClose={() => setIsNewProjectModalOpen(false)}
-            title="Create New Project"
-          >
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Project Name
-                </label>
-                <Input
-                  value={newProjectName}
-                  onChange={(e: any) => setNewProjectName(e.target.value)}
-                  placeholder="e.g. Website Redesign"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Project Key (Short)
-                </label>
-                <Input
-                  value={newProjectKey}
-                  onChange={(e: any) => setNewProjectKey(e.target.value.toUpperCase())}
-                  placeholder="e.g. KAN"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={newProjectDescription}
-                  onChange={(e) => setNewProjectDescription(e.target.value)}
-                  className="w-full border border-border-subtle rounded-lg p-2 text-sm"
-                  placeholder="Describe this project..."
-                  rows={3}
-                />
-              </div>
-              <Button
-                onClick={wrapAppSubmit("createProject", handleCreateProject)}
-                disabled={isSubmitting["createProject"]}
-                className="w-full justify-center"
-              >
-                Create Project
-              </Button>
-            </div>
-          </Modal>
+            newProjectName={newProjectName}
+            setNewProjectName={setNewProjectName}
+            newProjectKey={newProjectKey}
+            setNewProjectKey={setNewProjectKey}
+            newProjectDescription={newProjectDescription}
+            setNewProjectDescription={setNewProjectDescription}
+            onSubmit={wrapAppSubmit("createProject", handleCreateProject)}
+            isSubmitting={!!isSubmitting["createProject"]}
+          />
 
           {/* Keyboard Shortcuts Modal */}
           <KeyboardShortcutsModal
@@ -4054,479 +3852,73 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
             setIsShortcutsModalOpen={setIsShortcutsModalOpen}
           />
 
-          <Modal
+          <NewTaskModal
             isOpen={isNewTaskModalOpen}
             onClose={() => setIsNewTaskModalOpen(false)}
-            title="Add New Issue"
-            maxWidth="max-w-3xl"
-          >
-            <div className="space-y-4">
-              {/* Group 1: Basic Info */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Issue Title
-                  </label>
-                  <Input
-                    value={newTaskTitle}
-                    onChange={(e: any) => setNewTaskTitle(e.target.value)}
-                    placeholder="What needs to be done?"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-content-body mb-1">Type</label>
-                    <select
-                      value={newTaskType}
-                      onChange={(e: any) => setNewTaskType(e.target.value)}
-                      className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                    >
-                      {masterData.filter((m) => m.type === "issue_type").length > 0 ? (
-                        masterData
-                          .filter((m) => m.type === "issue_type")
-                          .map((t, idx) => (
-                            <option
-                              key={t.id ? `it-${t.id}-${idx}` : `it-${idx}`}
-                              value={t.label.toLowerCase()}
-                            >
-                              {t.label}
-                            </option>
-                          ))
-                      ) : (
-                        <>
-                          <option value="epic">Epic</option>
-                          <option value="task">Task</option>
-                          <option value="subtask">Subtask</option>
-                          <option value="bug">Bug</option>
-                          <option value="meeting">Meeting</option>
-                          <option value="document">Document</option>
-                          <option value="approval">Approval</option>
-                        </>
-                      )}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-content-body mb-1">
-                      Sprint
-                    </label>
-                    <select
-                      value={newTaskSprintId}
-                      onChange={(e: any) => setNewTaskSprintId(e.target.value)}
-                      className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                    >
-                      <option value="">Backlog</option>
-                      {sprints.map((s, idx) => (
-                        <option key={s.id ? `sp-${s.id}-${idx}` : `sp-${idx}`} value={s.id}>
-                          {s.name} ({s.status})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Initial Status
-                </label>
-                <StyledDropdown
-                  value={newTaskStatus}
-                  onChange={(val) => setNewTaskStatus(val)}
-                  options={masterData
-                    .filter((d) => d.type === "status")
-                    .map((d) => ({
-                      id: d.label,
-                      label: d.label,
-                      icon: d.icon,
-                      color: d.color,
-                    }))}
-                  type="status"
-                  masterData={masterData}
-                />
-              </div>
-              {newTaskType === "subtask" && (
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Parent Task / Epic
-                  </label>
-                  <select
-                    value={newTaskParentId}
-                    onChange={(e: any) => setNewTaskParentId(e.target.value)}
-                    className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                  >
-                    <option value="">Select Parent...</option>
-                    {tasks
-                      .filter((t) => t.type !== "subtask")
-                      .map((t, idx) => (
-                        <option key={t.id ? `pt-${t.id}-${idx}` : `pt-${idx}`} value={t.id}>
-                          {t.key}: {t.title}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-              )}
-              {/* Group 2: Assignment & Categorization */}
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border-faint">
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Priority
-                  </label>
-                  <StyledDropdown
-                    value={newTaskPriority}
-                    onChange={(val) => setNewTaskPriority(val)}
-                    options={masterData
-                      .filter((d) => d.type === "priority")
-                      .map((d) => ({
-                        id: d.label,
-                        label: d.label,
-                        icon: d.icon,
-                        color: d.color,
-                      }))}
-                    type="priority"
-                    masterData={masterData}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Category
-                  </label>
-                  <StyledDropdown
-                    value={newTaskCategory}
-                    onChange={(val) => setNewTaskCategory(val)}
-                    options={[
-                      { id: "none", label: "" },
-                      ...masterData.filter((d) => d.type === "category"),
-                    ]}
-                    type="category"
-                    masterData={masterData}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">Assignee</label>
-                <select
-                  value={newTaskAssigneeId}
-                  onChange={(e: any) => setNewTaskAssigneeId(e.target.value)}
-                  className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                >
-                  <option value="">Unassigned</option>
-                  {projectMembers.map((m, idx) => (
-                    <option key={m?.uid ? `pm-${m.uid}-${idx}` : `pm-${idx}`} value={m?.uid}>
-                      {m?.displayName || m?.email || "Anggota Tim"}
-                    </option>
-                  ))}
-                  {selectedProject?.pendingInvites?.map((email, idx) => (
-                    <option key={email ? `pi-${email}-${idx}` : `pi-${idx}`} value={email}>
-                      {email} (Pending)
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">Release</label>
-                <StyledDropdown
-                  value={newTaskRelease}
-                  onChange={(val) => setNewTaskRelease(val)}
-                  options={[
-                    { id: "none", label: "" },
-                    ...masterData
-                      .filter((d) => d.type === "release")
-                      .sort((a, b) => (a.order || 0) - (b.order || 0)),
-                  ]}
-                  type="release"
-                  masterData={masterData}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Story Points
-                  </label>
-                  <Input
-                    type="number"
-                    value={newTaskStoryPoints || ""}
-                    onChange={(e: any) => setNewTaskStoryPoints(parseInt(e.target.value) || 0)}
-                    placeholder="e.g. 5"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Labels (comma separated)
-                  </label>
-                  <Input
-                    value={newTaskLabels}
-                    onChange={(e: any) => setNewTaskLabels(e.target.value)}
-                    placeholder="e.g. frontend, bug"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Business Value
-                  </label>
-                  <select
-                    value={newTaskBusinessValue}
-                    onChange={(e: any) => setNewTaskBusinessValue(e.target.value)}
-                    className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                  >
-                    <option value="">Not Set</option>
-                    <option value="critical">Critical</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    System Risk
-                  </label>
-                  <select
-                    value={newTaskProjectRisk}
-                    onChange={(e: any) => setNewTaskProjectRisk(e.target.value)}
-                    className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                  >
-                    <option value="">Not Set</option>
-                    <option value="high">High Risk</option>
-                    <option value="medium">Medium Risk</option>
-                    <option value="low">Low Risk</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Environment
-                </label>
-                <StyledDropdown
-                  value={newTaskEnvironment}
-                  onChange={(val) => setNewTaskEnvironment(val)}
-                  options={[
-                    { id: "none", label: "None" },
-                    ...masterData.filter((d) => d.type === "environment"),
-                  ]}
-                  type="environment"
-                  masterData={masterData}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Figma URL
-                </label>
-                <Input
-                  type="url"
-                  value={newTaskFigmaUrl}
-                  onChange={(e: any) => setNewTaskFigmaUrl(e.target.value)}
-                  placeholder="https://figma.com/..."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Acceptance Criteria
-                </label>
-                <textarea
-                  value={newTaskAcceptanceCriteria}
-                  onChange={(e: any) => setNewTaskAcceptanceCriteria(e.target.value)}
-                  placeholder="What are the conditions for completion?"
-                  className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                  rows={3}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={newTaskDescription}
-                  onChange={(e: any) => setNewTaskDescription(e.target.value)}
-                  placeholder="Add description..."
-                  className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                  rows={4}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-content-body mb-1">
-                  Attachments
-                </label>
-                <input
-                  type="file"
-                  multiple
-                  onChange={(e: any) => {
-                    const files = Array.from(e.target.files || []) as File[];
-                    const validFiles: File[] = [];
-                    for (const f of files) {
-                      const check = validateFileClient(f);
-                      if (!check.valid) {
-                        toast.error(
-                          check.error ||
-                            "Gagal Mengunggah Dokumen: Format file tidak didukung atau ukuran melebihi batas maksimum (Max 10MB)."
-                        );
-                      } else {
-                        validFiles.push(f);
-                      }
-                    }
-                    setNewTaskAttachments(validFiles);
-                  }}
-                  className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Start Date
-                  </label>
-                  <Input
-                    type="date"
-                    value={newTaskStartDate}
-                    onChange={(e: any) => setNewTaskStartDate(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    End Date
-                  </label>
-                  <Input
-                    type="date"
-                    value={newTaskEndDate}
-                    onChange={(e: any) => setNewTaskEndDate(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Due Date
-                  </label>
-                  <Input
-                    type="date"
-                    value={newTaskDueDate}
-                    onChange={(e: any) => setNewTaskDueDate(e.target.value)}
-                  />
-                </div>
-              </div>
-              <Button
-                onClick={wrapAppSubmit("createTask", handleCreateTask)}
-                disabled={isSubmitting["createTask"]}
-                className="w-full justify-center"
-              >
-                Create Issue
-              </Button>
-            </div>
-          </Modal>
+            newTaskTitle={newTaskTitle}
+            setNewTaskTitle={setNewTaskTitle}
+            newTaskType={newTaskType}
+            setNewTaskType={setNewTaskType}
+            newTaskSprintId={newTaskSprintId}
+            setNewTaskSprintId={setNewTaskSprintId}
+            newTaskStatus={newTaskStatus}
+            setNewTaskStatus={setNewTaskStatus}
+            newTaskParentId={newTaskParentId}
+            setNewTaskParentId={setNewTaskParentId}
+            newTaskPriority={newTaskPriority}
+            setNewTaskPriority={setNewTaskPriority}
+            newTaskCategory={newTaskCategory}
+            setNewTaskCategory={setNewTaskCategory}
+            newTaskAssigneeId={newTaskAssigneeId}
+            setNewTaskAssigneeId={setNewTaskAssigneeId}
+            newTaskRelease={newTaskRelease}
+            setNewTaskRelease={setNewTaskRelease}
+            newTaskStoryPoints={newTaskStoryPoints}
+            setNewTaskStoryPoints={setNewTaskStoryPoints}
+            newTaskLabels={newTaskLabels}
+            setNewTaskLabels={setNewTaskLabels}
+            newTaskBusinessValue={newTaskBusinessValue}
+            setNewTaskBusinessValue={setNewTaskBusinessValue}
+            newTaskProjectRisk={newTaskProjectRisk}
+            setNewTaskProjectRisk={setNewTaskProjectRisk}
+            newTaskEnvironment={newTaskEnvironment}
+            setNewTaskEnvironment={setNewTaskEnvironment}
+            newTaskFigmaUrl={newTaskFigmaUrl}
+            setNewTaskFigmaUrl={setNewTaskFigmaUrl}
+            newTaskAcceptanceCriteria={newTaskAcceptanceCriteria}
+            setNewTaskAcceptanceCriteria={setNewTaskAcceptanceCriteria}
+            newTaskDescription={newTaskDescription}
+            setNewTaskDescription={setNewTaskDescription}
+            setNewTaskAttachments={setNewTaskAttachments}
+            newTaskStartDate={newTaskStartDate}
+            setNewTaskStartDate={setNewTaskStartDate}
+            newTaskEndDate={newTaskEndDate}
+            setNewTaskEndDate={setNewTaskEndDate}
+            newTaskDueDate={newTaskDueDate}
+            setNewTaskDueDate={setNewTaskDueDate}
+            masterData={masterData}
+            sprints={sprints}
+            tasks={tasks}
+            projectMembers={projectMembers}
+            selectedProject={selectedProject}
+            onSubmit={wrapAppSubmit("createTask", handleCreateTask)}
+            isSubmitting={!!isSubmitting["createTask"]}
+          />
 
-          <Modal
+          <EditProjectModal
             isOpen={isEditProjectModalOpen}
             onClose={() => setIsEditProjectModalOpen(false)}
-            title="Edit Project"
-            maxWidth="max-w-2xl"
-          >
-            {editingProject && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Project Name
-                  </label>
-                  <Input
-                    value={editingProject.name ?? ""}
-                    onChange={(e: any) =>
-                      setEditingProject({
-                        ...editingProject,
-                        name: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Project Key
-                  </label>
-                  <Input
-                    value={editingProject.key ?? ""}
-                    onChange={(e: any) =>
-                      setEditingProject({
-                        ...editingProject,
-                        key: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-content-body mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    value={editingProject.description || ""}
-                    onChange={(e) =>
-                      setEditingProject({
-                        ...editingProject,
-                        description: e.target.value,
-                      })
-                    }
-                    className="w-full border border-border-subtle rounded-lg p-2 text-sm"
-                    placeholder="Describe project..."
-                    rows={3}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-content-body mb-1">
-                      Status
-                    </label>
-                    <select
-                      value={editingProject.status || "Active"}
-                      onChange={(e) =>
-                        setEditingProject({
-                          ...editingProject,
-                          status: e.target.value as any,
-                        })
-                      }
-                      className="w-full border border-border-subtle rounded-lg p-2 text-sm"
-                    >
-                      <option value="Active">Active</option>
-                      <option value="On Hold">On Hold</option>
-                      <option value="Completed">Completed</option>
-                      <option value="Archived">Archived</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-content-body mb-1">
-                      ID (Ref)
-                    </label>
-                    <div className="px-3 py-2 bg-surface-sunken rounded-lg text-sm text-content-muted font-mono border border-border-faint italic">
-                      #{editingProject.id.slice(-6).toUpperCase()}
-                    </div>
-                  </div>
-                </div>
-                <div className="pt-2">
-                  <Button
-                    onClick={wrapAppSubmit("updateProject", handleUpdateProject)}
-                    disabled={isSubmitting["updateProject"]}
-                    className="w-full justify-center"
-                  >
-                    Save Changes
-                  </Button>
-                </div>
-
-                {hasPermission(
-                  effectiveRole,
-                  "configuration",
-                  "delete",
-                  (currentUser?.uid || user?.uid) === editingProject.ownerId,
-                  currentUserProfile?.permissions
-                ) && (
-                  <div className="mt-6 pt-6 border-t border-red-50">
-                    <p className="text-xs sm:text-[10px] font-medium text-red-400 uppercase tracking-widest mb-3">
-                      Danger Zone
-                    </p>
-                    <Button
-                      onClick={() => deleteProject(editingProject)}
-                      variant="danger"
-                      className="w-full justify-center"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      Terminate Project (Permanent Delete)
-                    </Button>
-                  </div>
-                )}
-              </div>
-            )}
-          </Modal>
+            editingProject={editingProject}
+            setEditingProject={setEditingProject}
+            onSubmit={wrapAppSubmit("updateProject", handleUpdateProject)}
+            isSubmitting={!!isSubmitting["updateProject"]}
+            effectiveRole={effectiveRole}
+            currentUser={currentUser}
+            user={user}
+            currentUserProfile={currentUserProfile}
+            hasPermission={hasPermission}
+            deleteProject={deleteProject}
+          />
 
           {confirmAction?.isOpen && (
             <ConfirmationModal

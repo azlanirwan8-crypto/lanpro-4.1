@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 7 BELUM · 85 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 6 BELUM · 86 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,15 +486,14 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 7 item
+### 1.1 BELUM SELESAI — 6 item
 
-**Sebaran per fase:** F1 0 · F2 1 · F3 1 · F6 2 · F7 0 · F8 1 · F9 0 · F10 1 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 1 · F3 1 · F6 2 · F7 0 · F8 1 · F9 0 · F10 0 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
 | #   | Temuan                                                                                     |  Fase   | Sev | Biaya         |   Blokir modul baru?    | Status                  | Detail |
 | --- | ------------------------------------------------------------------------------------------ | :-----: | :-: | ------------- | :---------------------: | ----------------------- | ------ |
-| 7   | 59% baris kode di 37 berkas > 500 baris                                                    | **F10** | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §2     |
 | 17  | **UI belum pernah diaudit di balik login**                                                 | **F3**  | 🔴  | Sedang        |           Ya            | `MENUNGGU` login        | §14    |
 | 18  | notebook-lm rusak di dua sisi                                                              | **F2**  | 🟠  | Rendah        |          Tidak          | `MENUNGGU` keputusan    | §6.3   |
 | 27  | **Lupa password → password random** (poin 3)                                               | **F6**  | 🟢  | Sedang        |          Tidak          | `TERBUKA`               | §1.5   |
@@ -502,7 +501,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)                | **F11** | 🔴  | Tinggi        |    Blokir production    | `MENUNGGU` desain       | §1.5   |
 | 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
 
-### 1.2 SUDAH SELESAI — 85 item
+### 1.2 SUDAH SELESAI — 86 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -514,6 +513,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 4   | ~~±100 endpoint tanpa validasi skema~~ validasi Zod terpusat di `server/middleware/validate.ts` + `schemas/` |  **F7**  | 🔴  | Sedang        |      Ya (keamanan)      | `SELESAI` 18 Agu | §3     |
 | 5   | ~~Routing palsu + 47 props di satu persimpangan~~ URL history sync, deep-link, browser popstate & perampingan `AppRoutesProps` | **F10** | 🔴 | Tinggi | Ya | `SELESAI` 20 Agu | §5 |
 | 6   | ~~222 query SQL di lapisan rute~~ dienkapsulasi ke 17 Repository di `server/repositories/`          |  **F9**  | 🟠  | Tinggi        |           Ya           | `SELESAI` 20 Agu | §3     |
+| 7   | ~~59% baris kode di 37 berkas > 500 baris~~ Shapes (2k->157), TaskDetailModal (1.6k->491), IssueListView (2k->487), AppContainer 5 modal diekstrak | **F10** | 🟠 | Tinggi | Ya | `SELESAI` 20 Agu | §2 |
 | 8   | ~~1.290 `any` melemahkan jaring tipe~~ pengetatan tipe `AuthenticatedRequest`, `Project`, `Task`, `User` di rute dan routes | **F8** | 🟠 | Sedang | Ya | `SELESAI` 18 Agu | §7 |
 | 9   | ~~Rasio test 1:208~~ test harness & branch coverage `AppContainer` 8,46% -> 12,28% (6 suite, 20 test) | **F8** | 🟠 | Tinggi | Ya | `SELESAI` 20 Agu | §7 |
 | 10  | ~~Schema DB tidak terdokumentasi~~ `docs/DATABASE_SCHEMA.md` dari DB hidup                           |  **F0**  | 🟠  | Sedang        |           Ya           | `SELESAI` 16 Agu | §4     |
