@@ -69,8 +69,8 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
           </div>
           <h3 className="text-lg font-bold text-content-strong">Lupa Kata Sandi?</h3>
           <p className="text-xs text-content-muted mt-1 max-w-xs mx-auto">
-            Masukkan alamat email akun Anda. Kami akan mengirimkan tautan untuk mengatur ulang kata
-            sandi.
+            Masukkan alamat email akun Anda. Sistem akan membuat kata sandi baru dan mengirimkannya
+            ke email Anda.
           </p>
         </div>
 
@@ -79,10 +79,10 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
             <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-start gap-3">
               <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
               <div className="text-xs leading-relaxed">
-                <p className="font-semibold mb-0.5">Tautan Pemulihan Dikirim!</p>
+                <p className="font-semibold mb-0.5">Kata Sandi Baru Dikirim!</p>
                 <p className="text-content-muted">
-                  Jika alamat <strong>{email}</strong> terdaftar, instruksi pemulihan telah dikirim.
-                  Tautan berlaku selama 15 menit.
+                  Kata sandi baru telah berhasil dibuat dan dikirimkan ke <strong>{email}</strong>.
+                  Silakan periksa kotak masuk Anda dan gunakan kata sandi tersebut untuk masuk.
                 </p>
               </div>
             </div>

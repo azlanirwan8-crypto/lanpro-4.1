@@ -24,6 +24,7 @@ jest.mock("../services/email.service", () => ({
   __esModule: true,
   kirimEmailSelamatDatang: jest.fn().mockResolvedValue({ success: true }),
   kirimEmailResetPassword: jest.fn().mockResolvedValue({ success: true }),
+  kirimEmailPasswordBaru: jest.fn().mockResolvedValue({ success: true }),
   kirimEmailTaskDigest: jest.fn().mockResolvedValue({ success: true }),
   emailTerkonfigurasi: () => false,
 }));
@@ -33,7 +34,7 @@ import request from "supertest";
 import jwt from "jsonwebtoken";
 import authRoutes from "./auth.routes";
 import { getJwtSecret } from "../helpers/jwtSecret";
-import { kirimEmailResetPassword } from "../services/email.service";
+import { kirimEmailPasswordBaru } from "../services/email.service";
 
 const buatApp = () => {
   const app = express();
@@ -48,7 +49,7 @@ describe("Auth Routes - Forgot Password & Reset Password (Item #27)", () => {
   beforeEach(() => {
     mockKueri.mockReset();
     jest.clearAllMocks();
-    (kirimEmailResetPassword as jest.Mock).mockResolvedValue({ success: true });
+    (kirimEmailPasswordBaru as jest.Mock).mockResolvedValue({ success: true });
     process.env = {
       ...originalEnv,
       JWT_SECRET: "test-jwt-secret-key-1234567890",
@@ -71,7 +72,20 @@ describe("Auth Routes - Forgot Password & Reset Password (Item #27)", () => {
       expect(res.body.message).toContain("Alamat email tidak valid");
     });
 
-    it("mengirimkan email reset password bila email terdaftar di database", async () => {
+    it("mengembalikan error 404 bila email tidak terdaftar dalam sistem", async () => {
+      mockKueri.mockResolvedValueOnce([[]]); // No user found
+
+      const res = await request(buatApp())
+        .post("/api/auth/forgot-password")
+        .send({ email: "unknown@rajonet.com" });
+
+      expect(res.status).toBe(404);
+      expect(res.body.status).toBe("error");
+      expect(res.body.message).toContain("Alamat email tidak terdaftar dalam sistem");
+      expect(kirimEmailPasswordBaru).not.toHaveBeenCalled();
+    });
+
+    it("membuat kata sandi baru, mengupdate database, dan mengirimkan email kata sandi baru bila email terdaftar", async () => {
       const mockUser = {
         id: "usr-100",
         uid: "usr-100",
@@ -80,7 +94,9 @@ describe("Auth Routes - Forgot Password & Reset Password (Item #27)", () => {
         displayName: "Member Satu",
       };
 
-      mockKueri.mockResolvedValueOnce([[mockUser]]); // findUserByEmail
+      mockKueri
+        .mockResolvedValueOnce([[mockUser]]) // findUserByEmail
+        .mockResolvedValueOnce([[{ id: "usr-100" }]]); // updateUserPassword
 
       const res = await request(buatApp())
         .post("/api/auth/forgot-password")
@@ -88,26 +104,14 @@ describe("Auth Routes - Forgot Password & Reset Password (Item #27)", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe("success");
-      expect(res.body.message).toContain("instruksi pemulihan kata sandi telah dikirimkan");
+      expect(res.body.message).toContain("Kata sandi baru telah berhasil dibuat");
 
-      expect(kirimEmailResetPassword).toHaveBeenCalledTimes(1);
-      const callArg = (kirimEmailResetPassword as jest.Mock).mock.calls[0][0];
+      expect(kirimEmailPasswordBaru).toHaveBeenCalledTimes(1);
+      const callArg = (kirimEmailPasswordBaru as jest.Mock).mock.calls[0][0];
       expect(callArg.email).toBe("member@rajonet.com");
       expect(callArg.username).toBe("member1");
-      expect(callArg.resetUrl).toContain("#reset-password?token=");
-    });
-
-    it("tetap mengembalikan respons sukses generik bila email tidak ditemukan (mencegah enumerasi akun)", async () => {
-      mockKueri.mockResolvedValueOnce([[]]); // No user found
-
-      const res = await request(buatApp())
-        .post("/api/auth/forgot-password")
-        .send({ email: "unknown@rajonet.com" });
-
-      expect(res.status).toBe(200);
-      expect(res.body.status).toBe("success");
-      expect(res.body.message).toContain("instruksi pemulihan kata sandi telah dikirimkan");
-      expect(kirimEmailResetPassword).not.toHaveBeenCalled();
+      expect(callArg.temporaryPassword).toBeDefined();
+      expect(callArg.temporaryPassword.length).toBeGreaterThanOrEqual(8);
     });
   });
 

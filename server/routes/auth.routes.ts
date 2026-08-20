@@ -8,10 +8,43 @@ import { adalahDuplikat } from "../helpers/pgErrors";
 import { roomPengguna, sidikToken } from "../middleware/socketAuth";
 import { z } from "zod";
 import { formatUserForAuthResponse, handleUserAuthentication } from "../services/auth.service";
-import { kirimEmailSelamatDatang, kirimEmailResetPassword } from "../services/email.service";
+import {
+  kirimEmailSelamatDatang,
+  kirimEmailResetPassword,
+  kirimEmailPasswordBaru,
+} from "../services/email.service";
+import crypto from "crypto";
 import { validasiBody } from "../middleware/validate";
 import { loginSchema, forceLogoutSchema } from "../schemas/auth.schema";
 import { authRepository } from "../repositories/auth.repository";
+
+export function generateRandomPassword(length = 10): string {
+  const uppers = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const lowers = "abcdefghijkmnopqrstuvwxyz";
+  const numbers = "23456789";
+  const symbols = "!@#$%&*";
+  const all = uppers + lowers + numbers + symbols;
+
+  const randomChar = (chars: string) => chars[crypto.randomInt(0, chars.length)];
+
+  const passwordChars = [
+    randomChar(uppers),
+    randomChar(lowers),
+    randomChar(numbers),
+    randomChar(symbols),
+  ];
+
+  for (let i = passwordChars.length; i < length; i++) {
+    passwordChars.push(randomChar(all));
+  }
+
+  for (let i = passwordChars.length - 1; i > 0; i--) {
+    const j = crypto.randomInt(0, i + 1);
+    [passwordChars[i], passwordChars[j]] = [passwordChars[j], passwordChars[i]];
+  }
+
+  return passwordChars.join("");
+}
 
 const router = express.Router();
 
@@ -396,42 +429,34 @@ router.post("/api/auth/forgot-password", async (req, res) => {
     }
 
     const user = await authRepository.findUserByEmail(email);
-    const genericSuccessMessage =
-      "Jika alamat email terdaftar, instruksi pemulihan kata sandi telah dikirimkan ke kotak masuk Anda.";
 
     if (!user) {
-      return res.json({
-        status: "success",
-        message: genericSuccessMessage,
+      return res.status(404).json({
+        status: "error",
+        message: "Alamat email tidak terdaftar dalam sistem.",
       });
     }
 
-    const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
-    const resetToken = jwt.sign(
-      {
-        id: user.id || user.uid,
-        email: user.email,
-        type: "password_reset",
-      },
-      getJwtSecret(),
-      { expiresIn: "15m" }
-    );
+    // Buat kata sandi acak baru dan hash ke database
+    const temporaryPassword = generateRandomPassword(10);
+    const hashedPassword = hashPassword(temporaryPassword);
 
-    const resetUrl = `${appUrl}/#reset-password?token=${encodeURIComponent(resetToken)}`;
+    const userId = user.id || user.uid;
+    await authRepository.updateUserPassword(userId, hashedPassword);
 
-    kirimEmailResetPassword({
+    kirimEmailPasswordBaru({
       email: user.email,
       nama: user.displayName || user.nama_lengkap || user.username,
       username: user.username || user.email,
-      resetUrl,
-      expiresInMinutes: 15,
+      temporaryPassword,
     }).catch((emailErr) => {
-      console.error("[EMAIL] Gagal mengirim email reset password:", emailErr?.message || emailErr);
+      console.error("[EMAIL] Gagal mengirim email kata sandi baru:", emailErr?.message || emailErr);
     });
 
     return res.json({
       status: "success",
-      message: genericSuccessMessage,
+      message:
+        "Kata sandi baru telah berhasil dibuat dan dikirimkan ke alamat email Anda. Silakan periksa kotak masuk dan masuk menggunakan kata sandi tersebut.",
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Forgot password error:", error);

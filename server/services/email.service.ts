@@ -365,8 +365,76 @@ export interface ResetPasswordEmailData {
   email: string;
   nama?: string;
   username: string;
-  resetUrl: string;
+  resetUrl?: string;
+  temporaryPassword?: string;
   expiresInMinutes?: number;
+}
+
+/**
+ * Mengirim email kata sandi baru acak kepada pengguna (Item #27).
+ */
+export async function kirimEmailPasswordBaru(data: {
+  email: string;
+  nama?: string;
+  username: string;
+  temporaryPassword: string;
+}): Promise<KirimEmailResult> {
+  const { email, nama, username, temporaryPassword } = data;
+  const namaPanggilan = (nama || username || "").trim();
+  const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+
+  const subject = "[LanPro] Kata Sandi Baru Akun Anda";
+
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1e293b; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+      <div style="margin-bottom: 24px; text-align: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+        <h1 style="color: #0f172a; font-size: 22px; margin: 0 0 6px 0; font-weight: 700;">Kata Sandi Baru Akun LanPro</h1>
+        <p style="color: #64748b; font-size: 13px; margin: 0;">LanPro Project Management</p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">Halo, ${namaPanggilan}!</p>
+        <p style="margin: 0 0 12px 0; font-size: 13px; line-height: 1.5; color: #475569;">
+          Kami telah mengatur ulang kata sandi untuk akun LanPro Anda (<strong>${username}</strong>) sesuai permintaan Anda.
+        </p>
+        <p style="margin: 0 0 16px 0; font-size: 13px; line-height: 1.5; color: #475569;">
+          Gunakan kata sandi sementara berikut untuk masuk ke akun Anda:
+        </p>
+      </div>
+
+      <div style="text-align: center; margin: 24px 0; background-color: #f1f5f9; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px;">
+        <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 1px; margin-bottom: 6px;">Kata Sandi Sementara:</div>
+        <div style="font-family: 'Courier New', Courier, monospace; font-size: 24px; font-weight: 700; color: #1e293b; letter-spacing: 2px;">
+          ${temporaryPassword}
+        </div>
+      </div>
+
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${appUrl}" style="display: inline-block; background-color: #405189; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">Masuk ke LanPro</a>
+      </div>
+
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; margin-bottom: 20px;">
+        <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #334155;">Catatan Keamanan:</p>
+        <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #64748b; line-height: 1.5;">
+          <li>Setelah masuk, Anda disarankan untuk segera mengubah kata sandi ini melalui menu Pengaturan Profil akun Anda.</li>
+          <li>Jangan berikan kata sandi ini kepada siapa pun demi keamanan akun Anda.</li>
+        </ul>
+      </div>
+
+      <p style="font-size: 11px; color: #94a3b8; text-align: center; margin-top: 24px;">
+        Email ini dikirim secara otomatis oleh sistem LanPro. Jangan membalas email ini.
+      </p>
+    </div>
+  `;
+
+  const text = `Halo ${namaPanggilan},\n\nKata sandi akun LanPro Anda (${username}) telah diatur ulang.\n\nKata Sandi Sementara: ${temporaryPassword}\n\nKunjungi aplikasi: ${appUrl}\n\nSetelah berhasil masuk, Anda dapat mengubah kata sandi ini melalui menu profil Anda.`;
+
+  return kirimEmail({
+    to: email,
+    subject,
+    html,
+    text,
+  });
 }
 
 /**
@@ -375,7 +443,16 @@ export interface ResetPasswordEmailData {
 export async function kirimEmailResetPassword(
   data: ResetPasswordEmailData
 ): Promise<KirimEmailResult> {
-  const { email, nama, username, resetUrl, expiresInMinutes = 15 } = data;
+  if (data.temporaryPassword) {
+    return kirimEmailPasswordBaru({
+      email: data.email,
+      nama: data.nama,
+      username: data.username,
+      temporaryPassword: data.temporaryPassword,
+    });
+  }
+
+  const { email, nama, username, resetUrl = "", expiresInMinutes = 15 } = data;
   const namaPanggilan = (nama || username || "").trim();
 
   const subject = "[LanPro] Permintaan Pengaturan Ulang Kata Sandi";
