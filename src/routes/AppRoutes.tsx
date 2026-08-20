@@ -49,7 +49,7 @@ const NotebookLM = React.lazy(() =>
   import("../features/notebook-lm").then((m) => ({ default: m.NotebookLM }))
 );
 const FlowchartView = React.lazy(() =>
-  import("../features/flowchart").then((m) => ({ default: m.FlowchartView }))
+  import("../features/flowchart/FlowchartContainer").then((m) => ({ default: m.FlowchartView }))
 );
 const MasterDataPanel = React.lazy(() =>
   import("../features/master/MasterDataPanel").then((m) => ({ default: m.MasterDataPanel }))
@@ -155,7 +155,8 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
 
   const currentView = props.currentView ?? store.currentView;
   const setCurrentView = props.setCurrentView ?? store.setCurrentView;
-  const selectedProject = props.selectedProject !== undefined ? props.selectedProject : store.selectedProject;
+  const selectedProject =
+    props.selectedProject !== undefined ? props.selectedProject : store.selectedProject;
   const tasks = props.tasks ?? store.tasks ?? [];
   const sprints = props.sprints ?? store.sprints ?? [];
   const masterData = props.masterData ?? store.masterData ?? [];
