@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { TestTube, Loader2, Save, FileEdit } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { TestTube, Loader2, Save, FileEdit, CheckCircle2, AlertTriangle, ShieldCheck, Mail } from "lucide-react";
 import { toast } from "sonner";
-import { PasswordInput } from "./PasswordInput";
 import { TemplateEditorModal } from "./TemplateEditorModal";
+import { fetchEmailSettings, testEmailConnection, EmailStatusData } from "../services/settings.service";
 
 interface EmailConfigFormProps {
   formData: any;
@@ -10,18 +10,56 @@ interface EmailConfigFormProps {
 }
 
 export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setFormData }) => {
+  const [emailStatus, setEmailStatus] = useState<EmailStatusData | null>(null);
+  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
   const [isTesting, setIsTesting] = useState(false);
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
   const [testTargetEmail, setTestTargetEmail] = useState("");
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
 
+  useEffect(() => {
+    let mounted = true;
+    const loadStatus = async () => {
+      try {
+        setIsLoadingStatus(true);
+        const res = await fetchEmailSettings();
+        if (mounted && res.status === "success" && res.data) {
+          setEmailStatus(res.data);
+        }
+      } catch (err) {
+        console.warn("[SETTINGS] Gagal memuat status integrasi email:", err);
+      } finally {
+        if (mounted) setIsLoadingStatus(false);
+      }
+    };
+    loadStatus();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const handleTestEmail = async (targetEmail: string) => {
+    const trimmed = targetEmail.trim();
+    if (!trimmed || !trimmed.includes("@") || !trimmed.includes(".")) {
+      toast.error("Silakan masukkan alamat email tujuan yang valid.");
+      return;
+    }
+
     setIsTesting(true);
-    setIsTestModalOpen(false);
-    // Mock API Call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsTesting(false);
-    toast.success(`Koneksi SMTP Berhasil! Email simulasi telah dikirim ke ${targetEmail}.`);
+    try {
+      const res = await testEmailConnection(trimmed);
+      if (res.status === "success") {
+        toast.success(res.message || `Email uji coba berhasil dikirim ke ${trimmed}.`);
+        setIsTestModalOpen(false);
+        setTestTargetEmail("");
+      } else {
+        toast.error(res.message || "Gagal mengirim email uji coba.");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Terjadi kesalahan saat mengirim email uji coba.");
+    } finally {
+      setIsTesting(false);
+    }
   };
 
   const handleSaveTemplate = (subject: string, body: string) => {
@@ -30,8 +68,32 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
       subjectTemplate: subject,
       bodyTemplate: body,
     }));
+    try {
+      localStorage.setItem(
+        "lanpro_email_template_config",
+        JSON.stringify({
+          subjectTemplate: subject,
+          bodyTemplate: body,
+        })
+      );
+    } catch (e) {}
     setIsTemplateModalOpen(false);
-    toast.success("Template email berhasil disimpan sementara.");
+    toast.success("Template email berhasil disimpan.");
+  };
+
+  const handleSaveConfig = () => {
+    try {
+      localStorage.setItem(
+        "lanpro_email_template_config",
+        JSON.stringify({
+          subjectTemplate: formData.subjectTemplate,
+          bodyTemplate: formData.bodyTemplate,
+        })
+      );
+      toast.success("Konfigurasi integrasi email & template berhasil disimpan.");
+    } catch (e) {
+      toast.error("Gagal menyimpan konfigurasi email.");
+    }
   };
 
   const inputStyle =
@@ -39,76 +101,84 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
 
   return (
     <div className="space-y-4 relative">
-      <div className="space-y-3">
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-content-body">SMTP Host</label>
-          <input
-            value={formData.host}
-            onChange={(e) => setFormData({ ...formData, host: e.target.value })}
-            placeholder="smtp.gmail.com"
-            className={inputStyle}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-content-body">SMTP Port</label>
-            <input
-              value={formData.port}
-              onChange={(e) => setFormData({ ...formData, port: e.target.value })}
-              placeholder="465"
-              className={inputStyle}
-            />
+      {/* Status Integrasi Backend Resend */}
+      <div className="p-3.5 rounded-lg border border-border-subtle/80 bg-surface-sunken/40 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Mail size={16} className="text-content-strong" />
+            <span className="text-xs font-semibold text-content-strong">Status Integrasi Email</span>
           </div>
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-content-body">Encryption Type</label>
-            <select
-              value={formData.encryption}
-              onChange={(e) => setFormData({ ...formData, encryption: e.target.value })}
-              className={inputStyle}
-            >
-              <option>SSL</option>
-              <option>TLS</option>
-              <option>None</option>
-            </select>
+          {isLoadingStatus ? (
+            <div className="flex items-center gap-1 text-xs text-content-muted">
+              <Loader2 size={12} className="animate-spin" />
+              <span>Memeriksa...</span>
+            </div>
+          ) : emailStatus?.aktif ? (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+              <CheckCircle2 size={12} />
+              Terkonfigurasi (Resend)
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/15 text-amber-700 border border-amber-500/30">
+              <AlertTriangle size={12} />
+              Mode Simulasi (Dev)
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
+          <div className="p-2.5 rounded bg-surface border border-border-subtle/60">
+            <span className="text-content-muted block text-[11px]">Provider Backend</span>
+            <span className="font-medium text-content-strong">
+              {emailStatus?.provider || "Resend (REST API)"}
+            </span>
+          </div>
+          <div className="p-2.5 rounded bg-surface border border-border-subtle/60">
+            <span className="text-content-muted block text-[11px]">Alamat Pengirim Default</span>
+            <span className="font-medium text-content-strong">
+              {emailStatus?.from || "LanPro <lanpro@rajonet.com>"}
+            </span>
           </div>
         </div>
 
+        <p className="text-[11px] text-content-muted leading-relaxed">
+          {emailStatus?.aktif
+            ? "Layanan email transaksional aktif dan terhubung ke Resend REST API dengan domain terverifikasi."
+            : "Layanan email berjalan dalam mode mock/simulasi untuk pengembangan lokal. Email akan tercatat di log konsol server."}
+        </p>
+      </div>
+
+      {/* Template Notifikasi Assignment */}
+      <div className="space-y-3 pt-1">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-content-body">Sender Email</label>
+          <label className="text-xs font-medium text-content-body">Subjek Email Default (Task Assignment)</label>
           <input
-            value={formData.username}
-            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+            value={formData.subjectTemplate || ""}
+            onChange={(e) => setFormData({ ...formData, subjectTemplate: e.target.value })}
+            placeholder="[LanPro] Task Assignment: {{task_key}}"
             className={inputStyle}
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium text-content-body">Sender Name</label>
-          <input
-            value={formData.senderName}
-            onChange={(e) => setFormData({ ...formData, senderName: e.target.value })}
-            placeholder="LanPro System"
-            className={inputStyle}
-          />
-        </div>
-
-        <div>
-          <PasswordInput
-            label="Sender Password / App Password"
-            value={formData.password}
-            onChange={(val) => setFormData({ ...formData, password: val })}
+          <label className="text-xs font-medium text-content-body">Isi Pesan Template (Body)</label>
+          <textarea
+            rows={4}
+            value={formData.bodyTemplate || ""}
+            onChange={(e) => setFormData({ ...formData, bodyTemplate: e.target.value })}
+            className={`${inputStyle} resize-none font-mono text-[11px]`}
           />
         </div>
       </div>
 
+      {/* Tombol Aksi */}
       <div className="flex flex-wrap gap-2.5 items-center mt-4 pt-3 border-t border-border-faint">
         <button
           onClick={() => setIsTemplateModalOpen(true)}
           className="flex items-center gap-1.5 border border-indigo-500/30 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/15 px-3 py-1.5 rounded-md text-xs font-medium transition mr-auto shadow-2xs cursor-pointer active:scale-95"
         >
           <FileEdit size={14} />
-          Edit Broadcast Template
+          Editor Template Lanjutan
         </button>
 
         <button
@@ -120,37 +190,55 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
           Test Connection
         </button>
 
-        <button className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse px-3.5 py-1.5 rounded-md text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95">
+        <button
+          onClick={handleSaveConfig}
+          className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse px-3.5 py-1.5 rounded-md text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95"
+        >
           <Save size={14} />
           Save Config
         </button>
       </div>
 
+      {/* Modal Uji Coba Kirim Email */}
       {isTestModalOpen && (
         <div className="absolute inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 rounded-lg">
           <div className="bg-surface p-5 rounded-lg shadow-xl max-w-sm w-full space-y-3 border border-border-subtle">
-            <h3 className="font-medium text-sm text-content-strong">Uji Coba Koneksi</h3>
+            <div className="flex items-center gap-2">
+              <ShieldCheck size={18} className="text-emerald-600" />
+              <h3 className="font-semibold text-sm text-content-strong">Uji Coba Pengiriman Email</h3>
+            </div>
+            <p className="text-xs text-content-muted">
+              Kirim email simulasi uji coba untuk memverifikasi koneksi integrasi layanan email.
+            </p>
             <div className="space-y-1">
-              <label className="text-xs text-content-muted">Email Tujuan</label>
+              <label className="text-xs text-content-body font-medium">Alamat Email Penerima</label>
               <input
+                type="email"
                 value={testTargetEmail}
                 onChange={(e) => setTestTargetEmail(e.target.value)}
-                placeholder="example@mail.com"
+                placeholder="nama@perusahaan.com"
                 className={inputStyle}
+                autoFocus
               />
             </div>
             <div className="flex gap-2 justify-end pt-2">
               <button
-                onClick={() => setIsTestModalOpen(false)}
-                className="px-3 py-1.5 rounded-md text-content-secondary text-xs font-medium hover:bg-surface-muted transition-colors"
+                onClick={() => {
+                  setIsTestModalOpen(false);
+                  setTestTargetEmail("");
+                }}
+                disabled={isTesting}
+                className="px-3 py-1.5 rounded-md text-content-body text-xs font-medium hover:bg-surface-sunken transition-colors cursor-pointer"
               >
                 Batal
               </button>
               <button
                 onClick={() => handleTestEmail(testTargetEmail)}
-                className="px-3.5 py-1.5 rounded-md bg-emerald-600 text-content-inverse text-xs font-medium hover:bg-emerald-700 shadow-xs transition-colors"
+                disabled={isTesting}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-emerald-600 text-content-inverse text-xs font-medium hover:bg-emerald-700 shadow-xs transition-colors cursor-pointer disabled:opacity-50"
               >
-                Kirim
+                {isTesting ? <Loader2 size={13} className="animate-spin" /> : <Mail size={13} />}
+                {isTesting ? "Mengirim..." : "Kirim Uji Coba"}
               </button>
             </div>
           </div>
@@ -168,3 +256,4 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
     </div>
   );
 };
+

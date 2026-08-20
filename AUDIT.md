@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 12 BELUM · 80 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 11 BELUM · 81 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 12 item
+### 1.1 BELUM SELESAI — 11 item
 
-**Sebaran per fase:** F1 0 · F2 1 · F3 1 · F6 3 · F7 0 · F8 3 · F9 1 · F10 2 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 1 · F3 1 · F6 2 · F7 0 · F8 3 · F9 1 · F10 2 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
@@ -504,10 +504,9 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 28  | **Digest task pending + jumlah** (poin 4)                                                  | **F6**  | 🟢  | Rendah        |          Tidak          | `TERBUKA`               | §1.5   |
 | 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)                | **F11** | 🔴  | Tinggi        |    Blokir production    | `MENUNGGU` desain       | §1.5   |
 | 40  | `tsconfig.json` tanpa `strict` — penyempitan diskriminan boolean tidak bekerja             | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §0.6   |
-| 45  | Form konfigurasi email di Settings **dekoratif** — `useState` lokal, tanpa simpan          | **F6**  | 🟠  | Sedang        |          Tidak          | `TERBUKA`               | §0.3   |
 | 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
 
-### 1.2 SUDAH SELESAI — 80 item
+### 1.2 SUDAH SELESAI — 81 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -544,6 +543,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 42  | ~~Pembuatan akun SSO menulis 2 tabel tanpa transaksi~~ kini transaksional                            |  **F5**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
 | 43  | ~~Callback SSO tak menyetel `currentSessionToken`~~ — login gagal SENYAP                             |  **F5**  | 🔴  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
 | 44  | ~~Domain email belum terverifikasi~~ domain `rajonet.com` & pengirim disiapkan dan diverifikasi       | **F6**   | 🔴  | Rendah        |         Tidak          | `SELESAI` 18 Agu | §0.4   |
+| 45  | ~~Form email di Settings dekoratif~~ dihubungkan ke backend Resend status & test email API + 3 test | **F6**   | 🟠  | Sedang        |         Tidak          | `SELESAI` 20 Agu | §0.3   |
 | 48  | ~~5 TABEL KEMBAR huruf kecil~~ dihapus, 35 tabel -> 30                                               |  **F0**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
 | 49  | `verifyProjectAccess(['*'])` lolos SEBELUM cek keanggotaan — bocor lintas proyek                     |  **F2**  | 🔴  | Rendah        | Ya (blokir production) | `SELESAI` 16 Agu | §13.5  |
 | 50  | Socket.IO **tanpa autentikasi sama sekali** — tak ada `io.use()` handshake                           |  **F2**  | 🔴  | Sedang        | Ya (blokir production) | `SELESAI` 16 Agu | §13.5  |
@@ -650,8 +650,8 @@ Didahului yang tidak menunggu pemilik: **#8**
 (1.290 `any`), **#47** (kolom kembar `discussion_point_comments`), **#87**
 (frontend abai peran proyek — `SELESAI` 17 Agu), **#25** (fondasi `email.service.ts` — `SELESAI` 18 Agu), **#13**/**#14** (F12 desain).
 
-Menunggu pemilik: #4, #16, #17, #27, #45, **#77** (sisa exceljs — §1.4 sempat salah
-menempatkannya di kelompok tanpa keputusan; papan §1 yang benar).
+Menunggu pemilik: #4, #16, #17, #27, **#77** (sisa exceljs — §1.4 sempat salah
+menempatkannya di kelompok tanpa keputusan; papan §1 yang benar). *(#45 SELESAI 20 Agu)*
 
 ### 1.4.4 Tinggi — 6 item, TUNDA
 
