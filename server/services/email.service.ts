@@ -122,10 +122,7 @@ export async function kirimEmail(input: KirimEmailInput): Promise<KirimEmailResu
     if (!response.ok) {
       const errorMsg =
         data?.message || data?.error || `HTTP ${response.status} ${response.statusText}`;
-      console.error(
-        `[EMAIL] Resend API menolak pengiriman ke ${penerima.join(", ")}:`,
-        errorMsg
-      );
+      console.error(`[EMAIL] Resend API menolak pengiriman ke ${penerima.join(", ")}:`, errorMsg);
       return {
         success: false,
         error: errorMsg,
@@ -203,3 +200,163 @@ export async function kirimEmailSelamatDatang(data: WelcomeEmailData): Promise<K
   });
 }
 
+export interface TaskDigestItem {
+  id: string;
+  key?: string;
+  title: string;
+  projectName?: string;
+  priority: string;
+  status: string;
+  dueDate?: string | null;
+  isOverdue?: boolean;
+}
+
+export interface TaskDigestEmailData {
+  email: string;
+  nama?: string;
+  username: string;
+  tasks: TaskDigestItem[];
+  tanggal?: string;
+}
+
+/**
+ * Mengirim email digest tugas tertunda harian / mingguan (F6.4).
+ */
+export async function kirimEmailTaskDigest(data: TaskDigestEmailData): Promise<KirimEmailResult> {
+  const { email, nama, username, tasks, tanggal } = data;
+  const namaPanggilan = (nama || username || "").trim();
+  const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+  const tanggalFormatted =
+    tanggal ||
+    new Date().toLocaleDateString("id-ID", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+  const jumlahTugas = tasks.length;
+  const overdueCount = tasks.filter((t) => t.isOverdue).length;
+  const highPriorityCount = tasks.filter((t) =>
+    ["high", "tinggi", "urgent", "kritis"].includes(t.priority?.toLowerCase())
+  ).length;
+
+  const subject = `[LanPro] Ringkasan Tugas Tertunda: ${jumlahTugas} Tugas (${tanggalFormatted})`;
+
+  const taskRowsHtml = tasks
+    .map((t) => {
+      const priorityColor = ["high", "tinggi", "urgent", "kritis"].includes(
+        t.priority?.toLowerCase()
+      )
+        ? "#ef4444"
+        : ["medium", "sedang"].includes(t.priority?.toLowerCase())
+          ? "#f59e0b"
+          : "#64748b";
+
+      const dueBadge = t.isOverdue
+        ? `<span style="background-color: #fee2e2; color: #dc2626; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;">Overdue (${t.dueDate || "-"})</span>`
+        : t.dueDate
+          ? `<span style="color: #64748b; font-size: 12px;">${t.dueDate}</span>`
+          : `<span style="color: #94a3b8; font-size: 12px;">-</span>`;
+
+      return `
+        <tr style="border-bottom: 1px solid #f1f5f9;">
+          <td style="padding: 10px 8px; font-size: 12px; font-family: monospace; color: #64748b;">${t.key || "-"}</td>
+          <td style="padding: 10px 8px;">
+            <div style="font-size: 13px; font-weight: 600; color: #1e293b;">${t.title}</div>
+            ${t.projectName ? `<div style="font-size: 11px; color: #64748b;">Proyek: ${t.projectName}</div>` : ""}
+          </td>
+          <td style="padding: 10px 8px; text-align: center;">
+            <span style="display: inline-block; font-size: 11px; font-weight: 600; color: ${priorityColor}; background-color: ${priorityColor}15; padding: 2px 8px; border-radius: 9999px;">
+              ${t.priority || "Medium"}
+            </span>
+          </td>
+          <td style="padding: 10px 8px; font-size: 12px; color: #475569; text-align: center;">${t.status}</td>
+          <td style="padding: 10px 8px; text-align: right;">${dueBadge}</td>
+        </tr>
+      `;
+    })
+    .join("");
+
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 24px; color: #1e293b; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+      <div style="margin-bottom: 20px; text-align: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+        <h1 style="color: #0f172a; font-size: 22px; margin: 0 0 4px 0; font-weight: 700;">LanPro Daily Task Digest</h1>
+        <p style="color: #64748b; font-size: 13px; margin: 0;">${tanggalFormatted}</p>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: 600;">Halo, ${namaPanggilan}!</p>
+        <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #475569;">
+          Berikut adalah rekapitulasi tugas tertunda yang membutuhkan perhatian Anda hari ini:
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+        <div style="flex: 1; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; text-align: center;">
+          <div style="font-size: 20px; font-weight: 700; color: #0f172a;">${jumlahTugas}</div>
+          <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Total Pending</div>
+        </div>
+        ${
+          overdueCount > 0
+            ? `
+        <div style="flex: 1; background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 12px; text-align: center;">
+          <div style="font-size: 20px; font-weight: 700; color: #dc2626;">${overdueCount}</div>
+          <div style="font-size: 11px; font-weight: 600; color: #991b1b; text-transform: uppercase;">Lewat Deadline</div>
+        </div>
+        `
+            : ""
+        }
+        ${
+          highPriorityCount > 0
+            ? `
+        <div style="flex: 1; background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 6px; padding: 12px; text-align: center;">
+          <div style="font-size: 20px; font-weight: 700; color: #d97706;">${highPriorityCount}</div>
+          <div style="font-size: 11px; font-weight: 600; color: #92400e; text-transform: uppercase;">Prioritas Tinggi</div>
+        </div>
+        `
+            : ""
+        }
+      </div>
+
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; text-align: left;">
+        <thead>
+          <tr style="background-color: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+            <th style="padding: 8px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Key</th>
+            <th style="padding: 8px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Judul Tugas</th>
+            <th style="padding: 8px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center;">Prioritas</th>
+            <th style="padding: 8px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: center;">Status</th>
+            <th style="padding: 8px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; text-align: right;">Deadline</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${taskRowsHtml}
+        </tbody>
+      </table>
+
+      <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #f1f5f9;">
+        <a href="${appUrl}" style="display: inline-block; background-color: #405189; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 600; padding: 10px 24px; border-radius: 6px;">Buka Dashboard LanPro</a>
+      </div>
+
+      <p style="font-size: 11px; color: #94a3b8; text-align: center; margin-top: 20px;">
+        Anda menerima email digest ini karena terdaftar sebagai anggota tim aktif di LanPro.
+      </p>
+    </div>
+  `;
+
+  const textTasks = tasks
+    .map(
+      (t) =>
+        `- [${t.key || "-"}] ${t.title} (Status: ${t.status}, Prioritas: ${t.priority}, Deadline: ${t.dueDate || "-"})`
+    )
+    .join("\n");
+
+  const text = `Halo ${namaPanggilan},\n\nBerikut ringkasan ${jumlahTugas} tugas tertunda Anda (${tanggalFormatted}):\n\n${textTasks}\n\nBuka dashboard LanPro: ${appUrl}`;
+
+  return kirimEmail({
+    to: email,
+    subject,
+    html,
+    text,
+  });
+}

@@ -57,6 +57,7 @@ import { setSocketServer } from "./server/config/socket";
 
 import { getSecret } from "./server/config/secrets";
 import { initWhatsAppScheduler, sendDailyTaskDigest } from "./server/services/whatsapp.service";
+import { initTaskDigestEmailScheduler } from "./server/services/taskDigest.service";
 import { jalankanMigrasiDenganUlangan, statusMigrasi } from "./server/services/migrasi-status";
 
 export const app = express();
@@ -1119,6 +1120,7 @@ app.use(errorHandler);
     // penjadwal tidak menghalangi server menerima permintaan. Bila token
     // belum dikonfigurasi, fungsinya melewat dengan pesan yang jelas.
     initWhatsAppScheduler();
+    initTaskDigestEmailScheduler();
   });
 }
 

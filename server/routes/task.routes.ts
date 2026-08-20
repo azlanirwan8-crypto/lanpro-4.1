@@ -13,17 +13,10 @@ import { optimisticLockingConflicts } from "../config/metrics";
 import { GoogleGenAI } from "@google/genai";
 import xss from "xss";
 import { generateContentWithFallback } from "../services/ai.service";
-import {
-  matchesCaller,
-  checkUserPermissionBackend,
-} from "../services/task.service";
+import { matchesCaller, checkUserPermissionBackend } from "../services/task.service";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { validasiBody } from "../middleware/validate";
-import {
-  createTaskSchema,
-  updateTaskSchema,
-  reorderTaskIdsSchema,
-} from "../schemas/task.schema";
+import { createTaskSchema, updateTaskSchema, reorderTaskIdsSchema } from "../schemas/task.schema";
 import { AuthenticatedRequest } from "../types/express";
 import { taskRepository } from "../repositories/task.repository";
 import { userRepository } from "../repositories/user.repository";
@@ -31,86 +24,97 @@ import { qaRepository } from "../repositories/qa.repository";
 
 const router = express.Router();
 
-router.get("/api/projects/:projectId/tasks", jagaProyek("list", "R"), async (req: AuthenticatedRequest, res) => {
-  try {
-    const { projectId } = req.params;
-    const userId = req.user?.id || req.user?.uid;
-    const rawIdentifiers: (string | null | undefined)[] = [
-      userId,
-      req.user?.uid,
-      req.user?.id,
-      req.user?.username,
-      req.user?.email,
-      req.user?.displayName,
-    ];
+router.get(
+  "/api/projects/:projectId/tasks",
+  jagaProyek("list", "R"),
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { projectId } = req.params;
+      const userId = req.user?.id || req.user?.uid;
+      const rawIdentifiers: (string | null | undefined)[] = [
+        userId,
+        req.user?.uid,
+        req.user?.id,
+        req.user?.username,
+        req.user?.email,
+        req.user?.displayName,
+      ];
 
-    if (userId) {
-      const user = await userRepository.findByIdOrUid(String(userId));
-      if (user) {
-        rawIdentifiers.push(user.id, user.uid, user.username, user.email, user.displayName, user.nama_lengkap);
-      }
-    }
-    const userIdentifiers = Array.from(new Set(rawIdentifiers.filter(Boolean) as string[]));
-
-    const uRole = req.user?.role || "viewer";
-    const isAdminOrManager = ["admin", "manager", "head"].includes(uRole.toLowerCase());
-
-    if (isAdminOrManager) {
-      const tasks = await taskRepository.findTasksWithRelations(projectId, null);
-      return res.json({ status: "success", data: tasks });
-    }
-
-    const allProjTasks = await taskRepository.findRawProjectTasks(projectId);
-    const directMatchedIds = new Set<string>();
-
-    const hasAncestorReporterMatch = (task: any): boolean => {
-      let curr = task;
-      while (curr && curr.parentId) {
-        const parent = allProjTasks.find((p: any) => p.id === curr.parentId);
-        if (!parent) break;
-        if (userIdentifiers.includes(parent.reporterId)) {
-          return true;
-        }
-        curr = parent;
-      }
-      return false;
-    };
-
-    allProjTasks.forEach((t: any) => {
-      if (!t) return;
-      const isAssignee = userIdentifiers.includes(t.assigneeId);
-      const isReporter = userIdentifiers.includes(t.reporterId);
-      const hasParentReporter = hasAncestorReporterMatch(t);
-
-      if (isAssignee || isReporter || hasParentReporter) {
-        directMatchedIds.add(t.id);
-      }
-    });
-
-    const allowedIds = new Set<string>(directMatchedIds);
-
-    const addAncestors = (childTask: any) => {
-      if (childTask && childTask.parentId) {
-        const parent = allProjTasks.find((p: any) => p.id === childTask.parentId);
-        if (parent && !allowedIds.has(parent.id)) {
-          allowedIds.add(parent.id);
-          addAncestors(parent);
+      if (userId) {
+        const user = await userRepository.findByIdOrUid(String(userId));
+        if (user) {
+          rawIdentifiers.push(
+            user.id,
+            user.uid,
+            user.username,
+            user.email,
+            user.displayName,
+            user.nama_lengkap
+          );
         }
       }
-    };
+      const userIdentifiers = Array.from(new Set(rawIdentifiers.filter(Boolean) as string[]));
 
-    directMatchedIds.forEach((id) => {
-      const t = allProjTasks.find((x: any) => x.id === id);
-      if (t) addAncestors(t);
-    });
+      const uRole = req.user?.role || "viewer";
+      const isAdminOrManager = ["admin", "manager", "head"].includes(uRole.toLowerCase());
 
-    const tasks = await taskRepository.findTasksWithRelations(projectId, allowedIds);
-    res.json({ status: "success", data: tasks });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/tasks error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      if (isAdminOrManager) {
+        const tasks = await taskRepository.findTasksWithRelations(projectId, null);
+        return res.json({ status: "success", data: tasks });
+      }
+
+      const allProjTasks = await taskRepository.findRawProjectTasks(projectId);
+      const directMatchedIds = new Set<string>();
+
+      const hasAncestorReporterMatch = (task: any): boolean => {
+        let curr = task;
+        while (curr && curr.parentId) {
+          const parent = allProjTasks.find((p: any) => p.id === curr.parentId);
+          if (!parent) break;
+          if (userIdentifiers.includes(parent.reporterId)) {
+            return true;
+          }
+          curr = parent;
+        }
+        return false;
+      };
+
+      allProjTasks.forEach((t: any) => {
+        if (!t) return;
+        const isAssignee = userIdentifiers.includes(t.assigneeId);
+        const isReporter = userIdentifiers.includes(t.reporterId);
+        const hasParentReporter = hasAncestorReporterMatch(t);
+
+        if (isAssignee || isReporter || hasParentReporter) {
+          directMatchedIds.add(t.id);
+        }
+      });
+
+      const allowedIds = new Set<string>(directMatchedIds);
+
+      const addAncestors = (childTask: any) => {
+        if (childTask && childTask.parentId) {
+          const parent = allProjTasks.find((p: any) => p.id === childTask.parentId);
+          if (parent && !allowedIds.has(parent.id)) {
+            allowedIds.add(parent.id);
+            addAncestors(parent);
+          }
+        }
+      };
+
+      directMatchedIds.forEach((id) => {
+        const t = allProjTasks.find((x: any) => x.id === id);
+        if (t) addAncestors(t);
+      });
+
+      const tasks = await taskRepository.findTasksWithRelations(projectId, allowedIds);
+      res.json({ status: "success", data: tasks });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/tasks error:", error);
+      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    }
   }
-});
+);
 
 router.get(
   "/api/projects/:projectId/team-tasks",
@@ -156,24 +160,28 @@ router.post(
       const authenticatedUserStr =
         (req as any).user?.uid || (req as any).user?.id || req.headers["x-user-id"];
 
-      const { id: newId, taskKey, reporterId: resolvedReporterId, reporterObj } =
-        await taskRepository.createTask(projectId, authenticatedUserStr, {
-          title,
-          description,
-          status,
-          type,
-          priority,
-          assigneeId,
-          reporterId,
-          sprintId,
-          parentId,
-          acceptanceCriteria,
-          storyPoints,
-          projectRisk,
-          startDate,
-          endDate,
-          attachments,
-        });
+      const {
+        id: newId,
+        taskKey,
+        reporterId: resolvedReporterId,
+        reporterObj,
+      } = await taskRepository.createTask(projectId, authenticatedUserStr, {
+        title,
+        description,
+        status,
+        type,
+        priority,
+        assigneeId,
+        reporterId,
+        sprintId,
+        parentId,
+        acceptanceCriteria,
+        storyPoints,
+        projectRisk,
+        startDate,
+        endDate,
+        attachments,
+      });
 
       const userIdStr = authenticatedUserStr || resolvedReporterId || "guest";
       await createAuditLog(
@@ -484,7 +492,12 @@ router.put(
       }
 
       if (updates.length > 0) {
-        const updated = await taskRepository.updateTaskWithVersionLock(id, projectId, updates, version);
+        const updated = await taskRepository.updateTaskWithVersionLock(
+          id,
+          projectId,
+          updates,
+          version
+        );
         if (!updated) {
           optimisticLockingConflicts.inc();
           return res.status(409).json({
@@ -536,13 +549,22 @@ router.put(
             changedFields.assigneeId !== undefined ? changedFields.assigneeId : oldTask.assigneeId;
           if (recipientId) {
             const updater = await userRepository.findByIdOrUid(userId);
-            const updaterName = updater ? updater.displayName || updater.username : "Seorang pengguna";
+            const updaterName = updater
+              ? updater.displayName || updater.username
+              : "Seorang pengguna";
             const taskKey = oldTask.taskKey || oldTask.key || id;
             const taskTitle = oldTask.title || "Tugas";
 
             const notifTitle = "⚠️ Tugas Terblokir (Blocked)";
             const notifMessage = `Tugas "${taskTitle}" (${taskKey}) telah ditandai sebagai Terblokir (Blocked) oleh ${updaterName}.`;
-            await createAutomatedNotification(recipientId, userId, notifTitle, notifMessage, "blocked", id);
+            await createAutomatedNotification(
+              recipientId,
+              userId,
+              notifTitle,
+              notifMessage,
+              "blocked",
+              id
+            );
           }
         }
 
@@ -944,5 +966,23 @@ router.delete(
     }
   }
 );
+
+router.post("/api/tasks/trigger-digest", async (req, res) => {
+  try {
+    const { targetUserId } = req.body || {};
+    const { kirimDailyTaskDigestEmail } = await import("../services/taskDigest.service");
+    const result = await kirimDailyTaskDigestEmail(targetUserId);
+    res.json({
+      status: "success",
+      message: `Digest email diproses: ${result.emailsSent} email terkirim, ${result.failedCount} gagal dari ${result.totalUsersChecked} pengguna.`,
+      data: result,
+    });
+  } catch (error: any) {
+    console.error("[TASK DIGEST] Gagal memicu digest email:", error);
+    res
+      .status(500)
+      .json({ status: "error", message: error?.message || "Gagal memicu digest email" });
+  }
+});
 
 export default router;
