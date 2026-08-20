@@ -201,6 +201,11 @@ body {
     color 0.2s ease-in-out;
 }
 
+select option {
+  background-color: var(--color-surface);
+  color: var(--color-content);
+}
+
 .dark .markdown-body h2 {
   border-bottom-color: #334155;
 }

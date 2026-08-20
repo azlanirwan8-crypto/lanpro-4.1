@@ -43,7 +43,6 @@ export const DEFAULT_PERMISSIONS: UserPermissions = {
   dashboard: { create: false, read: true, update: false, delete: false },
   meetingNotes: { create: true, read: true, update: true, delete: false },
   wiki: { create: true, read: true, update: true, delete: false },
-  notebooklm: { create: true, read: true, update: true, delete: false },
   flowchart: { create: true, read: true, update: true, delete: false },
   list: { create: true, read: true, update: true, delete: false },
   sprints: { create: false, read: true, update: false, delete: false },

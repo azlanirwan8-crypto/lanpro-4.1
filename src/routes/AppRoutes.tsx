@@ -61,9 +61,6 @@ const WikiView = lazyWithRetry(() =>
 const MeetingNotes = lazyWithRetry(() =>
   import("../features/meeting-notes/MeetingNotes").then((m) => ({ default: m.MeetingNotes }))
 );
-const NotebookLM = lazyWithRetry(() =>
-  import("../features/notebook-lm").then((m) => ({ default: m.NotebookLM }))
-);
 const FlowchartView = lazyWithRetry(() =>
   import("../features/flowchart/FlowchartContainer").then((m) => ({ default: m.FlowchartView }))
 );
@@ -279,34 +276,6 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
             currentUser={currentUserProfile || currentUser}
             masterData={masterData}
           />
-        </div>
-      );
-
-    case "notebooklm":
-      return (
-        <div className="flex-1 flex flex-col min-h-0 p-4 bg-surface-sunken">
-          {hasPermission(
-            effectiveRole,
-            "notebooklm",
-            "read",
-            false,
-            currentUserProfile?.permissions
-          ) ? (
-            <NotebookLM
-              project={selectedProject}
-              userRole={effectiveRole}
-              currentUser={currentUserProfile}
-            />
-          ) : (
-            <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center bg-surface-sunken rounded-xl min-h-[500px]">
-              <ShieldAlert className="w-16 h-16 text-rose-500 mb-4 animate-bounce" />
-              <h2 className="text-2xl font-medium text-content-strong mb-2">403 Forbidden</h2>
-              <p className="text-content-muted max-w-md text-sm">
-                Anda tidak memiliki izin untuk mengakses modul NotebookLM. Silakan hubungi
-                Administrator untuk memperbarui hak akses Anda.
-              </p>
-            </div>
-          )}
         </div>
       );
 

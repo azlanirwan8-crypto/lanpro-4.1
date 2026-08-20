@@ -52,8 +52,7 @@ export type ModulProyek =
   | "wiki"
   | "flowchart"
   | "meetingNotes"
-  | "qa"
-  | "notebooklm";
+  | "qa";
 
 /** Modul DI LUAR proyek. §19.4 */
 export type ModulSistem = "userManagement" | "masterData" | "auditLog" | "dbExplorer" | "settings";
@@ -175,17 +174,6 @@ export const MATRIKS_PROYEK: Record<ModulProyek, Partial<Record<ProjectRole, rea
     system_analyst: ["R", "U"],
     business_analyst: ["R", "U"],
     developer: ["R", "U"],
-    viewer: ["R"],
-  },
-  notebooklm: {
-    owner: ["C", "R", "U", "D"],
-    admin: ["C", "R", "U", "D"],
-    manager: ["C", "R", "U", "D"],
-    head: ["R"],
-    system_analyst: ["C", "R", "U"],
-    business_analyst: ["C", "R", "U"],
-    developer: ["R"],
-    qa: ["R"],
     viewer: ["R"],
   },
 };

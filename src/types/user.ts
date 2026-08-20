@@ -31,7 +31,6 @@ export interface UserPermissions {
   dashboard?: ModulePermission;
   meetingNotes?: ModulePermission;
   wiki?: ModulePermission;
-  notebooklm?: ModulePermission;
   list?: ModulePermission;
   sprints?: ModulePermission;
   board?: ModulePermission;

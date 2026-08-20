@@ -23,7 +23,6 @@ const modulMalas: [string, () => Promise<any>][] = [
   ["TestQAPanel", () => import("../features/qa/TestQAPanel")],
   ["WikiView", () => import("../features/wiki")],
   ["MeetingNotes", () => import("../features/meeting-notes/MeetingNotes")],
-  ["NotebookLM", () => import("../features/notebook-lm")],
   ["FlowchartView", () => import("../features/flowchart")],
   ["MasterDataPanel", () => import("../features/master/MasterDataPanel")],
   ["ConnectPanel", () => import("../features/connect/ConnectPanel")],
@@ -39,8 +38,8 @@ const modulMalas: [string, () => Promise<any>][] = [
 ];
 
 describe("AppRoutes — modul yang dimuat malas", () => {
-  it("mendaftarkan tujuh belas tampilan", () => {
-    expect(modulMalas).toHaveLength(17);
+  it("mendaftarkan enam belas tampilan", () => {
+    expect(modulMalas).toHaveLength(16);
   });
 
   it.each(modulMalas)("%s dapat dimuat dan mengekspor komponen", async (nama, muat) => {

@@ -19,7 +19,6 @@ const VALID_VIEWS = new Set<string>([
   "connect",
   "dbExplorer",
   "wiki",
-  "notebooklm",
   "flowchart",
   "auditLog",
   "enterprise-audit",
@@ -73,7 +72,9 @@ export const useAppNavigation = () => {
       }
 
       if (projParam && projects.length > 0) {
-        const found = projects.find((p) => p.id === projParam || p.key === projParam || (p as any).projectKey === projParam);
+        const found = projects.find(
+          (p) => p.id === projParam || p.key === projParam || (p as any).projectKey === projParam
+        );
         if (found && (!selectedProject || selectedProject.id !== found.id)) {
           setSelectedProject(found);
         }
@@ -98,7 +99,9 @@ export const useAppNavigation = () => {
 
         const projId = event.state?.projectId || params.get("projectId") || params.get("project");
         if (projId && projects.length > 0) {
-          const found = projects.find((p) => p.id === projId || p.key === projId || (p as any).projectKey === projId);
+          const found = projects.find(
+            (p) => p.id === projId || p.key === projId || (p as any).projectKey === projId
+          );
           if (found) {
             setSelectedProject(found);
           }
@@ -135,11 +138,7 @@ export const useAppNavigation = () => {
         const currentFull = `${window.location.pathname}${window.location.search}`;
 
         if (newUrl !== currentFull) {
-          window.history.pushState(
-            { view, projectId: activeProjId },
-            "",
-            newUrl
-          );
+          window.history.pushState({ view, projectId: activeProjId }, "", newUrl);
         }
       } catch (e) {
         // safe fallback

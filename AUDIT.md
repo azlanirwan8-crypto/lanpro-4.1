@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 2 BELUM · 90 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 1 BELUM · 90 SELESAI · 3 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,16 +486,15 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 2 item
+### 1.1 BELUM SELESAI — 1 item
 
-**Sebaran per fase:** F1 0 · F2 1 · F3 0 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 0 · F3 0 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
-| #   | Temuan                                                                      |  Fase   | Sev | Biaya  | Blokir modul baru? | Status               | Detail |
-| --- | --------------------------------------------------------------------------- | :-----: | :-: | ------ | :----------------: | -------------------- | ------ |
-| 18  | notebook-lm rusak di dua sisi                                               | **F2**  | 🟠  | Rendah |       Tidak        | `MENUNGGU` keputusan | §6.3   |
-| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2) | **F11** | 🔴  | Tinggi | Blokir production  | `MENUNGGU` desain    | §1.5   |
+| #   | Temuan                                                                      |  Fase   | Sev | Biaya  | Blokir modul baru? | Status            | Detail |
+| --- | --------------------------------------------------------------------------- | :-----: | :-: | ------ | :----------------: | ----------------- | ------ |
+| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2) | **F11** | 🔴  | Tinggi | Blokir production  | `MENUNGGU` desain | §1.5   |
 
 ### 1.2 SUDAH SELESAI — 90 item
 
@@ -595,12 +594,13 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 27  | ~~Lupa password → password random~~ reset token via email Resend + modal lupa & atur ulang password + 6 test                                       |  **F6**  | 🟢  | Sedang        |         Tidak          | `SELESAI` 20 Agu | §1.5   |
 | 17  | ~~UI belum pernah diaudit di balik login~~ verifikasi visual 10 layar internal + direct dynamic imports                                            |  **F3**  | 🔴  | Sedang        |           Ya           | `SELESAI` 20 Agu | §14    |
 
-### 1.3 DITAHAN / DIBATALKAN — 2 item
+### 1.3 DITAHAN / DIBATALKAN — 3 item
 
 | #   | Temuan                                                                                |  Fase  | Sev | Biaya  | Blokir modul baru? | Status                   | Detail |
 | --- | ------------------------------------------------------------------------------------- | :----: | :-: | ------ | :----------------: | ------------------------ | ------ |
 | 2   | ~~Driver `s3` belum pernah dieksekusi~~ DITAHAN — storage beralih ke drive user (#30) | **F1** | 🔴  | Rendah | Blokir production  | `DITAHAN` 16 Agu         | §6     |
 | 31  | ~~Login dengan email di kolom form~~                                                  | **—**  |  —  | —      |       Tidak        | `DIBATALKAN` 15 Agu 2026 | §1.5   |
+| 18  | ~~notebook-lm rusak di dua sisi~~ DIBATALKAN — modul dibuang atas keputusan pemilik   | **F2** | 🟠  | Rendah |       Tidak        | `DIBATALKAN` 20 Agu 2026 | §6.3   |
 
 ---
 
@@ -3960,9 +3960,6 @@ memiliki akses baca (`R`) di seluruh modul pada proyek yang ia ikuti (§19.48).
 | `qa`                      | **QA**                                                                        |  **CRUD**  |
 | `qa`                      | System Analyst · Business Analyst · Developer                                 |   R + U    |
 | `qa`                      | Department Head · Viewer                                                      |     R      |
-| `notebooklm`              | Project Owner · Project Admin · Project Manager                               |    CRUD    |
-| `notebooklm`              | System Analyst · Business Analyst                                             |    CRU     |
-| `notebooklm`              | Developer · QA · Department Head · Viewer                                     |     R      |
 | _(setelan proyek)_        | **Project Owner** · **Project Admin**                                         |   **U**    |
 | _(setelan proyek)_        | selain itu                                                                    |     —      |
 | _(hapus proyek)_          | **Project Owner**                                                             |   **D**    |

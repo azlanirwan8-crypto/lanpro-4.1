@@ -82,7 +82,7 @@ describe("penjaga lama `verifyProjectAccess` — daftar pemakainya dikunci", () 
     // di bawah `/api/projects/:projectId/<modul>/...` masuk daftar ini, itu
     // tanda ia sebenarnya BISA dipetakan dan hanya terlewat.
     const berModul = DIIZINKAN.filter((r) =>
-      /\/api\/projects\/:projectId\/(list|board|wiki|flowchart|meetingNotes|qa|sprints|timeline|notebooklm|access|documents|meetings|milestones|tasks)\b/.test(
+      /\/api\/projects\/:projectId\/(list|board|wiki|flowchart|meetingNotes|qa|sprints|timeline|access|documents|meetings|milestones|tasks)\b/.test(
         r
       )
     );

@@ -70,14 +70,6 @@ export const sidebarSections: SidebarSectionConfig[] = [
         module: "wiki",
       },
       {
-        id: "notebooklm",
-        label: "NotebookLM AI",
-        icon: <Sparkles className="w-4 h-4 text-purple-300" />,
-        module: "notebooklm",
-        badge: "Hot",
-        badgeColor: "orange",
-      },
-      {
         id: "flowchart",
         label: "Flowchart Editor",
         icon: <Workflow className="w-4 h-4" />,

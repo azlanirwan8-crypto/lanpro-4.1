@@ -70,10 +70,6 @@ const MODULE_DESCRIPTIONS: Record<string, { label: string; desc: string }> = {
     desc: "Membuat & mengelola catatan rapat serta AI Companion",
   },
   wiki: { label: "Wiki & Dokumentasi", desc: "Dokumentasi internal, SOP, dan pengetahuan tim" },
-  notebooklm: {
-    label: "NotebookLM AI Workspace",
-    desc: "Workspace catatan AI dan analisa sumber data",
-  },
   list: {
     label: "Pengelolaan Issue / Tugas",
     desc: "Daftar tugas, pembuatan issue, dan pelacakan status",

@@ -41,7 +41,6 @@ export type AppView =
   | "connect"
   | "dbExplorer"
   | "wiki"
-  | "notebooklm"
   | "flowchart"
   | "auditLog"
   | "qa"

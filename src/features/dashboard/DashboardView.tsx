@@ -611,9 +611,11 @@ export function DashboardView(props: DashboardViewProps) {
                 onChange={(e) => setSelectedSprintFilter(e.target.value)}
                 className="bg-transparent font-medium text-content-strong outline-none cursor-pointer"
               >
-                <option value="ALL">Semua Sprint ({tasks.length} tasks)</option>
+                <option value="ALL" className="bg-surface text-content-strong">
+                  Semua Sprint ({tasks.length} tasks)
+                </option>
                 {props.sprints.map((s) => (
-                  <option key={s.id} value={s.id}>
+                  <option key={s.id} value={s.id} className="bg-surface text-content-strong">
                     {s.name}
                   </option>
                 ))}

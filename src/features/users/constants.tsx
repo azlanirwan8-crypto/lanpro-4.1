@@ -24,10 +24,6 @@ export const MODULE_DESCRIPTIONS: Record<string, { label: string; desc: string }
     label: "Dokumentasi",
     desc: "Collaborative hub for project documentation and knowledge sharing.",
   },
-  notebooklm: {
-    label: "NotebookLM",
-    desc: "Grounded AI research assistant, document synthesis, and audio overview powered by Gemini.",
-  },
   flowchart: {
     label: "Flowchart Editor",
     desc: "Interactive tool for creating, editing, and mapping project workflows and process diagrams.",

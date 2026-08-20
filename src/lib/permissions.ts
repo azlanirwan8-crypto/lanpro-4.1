@@ -30,7 +30,6 @@ export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>>
     flowchart: FULL_ACCESS,
     meetingNotes: FULL_ACCESS,
     qa: FULL_ACCESS,
-    notebooklm: FULL_ACCESS,
     userManagement: NO_ACCESS,
     masterData: NO_ACCESS,
     auditLog: NO_ACCESS,
@@ -41,7 +40,6 @@ export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>>
     dashboard: FULL_ACCESS,
     meetingNotes: FULL_ACCESS,
     wiki: FULL_ACCESS,
-    notebooklm: FULL_ACCESS,
     list: FULL_ACCESS,
     sprints: FULL_ACCESS,
     board: FULL_ACCESS,
@@ -59,7 +57,6 @@ export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>>
     dashboard: READ_ONLY,
     meetingNotes: FULL_ACCESS,
     wiki: FULL_ACCESS,
-    notebooklm: FULL_ACCESS,
     list: FULL_ACCESS,
     sprints: FULL_ACCESS,
     board: FULL_ACCESS,
@@ -84,7 +81,6 @@ export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>>
     flowchart: FULL_ACCESS,
     meetingNotes: CRU_ACCESS,
     qa: RU_ACCESS,
-    notebooklm: CRU_ACCESS,
     userManagement: NO_ACCESS,
     masterData: NO_ACCESS,
     auditLog: NO_ACCESS,
@@ -102,7 +98,6 @@ export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>>
     flowchart: CRU_ACCESS,
     meetingNotes: FULL_ACCESS,
     qa: RU_ACCESS,
-    notebooklm: CRU_ACCESS,
     userManagement: NO_ACCESS,
     masterData: NO_ACCESS,
     auditLog: NO_ACCESS,
@@ -120,7 +115,6 @@ export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>>
     flowchart: READ_ONLY,
     meetingNotes: READ_ONLY,
     qa: RU_ACCESS,
-    notebooklm: READ_ONLY,
     userManagement: NO_ACCESS,
     masterData: NO_ACCESS,
     auditLog: NO_ACCESS,
@@ -138,7 +132,6 @@ export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>>
     flowchart: READ_ONLY,
     meetingNotes: CRU_ACCESS,
     qa: FULL_ACCESS,
-    notebooklm: READ_ONLY,
     userManagement: NO_ACCESS,
     masterData: NO_ACCESS,
     auditLog: NO_ACCESS,
@@ -149,7 +142,6 @@ export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>>
     dashboard: READ_ONLY,
     meetingNotes: CRU_ACCESS,
     wiki: READ_ONLY,
-    notebooklm: CRU_ACCESS,
     list: CRU_ACCESS,
     sprints: READ_ONLY,
     board: RU_ACCESS,
@@ -174,7 +166,6 @@ export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>>
     flowchart: READ_ONLY,
     meetingNotes: READ_ONLY,
     qa: READ_ONLY,
-    notebooklm: READ_ONLY,
     userManagement: READ_ONLY,
     masterData: READ_ONLY,
     auditLog: READ_ONLY,
@@ -185,7 +176,6 @@ export const DEFAULT_PERMISSIONS: Partial<Record<PeranEfektif, UserPermissions>>
     dashboard: READ_ONLY,
     meetingNotes: READ_ONLY,
     wiki: READ_ONLY,
-    notebooklm: READ_ONLY,
     list: READ_ONLY,
     sprints: READ_ONLY,
     board: READ_ONLY,
@@ -218,7 +208,6 @@ export const KEY_MAP: Record<string, string> = {
   auditLogs: "auditLog",
   configuration: "masterData",
   "meeting-notes": "meetingNotes",
-  "notebook-lm": "notebooklm",
 };
 
 export function normalizeModuleKey(key: string): string {
@@ -264,7 +253,10 @@ export function getUserPermissions(
     return DEFAULT_PERMISSIONS.admin || (DEFAULT_PERMISSIONS.owner as UserPermissions);
   }
 
-  const defaults = DEFAULT_PERMISSIONS[normRole as PeranEfektif] || DEFAULT_PERMISSIONS.viewer || (DEFAULT_PERMISSIONS.owner as UserPermissions);
+  const defaults =
+    DEFAULT_PERMISSIONS[normRole as PeranEfektif] ||
+    DEFAULT_PERMISSIONS.viewer ||
+    (DEFAULT_PERMISSIONS.owner as UserPermissions);
 
   // Deep copy and normalize defaults
   const merged: any = {};
@@ -461,12 +453,12 @@ export function can(
     normalizedAction === "CREATE" || normalizedAction === "C"
       ? "C"
       : normalizedAction === "READ" || normalizedAction === "R"
-      ? "R"
-      : normalizedAction === "UPDATE" || normalizedAction === "U"
-      ? "U"
-      : normalizedAction === "DELETE" || normalizedAction === "D"
-      ? "D"
-      : "R";
+        ? "R"
+        : normalizedAction === "UPDATE" || normalizedAction === "U"
+          ? "U"
+          : normalizedAction === "DELETE" || normalizedAction === "D"
+            ? "D"
+            : "R";
 
   const normModule = normalizeModuleKey(module);
 

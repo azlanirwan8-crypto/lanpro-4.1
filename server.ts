@@ -483,9 +483,6 @@ async function startServer() {
   const { default: notificationsRoutes } = await import('./server/routes/notifications.routes.ts');
   app.use(notificationsRoutes);
 
-  const { default: notebooklmRoutes } = await import('./server/routes/notebooklm.routes.ts');
-  app.use(notebooklmRoutes);
-
   const { default: projectModulesRoutes } = await import('./server/routes/project-modules.routes.ts');
   app.use(projectModulesRoutes);
 
