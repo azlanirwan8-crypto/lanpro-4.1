@@ -8,7 +8,7 @@ import { adalahDuplikat } from "../helpers/pgErrors";
 import { roomPengguna, sidikToken } from "../middleware/socketAuth";
 import { z } from "zod";
 import { formatUserForAuthResponse, handleUserAuthentication } from "../services/auth.service";
-import { kirimEmailSelamatDatang } from "../services/email.service";
+import { kirimEmailSelamatDatang, kirimEmailResetPassword } from "../services/email.service";
 import { validasiBody } from "../middleware/validate";
 import { loginSchema, forceLogoutSchema } from "../schemas/auth.schema";
 import { authRepository } from "../repositories/auth.repository";
@@ -129,7 +129,11 @@ router.post("/api/auth/login", validasiBody(loginSchema), async (req, res) => {
       device += ` (${deviceInfo.vendor || ""} ${deviceInfo.model || ""})`.trim();
     }
 
-    const updated = await authRepository.updateSessionToken(userId.toString(), token, String(Date.now()));
+    const updated = await authRepository.updateSessionToken(
+      userId.toString(),
+      token,
+      String(Date.now())
+    );
     if (!updated) {
       return res.status(404).json({ status: "error", message: "User tidak ditemukan." });
     }
@@ -196,7 +200,11 @@ router.post("/api/auth/force-logout", validasiBody(forceLogoutSchema), async (re
     const browser = `${browserInfo.name || "Unknown"} ${browserInfo.version || ""}`.trim();
     const device = `${osInfo.name || "Unknown"} ${osInfo.version || ""}`.trim();
 
-    const updated = await authRepository.updateSessionToken(userId.toString(), token, String(Date.now()));
+    const updated = await authRepository.updateSessionToken(
+      userId.toString(),
+      token,
+      String(Date.now())
+    );
     if (!updated) {
       return res.status(404).json({ status: "error", message: "User tidak ditemukan." });
     }
@@ -360,7 +368,10 @@ router.post("/api/auth/register", async (req, res) => {
       nama: fullName || insertDisplayName,
       username,
     }).catch((emailErr) => {
-      console.error("[EMAIL] Gagal mengirim email selamat datang pendaftaran:", emailErr?.message || emailErr);
+      console.error(
+        "[EMAIL] Gagal mengirim email selamat datang pendaftaran:",
+        emailErr?.message || emailErr
+      );
     });
 
     return res.status(201).json({
@@ -370,6 +381,125 @@ router.post("/api/auth/register", async (req, res) => {
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Register error:", error);
+    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+  }
+});
+
+router.post("/api/auth/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body || {};
+    if (!email || typeof email !== "string" || !email.includes("@")) {
+      return res.status(400).json({
+        status: "error",
+        message: "Alamat email tidak valid.",
+      });
+    }
+
+    const user = await authRepository.findUserByEmail(email);
+    const genericSuccessMessage =
+      "Jika alamat email terdaftar, instruksi pemulihan kata sandi telah dikirimkan ke kotak masuk Anda.";
+
+    if (!user) {
+      return res.json({
+        status: "success",
+        message: genericSuccessMessage,
+      });
+    }
+
+    const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+    const resetToken = jwt.sign(
+      {
+        id: user.id || user.uid,
+        email: user.email,
+        type: "password_reset",
+      },
+      getJwtSecret(),
+      { expiresIn: "15m" }
+    );
+
+    const resetUrl = `${appUrl}/#reset-password?token=${encodeURIComponent(resetToken)}`;
+
+    kirimEmailResetPassword({
+      email: user.email,
+      nama: user.displayName || user.nama_lengkap || user.username,
+      username: user.username || user.email,
+      resetUrl,
+      expiresInMinutes: 15,
+    }).catch((emailErr) => {
+      console.error("[EMAIL] Gagal mengirim email reset password:", emailErr?.message || emailErr);
+    });
+
+    return res.json({
+      status: "success",
+      message: genericSuccessMessage,
+    });
+  } catch (error: any) {
+    console.error("LOG ANOMALI CRITICAL: Forgot password error:", error);
+    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+  }
+});
+
+router.post("/api/auth/reset-password", async (req, res) => {
+  try {
+    const { token, newPassword, password } = req.body || {};
+    const effectivePassword = newPassword || password;
+
+    if (!token || typeof token !== "string") {
+      return res.status(400).json({
+        status: "error",
+        message: "Token pengaturan ulang kata sandi tidak valid atau hilang.",
+      });
+    }
+
+    const passwordSchema = z
+      .string()
+      .min(8, "Password minimal 8 karakter")
+      .regex(/[A-Z]/, "Password harus mengandung minimal 1 huruf besar (A-Z)")
+      .regex(/[a-z]/, "Password harus mengandung minimal 1 huruf kecil (a-z)")
+      .regex(/[0-9]/, "Password harus mengandung minimal 1 angka (0-9)")
+      .regex(/[@$!%*?&]/, "Password harus mengandung minimal 1 simbol khusus (@$!%*?&)");
+
+    const validationResult = passwordSchema.safeParse(effectivePassword);
+    if (!validationResult.success) {
+      return res.status(400).json({
+        status: "error",
+        message:
+          validationResult.error.issues[0]?.message ||
+          "Format kata sandi baru tidak memenuhi syarat keamanan.",
+      });
+    }
+
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, getJwtSecret());
+    } catch (err: any) {
+      return res.status(400).json({
+        status: "error",
+        message:
+          "Token pengaturan ulang kata sandi sudah kedaluwarsa atau tidak valid. Silakan ajukan permohonan baru.",
+      });
+    }
+
+    if (decoded.type !== "password_reset" || !decoded.id) {
+      return res.status(400).json({
+        status: "error",
+        message: "Jenis token tidak valid untuk pengaturan ulang kata sandi.",
+      });
+    }
+
+    const passwordHash = await hashPassword(effectivePassword);
+    await authRepository.updateUserPassword(decoded.id, passwordHash);
+
+    // Invalidate active sessions to force re-login
+    activeUserSessions.delete(decoded.id.toString());
+    await authRepository.clearSessionToken(decoded.id.toString());
+
+    return res.json({
+      status: "success",
+      message: "Kata sandi Anda berhasil diperbarui. Silakan masuk menggunakan kata sandi baru.",
+    });
+  } catch (error: any) {
+    console.error("LOG ANOMALI CRITICAL: Reset password error:", error);
     res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
   }
 });

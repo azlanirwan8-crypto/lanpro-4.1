@@ -360,3 +360,68 @@ export async function kirimEmailTaskDigest(data: TaskDigestEmailData): Promise<K
     text,
   });
 }
+
+export interface ResetPasswordEmailData {
+  email: string;
+  nama?: string;
+  username: string;
+  resetUrl: string;
+  expiresInMinutes?: number;
+}
+
+/**
+ * Mengirim email instruksi pengaturan ulang kata sandi / reset password (F6.5 / Item #27).
+ */
+export async function kirimEmailResetPassword(
+  data: ResetPasswordEmailData
+): Promise<KirimEmailResult> {
+  const { email, nama, username, resetUrl, expiresInMinutes = 15 } = data;
+  const namaPanggilan = (nama || username || "").trim();
+
+  const subject = "[LanPro] Permintaan Pengaturan Ulang Kata Sandi";
+
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1e293b; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+      <div style="margin-bottom: 24px; text-align: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+        <h1 style="color: #0f172a; font-size: 22px; margin: 0 0 6px 0; font-weight: 700;">Pengaturan Ulang Kata Sandi</h1>
+        <p style="color: #64748b; font-size: 13px; margin: 0;">LanPro Project Management</p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">Halo, ${namaPanggilan}!</p>
+        <p style="margin: 0 0 12px 0; font-size: 13px; line-height: 1.5; color: #475569;">
+          Kami menerima permintaan untuk mengatur ulang kata sandi akun LanPro Anda (<strong>${username}</strong>).
+        </p>
+        <p style="margin: 0 0 20px 0; font-size: 13px; line-height: 1.5; color: #475569;">
+          Silakan klik tombol di bawah ini untuk membuat kata sandi baru Anda:
+        </p>
+      </div>
+
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="${resetUrl}" style="display: inline-block; background-color: #2563eb; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">Atur Ulang Kata Sandi</a>
+      </div>
+
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; margin-bottom: 20px;">
+        <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #334155;">Catatan Keamanan:</p>
+        <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #64748b; line-height: 1.5;">
+          <li>Tautan di atas hanya berlaku selama <strong>${expiresInMinutes} menit</strong>.</li>
+          <li>Jika Anda tidak merasa meminta pengaturan ulang kata sandi ini, abaikan email ini dengan aman. Akun Anda tetap terlindungi.</li>
+        </ul>
+      </div>
+
+      <div style="font-size: 11px; color: #94a3b8; line-height: 1.4; border-top: 1px solid #f1f5f9; padding-top: 14px;">
+        <p style="margin: 0 0 4px 0;">Jika tombol di atas tidak berfungsi, salin dan buka tautan berikut di browser Anda:</p>
+        <p style="margin: 0; word-break: break-all; color: #64748b;">${resetUrl}</p>
+      </div>
+    </div>
+  `;
+
+  const text = `Halo ${namaPanggilan},\n\nKami menerima permintaan untuk mengatur ulang kata sandi akun LanPro Anda (${username}).\n\nBuka tautan berikut untuk membuat kata sandi baru (berlaku ${expiresInMinutes} menit):\n${resetUrl}\n\nJika Anda tidak meminta pengaturan ulang ini, abaikan email ini.`;
+
+  return kirimEmail({
+    to: email,
+    subject,
+    html,
+    text,
+  });
+}

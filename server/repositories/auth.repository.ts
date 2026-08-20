@@ -28,7 +28,9 @@ export class AuthRepository {
     }
   }
 
-  async findSessionData(userId: string): Promise<{ currentSessionToken?: string; lastSeen?: string } | null> {
+  async findSessionData(
+    userId: string
+  ): Promise<{ currentSessionToken?: string; lastSeen?: string } | null> {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
@@ -139,10 +141,40 @@ export class AuthRepository {
           user.passwordHash,
           user.department || null,
           user.position || null,
-          user.permissions ? (typeof user.permissions === "string" ? user.permissions : JSON.stringify(user.permissions)) : null,
+          user.permissions
+            ? typeof user.permissions === "string"
+              ? user.permissions
+              : JSON.stringify(user.permissions)
+            : null,
           user.phone || null,
         ]
       );
+    } finally {
+      connection.release();
+    }
+  }
+
+  async findUserByEmail(email: string): Promise<any | null> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        'SELECT * FROM "Users" WHERE LOWER(email) = LOWER(?)',
+        [email.trim()]
+      );
+      return rows && rows.length > 0 ? rows[0] : null;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async updateUserPassword(userId: string, passwordHash: string): Promise<boolean> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        'UPDATE "Users" SET "passwordHash" = ?, password = ? WHERE id = ? OR uid = ? RETURNING id',
+        [passwordHash, passwordHash, userId, userId]
+      );
+      return Array.isArray(rows) && rows.length > 0;
     } finally {
       connection.release();
     }

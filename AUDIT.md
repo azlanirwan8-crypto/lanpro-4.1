@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 4 BELUM · 88 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 3 BELUM · 89 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 4 item
+### 1.1 BELUM SELESAI — 3 item
 
-**Sebaran per fase:** F1 0 · F2 1 · F3 1 · F6 1 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 1 · F3 1 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
@@ -496,10 +496,9 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | --- | --------------------------------------------------------------------------- | :-----: | :-: | ------ | :----------------: | -------------------- | ------ |
 | 17  | **UI belum pernah diaudit di balik login**                                  | **F3**  | 🔴  | Sedang |         Ya         | `MENUNGGU` login     | §14    |
 | 18  | notebook-lm rusak di dua sisi                                               | **F2**  | 🟠  | Rendah |       Tidak        | `MENUNGGU` keputusan | §6.3   |
-| 27  | **Lupa password → password random** (poin 3)                                | **F6**  | 🟢  | Sedang |       Tidak        | `TERBUKA`            | §1.5   |
 | 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2) | **F11** | 🔴  | Tinggi | Blokir production  | `MENUNGGU` desain    | §1.5   |
 
-### 1.2 SUDAH SELESAI — 88 item
+### 1.2 SUDAH SELESAI — 89 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -594,6 +593,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 86  | ~~`modul_aplikasi` punya dua sumber~~ — `ProjectModules` jadi sumber kebenaran, 4 baris dibuang                                                    |  **F7**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §19.14 |
 | 77  | ~~2 kerentanan moderate tersisa~~ npm audit 0 vulnerabilities via uuid override & tsx update                                                       |  **F8**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 20 Agu | §18.7  |
 | 28  | ~~Digest task pending + jumlah~~ rekap email harian via Resend + scheduler cron 07:00 + 5 test                                                     |  **F6**  | 🟢  | Rendah        |         Tidak          | `SELESAI` 20 Agu | §1.5   |
+| 27  | ~~Lupa password → password random~~ reset token via email Resend + modal lupa & atur ulang password + 6 test                                       |  **F6**  | 🟢  | Sedang        |         Tidak          | `SELESAI` 20 Agu | §1.5   |
 
 ### 1.3 DITAHAN / DIBATALKAN — 2 item
 

@@ -6,6 +6,8 @@ import { safeLocalStorage } from "../../lib/safeStorage";
 import { cn } from "../../components/ui/CoreUI";
 import { LoginSkeletonState } from "./components/LoginSkeletonState";
 import { SsoButtons } from "./components/SsoButtons";
+import { ForgotPasswordModal } from "./components/ForgotPasswordModal";
+import { ResetPasswordModal } from "./components/ResetPasswordModal";
 import type { LoginScreenProps } from "./types";
 
 export const LoginScreen = ({
@@ -30,7 +32,32 @@ export const LoginScreen = ({
     }
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetToken, setResetToken] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
+
+  useEffect(() => {
+    try {
+      const hash = window.location.hash || "";
+      const search = window.location.search || "";
+      let token: string | null = null;
+
+      if (hash.includes("reset-password")) {
+        const queryIdx = hash.indexOf("?");
+        if (queryIdx !== -1) {
+          const params = new URLSearchParams(hash.substring(queryIdx));
+          token = params.get("token");
+        }
+      } else if (search.includes("token")) {
+        const params = new URLSearchParams(search);
+        token = params.get("token");
+      }
+
+      if (token) {
+        setResetToken(token);
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     try {
@@ -166,7 +193,7 @@ export const LoginScreen = ({
                 )}
               </div>
 
-              {/* REMEMBER ME */}
+              {/* REMEMBER ME & FORGOT PASSWORD */}
               <div className="flex items-center justify-between pt-1">
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input
@@ -177,6 +204,13 @@ export const LoginScreen = ({
                   />
                   <span className="text-xs font-medium text-content-secondary">Remember Me</span>
                 </label>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(true)}
+                  className="text-xs font-medium text-primary hover:text-primary-hover hover:underline cursor-pointer transition-colors"
+                >
+                  Forgot Password?
+                </button>
               </div>
 
               {/* SIGN IN BUTTON */}
@@ -206,6 +240,27 @@ export const LoginScreen = ({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        isOpen={showForgotPassword}
+        onClose={() => setShowForgotPassword(false)}
+      />
+
+      {/* Reset Password Modal (Triggered by reset token in URL) */}
+      <ResetPasswordModal
+        isOpen={!!resetToken}
+        token={resetToken}
+        onClose={() => {
+          setResetToken(null);
+          try {
+            window.location.hash = "";
+          } catch {}
+        }}
+        onSuccess={() => {
+          toast.success("Kata sandi berhasil diperbarui. Silakan masuk.");
+        }}
+      />
     </div>
   );
 };
