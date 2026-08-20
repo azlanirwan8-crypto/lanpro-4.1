@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 11 BELUM · 81 SELESAI · 2 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 10 BELUM · 82 SELESAI · 2 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 11 item
+### 1.1 BELUM SELESAI — 10 item
 
-**Sebaran per fase:** F1 0 · F2 1 · F3 1 · F6 2 · F7 0 · F8 3 · F9 1 · F10 2 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 1 · F3 1 · F6 2 · F7 0 · F8 2 · F9 1 · F10 2 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
@@ -503,10 +503,9 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 27  | **Lupa password → password random** (poin 3)                                               | **F6**  | 🟢  | Sedang        |          Tidak          | `TERBUKA`               | §1.5   |
 | 28  | **Digest task pending + jumlah** (poin 4)                                                  | **F6**  | 🟢  | Rendah        |          Tidak          | `TERBUKA`               | §1.5   |
 | 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)                | **F11** | 🔴  | Tinggi        |    Blokir production    | `MENUNGGU` desain       | §1.5   |
-| 40  | `tsconfig.json` tanpa `strict` — penyempitan diskriminan boolean tidak bekerja             | **F8**  | 🟠  | Tinggi        |           Ya            | `TERBUKA`               | §0.6   |
 | 77  | **2** kerentanan `moderate` tersisa (dari 4) — react-router dicabut, sisa exceljs+uuid     | **F8**  | 🟠  | Sedang        |          Tidak          | `MENUNGGU` keputusan    | §18.7  |
 
-### 1.2 SUDAH SELESAI — 81 item
+### 1.2 SUDAH SELESAI — 82 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -539,6 +538,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 37  | ~~`urlFrontend` memercayai `APP_URL` mentah~~ kini divalidasi                                        |  **F5**  | 🟠  | Sangat rendah |         Tidak          | `SELESAI` 15 Agu | §0.3   |
 | 38  | ~~`APP_URL` placeholder~~ diisi + penjaga di doctor                                                  |  **F0**  | 🟠  | Sangat rendah |   Ya (CORS produksi)   | `SELESAI` 16 Agu | §0.6   |
 | 39  | ~~Migrasi gagal senyap~~ kini mengulang + status terbaca                                             |  **F0**  | 🔴  | Rendah        |           Ya           | `SELESAI` 16 Agu | §0.6   |
+| 40  | ~~`tsconfig.json` tanpa `strict`~~ `strict: true` ditegakkan, null safety & diskriminan aktif (26 tipe dibersihkan) | **F8** | 🟠 | Tinggi | Ya | `SELESAI` 20 Agu | §0.6 |
 | 41  | ~~Identitas yatim mengunci email selamanya~~ dibersihkan + FK `ON DELETE CASCADE`                    |  **F5**  | 🔴  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
 | 42  | ~~Pembuatan akun SSO menulis 2 tabel tanpa transaksi~~ kini transaksional                            |  **F5**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
 | 43  | ~~Callback SSO tak menyetel `currentSessionToken`~~ — login gagal SENYAP                             |  **F5**  | 🔴  | Rendah        |         Tidak          | `SELESAI` 16 Agu | §0.3   |
@@ -653,9 +653,9 @@ Didahului yang tidak menunggu pemilik: **#8**
 Menunggu pemilik: #4, #16, #17, #27, **#77** (sisa exceljs — §1.4 sempat salah
 menempatkannya di kelompok tanpa keputusan; papan §1 yang benar). *(#45 SELESAI 20 Agu)*
 
-### 1.4.4 Tinggi — 6 item, TUNDA
+### 1.4.4 Tinggi — 5 item tersisa (#40 SELESAI 20 Agu)
 
-#5 · #6 · #7 · #9 · #30 · #40. Kelompok ini yang membuat §19.31 menyimpulkan
+#5 · #6 · #7 · #9 · #30. Kelompok ini yang membuat §19.31 menyimpulkan
 jaring pengaman `AppContainer` tidak bisa dibangun sebelum komponennya dipecah.
 **#30 satu-satunya penahan production di sini** dan tetap menunggu pemilik.
 

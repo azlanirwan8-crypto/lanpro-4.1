@@ -24,7 +24,7 @@ export interface LinkedTask {
 export interface Task {
   id: string;
   projectId: string;
-  sprintId?: string; // Link task to a sprint
+  sprintId?: string | null; // Link task to a sprint
   key: string; // e.g. "KAN-29"
   title: string;
   description?: string;

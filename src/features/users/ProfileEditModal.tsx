@@ -243,28 +243,28 @@ export const ProfileEditModal = ({
             <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
               Nama Lengkap
             </label>
-            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+            <Input value={displayName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDisplayName(e.target.value)} />
           </div>
 
           <div className="space-y-1">
             <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
               Username
             </label>
-            <Input value={username} onChange={(e) => setUsername(e.target.value)} />
+            <Input value={username} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)} />
           </div>
 
           <div className="space-y-1 md:col-span-2">
             <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
               Email
             </label>
-            <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input value={email} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)} />
           </div>
 
           <div className="space-y-1 md:col-span-2">
             <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
               Nomor Telepon
             </label>
-            <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <Input value={phone} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)} />
           </div>
         </div>
 
@@ -278,7 +278,7 @@ export const ProfileEditModal = ({
               <Input
                 type={showCurrentPassword ? "text" : "password"}
                 value={currentPassword}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setCurrentPassword(e.target.value);
                   setError(null);
                 }}
@@ -301,7 +301,7 @@ export const ProfileEditModal = ({
               <Input
                 type={showNewPassword ? "text" : "password"}
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPassword(e.target.value)}
                 placeholder="••••••••"
                 className="pr-10"
               />

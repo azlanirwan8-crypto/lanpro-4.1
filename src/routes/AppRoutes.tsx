@@ -107,7 +107,7 @@ export interface AppRoutesProps {
   selectedTaskForDetail: Task | null;
   expandedSprintId: string | null;
   hasPermission: (
-    role: string,
+    role: any,
     feature: string,
     action: string,
     isOwner?: boolean,
@@ -115,7 +115,7 @@ export interface AppRoutesProps {
   ) => boolean;
   updateTaskField: (id: string, field: string, value: any) => any;
   updateTaskStatus?: (id: string, status: string) => void;
-  handleQuickCreate: (title: string, parentId?: string) => void;
+  handleQuickCreate: (title: string, type?: string) => void | Promise<void>;
   setSelectedTaskForDetail: (task: Task | null) => void;
   setIsTaskDetailModalOpen: (open: boolean) => void;
   setIsNewTaskModalOpen: (open: boolean) => void;
@@ -237,7 +237,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
       return (
         <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken">
           <MeetingNotes
-            projectId={selectedProject?.id}
+            projectId={selectedProject?.id || ""}
             userRole={effectiveRole}
             currentUser={currentUserProfile || currentUser}
             projectMembers={projectMembers && projectMembers.length > 0 ? projectMembers : allUsers}
@@ -251,7 +251,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
       return (
         <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken">
           <WikiView
-            projectId={selectedProject?.id}
+            projectId={selectedProject?.id || ""}
             users={allUsers}
             currentUser={currentUserProfile || currentUser}
             masterData={masterData}

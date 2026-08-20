@@ -311,7 +311,11 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   };
 
   const handleResetToRoleDefaults = () => {
-    const defaultPerms = ROLE_DEFAULT_PERMISSIONS[editRole] || ROLE_DEFAULT_PERMISSIONS.user;
+    const defaultPerms =
+      ROLE_DEFAULT_PERMISSIONS[editRole] ||
+      ROLE_DEFAULT_PERMISSIONS.member ||
+      ROLE_DEFAULT_PERMISSIONS.viewer ||
+      (ROLE_DEFAULT_PERMISSIONS.owner as UserPermissions);
     setEditPermissions(defaultPerms);
     toast.success(`Matrix hak akses di-reset ke default role "${editRole}".`);
   };
@@ -684,7 +688,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             const newRole = e.target.value as AppRole;
                             setEditRole(newRole);
                             setEditPermissions(
-                              ROLE_DEFAULT_PERMISSIONS[newRole] || ROLE_DEFAULT_PERMISSIONS.user
+                              ROLE_DEFAULT_PERMISSIONS[newRole] ||
+                                ROLE_DEFAULT_PERMISSIONS.member ||
+                                ROLE_DEFAULT_PERMISSIONS.viewer ||
+                                (ROLE_DEFAULT_PERMISSIONS.owner as UserPermissions)
                             );
                           }}
                           className="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-indigo-500 transition-all cursor-pointer"

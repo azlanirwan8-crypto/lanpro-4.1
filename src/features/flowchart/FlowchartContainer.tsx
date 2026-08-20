@@ -66,7 +66,7 @@ import {
 } from "./services/flowchart.service";
 
 interface FlowchartViewProps {
-  selectedProject: Project;
+  selectedProject: Project | null;
   tasks: Task[];
   projectMembers: any[];
   setSelectedTaskForDetail: (task: Task) => void;
@@ -2424,7 +2424,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   const getLinkedTaskDetails = (taskId?: string) => {
-    if (!taskId) return null;
+    if (!taskId) return undefined;
     return tasks.find((t) => t.id === taskId);
   };
 
@@ -2714,7 +2714,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     <div className="flex-1 relative overflow-hidden bg-surface flex flex-col h-full min-h-0">
                       {/* FLOATING QUICK CANVAS CONTROL BAR ON TOP OF THE BOARD */}
                       <CanvasToolbar
-                        currentFlowMetadata={currentFlowMetadata}
+                        currentFlowMetadata={currentFlowMetadata || undefined}
                         canvasTheme={canvasTheme}
                         setCanvasTheme={setCanvasTheme}
                         isSnapToGrid={isSnapToGrid}

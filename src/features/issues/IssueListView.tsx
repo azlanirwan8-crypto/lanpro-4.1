@@ -857,7 +857,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteTask(task.id);
+                    deleteTask?.(task.id);
                   }}
                   className="p-1 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-lg transition-all cursor-pointer shadow-xs font-medium"
                   title="Hapus Issue"
@@ -904,7 +904,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            deleteTask(task.id);
+                            deleteTask?.(task.id);
                             setActiveContextMenuTaskId(null);
                           }}
                           className="w-full text-left px-3 py-1.5 text-xs sm:text-[11px] font-medium text-red-600 hover:bg-red-500/10 flex items-center gap-2 cursor-pointer border-t border-border-faint"

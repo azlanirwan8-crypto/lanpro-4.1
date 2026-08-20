@@ -1076,10 +1076,10 @@ export function renderCustomSvgShape(
           />
           <path
             d="M44,82 A6,6 0 1,1 54,82"
+            {...elementProps}
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
-            {...elementProps}
           />
           <polygon points="54,82 58,78 54,74" fill="currentColor" />
         </svg>

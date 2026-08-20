@@ -46,8 +46,8 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
     if (!fieldVal) return false;
     const f = fieldVal.toLowerCase().trim();
     const options = [currentUserProfile?.uid, currentUserProfile?.id, currentUserProfile?.username]
-      .filter(Boolean)
-      .map((s: string) => s.toLowerCase().trim());
+      .filter((s): s is string => Boolean(s))
+      .map((s) => s.toLowerCase().trim());
     return options.includes(f);
   };
 

@@ -74,13 +74,13 @@ export const DbExplorerPanel: React.FC<any> = ({
       const data = await runQuery(sqlToRun);
 
       if (data.status === "error") {
-        setError(data.message);
+        setError(data.message || "Terjadi kesalahan kueri database.");
       } else {
         setResult(data.data);
         setCurrentPage(1);
       }
     } catch (err: any) {
-      setError(err.message);
+      setError(err?.message || "Terjadi kesalahan kueri database.");
     } finally {
       setLoading(false);
     }

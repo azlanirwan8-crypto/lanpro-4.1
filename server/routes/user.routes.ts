@@ -131,11 +131,11 @@ router.post("/api/presence/ping", authenticateJWT, async (req: AuthenticatedRequ
 
     const currentUserProfile = processedUsers.find((u: any) => {
       const uId = u.uid || u.id;
-      return uId && uId.toString() === userId.toString();
+      return uId && userId && uId.toString() === userId.toString();
     });
 
     // Write to Redis if connected
-    if (currentUserProfile && isRedisConnected) {
+    if (currentUserProfile && isRedisConnected && userId) {
       try {
         await pubClient.set(`presence:user:${userId}`, JSON.stringify(currentUserProfile), {
           EX: 30,

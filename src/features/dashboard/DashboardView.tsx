@@ -1195,20 +1195,20 @@ export function DashboardView(props: DashboardViewProps) {
                       last7DaysData && last7DaysData.length > 0
                         ? last7DaysData
                         : [
-                            { day: "Mon", Created: 4, Completed: 3 },
-                            { day: "Tue", Created: 6, Completed: 5 },
-                            { day: "Wed", Created: 8, Completed: 7 },
-                            { day: "Thu", Created: 5, Completed: 6 },
-                            { day: "Fri", Created: 9, Completed: 8 },
-                            { day: "Sat", Created: 2, Completed: 4 },
-                            { day: "Sun", Created: 1, Completed: 2 },
+                            { name: "Mon", Activity: 4, Completed: 3 },
+                            { name: "Tue", Activity: 6, Completed: 5 },
+                            { name: "Wed", Activity: 8, Completed: 7 },
+                            { name: "Thu", Activity: 5, Completed: 6 },
+                            { name: "Fri", Activity: 9, Completed: 8 },
+                            { name: "Sat", Activity: 2, Completed: 4 },
+                            { name: "Sun", Activity: 1, Completed: 2 },
                           ]
                     }
                     margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis
-                      dataKey="day"
+                      dataKey="name"
                       tick={{ fontSize: 10, fill: "#64748b" }}
                       axisLine={false}
                       tickLine={false}

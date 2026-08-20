@@ -61,7 +61,7 @@ interface StudioNote {
 }
 
 interface NotebookLMProps {
-  project: Project;
+  project: Project | null;
   userRole?: string;
   currentUser?: any;
 }
@@ -194,10 +194,13 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
 
   // Load existing Project Wiki & Meeting Notes automatically into available sources
   useEffect(() => {
-    loadProjectSources();
-  }, [project.id]);
+    if (project?.id) {
+      loadProjectSources();
+    }
+  }, [project?.id]);
 
   const loadProjectSources = async () => {
+    if (!project?.id) return;
     setLoadingSources(true);
     try {
       const initialSources: Source[] = [];
@@ -302,7 +305,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
 
     try {
       const response = await sendChat({
-        projectId: project.id,
+        projectId: project?.id || "",
         sources: activeSources,
         prompt: textToSend,
         model: selectedModel,
@@ -474,7 +477,7 @@ export const NotebookLM: React.FC<NotebookLMProps> = ({
 
         <h2 className="text-xl md:text-2xl font-medium text-content tracking-tight leading-snug flex items-center gap-2">
           <BookOpen className="w-6 h-6 text-indigo-600 shrink-0" />
-          <span className="truncate">Konteks Proyek: {project.name}</span>
+          <span className="truncate">Konteks Proyek: {project?.name || "Semua Proyek"}</span>
         </h2>
       </div>
 

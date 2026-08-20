@@ -257,7 +257,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   const runAnalysisApi = async (transcriptText: string, link: string) => {
     setLoading(true);
     try {
-      const response = await analyzeTranscript(projectId, meeting.id, transcriptText, link);
+      const response = await analyzeTranscript(projectId || "", meeting.id || "", transcriptText, link);
 
       if (response.status === "success") {
         setAiData(response.data);

@@ -131,7 +131,7 @@ export function useAuth(
     try {
       const data = await apiRequest("/api/users");
       if (data.status === "success") {
-        setAllUsers(data.data as UserProfile[]);
+        setAllUsers?.(data.data as UserProfile[]);
       }
     } catch (error) {
       console.warn("Silent failure fetching all users:", error);

@@ -1177,7 +1177,7 @@ function AppContainer() {
       setSocketConnected(true);
     });
 
-    socket.on("connect_error", (err) => {
+    socket.on("connect_error", (err: any) => {
       // Suppress loud socket errors to avoid Vercel console spam
       setSocketConnected(false);
     });
@@ -1186,14 +1186,14 @@ function AppContainer() {
       setSocketConnected(false);
     });
 
-    socket.on("project_updated", (event) => {
+    socket.on("project_updated", (event: any) => {
       const refs = realTimeRefs.current;
       if (event && event.projectId === refs.selectedProject?.id) {
         refs.fetchTasks();
       }
     });
 
-    socket.on("data_changed", (event) => {
+    socket.on("data_changed", (event: any) => {
       const path = event.path || "";
       const refs = realTimeRefs.current;
 
@@ -1273,7 +1273,7 @@ function AppContainer() {
       }
     });
 
-    socket.on("user_avatar_updated", (event) => {
+    socket.on("user_avatar_updated", (event: any) => {
       const refs = realTimeRefs.current;
       if (refs && typeof refs.fetchAllUsers === "function") {
         refs.fetchAllUsers();
@@ -2075,14 +2075,14 @@ function AppContainer() {
     }
   };
 
-  const handleQuickCreate = async (title: string, type: string) => {
+  const handleQuickCreate = async (title: string, type?: string) => {
     const activeUid = currentUser?.uid || user?.uid;
     if (!selectedProject || !title.trim() || !activeUid) return;
     try {
       const data = await createTask(selectedProject.id, {
         title: title,
         status: "To Do",
-        type: type,
+        type: (type as any) || "task",
         assigneeId: null,
         priority: "Medium",
         reporterId: activeUid,

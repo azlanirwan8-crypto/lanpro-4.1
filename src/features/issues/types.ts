@@ -47,7 +47,7 @@ export interface TaskDetailModalProps {
   handleRemoveAttachment?: (attachmentId: string) => void;
   uploadProgress: Record<string, number>;
   isLoggedIn: boolean;
-  handleQuickAddSubtask: (parentId: string, type: string) => void;
+  handleQuickAddSubtask: (parentId: string, type: "task" | "subtask") => void | Promise<void>;
   mentionState: any;
   handleSelectMention: (username: string) => void;
   handleCommentChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;

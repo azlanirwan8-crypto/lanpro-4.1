@@ -237,9 +237,10 @@ export function cleanUserPermissions(custom: any): any {
   }
   if (!parsedCustom || typeof parsedCustom !== "object") return {};
   const cleaned: any = {};
+  const adminPerms = DEFAULT_PERMISSIONS.admin || (DEFAULT_PERMISSIONS.owner as UserPermissions);
   Object.keys(parsedCustom).forEach((key) => {
     const normKey = KEY_MAP[key] || key;
-    if (DEFAULT_PERMISSIONS.admin[normKey as keyof UserPermissions] !== undefined) {
+    if (adminPerms && adminPerms[normKey as keyof UserPermissions] !== undefined) {
       if (key !== normKey && parsedCustom[normKey] !== undefined) {
         return;
       }
@@ -260,10 +261,10 @@ export function getUserPermissions(
   const normRole: string = normalkanPeran(role) || "viewer";
   const isAdmin = normRole === "admin" || normRole === "administrator" || normRole === "superadmin";
   if (isAdmin) {
-    return DEFAULT_PERMISSIONS.admin;
+    return DEFAULT_PERMISSIONS.admin || (DEFAULT_PERMISSIONS.owner as UserPermissions);
   }
 
-  const defaults = DEFAULT_PERMISSIONS[normRole as PeranEfektif] || DEFAULT_PERMISSIONS.viewer!;
+  const defaults = DEFAULT_PERMISSIONS[normRole as PeranEfektif] || DEFAULT_PERMISSIONS.viewer || (DEFAULT_PERMISSIONS.owner as UserPermissions);
 
   // Deep copy and normalize defaults
   const merged: any = {};
