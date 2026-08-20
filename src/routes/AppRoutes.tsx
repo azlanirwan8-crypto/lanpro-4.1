@@ -66,7 +66,7 @@ const ActivityLogPanel = React.lazy(() =>
   import("../features/activity/ActivityLogPanel").then((m) => ({ default: m.ActivityLogPanel }))
 );
 const TimelinePanel = React.lazy(() =>
-  import("../features/timeline/index").then((m) => ({ default: m.TimelinePanel }))
+  import("../features/timeline/TimelinePanel").then((m) => ({ default: m.TimelinePanel }))
 );
 const TeamManagementPanel = React.lazy(() =>
   import("../features/team/TeamManagementPanel").then((m) => ({ default: m.TeamManagementPanel }))
