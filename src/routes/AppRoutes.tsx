@@ -18,63 +18,79 @@ import { useProjectStore } from "../store";
  * pada satu waktu. Tidak ada tampilan yang perlu hadir bersamaan, sehingga
  * memuatnya sesuai permintaan tidak mengubah perilaku apa pun.
  *
- * KENAPA ADA `.then(...)`. `React.lazy` hanya menerima modul dengan default
- * export, sementara repo ini memakai named export. Pembungkus itu menerjemahkan
- * keduanya. Nama di dalamnya HARUS sama persis dengan yang diekspor modulnya —
  * salah satu huruf saja membuat tampilan itu gagal dimuat, dan gagalnya baru
  * terlihat saat tampilan dibuka, bukan saat build.
  */
-const DashboardView = React.lazy(() =>
+function lazyWithRetry<T extends React.ComponentType<any>>(
+  componentImport: () => Promise<{ default: T }>
+) {
+  return React.lazy(async () => {
+    try {
+      return await componentImport();
+    } catch (error) {
+      console.warn("[Vite/Lazy] Dynamic import failed, retrying...", error);
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      try {
+        return await componentImport();
+      } catch (retryError) {
+        console.error("[Vite/Lazy] Dynamic import retry failed:", retryError);
+        throw retryError;
+      }
+    }
+  });
+}
+
+const DashboardView = lazyWithRetry(() =>
   import("../features/dashboard").then((m) => ({ default: m.DashboardView }))
 );
-const IssueListView = React.lazy(() =>
+const IssueListView = lazyWithRetry(() =>
   import("../features/issues").then((m) => ({ default: m.IssueListView }))
 );
-const PlanningView = React.lazy(() =>
+const PlanningView = lazyWithRetry(() =>
   import("../features/planning").then((m) => ({ default: m.PlanningView }))
 );
-const BoardView = React.lazy(() =>
+const BoardView = lazyWithRetry(() =>
   import("../features/kanban/index").then((m) => ({ default: m.BoardView }))
 );
-const TestQAPanel = React.lazy(() =>
+const TestQAPanel = lazyWithRetry(() =>
   import("../features/qa/TestQAPanel").then((m) => ({ default: m.TestQAPanel }))
 );
-const WikiView = React.lazy(() =>
+const WikiView = lazyWithRetry(() =>
   import("../features/wiki").then((m) => ({ default: m.WikiView }))
 );
-const MeetingNotes = React.lazy(() =>
+const MeetingNotes = lazyWithRetry(() =>
   import("../features/meeting-notes/MeetingNotes").then((m) => ({ default: m.MeetingNotes }))
 );
-const NotebookLM = React.lazy(() =>
+const NotebookLM = lazyWithRetry(() =>
   import("../features/notebook-lm").then((m) => ({ default: m.NotebookLM }))
 );
-const FlowchartView = React.lazy(() =>
+const FlowchartView = lazyWithRetry(() =>
   import("../features/flowchart/FlowchartContainer").then((m) => ({ default: m.FlowchartView }))
 );
-const MasterDataPanel = React.lazy(() =>
+const MasterDataPanel = lazyWithRetry(() =>
   import("../features/master/MasterDataPanel").then((m) => ({ default: m.MasterDataPanel }))
 );
-const ConnectPanel = React.lazy(() =>
+const ConnectPanel = lazyWithRetry(() =>
   import("../features/connect/ConnectPanel").then((m) => ({ default: m.ConnectPanel }))
 );
-const EnterpriseAuditDashboard = React.lazy(() =>
+const EnterpriseAuditDashboard = lazyWithRetry(() =>
   import("../features/enterprise-audit/EnterpriseAuditDashboard").then((m) => ({
     default: m.EnterpriseAuditDashboard,
   }))
 );
-const ActivityLogPanel = React.lazy(() =>
+const ActivityLogPanel = lazyWithRetry(() =>
   import("../features/activity/ActivityLogPanel").then((m) => ({ default: m.ActivityLogPanel }))
 );
-const TimelinePanel = React.lazy(() =>
+const TimelinePanel = lazyWithRetry(() =>
   import("../features/timeline/TimelinePanel").then((m) => ({ default: m.TimelinePanel }))
 );
-const TeamManagementPanel = React.lazy(() =>
+const TeamManagementPanel = lazyWithRetry(() =>
   import("../features/team/TeamManagementPanel").then((m) => ({ default: m.TeamManagementPanel }))
 );
-const DbExplorerPanel = React.lazy(() =>
+const DbExplorerPanel = lazyWithRetry(() =>
   import("../features/explorer/DbExplorerPanel").then((m) => ({ default: m.DbExplorerPanel }))
 );
-const SettingsPage = React.lazy(() =>
+const SettingsPage = lazyWithRetry(() =>
   import("../features/settings/SettingsPage").then((m) => ({ default: m.SettingsPage }))
 );
 
