@@ -166,7 +166,7 @@ export const LoginScreen = ({
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
+                    placeholder="Masukkan kata sandi"
                     value={password}
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     className={cn(
@@ -195,7 +195,7 @@ export const LoginScreen = ({
 
               {/* REMEMBER ME & FORGOT PASSWORD */}
               <div className="flex items-center justify-between pt-1">
-                <label className="flex items-center gap-2 cursor-pointer select-none">
+                <label className="flex items-center gap-2 cursor-pointer select-none py-2.5 -my-2.5">
                   <input
                     type="checkbox"
                     checked={rememberMe}
@@ -207,7 +207,7 @@ export const LoginScreen = ({
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-xs font-medium text-primary hover:text-primary-hover hover:underline cursor-pointer transition-colors"
+                  className="text-xs font-medium text-primary hover:text-primary-hover hover:underline cursor-pointer transition-colors py-2.5 -my-2.5"
                 >
                   Lupa Kata Sandi?
                 </button>
@@ -232,7 +232,7 @@ export const LoginScreen = ({
               <button
                 type="button"
                 onClick={onRegisterClick}
-                className="text-primary font-semibold hover:text-primary-hover transition-colors ml-1 cursor-pointer hover:underline"
+                className="text-primary font-semibold hover:text-primary-hover transition-colors ml-1 cursor-pointer hover:underline inline-block py-2.5 -my-2.5"
               >
                 Daftar
               </button>
