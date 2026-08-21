@@ -128,7 +128,21 @@
   --color-content-body: #334155; /* = slate-700 */
   --color-content-secondary: #475569; /* = slate-600 */
   --color-content-muted: #64748b; /* = slate-500 */
-  --color-content-subtle: #94a3b8; /* = slate-400 */
+  /* #108 — SEMULA #94a3b8 (slate-400). Di atas `surface` putih itu hanya
+   * 2,56:1: gagal AA teks (4,5), AA teks besar (3,0), DAN komponen antarmuka
+   * (3,0) sekaligus. Token ini dipakai 641 tempat, termasuk untuk kontrol yang
+   * bisa diklik seperti tautan "Lihat semua tugas" pada 11px.
+   *
+   * #64748b (slate-500) memberi 4,76:1 dan lolos AA. Ia kebetulan sama dengan
+   * `content-muted` di mode terang, jadi skala terang kehilangan satu tingkat.
+   * Itu HARGA YANG DISENGAJA: di atas putih, #64748b adalah warna paling
+   * terang yang masih lolos AA, sehingga tingkat yang lebih pucat dari itu
+   * hanya sah untuk teks yang benar-benar non-esensial. Bila kelak butuh
+   * tingkat lebih pucat lagi, ia tidak boleh dipakai untuk teks yang harus
+   * dibaca atau kontrol yang bisa ditekan.
+   *
+   * Sisi gelapnya tidak disentuh: #7c8ba1 di atas kartu gelap sudah 5,03:1. */
+  --color-content-subtle: #64748b; /* = slate-500 */
 
   /* Sidebar Semantik Velzon (Mode Terang: Dark Navy) */
   --color-sidebar-surface: #111c43;
