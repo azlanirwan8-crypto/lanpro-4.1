@@ -74,6 +74,12 @@
    * Satu token tidak bisa memikul dua peran yang saling berlawanan. */
   --color-primary-surface: #405189;
   --color-primary-surface-hover: #364473;
+  /* #110 — perhentian ketiga untuk gradasi panel merek layar auth. Peran
+   * `-surface` bernilai SAMA di kedua mode (§22.3), justru supaya latar
+   * berwarna pekat tidak ikut membalik. Nilainya sengaja disamakan dengan
+   * `primary-active` mode TERANG, sehingga tampilan mode terang tidak
+   * berubah sedikit pun. */
+  --color-primary-surface-active: #2d3960;
 
   /* ── Aksen: peran TEKS dipisah dari peran ISIAN ─────────────────────────
    * §19.50. Token aksen (`warning`, `success`, `danger`, `info`) DITERANGKAN
@@ -195,6 +201,12 @@ html.dark {
   --color-overlay: #0f172a;
   --color-primary-surface: #405189;
   --color-primary-surface-hover: #364473;
+  /* #110 — perhentian ketiga untuk gradasi panel merek layar auth. Peran
+   * `-surface` bernilai SAMA di kedua mode (§22.3), justru supaya latar
+   * berwarna pekat tidak ikut membalik. Nilainya sengaja disamakan dengan
+   * `primary-active` mode TERANG, sehingga tampilan mode terang tidak
+   * berubah sedikit pun. */
+  --color-primary-surface-active: #2d3960;
   --color-content-inverse-strong: #f1f5f9;
   --color-content-inverse-muted: #e2e8f0;
   --color-surface-marker: #cbd5e1;
