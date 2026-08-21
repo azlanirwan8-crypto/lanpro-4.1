@@ -631,8 +631,8 @@ export function DashboardView(props: DashboardViewProps) {
               />
             </div>
 
-            <div className="flex items-center gap-2 bg-indigo-500/10 px-3 py-2 rounded-lg border border-indigo-500/30 text-xs font-medium text-indigo-700 ">
-              <Zap className="w-3.5 h-3.5 text-indigo-500" />
+            <div className="flex items-center gap-2 bg-info/10 px-3 py-2 rounded-lg border border-info/20 text-xs font-medium text-info-text">
+              <Zap className="w-3.5 h-3.5 text-info-text" />
               <span>
                 Aktif: {activeSprint?.name || "Tidak ada Sprint Aktif"} ({sprintDaysLeft} hari
                 tersisa)
