@@ -14,6 +14,7 @@ import {
   Users,
   ArrowUpRight,
   Minus,
+  AlertTriangle,
   ShieldAlert,
   Target,
   Filter,
@@ -1051,25 +1052,25 @@ export function DashboardView(props: DashboardViewProps) {
                         if (user.Active >= 5) {
                           capacityBadge = (
                             <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-bold bg-rose-500/15 text-rose-700 border border-rose-500/30">
-                              ⚠️ Overload ({user.Active})
+                              <AlertTriangle className="w-3 h-3" /> Overload ({user.Active})
                             </span>
                           );
                         } else if (user.Active >= 3) {
                           capacityBadge = (
                             <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-medium bg-amber-500/15 text-amber-800 border border-amber-500/30">
-                              ⚡ Heavy ({user.Active})
+                              <Zap className="w-3 h-3" /> Heavy ({user.Active})
                             </span>
                           );
                         } else if (user.Active >= 1) {
                           capacityBadge = (
                             <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-medium bg-emerald-500/15 text-emerald-800 border border-emerald-500/30">
-                              ✅ Balanced ({user.Active})
+                              <CheckCircle2 className="w-3 h-3" /> Balanced ({user.Active})
                             </span>
                           );
                         } else {
                           capacityBadge = (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-medium bg-surface-muted text-content-secondary border border-border-subtle">
-                              💤 Available
+                              <Minus className="w-3 h-3" /> Available
                             </span>
                           );
                         }
