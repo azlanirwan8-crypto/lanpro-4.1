@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 1 BELUM · 91 SELESAI · 3 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 1 BELUM · 92 SELESAI · 3 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -496,7 +496,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | --- | --------------------------------------------------------------------------- | :-----: | :-: | ------ | :----------------: | ----------------- | ------ |
 | 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2) | **F11** | 🔴  | Tinggi | Blokir production  | `MENUNGGU` desain | §1.5   |
 
-### 1.2 SUDAH SELESAI — 91 item
+### 1.2 SUDAH SELESAI — 92 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -515,7 +515,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 11  | ~~`auth` 762 baris tanpa lapisan~~ dipecah                                                                                                          | **F5.2** | 🟠  | Rendah        |         Tidak          | `SELESAI` 15 Agu | §2     |
 | 12  | ~~ARCHITECTURE.md drift~~ angka diukur ulang                                                                                                        |  **F0**  | 🟡  | Rendah        |    Ya (menyesatkan)    | `SELESAI` 16 Agu | §8     |
 | 13  | ~~28 berkas `dark:` + 48 hex di luar token~~ dimigrasikan ke token semantik CSS                                                                     | **F12**  | 🟡  | Sedang        |         Tidak          | `SELESAI` 16 Agu | §8     |
-| 14  | ~~Kontras sidebar & jarak target sentuh~~ migrasi token inverse & target sentuh standar min 36-44px                                                 | **F12**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 17 Agu | §8     |
+| 14  | ~~Kontras sidebar & jarak target sentuh~~ migrasi token inverse & target sentuh standar min 36-44px                                                 | **F12**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 16 Agu | §8     |
 | 15  | ~~Dua Google API key lama belum dicabut~~ terverifikasi 0 API key di Google Cloud Console                                                           |  **F1**  | 🔴  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §6     |
 | 16  | ~~Logika aplikasi belum pernah diaudit~~ audit logika kalkulasi analitik, KPI, workload, burndown + unit test                                       |  **F2**  | 🔴  | Sedang        |           Ya           | `SELESAI` 18 Agu | §13    |
 | 19  | ~~`POST /api/db-query` tanpa penjaga read-only~~ ditegakkan read-only (SELECT/SHOW/DESCRIBE)                                                        |  **F2**  | 🔴  | Rendah        |         Tidak          | `SELESAI` 17 Agu | §6.3   |
@@ -594,6 +594,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 27  | ~~Lupa password → password random~~ reset token via email Resend + modal lupa & atur ulang password + 6 test                                        |  **F6**  | 🟢  | Sedang        |         Tidak          | `SELESAI` 20 Agu | §1.5   |
 | 17  | ~~UI belum pernah diaudit di balik login~~ verifikasi visual 10 layar internal + direct dynamic imports                                             |  **F3**  | 🔴  | Sedang        |           Ya           | `SELESAI` 20 Agu | §14    |
 | 95  | ~~Modal hapus QA, Master Data & User Mgmt belum SweetAlert~~ diseragamkan ke `confirmDeleteAlert` & `showSuccessAlert` mengikuti flow Documentation | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §12    |
+| 96  | ~~Modal logout menampilkan animasi konfeti perayaan~~ disesuaikan ke animasi peringatan/konfirmasi standar Velzon + custom iconSrc & iconColors     | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §12    |
 
 ### 1.3 DITAHAN / DIBATALKAN — 3 item
 
@@ -688,7 +689,7 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 | **F9**  |   P3   | Lapisan backend                    | #6                                   | 6–10 | Tinggi            | `TERBUKA`                            | — bisa jalan tanpa pemilik, tapi butuh F7 & F8 lebih dulu sebagai pengaman                                                                                                                                                                                                                                 |
 | **F10** |   P3   | Arsitektur frontend                | #5, #7, #21                          | 8–15 | **Sangat tinggi** | `TERBUKA`                            | — bisa jalan tanpa pemilik, tapi JANGAN sebelum F8. Merefactor 4.581 baris `AppContainer` dengan jaring pengaman sekarang adalah judi                                                                                                                                                                      |
 | **F11** | **P0** | **Drive-per-user — JALUR RILIS**   | #30 (prasyarat #46)                  | 6–10 | **Tinggi**        | `SIAP DIRANCANG`                     | **PEMILIK, 3 hal.** 6 keputusan desain sudah DIJAWAB 16 Agu (§11.1). Sisa: konfirmasi D1b & D3b · perbaiki **#46** (`SSO_ALLOWED_DOMAINS=gmail.com` membatalkan asumsi kuota corporate, §11.1b) · setujui rancangan penyimpanan refresh token terenkripsi                                                  |
-| **F12** |   P3   | Konsolidasi desain                 | #14, #13, #95                        | 2–3  | Rendah            | `TERBUKA` — #95 SELESAI              | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, yang akan mendata sendiri layar mana yang kontras & jarak sentuhnya bermasalah                                                                                                                                                                           |
+| **F12** |   P3   | Konsolidasi desain                 | #14, #13, #95, #96                   | 2–3  | Rendah            | `TERBUKA` — #95, #96 SELESAI         | — bisa jalan tanpa pemilik. Sebaiknya SESUDAH F3, yang akan mendata sendiri layar mana yang kontras & jarak sentuhnya bermasalah                                                                                                                                                                           |
 
 \*Perkiraan kasar dan **belum terverifikasi** — untuk membandingkan bobot antar
 fase, bukan janji jadwal. Perbarui dengan angka nyata setelah fase pertama tutup.

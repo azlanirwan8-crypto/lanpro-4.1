@@ -195,6 +195,8 @@ function AppContainer() {
     isAlert?: boolean;
     isLoading?: boolean;
     closeOnBackdropClick?: boolean;
+    iconSrc?: string;
+    iconColors?: string;
   } | null>(null);
 
   // useMasterData butuh isLoggedIn yang justru dihasilkan useAuthHook, sehingga
@@ -1627,7 +1629,13 @@ function AppContainer() {
   const handleStartSprint = async (sprintId: string) => {
     if (!selectedProject) return;
     if (
-      !hasPermission(userRoleForProject, "planning", "update", false, currentUserProfile?.permissions)
+      !hasPermission(
+        userRoleForProject,
+        "planning",
+        "update",
+        false,
+        currentUserProfile?.permissions
+      )
     ) {
       toast.error("Anda tidak memiliki izin untuk memulai sprint.");
       return;
@@ -1648,7 +1656,13 @@ function AppContainer() {
   const handleCompleteSprint = async (sprintId: string) => {
     if (!selectedProject) return;
     if (
-      !hasPermission(userRoleForProject, "planning", "update", false, currentUserProfile?.permissions)
+      !hasPermission(
+        userRoleForProject,
+        "planning",
+        "update",
+        false,
+        currentUserProfile?.permissions
+      )
     ) {
       toast.error("Anda tidak memiliki izin untuk menyelesaikan sprint.");
       return;
@@ -1844,7 +1858,13 @@ function AppContainer() {
     if (!selectedProject) return;
 
     if (
-      !hasPermission(userRoleForProject, "planning", "update", false, currentUserProfile?.permissions)
+      !hasPermission(
+        userRoleForProject,
+        "planning",
+        "update",
+        false,
+        currentUserProfile?.permissions
+      )
     ) {
       toast.error("Failed: You do not have permission to perform this action.");
       return;
@@ -1947,7 +1967,13 @@ function AppContainer() {
     if (!selectedProject || !newTaskTitle.trim() || !activeUid) return;
 
     if (
-      !hasPermission(userRoleForProject, "issueList", "create", false, currentUserProfile?.permissions)
+      !hasPermission(
+        userRoleForProject,
+        "issueList",
+        "create",
+        false,
+        currentUserProfile?.permissions
+      )
     ) {
       toast.error("Anda tidak memiliki izin untuk menambahkan tugas baru.");
       return;
@@ -2560,7 +2586,13 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
     const isOwner = taskToUpdate.assigneeId === user?.uid || taskToUpdate.reporterId === user?.uid;
     if (
-      !hasPermission(userRoleForProject, "issueList", "update", isOwner, currentUserProfile?.permissions)
+      !hasPermission(
+        userRoleForProject,
+        "issueList",
+        "update",
+        isOwner,
+        currentUserProfile?.permissions
+      )
     ) {
       toast.error("Failed: You do not have permission to edit this task.");
       return;
@@ -3964,6 +3996,8 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   confirmAction?.title?.toLowerCase().includes("terminate")
                 )
               }
+              iconSrc={confirmAction?.iconSrc}
+              iconColors={confirmAction?.iconColors}
             />
           )}
 

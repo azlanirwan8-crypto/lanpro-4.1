@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { Portal } from "./Portal";
+import { AnimatedLogoutIcon } from "./AnimatedLogoutIcon";
 
 declare global {
   namespace React.JSX {
@@ -11,6 +12,8 @@ declare global {
           src?: string;
           trigger?: string;
           colors?: string;
+          stroke?: string | number;
+          state?: string;
           style?: React.CSSProperties;
         },
         HTMLElement
@@ -19,7 +22,17 @@ declare global {
   }
   namespace JSX {
     interface IntrinsicElements {
-      "lord-icon": any;
+      "lord-icon": React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & {
+          src?: string;
+          trigger?: string;
+          colors?: string;
+          stroke?: string | number;
+          state?: string;
+          style?: React.CSSProperties;
+        },
+        HTMLElement
+      >;
     }
   }
 }
@@ -36,6 +49,9 @@ interface ConfirmationModalProps {
   isLoading?: boolean;
   isAlert?: boolean;
   closeOnBackdropClick?: boolean;
+  iconSrc?: string;
+  iconColors?: string;
+  customIcon?: React.ReactNode;
 }
 
 export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -50,6 +66,9 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   isLoading = false,
   isAlert = false,
   closeOnBackdropClick = true,
+  iconSrc,
+  iconColors,
+  customIcon,
 }) => {
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -62,11 +81,28 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     }
   }, [isOpen]);
 
-  const isDeleteAction =
-    variant === "danger" ||
-    title.toLowerCase().includes("hapus") ||
-    title.toLowerCase().includes("delete") ||
-    title.toLowerCase().includes("remove");
+  const isLogoutAction =
+    title.toLowerCase().includes("logout") ||
+    title.toLowerCase().includes("keluar") ||
+    title.toLowerCase().includes("sign out") ||
+    title.toLowerCase().includes("signout");
+
+  const isCelebration =
+    variant === "info" ||
+    isAlert ||
+    title.toLowerCase().includes("sukses") ||
+    title.toLowerCase().includes("berhasil") ||
+    title.toLowerCase().includes("selamat");
+
+  const resolvedIconSrc =
+    iconSrc ||
+    (isCelebration
+      ? "https://cdn.lordicon.com/lupuorrc.json"
+      : "https://cdn.lordicon.com/gsqxdxog.json");
+
+  const resolvedIconColors =
+    iconColors ||
+    (isCelebration ? "primary:#0ab39c,secondary:#405189" : "primary:#f7b84b,secondary:#f06548");
 
   return (
     <AnimatePresence>
@@ -99,20 +135,17 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                 <X className="w-4 h-4" />
               </button>
 
-              {/* Center Velzon Animated LordIcon */}
+              {/* Center Animated Icon */}
               <div className="w-24 h-24 mx-auto mb-1 flex items-center justify-center">
-                {isDeleteAction ? (
-                  <lord-icon
-                    src="https://cdn.lordicon.com/gsqxdxog.json"
-                    trigger="loop"
-                    colors="primary:#f7b84b,secondary:#f06548"
-                    style={{ width: "90px", height: "90px" }}
-                  />
+                {customIcon ? (
+                  customIcon
+                ) : isLogoutAction ? (
+                  <AnimatedLogoutIcon size={90} />
                 ) : (
                   <lord-icon
-                    src="https://cdn.lordicon.com/lupuorrc.json"
+                    src={resolvedIconSrc}
                     trigger="loop"
-                    colors="primary:#0ab39c,secondary:#405189"
+                    colors={resolvedIconColors}
                     style={{ width: "90px", height: "90px" }}
                   />
                 )}
