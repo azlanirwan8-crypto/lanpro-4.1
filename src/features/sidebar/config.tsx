@@ -81,7 +81,7 @@ export const sidebarSections: SidebarSectionConfig[] = [
   },
   {
     id: "projects",
-    title: "Management Project",
+    title: "Manajemen Proyek",
     items: [
       {
         id: "list",

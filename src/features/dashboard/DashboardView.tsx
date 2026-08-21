@@ -253,7 +253,7 @@ export function DashboardView(props: DashboardViewProps) {
   const sprintFilterOptions = useMemo(() => {
     const allOption = {
       id: "ALL",
-      label: `Semua Sprint (${tasks.length} tasks)`,
+      label: `Semua Sprint (${tasks.length} tugas)`,
       icon: "Layers",
       color: "#6366F1",
     };
@@ -574,9 +574,9 @@ export function DashboardView(props: DashboardViewProps) {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (hour < 18) return "Good Afternoon";
-    return "Good Evening";
+    if (hour < 12) return "Selamat Pagi";
+    if (hour < 18) return "Selamat Siang";
+    return "Selamat Malam";
   };
 
   const realVelocityChartData = useMemo(() => {
@@ -649,7 +649,7 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
-                  Total Tasks
+                  Total Tugas
                 </span>
                 <h3 className="text-2xl font-medium text-content-strong mt-1">{totalTasks}</h3>
               </div>
@@ -687,7 +687,7 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
-                  Pending / Active Tasks
+                  Tugas Berjalan
                 </span>
                 <h3 className="text-2xl font-medium text-content-strong mt-1">
                   {nonEpicTasks.filter((t) => t.status !== "Done" && t.status !== "Selesai").length}
@@ -715,7 +715,7 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
-                  Done / Selesai Tasks
+                  Tugas Selesai
                 </span>
                 <h3 className="text-2xl font-medium text-content-strong mt-1">
                   {completedTasks.length}
@@ -757,7 +757,7 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
-                  Blocked / Stoppers
+                  Tugas Tersumbat
                 </span>
                 {/* #111 — nol berarti TIDAK ADA yang tersumbat, itu kabar baik.
                     Mewarnainya merah membuat pemindaian sekilas menyimpulkan ada
@@ -789,7 +789,7 @@ export function DashboardView(props: DashboardViewProps) {
                     : "text-content-muted"
                 }`}
               >
-                {blockedTasks.length} Blocked • {overdueTasks.length} Overdue
+                {blockedTasks.length} Tersumbat • {overdueTasks.length} Terlambat
               </span>
               <button
                 onClick={() => props.setCurrentView("kanban")}
