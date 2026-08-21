@@ -759,16 +759,36 @@ export function DashboardView(props: DashboardViewProps) {
                 <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
                   Blocked / Stoppers
                 </span>
-                <h3 className="text-2xl font-medium text-rose-600 mt-1">
+                {/* #111 — nol berarti TIDAK ADA yang tersumbat, itu kabar baik.
+                    Mewarnainya merah membuat pemindaian sekilas menyimpulkan ada
+                    masalah. Merah hanya bila memang ada yang tersumbat. Token
+                    `danger-text` menggantikan `rose-600`: §22.3 menyebut peran
+                    TEKS berwarna milik `{aksen}-text`, dan `rose-600` hanya
+                    mencapai 3,84 di mode gelap. */}
+                <h3
+                  className={`text-2xl font-medium mt-1 ${
+                    blockedTasks.length + overdueTasks.length > 0
+                      ? "text-danger-text"
+                      : "text-content-strong"
+                  }`}
+                >
                   {blockedTasks.length + overdueTasks.length}
                 </h3>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-600 border border-rose-500/30">
+              {/* Ikon menandai IDENTITAS kartu, bukan nilainya, jadi ia tetap
+                  merah di keadaan mana pun — hanya tokennya yang diselaraskan. */}
+              <div className="w-10 h-10 rounded-lg bg-danger/10 flex items-center justify-center text-danger-text border border-danger/30">
                 <ShieldAlert className="w-5 h-5" />
               </div>
             </div>
             <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
-              <span className="font-medium text-rose-600">
+              <span
+                className={`font-medium ${
+                  blockedTasks.length + overdueTasks.length > 0
+                    ? "text-danger-text"
+                    : "text-content-muted"
+                }`}
+              >
                 {blockedTasks.length} Blocked • {overdueTasks.length} Overdue
               </span>
               <button
