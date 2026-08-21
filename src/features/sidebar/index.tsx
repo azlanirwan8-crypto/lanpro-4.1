@@ -104,7 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 className="flex flex-col"
               >
                 <span className={styles.logoText}>LANPRO</span>
-                <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-inverse-muted tracking-widest uppercase -mt-1">
+                <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-sidebar-title tracking-widest uppercase -mt-1">
                   Project Management
                 </span>
               </motion.div>
@@ -130,8 +130,8 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 className={styles.newButton}
                 title="Buat Proyek Baru"
               >
-                <Plus className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-xs sm:text-[10px] font-medium uppercase text-amber-300">
+                <Plus className="w-3.5 h-3.5 text-sidebar-text" />
+                <span className="text-xs sm:text-[10px] font-medium uppercase text-sidebar-text">
                   Baru
                 </span>
               </motion.button>
@@ -167,14 +167,14 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 className={cn(
                   styles.indicator,
                   selectedProject?.id === p.id
-                    ? "bg-amber-400 scale-125 shadow-xs"
-                    : "bg-content-subtle"
+                    ? "bg-sidebar-text-active scale-125 shadow-xs"
+                    : "bg-sidebar-title/40"
                 )}
               />
               {!isSidebarCollapsed && (
                 <>
                   <span className="truncate flex-1 text-left text-xs font-medium">{p.name}</span>
-                  <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded bg-black/20 text-primary">
+                  <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded bg-sidebar-item-hover text-sidebar-text-active">
                     {p.key}
                   </span>
                 </>
@@ -225,7 +225,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
             <React.Fragment key={section.id}>
               {!isSidebarCollapsed && (
                 <div className="flex items-center justify-between px-3 mt-5 mb-1.5">
-                  <div className="text-xs sm:text-[11px] font-medium text-content-inverse-muted uppercase tracking-wider">
+                  <div className="text-xs sm:text-[11px] font-semibold text-sidebar-title uppercase tracking-wider">
                     {section.title}
                   </div>
                 </div>
@@ -246,12 +246,12 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                       className={cn(
                         "w-full flex items-center gap-3 px-3 py-2.5 min-h-11 rounded-md transition-all text-xs relative overflow-hidden group",
                         isActive
-                          ? "bg-surface-inverse text-content-inverse font-medium border-l-3 border-amber-400 shadow-soft"
-                          : "text-content-inverse-muted hover:bg-content-inverse/5 hover:text-content-inverse"
+                          ? "bg-sidebar-item-active text-sidebar-text-active font-medium shadow-xs"
+                          : "text-sidebar-text hover:bg-sidebar-item-hover hover:text-sidebar-text-active"
                       )}
                       title={isSidebarCollapsed ? item.label : undefined}
                     >
-                      <div className="shrink-0 text-content-inverse-muted group-hover:text-content-inverse transition-colors">
+                      <div className="shrink-0 text-sidebar-text group-hover:text-sidebar-text-active transition-colors">
                         {item.icon}
                       </div>
                       {!isSidebarCollapsed && (
@@ -263,7 +263,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                           {hasChildren && (
                             <div
                               onClick={(e) => toggleExpand(item.id, e)}
-                              className="p-2 min-w-9 min-h-9 flex items-center justify-center rounded hover:bg-surface/10 text-content-inverse-muted hover:text-content-inverse transition-colors ml-1"
+                              className="p-2 min-w-9 min-h-9 flex items-center justify-center rounded hover:bg-sidebar-item-hover text-sidebar-text hover:text-sidebar-text-active transition-colors ml-1"
                             >
                               {isExpanded ? (
                                 <ChevronDown className="w-3.5 h-3.5" />
@@ -293,13 +293,11 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                               className={cn(
                                 "w-full flex items-center gap-2 py-2 px-2 min-h-11 rounded text-xs transition-colors text-left",
                                 isSubActive
-                                  ? "text-content-inverse font-medium bg-surface/10"
-                                  : "text-content-inverse-muted hover:text-content-inverse hover:bg-content-inverse/5"
+                                  ? "text-sidebar-text-active font-medium bg-sidebar-item-active"
+                                  : "text-sidebar-text hover:text-sidebar-text-active hover:bg-sidebar-item-hover"
                               )}
                             >
-                              <span className="text-content-inverse-muted text-xs sm:text-[10px]">
-                                —
-                              </span>
+                              <span className="text-sidebar-title text-xs sm:text-[10px]">—</span>
                               <span className="truncate">{subItem.label}</span>
                             </button>
                           );
@@ -315,20 +313,20 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
       </nav>
 
       {/* Velzon Bottom User Profile Footer */}
-      <div className="p-3 border-t border-inverse bg-surface-inverse-strong/30 mt-auto relative">
+      <div className="p-3 border-t border-sidebar-border bg-sidebar-surface mt-auto relative">
         {isUserMenuOpen && (
-          <div className="absolute bottom-full left-3 right-3 mb-2 bg-surface-inverse border border-border-inverse rounded-xl shadow-2xl py-1.5 z-50 text-content-inverse animate-in fade-in zoom-in-95 duration-150">
+          <div className="absolute bottom-full left-3 right-3 mb-2 bg-sidebar-surface border border-sidebar-border rounded-xl shadow-2xl py-1.5 z-50 text-sidebar-text-active animate-in fade-in zoom-in-95 duration-150">
             <button
               onClick={() => {
                 setIsUserMenuOpen(false);
                 if (onOpenProfile) onOpenProfile();
               }}
-              className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-content-inverse/10 flex items-center gap-2.5 transition-colors text-content-inverse-muted hover:text-content-inverse cursor-pointer"
+              className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-sidebar-item-hover flex items-center gap-2.5 transition-colors text-sidebar-text hover:text-sidebar-text-active cursor-pointer"
             >
-              <User className="w-4 h-4 text-amber-400" />
+              <User className="w-4 h-4 text-sidebar-title" />
               <span>Profil Anda</span>
             </button>
-            <div className="h-px bg-border-inverse my-1" />
+            <div className="h-px bg-sidebar-border my-1" />
             <button
               onClick={() => {
                 setIsUserMenuOpen(false);
@@ -346,28 +344,28 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
           whileHover={{ scale: 1.01 }}
           onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           className={cn(
-            "flex items-center p-2 rounded-lg hover:bg-surface/10 transition-all cursor-pointer group",
+            "flex items-center p-2 rounded-lg hover:bg-sidebar-item-hover transition-all cursor-pointer group",
             isSidebarCollapsed ? "justify-center" : "gap-3"
           )}
           title="Klik untuk opsi profil & keluar"
         >
           <UserAvatar
             user={user || currentUserProfile || currentUser}
-            className="w-8 h-8 shrink-0 border border-amber-400/50"
+            className="w-8 h-8 shrink-0 border border-sidebar-border"
           />
           {!isSidebarCollapsed && (
             <>
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-content-inverse truncate">
+                <div className="text-xs font-medium text-sidebar-text-active truncate">
                   {user?.displayName || currentUser?.displayName || currentUser?.username || "User"}
                 </div>
-                <div className="text-xs sm:text-[10px] text-content-inverse-muted truncate font-mono">
+                <div className="text-xs sm:text-[10px] text-sidebar-text truncate font-mono">
                   {currentUser?.username || "admin"}
                 </div>
               </div>
               <ChevronDown
                 className={cn(
-                  "w-4 h-4 text-content-inverse-muted transition-transform duration-200",
+                  "w-4 h-4 text-sidebar-text transition-transform duration-200",
                   isUserMenuOpen && "rotate-180"
                 )}
               />
@@ -379,7 +377,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className="w-full mt-2 flex justify-center p-2 text-content-inverse-muted hover:text-content-inverse transition-colors"
+            className="w-full mt-2 flex justify-center p-2 text-sidebar-text hover:text-sidebar-text-active transition-colors"
             title="Opsi Profil"
           >
             <User className="w-4 h-4" />

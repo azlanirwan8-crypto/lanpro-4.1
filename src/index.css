@@ -140,6 +140,15 @@
   --color-content-secondary: #475569; /* = slate-600 */
   --color-content-muted: #64748b; /* = slate-500 */
   --color-content-subtle: #94a3b8; /* = slate-400 */
+
+  /* Sidebar Semantik Velzon (Mode Terang: Dark Navy) */
+  --color-sidebar-surface: #111c43;
+  --color-sidebar-border: #1e2a56;
+  --color-sidebar-title: #878a99;
+  --color-sidebar-text: #abb9e8;
+  --color-sidebar-text-active: #ffffff;
+  --color-sidebar-item-active: rgba(255, 255, 255, 0.12);
+  --color-sidebar-item-hover: rgba(255, 255, 255, 0.06);
 }
 
 /* Padanan mode gelap. Hanya nilainya yang berganti; nama tokennya tetap. */
@@ -187,6 +196,15 @@ html.dark {
   --color-content-secondary: #a9b6c8;
   --color-content-muted: #94a3b8;
   --color-content-subtle: #7c8ba1;
+
+  /* Sidebar Semantik Velzon (Mode Gelap: Clean Dark Charcoal) */
+  --color-sidebar-surface: #121a2a;
+  --color-sidebar-border: #1e293b;
+  --color-sidebar-title: #64748b;
+  --color-sidebar-text: #94a3b8;
+  --color-sidebar-text-active: #ffffff;
+  --color-sidebar-item-active: rgba(255, 255, 255, 0.1);
+  --color-sidebar-item-hover: rgba(255, 255, 255, 0.05);
 }
 
 html.dark {

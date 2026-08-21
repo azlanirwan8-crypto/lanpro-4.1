@@ -49,6 +49,13 @@
     "color-content-secondary#1": "#475569",
     "color-content-muted#1": "#64748b",
     "color-content-subtle#1": "#94a3b8",
+    "color-sidebar-surface#1": "#111c43",
+    "color-sidebar-border#1": "#1e2a56",
+    "color-sidebar-title#1": "#878a99",
+    "color-sidebar-text#1": "#abb9e8",
+    "color-sidebar-text-active#1": "#ffffff",
+    "color-sidebar-item-active#1": "rgba(255, 255, 255, 0.12)",
+    "color-sidebar-item-hover#1": "rgba(255, 255, 255, 0.06)",
     "color-primary#2": "#7183bd",
     "color-primary-hover#2": "#8595cb",
     "color-primary-active#2": "#5d6fa8",
@@ -81,7 +88,14 @@
     "color-content-body#2": "#cbd5e1",
     "color-content-secondary#2": "#a9b6c8",
     "color-content-muted#2": "#94a3b8",
-    "color-content-subtle#2": "#7c8ba1"
+    "color-content-subtle#2": "#7c8ba1",
+    "color-sidebar-surface#2": "#121a2a",
+    "color-sidebar-border#2": "#1e293b",
+    "color-sidebar-title#2": "#64748b",
+    "color-sidebar-text#2": "#94a3b8",
+    "color-sidebar-text-active#2": "#ffffff",
+    "color-sidebar-item-active#2": "rgba(255, 255, 255, 0.1)",
+    "color-sidebar-item-hover#2": "rgba(255, 255, 255, 0.05)"
   },
   "dark": {
     "src/features/issues/styles.ts": 21
@@ -93,7 +107,6 @@
     "src/features/kanban/components/KanbanCard.tsx": 1,
     "src/features/qa/components/QATopBar.tsx": 1,
     "src/features/settings/components/TemplateEditorModal.tsx": 2,
-    "src/features/sidebar/index.tsx": 6,
-    "src/features/sidebar/styles.ts": 6
+    "src/features/sidebar/index.tsx": 1
   }
 }
