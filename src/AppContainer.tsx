@@ -449,20 +449,6 @@ function AppContainer() {
   }, [theme]);
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (themeDropdownRef.current && !themeDropdownRef.current.contains(event.target as Node)) {
-        setIsThemeOpen(false);
-      }
-    }
-    if (isThemeOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isThemeOpen]);
-
-  useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
@@ -3523,71 +3509,19 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                 )}
               </button>
 
-              {/* Theme Switcher Button & Dropdown */}
-              <div className="relative" ref={themeDropdownRef}>
-                <button
-                  onClick={() => setIsThemeOpen(!isThemeOpen)}
-                  className="p-2.5 min-w-11 min-h-11 items-center justify-center text-content-subtle hover:text-primary hover:bg-surface-sunken rounded-full transition-all flex relative"
-                  title="Ubah Tema"
-                >
-                  {theme === "light" ? (
-                    <Sun className="w-5 h-5 text-amber-500" />
-                  ) : theme === "dark" ? (
-                    <Moon className="w-5 h-5 text-primary" />
-                  ) : (
-                    <Monitor className="w-5 h-5" />
-                  )}
-                </button>
-
-                <AnimatePresence>
-                  {isThemeOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.15, ease: "easeOut" }}
-                      className="absolute right-0 mt-2 w-36 bg-surface border border-border-subtle rounded-xl shadow-soft-lg z-50 py-1.5 overflow-hidden origin-top-right"
-                    >
-                      <button
-                        onClick={() => {
-                          setTheme("light");
-                          setIsThemeOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "light" ? "bg-primary-surface/10 text-primary" : "text-content-secondary hover:bg-surface-sunken"}`}
-                      >
-                        <Sun
-                          className={`w-4 h-4 ${theme === "light" ? "text-amber-500" : "text-content-subtle"}`}
-                        />
-                        <span>Light</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setTheme("dark");
-                          setIsThemeOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "dark" ? "bg-primary-surface/10 text-primary" : "text-content-secondary hover:bg-surface-sunken"}`}
-                      >
-                        <Moon
-                          className={`w-4 h-4 ${theme === "dark" ? "text-primary" : "text-content-subtle"}`}
-                        />
-                        <span>Dark</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setTheme("system");
-                          setIsThemeOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-xs font-medium flex items-center gap-2.5 transition-colors ${theme === "system" ? "bg-primary-surface/10 text-primary" : "text-content-secondary hover:bg-surface-sunken"}`}
-                      >
-                        <Monitor
-                          className={`w-4 h-4 ${theme === "system" ? "text-primary" : "text-content-subtle"}`}
-                        />
-                        <span>Auto</span>
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              {/* Velzon 1-Click Direct Theme Switcher Button */}
+              <button
+                onClick={toggleTheme}
+                className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-content-strong hover:bg-surface-sunken rounded-full transition-all cursor-pointer relative"
+                title={isDarkMode() ? "Beralih ke Mode Terang" : "Beralih ke Mode Gelap"}
+                aria-label={isDarkMode() ? "Beralih ke Mode Terang" : "Beralih ke Mode Gelap"}
+              >
+                {isDarkMode() ? (
+                  <Sun className="w-5 h-5 text-warning transition-transform hover:rotate-45 duration-200" />
+                ) : (
+                  <Moon className="w-5 h-5 text-content-body transition-transform hover:-rotate-12 duration-200" />
+                )}
+              </button>
 
               <div className="relative" ref={notificationsRef}>
                 <button
