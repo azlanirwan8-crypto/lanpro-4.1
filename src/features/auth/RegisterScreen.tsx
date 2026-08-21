@@ -206,7 +206,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => handlePasswordChange(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Buat kata sandi"
               className={cn(
                 "w-full pl-4 pr-11 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-sm font-medium text-content placeholder:text-content-subtle",
                 fieldErrors.password

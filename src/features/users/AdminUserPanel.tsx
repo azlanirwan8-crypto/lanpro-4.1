@@ -1113,7 +1113,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 type="password"
                 value={addPeoplePassword}
                 onChange={(e: any) => handlePasswordChange(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Kata sandi awal pengguna"
               />
               {passwordStrength && (
                 <div className="mt-1.5 space-y-1">

@@ -123,7 +123,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder="Kata sandi baru"
                   value={newPassword}
                   onChange={(e) => {
                     setNewPassword(e.target.value);
@@ -153,7 +153,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
               </label>
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="Ulangi kata sandi baru"
                 value={confirmPassword}
                 onChange={(e) => {
                   setConfirmPassword(e.target.value);
