@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { cn } from "../../lib/utils";
 import { UserProfile } from "../../types";
 
+// #122 — URL avatar yang sudah terbukti 404, dibagi seluruh instance.
+const avatarGagal = new Set<string>();
+
 export const getUserAvatarColors = (idOrName: string = "") => {
   const colors = [
     { bg: "bg-blue-500/15", text: "text-blue-600", border: "border-blue-500/30" },
@@ -54,6 +57,10 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   size,
   onClick,
 }) => {
+  // #122 — `imgError` adalah state LOKAL, jadi setiap instance dengan URL rusak
+  // yang sama mencoba memuatnya sendiri-sendiri; satu avatar hilang yang muncul
+  // di lima tempat menghasilkan lima 404. Set di tingkat modul membuat kegagalan
+  // diingat bersama, termasuk saat komponen dipasang ulang.
   const [imgError, setImgError] = useState(false);
 
   // 1. Resolve user entity or member from members list
@@ -123,13 +130,16 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
       )}
       title={displayName}
     >
-      {resolvedAvatarUrl && !imgError ? (
+      {resolvedAvatarUrl && !imgError && !avatarGagal.has(resolvedAvatarUrl) ? (
         <img
           src={resolvedAvatarUrl}
           alt={displayName}
           className="w-full h-full object-cover"
           referrerPolicy="no-referrer"
-          onError={() => setImgError(true)}
+          onError={() => {
+            avatarGagal.add(resolvedAvatarUrl);
+            setImgError(true);
+          }}
         />
       ) : (
         <span className="leading-none">{getInitials(displayName)}</span>
