@@ -25,6 +25,7 @@ import { AdminUserPanelProps } from "./types";
 import { useAdminUsers } from "./hooks";
 import { Button, Modal, UserAvatar } from "./styles";
 import { toast } from "sonner";
+import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { DEFAULT_PERMISSIONS as ROLE_DEFAULT_PERMISSIONS } from "../../lib/permissions";
 import {
@@ -60,19 +61,6 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const [selectedAssignProjectRole, setSelectedAssignProjectRole] = React.useState("member");
   const [isAssigningProject, setIsAssigningProject] = React.useState(false);
   const [selectedTeamMemberIds, setSelectedTeamMemberIds] = React.useState<string[]>([]);
-
-  // Custom confirmation modal state to avoid iframe window.confirm block
-  const [confirmModal, setConfirmModal] = React.useState<{
-    isOpen: boolean;
-    title: string;
-    message: string;
-    onConfirm: () => void;
-  }>({
-    isOpen: false,
-    title: "",
-    message: "",
-    onConfirm: () => {},
-  });
 
   // Tooltip Mouse Event Handler State
   const [hoveredTooltip, setHoveredTooltip] = React.useState<{
@@ -168,34 +156,31 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
     }
   };
 
-  const handleRemoveProject = (projectId: string, userId: string) => {
-    setConfirmModal({
-      isOpen: true,
-      title: "Keluarkan dari Project",
-      message: "Apakah Anda yakin ingin mengeluarkan user dari project ini?",
-      onConfirm: async () => {
-        setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+  const handleRemoveProject = async (projectId: string, userId: string) => {
+    const isConfirmed = await confirmDeleteAlert(
+      "Keluarkan dari Project?",
+      "Apakah Anda yakin ingin mengeluarkan user dari project ini?"
+    );
+    if (!isConfirmed) return;
 
-        try {
-          const data = await removeUserFromProject(projectId, props.currentUserId, userId);
-          if (data.status === "success") {
-            toast.success("User berhasil dihapus dari Project");
-            if (props.onRefreshProjects) {
-              props.onRefreshProjects();
-            } else {
-              setTimeout(() => {
-                window.location.reload();
-              }, 800);
-            }
-          } else {
-            toast.error(data.message || "Gagal menghapus user dari project");
-          }
-        } catch (e) {
-          console.error(e);
-          toast.error("Terjadi kesalahan saat menghapus user dari project");
+    try {
+      const data = await removeUserFromProject(projectId, props.currentUserId, userId);
+      if (data.status === "success") {
+        showSuccessAlert("Berhasil!", "User berhasil dikeluarkan dari Project.");
+        if (props.onRefreshProjects) {
+          props.onRefreshProjects();
+        } else {
+          setTimeout(() => {
+            window.location.reload();
+          }, 800);
         }
-      },
-    });
+      } else {
+        toast.error(data.message || "Gagal menghapus user dari project");
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Terjadi kesalahan saat menghapus user dari project");
+    }
   };
 
   const [addPeopleUsername, setAddPeopleUsername] = React.useState("");
@@ -482,7 +467,14 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
         })
       );
 
-      toast.success(`Aksi Massal Selesai! Berhasil: ${successCount}, Gagal: ${failCount}`);
+      if (action === "delete") {
+        showSuccessAlert(
+          "Berhasil!",
+          `Hapus massal selesai: ${successCount} pengguna berhasil dihapus.`
+        );
+      } else {
+        toast.success(`Aksi Massal Selesai! Berhasil: ${successCount}, Gagal: ${failCount}`);
+      }
       setSelectedUserIds([]);
       fetchUsers();
     } catch (e) {
@@ -687,13 +679,27 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   </div>
 
                   <button
-                    onClick={() => {
-                      setConfirmModal({
-                        isOpen: true,
-                        title: "Hapus Pengguna Massal",
-                        message: `Apakah Anda yakin ingin menghapus ${selectedUserIds.length} pengguna terpilih secara massal? Tindakan ini tidak dapat dibatalkan.`,
-                        onConfirm: () => handleBulkAction("delete"),
-                      });
+                    onClick={async () => {
+                      const hasAdmins = filteredUsers.some(
+                        (u) => selectedUserIds.includes(u.id) && u.role === "admin"
+                      );
+                      if (hasAdmins) {
+                        toast.error("Tidak dapat menghapus user dengan role Admin secara massal");
+                        return;
+                      }
+                      const hasSelf = selectedUserIds.includes(props.currentUserId || "");
+                      if (hasSelf) {
+                        toast.error("Tidak dapat menghapus akun Anda sendiri secara massal");
+                        return;
+                      }
+
+                      const isConfirmed = await confirmDeleteAlert(
+                        "Hapus Pengguna Massal?",
+                        `Apakah Anda yakin ingin menghapus ${selectedUserIds.length} pengguna terpilih secara massal? Tindakan ini tidak dapat dibatalkan.`
+                      );
+                      if (!isConfirmed) return;
+
+                      await handleBulkAction("delete");
                     }}
                     disabled={isBulkActionPending}
                     className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
@@ -941,27 +947,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               <UserCog className="w-3.5 h-3.5 shrink-0" />
                             </button>
                             <button
-                              onClick={() => {
-                                setConfirmModal({
-                                  isOpen: true,
-                                  title: "Hapus Pengguna",
-                                  message: `Apakah Anda yakin ingin menghapus pengguna ${user?.displayName || user?.username} secara permanen?`,
-                                  onConfirm: async () => {
-                                    setConfirmModal((prev) => ({ ...prev, isOpen: false }));
-                                    try {
-                                      const data = await deleteUser(user.id);
-                                      if (data.status !== "success") throw new Error(data.message);
-                                      toast.success("User deleted successfully");
-                                      fetchUsers(); // Refresh
-                                    } catch (error: any) {
-                                      toast.error(
-                                        "Failed to delete user: " + (error.message || "Error")
-                                      );
-                                      console.error(error);
-                                    }
-                                  },
-                                });
-                              }}
+                              onClick={() => handleDeleteUser(user)}
                               disabled={user.role === "admin"}
                               className="p-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-1"
                               title="Hapus Pengguna"
@@ -1305,35 +1291,6 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           </button>
         </div>
       </Modal>
-
-      {confirmModal.isOpen && (
-        <Modal
-          isOpen={confirmModal.isOpen}
-          onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
-          title={confirmModal.title}
-          maxWidth="max-w-md"
-        >
-          <div className="space-y-6 py-2">
-            <p className="text-sm text-content-secondary leading-relaxed">{confirmModal.message}</p>
-            <div className="flex justify-end gap-3 pt-2">
-              <Button
-                variant="outline"
-                onClick={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
-                className="px-4 py-2 text-sm"
-              >
-                Batal
-              </Button>
-              <Button
-                variant="danger"
-                onClick={confirmModal.onConfirm}
-                className="px-4 py-2 text-sm"
-              >
-                Ya, Hapus
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
 
       {/* Senior Portal-Style Hover Tooltip overlay */}
       {hoveredTooltip && (

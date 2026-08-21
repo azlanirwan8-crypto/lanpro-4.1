@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { QATestSuite } from "../types";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
+import { StyledDropdown } from "../../../components/ui/CommonComponents";
 
 interface QASuiteSidebarProps {
   suitesForFilter: QATestSuite[];
@@ -21,7 +22,7 @@ interface QASuiteSidebarProps {
   setSuiteToEdit: (suite: QATestSuite) => void;
   setSuiteEditName: (name: string) => void;
   setSuiteEditAssignedTo: (assignedTo: string) => void;
-  setSuiteToDelete: (suite: QATestSuite) => void;
+  handleDeleteSuite: (suite: QATestSuite) => void;
   activeSuitePicDropdownId: string | null;
   setActiveSuitePicDropdownId: (id: string | null) => void;
   handleUpdateSuitePic: (suiteId: string, assignedTo: string) => void;
@@ -41,7 +42,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
   setSuiteToEdit,
   setSuiteEditName,
   setSuiteEditAssignedTo,
-  setSuiteToDelete,
+  handleDeleteSuite,
   activeSuitePicDropdownId,
   setActiveSuitePicDropdownId,
   handleUpdateSuitePic,
@@ -76,17 +77,25 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
 
         {/* Phase Filter Dropdown & Add Button (Hidden for non-creators) */}
         <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <select
+          <div className="flex-1 min-w-0">
+            <StyledDropdown
               value={phaseFilter}
-              onChange={(e) => setPhaseFilter(e.target.value as any)}
-              className="w-full py-1.5 px-2.5 bg-surface-sunken/80 border border-border-subtle rounded-md text-xs font-medium text-content-body focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all cursor-pointer"
-            >
-              <option value="ALL">Semua Fase (ALL)</option>
-              <option value="SIT">Fase SIT (System Integration Test)</option>
-              <option value="UAT">Fase UAT (User Acceptance Test)</option>
-              <option value="PTR">Fase PTR (Production Readiness Test)</option>
-            </select>
+              onChange={(val) => setPhaseFilter(val as any)}
+              options={[
+                { id: "ALL", label: "Semua Fase (ALL)", icon: "Layers", color: "#6366F1" },
+                { id: "SIT", label: "Fase SIT (Integration)", icon: "Cpu", color: "#3B82F6" },
+                {
+                  id: "UAT",
+                  label: "Fase UAT (Acceptance)",
+                  icon: "CheckCircle2",
+                  color: "#10B981",
+                },
+                { id: "PTR", label: "Fase PTR (Readiness)", icon: "ShieldCheck", color: "#F59E0B" },
+              ]}
+              masterData={[]}
+              className="w-full"
+              buttonClassName="h-8 bg-surface-sunken/80 rounded-md border border-border-subtle hover:border-border-subtle px-2.5 text-xs font-medium text-content-body"
+            />
           </div>
 
           {canCreate && (
@@ -156,7 +165,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSuiteToDelete(suite);
+                            handleDeleteSuite(suite);
                           }}
                           className="text-content-subtle hover:text-rose-500 transition-all p-1 bg-surface-sunken hover:bg-rose-500/10 rounded-md border border-border-faint"
                           title="Hapus Dokumen"

@@ -20,6 +20,7 @@ import {
 import { QATestCase, QATestSuite } from "../types";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { ResponsiveTable } from "../../../components/ResponsiveTable";
+import { StyledDropdown } from "../../../components/ui/CommonComponents";
 
 interface QATestCaseTableProps {
   activeSuite: QATestSuite | undefined;
@@ -51,7 +52,7 @@ interface QATestCaseTableProps {
   setCaseEditExpected: (expected: string) => void;
   setCaseEditPriority: (priority: "High" | "Medium" | "Low" | "Critical") => void;
   setCaseEditAssignedTo: (assignedTo: string) => void;
-  setCaseToDelete: (tc: QATestCase) => void;
+  handleDeleteTestCase: (tc: QATestCase) => void;
   handleOpenCreateBugModal: (tc: QATestCase) => void;
   setSelectedTestCase: (tc: QATestCase) => void;
 
@@ -92,7 +93,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   setCaseEditExpected,
   setCaseEditPriority,
   setCaseEditAssignedTo,
-  setCaseToDelete,
+  handleDeleteTestCase,
   handleOpenCreateBugModal,
   setSelectedTestCase,
 
@@ -295,20 +296,22 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             </div>
 
             {/* Elegant Filter Status Select */}
-            <div className="relative flex items-center gap-1 bg-surface-sunken border border-border-subtle/80 rounded-md px-2 py-1 text-xs font-medium text-content-body">
-              <Filter className="w-3 h-3 text-primary" />
-              <select
+            <div className="w-36 sm:w-44">
+              <StyledDropdown
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="bg-transparent border-none outline-none font-medium text-xs cursor-pointer text-content-body pr-1"
-              >
-                <option value="ALL">Status: Semua (ALL)</option>
-                <option value="Passed">Status: Passed</option>
-                <option value="Failed">Status: Failed</option>
-                <option value="Blocked">Status: Blocked</option>
-                <option value="Retest">Status: Retest</option>
-                <option value="Pending">Status: Pending</option>
-              </select>
+                onChange={(val) => setStatusFilter(val as any)}
+                options={[
+                  { id: "ALL", label: "Semua Status", icon: "Layers", color: "#6366F1" },
+                  { id: "Passed", label: "Passed", icon: "CheckCircle2", color: "#10B981" },
+                  { id: "Failed", label: "Failed", icon: "XCircle", color: "#EF4444" },
+                  { id: "Blocked", label: "Blocked", icon: "AlertOctagon", color: "#F59E0B" },
+                  { id: "Retest", label: "Retest", icon: "RefreshCw", color: "#6366F1" },
+                  { id: "Pending", label: "Pending", icon: "Clock", color: "#64748B" },
+                ]}
+                masterData={[]}
+                className="w-full"
+                buttonClassName="h-[30px] bg-surface-sunken rounded-md border border-border-subtle/80 hover:border-border-subtle px-2.5 text-xs font-medium text-content-body"
+              />
             </div>
           </div>
         </div>
@@ -536,10 +539,34 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       <td className="py-2.5 px-3" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-center gap-1.5">
                           {/* 1. Status Dropdown Pill (ALL USERS CAN UPDATE STATUS) */}
-                          <select
+                          <StyledDropdown
                             value={tc.status}
-                            onChange={(e) => handleStatusChange(tc.id, e.target.value as any)}
-                            className={`py-1 px-2.5 rounded-md text-xs sm:text-[10px] font-medium uppercase tracking-wider outline-none cursor-pointer transition-all border shadow-2xs ${
+                            onChange={(val) => handleStatusChange(tc.id, val as any)}
+                            options={[
+                              {
+                                id: "Passed",
+                                label: "Passed",
+                                icon: "CheckCircle2",
+                                color: "#10B981",
+                              },
+                              { id: "Failed", label: "Failed", icon: "XCircle", color: "#EF4444" },
+                              {
+                                id: "Blocked",
+                                label: "Blocked",
+                                icon: "AlertOctagon",
+                                color: "#F59E0B",
+                              },
+                              {
+                                id: "Retest",
+                                label: "Retest",
+                                icon: "RefreshCw",
+                                color: "#6366F1",
+                              },
+                              { id: "Pending", label: "Pending", icon: "Clock", color: "#64748B" },
+                            ]}
+                            masterData={[]}
+                            className="min-w-[100px]"
+                            buttonClassName={`py-1 px-2.5 rounded-md text-xs sm:text-[10px] font-medium uppercase tracking-wider border shadow-2xs ${
                               tc.status === "Passed"
                                 ? "bg-emerald-500/10 text-success-text border-emerald-500/30"
                                 : tc.status === "Failed"
@@ -550,13 +577,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                       ? "bg-indigo-500/10 text-indigo-700 border-indigo-500/30"
                                       : "bg-surface-muted text-content-secondary border-border-subtle"
                             }`}
-                          >
-                            <option value="Passed">Passed</option>
-                            <option value="Failed">Failed</option>
-                            <option value="Blocked">Blocked</option>
-                            <option value="Retest">Retest</option>
-                            <option value="Pending">Pending</option>
-                          </select>
+                          />
 
                           {/* 2. Sleek PIC Avatar Icon Button NEXT TO STATUS */}
                           <div className="relative">
@@ -704,7 +725,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
                           {canDelete && (
                             <button
-                              onClick={() => setCaseToDelete(tc)}
+                              onClick={() => handleDeleteTestCase(tc)}
                               className="p-1 text-content-subtle hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all"
                               title="Hapus Test Case"
                             >

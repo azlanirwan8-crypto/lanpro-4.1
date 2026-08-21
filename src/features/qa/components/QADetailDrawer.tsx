@@ -10,6 +10,7 @@ import {
   Bug,
 } from "lucide-react";
 import { QATestCase } from "../types";
+import { StyledDropdown } from "../../../components/ui/CommonComponents";
 
 interface QADetailDrawerProps {
   selectedTestCase: QATestCase | null;
@@ -80,15 +81,23 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
             </div>
 
             {/* STATUS UPDATE SELECTOR INTEGRATED DIRECTLY IN TOP HEADER */}
-            <div className="flex items-center gap-2">
-              <select
+            <div className="flex items-center gap-2 min-w-[120px]">
+              <StyledDropdown
                 value={selectedTestCase.status}
-                onChange={(e) => {
-                  const val = e.target.value as any;
-                  handleStatusChange(selectedTestCase.id, val);
-                  setSelectedTestCase({ ...selectedTestCase, status: val });
+                onChange={(val) => {
+                  handleStatusChange(selectedTestCase.id, val as any);
+                  setSelectedTestCase({ ...selectedTestCase, status: val as any });
                 }}
-                className={`py-1 px-2.5 rounded-md text-xs sm:text-[11px] font-medium uppercase tracking-wider outline-none cursor-pointer border shadow-2xs ${
+                options={[
+                  { id: "Passed", label: "Passed", icon: "CheckCircle2", color: "#10B981" },
+                  { id: "Failed", label: "Failed", icon: "XCircle", color: "#EF4444" },
+                  { id: "Blocked", label: "Blocked", icon: "AlertOctagon", color: "#F59E0B" },
+                  { id: "Retest", label: "Retest", icon: "RefreshCw", color: "#6366F1" },
+                  { id: "Pending", label: "Pending", icon: "Clock", color: "#64748B" },
+                ]}
+                masterData={[]}
+                className="w-full"
+                buttonClassName={`py-1 px-2.5 rounded-md text-xs sm:text-[11px] font-medium uppercase tracking-wider border shadow-2xs ${
                   selectedTestCase.status === "Passed"
                     ? "bg-emerald-500/10 text-success-text border-emerald-500/30"
                     : selectedTestCase.status === "Failed"
@@ -99,13 +108,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                           ? "bg-indigo-500/10 text-indigo-700 border-indigo-500/30"
                           : "bg-surface-muted text-content-secondary border-border-subtle"
                 }`}
-              >
-                <option value="Passed">Passed</option>
-                <option value="Failed">Failed</option>
-                <option value="Blocked">Blocked</option>
-                <option value="Retest">Retest</option>
-                <option value="Pending">Pending</option>
-              </select>
+              />
 
               <button
                 onClick={() => setSelectedTestCase(null)}

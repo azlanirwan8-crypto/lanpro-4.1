@@ -111,20 +111,59 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
   onSubmit,
   isSubmitting,
 }) => {
+  const issueTypeOptions = React.useMemo(() => {
+    const masterTypes = masterData.filter((m) => m.type === "issue_type");
+    if (masterTypes.length > 0) {
+      return masterTypes.map((t) => ({
+        id: t.label.toLowerCase(),
+        label: t.label,
+        icon: t.icon,
+        color: t.color,
+      }));
+    }
+    return [
+      { id: "epic", label: "Epic", icon: "Layers", color: "#8B5CF6" },
+      { id: "task", label: "Task", icon: "CheckSquare", color: "#3B82F6" },
+      { id: "subtask", label: "Subtask", icon: "GitCommit", color: "#06B6D4" },
+      { id: "bug", label: "Bug", icon: "AlertCircle", color: "#EF4444" },
+      { id: "meeting", label: "Meeting", icon: "Calendar", color: "#F59E0B" },
+      { id: "document", label: "Document", icon: "FileText", color: "#10B981" },
+      { id: "approval", label: "Approval", icon: "ShieldCheck", color: "#EC4899" },
+    ];
+  }, [masterData]);
+
+  const sprintOptions = React.useMemo(() => {
+    const backlogOpt = { id: "", label: "Backlog", icon: "Layers", color: "#64748B" };
+    const sprintList = sprints.map((s) => ({
+      id: s.id,
+      label: `${s.name} (${s.status})`,
+      icon:
+        s.status === "active" ? "Flame" : s.status === "completed" ? "CheckCircle2" : "Calendar",
+      color: s.status === "active" ? "#F97316" : s.status === "completed" ? "#10B981" : "#3B82F6",
+    }));
+    return [backlogOpt, ...sprintList];
+  }, [sprints]);
+
+  const parentTaskOptions = React.useMemo(() => {
+    const emptyOpt = { id: "", label: "Select Parent...", icon: "Layers", color: "#64748B" };
+    const parentList = tasks
+      .filter((t) => t.type !== "subtask")
+      .map((t) => ({
+        id: t.id,
+        label: `${t.key || t.id}: ${t.title}`,
+        icon: t.type === "epic" ? "Layers" : "CheckSquare",
+        color: t.type === "epic" ? "#8B5CF6" : "#3B82F6",
+      }));
+    return [emptyOpt, ...parentList];
+  }, [tasks]);
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Add New Issue"
-      maxWidth="max-w-3xl"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title="Add New Issue" maxWidth="max-w-3xl">
       <div className="space-y-4">
         {/* Group 1: Basic Info */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">
-              Issue Title
-            </label>
+            <label className="block text-sm font-medium text-content-body mb-1">Issue Title</label>
             <Input
               value={newTaskTitle}
               onChange={(e: any) => setNewTaskTitle(e.target.value)}
@@ -134,58 +173,30 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-content-body mb-1">Type</label>
-              <select
+              <StyledDropdown
                 value={newTaskType}
-                onChange={(e: any) => setNewTaskType(e.target.value)}
-                className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-              >
-                {masterData.filter((m) => m.type === "issue_type").length > 0 ? (
-                  masterData
-                    .filter((m) => m.type === "issue_type")
-                    .map((t, idx) => (
-                      <option
-                        key={t.id ? `it-${t.id}-${idx}` : `it-${idx}`}
-                        value={t.label.toLowerCase()}
-                      >
-                        {t.label}
-                      </option>
-                    ))
-                ) : (
-                  <>
-                    <option value="epic">Epic</option>
-                    <option value="task">Task</option>
-                    <option value="subtask">Subtask</option>
-                    <option value="bug">Bug</option>
-                    <option value="meeting">Meeting</option>
-                    <option value="document">Document</option>
-                    <option value="approval">Approval</option>
-                  </>
-                )}
-              </select>
+                onChange={(val) => setNewTaskType(val)}
+                options={issueTypeOptions}
+                masterData={masterData}
+                className="w-full"
+                buttonClassName="h-10 bg-surface rounded-lg border border-border-subtle hover:border-border-subtle px-3 text-sm font-medium"
+              />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-body mb-1">
-                Sprint
-              </label>
-              <select
+              <label className="block text-sm font-medium text-content-body mb-1">Sprint</label>
+              <StyledDropdown
                 value={newTaskSprintId}
-                onChange={(e: any) => setNewTaskSprintId(e.target.value)}
-                className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-              >
-                <option value="">Backlog</option>
-                {sprints.map((s, idx) => (
-                  <option key={s.id ? `sp-${s.id}-${idx}` : `sp-${idx}`} value={s.id}>
-                    {s.name} ({s.status})
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setNewTaskSprintId(val)}
+                options={sprintOptions}
+                masterData={masterData}
+                className="w-full"
+                buttonClassName="h-10 bg-surface rounded-lg border border-border-subtle hover:border-border-subtle px-3 text-sm font-medium"
+              />
             </div>
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">
-            Initial Status
-          </label>
+          <label className="block text-sm font-medium text-content-body mb-1">Initial Status</label>
           <StyledDropdown
             value={newTaskStatus}
             onChange={(val) => setNewTaskStatus(val)}
@@ -206,28 +217,20 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             <label className="block text-sm font-medium text-content-body mb-1">
               Parent Task / Epic
             </label>
-            <select
+            <StyledDropdown
               value={newTaskParentId}
-              onChange={(e: any) => setNewTaskParentId(e.target.value)}
-              className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            >
-              <option value="">Select Parent...</option>
-              {tasks
-                .filter((t) => t.type !== "subtask")
-                .map((t, idx) => (
-                  <option key={t.id ? `pt-${t.id}-${idx}` : `pt-${idx}`} value={t.id}>
-                    {t.key}: {t.title}
-                  </option>
-                ))}
-            </select>
+              onChange={(val) => setNewTaskParentId(val)}
+              options={parentTaskOptions}
+              masterData={masterData}
+              className="w-full"
+              buttonClassName="h-10 bg-surface rounded-lg border border-border-subtle hover:border-border-subtle px-3 text-sm font-medium"
+            />
           </div>
         )}
         {/* Group 2: Assignment & Categorization */}
         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border-faint">
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">
-              Priority
-            </label>
+            <label className="block text-sm font-medium text-content-body mb-1">Priority</label>
             <StyledDropdown
               value={newTaskPriority}
               onChange={(val) => setNewTaskPriority(val)}
@@ -244,9 +247,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">
-              Category
-            </label>
+            <label className="block text-sm font-medium text-content-body mb-1">Category</label>
             <StyledDropdown
               value={newTaskCategory}
               onChange={(val) => setNewTaskCategory(val)}
@@ -296,9 +297,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">
-              Story Points
-            </label>
+            <label className="block text-sm font-medium text-content-body mb-1">Story Points</label>
             <Input
               type="number"
               value={newTaskStoryPoints || ""}
@@ -335,9 +334,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">
-              System Risk
-            </label>
+            <label className="block text-sm font-medium text-content-body mb-1">System Risk</label>
             <select
               value={newTaskProjectRisk}
               onChange={(e: any) => setNewTaskProjectRisk(e.target.value)}
@@ -351,9 +348,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">
-            Environment
-          </label>
+          <label className="block text-sm font-medium text-content-body mb-1">Environment</label>
           <StyledDropdown
             value={newTaskEnvironment}
             onChange={(val) => setNewTaskEnvironment(val)}
@@ -366,9 +361,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">
-            Figma URL
-          </label>
+          <label className="block text-sm font-medium text-content-body mb-1">Figma URL</label>
           <Input
             type="url"
             value={newTaskFigmaUrl}
@@ -389,9 +382,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">
-            Description
-          </label>
+          <label className="block text-sm font-medium text-content-body mb-1">Description</label>
           <textarea
             value={newTaskDescription}
             onChange={(e: any) => setNewTaskDescription(e.target.value)}
@@ -401,9 +392,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">
-            Attachments
-          </label>
+          <label className="block text-sm font-medium text-content-body mb-1">Attachments</label>
           <input
             type="file"
             multiple
@@ -428,9 +417,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
         </div>
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">
-              Start Date
-            </label>
+            <label className="block text-sm font-medium text-content-body mb-1">Start Date</label>
             <Input
               type="date"
               value={newTaskStartDate}
@@ -438,9 +425,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">
-              End Date
-            </label>
+            <label className="block text-sm font-medium text-content-body mb-1">End Date</label>
             <Input
               type="date"
               value={newTaskEndDate}
@@ -448,9 +433,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">
-              Due Date
-            </label>
+            <label className="block text-sm font-medium text-content-body mb-1">Due Date</label>
             <Input
               type="date"
               value={newTaskDueDate}
@@ -458,11 +441,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             />
           </div>
         </div>
-        <Button
-          onClick={onSubmit}
-          disabled={isSubmitting}
-          className="w-full justify-center"
-        >
+        <Button onClick={onSubmit} disabled={isSubmitting} className="w-full justify-center">
           Create Issue
         </Button>
       </div>

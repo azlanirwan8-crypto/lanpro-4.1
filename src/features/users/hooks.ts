@@ -9,6 +9,7 @@ import {
   deleteUser as deleteUserApi,
 } from "./services/users.service";
 import { cleanUserPermissions } from "../../lib/permissions";
+import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 
 export const useAdminUsers = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -123,15 +124,21 @@ export const useAdminUsers = () => {
       toast.error("Cannot delete admin users");
       return;
     }
+    const isConfirmed = await confirmDeleteAlert(
+      "Hapus Pengguna?",
+      `Apakah Anda yakin ingin menghapus pengguna "${user.displayName || user.username}" secara permanen?`
+    );
+    if (!isConfirmed) return;
+
     setSaving(true);
     try {
       const data = await deleteUserApi(user.id);
       if (data.status !== "success") throw new Error(data.message);
 
-      toast.success("User deleted successfully");
+      showSuccessAlert("Berhasil!", "Pengguna berhasil dihapus.");
       fetchUsers(); // Refresh
     } catch (error: any) {
-      toast.error(error.message || "Failed to delete user");
+      toast.error(error.message || "Gagal menghapus pengguna");
       console.error(error);
     } finally {
       setSaving(false);

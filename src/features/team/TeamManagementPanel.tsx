@@ -20,6 +20,7 @@ import { toast } from "sonner";
 // membungkus state loading dan penanganan unmount.
 import { fetchTeamTasks as fetchTeamTasksApi } from "./services/team.service";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
+import { StyledDropdown as CommonStyledDropdown } from "../../components/ui/CommonComponents";
 
 export const TeamManagementPanel = ({
   projectMembers: propMembers,
@@ -79,6 +80,22 @@ export const TeamManagementPanel = ({
 
   // #82 — peran proyek dibaca dari Master Data.
   const peranProyek = React.useMemo(() => katalogPeranProyek(masterData), [masterData]);
+
+  const roleFilterOptions = React.useMemo(() => {
+    const allOpt = { id: "all", label: "Semua Role", icon: "Users", color: "#6366F1" };
+    const list = peranProyek.map((p) => ({
+      id: p.code,
+      label: p.label,
+      icon:
+        p.code === "pm" || p.code === "owner"
+          ? "Crown"
+          : p.code === "lead"
+            ? "ShieldCheck"
+            : "UserCheck",
+      color: p.code === "pm" || p.code === "owner" ? "#F59E0B" : "#3B82F6",
+    }));
+    return [allOpt, ...list];
+  }, [peranProyek]);
 
   const getUserTasks = (person: any) => {
     if (!person) return [];
@@ -334,23 +351,15 @@ export const TeamManagementPanel = ({
           </div>
 
           <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-            <div className="relative min-w-[140px]">
-              <select
+            <div className="min-w-[160px]">
+              <CommonStyledDropdown
                 value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                className="w-full pl-3 pr-8 py-1.5 bg-surface-sunken border border-border-subtle rounded-md outline-none text-content-body font-medium text-xs cursor-pointer appearance-none"
-              >
-                {/* #82 — dari Master Data. Versi lama menyebut "UI/UX Designer"
-                    dan "QA Engineer" yang tidak pernah ada di katalog peran,
-                    sehingga penyaringnya tidak pernah cocok dengan data. */}
-                <option value="all">Semua Role</option>
-                {peranProyek.map((p) => (
-                  <option key={p.code} value={p.code}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="w-3.5 h-3.5 text-content-subtle absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                onChange={(val: string) => setRoleFilter(val)}
+                options={roleFilterOptions}
+                masterData={masterData}
+                className="w-full"
+                buttonClassName="h-8 bg-surface-sunken rounded-md border border-border-subtle hover:border-border-subtle px-2.5 text-xs font-medium text-content-body"
+              />
             </div>
 
             {/* Grid vs List View Mode Buttons */}

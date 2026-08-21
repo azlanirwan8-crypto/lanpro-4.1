@@ -1,6 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { QATestCase } from "../../features/qa/types";
+import { StyledDropdown } from "../ui/CommonComponents";
 
 interface EditCaseModalProps {
   testCase: QATestCase | null;
@@ -61,16 +62,19 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
               <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
                 Prioritas
               </label>
-              <select
+              <StyledDropdown
                 value={editPriority}
-                onChange={(e) => onPriorityChange(e.target.value as any)}
-                className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong cursor-pointer"
-              >
-                <option value="Low">Low Priority</option>
-                <option value="Medium">Medium Priority</option>
-                <option value="High">High Priority</option>
-                <option value="Critical">Critical Priority</option>
-              </select>
+                onChange={(val) => onPriorityChange(val as any)}
+                options={[
+                  { id: "Critical", label: "Critical Priority", icon: "Flame", color: "#EF4444" },
+                  { id: "High", label: "High Priority", icon: "ChevronUp", color: "#F97316" },
+                  { id: "Medium", label: "Medium Priority", icon: "Circle", color: "#F59E0B" },
+                  { id: "Low", label: "Low Priority", icon: "ChevronDown", color: "#10B981" },
+                ]}
+                masterData={[]}
+                className="w-full"
+                buttonClassName="h-10 bg-surface-sunken rounded-md border border-border-subtle hover:border-border-subtle px-3 text-xs font-medium text-content-strong"
+              />
             </div>
             <div className="space-y-1">
               <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">

@@ -36,6 +36,7 @@ import Markdown from "react-markdown";
 import { cn } from "../../lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
+import { StyledDropdown } from "../../components/ui/CommonComponents";
 
 import type { DocumentModel, WikiViewProps } from "./types";
 import {
@@ -415,19 +416,79 @@ export const WikiView: React.FC<WikiViewProps> = ({
     const types = masterData.filter((d) => d.type === "jenis_dokumen");
     if (types.length === 0) {
       return [
-        { label: "PRD", value: "PRD" },
-        { label: "Panduan", value: "Panduan" },
-        { label: "Laporan", value: "Laporan" },
-        { label: "Spesifikasi", value: "Spesifikasi" },
-        { label: "Lainnya", value: "Lainnya" },
+        {
+          label: "Business Requirements Document (BRD)",
+          value: "Business Requirements Document (BRD)",
+          id: "Business Requirements Document (BRD)",
+          icon: "FileText",
+          color: "#8B5CF6",
+        },
+        {
+          label: "Functional Spec (FSD)",
+          value: "Functional Spec (FSD)",
+          id: "Functional Spec (FSD)",
+          icon: "FileCode",
+          color: "#3B82F6",
+        },
+        {
+          label: "Technical Spec (TSD)",
+          value: "Technical Spec (TSD)",
+          id: "Technical Spec (TSD)",
+          icon: "Cpu",
+          color: "#06B6D4",
+        },
+        {
+          label: "Test Plan",
+          value: "Test Plan",
+          id: "Test Plan",
+          icon: "ClipboardCheck",
+          color: "#F59E0B",
+        },
+        {
+          label: "UAT Sign-off Report",
+          value: "UAT Sign-off Report",
+          id: "UAT Sign-off Report",
+          icon: "FileCheck",
+          color: "#10B981",
+        },
+        {
+          label: "Architecture Diagram",
+          value: "Architecture Diagram",
+          id: "Architecture Diagram",
+          icon: "Network",
+          color: "#EC4899",
+        },
+        {
+          label: "Flowchart",
+          value: "Flowchart",
+          id: "Flowchart",
+          icon: "Workflow",
+          color: "#6366F1",
+        },
+        {
+          label: "Meeting Minutes",
+          value: "Meeting Minutes",
+          id: "Meeting Minutes",
+          icon: "NotebookPen",
+          color: "#64748B",
+        },
       ];
     }
-    const map = new Map<string, { label: string; value: string }>();
+    const map = new Map<
+      string,
+      { label: string; value: string; id: string; icon?: string; color?: string }
+    >();
     types
       .sort((a, b) => (a.order || 0) - (b.order || 0))
       .forEach((t) => {
         if (!map.has(t.label)) {
-          map.set(t.label, { label: t.label, value: t.label });
+          map.set(t.label, {
+            label: t.label,
+            value: t.label,
+            id: t.label,
+            icon: t.icon,
+            color: t.color,
+          });
         }
       });
     return Array.from(map.values());
@@ -1472,20 +1533,14 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
                       Jenis Kategori
                     </label>
-                    <div className="relative">
-                      <select
-                        value={editType}
-                        onChange={(e) => setEditType(e.target.value)}
-                        className="w-full bg-surface border border-border-subtle pl-3 pr-8 py-2 rounded-md text-xs font-medium text-content-body outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 appearance-none cursor-pointer transition-all shadow-2xs"
-                      >
-                        {documentTypes.map((t) => (
-                          <option key={t.value} value={t.value}>
-                            {t.label}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronRight className="w-3.5 h-3.5 text-content-subtle absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none rotate-90" />
-                    </div>
+                    <StyledDropdown
+                      value={editType}
+                      onChange={(val) => setEditType(val)}
+                      options={documentTypes}
+                      masterData={masterData}
+                      className="w-full"
+                      buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
+                    />
                   </div>
 
                   {/* External URL Link */}

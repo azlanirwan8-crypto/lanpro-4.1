@@ -38,6 +38,7 @@ import { cn } from "../../lib/utils";
 import { fetchMeetings, fetchDocuments } from "./services/dashboard.service";
 import { SidebarWidgetsStack } from "./components/SidebarWidgetsStack";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
+import { StyledDropdown } from "../../components/ui/CommonComponents";
 
 const defaultChartOrder = [
   "status-distribution",
@@ -248,6 +249,23 @@ export function DashboardView(props: DashboardViewProps) {
         !["done", "archive", "closed", "canceled"].includes(t.status?.toLowerCase() || "")
     );
   }, [tasks, currentUser]);
+
+  const sprintFilterOptions = useMemo(() => {
+    const allOption = {
+      id: "ALL",
+      label: `Semua Sprint (${tasks.length} tasks)`,
+      icon: "Layers",
+      color: "#6366F1",
+    };
+    const list = props.sprints.map((s) => ({
+      id: s.id,
+      label: s.name,
+      icon:
+        s.status === "active" ? "Flame" : s.status === "completed" ? "CheckCircle2" : "Calendar",
+      color: s.status === "active" ? "#F97316" : s.status === "completed" ? "#10B981" : "#3B82F6",
+    }));
+    return [allOption, ...list];
+  }, [props.sprints, tasks.length]);
 
   const [meetings, setMeetings] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
@@ -603,23 +621,15 @@ export function DashboardView(props: DashboardViewProps) {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             {/* Global Filter by Sprint */}
-            <div className="flex items-center gap-2 bg-surface-muted px-3 py-2 rounded-lg border border-border-subtle text-xs font-medium text-content-body ">
-              <Filter className="w-3.5 h-3.5 text-content-muted" />
-              <span>Sprint:</span>
-              <select
+            <div className="min-w-[220px]">
+              <StyledDropdown
                 value={selectedSprintFilter}
-                onChange={(e) => setSelectedSprintFilter(e.target.value)}
-                className="bg-transparent font-medium text-content-strong outline-none cursor-pointer"
-              >
-                <option value="ALL" className="bg-surface text-content-strong">
-                  Semua Sprint ({tasks.length} tasks)
-                </option>
-                {props.sprints.map((s) => (
-                  <option key={s.id} value={s.id} className="bg-surface text-content-strong">
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setSelectedSprintFilter(val)}
+                options={sprintFilterOptions}
+                masterData={[]}
+                className="w-full"
+                buttonClassName="h-10 bg-surface-muted rounded-lg border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
+              />
             </div>
 
             {/* Quick Action: Create Task */}

@@ -11,7 +11,7 @@ const Draggable = _Draggable as any;
 import { toast } from "sonner";
 import { MasterData, AppRole, PeranEfektif, UserProfile } from "../../types";
 import { Modal } from "../../components/ui/Modal";
-import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
+import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { RenderIcon, AVAILABLE_ICONS } from "../../components/RenderIcon";
 import { cn } from "../../lib/utils";
 import {
@@ -102,11 +102,6 @@ export const MasterDataPanel = ({
   const [isNewMasterModalOpen, setIsNewMasterModalOpen] = React.useState(false);
   const [editingMaster, setEditingMaster] = React.useState<MasterData | null>(null);
   const [isEditMasterModalOpen, setIsEditMasterModalOpen] = React.useState(false);
-  const [deleteConfirmState, setDeleteConfirmState] = React.useState<{
-    isOpen: boolean;
-    id: string;
-    label: string;
-  } | null>(null);
 
   const [isSaving, setIsSaving] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
@@ -443,18 +438,24 @@ export const MasterDataPanel = ({
     }
   };
 
-  const deleteMasterData = async (id: string) => {
+  const deleteMasterData = async (item: { id: string; label: string; isModule?: boolean }) => {
+    const isConfirmed = await confirmDeleteAlert(
+      "Apakah Anda Yakin?",
+      `Data master "${item.label}" akan dihapus secara permanen dan tidak dapat dikembalikan!`
+    );
+    if (!isConfirmed) return;
+
     setIsDeleting(true);
     try {
-      if (deleteConfirmState?.label.includes("(Modul)")) {
-        const data = await deleteProjectModule(id);
+      if (item.isModule || item.label.includes("(Modul)")) {
+        const data = await deleteProjectModule(item.id);
         if (data.status !== "success") throw new Error(data.message);
-        toast.success("Modul berhasil dihapus");
+        showSuccessAlert("Berhasil!", "Modul berhasil dihapus.");
         fetchProjectModules();
       } else {
-        const data = await deleteMasterDataApi(id);
+        const data = await deleteMasterDataApi(item.id);
         if (data.status !== "success") throw new Error(data.message);
-        toast.success("Master data berhasil dihapus");
+        showSuccessAlert("Berhasil!", "Data master berhasil dihapus.");
         onRefresh();
       }
     } catch (error: any) {
@@ -462,7 +463,6 @@ export const MasterDataPanel = ({
       toast.error(error.message || "Gagal menghapus master data.");
     } finally {
       setIsDeleting(false);
-      setDeleteConfirmState(null);
     }
   };
 
@@ -651,10 +651,10 @@ export const MasterDataPanel = ({
                             </button>
                             <button
                               onClick={() => {
-                                setDeleteConfirmState({
-                                  isOpen: true,
+                                deleteMasterData({
                                   id: mod.id,
                                   label: `${mod.namaModul} (Modul)`,
+                                  isModule: true,
                                 });
                               }}
                               className="w-7 h-7 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
@@ -966,10 +966,10 @@ export const MasterDataPanel = ({
                                           </button>
                                           <button
                                             onClick={() =>
-                                              setDeleteConfirmState({
-                                                isOpen: true,
+                                              deleteMasterData({
                                                 id: item.id,
                                                 label: item.label,
+                                                isModule: false,
                                               })
                                             }
                                             className="w-7 h-7 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
@@ -1610,24 +1610,6 @@ export const MasterDataPanel = ({
           </div>
         </div>
       </Modal>
-
-      {deleteConfirmState?.isOpen && (
-        <ConfirmationModal
-          isOpen={deleteConfirmState?.isOpen || false}
-          onClose={() => !isDeleting && setDeleteConfirmState(null)}
-          title="Apakah Anda Yakin?"
-          message={`Data master "${deleteConfirmState?.label}" akan dihapus secara permanen dan tidak dapat dikembalikan!`}
-          onConfirm={() => {
-            if (deleteConfirmState) {
-              deleteMasterData(deleteConfirmState.id);
-            }
-          }}
-          confirmText="Ya, Hapus!"
-          cancelText="Batal"
-          variant="danger"
-          isLoading={isDeleting}
-        />
-      )}
     </div>
   );
 };

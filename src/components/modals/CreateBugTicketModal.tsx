@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { XCircle, Search, CheckCircle2, Bug, ChevronDown } from "lucide-react";
 import { QATestCase } from "../../features/qa/types";
+import { StyledDropdown } from "../ui/CommonComponents";
 
 interface CreateBugTicketModalProps {
   isOpen: boolean;
@@ -188,34 +189,41 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
                 <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
                   SEVERITAS BUG
                 </label>
-                <select
+                <StyledDropdown
                   value={priorityInput}
-                  onChange={(e) => onPriorityChange(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong"
-                >
-                  <option value="Critical">Critical</option>
-                  <option value="High">High</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Low">Low</option>
-                </select>
+                  onChange={(val) => onPriorityChange(val)}
+                  options={[
+                    { id: "Critical", label: "Critical", icon: "Flame", color: "#EF4444" },
+                    { id: "High", label: "High", icon: "ChevronUp", color: "#F97316" },
+                    { id: "Medium", label: "Medium", icon: "Circle", color: "#F59E0B" },
+                    { id: "Low", label: "Low", icon: "ChevronDown", color: "#10B981" },
+                  ]}
+                  masterData={[]}
+                  className="w-full"
+                  buttonClassName="h-10 bg-surface-sunken rounded-md border border-border-subtle hover:border-border-subtle px-3 text-xs font-medium text-content-strong"
+                />
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
                   ASSIGNEE DEVELOPER
                 </label>
-                <select
+                <StyledDropdown
                   value={assigneeInput}
-                  onChange={(e) => onAssigneeChange(e.target.value)}
-                  className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong"
-                >
-                  <option value="">-- Belum Ditugaskan --</option>
-                  {(projectMembers || []).map((m: any, mIdx: number) => (
-                    <option key={m.id || m.uid || mIdx} value={m.id || m.uid}>
-                      {m.displayName || m.name || m.email || "Member"}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => onAssigneeChange(val)}
+                  options={[
+                    { id: "", label: "-- Belum Ditugaskan --", icon: "User", color: "#64748B" },
+                    ...(projectMembers || []).map((m: any) => ({
+                      id: m.id || m.uid,
+                      label: m.displayName || m.name || m.email || "Member",
+                      icon: "User",
+                      color: "#3B82F6",
+                    })),
+                  ]}
+                  masterData={[]}
+                  className="w-full"
+                  buttonClassName="h-10 bg-surface-sunken rounded-md border border-border-subtle hover:border-border-subtle px-3 text-xs font-medium text-content-strong"
+                />
               </div>
             </div>
 

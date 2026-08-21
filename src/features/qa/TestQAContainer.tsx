@@ -17,6 +17,7 @@ import {
   createTaskFromQA,
 } from "./services/qa.service";
 import { hasPermission } from "../../lib/permissions";
+import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { QAComment, QATestCase, QATestSuite, TestQAPanelProps } from "./types";
 import { QATopBar } from "./components/QATopBar";
 import { QASuiteSidebar } from "./components/QASuiteSidebar";
@@ -101,9 +102,6 @@ export function TestQAPanel({
     "Medium"
   );
   const [caseEditAssignedTo, setCaseEditAssignedTo] = useState("");
-
-  const [suiteToDelete, setSuiteToDelete] = useState<QATestSuite | null>(null);
-  const [caseToDelete, setCaseToDelete] = useState<QATestCase | null>(null);
 
   const [selectedTestCase, setSelectedTestCase] = useState<QATestCase | null>(null);
   const [drawerNewComment, setDrawerNewComment] = useState("");
@@ -336,13 +334,19 @@ export function TestQAPanel({
 
   const handleBulkDeleteCases = async () => {
     if (selectedCaseIds.length === 0) return;
+    const isConfirmed = await confirmDeleteAlert(
+      "Apakah Anda Yakin?",
+      `${selectedCaseIds.length} test case terpilih akan dihapus secara permanen dan tidak dapat dikembalikan!`
+    );
+    if (!isConfirmed) return;
+
     const updatedSuites = suites.map((suite) => ({
       ...suite,
       cases: suite.cases.filter((c) => !selectedCaseIds.includes(c.id)),
     }));
     saveSuitesToStorage(updatedSuites);
-    toast.success(`Berhasil menghapus ${selectedCaseIds.length} task sekaligus.`);
     setSelectedCaseIds([]);
+    showSuccessAlert("Berhasil!", `${selectedCaseIds.length} test case berhasil dihapus.`);
   };
 
   // Add Suite Handler
@@ -487,30 +491,44 @@ export function TestQAPanel({
   };
 
   // Delete Handlers
-  const handleDeleteSuite = async (id: string) => {
-    const updated = suites.filter((s) => s.id !== id);
+  const handleDeleteSuite = async (suite: QATestSuite) => {
+    const isConfirmed = await confirmDeleteAlert(
+      "Apakah Anda Yakin?",
+      `Test suite "${suite.name}" akan dihapus secara permanen dan tidak dapat dikembalikan!`
+    );
+    if (!isConfirmed) return;
+
+    const updated = suites.filter((s) => s.id !== suite.id);
     saveSuitesToStorage(updated);
-    if (selectedSuiteId === id) setSelectedSuiteId(updated[0]?.id || "");
+    if (selectedSuiteId === suite.id) setSelectedSuiteId(updated[0]?.id || "");
 
     try {
-      await deleteSuite(selectedProject.id, id);
-    } catch (e) {}
-    toast.success("Test suite dihapus.");
-    setSuiteToDelete(null);
+      await deleteSuite(selectedProject.id, suite.id);
+      showSuccessAlert("Berhasil!", "Test suite berhasil dihapus.");
+    } catch (e: any) {
+      toast.error(e?.message || "Gagal menghapus test suite.");
+    }
   };
 
-  const handleDeleteTestCase = async (id: string) => {
+  const handleDeleteTestCase = async (tc: QATestCase) => {
+    const isConfirmed = await confirmDeleteAlert(
+      "Apakah Anda Yakin?",
+      `Test case "${tc.title}" akan dihapus secara permanen dan tidak dapat dikembalikan!`
+    );
+    if (!isConfirmed) return;
+
     const updatedSuites = suites.map((suite) => ({
       ...suite,
-      cases: suite.cases.filter((c) => c.id !== id),
+      cases: suite.cases.filter((c) => c.id !== tc.id),
     }));
     saveSuitesToStorage(updatedSuites);
 
     try {
-      await deleteCase(selectedProject.id, id);
-    } catch (e) {}
-    toast.success("Test case dihapus.");
-    setCaseToDelete(null);
+      await deleteCase(selectedProject.id, tc.id);
+      showSuccessAlert("Berhasil!", "Test case berhasil dihapus.");
+    } catch (e: any) {
+      toast.error(e?.message || "Gagal menghapus test case.");
+    }
   };
 
   // Bug Ticket Creation Handler
@@ -698,7 +716,7 @@ export function TestQAPanel({
           setSuiteToEdit={setSuiteToEdit}
           setSuiteEditName={setSuiteEditName}
           setSuiteEditAssignedTo={setSuiteEditAssignedTo}
-          setSuiteToDelete={setSuiteToDelete}
+          handleDeleteSuite={handleDeleteSuite}
           activeSuitePicDropdownId={activeSuitePicDropdownId}
           setActiveSuitePicDropdownId={setActiveSuitePicDropdownId}
           handleUpdateSuitePic={handleUpdateSuitePic}
@@ -735,7 +753,7 @@ export function TestQAPanel({
           setCaseEditExpected={setCaseEditExpected}
           setCaseEditPriority={setCaseEditPriority}
           setCaseEditAssignedTo={setCaseEditAssignedTo}
-          setCaseToDelete={setCaseToDelete}
+          handleDeleteTestCase={handleDeleteTestCase}
           handleOpenCreateBugModal={handleOpenCreateBugModal}
           setSelectedTestCase={setSelectedTestCase}
           canCreate={canCreate}
@@ -819,12 +837,6 @@ export function TestQAPanel({
         caseEditAssignedTo={caseEditAssignedTo}
         setCaseEditAssignedTo={setCaseEditAssignedTo}
         submitEditTestCaseInfo={submitEditTestCaseInfo}
-        suiteToDelete={suiteToDelete}
-        setSuiteToDelete={setSuiteToDelete}
-        handleDeleteSuite={handleDeleteSuite}
-        caseToDelete={caseToDelete}
-        setCaseToDelete={setCaseToDelete}
-        handleDeleteTestCase={handleDeleteTestCase}
         isCreateBugModalOpen={isCreateBugModalOpen}
         setIsCreateBugModalOpen={setIsCreateBugModalOpen}
         bugModalTestCase={bugModalTestCase}

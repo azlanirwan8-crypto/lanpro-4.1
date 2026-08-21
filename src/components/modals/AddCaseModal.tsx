@@ -2,6 +2,7 @@ import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus, XCircle, Upload, Download } from "lucide-react";
 import { QATestSuite } from "../../features/qa/types";
+import { StyledDropdown } from "../ui/CommonComponents";
 
 interface AddCaseModalProps {
   isOpen: boolean;
@@ -144,16 +145,29 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                     <label className="text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider block">
                       Tingkat Prioritas *
                     </label>
-                    <select
+                    <StyledDropdown
                       value={casePriority}
-                      onChange={(e) => onPriorityChange(e.target.value as any)}
-                      className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-medium text-content-body cursor-pointer"
-                    >
-                      <option value="Low">Low Priority</option>
-                      <option value="Medium">Medium Priority</option>
-                      <option value="High">High Priority</option>
-                      <option value="Critical">Critical Priority</option>
-                    </select>
+                      onChange={(val) => onPriorityChange(val as any)}
+                      options={[
+                        {
+                          id: "Critical",
+                          label: "Critical Priority",
+                          icon: "Flame",
+                          color: "#EF4444",
+                        },
+                        { id: "High", label: "High Priority", icon: "ChevronUp", color: "#F97316" },
+                        {
+                          id: "Medium",
+                          label: "Medium Priority",
+                          icon: "Circle",
+                          color: "#F59E0B",
+                        },
+                        { id: "Low", label: "Low Priority", icon: "ChevronDown", color: "#10B981" },
+                      ]}
+                      masterData={[]}
+                      className="w-full"
+                      buttonClassName="h-10 bg-surface-sunken rounded-md border border-border-subtle hover:border-border-subtle px-3 text-xs font-medium text-content-body"
+                    />
                   </div>
                 </div>
 
