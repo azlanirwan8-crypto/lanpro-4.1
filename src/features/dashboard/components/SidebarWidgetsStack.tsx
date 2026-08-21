@@ -61,18 +61,18 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       {/* My Active Tasks */}
       <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-indigo-700 flex items-center gap-2">
-            <Zap className="w-4 h-4 text-indigo-500" /> My Active Tasks ({myActiveTasks.length})
+          <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-primary flex items-center gap-2">
+            <Zap className="w-4 h-4 text-primary" /> My Active Tasks ({myActiveTasks.length})
           </h3>
           {myActiveTasks.some((task) => isDueSoon24h(task.endDate)) && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-content-inverse animate-pulse shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
               ⏰ Urgen (24j)
             </span>
           )}
         </div>
         <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
           {myActiveTasks.length === 0 ? (
-            <div className="text-xs text-content-subtle font-medium italic text-center p-3">
+            <div className="text-xs text-content-muted font-medium italic text-center p-3">
               No active tasks assigned to you.
             </div>
           ) : (
@@ -80,10 +80,10 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
               <div
                 key={task.id}
                 className={cn(
-                  "group p-3 rounded-xl border transition-all cursor-pointer",
+                  "group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
                   isDueSoon24h(task.endDate)
-                    ? "border-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-amber-500 hover:bg-amber-500/10"
-                    : "border-indigo-500/30 hover:border-indigo-500/30 hover:shadow-2xs bg-surface"
+                    ? "border-warning bg-warning-surface/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-warning hover:bg-warning-surface/20"
+                    : "border-border-subtle hover:border-primary-border/60 hover:shadow-2xs"
                 )}
                 onClick={() => {
                   setSelectedTaskForDetail(task);
@@ -92,16 +92,16 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
               >
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1.5">
-                    <div className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2 py-[3px] rounded-full">
+                    <div className="text-[10px] leading-none font-medium text-primary bg-primary-surface/10 px-2 py-[3px] rounded-full">
                       {task.key}
                     </div>
                     {isDueSoon24h(task.endDate) && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-content-inverse animate-pulse">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
                   </div>
-                  <div className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
+                  <div className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider">
                     {task.priority}
                   </div>
                 </div>
@@ -115,27 +115,21 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </div>
 
       {/* Blocked / Stoppers */}
-      <div
-        className="shadow-soft border rounded-xl p-5"
-        style={{
-          borderColor: "rgba(239, 68, 68, 0.4)",
-          backgroundColor: "rgba(254, 242, 242, 0.5)",
-        }}
-      >
+      <div className="bg-surface shadow-soft border border-danger-border/40 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-rose-700 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-500 animate-bounce" /> Stoppers / Blocked (
+          <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-danger flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-danger animate-bounce" /> Stoppers / Blocked (
             {blockedTasks.length})
           </h3>
           {blockedTasks.some((task) => isDueSoon24h(task.endDate)) && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-content-inverse animate-pulse shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
               ⏰ Urgen (24j)
             </span>
           )}
         </div>
         <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
           {blockedTasks.length === 0 ? (
-            <div className="text-xs text-content-subtle font-medium italic p-2">
+            <div className="text-xs text-content-muted font-medium italic p-3 text-center">
               No blocked tasks.
             </div>
           ) : (
@@ -145,8 +139,8 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                 className={cn(
                   "group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
                   isDueSoon24h(task.endDate)
-                    ? "border-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-amber-500 hover:bg-amber-500/10"
-                    : "border-rose-500/30 hover:border-rose-500/30 hover:shadow-2xs"
+                    ? "border-warning bg-warning-surface/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-warning hover:bg-warning-surface/20"
+                    : "border-danger-border/30 hover:border-danger-border/60 hover:shadow-2xs"
                 )}
                 onClick={() => {
                   setSelectedTaskForDetail(task);
@@ -155,16 +149,16 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
               >
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1.5">
-                    <div className="text-[10px] leading-none font-medium text-rose-600 bg-rose-500/10 px-2 py-[3px] rounded-full">
+                    <div className="text-[10px] leading-none font-medium text-danger bg-danger-surface/20 px-2 py-[3px] rounded-full">
                       {task.key}
                     </div>
                     {isDueSoon24h(task.endDate) && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-content-inverse animate-pulse">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
                   </div>
-                  <div className="text-xs sm:text-[10px] font-medium text-rose-500 uppercase tracking-wider">
+                  <div className="text-xs sm:text-[10px] font-medium text-danger uppercase tracking-wider">
                     Blocked
                   </div>
                 </div>
@@ -178,31 +172,29 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </div>
 
       {/* Needs Attention / Overdue */}
-      <div className="bg-surface shadow-soft border border-rose-500/30 rounded-xl p-5">
+      <div className="bg-surface shadow-soft border border-danger-border/30 rounded-xl p-5">
         <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2 mb-3">
-          <AlertCircle className="w-4 h-4 text-rose-500 animate-pulse" /> Needs Attention (
+          <AlertCircle className="w-4 h-4 text-danger animate-pulse" /> Needs Attention (
           {overdueTasks.length})
         </h3>
         <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
           {overdueTasks.length === 0 ? (
-            <div className="text-xs text-content-subtle font-medium italic p-2">
+            <div className="text-xs text-content-muted font-medium italic p-3 text-center">
               All clear! No overdue tasks.
             </div>
           ) : (
             overdueTasks.map((task) => (
               <div
                 key={task.id}
-                className="group p-3 rounded-xl border border-border-faint hover:border-rose-500/30 hover:shadow-2xs transition-all cursor-pointer bg-surface"
+                className="group p-3 rounded-xl border border-border-subtle hover:border-danger-border/60 hover:shadow-2xs transition-all cursor-pointer bg-surface"
                 onClick={() => {
                   setSelectedTaskForDetail(task);
                   setIsTaskDetailModalOpen(true);
                 }}
               >
                 <div className="flex justify-between items-start mb-1">
-                  <div className="text-xs sm:text-[10px] font-medium text-indigo-600">
-                    {task.key}
-                  </div>
-                  <div className="text-xs sm:text-[10px] font-medium text-rose-500 uppercase tracking-wider">
+                  <div className="text-xs sm:text-[10px] font-medium text-primary">{task.key}</div>
+                  <div className="text-xs sm:text-[10px] font-medium text-danger uppercase tracking-wider">
                     Overdue
                   </div>
                 </div>
@@ -216,20 +208,20 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </div>
 
       {/* Due Soon */}
-      <div className="bg-surface shadow-soft border border-border-faint/80 rounded-xl p-5">
+      <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2">
-            <Zap className="w-4 h-4 text-amber-500" /> Due Soon (3 Days) ({dueSoonTasks.length})
+            <Zap className="w-4 h-4 text-warning" /> Due Soon (3 Days) ({dueSoonTasks.length})
           </h3>
           {dueSoonTasks.some((task) => isDueSoon24h(task.endDate)) && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-content-inverse animate-pulse shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
               ⏰ Urgen (24j)
             </span>
           )}
         </div>
         <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
           {dueSoonTasks.length === 0 ? (
-            <div className="text-xs text-content-subtle font-medium italic p-2">
+            <div className="text-xs text-content-muted font-medium italic p-3 text-center">
               No urgent deadlines in next 3 days.
             </div>
           ) : (
@@ -237,10 +229,10 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
               <div
                 key={task.id}
                 className={cn(
-                  "group p-3 rounded-xl border transition-all cursor-pointer",
+                  "group p-3 rounded-xl border transition-all cursor-pointer bg-surface",
                   isDueSoon24h(task.endDate)
-                    ? "border-amber-400 bg-amber-500/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-amber-500 hover:bg-amber-500/10"
-                    : "border-border-faint hover:border-indigo-500/30 hover:shadow-2xs bg-surface"
+                    ? "border-warning bg-warning-surface/10 shadow-[0_0_12px_rgba(245,158,11,0.15)] hover:border-warning hover:bg-warning-surface/20"
+                    : "border-border-subtle hover:border-primary-border/60 hover:shadow-2xs"
                 )}
                 onClick={() => {
                   setSelectedTaskForDetail(task);
@@ -249,16 +241,16 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
               >
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex items-center gap-1.5">
-                    <div className="text-xs sm:text-[10px] font-medium text-indigo-600">
+                    <div className="text-xs sm:text-[10px] font-medium text-primary">
                       {task.key}
                     </div>
                     {isDueSoon24h(task.endDate) && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-amber-500 text-content-inverse animate-pulse">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
                   </div>
-                  <div className="text-xs sm:text-[10px] font-medium text-content-subtle">
+                  <div className="text-xs sm:text-[10px] font-medium text-content-muted">
                     {formatDistanceToNow(ensureDate(task.endDate!), {
                       addSuffix: true,
                     })}
@@ -274,32 +266,32 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </div>
 
       {/* Recent Meeting Notes */}
-      <div className="bg-surface shadow-soft border border-border-faint/80 rounded-xl p-5">
+      <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2">
-            <Video className="w-4 h-4 text-sky-500" /> Recent Meetings ({meetings.length})
+            <Video className="w-4 h-4 text-info" /> Recent Meetings ({meetings.length})
           </h3>
         </div>
         <div className="space-y-2.5 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
           {meetings.length === 0 ? (
-            <div className="text-xs text-content-subtle font-medium italic p-2">
+            <div className="text-xs text-content-muted font-medium italic p-3 text-center">
               No meeting notes yet.
             </div>
           ) : (
             meetings.map((meeting: any) => (
               <div
                 key={meeting.id}
-                className="group p-3 rounded-xl border border-border-subtle/70 hover:border-sky-500/30 transition-all cursor-pointer bg-surface shadow-2xs"
+                className="group p-3 rounded-xl border border-border-subtle/70 hover:border-info-border/60 transition-all cursor-pointer bg-surface shadow-2xs"
                 onClick={() => setCurrentView("meetings")}
               >
                 <div className="text-xs font-medium text-content-strong line-clamp-1 mb-1 leading-normal">
                   {meeting.title}
                 </div>
-                <div className="flex justify-between items-center text-xs sm:text-[10px] text-content-subtle">
+                <div className="flex justify-between items-center text-xs sm:text-[10px] text-content-muted">
                   <span className="font-medium uppercase text-content-muted">
                     {format(ensureDate(meeting.createdAt), "MMM dd, yyyy")}
                   </span>
-                  <span className="text-sky-500 flex items-center gap-1 font-medium">
+                  <span className="text-info flex items-center gap-1 font-medium">
                     Open <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
@@ -310,32 +302,32 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       </div>
 
       {/* Recent Documentation */}
-      <div className="bg-surface shadow-soft border border-border-faint/80 rounded-xl p-5">
+      <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2">
-            <FileText className="w-4 h-4 text-teal-500" /> Documentation ({documents.length})
+            <FileText className="w-4 h-4 text-success" /> Documentation ({documents.length})
           </h3>
         </div>
         <div className="space-y-2.5 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
           {documents.length === 0 ? (
-            <div className="text-xs text-content-subtle font-medium italic p-2">
+            <div className="text-xs text-content-muted font-medium italic p-3 text-center">
               No documents uploaded.
             </div>
           ) : (
             documents.map((doc: any) => (
               <div
                 key={doc.id}
-                className="group p-3 rounded-xl border border-border-faint hover:border-teal-500/30 hover:shadow-2xs transition-all cursor-pointer bg-surface"
+                className="group p-3 rounded-xl border border-border-subtle hover:border-success-border/60 hover:shadow-2xs transition-all cursor-pointer bg-surface"
                 onClick={() => setCurrentView("wiki")}
               >
                 <div className="text-xs font-medium text-content-strong leading-snug line-clamp-1 mb-1">
                   {doc.title}
                 </div>
-                <div className="text-xs sm:text-[10px] font-medium text-content-subtle flex justify-between">
-                  <span className="uppercase tracking-wider text-teal-600 bg-teal-500/10 px-1 py-0.5 rounded font-mono">
+                <div className="text-xs sm:text-[10px] font-medium text-content-muted flex justify-between">
+                  <span className="uppercase tracking-wider text-success bg-success-surface/10 px-1 py-0.5 rounded font-mono">
                     {doc.type || "DOC"}
                   </span>
-                  <span className="text-teal-500 flex items-center gap-1 font-medium">
+                  <span className="text-success flex items-center gap-1 font-medium">
                     View <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
