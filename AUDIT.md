@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 16 BELUM · 103 SELESAI · 3 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 14 BELUM · 105 SELESAI · 3 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 16 item
+### 1.1 BELUM SELESAI — 14 item
 
-**Sebaran per fase:** F1 0 · F2 2 · F3 5 · F5 1 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 7
+**Sebaran per fase:** F1 0 · F2 2 · F3 4 · F5 1 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 6
 
 **Masih menahan rilis production:** #30 · #121 (keamanan, diusulkan 21 Agu — menunggu penilaian pemilik proyek)
 
@@ -500,9 +500,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 108 | Token `--color-content-subtle` `#94a3b8` memberi **2,56:1** di atas `bg-surface` putih — gagal AA teks, AA besar, DAN komponen UI sekaligus. Dipakai 641 tempat. Sisi gelapnya `#7c8ba1` sehat 5,03                      | **F12** | 🔴  | Tinggi        |       Tidak        | `BELUM`           | §21.4  |
 | 109 | Mode TERANG punya 36 kegagalan di bawah 3,0 (gelap hanya 11) — kebalikan dari asumsi yang mendasari #98–#100. Sebagian besar berakar di #108                                                                             | **F12** | 🟠  | Tinggi        |       Tidak        | `BELUM`           | §21.4  |
 | 110 | Panel merek layar auth MEMBALIK jadi lebih terang di mode gelap (`rgb(54,68,115)` → `rgb(133,149,203)`); token aksen dipakai sebagai latar besar, §22.3 menyebut peran itu milik `-surface`                              | **F12** | 🟠  | Sedang        |       Tidak        | `BELUM`           | §22.3  |
-| 111 | Kartu Blocked/Stoppers mewarnai nilai `0` MERAH (`text-rose-600`) padahal nol berarti kabar baik; kartu `Done 0` di sebelahnya netral padahal kabar buruk. Kontras gelapnya 3,84                                         | **F12** | 🟠  | Rendah        |       Tidak        | `BELUM`           | §14    |
 | 112 | Dashboard menampilkan DUA populasi angka sekaligus: dropdown & isi breakdown memakai 12, kartu KPI & judul breakdown memakai 3. Judul "3 Total" di atas daftar berjumlah 12 salah, bukan ambigu                          | **F2**  | 🔴  | Sedang        |       Tidak        | `BELUM`           | §13    |
-| 114 | Campur bahasa masuk ke DALAM satu label di dashboard: "Done / Selesai Tasks", "Semua Sprint (12 Tasks)", sapaan Inggris di atas subteks Indonesia. Sidebar juga "MANAGEMENT PROJECT" terbalik                            | **F3**  | 🟡  | Sedang        |       Tidak        | `BELUM`           | §14    |
 | 115 | Tiga kontrol layar masuk setinggi 16px tanpa padding vertikal, di bawah rentang sentuh 36–44px yang ditetapkan #14 (`Lupa Kata Sandi?` 103×16, `Daftar` 45×16, kotak centang 16×16)                                      | **F12** | 🟡  | Rendah        |       Tidak        | `BELUM`           | §14    |
 | 116 | Panel merek `hidden lg:flex` hilang di 768–1023px, menyisakan bidang kosong berisi ornamen rangka saja; merek turun jadi wordmark kecil di pojok                                                                         | **F3**  | 🟡  | Rendah        |       Tidak        | `BELUM`           | §14    |
 | 118 | Placeholder kata sandi berupa delapan karakter bulatan harfiah (4 tempat); nama aksesibilitasnya jadi `••••••••` dan field terbaca seolah sudah terisi                                                                   | **F3**  | 🟢  | Sangat rendah |       Tidak        | `BELUM`           | §14    |
@@ -511,7 +509,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 121 | `POST /api/auth/forgot-password` mengembalikan 404 untuk email tak dikenal (orakel enumerasi) DAN mereset kata sandi pengguna atas permintaan TANPA autentikasi — siapa pun yang tahu sebuah email bisa mengunci akunnya | **F2**  | 🔴  | Rendah        |   Ya (keamanan)    | `BELUM`           | §6     |
 | 122 | `GET /uploads/avatar-1-1786840166479.jpg` mengembalikan 404 berulang-ulang di konsol; berkas avatar hilang dan komponennya terus mencoba lagi tanpa henti                                                                | **F5**  | 🟡  | Sangat rendah |       Tidak        | `BELUM`           | §5     |
 
-### 1.2 SUDAH SELESAI — 103 item
+### 1.2 SUDAH SELESAI — 105 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -619,6 +617,8 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 105 | ~~Kartu KPI dashboard menampilkan panah tren NAIK saat delta nol~~ ikon jadi netral (`Minus`) dan tanda `+` disembunyikan saat 0%; warna `content-muted`                                      |  **F3**  | 🟡  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §14    |
 | 113 | ~~Tombol "Kirim Tautan" menyebut mekanisme yang tidak ada~~ jadi "Kirim Kata Sandi Baru", selaras dengan isi modal dan `auth.routes.ts:441` yang memang mengirim kata sandi                   |  **F6**  | 🟠  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §12    |
 | 117 | ~~Sumbu Y chart memakai pecahan untuk satuan cacahan~~ `allowDecimals={false}` pada dua chart dashboard; sumbu sprint 0/0,25/0,5/0,75/1 → 0/1/2/3/4                                           |  **F3**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §14    |
+| 111 | ~~Kartu Blocked/Stoppers mewarnai nilai `0` MERAH~~ merah hanya bila ada yang tersumbat; `text-rose-600` → token `danger-text` (6,47 terang · 7,12 gelap)                                     | **F12**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §14    |
+| 114 | ~~Campur bahasa DI DALAM satu label dashboard~~ 4 label KPI, ringkasan Stoppers, dropdown sprint, sapaan, dan judul sidebar diseragamkan ke bahasa Indonesia                                  |  **F3**  | 🟡  | Sedang        |         Tidak          | `SELESAI` 21 Agu | §14    |
 | 101 | ~~Layar masuk & daftar mencampur label Inggris dengan kontrol Indonesia~~ seluruh teks kasat mata layar auth diterjemahkan (`LoginScreen`, `RegisterScreen`, `LoginSkeletonState`, `useAuth`) | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §12    |
 | 102 | ~~Atribut `required` membuat validasi bawaan peramban (selalu Inggris) menyela Zod~~ `required` dilepas dari 4 input daftar sehingga pesan `registrationSchema` Indonesia yang tampil         | **F12**  | 🟢  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §12    |
 
