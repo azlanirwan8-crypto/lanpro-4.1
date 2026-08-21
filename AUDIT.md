@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 10 BELUM · 110 SELESAI · 3 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 7 BELUM · 113 SELESAI · 3 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,9 +486,9 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 10 item
+### 1.1 BELUM SELESAI — 7 item
 
-**Sebaran per fase:** F1 0 · F2 2 · F3 4 · F5 1 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 3
+**Sebaran per fase:** F1 0 · F2 2 · F3 2 · F5 1 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 1
 
 **Masih menahan rilis production:** #30 · #121 (keamanan, diusulkan 21 Agu — menunggu penilaian pemilik proyek)
 
@@ -497,15 +497,12 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)                                                                                                                                              | **F11** | 🔴  | Tinggi        | Blokir production  | `MENUNGGU` desain | §1.5   |
 | 123 | Mode GELAP kini yang tertinggal: 32 temuan kontras, akarnya warna keras `indigo-600` · `blue-600` · lapisan `bg-{warna}/15` pada avatar, dan legenda chart `recharts-legend-item-text` 2,54 di kedua mode                | **F12** | 🟠  | Sedang        |       Tidak        | `BELUM`           | §21.4  |
 | 112 | Dashboard menampilkan DUA populasi angka sekaligus: dropdown & isi breakdown memakai 12, kartu KPI & judul breakdown memakai 3. Judul "3 Total" di atas daftar berjumlah 12 salah, bukan ambigu                          | **F2**  | 🔴  | Sedang        |       Tidak        | `BELUM`           | §13    |
-| 115 | Tiga kontrol layar masuk setinggi 16px tanpa padding vertikal, di bawah rentang sentuh 36–44px yang ditetapkan #14 (`Lupa Kata Sandi?` 103×16, `Daftar` 45×16, kotak centang 16×16)                                      | **F12** | 🟡  | Rendah        |       Tidak        | `BELUM`           | §14    |
-| 116 | Panel merek `hidden lg:flex` hilang di 768–1023px, menyisakan bidang kosong berisi ornamen rangka saja; merek turun jadi wordmark kecil di pojok                                                                         | **F3**  | 🟡  | Rendah        |       Tidak        | `BELUM`           | §14    |
-| 118 | Placeholder kata sandi berupa delapan karakter bulatan harfiah (4 tempat); nama aksesibilitasnya jadi `••••••••` dan field terbaca seolah sudah terisi                                                                   | **F3**  | 🟢  | Sangat rendah |       Tidak        | `BELUM`           | §14    |
 | 119 | Ornamen rangka putus-putus di latar layar auth; pola dekoratif, paling terekspos di lebar tablet karena #116                                                                                                             | **F3**  | 🟢  | Sangat rendah |       Tidak        | `BELUM`           | §14    |
 | 120 | Emoji `✅` dipakai sebagai elemen antarmuka pada lencana "Balanced" (`DashboardView.tsx:1040`); glif emoji tidak mengikuti token warna sehingga lepas dari kendali tema                                                  | **F3**  | 🟢  | Sangat rendah |       Tidak        | `BELUM`           | §14    |
 | 121 | `POST /api/auth/forgot-password` mengembalikan 404 untuk email tak dikenal (orakel enumerasi) DAN mereset kata sandi pengguna atas permintaan TANPA autentikasi — siapa pun yang tahu sebuah email bisa mengunci akunnya | **F2**  | 🔴  | Rendah        |   Ya (keamanan)    | `BELUM`           | §6     |
 | 122 | `GET /uploads/avatar-1-1786840166479.jpg` mengembalikan 404 berulang-ulang di konsol; berkas avatar hilang dan komponennya terus mencoba lagi tanpa henti                                                                | **F5**  | 🟡  | Sangat rendah |       Tidak        | `BELUM`           | §5     |
 
-### 1.2 SUDAH SELESAI — 110 item
+### 1.2 SUDAH SELESAI — 113 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -620,6 +617,9 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 108 | ~~Token `content-subtle` 2,56:1 di mode terang~~ `#94a3b8` → `#64748b` (4,76:1, lolos AA); 641 pemakaian ikut terbawa sekaligus                                                                               | **F12**  | 🔴  | Tinggi        |         Tidak          | `SELESAI` 21 Agu | §21.4  |
 | 109 | ~~Mode terang lebih buruk daripada mode gelap~~ tertutup oleh #108; terukur 44 → 12 di mode terang, keadaannya kini terbalik                                                                                  | **F12**  | 🟠  | Tinggi        |         Tidak          | `SELESAI` 21 Agu | §21.4  |
 | 110 | ~~Panel merek layar auth membalik jadi lebih terang di mode gelap~~ gradasi pindah ke peran `-surface` yang mode-stabil; token `primary-surface-active` ditambahkan supaya tampilan mode terang tidak berubah | **F12**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 21 Agu | §22.3  |
+| 115 | ~~Tiga kontrol layar masuk di bawah rentang sentuh #14~~ `py-2.5 -my-2.5`; terukur 36px tanpa menggeser tata letak                                                                                            | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §14    |
+| 116 | ~~Panel merek hilang di 768–1023px~~ breakpoint turun ke `md`; diverifikasi di 375/768/1024/1440 tanpa scroll horizontal                                                                                      |  **F3**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §14    |
+| 118 | ~~Placeholder kata sandi berupa karakter bulatan~~ diganti teks bermakna di 7 tempat (4 layar auth + 3 panel pengguna); nol bulatan tersisa                                                                   |  **F3**  | 🟢  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §14    |
 | 101 | ~~Layar masuk & daftar mencampur label Inggris dengan kontrol Indonesia~~ seluruh teks kasat mata layar auth diterjemahkan (`LoginScreen`, `RegisterScreen`, `LoginSkeletonState`, `useAuth`)                 | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §12    |
 | 102 | ~~Atribut `required` membuat validasi bawaan peramban (selalu Inggris) menyela Zod~~ `required` dilepas dari 4 input daftar sehingga pesan `registrationSchema` Indonesia yang tampil                         | **F12**  | 🟢  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §12    |
 
