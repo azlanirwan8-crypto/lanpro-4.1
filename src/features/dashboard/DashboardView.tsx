@@ -862,7 +862,13 @@ export function DashboardView(props: DashboardViewProps) {
                       axisLine={false}
                       tickLine={false}
                     />
+                    {/* #117 — satuannya task dan story point, keduanya cacahan.
+                        Tanpa `allowDecimals={false}` Recharts membagi rentang
+                        jadi empat, sehingga sumbu berbunyi 0,25 / 0,5 / 0,75
+                        setiap kali nilai maksimumnya kecil. 0,75 task tidak
+                        ada wujudnya. */}
                     <YAxis
+                      allowDecimals={false}
                       tick={{ fontSize: 11, fill: "#64748b" }}
                       axisLine={false}
                       tickLine={false}
@@ -1240,7 +1246,12 @@ export function DashboardView(props: DashboardViewProps) {
                       axisLine={false}
                       tickLine={false}
                     />
+                    {/* #117 — cacat yang SAMA. Belum tampak karena data
+                        contohnya kebetulan mencapai 9, tetapi Activity dan
+                        Completed juga cacahan dan akan pecah begitu angkanya
+                        mengecil. */}
                     <YAxis
+                      allowDecimals={false}
                       tick={{ fontSize: 10, fill: "#64748b" }}
                       axisLine={false}
                       tickLine={false}
