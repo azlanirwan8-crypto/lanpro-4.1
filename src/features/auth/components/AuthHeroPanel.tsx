@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { VelzonFloatingParticles } from "../../../components/ui/CoreUI";
 
 export const AuthHeroPanel = () => (
-  <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-primary-surface-hover via-primary-surface to-primary-surface-active items-center justify-center p-8 xl:p-12 select-none min-h-screen z-10 overflow-hidden">
+  <div className="hidden md:flex md:w-1/2 relative bg-gradient-to-br from-primary-surface-hover via-primary-surface to-primary-surface-active items-center justify-center p-8 xl:p-12 select-none min-h-screen z-10 overflow-hidden">
     {/* Floating White Particles Effect */}
     <VelzonFloatingParticles />
 

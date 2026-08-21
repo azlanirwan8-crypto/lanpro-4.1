@@ -3304,7 +3304,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen flex flex-col lg:flex-row font-sans bg-surface-sunken overflow-x-hidden">
+      <div className="min-h-screen flex flex-col md:flex-row font-sans bg-surface-sunken overflow-x-hidden">
         <Toaster position="top-right" richColors />
         <RateLimitIndicator />
 
@@ -3312,7 +3312,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         <AuthHeroPanel />
 
         {/* Form Side with Watermark & Animated Form Switching */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-12 bg-surface-muted relative overflow-y-auto min-h-screen">
+        <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-12 bg-surface-muted relative overflow-y-auto min-h-screen">
           <AuthWatermarkPattern />
 
           <AnimatePresence mode="wait">
