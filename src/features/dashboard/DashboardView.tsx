@@ -932,8 +932,13 @@ export function DashboardView(props: DashboardViewProps) {
                     <LayoutGrid className="w-4 h-4 text-purple-500" />
                     Task Breakdown by Type
                   </h3>
+                  {/* #112 — judul WAJIB menjumlahkan isi yang ditampilkan.
+                      Sebelumnya ia memakai `totalTasks` sementara isinya
+                      dihitung dari `filteredTasks`, jadi "3 Total" berdiri di
+                      atas daftar yang berjumlah 12. Itu bukan ambigu, itu
+                      salah. */}
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle">
-                    {totalTasks} Total
+                    {taskTypeBreakdown.reduce((a, t) => a + t.value, 0)} Total
                   </span>
                 </div>
 
@@ -973,8 +978,9 @@ export function DashboardView(props: DashboardViewProps) {
                     <PieChartIcon className="w-4 h-4 text-emerald-500" />
                     Task Breakdown by Status
                   </h3>
+                  {/* #112 — idem, dijumlahkan dari isinya sendiri. */}
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle">
-                    {totalTasks} Total
+                    {statusBreakdown.reduce((a, t) => a + t.value, 0)} Total
                   </span>
                 </div>
 
