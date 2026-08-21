@@ -13,6 +13,7 @@ import {
   PieChartIcon,
   Users,
   ArrowUpRight,
+  Minus,
   ShieldAlert,
   Target,
   Filter,
@@ -657,8 +658,20 @@ export function DashboardView(props: DashboardViewProps) {
               </div>
             </div>
             <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
-              <span className="flex items-center gap-1 font-medium text-emerald-600">
-                <ArrowUpRight className="w-3.5 h-3.5" /> {completionPercentage}% Completed
+              {/* #105 — panah NAIK hanya bila memang ada kenaikan. Saat 0%
+                  tidak ada yang tumbuh, jadi ikonnya netral dan warnanya bukan
+                  hijau "bertumbuh". */}
+              <span
+                className={`flex items-center gap-1 font-medium ${
+                  completionPercentage > 0 ? "text-emerald-600" : "text-content-muted"
+                }`}
+              >
+                {completionPercentage > 0 ? (
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                ) : (
+                  <Minus className="w-3.5 h-3.5" />
+                )}{" "}
+                {completionPercentage}% Completed
               </span>
               <button
                 onClick={() => props.setCurrentView("kanban")}
@@ -713,8 +726,22 @@ export function DashboardView(props: DashboardViewProps) {
               </div>
             </div>
             <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
-              <span className="flex items-center gap-1 font-medium text-emerald-600">
-                <ArrowUpRight className="w-3.5 h-3.5" /> +{completionPercentage}% Rate
+              {/* #105 — idem. Tanda `+` ikut disembunyikan saat nol; "+0%"
+                  membaca seperti pertumbuhan yang tidak terjadi. */}
+              <span
+                className={`flex items-center gap-1 font-medium ${
+                  completionPercentage > 0 ? "text-emerald-600" : "text-content-muted"
+                }`}
+              >
+                {completionPercentage > 0 ? (
+                  <>
+                    <ArrowUpRight className="w-3.5 h-3.5" /> +{completionPercentage}% Rate
+                  </>
+                ) : (
+                  <>
+                    <Minus className="w-3.5 h-3.5" /> {completionPercentage}% Rate
+                  </>
+                )}
               </span>
               <button
                 onClick={() => props.setCurrentView("kanban")}

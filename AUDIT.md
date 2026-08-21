@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 2 BELUM · 100 SELESAI · 3 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 1 BELUM · 101 SELESAI · 3 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,18 +486,17 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 2 item
+### 1.1 BELUM SELESAI — 1 item
 
-**Sebaran per fase:** F1 0 · F2 0 · F3 1 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 0 · F3 0 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
-| #   | Temuan                                                                                                                                            |  Fase   | Sev | Biaya         | Blokir modul baru? | Status            | Detail |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------- | :-----: | :-: | ------------- | :----------------: | ----------------- | ------ |
-| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)                                                                       | **F11** | 🔴  | Tinggi        | Blokir production  | `MENUNGGU` desain | §1.5   |
-| 105 | Kartu KPI dashboard menampilkan panah tren NAIK (`↗`) dan tanda `+` saat delta nol — `0% Completed` dan `+0% Rate` terbaca seolah ada pertumbuhan | **F3**  | 🟡  | Sangat rendah |       Tidak        | `BELUM`           | §14    |
+| #   | Temuan                                                                      |  Fase   | Sev | Biaya  | Blokir modul baru? | Status            | Detail |
+| --- | --------------------------------------------------------------------------- | :-----: | :-: | ------ | :----------------: | ----------------- | ------ |
+| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2) | **F11** | 🔴  | Tinggi | Blokir production  | `MENUNGGU` desain | §1.5   |
 
-### 1.2 SUDAH SELESAI — 100 item
+### 1.2 SUDAH SELESAI — 101 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -602,6 +601,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 100 | ~~Kontras card Stoppers/Blocked di dashboard silau/rusak di mode gelap~~ inline style hardcoded dihapus & diselaraskan ke token semantik `bg-surface`, `danger-*`, `warning-*`                | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §12    |
 | 103 | ~~Token aksen `-text` ditulis di dalam `@theme` di atas nilai mode terang~~ dipindah ke `html.dark` sehingga versi gelapnya berlaku; badge sprint aktif 2,15 → 5,78                           | **F12**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §19.50 |
 | 104 | ~~Pemindai kontras §21.3 mengarang tabrakan~~ `rgb()` memakai canvas 1×1 tanpa `clearRect`, warna beralpha menumpuk hingga `bgOf` menerima lapisan transparan sebagai latar pekat             | **F12**  | 🔴  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §21.3  |
+| 105 | ~~Kartu KPI dashboard menampilkan panah tren NAIK saat delta nol~~ ikon jadi netral (`Minus`) dan tanda `+` disembunyikan saat 0%; warna `content-muted`                                      |  **F3**  | 🟡  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §14    |
 | 101 | ~~Layar masuk & daftar mencampur label Inggris dengan kontrol Indonesia~~ seluruh teks kasat mata layar auth diterjemahkan (`LoginScreen`, `RegisterScreen`, `LoginSkeletonState`, `useAuth`) | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §12    |
 | 102 | ~~Atribut `required` membuat validasi bawaan peramban (selalu Inggris) menyela Zod~~ `required` dilepas dari 4 input daftar sehingga pesan `registrationSchema` Indonesia yang tampil         | **F12**  | 🟢  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §12    |
 
