@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 1 BELUM · 96 SELESAI · 3 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 2 BELUM · 100 SELESAI · 3 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,17 +486,18 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 1 item
+### 1.1 BELUM SELESAI — 2 item
 
-**Sebaran per fase:** F1 0 · F2 0 · F3 0 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 0 · F3 1 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
-| #   | Temuan                                                                      |  Fase   | Sev | Biaya  | Blokir modul baru? | Status            | Detail |
-| --- | --------------------------------------------------------------------------- | :-----: | :-: | ------ | :----------------: | ----------------- | ------ |
-| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2) | **F11** | 🔴  | Tinggi | Blokir production  | `MENUNGGU` desain | §1.5   |
+| #   | Temuan                                                                                                                                            |  Fase   | Sev | Biaya         | Blokir modul baru? | Status            | Detail |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------- | :-----: | :-: | ------------- | :----------------: | ----------------- | ------ |
+| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)                                                                       | **F11** | 🔴  | Tinggi        | Blokir production  | `MENUNGGU` desain | §1.5   |
+| 105 | Kartu KPI dashboard menampilkan panah tren NAIK (`↗`) dan tanda `+` saat delta nol — `0% Completed` dan `+0% Rate` terbaca seolah ada pertumbuhan | **F3**  | 🟡  | Sangat rendah |       Tidak        | `BELUM`           | §14    |
 
-### 1.2 SUDAH SELESAI — 98 item
+### 1.2 SUDAH SELESAI — 100 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -599,6 +600,8 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 98  | ~~Dark mode sidebar & layout beda dengan Velzon~~ diselaraskan via token semantik `sidebar-*` (Dark Navy di Terang, Clean Dark Charcoal di Gelap) + perapian menu                             | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §22    |
 | 99  | ~~Pengubah tema di header berupa dropdown 2-klik~~ disederhanakan jadi tombol toggle langsung 1-klik (Moon/Sun) sesuai standar Velzon                                                         | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §12    |
 | 100 | ~~Kontras card Stoppers/Blocked di dashboard silau/rusak di mode gelap~~ inline style hardcoded dihapus & diselaraskan ke token semantik `bg-surface`, `danger-*`, `warning-*`                | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §12    |
+| 103 | ~~Token aksen `-text` ditulis di dalam `@theme` di atas nilai mode terang~~ dipindah ke `html.dark` sehingga versi gelapnya berlaku; badge sprint aktif 2,15 → 5,78                           | **F12**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §19.50 |
+| 104 | ~~Pemindai kontras §21.3 mengarang tabrakan~~ `rgb()` memakai canvas 1×1 tanpa `clearRect`, warna beralpha menumpuk hingga `bgOf` menerima lapisan transparan sebagai latar pekat             | **F12**  | 🔴  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §21.3  |
 | 101 | ~~Layar masuk & daftar mencampur label Inggris dengan kontrol Indonesia~~ seluruh teks kasat mata layar auth diterjemahkan (`LoginScreen`, `RegisterScreen`, `LoginSkeletonState`, `useAuth`) | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §12    |
 | 102 | ~~Atribut `required` membuat validasi bawaan peramban (selalu Inggris) menyela Zod~~ `required` dilepas dari 4 input daftar sehingga pesan `registrationSchema` Indonesia yang tampil         | **F12**  | 🟢  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §12    |
 
@@ -6676,6 +6679,7 @@ layar yang **sudah login**:
   function rgb(c) {
     cv.fillStyle = "#000";
     cv.fillStyle = c;
+    cv.clearRect(0, 0, 1, 1);
     cv.fillRect(0, 0, 1, 1);
     var d = cv.getImageData(0, 0, 1, 1).data;
     return [d[0], d[1], d[2], d[3]];
@@ -6744,7 +6748,7 @@ layar yang **sudah login**:
 })();
 ```
 
-**Empat hal yang WAJIB diperhatikan:**
+**Lima hal yang WAJIB diperhatikan:**
 
 1. **Periksa `masuk` pada hasilnya.** Bila `false`, itu layar login dan angkanya
    TIDAK sebanding dengan layar yang sudah login. Kesalahan ini terjadi **tiga
@@ -6757,22 +6761,55 @@ layar yang **sudah login**:
    lebih kecil dari itu dan akan hilang dari hitungan (§19.49 kesalahan #2).
 4. **`bgOf` HARUS menolak latar transparan.** Cadangan yang mengembalikan putih
    pernah MENGARANG 78 tabrakan palsu (§19.49 kesalahan #4).
+5. **`clearRect` di `rgb()` TIDAK BOLEH dihapus** (#104). Tanpa itu `fillRect`
+   mengomposisikan warna beralpha di atas piksel panggilan sebelumnya, sehingga
+   canvas 1×1 yang dipakai ulang menumpuk. Warna yang sama,
+   `rgba(255,255,255,0.1)`, terukur mengembalikan alpha
+   26 → 49 → 70 → 88 → 105 → 120 → 133 → 145 pada delapan panggilan berturut-turut.
+   Setelah ±15 panggilan ambang `alpha > 200` di `bgOf` terlampaui, dan lapisan
+   transparan — pola `bg-white/10` yang §22.5 sebut SENGAJA dipakai di kartu
+   gelap — diterima sebagai latar pekat. Teks putih di sidebar navy karena itu
+   terbaca 1,00 alih-alih ±17. Hasilnya juga tidak deterministik: elemen ke-500
+   dinilai berbeda dari elemen ke-1 walau identik.
 
 ### 21.4 Sisa pekerjaan tema, sejauh yang diketahui
 
-Diukur **sebelum** langkah 3, pada layar yang sudah login. **Belum diukur ulang.**
+Diukur **sebelum** langkah 3, pada layar yang sudah login. Diukur ulang 21 Agu 2026
+dengan pemindai yang sudah diperbaiki (#104) — dua baris pertama terbukti **hantu**.
 
-| Sisa                       |       Rasio | Sifat                                                                                                                                        |
-| -------------------------- | ----------: | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Teks sidebar tertentu      |        ~1.0 | perlu ditelusuri; kemungkinan pasangan token inverse yang latarnya bukan permukaan inverse                                                   |
-| Lencana kecil              |    ~1.0–1.2 | idem                                                                                                                                         |
-| Lencana "Hot" / "New"      | 2.45 · 1.85 | **BUKAN regresi** — sudah di bawah 4.5 sejak mode terang (§19.47). Memperbaikinya berarti mengubah warna merek: **keputusan pemilik proyek** |
-| Tombol nonaktif            |         2.9 | **BUKAN cacat** — kontrol nonaktif dikecualikan WCAG                                                                                         |
-| `text-amber-400` pada logo |        1.65 | aksen merek                                                                                                                                  |
+| Sisa                       |        Rasio | Sifat                                                                                                                                        |
+| -------------------------- | -----------: | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| ~~Teks sidebar tertentu~~  |     ~~~1.0~~ | **HANTU** (#104) — artefak canvas menumpuk. Teks `Dashboard` putih di atas sidebar `rgb(18,26,42)` terukur ±17,4. Jangan ditambal            |
+| ~~Lencana kecil~~          | ~~~1.0–1.2~~ | **HANTU** (#104) — idem; lencana duduk di atas lapisan `bg-{warna}/10` yang ditolak `bgOf`, lalu diterima keliru sesudah canvas menumpuk     |
+| Lencana "Hot" / "New"      |  2.45 · 1.85 | **BUKAN regresi** — sudah di bawah 4.5 sejak mode terang (§19.47). Memperbaikinya berarti mengubah warna merek: **keputusan pemilik proyek** |
+| Tombol nonaktif            |          2.9 | **BUKAN cacat** — kontrol nonaktif dikecualikan WCAG                                                                                         |
+| `text-amber-400` pada logo |         1.65 | aksen merek                                                                                                                                  |
 
 **Jangan menambal daftar ini satu per satu sebelum langkah 4 dijalankan.**
 Sebagian mungkin sudah tertutup langkah 3, dan menambal yang sudah benar adalah
 cara memasukkan cacat baru.
+
+**Pengukuran ulang 21 Agu 2026** — pemindai #104, transisi dibiarkan mengendap,
+layar **sudah login** (`masuk: true`). Ini pengukuran pertama yang angkanya
+sebanding antar mode:
+
+| Mode   | Pemindai sebelum #104 | Sesudah #104 | Di bawah 3,0 |
+| ------ | --------------------: | -----------: | -----------: |
+| Gelap  |                    40 |           33 |           11 |
+| Terang |                     — |           44 |       **36** |
+
+Seluruh entri berasio 1,00–1,06 lenyap sesudah perbaikan.
+
+Temuan yang mengejutkan: **mode terang lebih buruk daripada mode gelap**,
+kebalikan dari asumsi yang mendasari #98–#100. Akar terbesarnya satu token,
+**belum bernomor** dan menunggu keputusan pemilik proyek karena §22.4 poin 1
+melarang mengubah nilai token tanpa laporan lebih dulu:
+`--color-content-subtle` (`src/index.css:142`) bernilai `#94a3b8`, memberi
+**2,56:1** di atas `bg-surface` putih — gagal AA teks (4,5), AA besar (3,0),
+dan komponen antarmuka (3,0) sekaligus — sementara sisi gelapnya `#7c8ba1`
+sehat di 5,03:1. Token itu dipakai **641 tempat**. `#64748b` (slate-500)
+memberi 4,76:1 dan lolos AA, tetapi wajib dibuktikan di banyak layar, bukan
+hanya dashboard.
 
 ### 21.5 Item lain yang tersentuh sesi ini tetapi belum tuntas
 
