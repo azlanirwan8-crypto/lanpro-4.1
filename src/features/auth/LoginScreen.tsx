@@ -14,7 +14,7 @@ export const LoginScreen = ({
   onLogin,
   onRegisterClick,
   loading,
-  loadingText = "Authenticating...",
+  loadingText = "Mengautentikasi...",
 }: LoginScreenProps) => {
   const [username, setUsername] = useState(() => {
     try {
@@ -126,9 +126,9 @@ export const LoginScreen = ({
           >
             {/* Velzon Card Header */}
             <div className="text-center space-y-1.5 mb-6">
-              <h2 className="text-2xl font-bold text-content-strong tracking-tight">Sign In</h2>
+              <h2 className="text-2xl font-bold text-content-strong tracking-tight">Masuk</h2>
               <p className="text-xs font-medium text-content-muted">
-                Sign in to continue to LanPro Workspace
+                Masuk untuk melanjutkan ke LanPro Workspace
               </p>
             </div>
 
@@ -140,7 +140,7 @@ export const LoginScreen = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="Enter your username"
+                  placeholder="Masukkan username Anda"
                   value={username}
                   onChange={(e) => handleUsernameChange(e.target.value)}
                   className={cn(
@@ -180,7 +180,7 @@ export const LoginScreen = ({
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-content-subtle hover:text-primary focus:outline-none cursor-pointer transition-colors"
-                    title={showPassword ? "Hide password" : "Show password"}
+                    title={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -202,14 +202,14 @@ export const LoginScreen = ({
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 rounded border-border-subtle text-primary focus:ring-primary cursor-pointer"
                   />
-                  <span className="text-xs font-medium text-content-secondary">Remember Me</span>
+                  <span className="text-xs font-medium text-content-secondary">Ingat Saya</span>
                 </label>
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
                   className="text-xs font-medium text-primary hover:text-primary-hover hover:underline cursor-pointer transition-colors"
                 >
-                  Forgot Password?
+                  Lupa Kata Sandi?
                 </button>
               </div>
 
@@ -219,7 +219,7 @@ export const LoginScreen = ({
                 disabled={loading || !username.trim() || !password.trim()}
                 className="w-full bg-primary-surface text-content-inverse py-3 rounded-lg font-semibold uppercase tracking-wider text-xs hover:bg-primary-surface-hover transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2.5 group cursor-pointer disabled:bg-primary-surface/60 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <span>Sign In</span>
+                <span>Masuk</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
@@ -228,13 +228,13 @@ export const LoginScreen = ({
             <SsoButtons mode="login" />
 
             <p className="text-center text-xs font-medium text-content-muted pt-5 mt-4 border-t border-border-faint">
-              Don't have an account?{" "}
+              Belum punya akun?{" "}
               <button
                 type="button"
                 onClick={onRegisterClick}
                 className="text-primary font-semibold hover:text-primary-hover transition-colors ml-1 cursor-pointer hover:underline"
               >
-                Sign Up
+                Daftar
               </button>
             </p>
           </motion.div>

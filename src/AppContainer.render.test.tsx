@@ -17,13 +17,13 @@
  * berkas ini harus ikut berubah — kalau tidak, test menguji pohon yang tidak
  * pernah benar-benar dirender.
  */
-import React from 'react';
-import { render, screen } from '@testing-library/react';
+import React from "react";
+import { render, screen } from "@testing-library/react";
 
 // --- Isolasi jaringan -------------------------------------------------------
 // Komponen tidak boleh menyentuh backend saat test. Socket.IO akan membuka
 // koneksi sungguhan dan menahan proses Jest tetap hidup.
-jest.mock('socket.io-client', () => ({
+jest.mock("socket.io-client", () => ({
   __esModule: true,
   default: () => ({
     on: jest.fn(),
@@ -33,55 +33,55 @@ jest.mock('socket.io-client', () => ({
     connect: jest.fn(),
     io: { on: jest.fn(), off: jest.fn() },
     connected: false,
-    id: 'test-socket',
+    id: "test-socket",
   }),
 }));
 
-import App from './App';
-import { AuthNotificationProvider } from './components/AuthToastContainer';
+import App from "./App";
+import { AuthNotificationProvider } from "./components/AuthToastContainer";
 
-describe('AppContainer', () => {
-  it('ter-mount tanpa melempar saat pengguna belum login', () => {
-    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+describe("AppContainer", () => {
+  it("ter-mount tanpa melempar saat pengguna belum login", () => {
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
 
     expect(() =>
       render(
         <AuthNotificationProvider>
           <App />
-        </AuthNotificationProvider>,
-      ),
+        </AuthNotificationProvider>
+      )
     ).not.toThrow();
 
     // React menangkap kegagalan render di error boundary dan melaporkannya
     // lewat console.error, bukan lewat lemparan yang bisa ditangkap di atas.
     // Tanpa pemeriksaan ini, komponen yang crash tetap lolos.
     const renderErrors = errorSpy.mock.calls.filter((call) =>
-      String(call[0]).includes('The above error occurred'),
+      String(call[0]).includes("The above error occurred")
     );
     expect(renderErrors).toHaveLength(0);
 
     errorSpy.mockRestore();
   });
 
-  it('me-render layar login sungguhan, bukan pohon kosong', () => {
+  it("me-render layar login sungguhan, bukan pohon kosong", () => {
     render(
       <AuthNotificationProvider>
         <App />
-      </AuthNotificationProvider>,
+      </AuthNotificationProvider>
     );
 
     // Assertion pada isi nyata, bukan sekadar "ada sesuatu". Pemeriksaan
     // "body tidak kosong" akan tetap hijau meski yang ter-render hanyalah
     // error boundary — persis kegagalan yang test ini seharusnya tangkap.
     expect(screen.getByText(/Project Management Platform/i)).toBeInTheDocument();
-    expect(screen.getByText(/Sign in to continue to LanPro Workspace/i)).toBeInTheDocument();
+    expect(screen.getByText(/Masuk untuk melanjutkan ke LanPro Workspace/i)).toBeInTheDocument();
   });
 
-  it('tidak menampilkan error boundary', () => {
+  it("tidak menampilkan error boundary", () => {
     render(
       <AuthNotificationProvider>
         <App />
-      </AuthNotificationProvider>,
+      </AuthNotificationProvider>
     );
 
     expect(screen.queryByText(/React Render Crash/i)).not.toBeInTheDocument();

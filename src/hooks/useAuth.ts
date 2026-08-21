@@ -100,7 +100,7 @@ export function useAuth(
   const [activeSessionData, setActiveSessionData] = useState<any>(null);
   const [pendingLoginCredentials, setPendingLoginCredentials] = useState<any>(null);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
-  const [loginStatusText, setLoginStatusText] = useState<string>("Authenticating...");
+  const [loginStatusText, setLoginStatusText] = useState<string>("Mengautentikasi...");
 
   // Effective role calculation
   const user: any = currentUser;
@@ -220,7 +220,7 @@ export function useAuth(
 
     try {
       setIsAuthLoading(true);
-      setLoginStatusText("Authenticating...");
+      setLoginStatusText("Mengautentikasi...");
 
       // #91 — DI SINI DULU ADA PINTU BELAKANG:
       //

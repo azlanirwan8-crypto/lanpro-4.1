@@ -2,7 +2,7 @@
  * Test render AppContainer pada jalur SUDAH LOGIN.
  *
  * ALASAN TEST INI ADA: sampai sekarang satu-satunya test render AppContainer
- * hanya menempuh jalur BELUM login — yang berhenti di layar Sign In dan tidak
+ * hanya menempuh jalur BELUM login — yang berhenti di layar Masuk dan tidak
  * pernah menyentuh sidebar, header, routing tampilan, maupun ratusan handler
  * di dalamnya. Padahal jalur itulah yang dipakai pengguna 99% waktu.
  *
@@ -113,7 +113,9 @@ describe("AppContainer — jalur sudah login", () => {
       { timeout: 5000 }
     );
 
-    expect(screen.queryByText(/Sign in to continue to LanPro Workspace/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Masuk untuk melanjutkan ke LanPro Workspace/i)
+    ).not.toBeInTheDocument();
     expect(screen.queryByText(/React Render Crash/i)).not.toBeInTheDocument();
   });
 

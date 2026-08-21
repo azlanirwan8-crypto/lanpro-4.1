@@ -109,11 +109,9 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
     >
       {/* Velzon Header */}
       <div className="text-center space-y-1.5 mb-6">
-        <h2 className="text-2xl font-bold text-content-strong tracking-tight">
-          Create New Account
-        </h2>
+        <h2 className="text-2xl font-bold text-content-strong tracking-tight">Buat Akun Baru</h2>
         <p className="text-xs font-medium text-content-muted">
-          Join LanPro to manage projects and workflows
+          Bergabung dengan LanPro untuk mengelola proyek dan alur kerja
         </p>
       </div>
 
@@ -121,12 +119,11 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* FULL NAME INPUT */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            Full Name <span className="text-rose-500">*</span>
+            Nama Lengkap <span className="text-rose-500">*</span>
           </label>
           <input
             type="text"
             maxLength={25}
-            required
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder="John Doe"
@@ -148,14 +145,13 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* EMAIL ADDRESS INPUT */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            Email Address <span className="text-rose-500">*</span>
+            Alamat Email <span className="text-rose-500">*</span>
           </label>
           <input
             type="email"
-            required
             value={email}
             onChange={(e) => handleEmailChange(e.target.value)}
-            placeholder="john.doe@company.com"
+            placeholder="nama@perusahaan.com"
             className={cn(
               "w-full px-4 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-sm font-medium text-content placeholder:text-content-subtle",
               fieldErrors.email
@@ -182,7 +178,6 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
           <input
             type="text"
             maxLength={10}
-            required
             value={username}
             onChange={handleUsernameChange}
             placeholder="johndoe"
@@ -209,7 +204,6 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
-              required
               value={password}
               onChange={(e) => handlePasswordChange(e.target.value)}
               placeholder="••••••••"
@@ -224,7 +218,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-content-subtle hover:text-primary focus:outline-none cursor-pointer transition-colors"
-              title={showPassword ? "Hide password" : "Show password"}
+              title={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -234,7 +228,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
           {password.length > 0 && (
             <div className="mt-2 space-y-1.5 p-2.5 bg-surface-sunken border border-border-subtle/80 rounded-lg">
               <div className="flex items-center justify-between text-xs sm:text-[11px] font-medium">
-                <span className="text-content-secondary">Password Strength:</span>
+                <span className="text-content-secondary">Kekuatan Kata Sandi:</span>
                 <span className={passStrength.color}>{passStrength.label}</span>
               </div>
               <div className="w-full bg-surface-strong rounded-full h-1.5 overflow-hidden">
@@ -309,11 +303,11 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
           {isRegistering ? (
             <>
               <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-              <span>Creating Account...</span>
+              <span>Membuat Akun...</span>
             </>
           ) : (
             <>
-              <span>Sign Up</span>
+              <span>Daftar</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </>
           )}
@@ -325,13 +319,13 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
       <SsoButtons mode="daftar" />
 
       <p className="text-center text-xs font-medium text-content-muted pt-5 mt-4 border-t border-border-faint">
-        Already have an account?{" "}
+        Sudah punya akun?{" "}
         <button
           type="button"
           onClick={onBackToLogin}
           className="text-primary font-semibold hover:text-primary-hover transition-colors ml-1 cursor-pointer hover:underline"
         >
-          Sign In
+          Masuk
         </button>
       </p>
 
@@ -346,7 +340,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             <button
               onClick={handleSuccessModalConfirm}
               className="absolute top-4 right-4 text-content-subtle hover:text-content-secondary transition-colors p-1 rounded-md"
-              title="Close"
+              title="Tutup"
             >
               <X className="w-5 h-5" />
             </button>

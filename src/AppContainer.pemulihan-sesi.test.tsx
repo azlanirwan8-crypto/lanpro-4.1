@@ -97,7 +97,9 @@ describe("pemulihan sesi dari sessionStorage — jalur 'jangan ingat saya'", () 
     await waitFor(() => expect(screen.getByText("Dashboard")).toBeInTheDocument(), {
       timeout: 12000,
     });
-    expect(screen.queryByText(/Sign in to continue to LanPro Workspace/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Masuk untuk melanjutkan ke LanPro Workspace/i)
+    ).not.toBeInTheDocument();
   }, 20000);
 
   it("memulihkan sesi walau localStorage KOSONG", async () => {
@@ -110,7 +112,9 @@ describe("pemulihan sesi dari sessionStorage — jalur 'jangan ingat saya'", () 
     await waitFor(() => expect(screen.getByText("Dashboard")).toBeInTheDocument(), {
       timeout: 12000,
     });
-    expect(screen.queryByText(/Sign in to continue to LanPro Workspace/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/Masuk untuk melanjutkan ke LanPro Workspace/i)
+    ).not.toBeInTheDocument();
   }, 20000);
 });
 
@@ -165,7 +169,9 @@ describe("isi storage yang RUSAK tidak boleh mengunci pengguna", () => {
 
     await waitFor(
       () =>
-        expect(screen.getByText(/Sign in to continue to LanPro Workspace/i)).toBeInTheDocument(),
+        expect(
+          screen.getByText(/Masuk untuk melanjutkan ke LanPro Workspace/i)
+        ).toBeInTheDocument(),
       { timeout: 5000 }
     );
 
