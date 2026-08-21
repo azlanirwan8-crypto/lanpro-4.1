@@ -15,7 +15,6 @@ import {
   ArrowUpRight,
   ShieldAlert,
   Target,
-  Plus,
   Filter,
 } from "lucide-react";
 import {
@@ -631,17 +630,6 @@ export function DashboardView(props: DashboardViewProps) {
                 buttonClassName="h-10 bg-surface-muted rounded-lg border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
               />
             </div>
-
-            {/* Quick Action: Create Task */}
-            {props.setIsNewTaskModalOpen && (
-              <button
-                onClick={() => props.setIsNewTaskModalOpen?.(true)}
-                className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-content-inverse px-3.5 py-2.5 min-h-11 rounded-lg text-xs font-medium shadow-soft transition-all cursor-pointer shrink-0"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Task Baru</span>
-              </button>
-            )}
 
             <div className="flex items-center gap-2 bg-indigo-500/10 px-3 py-2 rounded-lg border border-indigo-500/30 text-xs font-medium text-indigo-700 ">
               <Zap className="w-3.5 h-3.5 text-indigo-500" />

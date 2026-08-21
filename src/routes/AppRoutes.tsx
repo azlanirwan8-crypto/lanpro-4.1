@@ -245,7 +245,6 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
             setCurrentView={setCurrentView}
             setSelectedTaskForDetail={setSelectedTaskForDetail}
             setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-            setIsNewTaskModalOpen={setIsNewTaskModalOpen}
             userRole={effectiveRole}
             currentUser={currentUser}
             fetchTasks={fetchTasks}
