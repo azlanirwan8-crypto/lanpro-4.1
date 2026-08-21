@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 14 BELUM · 105 SELESAI · 3 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 12 BELUM · 107 SELESAI · 3 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,17 +486,15 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 14 item
+### 1.1 BELUM SELESAI — 12 item
 
-**Sebaran per fase:** F1 0 · F2 2 · F3 4 · F5 1 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 6
+**Sebaran per fase:** F1 0 · F2 2 · F3 4 · F5 1 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 4
 
 **Masih menahan rilis production:** #30 · #121 (keamanan, diusulkan 21 Agu — menunggu penilaian pemilik proyek)
 
 | #   | Temuan                                                                                                                                                                                                                   |  Fase   | Sev | Biaya         | Blokir modul baru? | Status            | Detail |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-----: | :-: | ------------- | :----------------: | ----------------- | ------ |
 | 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)                                                                                                                                              | **F11** | 🔴  | Tinggi        | Blokir production  | `MENUNGGU` desain | §1.5   |
-| 106 | Pemindai kontras §21.3 memanggil `ukur()` tepat sesudah `classList` diubah, jadi membaca warna di TENGAH transisi (`body` 200ms, global 150ms `src/index.css:405`)                                                       | **F12** | 🔴  | Sangat rendah |       Tidak        | `BELUM`           | §21.3  |
-| 107 | `bgOf` buta terhadap panel gradasi: `background-color` transparan + `background-image` dilewati, mendarat di induk jauh. Tagline hero terbaca 1,18 padahal jelas terbaca                                                 | **F12** | 🟠  | Rendah        |       Tidak        | `BELUM`           | §21.3  |
 | 108 | Token `--color-content-subtle` `#94a3b8` memberi **2,56:1** di atas `bg-surface` putih — gagal AA teks, AA besar, DAN komponen UI sekaligus. Dipakai 641 tempat. Sisi gelapnya `#7c8ba1` sehat 5,03                      | **F12** | 🔴  | Tinggi        |       Tidak        | `BELUM`           | §21.4  |
 | 109 | Mode TERANG punya 36 kegagalan di bawah 3,0 (gelap hanya 11) — kebalikan dari asumsi yang mendasari #98–#100. Sebagian besar berakar di #108                                                                             | **F12** | 🟠  | Tinggi        |       Tidak        | `BELUM`           | §21.4  |
 | 110 | Panel merek layar auth MEMBALIK jadi lebih terang di mode gelap (`rgb(54,68,115)` → `rgb(133,149,203)`); token aksen dipakai sebagai latar besar, §22.3 menyebut peran itu milik `-surface`                              | **F12** | 🟠  | Sedang        |       Tidak        | `BELUM`           | §22.3  |
@@ -509,7 +507,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 121 | `POST /api/auth/forgot-password` mengembalikan 404 untuk email tak dikenal (orakel enumerasi) DAN mereset kata sandi pengguna atas permintaan TANPA autentikasi — siapa pun yang tahu sebuah email bisa mengunci akunnya | **F2**  | 🔴  | Rendah        |   Ya (keamanan)    | `BELUM`           | §6     |
 | 122 | `GET /uploads/avatar-1-1786840166479.jpg` mengembalikan 404 berulang-ulang di konsol; berkas avatar hilang dan komponennya terus mencoba lagi tanpa henti                                                                | **F5**  | 🟡  | Sangat rendah |       Tidak        | `BELUM`           | §5     |
 
-### 1.2 SUDAH SELESAI — 105 item
+### 1.2 SUDAH SELESAI — 107 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -619,6 +617,8 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 117 | ~~Sumbu Y chart memakai pecahan untuk satuan cacahan~~ `allowDecimals={false}` pada dua chart dashboard; sumbu sprint 0/0,25/0,5/0,75/1 → 0/1/2/3/4                                           |  **F3**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §14    |
 | 111 | ~~Kartu Blocked/Stoppers mewarnai nilai `0` MERAH~~ merah hanya bila ada yang tersumbat; `text-rose-600` → token `danger-text` (6,47 terang · 7,12 gelap)                                     | **F12**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §14    |
 | 114 | ~~Campur bahasa DI DALAM satu label dashboard~~ 4 label KPI, ringkasan Stoppers, dropdown sprint, sapaan, dan judul sidebar diseragamkan ke bahasa Indonesia                                  |  **F3**  | 🟡  | Sedang        |         Tidak          | `SELESAI` 21 Agu | §14    |
+| 106 | ~~Pemindai §21.3 mengukur di TENGAH transisi~~ jeda 400ms sesudah tiap pergantian tema, tema dikembalikan ke keadaan semula, deteksi `masuk` pindah ke token (regex lama rusak oleh #101)     | **F12**  | 🔴  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §21.3  |
+| 107 | ~~`bgOf` buta terhadap panel gradasi~~ membaca `background-image` dan memakai rata-rata perhentian gradasi sebagai perkiraan latar                                                            | **F12**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §21.3  |
 | 101 | ~~Layar masuk & daftar mencampur label Inggris dengan kontrol Indonesia~~ seluruh teks kasat mata layar auth diterjemahkan (`LoginScreen`, `RegisterScreen`, `LoginSkeletonState`, `useAuth`) | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §12    |
 | 102 | ~~Atribut `required` membuat validasi bawaan peramban (selalu Inggris) menyela Zod~~ `required` dilepas dari 4 input daftar sehingga pesan `registrationSchema` Indonesia yang tampil         | **F12**  | 🟢  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §12    |
 
@@ -6686,12 +6686,14 @@ Yang berubah **hanya sisi terangnya**. Token lama juga tidak disentuh.
 
 ### 21.3 Pemindai kontras — PAKAI INI, jangan menulis ulang
 
-Pemindai ini sudah melewati **empat kali koreksi** (§19.49). Menulis ulang dari
-nol berarti mengulang keempat kesalahan itu. Tempel di konsol peramban, pada
-layar yang **sudah login**:
+Pemindai ini sudah melewati **empat kali koreksi** (§19.49) ditambah tiga lagi
+(#104, #106, #107). Menulis ulang dari nol berarti mengulang ketujuh kesalahan
+itu. Tempel di konsol peramban, pada layar yang **sudah login**. Ia dimulai
+dengan `await`, jadi tempelkan apa adanya — konsol DevTools mendukung
+top-level await:
 
 ```js
-(function () {
+await (async function () {
   var cv = document.createElement("canvas").getContext("2d", { willReadFrequently: true });
   function rgb(c) {
     cv.fillStyle = "#000";
@@ -6711,10 +6713,37 @@ layar yang **sudah login**:
   function bgOf(el) {
     var e = el;
     while (e) {
-      var c = getComputedStyle(e).backgroundColor;
+      var st = getComputedStyle(e);
+      var c = st.backgroundColor;
       if (c && c !== "rgba(0, 0, 0, 0)" && c !== "transparent") {
         var m = rgb(c);
         if (m[3] > 200) return m;
+      }
+      // #107 — panel gradasi mengecat lewat `background-image`; `backgroundColor`
+      // -nya transparan, jadi tanpa cabang ini ia DILEWATI dan pengukuran
+      // mendarat di induk yang jauh. Nilainya rata-rata seluruh perhentian
+      // gradasi: sebuah PERKIRAAN, karena warna tepat di bawah satu elemen
+      // bergantung posisinya. Perkiraan yang masuk akal jauh lebih baik
+      // daripada mendarat di latar yang salah sama sekali.
+      var bi = st.backgroundImage;
+      if (bi && bi !== "none" && bi.indexOf("gradient(") >= 0) {
+        var stop = bi.match(/rgba?\([^)]+\)/g);
+        if (stop && stop.length) {
+          var r = 0,
+            g = 0,
+            b = 0,
+            n = 0;
+          for (var i = 0; i < stop.length; i++) {
+            var v = rgb(stop[i]);
+            if (v[3] > 200) {
+              r += v[0];
+              g += v[1];
+              b += v[2];
+              n++;
+            }
+          }
+          if (n) return [Math.round(r / n), Math.round(g / n), Math.round(b / n), 255];
+        }
       }
       e = e.parentElement;
     }
@@ -6745,15 +6774,26 @@ layar yang **sudah login**:
       return a.r - b.r;
     });
   }
+  function tunggu(ms) {
+    return new Promise(function (r) {
+      setTimeout(r, ms);
+    });
+  }
   var d = document.documentElement;
+  var semulaGelap = d.classList.contains("dark");
   d.classList.add("dark");
+  await tunggu(400);
   var gelap = ukur();
   d.classList.remove("dark");
+  await tunggu(400);
   var terang = ukur();
-  d.classList.add("dark");
+  if (semulaGelap) d.classList.add("dark");
+  await tunggu(400);
   return JSON.stringify(
     {
-      masuk: !/Sign in to continue/i.test(document.body.innerText),
+      masuk: !!(
+        localStorage.getItem("lanpro_jwt_token") || sessionStorage.getItem("lanpro_jwt_token")
+      ),
       gelap: gelap.length,
       terang: terang.length,
       terburukTerang: terang.slice(0, 6),
@@ -6765,11 +6805,16 @@ layar yang **sudah login**:
 })();
 ```
 
-**Lima hal yang WAJIB diperhatikan:**
+**Tujuh hal yang WAJIB diperhatikan:**
 
 1. **Periksa `masuk` pada hasilnya.** Bila `false`, itu layar login dan angkanya
    TIDAK sebanding dengan layar yang sudah login. Kesalahan ini terjadi **tiga
-   kali** dalam sesi ini.
+   kali** dalam sesi ini. Sejak #106 penandanya adalah ADA/TIDAKNYA
+   `lanpro_jwt_token`, bukan lagi mencocokkan kalimat di layar. Versi lama
+   mencari `"Sign in to continue"`; #101 menerjemahkan kalimat itu ke bahasa
+   Indonesia, jadi pemindai diam-diam melaporkan `masuk: true` **di layar
+   login** — tepat kesalahan yang catatan ini larang. Penanda berbasis token
+   tidak bisa rusak oleh terjemahan.
 2. **Jangan me-reload untuk berganti tema.** Reload mengeluarkan sesi (login
    per-tab, "Remember Me" tidak dicentang). Pemindai di atas berganti tema
    dengan memasang/mencabut kelas `dark` DI TEMPAT — itu sebabnya ia bisa
@@ -6788,6 +6833,20 @@ layar yang **sudah login**:
    gelap — diterima sebagai latar pekat. Teks putih di sidebar navy karena itu
    terbaca 1,00 alih-alih ±17. Hasilnya juga tidak deterministik: elemen ke-500
    dinilai berbeda dari elemen ke-1 walau identik.
+6. **Jalankan dengan `await`, dan jangan hapus jedanya** (#106). Versi lama
+   memanggil `ukur()` tepat sesudah `classList` diubah, sehingga
+   `getComputedStyle` mengembalikan warna yang sedang DIANIMASIKAN, bukan warna
+   tujuannya — `body` mentransisikan warna 200ms dan aturan global
+   `src/index.css:405` 150ms. Pemindai kini menunggu 400ms sesudah setiap
+   pergantian tema. Ia juga MENGEMBALIKAN tema ke keadaan semula; versi lama
+   selalu meninggalkan halaman dalam mode gelap.
+7. **`bgOf` membaca panel gradasi, dan hasilnya PERKIRAAN** (#107). Panel
+   gradasi mengecat lewat `background-image` dengan `backgroundColor`
+   transparan, jadi versi lama melewatinya dan mendarat di induk yang jauh —
+   tagline hero terbaca 1,18 padahal jelas terbaca. Nilai yang dipakai adalah
+   rata-rata seluruh perhentian gradasi. Warna tepat di bawah satu elemen
+   bergantung posisinya, jadi angka pada elemen di atas gradasi harus dibaca
+   sebagai indikasi, bukan vonis.
 
 ### 21.4 Sisa pekerjaan tema, sejauh yang diketahui
 
