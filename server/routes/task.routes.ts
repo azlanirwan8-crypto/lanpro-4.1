@@ -281,6 +281,14 @@ router.put(
         acceptanceCriteria,
         version,
         isBlocked,
+        // Item #139 — lima field ini punya dropdown di Daftar Isu tetapi tidak
+        // pernah ikut di-destructure, sehingga nilainya berhenti di sini tanpa
+        // satu pun pesan galat.
+        resolution,
+        release,
+        category,
+        environment,
+        projectRisk,
       } = req.body;
       const title = req.body.title !== undefined ? xss(req.body.title || "") : undefined;
       const description =
@@ -480,6 +488,11 @@ router.put(
       checkUpdate("estimatedHours", estimatedHours);
       checkUpdate("loggedHours", loggedHours);
       checkUpdate("acceptanceCriteria", acceptanceCriteria);
+      checkUpdate("resolution", resolution);
+      checkUpdate("release", release);
+      checkUpdate("category", category);
+      checkUpdate("environment", environment);
+      checkUpdate("projectRisk", projectRisk);
 
       if (isBlocked !== undefined) {
         const oldBlockedVal = oldTask.isBlocked === true || oldTask.isBlocked === 1;

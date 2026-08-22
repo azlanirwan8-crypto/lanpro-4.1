@@ -67,12 +67,12 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 | --------------------------- | ----: | ----: |
 | `ActivityLogs`              |    11 |     1 |
 | `Attachments`               |    18 |     0 |
-| `AuditLogs`                 |    12 |   124 |
+| `AuditLogs`                 |    12 |   126 |
 | `Comments`                  |     8 |     0 |
 | `DiscussionPoints`          |    34 |     7 |
 | `Documents`                 |    16 |     8 |
 | `LinkedTasks`               |     5 |     0 |
-| `MasterData`                |    12 |   102 |
+| `MasterData`                |    12 |   121 |
 | `Meetings`                  |    22 |    10 |
 | `Messages`                  |     9 |     0 |
 | `MilestoneSprints`          |     2 |     0 |
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 | `Sprints`                   |    11 |     6 |
 | `TaskCustomFields`          |     5 |     0 |
 | `TaskExternalLinks`         |     6 |     0 |
-| `Tasks`                     |    32 |    28 |
+| `Tasks`                     |    35 |    28 |
 | `TokenBlacklist`            |     4 |     0 |
 | `UserIdentities`            |     6 |     1 |
 | `Users`                     |    21 |    10 |
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `AuditLogs`
 
-12 kolom · 124 baris
+12 kolom · 126 baris
 
 | Kolom        | Tipe                        | Null | Kunci |
 | ------------ | --------------------------- | :--: | ----- |
@@ -255,7 +255,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `MasterData`
 
-12 kolom · 102 baris
+12 kolom · 121 baris
 
 | Kolom             | Tipe                        | Null | Kunci |
 | ----------------- | --------------------------- | :--: | ----- |
@@ -539,7 +539,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `Tasks`
 
-32 kolom · 28 baris
+35 kolom · 28 baris
 
 | Kolom                | Tipe                        | Null | Kunci |
 | -------------------- | --------------------------- | :--: | ----- |
@@ -575,6 +575,9 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 | `startDate`          | character varying           |  ya  | —     |
 | `endDate`            | character varying           |  ya  | —     |
 | `environment`        | character varying           |  ya  | —     |
+| `resolution`         | character varying           |  ya  | —     |
+| `release`            | character varying           |  ya  | —     |
+| `category`           | character varying           |  ya  | —     |
 
 ### `TokenBlacklist`
 

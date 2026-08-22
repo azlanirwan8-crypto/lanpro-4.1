@@ -47,6 +47,14 @@ export const updateTaskSchema = z.object({
   orderIndex: z.number().optional(),
   attachments: z.array(z.any()).optional(),
   linkedTaskIds: z.array(z.any()).optional(),
+  // Item #139 — tanpa entri di sini, validasiBody membuang kelima field ini
+  // (req.body diganti hasil parse zod) sebelum rute sempat melihatnya. Jadi
+  // memperluas allowlist rute saja tidak cukup.
+  resolution: z.string().optional().nullable(),
+  release: z.string().optional().nullable(),
+  category: z.string().optional().nullable(),
+  environment: z.string().optional().nullable(),
+  projectRisk: z.string().optional().nullable(),
 });
 
 export const reorderTaskIdsSchema = z.object({

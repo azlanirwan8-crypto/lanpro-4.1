@@ -706,6 +706,18 @@ export async function runMigrations(pool: Pool): Promise<void> {
 
       ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS "environment" VARCHAR(255);
 
+      -- Item #139 — tiga kolom yang sudah punya dropdown di Daftar Isu tetapi
+      -- tidak pernah punya tempat penyimpanan. Karena kolomnya tidak ada,
+      -- nilainya tidak bisa disimpan sama sekali; pembaruan optimistis di UI
+      -- membuatnya tampak berhasil sampai halaman dimuat ulang.
+      --
+      -- Kolom "category" di sini adalah AREA TEKNIS (Backend/Frontend/
+      -- DevOps/...) sesuai keputusan item #85, bukan duplikat "issue_type"
+      -- yang dulu dihapus dari MasterData.
+      ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS "resolution" VARCHAR(255);
+      ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS "release" VARCHAR(255);
+      ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS "category" VARCHAR(255);
+
       ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "fileName" VARCHAR(255);
       ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "fileType" VARCHAR(100);
       ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "fileSize" BIGINT;
