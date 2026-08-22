@@ -678,7 +678,7 @@ export function DashboardView(props: DashboardViewProps) {
                 onClick={() => props.setCurrentView("kanban")}
                 className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
-                View all tasks
+                Lihat semua tugas
               </button>
             </div>
           </div>
@@ -706,7 +706,7 @@ export function DashboardView(props: DashboardViewProps) {
                 onClick={() => props.setCurrentView("kanban")}
                 className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
-                View active board
+                Lihat papan aktif
               </button>
             </div>
           </div>
@@ -748,7 +748,7 @@ export function DashboardView(props: DashboardViewProps) {
                 onClick={() => props.setCurrentView("kanban")}
                 className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
-                View done list
+                Lihat daftar selesai
               </button>
             </div>
           </div>
@@ -796,7 +796,7 @@ export function DashboardView(props: DashboardViewProps) {
                 onClick={() => props.setCurrentView("kanban")}
                 className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
-                Resolve issues
+                Tangani hambatan
               </button>
             </div>
           </div>
@@ -812,7 +812,7 @@ export function DashboardView(props: DashboardViewProps) {
                 <div>
                   <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-indigo-500" />
-                    Sprint Progress & Velocity Overview
+                    Ringkasan Progres & Kecepatan Sprint
                   </h3>
                 </div>
                 <div className="flex items-center gap-1 bg-surface-muted p-1 rounded-md">
@@ -837,7 +837,7 @@ export function DashboardView(props: DashboardViewProps) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 p-4 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
                 <div>
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
-                    Active Sprint
+                    Sprint Aktif
                   </span>
                   <p className="text-sm font-medium text-content-strong mt-0.5 truncate">
                     {activeSprint?.name || "No Sprint"}
@@ -845,7 +845,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
                 <div>
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
-                    Sprint Progress
+                    Progres Sprint
                   </span>
                   <p className="text-sm font-medium text-success-text mt-0.5">
                     {sprintProgress}% ({sprintCompletedTasks}/{sprintTotalTasks} tasks)
@@ -853,7 +853,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
                 <div>
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
-                    Weekly Velocity
+                    Kecepatan Mingguan
                   </span>
                   <p className="text-sm font-medium text-primary mt-0.5">
                     {weeklyVelocity ? weeklyVelocity : "0.0"} pts/sprint
@@ -861,7 +861,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
                 <div>
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
-                    Days Left
+                    Sisa Hari
                   </span>
                   <p className="text-sm font-medium text-content-strong mt-0.5">
                     {sprintDaysLeft} days
@@ -936,12 +936,12 @@ export function DashboardView(props: DashboardViewProps) {
 
             {/* Task Breakdown Grid (Jenis Task & Status Breakdown) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Task Breakdown by Type (Epic, Story, Task, Bug, Subtask) */}
+              {/* Rincian Tugas per Jenis (Epic, Story, Task, Bug, Subtask) */}
               <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                   <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <LayoutGrid className="w-4 h-4 text-purple-500" />
-                    Task Breakdown by Type
+                    Rincian Tugas per Jenis
                   </h3>
                   {/* #112 — judul WAJIB menjumlahkan isi yang ditampilkan.
                       Sebelumnya ia memakai `totalTasks` sementara isinya
@@ -982,12 +982,12 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
               </div>
 
-              {/* Task Breakdown by Status (To Do, In Progress, Review, Done, Blocked) */}
+              {/* Rincian Tugas per Status (To Do, In Progress, Review, Done, Blocked) */}
               <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                   <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <PieChartIcon className="w-4 h-4 text-emerald-500" />
-                    Task Breakdown by Status
+                    Rincian Tugas per Status
                   </h3>
                   {/* #112 — idem, dijumlahkan dari isinya sendiri. */}
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle">
@@ -1031,7 +1031,7 @@ export function DashboardView(props: DashboardViewProps) {
                 <div>
                   <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <Users className="w-4 h-4 text-indigo-500" />
-                    Task Workload Distribution per User
+                    Sebaran Beban Tugas per Anggota
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
                     Alokasi & penyelesaian task tiap anggota tim dengan indikator beban kerja
@@ -1041,7 +1041,7 @@ export function DashboardView(props: DashboardViewProps) {
                   onClick={() => props.setCurrentView("team")}
                   className="text-xs font-medium text-primary hover:underline cursor-pointer inline-flex items-center min-h-11 py-2"
                 >
-                  Manage Team
+                  Kelola Tim
                 </button>
               </div>
 
@@ -1049,12 +1049,12 @@ export function DashboardView(props: DashboardViewProps) {
                 <ResponsiveTable className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-border-faint text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
-                      <th className="py-2.5 px-2">Team Member</th>
-                      <th className="py-2.5 px-2">Active Tasks</th>
-                      <th className="py-2.5 px-2">Done Tasks</th>
-                      <th className="py-2.5 px-2">Total Allocated</th>
+                      <th className="py-2.5 px-2">Anggota Tim</th>
+                      <th className="py-2.5 px-2">Tugas Berjalan</th>
+                      <th className="py-2.5 px-2">Tugas Selesai</th>
+                      <th className="py-2.5 px-2">Total Dialokasikan</th>
                       <th className="py-2.5 px-2">Status Beban</th>
-                      <th className="py-2.5 px-2 text-right">Progress</th>
+                      <th className="py-2.5 px-2 text-right">Progres</th>
                     </tr>
                   </thead>
                   <tbody className="text-xs divide-y divide-border-faint font-medium text-content-body ">
@@ -1144,7 +1144,7 @@ export function DashboardView(props: DashboardViewProps) {
                 <div>
                   <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <Target className="w-4 h-4 text-purple-500" />
-                    Epic & Roadmap Milestone Delivery Status
+                    Status Pencapaian Epic & Peta Jalan
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
                     Progress pencapaian Epic & milestone utama proyek
@@ -1154,7 +1154,7 @@ export function DashboardView(props: DashboardViewProps) {
                   onClick={() => props.setCurrentView("roadmap")}
                   className="text-xs font-medium text-primary hover:underline inline-flex items-center min-h-11 py-2"
                 >
-                  View Roadmap
+                  Lihat Peta Jalan
                 </button>
               </div>
 
@@ -1204,7 +1204,7 @@ export function DashboardView(props: DashboardViewProps) {
                 <div>
                   <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <Clock className="w-4 h-4 text-blue-500" />
-                    Time Tracking & Effort Estimation
+                    Pencatatan Waktu & Estimasi Upaya
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
                     Perbandingan estimasi jam pengerjaan vs jam terpakai
@@ -1218,7 +1218,7 @@ export function DashboardView(props: DashboardViewProps) {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
                   <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase">
-                    Estimated Hours
+                    Jam Diperkirakan
                   </span>
                   <p className="text-lg font-medium text-content-strong mt-0.5">
                     {timeTrackingStats.totalEst} Hours
@@ -1226,7 +1226,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
                   <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase">
-                    Logged Hours
+                    Jam Tercatat
                   </span>
                   <p className="text-lg font-medium text-primary mt-0.5">
                     {timeTrackingStats.totalLog} Hours
@@ -1234,7 +1234,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
                   <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase">
-                    Remaining Variance
+                    Selisih Tersisa
                   </span>
                   <p className="text-lg font-medium text-success-text mt-0.5">
                     {timeTrackingStats.diff >= 0
@@ -1346,7 +1346,7 @@ export function DashboardView(props: DashboardViewProps) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                   <Zap className="w-4 h-4 text-amber-500" />
-                  Task Priority Breakdown
+                  Rincian Prioritas Tugas
                 </h3>
                 <button
                   onClick={() => props.setCurrentView("kanban")}
@@ -1396,7 +1396,7 @@ export function DashboardView(props: DashboardViewProps) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-rose-500" />
-                  Blocked & Overdue Issues
+                  Hambatan & Tugas Terlambat
                 </h3>
                 <span className="text-[10px] leading-none font-medium text-rose-600 bg-rose-500/10 px-2 py-[3px] rounded border border-rose-500/30">
                   {blockedTasks.length + overdueTasks.length} Need Action

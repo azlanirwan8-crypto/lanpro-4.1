@@ -294,9 +294,63 @@ section('6. Penyimpanan berkas unggahan');
 }
 
 // ── 7. Koneksi database sungguhan ─────────────────────────────────
-section('7. Uji koneksi database');
-
 (async () => {
+  // ── 6b. Domain pengirim email ─────────────────────────────────────
+  section('6b. Domain pengirim email (Resend)');
+
+  // #127 — #44 mencatat domain `rajonet.com` sudah terverifikasi, lalu 21 Agu 2026
+  // Resend menolak pengiriman dengan "The rajonet.com domain is not verified".
+  // Item yang ditandai selesai bisa berbalik tanpa satu pun berkas berubah, karena
+  // keadaannya hidup di layanan pihak ketiga. Tidak ada gerbang yang menangkapnya,
+  // jadi kegagalannya hanya muncul sebagai satu baris di log server saat email
+  // benar-benar dikirim — yaitu tepat saat pengguna sedang menunggunya.
+  const kunciResend = (process.env.RESEND_API_KEY || '').trim();
+  const pengirim = (process.env.EMAIL_FROM || '').trim() || 'LanPro <lanpro@rajonet.com>';
+  const domainPengirim = (pengirim.match(/@([^>\s]+)/) || [])[1] || '';
+
+  if (!kunciResend) {
+    warn('RESEND_API_KEY belum diisi — status domain tidak bisa diperiksa',
+      'Di PRODUKSI ini berarti tidak ada email yang terkirim sama sekali: ' +
+      'verifikasi akun, tautan lupa kata sandi, dan digest harian semuanya diam');
+  } else if (!domainPengirim) {
+    warn(`EMAIL_FROM tidak memuat domain yang bisa dibaca: ${pengirim}`,
+      'Isi dengan bentuk "Nama <alamat@domain>"');
+  } else {
+    try {
+      const r = await fetch('https://api.resend.com/domains', {
+        headers: { Authorization: `Bearer ${kunciResend}` },
+      });
+      if (!r.ok) {
+        warn(`Resend menolak permintaan status domain (HTTP ${r.status})`,
+          'Periksa RESEND_API_KEY masih berlaku dan punya izin membaca domain');
+      } else {
+        const data = await r.json();
+        const daftar = Array.isArray(data && data.data) ? data.data : [];
+        const cocok = daftar.find((d) => (d && d.name || '').toLowerCase() === domainPengirim.toLowerCase());
+        // Sama seperti bagian 6: di PRODUKSI ini menahan rilis, di pengembangan
+        // cukup peringatan — domain email memang sering belum disiapkan di lokal.
+        const produksi = (process.env.NODE_ENV || '').toLowerCase() === 'production';
+        const angkat = produksi ? fail : warn;
+        if (!cocok) {
+          angkat(`Domain pengirim ${domainPengirim} TIDAK terdaftar di Resend`,
+            `EMAIL_FROM memakai ${pengirim}, tetapi domain itu tidak ada di akun Resend. ` +
+            'Tambahkan dan verifikasi domainnya, atau ganti EMAIL_FROM ke domain yang sudah ada');
+        } else if (String(cocok.status || '').toLowerCase() !== 'verified') {
+          angkat(`Domain pengirim ${domainPengirim} BELUM terverifikasi (status: ${cocok.status})`,
+            'Selesaikan verifikasi DNS di https://resend.com/domains. ' +
+            'Sampai itu selesai, SETIAP pengiriman ditolak dan hanya terlihat sebagai baris log');
+        } else {
+          ok(`Domain pengirim ${domainPengirim} terverifikasi`, pengirim);
+        }
+      }
+    } catch (e) {
+      warn('Gagal menghubungi Resend untuk memeriksa domain',
+        `Pemeriksaan DILEWATI, jangan diartikan domainnya sehat: ${e && e.message ? e.message : e}`);
+    }
+  }
+
+  section('7. Uji koneksi database');
+
   if (!process.env.DATABASE_URL) {
     fail('Dilewati — DATABASE_URL kosong');
   } else {

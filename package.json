@@ -15,6 +15,7 @@
     "db:verify-schema": "node scripts/verifikasi-schema.cjs",
     "db:seed-roles": "node scripts/db/seed-katalog-peran.cjs",
     "db:hapus-kolom-kembar": "node scripts/db/hapus-kolom-kembar.cjs",
+    "db:bersihkan-avatar-yatim": "node scripts/db/bersihkan-avatar-yatim.cjs",
     "db:migrasi-peran": "node scripts/db/migrasi-peran.cjs",
     "db:seed-master": "node scripts/db/seed-master-data.cjs",
     "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
