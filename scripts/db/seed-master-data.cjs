@@ -338,6 +338,21 @@ const KODE_SAJA = {
     }
   };
 
+  /**
+   * Item #141 — memastikan sebuah kolom benar-benar ada sebelum dipakai.
+   *
+   * Tanpa ini, satu blok migrasi yang merujuk kolom tidak ada akan
+   * MENGGAGALKAN SELURUH penyemai, termasuk blok-blok sesudahnya yang tidak
+   * ada hubungannya. Itulah yang terjadi selama ini.
+   */
+  const kolomAda = async (tabel, kolom) => {
+    const { rows } = await client.query(
+      `SELECT 1 FROM information_schema.columns WHERE table_name = $1 AND column_name = $2`,
+      [tabel, kolom]
+    );
+    return rows.length > 0;
+  };
+
   try {
     console.log("");
     console.log(warna.tebal("Menyemai Master Data"));
@@ -390,6 +405,27 @@ const KODE_SAJA = {
     console.log("");
     console.log(warna.tebal("  Migrasi Tasks.category (item #85)"));
 
+    // Item #141 — blok ini merujuk kolom "Tasks"."issue_type" yang TIDAK PERNAH
+    // ADA di skema; tabel Tasks menyimpan jenis pekerjaan di kolom "type".
+    // Akibatnya penyemai selalu gagal di sini, dan dua blok sesudahnya
+    // ("Melengkapi kode" dan "Dedup & migrasi rujukan") tidak pernah berjalan
+    // sekali pun sejak #85 ditulis.
+    //
+    // Yang dilakukan di sini hanya MELEWATI blok bila kolomnya tidak ada,
+    // bukan menebak maksud aslinya. Menulis ulang `issue_type` menjadi `type`
+    // akan MENGUBAH data — dan tidak ada yang perlu diubah: seluruh
+    // Tasks.category bernilai NULL. Bila suatu saat basis data lama dengan
+    // kolom itu dipulihkan, blok ini akan berjalan seperti semula.
+    const bisaMigrasiCategory =
+      (await kolomAda("Tasks", "category")) && (await kolomAda("Tasks", "issue_type"));
+
+    if (!bisaMigrasiCategory) {
+      console.log(
+        warna.kuning('    LEWAT   kolom "Tasks"."issue_type" tidak ada — migrasi #85 dilewati')
+      );
+      console.log(warna.redup("            lihat item #141; ini BUKAN kegagalan penyemaian"));
+    } else {
+
     const PETA_CATEGORY_KE_ISSUETYPE = [
       { dari: "bug",         ke: "bug"   },
       { dari: "enhancement", ke: "story" },  // Enhancement paling dekat Story
@@ -422,6 +458,7 @@ const KODE_SAJA = {
       }
     }
     if (migrasiCategory === 0) console.log(warna.redup("    (tidak ada Tasks yang perlu dimigrasikan)"));
+    }
 
     // Melengkapi kode pada tipe khas domain, tanpa mengubah labelnya
     console.log("");
@@ -544,6 +581,46 @@ const KODE_SAJA = {
       }
     }
     if (yatim === 0) console.log(warna.hijau("    (tidak ada)"));
+
+    // ── Kode susulan untuk baris di luar katalog (item #141) ───────────────
+    //
+    // Blok "Melengkapi kode" di atas hanya mengenal label yang terdaftar di
+    // katalog skrip ini. Baris yang DITAMBAHKAN PENGGUNA lewat panel Master
+    // Data tidak ada di sana — dan INSERT-nya memang tidak mengisi `code`
+    // sama sekali (lihat item #143), jadi baris seperti itu akan terus
+    // bermunculan tanpa kode.
+    //
+    // Di sini kodenya diturunkan dari label sebagai jalan terakhir. Labelnya
+    // TIDAK diubah, sesuai aturan 1 — termasuk bila label itu punya spasi di
+    // ujung; yang dibersihkan hanya kode turunannya.
+    console.log("");
+    console.log(warna.tebal("  Kode susulan untuk baris di luar katalog"));
+
+    const { rows: tanpaKode } = await client.query(
+      `SELECT id, type, label FROM "MasterData" WHERE code IS NULL OR code = ''`
+    );
+
+    const jadikanKode = (label) =>
+      String(label)
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "");
+
+    let kodeSusulan = 0;
+    for (const baris of tanpaKode) {
+      const kode = jadikanKode(baris.label);
+      if (!kode) {
+        console.log(warna.kuning(`    LEWAT   ${baris.type}: label "${baris.label}" tidak menghasilkan kode`));
+        continue;
+      }
+      await client.query(`UPDATE "MasterData" SET code = $1 WHERE id = $2`, [kode, baris.id]);
+      kodeSusulan++;
+      console.log(warna.hijau(`    ISI     ${baris.type}: "${baris.label}" -> code='${kode}'`));
+    }
+    if (kodeSusulan === 0 && tanpaKode.length === 0) {
+      console.log(warna.redup("    (semua baris sudah punya kode)"));
+    }
 
     const { rows: sisa } = await client.query(
       `SELECT type, COUNT(*)::int AS total, COUNT(code)::int AS ber_kode
