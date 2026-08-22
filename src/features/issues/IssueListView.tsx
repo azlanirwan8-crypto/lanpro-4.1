@@ -216,13 +216,19 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
     return Array.from(envSet).sort();
   }, [rawTasks, mArr]);
 
+  // Item #140 — dulu benihnya daftar keras ["Low","Medium","High"] di sini,
+  // satu-satunya filter Daftar Isu yang tidak berbasis MasterData. Sekarang
+  // sepola dengan environment/release/resolution di sekitarnya: disemai dari
+  // MasterData, lalu ditambah nilai yang sudah dipakai data hidup supaya
+  // tugas lama tidak hilang dari filter.
   const allProjectRisks = useMemo(() => {
-    const riskSet = new Set<string>(["Low", "Medium", "High"]);
+    const riskSet = new Set<string>();
+    mArr.filter((m) => m.type === "project_risk").forEach((m) => riskSet.add(m.label));
     rawTasks.forEach((t) => {
       if (t.projectRisk) riskSet.add(t.projectRisk);
     });
     return Array.from(riskSet).sort();
-  }, [rawTasks]);
+  }, [rawTasks, mArr]);
 
   const allReleases = useMemo(() => {
     const releaseSet = new Set<string>();

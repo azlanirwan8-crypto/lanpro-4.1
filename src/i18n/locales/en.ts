@@ -582,8 +582,6 @@ export const en = {
     terminate: "Terminate Project (Permanent Delete)",
   },
   editSprint: {
-    planned: "Planned",
-    completedOpt: "Completed",
     title: "Edit Phase",
     name: "Name",
     startDate: "Start Date",
@@ -1305,9 +1303,6 @@ export const en = {
     picRegistered: "Module PIC Registered",
     allProjectPic: "All Project PICs (All Members)",
     allPhases: "All Phases (ALL)",
-    phaseSit: "SIT Phase (Integration)",
-    phaseUat: "UAT Phase (Acceptance)",
-    phasePtr: "PTR Phase (Readiness)",
     moduleList: "Testing Module List",
     docScenario: "Test Documents & Scenarios",
     addModule: "Add New Testing Module",
@@ -1476,9 +1471,6 @@ export const en = {
     whatsappPreview: "WhatsApp Preview",
   },
   addSuite: {
-    phaseSitFull: "SIT Phase (System Integration Test)",
-    phaseUatFull: "UAT Phase (User Acceptance Test)",
-    phasePtrFull: "PTR Phase (Production Readiness Test)",
     createDocument: "Create Document",
     title: "Add Script Document",
     subtitle: "Create a new test scenario module",
@@ -1530,7 +1522,6 @@ export const en = {
     save: "Save Changes",
   },
   sprintPhase: {
-    planned: "Planned",
     completed: "Completed",
   },
   issueQuick: {

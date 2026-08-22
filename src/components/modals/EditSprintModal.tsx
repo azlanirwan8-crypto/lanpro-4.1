@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useMasterOptions } from "../../hooks/useMasterOptions";
 import React from "react";
 import { format } from "date-fns";
 import { ensureDate } from "../../lib/utils";
@@ -15,6 +16,13 @@ interface EditSprintModalProps {
   isSubmitting: boolean;
 }
 
+/**
+ * Dipakai hanya bila MasterData belum memuat tipe sprint_status.
+ *
+ * HURUF KECIL disengaja: itulah yang tersimpan di kolom Sprints.status.
+ */
+const CADANGAN_STATUS_SPRINT = ["planned", "active", "completed"];
+
 export const EditSprintModal: React.FC<EditSprintModalProps> = ({
   isOpen,
   onClose,
@@ -24,6 +32,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
   isSubmitting,
 }) => {
   const { t } = useTranslation();
+  const opsiStatus = useMasterOptions("sprint_status", CADANGAN_STATUS_SPRINT);
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t("editSprint.title")} maxWidth="max-w-xl">
       {editingSprint && (
@@ -60,9 +69,11 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
               }
               className="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface"
             >
-              <option value="planned">{t("editSprint.planned")}</option>
-              <option value="active">{t("editSprint.active")}</option>
-              <option value="completed">{t("editSprint.completedOpt")}</option>
+              {opsiStatus.map((st) => (
+                <option key={st} value={st}>
+                  {st}
+                </option>
+              ))}
             </select>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -125,9 +136,11 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
               }
               className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium outline-none"
             >
-              <option value="planned">{t("editSprint.planned")}</option>
-              <option value="active">{t("editSprint.active")}</option>
-              <option value="completed">{t("editSprint.completedOpt")}</option>
+              {opsiStatus.map((st) => (
+                <option key={st} value={st}>
+                  {st}
+                </option>
+              ))}
             </select>
           </div>
 

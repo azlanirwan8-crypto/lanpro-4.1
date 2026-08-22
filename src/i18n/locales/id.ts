@@ -579,8 +579,6 @@ export const id = {
     terminate: "Hentikan Proyek (Hapus Permanen)",
   },
   editSprint: {
-    planned: "Direncanakan",
-    completedOpt: "Selesai",
     title: "Ubah Fase",
     name: "Nama",
     startDate: "Tanggal Mulai",
@@ -1309,9 +1307,6 @@ export const id = {
     picRegistered: "PIC Modul Terdaftar",
     allProjectPic: "Semua PIC Proyek (Semua Anggota)",
     allPhases: "Semua Fase (ALL)",
-    phaseSit: "Fase SIT (Integration)",
-    phaseUat: "Fase UAT (Acceptance)",
-    phasePtr: "Fase PTR (Readiness)",
     moduleList: "Daftar Modul Testing",
     docScenario: "Dokumen & Skenario Pengujian",
     addModule: "Tambah Modul Testing Baru",
@@ -1481,9 +1476,6 @@ export const id = {
     whatsappPreview: "Pratinjau WhatsApp",
   },
   addSuite: {
-    phaseSitFull: "Fase SIT (System Integration Test)",
-    phaseUatFull: "Fase UAT (User Acceptance Test)",
-    phasePtrFull: "Fase PTR (Production Readiness Test)",
     createDocument: "Buat Dokumen",
     title: "Tambah Dokumen Skrip",
     subtitle: "Buat modul skenario pengujian baru",
@@ -1535,7 +1527,6 @@ export const id = {
     save: "Simpan Perubahan",
   },
   sprintPhase: {
-    planned: "Direncanakan",
     completed: "Selesai",
   },
   issueQuick: {

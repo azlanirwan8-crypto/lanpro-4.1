@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useMasterOptionItems } from "../../../hooks/useMasterOptions";
 import React from "react";
 import {
   Plus,
@@ -33,6 +34,13 @@ interface QASuiteSidebarProps {
   canDelete: boolean;
 }
 
+/** Dipakai hanya bila MasterData belum memuat tipe qa_phase. */
+const CADANGAN_FASE = [
+  { id: "SIT", label: "SIT", icon: "Cpu", color: "#3B82F6" },
+  { id: "UAT", label: "UAT", icon: "CheckCircle2", color: "#10B981" },
+  { id: "PTR", label: "PTR", icon: "ShieldCheck", color: "#F59E0B" },
+];
+
 export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
   suitesForFilter,
   selectedSuiteId,
@@ -53,6 +61,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
   canDelete,
 }) => {
   const { t } = useTranslation();
+  const opsiFase = useMasterOptionItems("qa_phase", CADANGAN_FASE);
   return (
     <div className="lg:col-span-3 space-y-3 lg:max-h-[calc(100vh-140px)] lg:sticky lg:top-4 pr-1 custom-scrollbar">
       {/* Velzon Ultra-Compact Card Box */}
@@ -85,14 +94,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
               onChange={(val) => setPhaseFilter(val as any)}
               options={[
                 { id: "ALL", label: t("qaSuite.allPhases"), icon: "Layers", color: "#6366F1" },
-                { id: "SIT", label: t("qaSuite.phaseSit"), icon: "Cpu", color: "#3B82F6" },
-                {
-                  id: "UAT",
-                  label: t("qaSuite.phaseUat"),
-                  icon: "CheckCircle2",
-                  color: "#10B981",
-                },
-                { id: "PTR", label: t("qaSuite.phasePtr"), icon: "ShieldCheck", color: "#F59E0B" },
+                ...opsiFase,
               ]}
               masterData={[]}
               className="w-full"

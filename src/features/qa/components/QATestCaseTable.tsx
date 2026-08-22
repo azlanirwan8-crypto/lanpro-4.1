@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useMasterOptionItems } from "../../../hooks/useMasterOptions";
 import React, { useState } from "react";
 import {
   Plus,
@@ -70,6 +71,15 @@ interface QATestCaseTableProps {
   handleBulkDeleteCases: () => void;
 }
 
+/** Dipakai hanya bila MasterData belum memuat tipe qa_status. */
+const CADANGAN_STATUS_QA = [
+  { id: "Passed", label: "Passed", icon: "CheckCircle2", color: "#10B981" },
+  { id: "Failed", label: "Failed", icon: "XCircle", color: "#EF4444" },
+  { id: "Blocked", label: "Blocked", icon: "AlertOctagon", color: "#F59E0B" },
+  { id: "Retest", label: "Retest", icon: "RefreshCw", color: "#6366F1" },
+  { id: "Pending", label: "Pending", icon: "Clock", color: "#64748B" },
+];
+
 export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   activeSuite,
   filteredCases,
@@ -110,6 +120,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   handleBulkDeleteCases,
 }) => {
   const { t } = useTranslation();
+  const opsiStatusQa = useMasterOptionItems("qa_status", CADANGAN_STATUS_QA);
   const [isBulkPicDropdownOpen, setIsBulkPicDropdownOpen] = useState(false);
   const [isBulkStatusDropdownOpen, setIsBulkStatusDropdownOpen] = useState(false);
 
@@ -309,11 +320,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     icon: "Layers",
                     color: "#6366F1",
                   },
-                  { id: "Passed", label: "Passed", icon: "CheckCircle2", color: "#10B981" },
-                  { id: "Failed", label: "Failed", icon: "XCircle", color: "#EF4444" },
-                  { id: "Blocked", label: "Blocked", icon: "AlertOctagon", color: "#F59E0B" },
-                  { id: "Retest", label: "Retest", icon: "RefreshCw", color: "#6366F1" },
-                  { id: "Pending", label: "Pending", icon: "Clock", color: "#64748B" },
+                  ...opsiStatusQa,
                 ]}
                 masterData={[]}
                 className="w-full"

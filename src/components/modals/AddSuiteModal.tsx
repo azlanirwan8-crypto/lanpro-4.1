@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useMasterOptions } from "../../hooks/useMasterOptions";
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus } from "lucide-react";
@@ -15,6 +16,9 @@ interface AddSuiteModalProps {
   onSubmit: (e: React.FormEvent) => void;
 }
 
+/** Dipakai hanya bila MasterData belum memuat tipe qa_phase. */
+const CADANGAN_FASE = ["SIT", "UAT", "PTR"];
+
 export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
   isOpen,
   onClose,
@@ -25,6 +29,7 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
   onSubmit,
 }) => {
   const { t } = useTranslation();
+  const opsiFase = useMasterOptions("qa_phase", CADANGAN_FASE);
   if (!isOpen) return null;
 
   return (
@@ -75,9 +80,11 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
                 onChange={(e) => onPhaseChange(e.target.value as any)}
                 className="w-full text-xs p-3 bg-surface-sunken/80 border border-border-subtle rounded-md focus:border-primary focus:outline-none font-medium text-primary cursor-pointer"
               >
-                <option value="SIT">{t("addSuite.phaseSitFull")}</option>
-                <option value="UAT">{t("addSuite.phaseUatFull")}</option>
-                <option value="PTR">{t("addSuite.phasePtrFull")}</option>
+                {opsiFase.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
               </select>
             </div>
 
