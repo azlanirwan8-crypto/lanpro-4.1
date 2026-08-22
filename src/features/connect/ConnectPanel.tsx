@@ -1,9 +1,11 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { CheckCircle2, Wifi, Loader2, Database, Save, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { fetchDbConfig, testDbConfig, saveDbConfig } from "./services/connect.service";
 
 export const ConnectPanel = () => {
+  const { t } = useTranslation();
   const [config, setConfig] = useState({
     host: "localhost",
     port: "3306",
@@ -98,7 +100,7 @@ export const ConnectPanel = () => {
           </div>
           <div>
             <h3 className="text-xs font-medium text-content-strong uppercase tracking-wide">
-              Active MySQL Connection Help
+              {t("connect.mysqlHelp")}
             </h3>
             <p className="text-content-secondary mt-1 text-xs leading-relaxed">
               Aplikasi terhubung aktif ke backend MySQL. Anda dapat menguji (Test) maupun menyimpan
@@ -113,7 +115,7 @@ export const ConnectPanel = () => {
           <div className="px-4 py-3 border-b border-border-subtle/80 bg-surface-sunken/80 flex justify-between items-center">
             <h2 className="text-xs font-medium text-content-strong uppercase tracking-wide flex items-center gap-2">
               <Database className="w-4 h-4 text-indigo-600" />
-              Konfigurasi Database MySQL
+              {t("connect.mysqlConfig")}
             </h2>
           </div>
 
@@ -174,7 +176,7 @@ export const ConnectPanel = () => {
                     </span>{" "}
                     di atas. Ubahlah kembali menjadi{" "}
                     <strong className="font-medium text-emerald-700">defaultdb</strong> lalu klik{" "}
-                    <strong>Save & Apply Live</strong>.
+                    <strong>{t("connect.saveApply")}</strong>.
                   </p>
                 </div>
               </div>
@@ -223,7 +225,7 @@ export const ConnectPanel = () => {
                 ) : (
                   <>
                     <Wifi className="w-3.5 h-3.5 mr-1.5 text-content-muted" />
-                    Test Connection
+                    {t("connect.testConnection")}
                   </>
                 )}
               </button>
@@ -239,7 +241,7 @@ export const ConnectPanel = () => {
                 ) : (
                   <>
                     <Save className="w-3.5 h-3.5 mr-1.5" />
-                    Save & Apply Live
+                    {t("connect.saveApply")}
                   </>
                 )}
               </button>

@@ -610,7 +610,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     disabled={currentPage === 1}
                     className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs font-medium disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
                   >
-                    Previous
+                    {t("meetingExtra.previous")}
                   </button>
                   <span className="px-3 py-1.5 bg-primary-surface text-content-inverse rounded-md text-xs font-medium shadow-xs">
                     {currentPage}
@@ -620,7 +620,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     disabled={currentPage === totalPages}
                     className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs font-medium disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
                   >
-                    Next
+                    {t("meetingExtra.next")}
                   </button>
                 </div>
               )}
@@ -703,12 +703,12 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             handleDownloadMeeting(activeMeeting.id!, activeMeeting.fileName!)
                           }
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 rounded-md text-xs font-medium transition-all border border-emerald-500/30 cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
-                          title="Unduh Berkas Lampiran"
+                          title={t("meetingExtra.downloadAttachment")}
                         >
                           <FileText className="w-3.5 h-3.5 text-emerald-600" />
                           <span className="truncate max-w-[140px]">{activeMeeting.fileName}</span>
                           <span className="text-xs sm:text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded font-medium">
-                            Download
+                            {t("meetingExtra.download")}
                           </span>
                         </button>
                       )}
@@ -852,7 +852,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                       onClick={() => setNewMeetingFile(null)}
                       className="text-xs sm:text-[10px] text-rose-600 hover:underline font-medium"
                     >
-                      Remove
+                      {t("meetingExtra.remove")}
                     </button>
                   )}
                 </label>
@@ -905,7 +905,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                           }}
                           className="text-[10px] leading-none bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 px-2 py-1 rounded font-medium transition-all"
                         >
-                          Hapus Berkas
+                          {t("meetingExtra.deleteFile")}
                         </button>
                       )}
                     </div>
@@ -955,7 +955,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   {loading ? (
                     <>
                       <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      <span>Saving...</span>
+                      <span>{t("meetingExtra.saving")}</span>
                     </>
                   ) : (
                     <span>{t("meetings.saveMeeting")}</span>

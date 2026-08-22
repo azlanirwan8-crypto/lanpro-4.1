@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect, useCallback } from "react";
 import { ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -28,6 +29,7 @@ export const CompleteRegistrationScreen = ({
   onSelesai,
   onBatal,
 }: CompleteRegistrationScreenProps) => {
+  const { t } = useTranslation();
   // Kolom sudah terisi usulan dari email, TETAPI tetap bisa diubah. Mengunci
   // usulan akan membuat pengguna mentok bila nama itu sudah dipakai orang lain
   // — dan itu tidak jarang, karena pemotongan 10 karakter membuat nama yang
@@ -101,7 +103,9 @@ export const CompleteRegistrationScreen = ({
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-success/10">
           <CheckCircle2 className="h-7 w-7 text-success-text" />
         </div>
-        <h2 className="text-2xl font-semibold text-content-strong">Pendaftaran Berhasil</h2>
+        <h2 className="text-2xl font-semibold text-content-strong">
+          {t("completeReg.regSuccess")}
+        </h2>
         <p className="mt-2 text-sm text-content-secondary">{berhasil}</p>
         <button
           type="button"
@@ -109,7 +113,7 @@ export const CompleteRegistrationScreen = ({
           className="mt-6 inline-flex min-h-11 items-center justify-center rounded-lg bg-primary-surface px-6
                      text-sm font-medium text-content-inverse transition-colors duration-150 hover:bg-primary-surface-hover"
         >
-          Kembali ke Halaman Masuk
+          {t("completeReg.backToLogin")}
         </button>
         <p className="mt-3 text-xs text-content-muted">
           Otomatis kembali ke halaman masuk dalam {hitungMundur} detik…
@@ -124,10 +128,8 @@ export const CompleteRegistrationScreen = ({
       animate={{ opacity: 1, y: 0 }}
       className="w-full max-w-md"
     >
-      <h2 className="text-2xl font-semibold text-content-strong">Lengkapi Pendaftaran</h2>
-      <p className="mt-1.5 text-sm text-content-secondary">
-        Satu langkah lagi. Pilih username untuk akun LanPro Anda.
-      </p>
+      <h2 className="text-2xl font-semibold text-content-strong">{t("completeReg.completeReg")}</h2>
+      <p className="mt-1.5 text-sm text-content-secondary">{t("completeReg.oneMoreStep")}</p>
 
       {/* Nama dan email sengaja TIDAK ditampilkan. Keduanya dulu berupa kolom
           input mati yang tidak bisa disentuh, dan itu membuat layar terasa
@@ -145,7 +147,7 @@ export const CompleteRegistrationScreen = ({
             type="text"
             value={username}
             onChange={(e) => ubahUsername(e.target.value)}
-            placeholder="johndoe"
+            placeholder={t("completeReg.usernamePlaceholder")}
             autoFocus
             className="min-h-11 w-full rounded-lg border border-border-subtle bg-surface px-3.5
                        text-sm text-content transition-colors duration-150
@@ -154,9 +156,7 @@ export const CompleteRegistrationScreen = ({
           {/* Keterangan hanya muncul bila memang ada usulan. Menampilkan
               "kami sarankan" pada kolom kosong justru membingungkan. */}
           {adaUsulan && (
-            <p className="mt-1 text-xs text-content-muted">
-              Kami sarankan dari email Anda. Silakan ubah bila ingin nama lain.
-            </p>
+            <p className="mt-1 text-xs text-content-muted">{t("completeReg.suggestHint")}</p>
           )}
         </div>
 
@@ -185,7 +185,7 @@ export const CompleteRegistrationScreen = ({
           className="inline-flex min-h-11 w-full items-center justify-center text-sm
                      text-content-secondary transition-colors duration-150 hover:text-content"
         >
-          Batal
+          {t("completeReg.cancel")}
         </button>
       </form>
     </motion.div>

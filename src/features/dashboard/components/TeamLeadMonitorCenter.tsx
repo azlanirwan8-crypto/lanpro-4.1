@@ -536,7 +536,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                     </p>
                     <div className="pt-2">
                       <div className="flex justify-between text-xs sm:text-[10px] font-medium text-content-subtle mb-1">
-                        <span>Progress Sprint</span>
+                        <span>{t("teamLead2.sprintProgress")}</span>
                         <span>{activeSprint.progress || 0}%</span>
                       </div>
                       <div className="w-full h-2 rounded-full bg-surface-inverse overflow-hidden">
@@ -551,19 +551,19 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                     onClick={() => setCurrentView("planning")}
                     className="w-full py-2.5 rounded-xl bg-surface-inverse hover:bg-slate-700 text-content-inverse-muted text-xs font-medium transition-all border border-border-inverse text-center"
                   >
-                    Buka Panel Perencanaan Sprint Lengkap
+                    {t("teamLead2.openPlanning")}
                   </button>
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <p className="text-xs text-content-subtle italic">
-                    Belum ada sprint aktif saat ini.
+                    {t("teamLead2.noActiveSprint")}
                   </p>
                   <button
                     onClick={() => setCurrentView("planning")}
                     className="mt-3 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-content-inverse text-xs font-medium transition-all"
                   >
-                    Buat Sprint Baru
+                    {t("teamLead2.createSprint")}
                   </button>
                 </div>
               )}
@@ -581,7 +581,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
           <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
             {activityLogs.length === 0 ? (
               <div className="text-center py-12 text-content-muted text-xs italic">
-                Belum ada log aktivitas tercatat.
+                {t("teamLead2.noActivityLog")}
               </div>
             ) : (
               activityLogs.slice(0, 15).map((log, idx) => (

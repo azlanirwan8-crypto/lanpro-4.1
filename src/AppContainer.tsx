@@ -2561,7 +2561,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               }}
               className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-slate-950 text-xs font-medium rounded-xl uppercase tracking-wider shrink-0 transition-all cursor-pointer shadow-md flex items-center gap-1"
             >
-              <span>LIHAT BUG</span>
+              <span>{t("appShell.viewBug")}</span>
             </button>
           </div>
         ),
@@ -3540,7 +3540,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                 <button
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
                   className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-violet-600 hover:bg-violet-500/10 rounded-full transition-all relative"
-                  title="Notifikasi"
+                  title={t("appShell.notifications")}
                 >
                   <Bell className="w-5 h-5" />
                   {notifications.filter((n) => !n.read).length > 0 && (
@@ -3624,13 +3624,13 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                             <button
                               onClick={() => setIsTaskDetailModalOpen(false)}
                               className="h-8 w-8 rounded-md bg-surface-sunken border border-border-subtle/80 text-content-secondary hover:bg-indigo-500/10 hover:text-indigo-600 hover:border-indigo-500/30 flex items-center justify-center transition-all shadow-2xs"
-                              title="Back"
+                              title={t("appShell.back")}
                             >
                               <ArrowLeft className="w-4 h-4" />
                             </button>
                             <div className="flex items-center gap-2.5">
                               <h3 className="text-sm font-medium text-content-strong tracking-tight">
-                                Issue Details
+                                {t("appShell.issueDetails")}
                               </h3>
                               <span className="text-xs font-medium text-indigo-700 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
                                 {selectedTaskForDetail?.key || "TASK"}
@@ -3747,7 +3747,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                 <FolderKanban className="w-8 h-8" />
               </div>
               <h3 className="text-xl font-medium text-content-strong mb-2">
-                Pilih atau Buat Proyek Baru
+                {t("appShell.pickOrCreateProject")}
               </h3>
               <p className="text-sm text-content-muted max-w-md mb-6">
                 {hasPermission(
@@ -3776,7 +3776,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-xl font-medium text-sm shadow-md shadow-indigo-200 transition-all flex items-center gap-2"
                 >
                   <Plus className="w-4 h-4" />
-                  <span>Buat Proyek Baru</span>
+                  <span>{t("appShell.createNewProject")}</span>
                 </button>
               )}
             </div>
