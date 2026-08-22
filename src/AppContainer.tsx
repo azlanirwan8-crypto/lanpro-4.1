@@ -144,7 +144,6 @@ const chunkArray = <T,>(arr: T[], size: number): T[][] => {
 import { ensureDate, safeFormat, Button, Input, Textarea } from "./components/ui/CoreUI";
 import {
   AuthHeroPanel,
-  AuthWatermarkPattern,
   RegisterScreen,
   LoginScreen,
   CompleteRegistrationScreen,
@@ -3313,8 +3312,6 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
         {/* Form Side with Watermark & Animated Form Switching */}
         <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-12 bg-surface-muted relative overflow-y-auto min-h-screen">
-          <AuthWatermarkPattern />
-
           <AnimatePresence mode="wait">
             {hasilSso.jenis === "lengkapi" ? (
               <CompleteRegistrationScreen

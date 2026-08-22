@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 2 BELUM · 121 SELESAI · 3 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 1 BELUM · 122 SELESAI · 3 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -486,18 +486,17 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 2 item
+### 1.1 BELUM SELESAI — 1 item
 
-**Sebaran per fase:** F1 0 · F2 0 · F3 1 · F5 0 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 0 · F3 0 · F5 0 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 0
 
 **Masih menahan rilis production:** #30
 
-| #   | Temuan                                                                                                       |  Fase   | Sev | Biaya         | Blokir modul baru? | Status            | Detail |
-| --- | ------------------------------------------------------------------------------------------------------------ | :-----: | :-: | ------------- | :----------------: | ----------------- | ------ |
-| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)                                  | **F11** | 🔴  | Tinggi        | Blokir production  | `MENUNGGU` desain | §1.5   |
-| 119 | Ornamen rangka putus-putus di latar layar auth; pola dekoratif, paling terekspos di lebar tablet karena #116 | **F3**  | 🟢  | Sangat rendah |       Tidak        | `BELUM`           | §14    |
+| #   | Temuan                                                                      |  Fase   | Sev | Biaya  | Blokir modul baru? | Status            | Detail |
+| --- | --------------------------------------------------------------------------- | :-----: | :-: | ------ | :----------------: | ----------------- | ------ |
+| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2) | **F11** | 🔴  | Tinggi | Blokir production  | `MENUNGGU` desain | §1.5   |
 
-### 1.2 SUDAH SELESAI — 121 item
+### 1.2 SUDAH SELESAI — 122 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -620,6 +619,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 125 | ~~Inisial avatar terbaca 1,85 di mode gelap~~ palet pindah ke latar PEKAT `-700` dengan teks `content-inverse` (#ffffff di kedua mode); 8 warna terukur 5,02–7,90                                                 | **F12**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §14    |
 | 126 | ~~Legenda chart terbaca 2,54 di kedua mode~~ hanya TEKS-nya dipaksa ke `content-body` lewat `formatter`; kotak penanda tetap warna seri, palet DATA tidak disentuh (§22.5)                                        |  **F3**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §22.5  |
 | 121 | ~~`forgot-password` membocorkan keberadaan email dan mereset kata sandi tanpa autentikasi~~ balasan netral identik untuk terdaftar/tidak, dan kini mengirim TAUTAN bertoken 15 menit alih-alih menimpa kata sandi |  **F2**  | 🔴  | Rendah        |     Ya (keamanan)      | `SELESAI` 21 Agu | §6     |
+| 119 | ~~Ornamen rangka putus-putus di latar layar auth~~ `AuthWatermarkPattern` dihapus beserta berkasnya; sisi form kini hanya memuat kartu masuk                                                                      |  **F3**  | 🟢  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §14    |
 | 115 | ~~Tiga kontrol layar masuk di bawah rentang sentuh #14~~ `py-2.5 -my-2.5`; terukur 36px tanpa menggeser tata letak                                                                                                | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §14    |
 | 116 | ~~Panel merek hilang di 768–1023px~~ breakpoint turun ke `md`; diverifikasi di 375/768/1024/1440 tanpa scroll horizontal                                                                                          |  **F3**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §14    |
 | 118 | ~~Placeholder kata sandi berupa karakter bulatan~~ diganti teks bermakna di 7 tempat (4 layar auth + 3 panel pengguna); nol bulatan tersisa                                                                       |  **F3**  | 🟢  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §14    |
