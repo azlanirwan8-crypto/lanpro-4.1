@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Layout, Trash2 } from "lucide-react";
 import { cn } from "../../../../lib/utils";
@@ -28,6 +29,7 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
   projectMembers,
   masterData,
 }) => {
+  const { t } = useTranslation();
   const childSubtasks = tasks.filter((t) => t.parentId === task.id);
 
   return (
@@ -35,7 +37,7 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-content uppercase tracking-widest flex items-center gap-2">
           <Layout className="w-4 h-4 text-blue-500" />
-          Subtask List
+          {t("subtasks.list")}
         </h3>
       </div>
       <div className="space-y-3 p-4 bg-surface-sunken/50 rounded-lg border border-dashed border-border-subtle shadow-xs">
@@ -54,11 +56,7 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
               className="w-5 h-5 rounded-lg border-border-subtle text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer shadow-soft"
               checked={st.status === "Done"}
               onChange={() =>
-                updateTaskField(
-                  st.id,
-                  "status",
-                  st.status === "Done" ? "To Do" : "Done"
-                )
+                updateTaskField(st.id, "status", st.status === "Done" ? "To Do" : "Done")
               }
               disabled={!isEditable}
             />
@@ -73,7 +71,7 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
               initialValue={st.title}
               onSave={(val: string) => updateTaskField(st.id, "title", val)}
               onAutoSave={(val: string) => updateTaskField(st.id, "title", val)}
-              placeholder="Untitled Subtask"
+              placeholder={t("subtasks.untitled")}
               disabled={!isEditable}
             />
             <div className="flex items-center gap-3 shrink-0">
@@ -102,7 +100,7 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
                     }
                   }}
                   className="p-1 text-content-subtle hover:text-danger-text hover:bg-danger/10 rounded-lg transition-colors ml-1"
-                  title="Hapus Subtask"
+                  title={t("subtasks.delete")}
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -113,7 +111,7 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
         {childSubtasks.length === 0 && (
           <div className="py-4 text-center">
             <p className="text-xs font-medium text-content-subtle uppercase tracking-widest italic">
-              No subtasks defined
+              {t("subtasks.empty")}
             </p>
           </div>
         )}

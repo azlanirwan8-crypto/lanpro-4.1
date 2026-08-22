@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import {
   Mail,
@@ -30,6 +31,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
   emailTemplate,
   waTemplate,
 }) => {
+  const { t } = useTranslation();
   const [items, setItems] = useState<BroadcastItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -161,7 +163,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
           className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-surface/10 text-primary hover:bg-primary-surface/15 rounded-md text-xs font-medium transition border border-primary/20 shadow-xs"
         >
           <Eye size={14} />
-          Preview Template
+          {t("broadcast.previewTemplate")}
         </button>
       </div>
 
@@ -231,7 +233,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
                       onClick={() => handleManualRetry(item.id)}
                       disabled={isRetrying}
                       className="p-1 text-content-subtle hover:text-content-body hover:bg-surface-muted rounded-md transition-all disabled:opacity-50"
-                      title="Retry Broadcast"
+                      title={t("broadcast.retry")}
                     >
                       <RotateCcw
                         size={14}
@@ -254,7 +256,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
             <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle shrink-0">
               <h3 className="font-medium text-sm text-content-strong flex items-center gap-2">
                 <Eye size={16} className="text-indigo-500" />
-                Template Preview
+                {t("broadcast.templatePreview")}
               </h3>
               <button
                 onClick={() => setIsPreviewOpen(false)}
@@ -270,7 +272,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
                   <div className="p-1 bg-blue-500/10 text-blue-500 rounded">
                     <Mail size={14} />
                   </div>
-                  Email Preview
+                  {t("broadcast.emailPreview")}
                 </div>
                 <div className="bg-surface-sunken border border-border-faint rounded-xl p-4 text-sm font-mono text-content-body whitespace-pre-wrap shadow-soft">
                   <div className="font-medium border-b border-border-subtle pb-3 mb-3 text-content-strong">
@@ -285,7 +287,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
                   <div className="p-1 bg-emerald-500/10 text-emerald-500 rounded">
                     <MessageSquare size={14} />
                   </div>
-                  WhatsApp Preview
+                  {t("broadcast.whatsappPreview")}
                 </div>
                 <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-sm font-mono text-emerald-800 whitespace-pre-wrap leading-relaxed shadow-soft">
                   {replaceMockData(waTemplate)}

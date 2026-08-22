@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Activity, Globe } from "lucide-react";
 import { usePresence } from "../contexts/PresenceContext";
@@ -7,6 +8,7 @@ export const HeaderNetworkStatus: React.FC<{
   latencyText: string;
   selectedProjectKey: string;
 }> = ({ latencyStatus, latencyText, selectedProjectKey }) => {
+  const { t } = useTranslation();
   const { onlineUsers } = usePresence();
 
   return (
@@ -27,22 +29,22 @@ export const HeaderNetworkStatus: React.FC<{
         </span>
         {latencyStatus === "good" && (
           <span className="text-[10px] leading-none sm:text-[9px] bg-emerald-500/10 text-emerald-600 px-1.5 py-[3px] rounded font-medium tracking-wider">
-            Cepat
+            {t("network.fast")}
           </span>
         )}
         {latencyStatus === "warning" && (
           <span className="text-[10px] leading-none sm:text-[9px] bg-amber-500/10 text-amber-600 px-1.5 py-[3px] rounded font-medium tracking-wider">
-            Sedang
+            {t("network.medium")}
           </span>
         )}
         {latencyStatus === "poor" && (
           <span className="text-[10px] leading-none sm:text-[9px] bg-rose-500/10 text-rose-600 px-1.5 py-[3px] rounded font-medium tracking-wider">
-            Lambat
+            {t("network.slow")}
           </span>
         )}
         {latencyStatus === "offline" && (
           <span className="text-xs sm:text-[11px] sm:text-[9px] bg-surface-muted text-content-muted px-1.5 py-0.5 rounded font-medium tracking-wider">
-            Offline
+            {t("network.offline")}
           </span>
         )}
       </div>
@@ -51,7 +53,7 @@ export const HeaderNetworkStatus: React.FC<{
 
       <div className="flex items-center gap-1.5">
         <Activity className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />
-        <span className="text-content-muted">Realtime:</span>
+        <span className="text-content-muted">{t("network.realtime")}</span>
         <span className="text-indigo-600 font-medium">
           {onlineUsers.length > 0 ? `${onlineUsers.length} Kolaborator` : "Aktif"}
         </span>

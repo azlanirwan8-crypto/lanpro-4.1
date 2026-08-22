@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus } from "lucide-react";
@@ -23,6 +24,7 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
   onPhaseChange,
   onSubmit,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return (
@@ -40,10 +42,10 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-medium text-content-strong uppercase tracking-wider">
-                Tambah Dokumen Skrip
+                {t("addSuite.title")}
               </h3>
               <p className="text-xs sm:text-[11px] text-content-subtle font-medium">
-                Buat modul skenario pengujian baru
+                {t("addSuite.subtitle")}
               </p>
             </div>
           </div>
@@ -51,7 +53,7 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs sm:text-[11px] text-content-body font-medium block">
-                Nama Dokumen *
+                {t("addSuite.docName")}
               </label>
               <input
                 autoFocus
@@ -60,13 +62,13 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
                 value={suiteName}
                 onChange={(e) => onNameChange(e.target.value)}
                 className="w-full text-xs p-3 bg-surface-sunken/80 border border-border-subtle rounded-md focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none font-medium text-content-strong"
-                placeholder="Masukkan nama dokumen..."
+                placeholder={t("addSuite.docNamePlaceholder")}
               />
             </div>
 
             <div className="space-y-1.5">
               <label className="text-xs sm:text-[11px] text-content-body font-medium block">
-                Fase Testing *
+                {t("addSuite.testPhase")}
               </label>
               <select
                 value={phase}
@@ -85,7 +87,7 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
                 onClick={onClose}
                 className="px-4 py-2.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium uppercase tracking-wider rounded-md transition-all cursor-pointer"
               >
-                Batal
+                {t("addSuite.cancel")}
               </button>
               <button
                 type="submit"
