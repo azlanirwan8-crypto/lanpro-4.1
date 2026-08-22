@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { format } from "date-fns";
@@ -44,6 +45,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
   setIsTaskDetailModalOpen,
   setCurrentView,
 }) => {
+  const { t } = useTranslation();
   const [selectedTab, setSelectedTab] = useState<"workload" | "blockers" | "sprint" | "activity">(
     "workload"
   );
@@ -81,7 +83,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
             </span>
           </div>
           <h2 className="text-2xl md:text-3xl font-medium tracking-tight text-content-inverse flex items-center gap-3">
-            Dashboard Pemantauan Tim Lead
+            {t("teamLead.title")}
           </h2>
           <p className="text-xs text-content-subtle font-medium mt-1 max-w-2xl leading-relaxed">
             Pusat kendali operasional untuk memantau beban kerja anggota, mendeteksi hambatan
@@ -96,14 +98,14 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
             className="px-4 py-2.5 rounded-xl bg-surface-inverse hover:bg-slate-700 text-content-inverse-muted text-xs font-medium transition-all border border-border-inverse flex items-center gap-2 shadow-soft"
           >
             <Users className="w-4 h-4 text-indigo-400" />
-            Kelola Anggota Tim
+            {t("teamLead.manageMembers")}
           </button>
           <button
             onClick={() => setCurrentView("planning")}
             className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-content-inverse text-xs font-medium transition-all flex items-center gap-2 shadow-soft-lg shadow-indigo-600/25"
           >
             <Zap className="w-4 h-4" />
-            Manajemen Sprint & Backlog
+            {t("teamLead.sprintBacklogMgmt")}
           </button>
         </div>
       </div>
@@ -113,7 +115,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
         <div className="bg-slate-800/60 backdrop-blur-md p-5 rounded-xl border border-slate-700/60 flex items-center justify-between">
           <div>
             <span className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-subtle">
-              Total Anggota Aktif
+              {t("teamLead.totalActiveMembers")}
             </span>
             <div className="text-2xl font-medium text-content-inverse mt-1">
               {projectMembers.length} Personil
@@ -164,7 +166,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
         <div className="bg-slate-800/60 backdrop-blur-md p-5 rounded-xl border border-slate-700/60 flex items-center justify-between">
           <div>
             <span className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-subtle">
-              Sprint Aktif
+              {t("teamLead.activeSprint")}
             </span>
             <div className="text-2xl font-medium text-emerald-400 mt-1 truncate max-w-[140px]">
               {activeSprint ? activeSprint.name : "Tidak Ada Sprint"}
@@ -222,7 +224,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
           )}
         >
           <Zap className="w-4 h-4" />
-          Status Sprint & Tim Departemen
+          {t("teamLead.sprintTeamStatus")}
         </button>
 
         <button
@@ -235,7 +237,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
           )}
         >
           <Activity className="w-4 h-4" />
-          Log Aktivitas & Audit Real-Time
+          {t("teamLead.activityLog")}
         </button>
       </div>
 
@@ -247,7 +249,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
               <Search className="w-4 h-4 text-content-subtle absolute left-3" />
               <input
                 type="text"
-                placeholder="Cari anggota tim..."
+                placeholder={t("teamLead.searchMember")}
                 value={searchMember}
                 onChange={(e) => setSearchMember(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 rounded-xl bg-surface-inverse-strong border border-border-inverse text-xs text-content-inverse placeholder-content-muted focus:outline-none focus:border-indigo-500"
@@ -255,7 +257,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
             </div>
             <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
               <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase">
-                Departemen:
+                {t("teamLead.department")}
               </span>
               <button
                 onClick={() => setSelectedDepartment("all")}
@@ -266,7 +268,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                     : "bg-surface-inverse text-content-subtle hover:text-content-inverse"
                 )}
               >
-                Semua
+                {t("teamLead.all")}
               </button>
               {departments.map((dept) => (
                 <button
@@ -324,11 +326,11 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                       </div>
                       {isOverloaded ? (
                         <span className="px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[10px] leading-none sm:text-[9px] font-medium uppercase tracking-wider">
-                          Overloaded ⚠️
+                          {t("teamLead.overloaded")} ⚠️
                         </span>
                       ) : (
                         <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] leading-none sm:text-[9px] font-medium uppercase tracking-wider">
-                          Optimal
+                          {t("teamLead.optimal")}
                         </span>
                       )}
                     </div>
@@ -336,7 +338,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                     <div className="grid grid-cols-3 gap-2 py-3 border-y border-slate-700/60 my-3 text-center">
                       <div>
                         <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle uppercase tracking-widest font-medium block">
-                          Total
+                          {t("teamLead.total")}
                         </span>
                         <span className="text-sm font-medium text-content-inverse">
                           {totalAssigned}
@@ -344,13 +346,13 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                       </div>
                       <div>
                         <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle uppercase tracking-widest font-medium block">
-                          Aktif
+                          {t("teamLead.active")}
                         </span>
                         <span className="text-sm font-medium text-sky-400">{activeCount}</span>
                       </div>
                       <div>
                         <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle uppercase tracking-widest font-medium block">
-                          Selesai
+                          {t("teamLead.done")}
                         </span>
                         <span className="text-sm font-medium text-emerald-400">{doneCount}</span>
                       </div>
@@ -358,7 +360,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
 
                     <div className="space-y-1.5">
                       <div className="flex justify-between text-xs sm:text-[10px] font-medium text-content-subtle">
-                        <span>Rasio Penyelesaian</span>
+                        <span>{t("teamLead.completionRatio")}</span>
                         <span>{workloadPercentage}%</span>
                       </div>
                       <div className="w-full h-2 rounded-full bg-surface-inverse-strong overflow-hidden">
@@ -417,11 +419,9 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
               <div className="text-center py-12 bg-slate-800/40 rounded-xl border border-border-inverse">
                 <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
                 <h4 className="text-base font-medium text-content-inverse">
-                  Tidak Ada Kendala Kritis!
+                  {t("teamLead.noCriticalIssue")}
                 </h4>
-                <p className="text-xs text-content-subtle mt-1">
-                  Semua tugas berjalan lancar tanpa blocker maupun overdue yang tertunda.
-                </p>
+                <p className="text-xs text-content-subtle mt-1">{t("teamLead.noCriticalHint")}</p>
               </div>
             ) : (
               [...blockedTasks, ...overdueTasks].map((task, idx) => {
@@ -460,7 +460,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                     <div className="flex items-center gap-3 shrink-0">
                       <div className="text-right hidden sm:block">
                         <span className="text-xs sm:text-[10px] text-content-subtle font-medium block">
-                          Deadline
+                          {t("teamLead.deadline")}
                         </span>
                         <span className="text-xs text-rose-400 font-medium">
                           {task.endDate
@@ -528,7 +528,7 @@ export const TeamLeadMonitorCenter: React.FC<TeamLeadMonitorCenterProps> = ({
                         {activeSprint.name}
                       </span>
                       <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-xs sm:text-[10px] font-medium">
-                        Aktif
+                        {t("teamLead.active")}
                       </span>
                     </div>
                     <p className="text-xs text-content-subtle">

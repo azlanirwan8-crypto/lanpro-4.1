@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { safeLocalStorage } from "../lib/safeStorage";
 import React, { useState, useEffect, useRef } from "react";
 import {
@@ -54,6 +55,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   currentUser,
   allUsers,
 }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeChatUser, setActiveChatUser] = useState<UserProfile | null>(null);
@@ -610,7 +612,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                 {name}
               </p>
               <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-mono">
-                Unduh berkas
+                {t("chat.downloadFile")}
               </p>
             </div>
             <Download className="w-3.5 h-3.5 text-content-subtle shrink-0" />
@@ -643,7 +645,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
         className="relative w-12 h-12 rounded-full bg-surface-inverse-strong text-content-inverse flex items-center justify-center shadow-xl border border-border-inverse hover:bg-orange-600 hover:border-orange-500 hover:text-content-inverse transition-all duration-300"
-        title="Live Chat Obrolan LanPro"
+        title={t("chat.liveChat")}
       >
         <MessageSquare className="w-5 h-5" />
         {/* Red Badge Indicator */}
@@ -682,7 +684,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
                     <span className="font-medium text-sm tracking-tight text-content-inverse">
-                      Obrolan LanPro
+                      {t("chat.chatTitle")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2.5">
@@ -712,7 +714,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-2.5" />
                     <input
                       type="text"
-                      placeholder="Cari saluran atau rekan..."
+                      placeholder={t("chat.searchChannel")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-9 pr-3 py-1.5 bg-surface border border-border-subtle rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/10 focus:border-orange-500 transition-all font-medium text-content-strong"
@@ -726,7 +728,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                   {filteredVirtuals.length > 0 && (
                     <div className="bg-surface-sunken/40">
                       <p className="px-4 pt-2.5 pb-1 text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-widest text-content-subtle uppercase">
-                        Saluran & Asisten
+                        {t("chat.channelsAssistant")}
                       </p>
                       {filteredVirtuals.map((virtual) => {
                         const isGroup = virtual.id === "group";
@@ -793,7 +795,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     </p>
                     {filteredUsers.length === 0 ? (
                       <div className="p-6 text-center text-content-subtle text-xs">
-                        Tidak ada rekan kerja ditemukan.
+                        {t("chat.noColleague")}
                       </div>
                     ) : (
                       filteredUsers.map((targetUser) => {
@@ -869,7 +871,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     <button
                       onClick={() => setActiveChatUser(null)}
                       className="p-1 text-content-subtle hover:text-content-inverse hover:bg-surface-inverse rounded-lg transition-all"
-                      title="Kembali"
+                      title={t("chat.back")}
                     >
                       <ArrowLeft className="w-4 h-4" />
                     </button>
@@ -928,14 +930,14 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         setMsgSearchQuery("");
                       }}
                       className={`p-1.5 rounded-lg transition-all ${isMsgSearchOpen ? "bg-surface-inverse text-orange-500" : "text-content-subtle hover:text-content-inverse"}`}
-                      title="Cari dalam chat ini"
+                      title={t("chat.searchInChat")}
                     >
                       <Search className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => setActiveChatUser(null)}
                       className="p-1.5 text-content-subtle hover:text-content-inverse hover:bg-surface-inverse rounded-lg transition-all"
-                      title="Sembunyikan"
+                      title={t("chat.hide")}
                     >
                       <Minus className="w-3.5 h-3.5" />
                     </button>
@@ -948,7 +950,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     <Search className="w-3 h-3 text-content-subtle" />
                     <input
                       type="text"
-                      placeholder="Filter kata kunci percakapan..."
+                      placeholder={t("chat.filterKeyword")}
                       value={msgSearchQuery}
                       onChange={(e) => setMsgSearchQuery(e.target.value)}
                       className="flex-1 bg-transparent border-none text-xs sm:text-[11px] focus:outline-none focus:ring-0 text-content-strong font-medium"
@@ -971,7 +973,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     <div className="h-full flex flex-col items-center justify-center gap-1">
                       <Loader2 className="w-5 h-5 text-orange-500 animate-spin" />
                       <span className="text-xs sm:text-[10px] font-medium text-content-subtle">
-                        Memuat pesan...
+                        {t("chat.loadingMessages")}
                       </span>
                     </div>
                   ) : filteredMessages.length === 0 ? (
@@ -1081,7 +1083,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       <span
                         className={`w-1.5 h-1.5 rounded-full ${simulationEnabled ? "bg-emerald-400 animate-pulse" : "bg-surface-marker"}`}
                       />
-                      Simulasi Balasan Otomatis
+                      {t("chat.autoReplySim")}
                     </span>
                     <button
                       type="button"
@@ -1108,7 +1110,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-xs sm:text-[10px] font-medium tracking-widest text-content-muted uppercase">
-                          Kirim Lampiran & Mockup
+                          {t("chat.sendAttachment")}
                         </span>
                         <button
                           onClick={() => setIsAttachmentMenuOpen(false)}
@@ -1177,7 +1179,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         className="w-full py-1.5 bg-surface-inverse-strong text-content-inverse rounded-xl text-xs sm:text-[10px] font-medium tracking-wider uppercase flex items-center justify-center gap-1.5 hover:bg-orange-600 transition-colors shadow-soft"
                       >
                         <FileUp className="w-3.5 h-3.5" />
-                        Unggah File Komputer Anda
+                        {t("chat.uploadFromComputer")}
                       </button>
                       <input
                         type="file"
@@ -1204,7 +1206,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         ? "bg-orange-500/10 border-orange-500/30 text-orange-600"
                         : "bg-surface-sunken border-border-subtle text-content-muted hover:bg-surface-muted hover:text-content-strong"
                     }`}
-                    title="Sisipkan file, gambar, atau mockup"
+                    title={t("chat.insertFile")}
                   >
                     {isUploading ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin text-orange-500" />
@@ -1225,7 +1227,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     type="submit"
                     disabled={!inputMessage.trim() || isUploading}
                     className="p-2 bg-surface-inverse-strong text-content-inverse hover:bg-orange-500 rounded-xl transition-all shadow-soft disabled:opacity-30 disabled:hover:bg-surface-inverse-strong flex items-center justify-center shrink-0"
-                    title="Kirim Pesan"
+                    title={t("chat.sendMessage")}
                   >
                     <Send className="w-3.5 h-3.5" />
                   </button>

@@ -176,7 +176,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-content-body mb-1">Type</label>
+              <label className="block text-sm font-medium text-content-body mb-1">
+                {t("newTask.type")}
+              </label>
               <StyledDropdown
                 value={newTaskType}
                 onChange={(val) => setNewTaskType(val)}
@@ -257,7 +259,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">Category</label>
+            <label className="block text-sm font-medium text-content-body mb-1">
+              {t("newTask.category")}
+            </label>
             <StyledDropdown
               value={newTaskCategory}
               onChange={(val) => setNewTaskCategory(val)}
@@ -271,13 +275,15 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">Assignee</label>
+          <label className="block text-sm font-medium text-content-body mb-1">
+            {t("newTask.assignee")}
+          </label>
           <select
             value={newTaskAssigneeId}
             onChange={(e: any) => setNewTaskAssigneeId(e.target.value)}
             className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
           >
-            <option value="">Unassigned</option>
+            <option value="">{t("newTask.unassigned")}</option>
             {projectMembers.map((m, idx) => (
               <option key={m?.uid ? `pm-${m.uid}-${idx}` : `pm-${idx}`} value={m?.uid}>
                 {m?.displayName || m?.email || "Anggota Tim"}
@@ -291,7 +297,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">Release</label>
+          <label className="block text-sm font-medium text-content-body mb-1">
+            {t("newTask.release")}
+          </label>
           <StyledDropdown
             value={newTaskRelease}
             onChange={(val) => setNewTaskRelease(val)}
@@ -307,7 +315,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">Story Points</label>
+            <label className="block text-sm font-medium text-content-body mb-1">
+              {t("newTask.storyPoints")}
+            </label>
             <Input
               type="number"
               value={newTaskStoryPoints || ""}
@@ -322,14 +332,14 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             <Input
               value={newTaskLabels}
               onChange={(e: any) => setNewTaskLabels(e.target.value)}
-              placeholder="e.g. frontend, bug"
+              placeholder={t("newTask.tagsPlaceholder")}
             />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-content-body mb-1">
-              Business Value
+              {t("newTask.businessValue")}
             </label>
             <select
               value={newTaskBusinessValue}
@@ -337,28 +347,32 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
             >
               <option value="">{t("newTask.notSet")}</option>
-              <option value="critical">Critical</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
+              <option value="critical">{t("newTask.critical")}</option>
+              <option value="high">{t("newTask.high")}</option>
+              <option value="medium">{t("newTask.medium")}</option>
+              <option value="low">{t("newTask.low")}</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">System Risk</label>
+            <label className="block text-sm font-medium text-content-body mb-1">
+              {t("newTask.systemRisk")}
+            </label>
             <select
               value={newTaskProjectRisk}
               onChange={(e: any) => setNewTaskProjectRisk(e.target.value)}
               className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
             >
               <option value="">{t("newTask.notSet")}</option>
-              <option value="high">High Risk</option>
-              <option value="medium">Medium Risk</option>
-              <option value="low">Low Risk</option>
+              <option value="high">{t("newTask.highRisk")}</option>
+              <option value="medium">{t("newTask.mediumRisk")}</option>
+              <option value="low">{t("newTask.lowRisk")}</option>
             </select>
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">Environment</label>
+          <label className="block text-sm font-medium text-content-body mb-1">
+            {t("newTask.environment")}
+          </label>
           <StyledDropdown
             value={newTaskEnvironment}
             onChange={(val) => setNewTaskEnvironment(val)}
@@ -371,17 +385,19 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">Figma URL</label>
+          <label className="block text-sm font-medium text-content-body mb-1">
+            {t("newTask.figmaUrl")}
+          </label>
           <Input
             type="url"
             value={newTaskFigmaUrl}
             onChange={(e: any) => setNewTaskFigmaUrl(e.target.value)}
-            placeholder="https://figma.com/..."
+            placeholder={t("newTask.figmaUrlPlaceholder")}
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-content-body mb-1">
-            Acceptance Criteria
+            {t("newTask.acceptanceCriteria")}
           </label>
           <textarea
             value={newTaskAcceptanceCriteria}
@@ -404,7 +420,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">Attachments</label>
+          <label className="block text-sm font-medium text-content-body mb-1">
+            {t("newTask.attachments")}
+          </label>
           <input
             type="file"
             multiple
