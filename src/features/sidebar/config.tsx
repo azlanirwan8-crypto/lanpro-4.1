@@ -55,26 +55,26 @@ export const sidebarSections: SidebarSectionConfig[] = [
   },
   {
     id: "collaboration",
-    title: "Collaboration",
+    title: "Kolaborasi",
     items: [
       {
         id: "meetingNotes",
-        label: "Meeting Notes",
+        label: "Catatan Rapat",
         icon: <Video className="w-4 h-4" />,
         module: "meetingNotes",
       },
       {
         id: "wiki",
-        label: "Documentation",
+        label: "Dokumentasi",
         icon: <Book className="w-4 h-4" />,
         module: "wiki",
       },
       {
         id: "flowchart",
-        label: "Flowchart Editor",
+        label: "Editor Diagram Alur",
         icon: <Workflow className="w-4 h-4" />,
         module: "flowchartEditor",
-        badge: "New",
+        badge: "Baru",
         badgeColor: "emerald",
       },
     ],
@@ -85,37 +85,37 @@ export const sidebarSections: SidebarSectionConfig[] = [
     items: [
       {
         id: "list",
-        label: "Issue List",
+        label: "Daftar Isu",
         icon: <ListTodo className="w-4 h-4" />,
         module: "list",
       },
       {
         id: "sprints",
-        label: "Planning & Sprint",
+        label: "Perencanaan & Sprint",
         icon: <Target className="w-4 h-4" />,
         module: "sprints",
       },
       {
         id: "board",
-        label: "Kanban board",
+        label: "Papan Kanban",
         icon: <Trello className="w-4 h-4" />,
         module: "board",
       },
       {
         id: "qa",
-        label: "Quality Assessment",
+        label: "Penilaian Kualitas",
         icon: <Beaker className="w-4 h-4" />,
         module: "qa",
       },
       {
         id: "timeline",
-        label: "Roadmap & Timeline",
+        label: "Peta Jalan & Linimasa",
         icon: <Clock className="w-4 h-4" />,
         module: "timeline",
       },
       {
         id: "team",
-        label: "Team",
+        label: "Tim",
         icon: <Users className="w-4 h-4" />,
         module: "access",
       },
@@ -123,7 +123,7 @@ export const sidebarSections: SidebarSectionConfig[] = [
   },
   {
     id: "administration",
-    title: "Administration",
+    title: "Administrasi",
     items: [
       {
         id: "master",
@@ -133,25 +133,25 @@ export const sidebarSections: SidebarSectionConfig[] = [
       },
       {
         id: "users",
-        label: "User management",
+        label: "Manajemen Pengguna",
         icon: <UserCog className="w-4 h-4" />,
         module: "userManagement",
       },
       {
         id: "auditLog",
-        label: "Enterprise Audit",
+        label: "Audit Perusahaan",
         icon: <History className="w-4 h-4" />,
         module: "auditLog",
       },
       {
         id: "dbExplorer",
-        label: "DB EXplorer",
+        label: "Penjelajah Basis Data",
         icon: <Database className="w-4 h-4" />,
         module: "dbExplorer",
       },
       {
         id: "settingsIntegration",
-        label: "Setting integration",
+        label: "Pengaturan Integrasi",
         icon: <Settings2 className="w-4 h-4" />,
         module: "settings",
       },

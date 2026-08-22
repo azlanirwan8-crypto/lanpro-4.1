@@ -684,7 +684,7 @@ export function DashboardView(props: DashboardViewProps) {
                 ) : (
                   <Minus className="w-3.5 h-3.5" />
                 )}{" "}
-                {completionPercentage}% Completed
+                {completionPercentage}% Selesai
               </span>
               <button
                 onClick={() => props.setCurrentView("kanban")}
@@ -748,11 +748,11 @@ export function DashboardView(props: DashboardViewProps) {
               >
                 {completionPercentage > 0 ? (
                   <>
-                    <ArrowUpRight className="w-3.5 h-3.5" /> +{completionPercentage}% Rate
+                    <ArrowUpRight className="w-3.5 h-3.5" /> +{completionPercentage}% Tuntas
                   </>
                 ) : (
                   <>
-                    <Minus className="w-3.5 h-3.5" /> {completionPercentage}% Rate
+                    <Minus className="w-3.5 h-3.5" /> {completionPercentage}% Tuntas
                   </>
                 )}
               </span>
@@ -929,14 +929,14 @@ export function DashboardView(props: DashboardViewProps) {
                     />
                     <Bar
                       dataKey="Completed"
-                      name="Completed Tasks / Points"
+                      name="Tugas Selesai / Poin"
                       fill="#10b981"
                       radius={[4, 4, 0, 0]}
                       maxBarSize={24}
                     />
                     <Bar
                       dataKey="Planned"
-                      name="Total Planned Tasks / Points"
+                      name="Total Tugas Direncanakan / Poin"
                       fill="#6366f1"
                       radius={[4, 4, 0, 0]}
                       maxBarSize={24}
@@ -1187,7 +1187,7 @@ export function DashboardView(props: DashboardViewProps) {
                           </span>
                         </div>
                         <span className="text-xs sm:text-[11px] font-medium text-content-muted shrink-0">
-                          {epic.childCompleted}/{epic.childTotal} Child Tasks ({epic.progress}%)
+                          {epic.childCompleted}/{epic.childTotal} Tugas Anak ({epic.progress}%)
                         </span>
                       </div>
                       <div className="w-full h-2 bg-surface-strong/80 rounded-full overflow-hidden">
@@ -1223,7 +1223,7 @@ export function DashboardView(props: DashboardViewProps) {
                   </p>
                 </div>
                 <span className="text-[10px] leading-none font-medium text-primary bg-indigo-500/10 px-2 py-[3px] rounded border border-indigo-500/30">
-                  {timeTrackingStats.accuracy}% Accuracy Rate
+                  {timeTrackingStats.accuracy}% Akurasi
                 </span>
               </div>
 
@@ -1233,7 +1233,7 @@ export function DashboardView(props: DashboardViewProps) {
                     Jam Diperkirakan
                   </span>
                   <p className="text-lg font-medium text-content-strong mt-0.5">
-                    {timeTrackingStats.totalEst} Hours
+                    {timeTrackingStats.totalEst} Jam
                   </p>
                 </div>
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
@@ -1241,7 +1241,7 @@ export function DashboardView(props: DashboardViewProps) {
                     Jam Tercatat
                   </span>
                   <p className="text-lg font-medium text-primary mt-0.5">
-                    {timeTrackingStats.totalLog} Hours
+                    {timeTrackingStats.totalLog} Jam
                   </p>
                 </div>
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
@@ -1250,7 +1250,7 @@ export function DashboardView(props: DashboardViewProps) {
                   </span>
                   <p className="text-lg font-medium text-success-text mt-0.5">
                     {timeTrackingStats.diff >= 0
-                      ? `${timeTrackingStats.diff} Hours Left`
+                      ? `${timeTrackingStats.diff} Jam Tersisa`
                       : `${Math.abs(timeTrackingStats.diff)} Hours Over`}
                   </p>
                 </div>
@@ -1411,7 +1411,7 @@ export function DashboardView(props: DashboardViewProps) {
                   Hambatan & Tugas Terlambat
                 </h3>
                 <span className="text-[10px] leading-none font-medium text-rose-600 bg-rose-500/10 px-2 py-[3px] rounded border border-rose-500/30">
-                  {blockedTasks.length + overdueTasks.length} Need Action
+                  {blockedTasks.length + overdueTasks.length} Perlu Tindakan
                 </span>
               </div>
 
@@ -1445,7 +1445,7 @@ export function DashboardView(props: DashboardViewProps) {
                 ))}
                 {blockedTasks.length === 0 && overdueTasks.length === 0 && (
                   <div className="py-4 text-center text-xs text-content-subtle italic">
-                    No blocked or overdue issues detected.
+                    Tidak ada isu tersumbat atau terlambat.
                   </div>
                 )}
               </div>

@@ -130,7 +130,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
         <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
           {blockedTasks.length === 0 ? (
             <div className="text-xs text-content-muted font-medium italic p-3 text-center">
-              No blocked tasks.
+              Tidak ada tugas tersumbat.
             </div>
           ) : (
             blockedTasks.map((task) => (
@@ -180,7 +180,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
         <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
           {overdueTasks.length === 0 ? (
             <div className="text-xs text-content-muted font-medium italic p-3 text-center">
-              All clear! No overdue tasks.
+              Aman! Tidak ada tugas terlambat.
             </div>
           ) : (
             overdueTasks.map((task) => (
@@ -222,7 +222,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
         <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
           {dueSoonTasks.length === 0 ? (
             <div className="text-xs text-content-muted font-medium italic p-3 text-center">
-              No urgent deadlines in next 3 days.
+              Tidak ada tenggat mendesak dalam 3 hari ke depan.
             </div>
           ) : (
             dueSoonTasks.map((task) => (
@@ -275,7 +275,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
         <div className="space-y-2.5 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
           {meetings.length === 0 ? (
             <div className="text-xs text-content-muted font-medium italic p-3 text-center">
-              No meeting notes yet.
+              Belum ada catatan rapat.
             </div>
           ) : (
             meetings.map((meeting: any) => (
@@ -311,7 +311,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
         <div className="space-y-2.5 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
           {documents.length === 0 ? (
             <div className="text-xs text-content-muted font-medium italic p-3 text-center">
-              No documents uploaded.
+              Belum ada dokumen diunggah.
             </div>
           ) : (
             documents.map((doc: any) => (
@@ -371,7 +371,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
           onClick={() => setCurrentView("activity")}
           className="w-full mt-4 py-3 min-h-11 text-xs font-medium uppercase tracking-wider text-content-inverse bg-surface/10 hover:bg-surface/20 rounded-lg transition-colors border border-white/10 cursor-pointer"
         >
-          View Full Audit Log
+          Lihat Log Audit Lengkap
         </button>
       </div>
     </div>
