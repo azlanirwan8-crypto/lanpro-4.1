@@ -539,7 +539,7 @@ export const MasterDataPanel = ({
                   {t("master.systemMaster")}
                 </span>
                 <span className="text-xs text-content-subtle font-medium">
-                  • Pusat Kendali Perusahaan
+                  • {t("master.enterpriseControl")}
                 </span>
               </div>
               <h2 className="text-base font-medium text-content-strong tracking-tight">
@@ -547,8 +547,12 @@ export const MasterDataPanel = ({
               </h2>
               <p className="text-content-muted text-xs font-medium mt-0.5">
                 {selectedType === "modul_aplikasi"
-                  ? "Kelola master data modul / aplikasi yang dipetakan ke project aktif enterprise."
-                  : `Kelola konfigurasi standar untuk ${masterDataTypes.find((t) => t.type === selectedType)?.label.toLowerCase()} dengan penguncian integritas data.`}
+                  ? t("master.moduleHint")
+                  : t("master.configHint", {
+                      type: masterDataTypes
+                        .find((mt) => mt.type === selectedType)
+                        ?.label.toLowerCase(),
+                    })}
               </p>
             </div>
             {hasPermission(
@@ -1016,7 +1020,7 @@ export const MasterDataPanel = ({
               </div>
               <div className="flex flex-col">
                 <span className="text-base font-medium text-content-inverse">
-                  {newMasterLabel || "Label Master Data"}
+                  {newMasterLabel || t("master.labelMasterData")}
                 </span>
                 {selectedType === "project_role" && (
                   <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-widest text-indigo-400 mt-0.5">
@@ -1223,7 +1227,7 @@ export const MasterDataPanel = ({
           <div>
             <div className="flex items-center justify-between mb-1.5 ml-1">
               <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
-                Pilih Ikon ({filteredNewIcons.length} tersedia)
+                {t("master.pickIcon", { count: filteredNewIcons.length })}
               </label>
             </div>
 
@@ -1280,7 +1284,7 @@ export const MasterDataPanel = ({
               disabled={isSaving}
               className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
             >
-              {isSaving ? "Menyimpan..." : "Simpan Master Data"}
+              {isSaving ? t("master.saving") : t("master.saveMasterData")}
             </Button>
           </div>
         </div>
@@ -1309,7 +1313,7 @@ export const MasterDataPanel = ({
                 </div>
                 <div>
                   <span className="text-base font-medium text-content-inverse">
-                    {editingMaster.label || "Label Master Data"}
+                    {editingMaster.label || t("master.labelMasterData")}
                   </span>
                 </div>
               </div>

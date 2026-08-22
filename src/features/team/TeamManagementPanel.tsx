@@ -260,7 +260,7 @@ export const TeamManagementPanel = ({
               {t("team.title")}
             </h1>
             <p className="text-xs text-content-muted font-medium mt-0.5">
-              Daftar anggota tim yang bergabung dalam proyek{" "}
+              {t("team.membersOf")}{" "}
               {selectedProject ? (
                 <span className="font-medium text-content-body">
                   {selectedProject.name} ({selectedProject.key})

@@ -3326,6 +3326,12 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
         {/* Form Side with Watermark & Animated Form Switching */}
         <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-12 bg-surface-muted relative overflow-y-auto min-h-screen">
+          {/* #135 — pemilih bahasa HARUS tersedia sebelum login. Tanpa ini
+              pengguna terkunci pada bahasa tersimpan dan tidak punya cara
+              menggantinya dari layar masuk. */}
+          <div className="absolute top-4 right-4 z-20">
+            <LanguageSwitcher />
+          </div>
           <AnimatePresence mode="wait">
             {hasilSso.jenis === "lengkapi" ? (
               <CompleteRegistrationScreen

@@ -125,6 +125,7 @@ export const en = {
     dueSoonShort: "due soon",
   },
   team: {
+    membersOf: "Team members joined to the project",
     title: "Team Management",
     activeTeam: "Active Team",
     pendingInvites: "Pending Invites",
@@ -149,6 +150,8 @@ export const en = {
     searchPlaceholder: "Search for name, designation, or email...",
   },
   users: {
+    projectsCount: "{{count}} Projects",
+    tasksCount: "{{count}} Tasks",
     selectedForBulk: "users selected for bulk action",
     cancel: "Cancel",
     deptPosition: "Department / Position",
@@ -247,6 +250,14 @@ export const en = {
     previous: "Previous",
   },
   master: {
+    enterpriseControl: "Enterprise Control Center",
+    moduleHint:
+      "Manage master data of modules / applications mapped to the active enterprise project.",
+    configHint: "Manage the standard configuration for {{type}} with data integrity locking.",
+    labelMasterData: "Master Data Label",
+    saveMasterData: "Save Master Data",
+    saving: "Saving...",
+    pickIcon: "Choose Icon ({{count}} available)",
     systemMaster: "System Master",
     masterDatabase: "Master Database",
     systemConfiguration: "System configuration",
@@ -807,6 +818,9 @@ export const en = {
     deleteIssue: "Delete Issue",
   },
   planning: {
+    issues: "Issues",
+    start: "START",
+    complete: "COMPLETE",
     noRelease: "No Release",
     points: "Points",
     newSprint: "NEW SPRINT",
@@ -1376,6 +1390,7 @@ export const en = {
     whatsappPreview: "WhatsApp Preview",
   },
   addSuite: {
+    createDocument: "Create Document",
     title: "Add Script Document",
     subtitle: "Create a new test scenario module",
     docName: "Document Name",

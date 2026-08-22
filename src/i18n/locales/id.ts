@@ -123,6 +123,7 @@ export const id = {
     dueSoonShort: "segera jatuh tempo",
   },
   team: {
+    membersOf: "Daftar anggota tim yang bergabung dalam proyek",
     title: "Manajemen Tim",
     activeTeam: "Tim Aktif",
     pendingInvites: "Undangan Tertunda",
@@ -147,6 +148,8 @@ export const id = {
     searchPlaceholder: "Cari nama, jabatan, atau email...",
   },
   users: {
+    projectsCount: "{{count}} Proyek",
+    tasksCount: "{{count}} Tugas",
     selectedForBulk: "pengguna terpilih untuk Aksi Massal",
     cancel: "Batal",
     deptPosition: "Departemen / Jabatan",
@@ -245,6 +248,13 @@ export const id = {
     previous: "Sebelumnya",
   },
   master: {
+    enterpriseControl: "Pusat Kendali Perusahaan",
+    moduleHint: "Kelola master data modul / aplikasi yang dipetakan ke proyek aktif enterprise.",
+    configHint: "Kelola konfigurasi standar untuk {{type}} dengan penguncian integritas data.",
+    labelMasterData: "Label Master Data",
+    saveMasterData: "Simpan Master Data",
+    saving: "Menyimpan...",
+    pickIcon: "Pilih Ikon ({{count}} tersedia)",
     systemMaster: "Master Sistem",
     masterDatabase: "Basis Data Master",
     systemConfiguration: "Konfigurasi Sistem",
@@ -811,6 +821,9 @@ export const id = {
     deleteIssue: "Hapus Isu",
   },
   planning: {
+    issues: "Isu",
+    start: "MULAI",
+    complete: "SELESAIKAN",
     noRelease: "Tanpa Rilis",
     points: "Poin",
     newSprint: "SPRINT BARU",
@@ -1382,6 +1395,7 @@ export const id = {
     whatsappPreview: "Pratinjau WhatsApp",
   },
   addSuite: {
+    createDocument: "Buat Dokumen",
     title: "Tambah Dokumen Skrip",
     subtitle: "Buat modul skenario pengujian baru",
     docName: "Nama Dokumen",

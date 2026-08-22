@@ -878,7 +878,9 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 )}
                               >
                                 <Layout className="w-3 h-3 text-indigo-500" />
-                                <span>{userProjectsCount} Proyek</span>
+                                <span>
+                                  {t("users.projectsCount", { count: userProjectsCount })}
+                                </span>
                               </span>
                             </div>
                             <div className="flex items-center gap-2">
@@ -891,7 +893,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 )}
                               >
                                 <CheckCircle className="w-3 h-3 text-violet-500" />
-                                <span>{userTasksCount} Tugas</span>
+                                <span>{t("users.tasksCount", { count: userTasksCount })}</span>
                               </span>
                             </div>
                           </div>
@@ -978,9 +980,10 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             <div className="border-t border-border-faint p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-sunken/50 mt-auto">
               <div className="flex items-center gap-3">
                 <span className="text-xs font-medium text-content-muted">
-                  Showing {filteredUsers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} to{" "}
-                  {Math.min(currentPage * itemsPerPage, filteredUsers.length)} of{" "}
-                  {filteredUsers.length} entries
+                  {t("common.showing")}{" "}
+                  {filteredUsers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
+                  {t("common.to")} {Math.min(currentPage * itemsPerPage, filteredUsers.length)}{" "}
+                  {t("common.of")} {filteredUsers.length} {t("common.entries")}
                 </span>
                 <div className="flex items-center gap-1.5 text-xs text-content-muted font-medium">
                   <span>{t("users.rowsPerPage")}</span>

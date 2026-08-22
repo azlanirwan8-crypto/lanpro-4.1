@@ -158,7 +158,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                   <div className="flex items-center gap-3">
                     <div className="text-right hidden md:block">
                       <span className="text-xs sm:text-[10px] font-medium text-content-subtle block uppercase leading-none">
-                        Issues
+                        {t("planning.issues")}
                       </span>
                       <span className="text-xs font-medium text-content-body">
                         {sprintTasks.length}
@@ -183,7 +183,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                             }}
                             className="h-7 px-2.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse text-xs font-medium rounded-md transition-all flex items-center gap-1 shadow-2xs shrink-0 cursor-pointer"
                           >
-                            <Zap className="w-3 h-3" /> <span>START</span>
+                            <Zap className="w-3 h-3" /> <span>{t("planning.start")}</span>
                           </button>
                         )}
                         {sprint.status === "active" && (
@@ -194,7 +194,8 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                             }}
                             className="h-7 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse text-xs font-medium rounded-md transition-all flex items-center gap-1 shadow-2xs shrink-0 cursor-pointer"
                           >
-                            <CheckCircle2 className="w-3 h-3" /> <span>COMPLETE</span>
+                            <CheckCircle2 className="w-3 h-3" />{" "}
+                            <span>{t("planning.complete")}</span>
                           </button>
                         )}
                         <button

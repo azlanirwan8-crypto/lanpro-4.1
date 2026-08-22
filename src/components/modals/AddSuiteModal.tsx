@@ -93,7 +93,7 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
                 type="submit"
                 className="px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
               >
-                <Plus className="w-4 h-4" /> Buat Dokumen
+                <Plus className="w-4 h-4" /> {t("addSuite.createDocument")}
               </button>
             </div>
           </form>
