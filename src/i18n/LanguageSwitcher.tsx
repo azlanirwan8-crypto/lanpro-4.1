@@ -2,9 +2,17 @@
  * Tombol ganti bahasa 1-klik (item #134).
  *
  * Bentuknya mengikuti tombol tema di sebelahnya (§ item #99): satu klik
- * langsung menukar, bukan dropdown dua langkah. Yang ditampilkan adalah
- * bendera bahasa YANG AKAN DITUJU, bukan yang sedang aktif — sama seperti
- * tombol tema yang menampilkan matahari ketika mode gelap sedang menyala.
+ * langsung menukar, bukan dropdown dua langkah.
+ *
+ * Yang ditampilkan adalah bendera bahasa YANG SEDANG AKTIF, bukan tujuannya.
+ * Ini SENGAJA berbeda dari tombol tema di sebelahnya (yang menampilkan
+ * matahari saat mode gelap menyala). Alasannya: bendera negara dibaca orang
+ * sebagai pernyataan "aplikasi ini berbahasa X", bukan sebagai tombol aksi.
+ * Konvensi tujuan sempat dipakai dan terbukti salah dibaca oleh pemilik
+ * proyek sendiri — ia melaporkan halaman "tidak ikut berganti" padahal
+ * halaman itu memang sedang benar berbahasa Inggris.
+ *
+ * Tujuan kliknya tetap dijelaskan lewat tooltip dan teks sr-only.
  *
  * Benderanya SVG inline, bukan emoji: emoji bendera tidak dirender di Windows
  * dan akan tampil sebagai dua huruf ("ID"/"GB") di mesin pemilik proyek.
@@ -50,7 +58,7 @@ export const LanguageSwitcher = () => {
       aria-label={judul}
       data-testid="language-switcher"
     >
-      {tujuan === "en" ? <BenderaInggris /> : <BenderaIndonesia />}
+      {aktif === "id" ? <BenderaIndonesia /> : <BenderaInggris />}
       <span className="sr-only">{t("language.switchTo")}</span>
     </button>
   );
