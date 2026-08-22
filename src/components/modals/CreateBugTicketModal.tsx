@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { XCircle, Search, CheckCircle2, Bug, ChevronDown } from "lucide-react";
@@ -53,6 +54,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
   projectMembers,
   selectedProject,
 }) => {
+  const { t } = useTranslation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const parentCandidates = (tasks || []).filter(
@@ -85,7 +87,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
               </div>
               <div>
                 <h3 className="text-base font-medium text-content-strong">
-                  Buat Tiket Bug Terstruktur
+                  {t("bugTicket.title")}
                 </h3>
                 <p className="text-xs sm:text-[11px] text-content-muted font-medium">
                   Dibuat dari Test Case #{testCase.rowNum}
@@ -104,7 +106,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
-                JUDUL TIKET BUG *
+                {t("bugTicket.ticketTitle")}
               </label>
               <input
                 type="text"
@@ -142,7 +144,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
                       <input
                         autoFocus
                         type="text"
-                        placeholder="Cari nama Epic atau Task..."
+                        placeholder={t("bugTicket.searchTarget")}
                         value={parentSearchTerm}
                         onChange={(e) => onSearchTermChange(e.target.value)}
                         className="w-full text-xs pl-8 pr-3 py-1.5 bg-surface-sunken border border-border-subtle rounded-md focus:outline-none"
@@ -152,7 +154,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
                     <div className="max-h-48 overflow-y-auto border border-border-faint rounded-md divide-y divide-border-faint bg-surface custom-scrollbar">
                       {filteredParents.length === 0 ? (
                         <div className="p-3 text-center text-xs text-content-subtle">
-                          Tidak ada task target yang cocok.
+                          {t("bugTicket.noTarget")}
                         </div>
                       ) : (
                         filteredParents.map((pt: any) => (
@@ -187,7 +189,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
-                  SEVERITAS BUG
+                  {t("bugTicket.severity")}
                 </label>
                 <StyledDropdown
                   value={priorityInput}
@@ -206,7 +208,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
 
               <div className="space-y-1.5">
                 <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
-                  ASSIGNEE DEVELOPER
+                  {t("bugTicket.assigneeDev")}
                 </label>
                 <StyledDropdown
                   value={assigneeInput}
@@ -229,7 +231,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
 
             <div className="space-y-1.5">
               <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
-                DESKRIPSI BUG
+                {t("bugTicket.description")}
               </label>
               <textarea
                 rows={5}
@@ -245,7 +247,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
                 onClick={onClose}
                 className="flex-1 py-3 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium rounded-md uppercase tracking-wider cursor-pointer"
               >
-                Batal
+                {t("bugTicket.cancel")}
               </button>
               <button
                 type="submit"

@@ -341,14 +341,14 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                         setCurrentView("issueDetail" as any);
                       }}
                       className="text-[13px] font-medium text-content-body hover:text-blue-600 transition-colors cursor-pointer truncate max-w-[320px] block"
-                      title="Klik untuk membuka halaman detail issue"
+                      title={t("issueRow.openDetail")}
                     >
                       {task.title || (task as any).summary || (task as any).name || ""}
                     </span>
 
                     {!!task.parentId && (
                       <span className="text-xs sm:text-[10px] text-content-subtle font-medium bg-surface-muted px-1.5 py-0.5 rounded border border-border-subtle shrink-0">
-                        Subtask
+                        {t("issueRow.subtask")}
                       </span>
                     )}
 
@@ -362,7 +362,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                         }
                       }}
                       className="p-1 opacity-0 group-hover:opacity-100 text-content-subtle hover:text-blue-600 hover:bg-blue-500/10 rounded-md transition-all shrink-0 border border-transparent hover:border-blue-500/30"
-                      title="Add subtask"
+                      title={t("issueRow.addSubtask")}
                     >
                       <Plus className="w-3.5 h-3.5" />
                     </button>
@@ -677,7 +677,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                   deleteTask?.(task.id);
                 }}
                 className="p-1 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-lg transition-all cursor-pointer shadow-xs font-medium"
-                title="Hapus Issue"
+                title={t("issueRow.deleteIssue")}
               >
                 <Trash className="w-3.5 h-3.5 shrink-0" />
               </button>
@@ -689,7 +689,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                   setActiveContextMenuTaskId(activeContextMenuTaskId === task.id ? null : task.id);
                 }}
                 className="p-1 bg-surface-muted hover:bg-indigo-600 text-content-secondary hover:text-content-inverse border border-border-subtle rounded-lg transition-all cursor-pointer shadow-xs font-medium"
-                title="Menu Aksi"
+                title={t("issueRow.actionMenu")}
               >
                 <MoreVertical className="w-3.5 h-3.5 shrink-0" />
               </button>
@@ -713,7 +713,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                       className="w-full text-left px-3 py-1.5 text-xs sm:text-[11px] font-medium text-content-secondary hover:bg-surface-sunken flex items-center gap-2 cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5 text-content-subtle" />
-                      <span>View Details</span>
+                      <span>{t("issueRow.viewDetails")}</span>
                     </button>
                     {canDelete && (
                       <button

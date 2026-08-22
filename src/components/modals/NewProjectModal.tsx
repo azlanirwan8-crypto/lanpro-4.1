@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Modal } from "../ui/Modal";
 import { Input, Button } from "../ui/CoreUI";
@@ -27,21 +28,18 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
   onSubmit,
   isSubmitting,
 }) => {
+  const { t } = useTranslation();
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Create New Project"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title={t("newProject.title")}>
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-content-body mb-1">
-            Project Name
+            {t("newProject.name")}
           </label>
           <Input
             value={newProjectName}
             onChange={(e: any) => setNewProjectName(e.target.value)}
-            placeholder="e.g. Website Redesign"
+            placeholder={t("newProject.namePlaceholder")}
           />
         </div>
         <div>
@@ -51,27 +49,23 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
           <Input
             value={newProjectKey}
             onChange={(e: any) => setNewProjectKey(e.target.value.toUpperCase())}
-            placeholder="e.g. KAN"
+            placeholder={t("newProject.keyPlaceholder")}
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-content-body mb-1">
-            Description
+            {t("newProject.description")}
           </label>
           <textarea
             value={newProjectDescription}
             onChange={(e) => setNewProjectDescription(e.target.value)}
             className="w-full border border-border-subtle rounded-lg p-2 text-sm"
-            placeholder="Describe this project..."
+            placeholder={t("newProject.descriptionPlaceholder")}
             rows={3}
           />
         </div>
-        <Button
-          onClick={onSubmit}
-          disabled={isSubmitting}
-          className="w-full justify-center"
-        >
-          Create Project
+        <Button onClick={onSubmit} disabled={isSubmitting} className="w-full justify-center">
+          {t("newProject.create")}
         </Button>
       </div>
     </Modal>

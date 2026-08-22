@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { QATestCase } from "../../features/qa/types";
@@ -32,6 +33,7 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
   onPriorityChange,
   onSubmit,
 }) => {
+  const { t } = useTranslation();
   if (!testCase) return null;
 
   return (
@@ -44,12 +46,12 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
           className="bg-surface border border-border-subtle/80 rounded-md p-6 max-w-lg w-full shadow-2xl space-y-4"
         >
           <h3 className="text-sm font-medium text-content-strong uppercase tracking-wider">
-            Ubah Test Case Detail
+            {t("editCase.title")}
           </h3>
           <div className="space-y-3">
             <div className="space-y-1">
               <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
-                Judul Test Case
+                {t("editCase.caseTitle")}
               </label>
               <input
                 type="text"
@@ -60,7 +62,7 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
             </div>
             <div className="space-y-1">
               <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
-                Prioritas
+                {t("editCase.priority")}
               </label>
               <StyledDropdown
                 value={editPriority}
@@ -78,7 +80,7 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
             </div>
             <div className="space-y-1">
               <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
-                Langkah Pengujian
+                {t("editCase.steps")}
               </label>
               <textarea
                 rows={3}
@@ -89,7 +91,7 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
             </div>
             <div className="space-y-1">
               <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
-                Hasil yang Diharapkan
+                {t("editCase.expected")}
               </label>
               <textarea
                 rows={2}
@@ -104,13 +106,13 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 bg-surface-muted text-content-secondary text-xs font-medium rounded-md cursor-pointer"
             >
-              Batal
+              {t("editCase.cancel")}
             </button>
             <button
               onClick={onSubmit}
               className="px-4 py-2 bg-primary-surface text-content-inverse text-xs font-medium rounded-md cursor-pointer shadow-xs active:scale-95"
             >
-              Simpan Perubahan
+              {t("editCase.save")}
             </button>
           </div>
         </motion.div>

@@ -8,6 +8,7 @@
  * Tanpa state sendiri. Pencarian, warna default, dan grup mana yang terbuka
  * semuanya tinggal di useFlowchartUI, tempat state itu memang berada.
  */
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Layers, ChevronDown, X, Search } from "lucide-react";
 import { toast } from "sonner";
@@ -41,6 +42,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
   toggleGroupExpanded,
   handleAddNewNode,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="relative font-sans">
       <button
@@ -51,7 +53,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
             ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-700"
             : " hover:bg-surface-muted"
         )}
-        title="Buka Koleksi Simbol"
+        title={t("shapePalette.openCollection")}
       >
         <Layers className="w-4 h-4" />
         <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-medium uppercase tracking-tight text-indigo-600 mt-0.5 flex items-center">
@@ -68,7 +70,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                 <Layers className="w-3.5 h-3.5" />
               </div>
               <span className="text-xs font-medium text-content-strong uppercase tracking-tight">
-                Diagramming shapes
+                {t("shapePalette.diagrammingShapes")}
               </span>
             </div>
             <button
@@ -82,7 +84,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
           {/* Preset Colors Bar */}
           <div className="px-3.5 py-2 border-b border-border-faint bg-surface-sunken/20 flex items-center justify-between shrink-0">
             <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wide">
-              Warna Default:
+              {t("shapePalette.defaultColor")}
             </span>
             <div className="flex items-center gap-1">
               {["yellow", "blue", "green", "purple", "rose", "sky", "slate"].map((colName) => {
@@ -122,7 +124,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
               <Search className="w-3 h-3 text-content-subtle absolute left-2.5 top-2.5" />
               <input
                 type="text"
-                placeholder="Cari bentuk (e.g. DBA, flow...)"
+                placeholder={t("shapePalette.searchShape")}
                 value={shapeSearchQuery}
                 onChange={(e) => setShapeSearchQuery(e.target.value)}
                 className="w-full text-xs sm:text-[11px] bg-surface-sunken border border-border-subtle rounded-lg p-1.5 pl-7 text-content placeholder-content-subtle focus:outline-none focus:ring-1 focus:ring-violet-500 focus:bg-surface transition-all"
@@ -132,7 +134,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                   onClick={() => setShapeSearchQuery("")}
                   className="absolute right-2.5 top-2.5 text-xs sm:text-[10px] text-content-subtle"
                 >
-                  Clear
+                  {t("shapePalette.clear")}
                 </button>
               )}
             </div>
@@ -236,7 +238,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                 ).length === 0
             ) && (
               <div className="text-center py-8 text-content-subtle text-xs sm:text-[11px]">
-                Tidak menemukan bentuk dengan kata kunci tersebut.
+                {t("shapePalette.noShapeFound")}
               </div>
             )}
           </div>
