@@ -67,33 +67,33 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 | --------------------------- | ----: | ----: |
 | `ActivityLogs`              |    11 |     1 |
 | `Attachments`               |    18 |     0 |
-| `AuditLogs`                 |    12 |    63 |
+| `AuditLogs`                 |    12 |   124 |
 | `Comments`                  |     8 |     0 |
-| `DiscussionPoints`          |    34 |     5 |
-| `Documents`                 |    15 |    10 |
+| `DiscussionPoints`          |    34 |     7 |
+| `Documents`                 |    16 |     8 |
 | `LinkedTasks`               |     5 |     0 |
-| `MasterData`                |    11 |    76 |
-| `Meetings`                  |    22 |     9 |
+| `MasterData`                |    12 |   102 |
+| `Meetings`                  |    22 |    10 |
 | `Messages`                  |     9 |     0 |
 | `MilestoneSprints`          |     2 |     0 |
 | `Milestones`                |     8 |     0 |
-| `Notifications`             |    10 |    64 |
+| `Notifications`             |    10 |    68 |
 | `ProjectInvites`            |     7 |     0 |
-| `ProjectMembers`            |     4 |    10 |
+| `ProjectMembers`            |     3 |    10 |
 | `ProjectModules`            |     5 |     2 |
 | `Projects`                  |    12 |     2 |
 | `QATestCaseExecutionLogs`   |    13 |     0 |
-| `QATestCases`               |    35 |     1 |
-| `QATestSuites`              |    12 |     2 |
-| `Sprints`                   |    11 |     7 |
+| `QATestCases`               |    35 |     5 |
+| `QATestSuites`              |    12 |     3 |
+| `Sprints`                   |    11 |     6 |
 | `TaskCustomFields`          |     5 |     0 |
 | `TaskExternalLinks`         |     6 |     0 |
-| `Tasks`                     |    32 |    30 |
+| `Tasks`                     |    32 |    28 |
 | `TokenBlacklist`            |     4 |     0 |
-| `UserIdentities`            |     6 |     2 |
-| `Users`                     |    21 |    11 |
+| `UserIdentities`            |     6 |     1 |
+| `Users`                     |    21 |    10 |
 | `ai_learning_logs`          |     4 |     0 |
-| `discussion_point_comments` |    11 |     4 |
+| `discussion_point_comments` |     6 |    10 |
 | `meeting_details`           |    12 |     0 |
 
 ---
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `AuditLogs`
 
-12 kolom · 63 baris
+12 kolom · 124 baris
 
 | Kolom        | Tipe                        | Null | Kunci |
 | ------------ | --------------------------- | :--: | ----- |
@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `DiscussionPoints`
 
-34 kolom · 5 baris
+34 kolom · 7 baris
 
 | Kolom                 | Tipe                        | Null | Kunci |
 | --------------------- | --------------------------- | :--: | ----- |
@@ -220,7 +220,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `Documents`
 
-15 kolom · 10 baris
+16 kolom · 8 baris
 
 | Kolom           | Tipe                        | Null | Kunci |
 | --------------- | --------------------------- | :--: | ----- |
@@ -239,6 +239,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 | `fileSize`      | bigint                      |  ya  | —     |
 | `fileRef`       | text                        |  ya  | —     |
 | `fileData`      | text                        |  ya  | —     |
+| `canvasData`    | text                        |  ya  | —     |
 
 ### `LinkedTasks`
 
@@ -254,7 +255,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `MasterData`
 
-11 kolom · 76 baris
+12 kolom · 102 baris
 
 | Kolom             | Tipe                        | Null | Kunci |
 | ----------------- | --------------------------- | :--: | ----- |
@@ -269,10 +270,11 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 | `description`     | text                        |  ya  | —     |
 | `fieldType`       | character varying           |  ya  | —     |
 | `dropdownOptions` | jsonb                       |  ya  | —     |
+| `code`            | character varying           |  ya  | —     |
 
 ### `Meetings`
 
-22 kolom · 9 baris
+22 kolom · 10 baris
 
 | Kolom             | Tipe                        | Null | Kunci |
 | ----------------- | --------------------------- | :--: | ----- |
@@ -341,7 +343,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `Notifications`
 
-10 kolom · 64 baris
+10 kolom · 68 baris
 
 | Kolom         | Tipe                        | Null | Kunci |
 | ------------- | --------------------------- | :--: | ----- |
@@ -372,14 +374,13 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `ProjectMembers`
 
-4 kolom · 10 baris
+3 kolom · 10 baris
 
-| Kolom           | Tipe              | Null | Kunci |
-| --------------- | ----------------- | :--: | ----- |
-| `projectId`     | character varying |  —   | PK    |
-| `userId`        | character varying |  —   | PK    |
-| `role`          | character varying |  ya  | —     |
-| `parentAdminId` | character varying |  ya  | —     |
+| Kolom       | Tipe              | Null | Kunci |
+| ----------- | ----------------- | :--: | ----- |
+| `projectId` | character varying |  —   | PK    |
+| `userId`    | character varying |  —   | PK    |
+| `role`      | character varying |  ya  | —     |
 
 ### `ProjectModules`
 
@@ -434,7 +435,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `QATestCases`
 
-35 kolom · 1 baris
+35 kolom · 5 baris
 
 | Kolom              | Tipe                        | Null | Kunci |
 | ------------------ | --------------------------- | :--: | ----- |
@@ -476,7 +477,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `QATestSuites`
 
-12 kolom · 2 baris
+12 kolom · 3 baris
 
 | Kolom         | Tipe                        | Null | Kunci |
 | ------------- | --------------------------- | :--: | ----- |
@@ -495,7 +496,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `Sprints`
 
-11 kolom · 7 baris
+11 kolom · 6 baris
 
 | Kolom            | Tipe                        | Null | Kunci |
 | ---------------- | --------------------------- | :--: | ----- |
@@ -538,7 +539,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `Tasks`
 
-32 kolom · 30 baris
+32 kolom · 28 baris
 
 | Kolom                | Tipe                        | Null | Kunci |
 | -------------------- | --------------------------- | :--: | ----- |
@@ -588,7 +589,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `UserIdentities`
 
-6 kolom · 2 baris
+6 kolom · 1 baris
 
 | Kolom       | Tipe                        | Null | Kunci  |
 | ----------- | --------------------------- | :--: | ------ |
@@ -601,7 +602,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `Users`
 
-21 kolom · 11 baris
+21 kolom · 10 baris
 
 | Kolom                 | Tipe                        | Null | Kunci  |
 | --------------------- | --------------------------- | :--: | ------ |
@@ -640,21 +641,16 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `discussion_point_comments`
 
-11 kolom · 4 baris
+6 kolom · 10 baris
 
-| Kolom          | Tipe              | Null | Kunci |
-| -------------- | ----------------- | :--: | ----- |
-| `id`           | character varying |  —   | PK    |
-| `pointid`      | character varying |  —   | —     |
-| `point_id`     | character varying |  ya  | —     |
-| `userId`       | character varying |  ya  | —     |
-| `user_id`      | character varying |  ya  | —     |
-| `username`     | character varying |  ya  | —     |
-| `user_name`    | character varying |  ya  | —     |
-| `commenttext`  | text              |  —   | —     |
-| `comment_text` | text              |  ya  | —     |
-| `createdAt`    | character varying |  —   | —     |
-| `created_at`   | character varying |  ya  | —     |
+| Kolom         | Tipe              | Null | Kunci |
+| ------------- | ----------------- | :--: | ----- |
+| `id`          | character varying |  —   | PK    |
+| `pointid`     | character varying |  —   | —     |
+| `userId`      | character varying |  ya  | —     |
+| `username`    | character varying |  ya  | —     |
+| `commenttext` | text              |  —   | —     |
+| `createdAt`   | character varying |  —   | —     |
 
 ### `meeting_details`
 
