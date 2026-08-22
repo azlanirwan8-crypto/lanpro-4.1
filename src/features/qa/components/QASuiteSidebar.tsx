@@ -224,7 +224,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                             ? "cursor-pointer hover:bg-indigo-500/10 hover:border-primary/50"
                             : "cursor-default"
                         }`}
-                        title={canUpdate ? "Assign / Ubah PIC Modul" : "PIC Modul Terdaftar"}
+                        title={canUpdate ? t("qaSuite.assignPic") : t("qaSuite.picRegistered")}
                       >
                         {suite.assignedTo ? (
                           <>

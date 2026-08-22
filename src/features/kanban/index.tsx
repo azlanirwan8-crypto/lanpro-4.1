@@ -171,7 +171,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
     if (showUnassigned) {
       memberLanes.push({
         id: "unassigned",
-        displayName: "Unassigned",
+        displayName: t("newTask.unassigned"),
         email: "No Assignee",
         photoURL: undefined,
       });
@@ -397,7 +397,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                             <UserAvatar user={member} className="w-5 h-5 text-xs sm:text-[10px]" />
                           )}
                           <span className="text-xs sm:text-[10px] font-medium uppercase tracking-wider text-content-muted truncate">
-                            {isUnassigned ? "Unassigned" : "Assignee"}
+                            {isUnassigned ? t("newTask.unassigned") : t("issueColumns.assignee")}
                           </span>
                           <span className="ml-auto bg-surface-muted text-content-secondary px-1.5 py-0.2 rounded text-xs sm:text-[10px] font-medium shrink-0">
                             {totalIssueCount}

@@ -179,7 +179,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/30 flex items-center gap-1 shadow-soft">
                 Assignee:{" "}
                 {projectMembers.find((m) => m.uid === listFilterAssignee)?.displayName ||
-                  "Unassigned"}
+                  t("newTask.unassigned")}
                 <button
                   type="button"
                   onClick={() => setListFilterAssignee("All")}

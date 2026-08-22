@@ -110,7 +110,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             value={task.assigneeId || ""}
             onChange={(val) => updateTaskField(task.id, "assigneeId", val)}
             options={[
-              { id: "", label: "Unassigned" },
+              { id: "", label: t("newTask.unassigned") },
               ...(projectMembers || []).map((m) => ({
                 id: m?.uid || "",
                 label: m?.displayName || m?.email || "Unknown",

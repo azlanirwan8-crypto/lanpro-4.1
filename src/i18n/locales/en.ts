@@ -723,6 +723,7 @@ export const en = {
     delete: "Delete",
   },
   common: {
+    unknown: "Unknown",
     projectSettings: "Project Settings",
     showing: "Showing",
     to: "to",
@@ -1021,6 +1022,7 @@ export const en = {
     pickAbove: "Please drag or choose a diagram above",
   },
   audit: {
+    infraSubtitle: "LanPro infrastructure activity history (Real-time & Immutable)",
     allEntities: "All Entities",
     allAccess: "All Access",
     systemAudit: "System Audit",
@@ -1298,6 +1300,8 @@ export const en = {
     noActiveLock: "No active lock. Opening a test suite locks it automatically.",
   },
   qaSuite: {
+    assignPic: "Assign / Change Module PIC",
+    picRegistered: "Module PIC Registered",
     allProjectPic: "All Project PICs (All Members)",
     allPhases: "All Phases (ALL)",
     phaseSit: "SIT Phase (Integration)",

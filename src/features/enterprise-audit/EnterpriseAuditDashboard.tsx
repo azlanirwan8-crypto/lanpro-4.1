@@ -227,7 +227,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
             {t("audit.title")}
           </h1>
           <p className="text-xs text-content-muted font-medium mt-0.5">
-            Riwayat aktivitas infrastruktur LanPro (Real-time & Immutable)
+            {t("audit.infraSubtitle")}
           </p>
         </div>
 

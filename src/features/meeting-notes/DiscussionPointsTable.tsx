@@ -485,7 +485,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   <StyledDropdown
                     value={editForm.assignTo || "Unassigned"}
                     onChange={(val) => setEditForm({ ...editForm, assignTo: val })}
-                    options={[{ id: "Unassigned", label: "Unassigned" }, ...userOptions]}
+                    options={[{ id: "Unassigned", label: t("newTask.unassigned") }, ...userOptions]}
                     members={projectMembers}
                     type="member"
                     masterData={masterData}
@@ -589,7 +589,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                       projectMembers.find((m) => (m.uid || m.id) === (p.assignTo || p.assignee_id))
                         ?.username ||
                       p.assignTo ||
-                      "Unassigned";
+                      t("newTask.unassigned");
 
                     return (
                       <tr key={p.id} className="hover:bg-surface-sunken/70 transition-colors group">

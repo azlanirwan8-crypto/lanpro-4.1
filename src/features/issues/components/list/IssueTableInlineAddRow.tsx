@@ -156,7 +156,7 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                   value={inlineAddAssigneeId}
                   onChange={(val) => setInlineAddAssigneeId(val)}
                   options={[
-                    { id: "", label: "Unassigned" },
+                    { id: "", label: t("newTask.unassigned") },
                     ...projectMembers.map((m) => ({
                       id: m?.uid || "",
                       label: m?.displayName || m?.email || "Unknown",

@@ -372,7 +372,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
 
               case "assignee":
                 const memberOptions = [
-                  { id: "", label: "Unassigned" },
+                  { id: "", label: t("newTask.unassigned") },
                   ...projectMembers.map((m) => ({
                     id: m?.uid || "",
                     label: m?.displayName || m?.email || "Unknown",
@@ -402,7 +402,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                   reporterObj?.name ||
                   reporterObj?.displayName ||
                   reporterObj?.email ||
-                  (task.reporterId ? "Unknown" : "Unassigned");
+                  (task.reporterId ? t("common.unknown") : t("newTask.unassigned"));
                 content = (
                   <div className="flex items-center gap-2">
                     <UserAvatar

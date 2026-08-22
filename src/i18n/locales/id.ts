@@ -722,6 +722,7 @@ export const id = {
     delete: "Hapus",
   },
   common: {
+    unknown: "Tidak Diketahui",
     projectSettings: "Pengaturan Proyek",
     showing: "Menampilkan",
     to: "sampai",
@@ -1024,6 +1025,7 @@ export const id = {
     pickAbove: "Silakan tarik / pilih diagram di atas",
   },
   audit: {
+    infraSubtitle: "Riwayat aktivitas infrastruktur LanPro (Real-time & Immutable)",
     allEntities: "Semua Entitas",
     allAccess: "Semua Akses",
     systemAudit: "Audit Sistem",
@@ -1302,6 +1304,8 @@ export const id = {
     noActiveLock: "Tidak ada kunci aktif. Membuka test suite akan mengunci otomatis.",
   },
   qaSuite: {
+    assignPic: "Tetapkan / Ubah PIC Modul",
+    picRegistered: "PIC Modul Terdaftar",
     allProjectPic: "Semua PIC Proyek (Semua Anggota)",
     allPhases: "Semua Fase (ALL)",
     phaseSit: "Fase SIT (Integration)",
