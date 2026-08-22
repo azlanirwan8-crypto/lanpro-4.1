@@ -476,10 +476,10 @@ export const MasterDataPanel = ({
           <div className="p-3.5 border-b border-border-faint flex items-center justify-between bg-surface-sunken/50">
             <div>
               <h3 className="font-medium text-content-strong text-xs uppercase tracking-wider">
-                Master Database
+                {t("master.masterDatabase")}
               </h3>
               <p className="text-xs sm:text-[10px] font-medium text-content-subtle mt-0.5">
-                System configuration
+                {t("master.systemConfiguration")}
               </p>
             </div>
             <div className="w-7 h-7 rounded-md bg-indigo-500/10 flex items-center justify-center text-indigo-600">
@@ -536,7 +536,7 @@ export const MasterDataPanel = ({
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
-                  Master Sistem
+                  {t("master.systemMaster")}
                 </span>
                 <span className="text-xs text-content-subtle font-medium">
                   • Pusat Kendali Perusahaan
@@ -586,18 +586,14 @@ export const MasterDataPanel = ({
               {loadingModules ? (
                 <div className="flex justify-center items-center h-48">
                   <span className="text-xs font-medium text-content-muted animate-pulse">
-                    Memuat modul aplikasi...
+                    {t("master.loadingModules")}
                   </span>
                 </div>
               ) : projectModules.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-content-subtle">
                   <Layers className="w-12 h-12 mb-3 text-content-subtle animate-pulse" />
-                  <p className="text-xs font-medium text-content-body">
-                    Belum ada modul / aplikasi
-                  </p>
-                  <p className="text-xs mt-1 text-content-subtle">
-                    Klik tombol 'Add Modul / Aplikasi' di atas untuk membuat modul master pertama.
-                  </p>
+                  <p className="text-xs font-medium text-content-body">{t("master.noModules")}</p>
+                  <p className="text-xs mt-1 text-content-subtle">{t("master.noModulesHint")}</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -624,7 +620,7 @@ export const MasterDataPanel = ({
                             <p className="text-xs sm:text-[11px] text-content-subtle font-medium mt-0.5">
                               {mod.keterangan || (
                                 <span className="text-content-subtle italic">
-                                  Tidak ada keterangan
+                                  {t("master.noDescription")}
                                 </span>
                               )}
                             </p>
@@ -660,7 +656,7 @@ export const MasterDataPanel = ({
                                 });
                               }}
                               className="w-7 h-7 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
-                              title="Hapus Modul"
+                              title={t("master.deleteModule")}
                             >
                               <Trash2 className="w-3.5 h-3.5 shrink-0" />
                             </button>
@@ -975,7 +971,7 @@ export const MasterDataPanel = ({
                                               })
                                             }
                                             className="w-7 h-7 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
-                                            title="Hapus Master Data"
+                                            title={t("master.deleteMasterData")}
                                           >
                                             <Trash2 className="w-3.5 h-3.5 shrink-0" />
                                           </button>
@@ -1093,12 +1089,12 @@ export const MasterDataPanel = ({
             {selectedType === "priority" && (
               <div>
                 <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-                  Short Code
+                  {t("master.shortCode")}
                 </label>
                 <Input
                   value={newMasterShortCode}
                   onChange={(e: any) => setNewMasterShortCode(e.target.value)}
-                  placeholder="misal: P0, P1, CRIT"
+                  placeholder={t("master.shortCodePlaceholder")}
                   className="!bg-surface border-border-subtle"
                 />
               </div>
@@ -1107,7 +1103,7 @@ export const MasterDataPanel = ({
             {selectedType === "issue_type" && (
               <div>
                 <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-                  Hierarchy Level
+                  {t("master.hierarchyLevel")}
                 </label>
                 <select
                   value={newMasterHierarchy}
@@ -1141,12 +1137,12 @@ export const MasterDataPanel = ({
             {selectedType === "environment" && (
               <div>
                 <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-                  Endpoint / Base URL
+                  {t("master.endpointBaseUrl")}
                 </label>
                 <Input
                   value={newMasterBaseUrl}
                   onChange={(e: any) => setNewMasterBaseUrl(e.target.value)}
-                  placeholder="https://staging.enterprise.com"
+                  placeholder={t("master.endpointPlaceholder")}
                   className="!bg-surface border-border-subtle"
                 />
               </div>
@@ -1154,7 +1150,7 @@ export const MasterDataPanel = ({
 
             <div>
               <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-                Warna / Color Accent
+                {t("master.colorAccent")}
               </label>
               <div className="flex gap-2">
                 <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-border-subtle shadow-soft shrink-0 bg-surface flex items-center justify-center">
@@ -1191,7 +1187,7 @@ export const MasterDataPanel = ({
 
           <div>
             <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-              Palet Warna
+              {t("master.colorPalette")}
             </label>
             <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-xl">
               {[
@@ -1234,7 +1230,7 @@ export const MasterDataPanel = ({
             <div className="relative mb-2">
               <input
                 type="text"
-                placeholder="Cari ikon... (cth: bug, target, timer, check, activity, file, user, db, lock)"
+                placeholder={t("master.searchIcon")}
                 value={iconSearch}
                 onChange={(e) => setIconSearch(e.target.value)}
                 className="w-full px-10 py-2.5 bg-surface border border-border-subtle rounded-xl text-xs font-medium text-content-body placeholder:text-content-subtle focus:outline-none focus:border-indigo-500 transition-all pl-10"
@@ -1277,7 +1273,7 @@ export const MasterDataPanel = ({
               }}
               className="flex-1 justify-center py-3"
             >
-              Batal
+              {t("master.cancel")}
             </Button>
             <Button
               onClick={handleCreateMasterData}
@@ -1297,7 +1293,7 @@ export const MasterDataPanel = ({
           setIsEditMasterModalOpen(false);
           setEditIconSearch("");
         }}
-        title="Edit Master Data"
+        title={t("master.editMasterData")}
         maxWidth="max-w-xl"
       >
         {editingMaster && (
@@ -1334,7 +1330,7 @@ export const MasterDataPanel = ({
               </div>
               <div>
                 <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-                  Warna / Color Accent
+                  {t("master.colorAccent")}
                 </label>
                 <div className="flex gap-2">
                   <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-border-subtle shadow-soft shrink-0 bg-surface flex items-center justify-center">
@@ -1373,7 +1369,7 @@ export const MasterDataPanel = ({
 
             <div>
               <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-                Palet Warna
+                {t("master.colorPalette")}
               </label>
               <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-xl">
                 {[
@@ -1416,7 +1412,7 @@ export const MasterDataPanel = ({
               <div className="relative mb-2">
                 <input
                   type="text"
-                  placeholder="Cari ikon... (cth: bug, target, timer, check, activity, file, user, db, lock)"
+                  placeholder={t("master.searchIcon")}
                   value={editIconSearch}
                   onChange={(e) => setEditIconSearch(e.target.value)}
                   className="w-full px-10 py-2.5 bg-surface border border-border-subtle rounded-xl text-xs font-medium text-content-body placeholder:text-content-subtle focus:outline-none focus:border-indigo-500 transition-all pl-10"
@@ -1459,7 +1455,7 @@ export const MasterDataPanel = ({
                 }}
                 className="flex-1 justify-center py-3"
               >
-                Batal
+                {t("master.cancel")}
               </Button>
               <Button
                 onClick={handleUpdateMasterData}
@@ -1477,7 +1473,7 @@ export const MasterDataPanel = ({
       <Modal
         isOpen={isNewModuleModalOpen}
         onClose={() => setIsNewModuleModalOpen(false)}
-        title="Tambah Modul / Aplikasi Baru"
+        title={t("master.addModuleTitle")}
         maxWidth="max-w-xl"
       >
         <div className="space-y-4">
@@ -1501,24 +1497,24 @@ export const MasterDataPanel = ({
 
           <div>
             <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-              Nama Modul / Aplikasi
+              {t("master.moduleName")}
             </label>
             <Input
               value={newModuleNamaModul}
               onChange={(e: any) => setNewModuleNamaModul(e.target.value)}
-              placeholder="misal: Front Office, Settlement, Auth Service"
+              placeholder={t("master.moduleNamePlaceholder")}
               className="!bg-surface border-border-subtle"
             />
           </div>
 
           <div>
             <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-              Keterangan
+              {t("master.remarks")}
             </label>
             <textarea
               value={newModuleKeterangan}
               onChange={(e) => setNewModuleKeterangan(e.target.value)}
-              placeholder="Deskripsi singkat modul/aplikasi..."
+              placeholder={t("master.remarksPlaceholder")}
               rows={3}
               className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-medium text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
             />
@@ -1530,7 +1526,7 @@ export const MasterDataPanel = ({
               onClick={() => setIsNewModuleModalOpen(false)}
               className="flex-1 justify-center py-3"
             >
-              Batal
+              {t("master.cancel")}
             </Button>
             <Button
               onClick={handleCreateModule}
@@ -1553,7 +1549,7 @@ export const MasterDataPanel = ({
         <div className="space-y-4">
           <div>
             <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-              Nama Project
+              {t("master.projectName")}
             </label>
             <select
               value={editingModuleProjectId}
@@ -1571,24 +1567,24 @@ export const MasterDataPanel = ({
 
           <div>
             <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-              Nama Modul / Aplikasi
+              {t("master.moduleName")}
             </label>
             <Input
               value={editingModuleNamaModul}
               onChange={(e: any) => setEditingModuleNamaModul(e.target.value)}
-              placeholder="misal: Front Office, Settlement, Auth Service"
+              placeholder={t("master.moduleNamePlaceholder")}
               className="!bg-surface border-border-subtle"
             />
           </div>
 
           <div>
             <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-              Keterangan
+              {t("master.remarks")}
             </label>
             <textarea
               value={editingModuleKeterangan}
               onChange={(e) => setEditingModuleKeterangan(e.target.value)}
-              placeholder="Deskripsi singkat modul/aplikasi..."
+              placeholder={t("master.remarksPlaceholder")}
               rows={3}
               className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-medium text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
             />
@@ -1600,7 +1596,7 @@ export const MasterDataPanel = ({
               onClick={() => setIsEditModuleModalOpen(false)}
               className="flex-1 justify-center py-3"
             >
-              Batal
+              {t("master.cancel")}
             </Button>
             <Button
               onClick={handleUpdateModule}
