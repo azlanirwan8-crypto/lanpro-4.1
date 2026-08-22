@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Trash, X } from "lucide-react";
@@ -38,6 +39,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
   bulkDeleteTasks,
   canDeleteIssue,
 }) => {
+  const { t } = useTranslation();
   const mArr = masterData || [];
   const tArr = tasks || [];
   const totalPages = Math.ceil(displayRoots.length / itemsPerPage);
@@ -54,7 +56,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
           </span>
           <div className="flex items-center gap-1.5 pl-2 border-l border-border-subtle">
             <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
-              Per Page:
+              {t("bulkActions.perPage")}
             </span>
             <select
               value={itemsPerPage}
@@ -69,7 +71,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
               <option value={30}>30</option>
               <option value={50}>50</option>
               <option value={100}>100</option>
-              <option value={9999}>All</option>
+              <option value={9999}>{t("bulkActions.all")}</option>
             </select>
           </div>
         </div>
@@ -80,7 +82,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
             disabled={listPage === 1}
             className="px-2.5 py-1 text-xs sm:text-[10px] font-medium text-content-secondary bg-surface border border-border-subtle rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
           >
-            Prev
+            {t("bulkActions.prev")}
           </button>
           <div className="flex gap-1 items-center px-1 max-w-[200px] overflow-x-auto">
             {Array.from({ length: totalPages }).map((_, i) => (
@@ -99,13 +101,11 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
             ))}
           </div>
           <button
-            onClick={() =>
-              setListPage((p) => Math.min(totalPages, p + 1))
-            }
+            onClick={() => setListPage((p) => Math.min(totalPages, p + 1))}
             disabled={listPage >= totalPages}
             className="px-2.5 py-1 text-xs sm:text-[10px] font-medium text-content-secondary bg-surface border border-border-subtle rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
           >
-            Next
+            {t("bulkActions.next")}
           </button>
         </div>
       </div>
@@ -125,14 +125,14 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                 {selectedTaskIds.size}
               </span>
               <span className="text-content-subtle font-medium uppercase tracking-wider text-xs sm:text-[10px]">
-                Tugas Dipilih
+                {t("bulkActions.selectedTasks")}
               </span>
             </div>
 
             {/* Change Status Dropdown */}
             <div className="flex items-center gap-2">
               <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-wider">
-                Status:
+                {t("bulkActions.status")}
               </span>
               <select
                 onChange={(e) => {
@@ -140,9 +140,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                   if (val) {
                     const ids = Array.from(selectedTaskIds);
                     ids.forEach((id) => updateTaskField(id, "status", val));
-                    toast.success(
-                      `Berhasil mengubah status ${ids.length} tugas menjadi "${val}"`
-                    );
+                    toast.success(`Berhasil mengubah status ${ids.length} tugas menjadi "${val}"`);
                     setSelectedTaskIds(new Set());
                   }
                 }}
@@ -150,7 +148,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                 className="bg-surface-inverse border border-border-inverse text-content-inverse rounded-xl px-2.5 py-1.5 text-xs outline-none focus:border-indigo-500 cursor-pointer font-medium"
               >
                 <option value="" disabled>
-                  Pilih Status...
+                  {t("bulkActions.pickStatus")}
                 </option>
                 {mArr
                   .filter((m) => m.type === "status")
@@ -165,7 +163,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
             {/* Change Assignee Dropdown */}
             <div className="flex items-center gap-2">
               <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-wider">
-                Assignee:
+                {t("bulkActions.assignee")}
               </span>
               <select
                 onChange={(e) => {
@@ -180,7 +178,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                 className="bg-surface-inverse border border-border-inverse text-content-inverse rounded-xl px-2.5 py-1.5 text-xs outline-none focus:border-indigo-500 cursor-pointer font-medium"
               >
                 <option value="" disabled>
-                  Pilih Assignee...
+                  {t("bulkActions.pickAssignee")}
                 </option>
                 <option value="unassigned">Unassigned (Kosongkan)</option>
                 {projectMembers.map((m) => (
@@ -225,7 +223,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
             <button
               onClick={() => setSelectedTaskIds(new Set())}
               className="p-1.5 hover:bg-surface-inverse text-content-subtle hover:text-content-inverse rounded-xl transition-all cursor-pointer"
-              title="Batal pilih semua"
+              title={t("bulkActions.clearSelection")}
             >
               <X className="w-4 h-4" />
             </button>

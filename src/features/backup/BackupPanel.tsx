@@ -205,9 +205,7 @@ export const BackupPanel = (_props: {
                 <h2 className="text-xs font-medium text-content-strong uppercase tracking-wide">
                   {t("backup.exportDatabase")}
                 </h2>
-                <p className="text-xs text-content-muted mt-0.5">
-                  Unduh snapshot lengkap seluruh tabel database dalam format JSON.
-                </p>
+                <p className="text-xs text-content-muted mt-0.5">{t("backupPanel.exportHint")}</p>
               </div>
             </div>
           </div>
@@ -231,7 +229,7 @@ export const BackupPanel = (_props: {
               </div>
               <div>
                 <h2 className="text-xs font-medium text-content-strong uppercase tracking-wide">
-                  Restore Database Backup
+                  {t("backupPanel.restoreTitle")}
                 </h2>
                 <p className="text-xs text-content-muted flex items-center gap-1 mt-0.5">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
@@ -279,9 +277,9 @@ export const BackupPanel = (_props: {
               <tr>
                 <th className="py-2.5 px-3.5">{t("backup.exportTime")}</th>
                 <th className="py-2.5 px-3.5">{t("backup.fileName")}</th>
-                <th className="py-2.5 px-3.5">Ukuran</th>
+                <th className="py-2.5 px-3.5">{t("backupPanel.size")}</th>
                 <th className="py-2.5 px-3.5">{t("backup.processStatus")}</th>
-                <th className="py-2.5 px-3.5 text-right">Aksi</th>
+                <th className="py-2.5 px-3.5 text-right">{t("backupPanel.action")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-faint font-medium">
@@ -304,7 +302,7 @@ export const BackupPanel = (_props: {
                           <div className="flex justify-between text-xs sm:text-[10px] text-amber-700 font-medium">
                             <span className="flex items-center gap-1">
                               <Loader2 className="w-3 h-3 animate-spin text-amber-600" />
-                              Exporting...
+                              {t("backupPanel.exporting")}
                             </span>
                             <span>{item.progress}%</span>
                           </div>
@@ -319,13 +317,13 @@ export const BackupPanel = (_props: {
                       {item.status === "completed" && (
                         <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded text-[10px] leading-none font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                          Selesai
+                          {t("backupPanel.done")}
                         </span>
                       )}
                       {item.status === "failed" && (
                         <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded text-[10px] leading-none font-medium bg-rose-500/10 text-rose-700 border border-rose-500/30">
                           <AlertTriangle className="w-3 h-3 text-rose-600" />
-                          Gagal
+                          {t("backupPanel.failed")}
                         </span>
                       )}
                     </td>
@@ -337,16 +335,16 @@ export const BackupPanel = (_props: {
                           title={t("backup.downloadBackup")}
                         >
                           <Download className="w-3 h-3" />
-                          Download
+                          {t("backupPanel.download")}
                         </button>
                       )}
                       <button
                         onClick={() => handleDeleteItem(item.id)}
                         className="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 border border-rose-500/30 rounded font-medium text-[10px] leading-none transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
-                        title="Hapus riwayat"
+                        title={t("backupPanel.deleteHistory")}
                       >
                         <Trash2 className="w-3 h-3" />
-                        Hapus
+                        {t("backupPanel.delete")}
                       </button>
                     </td>
                   </tr>
@@ -372,7 +370,7 @@ export const BackupPanel = (_props: {
           isOpen={isRestoreConfirmOpen}
           onClose={cancelRestore}
           onConfirm={executeRestore}
-          title="Konfirmasi Restore Database"
+          title={t("backupPanel.confirmRestore")}
           message="Apakah Anda yakin ingin melakukan restore? Tindakan ini akan menimpa seluruh data saat ini dengan data dari file backup. Tindakan ini tidak dapat dibatalkan!"
           confirmText="Ya, Restore Sekarang"
           cancelText="Batal"

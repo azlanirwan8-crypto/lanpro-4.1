@@ -13,6 +13,7 @@
  * Daftar props yang panjang justru membuat ketergantungan itu terlihat, bukan
  * menyembunyikannya di balik closure.
  */
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -85,6 +86,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
   setSelectedTaskForDetail,
   setIsTaskDetailModalOpen,
 }) => {
+  const { t } = useTranslation();
   const isSelected = selectedNodeId === node.id || copiedNodes.some((copy) => copy.id === node.id);
   const isSourceOfConnect = connectSourceId === node.id;
   const linkedTask = getLinkedTaskDetails(node.taskId);
@@ -190,7 +192,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
               e.stopPropagation();
               handleConnectPortClick(node.id, "top");
             }}
-            title="Tarik panah dari Sisi Atas"
+            title={t("flowNode.dragTop")}
           >
             <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-violet-600 font-medium" />
           </div>
@@ -202,7 +204,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
               e.stopPropagation();
               handleConnectPortClick(node.id, "right");
             }}
-            title="Tarik panah dari Sisi Kanan"
+            title={t("flowNode.dragRight")}
           >
             <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-violet-600 font-medium" />
           </div>
@@ -214,7 +216,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
               e.stopPropagation();
               handleConnectPortClick(node.id, "bottom");
             }}
-            title="Tarik panah dari Sisi Bawah"
+            title={t("flowNode.dragBottom")}
           >
             <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-violet-600 font-medium" />
           </div>
@@ -226,7 +228,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
               e.stopPropagation();
               handleConnectPortClick(node.id, "left");
             }}
-            title="Tarik panah dari Sisi Kiri"
+            title={t("flowNode.dragLeft")}
           >
             <Plus className="w-2 md:w-2.5 h-2 md:h-2.5 text-violet-600 font-medium" />
           </div>
@@ -394,7 +396,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
                   setSelectedTaskForDetail(linkedTask);
                   setIsTaskDetailModalOpen(true);
                 }}
-                title="Klik untuk detail Backlog"
+                title={t("flowNode.backlogDetail")}
               >
                 <span>{linkedTask.key}</span>
                 <span className="w-1 h-3 bg-current/40 mx-0.5" />
@@ -413,19 +415,19 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
           <div
             onMouseDown={(e) => handleResizeMouseDown(e, node.id, "e")}
             className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-2.5 h-2.5 bg-violet-600 rounded-full border border-surface cursor-ew-resize z-30 hover:scale-125 transition-transform shadow-md"
-            title="Tarik untuk melebarkan"
+            title={t("flowNode.resizeWidth")}
           />
           {/* Bottom South sizing circle handle */}
           <div
             onMouseDown={(e) => handleResizeMouseDown(e, node.id, "s")}
             className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2.5 h-2.5 bg-violet-600 rounded-full border border-surface cursor-ns-resize z-30 hover:scale-125 transition-transform shadow-md"
-            title="Tarik untuk mempertinggi"
+            title={t("flowNode.resizeHeight")}
           />
           {/* Corners SE sizing square handle */}
           <div
             onMouseDown={(e) => handleResizeMouseDown(e, node.id, "se")}
             className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-3.5 h-3.5 bg-violet-600 rounded border border-surface cursor-nwse-resize z-30 hover:scale-125 transition-transform shadow-md"
-            title="Sizing Bebas"
+            title={t("flowNode.freeSizing")}
           />
 
           {/* Auto-Connector plus direction link helper */}
@@ -453,7 +455,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
               toast.success("Otomatis menambahkan & menghubungkan alur langkah baru!");
             }}
             className="absolute -right-11 top-1/2 -translate-y-1/2 w-7 h-7 bg-surface hover:bg-violet-600 border shadow-soft-lg text-violet-600 hover:text-content-inverse rounded-full flex items-center justify-center font-medium text-base transition-all scale-90 hover:scale-110 z-30"
-            title="Buat Alur Hubung Baru secara Instan"
+            title={t("flowNode.instantConnector")}
           >
             <Plus className="w-4 h-4" />
           </button>
@@ -483,7 +485,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
               toast.success("Otomatis menambahkan & menghubungkan alur ke bawah!");
             }}
             className="absolute -bottom-11 left-1/2 -translate-x-1/2 w-7 h-7 bg-surface hover:bg-indigo-600 border shadow-soft-lg text-indigo-600 hover:text-content-inverse rounded-full flex items-center justify-center font-medium text-base transition-all scale-90 hover:scale-110 z-30"
-            title="Hubungkan Alir ke Bawah Baru secara Instan"
+            title={t("flowNode.instantDownConnector")}
           >
             <Plus className="w-4 h-4" />
           </button>
