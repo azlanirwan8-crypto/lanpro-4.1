@@ -26,6 +26,7 @@ interface DocumentRow {
   title: string;
   description?: string;
   canvasData?: string;
+  category?: string;
   type?: string;
   link?: string;
   createdBy?: string;
@@ -59,7 +60,11 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
   return {
     id: doc.id,
     name: doc.title,
-    category: "Panduan",
+    // Item #144 — dulu dikeraskan "Panduan" di sini, sementara `category` juga
+    // tidak pernah dikirim saat menyimpan. Akibatnya pilihan pengguna di modal
+    // dibuang diam-diam dan SETIAP diagram tampil "Panduan" setelah dimuat
+    // ulang. Kosong dibiarkan kosong; yang menampilkan boleh memilih teksnya.
+    category: doc.category ?? "",
     // Jangan pernah teruskan payload kanvas sebagai deskripsi manusia.
     description: payloadLama ? "" : (doc.description ?? ""),
     nodes,
@@ -96,7 +101,7 @@ export async function createFlowchart(
   projectId: string,
   flow: Pick<
     FlowchartData,
-    "name" | "nodes" | "edges" | "externalUrl" | "createdBy" | "description"
+    "name" | "nodes" | "edges" | "externalUrl" | "createdBy" | "description" | "category"
   >
 ): Promise<void> {
   await apiRequest(`/api/projects/${projectId}/documents`, {
@@ -105,6 +110,7 @@ export async function createFlowchart(
       title: flow.name,
       description: flow.description || null,
       canvasData: encodeFlowPayload(flow),
+      category: flow.category || null,
       type: "flowchart",
       link: flow.externalUrl || null,
       createdBy: flow.createdBy,
@@ -122,6 +128,7 @@ export async function updateFlowchart(
     edges: any[];
     externalUrl?: string;
     description?: string;
+    category?: string;
   }
 ): Promise<void> {
   await apiRequest(`/api/projects/${projectId}/documents/${flowId}`, {
@@ -130,6 +137,7 @@ export async function updateFlowchart(
       title: data.name,
       description: data.description ?? null,
       canvasData: encodeFlowPayload({ nodes: data.nodes, edges: data.edges }),
+      category: data.category ?? null,
       link: data.externalUrl || null,
     },
   });

@@ -12,6 +12,8 @@ export interface DocumentEntity {
   fileType?: string | null;
   /** Payload kanvas flowchart ({nodes,edges}). Item #136 — dulu menumpang `description`. */
   canvasData?: string | null;
+  /** Kategori dokumen. Item #144 — dulu tidak punya kolom sama sekali. */
+  category?: string | null;
   createdBy?: string;
   downloadCount?: number;
   createdAt?: string;
@@ -23,7 +25,7 @@ export class DocumentRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        "SELECT id, projectId, title, description, type, link, fileName, fileType, canvasData, createdBy, downloadCount, createdAt, updatedAt FROM Documents WHERE projectId = ? ORDER BY createdAt DESC",
+        "SELECT id, projectId, title, description, type, link, fileName, fileType, canvasData, category, createdBy, downloadCount, createdAt, updatedAt FROM Documents WHERE projectId = ? ORDER BY createdAt DESC",
         [projectId]
       );
       return rows || [];
@@ -68,7 +70,7 @@ export class DocumentRepository {
     const connection = await db.getConnection();
     try {
       await connection.query(
-        "INSERT INTO Documents (id, projectId, title, description, type, link, fileData, fileName, fileType, canvasData, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO Documents (id, projectId, title, description, type, link, fileData, fileName, fileType, canvasData, category, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           doc.id,
           doc.projectId,
@@ -80,6 +82,7 @@ export class DocumentRepository {
           doc.fileName || null,
           doc.fileType || null,
           doc.canvasData || null,
+          doc.category || null,
           doc.createdBy || "guest",
         ]
       );
@@ -125,6 +128,10 @@ export class DocumentRepository {
       if (updates.canvasData !== undefined) {
         sqlUpdates.push("canvasData = ?");
         values.push(updates.canvasData);
+      }
+      if (updates.category !== undefined) {
+        sqlUpdates.push("category = ?");
+        values.push(updates.category);
       }
 
       if (sqlUpdates.length > 0) {

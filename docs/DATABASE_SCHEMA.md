@@ -67,10 +67,10 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 | --------------------------- | ----: | ----: |
 | `ActivityLogs`              |    11 |     1 |
 | `Attachments`               |    18 |     0 |
-| `AuditLogs`                 |    12 |   126 |
+| `AuditLogs`                 |    12 |   131 |
 | `Comments`                  |     8 |     0 |
 | `DiscussionPoints`          |    34 |     7 |
-| `Documents`                 |    16 |     8 |
+| `Documents`                 |    17 |     8 |
 | `LinkedTasks`               |     5 |     0 |
 | `MasterData`                |    12 |   121 |
 | `Meetings`                  |    22 |    10 |
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `AuditLogs`
 
-12 kolom · 126 baris
+12 kolom · 131 baris
 
 | Kolom        | Tipe                        | Null | Kunci |
 | ------------ | --------------------------- | :--: | ----- |
@@ -220,7 +220,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 
 ### `Documents`
 
-16 kolom · 8 baris
+17 kolom · 8 baris
 
 | Kolom           | Tipe                        | Null | Kunci |
 | --------------- | --------------------------- | :--: | ----- |
@@ -240,6 +240,7 @@ CREATE TABLE IF NOT EXISTS NamaTabel   (   -- SALAH, jadi namatabel
 | `fileRef`       | text                        |  ya  | —     |
 | `fileData`      | text                        |  ya  | —     |
 | `canvasData`    | text                        |  ya  | —     |
+| `category`      | character varying           |  ya  | —     |
 
 ### `LinkedTasks`
 

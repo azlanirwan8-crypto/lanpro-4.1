@@ -59,6 +59,7 @@ router.post(
         fileName,
         fileType,
         canvasData,
+        category,
         createdBy,
       } = req.body;
       const currentUserId = req.user?.id || req.user?.uid || createdBy || "guest";
@@ -75,6 +76,7 @@ router.post(
         fileName: fileName || null,
         fileType: fileType || null,
         canvasData: canvasData || null,
+        category: category || null,
         createdBy: currentUserId,
       });
 
@@ -123,7 +125,8 @@ router.put(
         });
       }
 
-      const { title, description, type, link, fileData, fileName, fileType, canvasData } = req.body;
+      const { title, description, type, link, fileData, fileName, fileType, canvasData, category } =
+        req.body;
 
       await documentRepository.update(id, {
         title,
@@ -134,6 +137,7 @@ router.put(
         fileName,
         fileType,
         canvasData,
+        category,
       });
 
       res.json({ status: "success", message: "Document updated" });

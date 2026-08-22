@@ -462,6 +462,7 @@ export const id = {
     swimlanes: "Jalur",
   },
   flowchart: {
+    uncategorized: "Tanpa Kategori",
     backToList: "← Kembali ke Daftar Diagram Alur",
     subtitle: "Kelola diagram interaktif, alur proses, dan arsitektur visual.",
     addFlowchart: "Tambah Diagram Alur",

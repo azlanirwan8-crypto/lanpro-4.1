@@ -465,6 +465,7 @@ export const en = {
     swimlanes: "Swimlanes",
   },
   flowchart: {
+    uncategorized: "Uncategorized",
     backToList: "← Back to Flowchart List",
     subtitle: "Manage interactive diagrams, process flows, and visual architecture.",
     addFlowchart: "Add Flowchart",

@@ -545,6 +545,12 @@ export async function runMigrations(pool: Pool): Promise<void> {
       ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS "fileRef" TEXT;
       ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS "fileData" TEXT;
       ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS "canvasData" TEXT;
+
+      -- Item #144 — kategori dokumen/flowchart. Kolom "type" sudah dipakai
+      -- ganda: untuk flowchart ia penanda jenis ('flowchart'), untuk dokumen
+      -- wiki ia justru kategorinya. Akibatnya kategori flowchart tidak punya
+      -- tempat, dan pilihan pengguna di modal dibuang diam-diam.
+      ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS category VARCHAR(255);
     `);
 
     // Item #136 — payload kanvas flowchart pindah dari `description` ke kolom

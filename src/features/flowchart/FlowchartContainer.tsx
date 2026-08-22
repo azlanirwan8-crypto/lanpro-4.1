@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useMasterOptions } from "../../hooks/useMasterOptions";
 import { safeLocalStorage, safeSessionStorage } from "../../lib/safeStorage";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useFlowchartCanvas } from "../../hooks/useFlowchartCanvas";
@@ -76,6 +77,14 @@ interface FlowchartViewProps {
   onSaveFlowcharts?: (data: any) => Promise<void>;
 }
 
+/**
+ * Dipakai hanya bila MasterData belum memuat tipe jenis_dokumen.
+ *
+ * Isinya sengaja tiga nilai lama (PRD/Panduan/Laporan) supaya diagram yang
+ * terlanjur menyimpan salah satunya tetap punya pilihan yang cocok.
+ */
+const CADANGAN_KATEGORI_DOKUMEN = ["PRD", "Panduan", "Laporan"];
+
 export const FlowchartView: React.FC<FlowchartViewProps> = ({
   selectedProject,
   tasks,
@@ -85,6 +94,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   onSaveFlowcharts,
 }) => {
   const { t } = useTranslation();
+  // Item #144 — sumber yang SAMA dengan modal Dokumentasi. Sebelumnya modal
+  // ini punya daftar kerasnya sendiri (PRD/Panduan/Laporan), jadi dua dropdown
+  // "Kategori Dokumen" pada tabel Documents yang sama menawarkan pilihan
+  // berbeda: 3 di sini, 9 di Dokumentasi.
+  const opsiKategoriDokumen = useMasterOptions("jenis_dokumen", CADANGAN_KATEGORI_DOKUMEN);
   // Get active logged in user author name dynamically
   const getResolvedAuthor = () => {
     if (currentUserProfile?.displayName) return currentUserProfile.displayName;
@@ -1423,6 +1437,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             edges: foundFlow?.edges || [],
             externalUrl: flowExternalUrl,
             description: flowDescription,
+            // Item #144 — tanpa baris ini kategorinya hanya bertahan di
+            // localStorage dan hilang begitu cache dibersihkan.
+            category: flowCategory,
           });
         } catch (apiErr) {
           console.warn("API sync error:", apiErr);
@@ -3655,9 +3672,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   onChange={(e) => setFlowCategory(e.target.value)}
                   className="w-full text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
                 >
-                  <option value="PRD">{t("shapes.docPrd")}</option>
-                  <option value="Panduan">{t("shapes.docGuide")}</option>
-                  <option value="Laporan">{t("shapes.docReport")}</option>
+                  {opsiKategoriDokumen.map((k) => (
+                    <option key={k} value={k}>
+                      {k}
+                    </option>
+                  ))}
                 </select>
               </div>
 
