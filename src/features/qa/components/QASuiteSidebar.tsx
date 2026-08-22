@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import {
   Plus,
@@ -51,6 +52,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
   canUpdate,
   canDelete,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="lg:col-span-3 space-y-3 lg:max-h-[calc(100vh-140px)] lg:sticky lg:top-4 pr-1 custom-scrollbar">
       {/* Velzon Ultra-Compact Card Box */}
@@ -63,10 +65,10 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
             </div>
             <div>
               <h3 className="text-xs sm:text-[11px] font-medium text-content-strong uppercase tracking-wider">
-                Daftar Modul Testing
+                {t("qaSuite.moduleList")}
               </h3>
               <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
-                Dokumen & Skenario Pengujian
+                {t("qaSuite.docScenario")}
               </p>
             </div>
           </div>
@@ -102,10 +104,10 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
             <button
               onClick={() => setIsAddSuiteOpen(true)}
               className="px-2.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md shadow-2xs transition-all flex items-center gap-1 text-xs font-medium cursor-pointer shrink-0"
-              title="Tambah Modul Testing Baru"
+              title={t("qaSuite.addModule")}
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Tambah</span>
+              <span>{t("qaSuite.add")}</span>
             </button>
           )}
         </div>
@@ -114,7 +116,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
         <div className="space-y-2.5 max-h-[480px] overflow-y-auto pr-1 custom-scrollbar pb-10">
           {suitesForFilter.length === 0 ? (
             <div className="text-center py-10 text-content-subtle text-xs font-medium">
-              Tidak ada dokumen pengujian untuk filter ini.
+              {t("qaSuite.emptyFilter")}
             </div>
           ) : (
             suitesForFilter.map((suite, sIdx) => {
@@ -156,7 +158,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                             setSuiteEditAssignedTo(suite.assignedTo || "");
                           }}
                           className="text-content-subtle hover:text-primary transition-all p-1 bg-surface-sunken hover:bg-indigo-500/10 rounded-md border border-border-faint"
-                          title="Ubah Dokumen"
+                          title={t("qaSuite.editDoc")}
                         >
                           <Edit3 className="w-3 h-3" />
                         </button>
@@ -168,7 +170,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                             handleDeleteSuite(suite);
                           }}
                           className="text-content-subtle hover:text-rose-500 transition-all p-1 bg-surface-sunken hover:bg-rose-500/10 rounded-md border border-border-faint"
-                          title="Hapus Dokumen"
+                          title={t("qaSuite.deleteDoc")}
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -241,7 +243,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                           <div className="flex items-center gap-1 text-primary">
                             <User className="w-2.5 h-2.5" />
                             <span className="text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase">
-                              All PIC
+                              {t("qaSuite.allPic")}
                             </span>
                           </div>
                         )}

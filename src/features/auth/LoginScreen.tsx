@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,6 +17,7 @@ export const LoginScreen = ({
   loading,
   loadingText = "Mengautentikasi...",
 }: LoginScreenProps) => {
+  const { t } = useTranslation();
   const [username, setUsername] = useState(() => {
     try {
       return safeLocalStorage.getItem("savedUsername") || "";
@@ -126,10 +128,10 @@ export const LoginScreen = ({
           >
             {/* Velzon Card Header */}
             <div className="text-center space-y-1.5 mb-6">
-              <h2 className="text-2xl font-bold text-content-strong tracking-tight">Masuk</h2>
-              <p className="text-xs font-medium text-content-muted">
-                Masuk untuk melanjutkan ke LanPro Workspace
-              </p>
+              <h2 className="text-2xl font-bold text-content-strong tracking-tight">
+                {t("login.signIn")}
+              </h2>
+              <p className="text-xs font-medium text-content-muted">{t("login.subtitle")}</p>
             </div>
 
             <form className="space-y-4" onSubmit={handleLoginSubmit}>
@@ -140,7 +142,7 @@ export const LoginScreen = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="Masukkan username Anda"
+                  placeholder={t("login.usernamePlaceholder")}
                   value={username}
                   onChange={(e) => handleUsernameChange(e.target.value)}
                   className={cn(
@@ -166,7 +168,7 @@ export const LoginScreen = ({
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
-                    placeholder="Masukkan kata sandi"
+                    placeholder={t("login.passwordPlaceholder")}
                     value={password}
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     className={cn(
@@ -202,14 +204,16 @@ export const LoginScreen = ({
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="w-4 h-4 rounded border-border-subtle text-primary focus:ring-primary cursor-pointer"
                   />
-                  <span className="text-xs font-medium text-content-secondary">Ingat Saya</span>
+                  <span className="text-xs font-medium text-content-secondary">
+                    {t("login.rememberMe")}
+                  </span>
                 </label>
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
                   className="text-xs font-medium text-primary hover:text-primary-hover hover:underline cursor-pointer transition-colors py-2.5 -my-2.5"
                 >
-                  Lupa Kata Sandi?
+                  {t("login.forgotPassword")}
                 </button>
               </div>
 
@@ -219,7 +223,7 @@ export const LoginScreen = ({
                 disabled={loading || !username.trim() || !password.trim()}
                 className="w-full bg-primary-surface text-content-inverse py-3 rounded-lg font-semibold uppercase tracking-wider text-xs hover:bg-primary-surface-hover transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2.5 group cursor-pointer disabled:bg-primary-surface/60 disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <span>Masuk</span>
+                <span>{t("login.signIn")}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
@@ -234,7 +238,7 @@ export const LoginScreen = ({
                 onClick={onRegisterClick}
                 className="text-primary font-semibold hover:text-primary-hover transition-colors ml-1 cursor-pointer hover:underline inline-block py-2.5 -my-2.5"
               >
-                Daftar
+                {t("login.signUp")}
               </button>
             </p>
           </motion.div>

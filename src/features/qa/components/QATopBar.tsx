@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Lock, Unlock, ShieldAlert, FileSpreadsheet } from "lucide-react";
 
@@ -22,6 +23,7 @@ export const QATopBar: React.FC<QATopBarProps> = ({
   handleForceUnlock,
   releaseLockManually,
 }) => {
+  const { t } = useTranslation();
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60)
       .toString()
@@ -41,11 +43,9 @@ export const QATopBar: React.FC<QATopBarProps> = ({
         </div>
         <div>
           <h1 className="text-base font-bold text-content-strong tracking-tight">
-            Kasus Uji QA & Matriks Eksekusi
+            {t("qaTop.title")}
           </h1>
-          <p className="text-xs text-content-muted font-medium mt-0.5">
-            Manajemen kasus pengujian dan matriks eksekusi QA
-          </p>
+          <p className="text-xs text-content-muted font-medium mt-0.5">{t("qaTop.subtitle")}</p>
         </div>
       </div>
 
@@ -60,7 +60,7 @@ export const QATopBar: React.FC<QATopBarProps> = ({
                 </div>
                 <div>
                   <span className="text-xs sm:text-[10px] text-danger-text font-bold uppercase tracking-wider block">
-                    DILOCK OLEH LAIN
+                    {t("qaTop.lockedByOther")}
                   </span>
                   <span className="text-xs font-semibold text-content-body block mt-0.5">
                     {lockState.userName}
@@ -74,7 +74,7 @@ export const QATopBar: React.FC<QATopBarProps> = ({
                     className="ml-auto md:ml-2 px-2.5 py-1.5 bg-danger-surface hover:bg-danger-hover text-content-inverse text-xs sm:text-[10px] font-semibold uppercase tracking-wider rounded-md transition-all shadow-xs flex items-center gap-1 cursor-pointer"
                   >
                     <ShieldAlert className="w-3.5 h-3.5" />
-                    Force Unlock
+                    {t("qaTop.forceUnlock")}
                   </button>
                 )}
               </div>
@@ -86,21 +86,21 @@ export const QATopBar: React.FC<QATopBarProps> = ({
                 <div>
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs sm:text-[10px] text-success-text font-bold uppercase tracking-wider">
-                      Anda Memegang Lock
+                      {t("qaTop.youHoldLock")}
                     </span>
                     <span className="px-2 py-[3px] bg-primary-surface/10 text-primary text-[10px] leading-none font-bold rounded-md">
                       {formatTime(remainingTime)}
                     </span>
                   </div>
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle block mt-0.5">
-                    Auto-Unlock dalam 15 mnt inaktivitas
+                    {t("qaTop.autoUnlock")}
                   </span>
                 </div>
                 <button
                   onClick={releaseLockManually}
                   className="ml-auto md:ml-2 px-2.5 py-1.5 bg-surface-muted hover:bg-surface-sunken text-content-body text-xs sm:text-[10px] font-semibold uppercase tracking-wider rounded-md transition-all cursor-pointer"
                 >
-                  Unlock Now
+                  {t("qaTop.unlockNow")}
                 </button>
               </div>
             )}
@@ -109,7 +109,7 @@ export const QATopBar: React.FC<QATopBarProps> = ({
           <div className="flex items-center gap-2 px-1 py-0.5">
             <span className="w-2 h-2 rounded-full bg-content-subtle" />
             <span className="text-xs text-content-muted font-medium">
-              Tidak ada kunci aktif. Membuka test suite akan mengunci otomatis.
+              {t("qaTop.noActiveLock")}
             </span>
           </div>
         )}

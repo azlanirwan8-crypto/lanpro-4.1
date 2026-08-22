@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import {
   History,
@@ -27,6 +28,7 @@ export const ActivityLogPanel = ({
   projectMembers: UserProfile[];
   safeFormat: (date: any, formatStr: string) => string;
 }) => {
+  const { t } = useTranslation();
   const [auditLogSearch, setAuditLogSearch] = useState("");
   const activityLogs = Array.isArray(propLogs) ? propLogs : [];
   const projectMembers = Array.isArray(propMembers) ? propMembers : [];
@@ -77,10 +79,10 @@ export const ActivityLogPanel = ({
             </div>
             <div>
               <h1 className="text-3xl font-medium text-content-strong tracking-tight">
-                System Audit Log
+                {t("activityLog.title")}
               </h1>
               <p className="text-content-muted font-medium mt-1 text-sm tracking-wide">
-                Comprehensive tracking of all system events, data mutations, and access records.
+                {t("activityLog.subtitle")}
               </p>
             </div>
           </div>
@@ -90,7 +92,7 @@ export const ActivityLogPanel = ({
               <input
                 value={auditLogSearch}
                 onChange={(e) => setAuditLogSearch(e.target.value)}
-                placeholder="Search audit logs..."
+                placeholder={t("activityLog.searchLogs")}
                 className="bg-transparent border-none outline-none text-xs w-48 placeholder:text-content-subtle text-content-body"
               />
             </div>
@@ -152,7 +154,7 @@ export const ActivityLogPanel = ({
             <div className="relative flex-1 custom-search-bar w-full">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle" />
               <input
-                placeholder="Search event logs, user ID, or actions by keyword..."
+                placeholder={t("activityLog.searchEvents")}
                 value={auditLogSearch}
                 onChange={(e) => setAuditLogSearch(e.target.value)}
                 className="w-full pl-14 pr-6 py-4 bg-surface border border-border-subtle rounded-xl text-[13px] font-medium text-content-body tracking-wide focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:font-medium placeholder:text-content-subtle"
@@ -161,7 +163,7 @@ export const ActivityLogPanel = ({
           </div>
           {activityLogs.length === 0 ? (
             <div className="p-20 text-center text-content-subtle font-medium">
-              No system events tracked yet. All events will appear here.
+              {t("activityLog.empty")}
             </div>
           ) : (
             <div className="overflow-x-auto min-h-[500px]">
@@ -169,16 +171,16 @@ export const ActivityLogPanel = ({
                 <thead className="bg-surface">
                   <tr>
                     <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle whitespace-nowrap">
-                      Timestamp
+                      {t("activityLog.timestamp")}
                     </th>
                     <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle">
-                      Event Signature
+                      {t("activityLog.eventSignature")}
                     </th>
                     <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle">
                       Subject (Actor)
                     </th>
                     <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle text-right">
-                      Audit Trail ID
+                      {t("activityLog.auditTrailId")}
                     </th>
                   </tr>
                 </thead>
@@ -255,7 +257,7 @@ export const ActivityLogPanel = ({
                                         {log.action?.replace(/_/g, " ") || "ACTION_EXECUTED"}
                                       </span>
                                       <span className="text-xs sm:text-[10px] font-medium text-content-subtle capitalize px-1 ring-1 ring-border-subtle rounded-sm bg-surface-sunken">
-                                        Source: UI
+                                        {t("activityLog.sourceUi")}
                                       </span>
                                     </div>
                                     <div className="font-mono text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle p-2.5 rounded-lg shadow-inner whitespace-pre-wrap word-break">

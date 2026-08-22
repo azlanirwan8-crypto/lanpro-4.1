@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Modal } from "../ui/Modal";
 import { Input, Textarea, Button } from "../ui/CoreUI";
@@ -31,37 +32,34 @@ export const NewSprintModal: React.FC<NewSprintModalProps> = ({
   onSubmit,
   isSubmitting,
 }) => {
+  const { t } = useTranslation();
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Buat Fase Baru"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title={t("newSprint.title")}>
       <div className="space-y-4 max-h-[80vh] overflow-y-auto pr-2">
         <div>
           <label className="block text-sm font-medium text-content-body mb-1">
-            Nama Fase
+            {t("newSprint.name")}
           </label>
           <Input
             value={newSprintName}
             onChange={(e: any) => setNewSprintName(e.target.value)}
-            placeholder="contoh: Fase 1 - Fondasi"
+            placeholder={t("newSprint.namePlaceholder")}
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-content-body mb-1">
-            Tujuan Fase
+            {t("newSprint.goal")}
           </label>
           <Textarea
             value={newSprintGoal}
             onChange={(e: any) => setNewSprintGoal(e.target.value)}
-            placeholder="Apa yang ingin dicapai dalam sprint ini?"
+            placeholder={t("newSprint.goalPlaceholder")}
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium text-content-body mb-1">
-              Start Date
+              {t("newSprint.startDate")}
             </label>
             <input
               type="date"
@@ -72,7 +70,7 @@ export const NewSprintModal: React.FC<NewSprintModalProps> = ({
           </div>
           <div>
             <label className="block text-xs font-medium text-content-body mb-1">
-              End Date
+              {t("newSprint.endDate")}
             </label>
             <input
               type="date"
@@ -88,7 +86,7 @@ export const NewSprintModal: React.FC<NewSprintModalProps> = ({
           disabled={isSubmitting}
           className="w-full justify-center bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse shadow-xs py-2.5 rounded-md font-medium text-xs cursor-pointer"
         >
-          Create Phase & Assign Tasks
+          {t("newSprint.createAssign")}
         </Button>
       </div>
     </Modal>
