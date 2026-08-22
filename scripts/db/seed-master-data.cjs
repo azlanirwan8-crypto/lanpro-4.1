@@ -34,6 +34,8 @@
  * Jalankan: npm run db:seed-master
  */
 
+const { kodeDariLabel } = require("../../server/lib/kode-master.cjs");
+
 const warna = {
   hijau: (t) => `\x1b[32m${t}\x1b[0m`,
   kuning: (t) => `\x1b[33m${t}\x1b[0m`,
@@ -600,16 +602,9 @@ const KODE_SAJA = {
       `SELECT id, type, label FROM "MasterData" WHERE code IS NULL OR code = ''`
     );
 
-    const jadikanKode = (label) =>
-      String(label)
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .replace(/^_+|_+$/g, "");
-
     let kodeSusulan = 0;
     for (const baris of tanpaKode) {
-      const kode = jadikanKode(baris.label);
+      const kode = kodeDariLabel(baris.label);
       if (!kode) {
         console.log(warna.kuning(`    LEWAT   ${baris.type}: label "${baris.label}" tidak menghasilkan kode`));
         continue;

@@ -8,6 +8,10 @@ import { Router } from "express";
 import { verifyGlobalAdmin } from "../middleware/auth";
 import crypto from "crypto";
 import { masterDataRepository } from "../repositories/master-data.repository";
+// Aturan penurunan kode dipakai bersama dengan penyemai (item #143).
+// Impor statis, BUKAN require: proyek ini ESM, jadi `require` di berkas TS
+// akan melempar "require is not defined" begitu server dijalankan.
+import { kodeUnik } from "../lib/kode-master.cjs";
 
 const router = Router();
 
@@ -32,7 +36,20 @@ router.get("/api/master-data", async (req, res) => {
  */
 router.post("/api/master-data", verifyGlobalAdmin, async (req, res) => {
   try {
-    const { id, type, label, color, icon, order, description, fieldType, dropdownOptions, role_type, roleType } = req.body;
+    const {
+      id,
+      type,
+      label,
+      code,
+      color,
+      icon,
+      order,
+      description,
+      fieldType,
+      dropdownOptions,
+      role_type,
+      roleType,
+    } = req.body;
     const rType = role_type || roleType || null;
 
     const newId = id || crypto.randomUUID();
@@ -42,21 +59,51 @@ router.post("/api/master-data", verifyGlobalAdmin, async (req, res) => {
     if (type === "project_role") {
       const trimmedLabel = itemLabel.trim();
       if (trimmedLabel.length < 3) {
-        return res.status(400).json({ status: "error", message: "Nama Role minimal harus 3 karakter." });
+        return res
+          .status(400)
+          .json({ status: "error", message: "Nama Role minimal harus 3 karakter." });
       }
       if (/^(.)\1+$/i.test(trimmedLabel)) {
-        return res.status(400).json({ status: "error", message: "Nama Role tidak boleh berisi karakter sampah atau berulang." });
+        return res
+          .status(400)
+          .json({
+            status: "error",
+            message: "Nama Role tidak boleh berisi karakter sampah atau berulang.",
+          });
       }
       const lowerLabel = trimmedLabel.toLowerCase();
-      if (lowerLabel === "asdf" || lowerLabel === "qwer" || lowerLabel === "zxcv" || lowerLabel === "junk" || lowerLabel === "test" || lowerLabel === "testing" || lowerLabel === "dd") {
-        return res.status(400).json({ status: "error", message: "Nama Role tidak boleh berupa karakter sampah atau acak." });
+      if (
+        lowerLabel === "asdf" ||
+        lowerLabel === "qwer" ||
+        lowerLabel === "zxcv" ||
+        lowerLabel === "junk" ||
+        lowerLabel === "test" ||
+        lowerLabel === "testing" ||
+        lowerLabel === "dd"
+      ) {
+        return res
+          .status(400)
+          .json({
+            status: "error",
+            message: "Nama Role tidak boleh berupa karakter sampah atau acak.",
+          });
       }
     }
 
+    // Item #143 — INSERT dulu tidak pernah menyertakan `code`, jadi setiap
+    // baris yang ditambahkan lewat panel lahir tanpa kode dan baru tertambal
+    // kalau seseorang menjalankan `npm run db:seed-master`.
+    const tipeFinal = type || "general";
+    const kodeFinal =
+      (typeof code === "string" && code.trim()) ||
+      kodeUnik(itemLabel, await masterDataRepository.findCodesByType(tipeFinal)) ||
+      null;
+
     const created = await masterDataRepository.create({
       id: newId,
-      type: type || "general",
+      type: tipeFinal,
       label: itemLabel,
+      code: kodeFinal,
       color: color || null,
       icon: icon || null,
       order: order || 0,
@@ -81,7 +128,18 @@ router.post("/api/master-data", verifyGlobalAdmin, async (req, res) => {
 router.put("/api/master-data/:id", verifyGlobalAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { label, color, icon, order, description, fieldType, dropdownOptions, role_type, roleType, type } = req.body;
+    const {
+      label,
+      color,
+      icon,
+      order,
+      description,
+      fieldType,
+      dropdownOptions,
+      role_type,
+      roleType,
+      type,
+    } = req.body;
     const rType = role_type || roleType || null;
 
     const itemLabel = label !== undefined && label !== null ? label : "Item";
@@ -98,14 +156,34 @@ router.put("/api/master-data/:id", verifyGlobalAdmin, async (req, res) => {
     if (itemType === "project_role") {
       const trimmedLabel = itemLabel.trim();
       if (trimmedLabel.length < 3) {
-        return res.status(400).json({ status: "error", message: "Nama Role minimal harus 3 karakter." });
+        return res
+          .status(400)
+          .json({ status: "error", message: "Nama Role minimal harus 3 karakter." });
       }
       if (/^(.)\1+$/i.test(trimmedLabel)) {
-        return res.status(400).json({ status: "error", message: "Nama Role tidak boleh berisi karakter sampah atau berulang." });
+        return res
+          .status(400)
+          .json({
+            status: "error",
+            message: "Nama Role tidak boleh berisi karakter sampah atau berulang.",
+          });
       }
       const lowerLabel = trimmedLabel.toLowerCase();
-      if (lowerLabel === "asdf" || lowerLabel === "qwer" || lowerLabel === "zxcv" || lowerLabel === "junk" || lowerLabel === "test" || lowerLabel === "testing" || lowerLabel === "dd") {
-        return res.status(400).json({ status: "error", message: "Nama Role tidak boleh berupa karakter sampah atau acak." });
+      if (
+        lowerLabel === "asdf" ||
+        lowerLabel === "qwer" ||
+        lowerLabel === "zxcv" ||
+        lowerLabel === "junk" ||
+        lowerLabel === "test" ||
+        lowerLabel === "testing" ||
+        lowerLabel === "dd"
+      ) {
+        return res
+          .status(400)
+          .json({
+            status: "error",
+            message: "Nama Role tidak boleh berupa karakter sampah atau acak.",
+          });
       }
     }
 
@@ -141,12 +219,22 @@ router.delete("/api/master-data/:id", verifyGlobalAdmin, async (req, res) => {
     }
 
     if (item.is_system_default === 1 || item.is_system_default === true) {
-      return res.status(400).json({ status: "error", message: "Data master bawaan sistem terkunci dan tidak dapat dihapus." });
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          message: "Data master bawaan sistem terkunci dan tidak dapat dihapus.",
+        });
     }
 
     const usageCount = await masterDataRepository.countTaskUsage(item.label);
     if (usageCount > 0) {
-      return res.status(400).json({ status: "error", message: `Data master ini sedang digunakan oleh ${usageCount} Task aktif dan tidak dapat dihapus.` });
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          message: `Data master ini sedang digunakan oleh ${usageCount} Task aktif dan tidak dapat dihapus.`,
+        });
     }
 
     await masterDataRepository.delete(id);
