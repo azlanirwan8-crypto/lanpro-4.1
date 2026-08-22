@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Trash2 } from "lucide-react";
 import { Modal } from "../ui/Modal";
@@ -33,18 +34,14 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
   hasPermission,
   deleteProject,
 }) => {
+  const { t } = useTranslation();
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Edit Project"
-      maxWidth="max-w-2xl"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title={t("editProject.title")} maxWidth="max-w-2xl">
       {editingProject && (
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-content-body mb-1">
-              Project Name
+              {t("editProject.projectName")}
             </label>
             <Input
               value={editingProject.name ?? ""}
@@ -58,7 +55,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
           </div>
           <div>
             <label className="block text-sm font-medium text-content-body mb-1">
-              Project Key
+              {t("editProject.projectKey")}
             </label>
             <Input
               value={editingProject.key ?? ""}
@@ -72,7 +69,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
           </div>
           <div>
             <label className="block text-sm font-medium text-content-body mb-1">
-              Description
+              {t("editProject.description")}
             </label>
             <textarea
               value={editingProject.description || ""}
@@ -83,14 +80,14 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 })
               }
               className="w-full border border-border-subtle rounded-lg p-2 text-sm"
-              placeholder="Describe project..."
+              placeholder={t("editProject.descriptionPlaceholder")}
               rows={3}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-content-body mb-1">
-                Status
+                {t("editProject.status")}
               </label>
               <select
                 value={editingProject.status || "Active"}
@@ -102,28 +99,22 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 }
                 className="w-full border border-border-subtle rounded-lg p-2 text-sm"
               >
-                <option value="Active">Active</option>
+                <option value="Active">{t("editProject.active")}</option>
                 <option value="On Hold">On Hold</option>
                 <option value="Completed">Completed</option>
                 <option value="Archived">Archived</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-body mb-1">
-                ID (Ref)
-              </label>
+              <label className="block text-sm font-medium text-content-body mb-1">ID (Ref)</label>
               <div className="px-3 py-2 bg-surface-sunken rounded-lg text-sm text-content-muted font-mono border border-border-faint italic">
                 #{editingProject.id.slice(-6).toUpperCase()}
               </div>
             </div>
           </div>
           <div className="pt-2">
-            <Button
-              onClick={onSubmit}
-              disabled={isSubmitting}
-              className="w-full justify-center"
-            >
-              Save Changes
+            <Button onClick={onSubmit} disabled={isSubmitting} className="w-full justify-center">
+              {t("editProject.saveChanges")}
             </Button>
           </div>
 
@@ -144,7 +135,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 className="w-full justify-center"
               >
                 <Trash2 className="w-4 h-4" />
-                Terminate Project (Permanent Delete)
+                {t("editProject.terminate")}
               </Button>
             </div>
           )}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { format } from "date-fns";
 import { ensureDate } from "../../lib/utils";
@@ -22,24 +23,18 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
   onSubmit,
   isSubmitting,
 }) => {
+  const { t } = useTranslation();
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Edit Phase"
-      maxWidth="max-w-xl"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title={t("editSprint.title")} maxWidth="max-w-xl">
       {editingSprint && (
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-              Name
+              {t("editSprint.name")}
             </label>
             <Input
               value={editingSprint.name}
-              onChange={(e: any) =>
-                setEditingSprint({ ...editingSprint, name: e.target.value })
-              }
+              onChange={(e: any) => setEditingSprint({ ...editingSprint, name: e.target.value })}
             />
           </div>
           <div>
@@ -48,14 +43,12 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
             </label>
             <Textarea
               value={editingSprint.goal}
-              onChange={(e: any) =>
-                setEditingSprint({ ...editingSprint, goal: e.target.value })
-              }
+              onChange={(e: any) => setEditingSprint({ ...editingSprint, goal: e.target.value })}
             />
           </div>
           <div>
             <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-              Status
+              {t("editSprint.status")}
             </label>
             <select
               value={editingSprint.status}
@@ -68,14 +61,14 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
               className="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface"
             >
               <option value="planned">Planned</option>
-              <option value="active">Active</option>
+              <option value="active">{t("editSprint.active")}</option>
               <option value="completed">Completed</option>
             </select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Start Date
+                {t("editSprint.startDate")}
               </label>
               <input
                 type="date"
@@ -97,7 +90,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
             </div>
             <div>
               <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                End Date
+                {t("editSprint.endDate")}
               </label>
               <input
                 type="date"
@@ -120,7 +113,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
           </div>
           <div>
             <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-              Status
+              {t("editSprint.status")}
             </label>
             <select
               value={editingSprint.status}
@@ -133,25 +126,21 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
               className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium outline-none"
             >
               <option value="planned">Planned</option>
-              <option value="active">Active</option>
+              <option value="active">{t("editSprint.active")}</option>
               <option value="completed">Completed</option>
             </select>
           </div>
 
           <div className="flex gap-3 pt-4 border-t border-border-subtle">
-            <Button
-              variant="secondary"
-              onClick={onClose}
-              className="flex-1 justify-center"
-            >
-              Cancel
+            <Button variant="secondary" onClick={onClose} className="flex-1 justify-center">
+              {t("editSprint.cancel")}
             </Button>
             <Button
               onClick={onSubmit}
               disabled={isSubmitting}
               className="flex-1 justify-center bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse shadow-xs rounded-md text-xs font-medium py-2 cursor-pointer"
             >
-              Save Changes
+              {t("editSprint.saveChanges")}
             </Button>
           </div>
         </div>
