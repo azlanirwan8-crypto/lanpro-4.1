@@ -69,7 +69,7 @@ function hapusCookie(res: any, nama: string) {
  * pengguna dilempar ke alamat yang tidak ada. Menurunkannya dari request
  * membuat alur tetap benar walau konfigurasinya belum diisi.
  */
-function urlFrontend(req: any): string {
+export function urlFrontend(req: any): string {
   const dariEnv = process.env.APP_URL || "";
   if (/^https?:\/\//i.test(dariEnv)) return dariEnv.replace(/\/$/, "");
 

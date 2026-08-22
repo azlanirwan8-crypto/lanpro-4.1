@@ -17,6 +17,7 @@ import crypto from "crypto";
 import { validasiBody } from "../middleware/validate";
 import { loginSchema, forceLogoutSchema } from "../schemas/auth.schema";
 import { authRepository } from "../repositories/auth.repository";
+import { urlFrontend } from "./auth-oidc.routes";
 
 export function generateRandomPassword(length = 10): string {
   const uppers = "ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -428,39 +429,62 @@ router.post("/api/auth/forgot-password", async (req, res) => {
       });
     }
 
-    const user = await authRepository.findUserByEmail(email);
+    /**
+     * #121 — Balasan ini SENGAJA sama persis untuk alamat yang terdaftar
+     * maupun yang tidak. Versi lama menjawab 404 "Alamat email tidak terdaftar
+     * dalam sistem", yang berarti siapa pun bisa memakai formulir ini untuk
+     * menguji satu per satu apakah sebuah email punya akun di sini.
+     */
+    const balasanNetral = {
+      status: "success",
+      message:
+        "Bila alamat email itu terdaftar, tautan pengaturan ulang kata sandi sudah dikirim ke sana. Tautannya berlaku 15 menit.",
+    };
 
+    const user = await authRepository.findUserByEmail(email);
     if (!user) {
-      return res.status(404).json({
-        status: "error",
-        message: "Alamat email tidak terdaftar dalam sistem.",
-      });
+      return res.json(balasanNetral);
     }
 
-    // Buat kata sandi acak baru dan hash ke database
-    const temporaryPassword = generateRandomPassword(10);
-    const hashedPassword = hashPassword(temporaryPassword);
-
+    /**
+     * #121 — Kata sandi TIDAK lagi diganti di sini. Versi lama langsung menimpa
+     * kata sandi pengguna atas permintaan yang tidak terautentikasi, sehingga
+     * siapa pun yang tahu sebuah alamat email bisa mengunci pemiliknya keluar
+     * dari akunnya sendiri kapan saja.
+     *
+     * Yang dikirim sekarang adalah TAUTAN bertoken. Kata sandi baru hanya
+     * berlaku setelah pemilik email membukanya dan mengetiknya sendiri lewat
+     * `/api/auth/reset-password`, yang sudah memverifikasi token bertipe
+     * `password_reset` dan menegakkan syarat kekuatan kata sandi.
+     */
     const userId = user.id || user.uid;
-    await authRepository.updateUserPassword(userId, hashedPassword);
+    const token = jwt.sign(
+      { id: userId, email: user.email, type: "password_reset" },
+      getJwtSecret(),
+      { expiresIn: "15m" }
+    );
+    const resetUrl = `${urlFrontend(req)}/#reset-password?token=${encodeURIComponent(token)}`;
 
-    kirimEmailPasswordBaru({
+    kirimEmailResetPassword({
       email: user.email,
       nama: user.displayName || user.nama_lengkap || user.username,
       username: user.username || user.email,
-      temporaryPassword,
+      resetUrl,
+      expiresInMinutes: 15,
     }).catch((emailErr) => {
-      console.error("[EMAIL] Gagal mengirim email kata sandi baru:", emailErr?.message || emailErr);
+      console.error(
+        "[EMAIL] Gagal mengirim tautan pengaturan ulang:",
+        emailErr?.message || emailErr
+      );
     });
 
-    return res.json({
-      status: "success",
-      message:
-        "Kata sandi baru telah berhasil dibuat dan dikirimkan ke alamat email Anda. Silakan periksa kotak masuk dan masuk menggunakan kata sandi tersebut.",
-    });
+    return res.json(balasanNetral);
   } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: Forgot password error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    console.error("LOG ANOMALI: forgot-password error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Terjadi kesalahan internal server.",
+    });
   }
 });
 

@@ -69,8 +69,8 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
           </div>
           <h3 className="text-lg font-bold text-content-strong">Lupa Kata Sandi?</h3>
           <p className="text-xs text-content-muted mt-1 max-w-xs mx-auto">
-            Masukkan alamat email akun Anda. Sistem akan membuat kata sandi baru dan mengirimkannya
-            ke email Anda.
+            Masukkan alamat email akun Anda. Kami akan mengirim tautan untuk mengatur ulang kata
+            sandi. Tautannya berlaku 15 menit.
           </p>
         </div>
 
@@ -79,10 +79,13 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
             <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-start gap-3">
               <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
               <div className="text-xs leading-relaxed">
-                <p className="font-semibold mb-0.5">Kata Sandi Baru Dikirim!</p>
+                <p className="font-semibold mb-0.5">Periksa Kotak Masuk Anda</p>
+                {/* #121 — Pesan ini SENGAJA netral. Menyebut "berhasil dikirim ke
+                    alamat ini" akan mengonfirmasi bahwa alamat itu punya akun,
+                    dan membocorkan lagi hal yang baru saja ditutup di backend. */}
                 <p className="text-content-muted">
-                  Kata sandi baru telah berhasil dibuat dan dikirimkan ke <strong>{email}</strong>.
-                  Silakan periksa kotak masuk Anda dan gunakan kata sandi tersebut untuk masuk.
+                  Bila <strong>{email}</strong> terdaftar, tautan untuk mengatur ulang kata sandi
+                  sudah dikirim ke sana. Tautannya berlaku 15 menit.
                 </p>
               </div>
             </div>
@@ -139,7 +142,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
                 disabled={loading || !email.trim()}
                 className="flex-1 py-2.5 px-4 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover font-semibold rounded-lg text-xs transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <span>{loading ? "Mengirim..." : "Kirim Kata Sandi Baru"}</span>
+                <span>{loading ? "Mengirim..." : "Kirim Tautan"}</span>
                 {!loading && <ArrowRight className="w-3.5 h-3.5" />}
               </button>
             </div>
