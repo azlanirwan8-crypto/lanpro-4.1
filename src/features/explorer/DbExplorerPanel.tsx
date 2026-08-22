@@ -109,7 +109,7 @@ export const DbExplorerPanel: React.FC<any> = ({
             Perkakas Basis Data
           </h1>
           <p className="text-xs text-content-muted font-medium mt-0.5">
-            Kelola Penjelajah Basis Data, Koneksi, dan Cadangan.
+            {t("dbExplorer.toolsSubtitle")}
           </p>
         </div>
 

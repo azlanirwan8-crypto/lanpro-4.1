@@ -84,15 +84,15 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
               value={phaseFilter}
               onChange={(val) => setPhaseFilter(val as any)}
               options={[
-                { id: "ALL", label: "Semua Fase (ALL)", icon: "Layers", color: "#6366F1" },
-                { id: "SIT", label: "Fase SIT (Integration)", icon: "Cpu", color: "#3B82F6" },
+                { id: "ALL", label: t("qaSuite.allPhases"), icon: "Layers", color: "#6366F1" },
+                { id: "SIT", label: t("qaSuite.phaseSit"), icon: "Cpu", color: "#3B82F6" },
                 {
                   id: "UAT",
-                  label: "Fase UAT (Acceptance)",
+                  label: t("qaSuite.phaseUat"),
                   icon: "CheckCircle2",
                   color: "#10B981",
                 },
-                { id: "PTR", label: "Fase PTR (Readiness)", icon: "ShieldCheck", color: "#F59E0B" },
+                { id: "PTR", label: t("qaSuite.phasePtr"), icon: "ShieldCheck", color: "#F59E0B" },
               ]}
               masterData={[]}
               className="w-full"

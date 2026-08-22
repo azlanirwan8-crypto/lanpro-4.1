@@ -75,7 +75,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 value={priorityFilter}
                 onChange={(val) => setPriorityFilter(val)}
                 options={[
-                  { id: "All Priorities", label: "All Priorities" },
+                  { id: "All Priorities", label: t("planning.allPriorities") },
                   ...masterData
                     .filter((m) => m.type === "priority")
                     .map((p) => ({ id: p.label, label: p.label, icon: p.icon, color: p.color })),

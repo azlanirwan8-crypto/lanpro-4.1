@@ -92,7 +92,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                   />
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
                     <h3 className="font-bold text-content-strong text-sm truncate min-w-0 flex-1">
-                      {sprint.name?.trim() || "Fase Tanpa Judul"}
+                      {sprint.name?.trim() || t("planning.untitledSprint")}
                     </h3>
                     <span
                       className={cn(
@@ -278,8 +278,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                               {sprintTasks.length === 0 && !snapshot.isDraggingOver ? (
                                 <div className="flex items-center justify-center p-6 text-center">
                                   <p className="text-xs font-medium text-content-subtle">
-                                    Belum ada task di sprint ini. Tarik task dari Backlog di sebelah
-                                    kiri ke sini.
+                                    {t("planning.sprintEmptyDrag")}
                                   </p>
                                 </div>
                               ) : (

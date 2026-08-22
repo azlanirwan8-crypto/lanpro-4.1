@@ -285,7 +285,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 onClick={() => setEntityFilter(ent)}
                 className={`px-3 py-1 text-xs font-medium rounded transition-all ${entityFilter === ent ? "bg-surface text-indigo-700 shadow-2xs font-medium" : "text-content-muted hover:text-content-strong"}`}
               >
-                {ent === "All" ? "Semua Entitas" : ent}
+                {ent === "All" ? t("audit.allEntities") : ent}
               </button>
             ))}
           </div>
@@ -297,7 +297,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 onClick={() => setActionFilter(act)}
                 className={`px-3 py-1 text-xs font-medium rounded transition-all ${actionFilter === act ? "bg-surface text-indigo-700 shadow-2xs font-medium" : "text-content-muted hover:text-content-strong"}`}
               >
-                {act === "All" ? "Semua Akses" : act}
+                {act === "All" ? t("audit.allAccess") : act}
               </button>
             ))}
           </div>

@@ -300,6 +300,7 @@ export const en = {
     selectProject: "-- Select Project --",
   },
   filters: {
+    searchIssues: "Search issues...",
     advancedFilters: "Advanced Filters",
     allCategories: "All Categories",
     allEnvironments: "All Environments",
@@ -818,6 +819,10 @@ export const en = {
     deleteIssue: "Delete Issue",
   },
   planning: {
+    allPriorities: "All Priorities",
+    untitledSprint: "Untitled Phase",
+    sprintEmptyDrag:
+      "No tasks in this sprint yet. Drag tasks from the Backlog on the left to here.",
     issues: "Issues",
     start: "START",
     complete: "COMPLETE",
@@ -974,6 +979,8 @@ export const en = {
     pickAbove: "Please drag or choose a diagram above",
   },
   audit: {
+    allEntities: "All Entities",
+    allAccess: "All Access",
     systemAudit: "System Audit",
     title: "Enterprise Audit Dashboard",
     totalLog: "Total Logs:",
@@ -992,6 +999,7 @@ export const en = {
     doneReviewing: "DONE REVIEWING",
   },
   dbExplorer: {
+    toolsSubtitle: "Manage the Database Explorer, Connections, and Backups.",
     backupRestore: "Backup & Restore",
     connection: "Connection",
     explorer: "DB Explorer",
@@ -1055,6 +1063,7 @@ export const en = {
     toLoginPage: "Go to Sign In Page",
   },
   qaTable: {
+    allStatusFilter: "All Statuses",
     pickModule: "Please Select a Testing Module",
     generateAi: "Generate test cases with AI",
     passedRate: "Passed Rate",
@@ -1134,6 +1143,7 @@ export const en = {
     clearCanvas: "Clear Canvas",
   },
   teamPanel: {
+    allRoles: "All Roles",
     assigned: "Assigned",
     done: "Done",
     viewProfile: "View Profile",
@@ -1230,6 +1240,10 @@ export const en = {
     noActiveLock: "No active lock. Opening a test suite locks it automatically.",
   },
   qaSuite: {
+    allPhases: "All Phases (ALL)",
+    phaseSit: "SIT Phase (Integration)",
+    phaseUat: "UAT Phase (Acceptance)",
+    phasePtr: "PTR Phase (Readiness)",
     moduleList: "Testing Module List",
     docScenario: "Test Documents & Scenarios",
     addModule: "Add New Testing Module",
@@ -1362,6 +1376,7 @@ export const en = {
     saving: "Saving...",
   },
   subtasks: {
+    whatToDo: "What needs to be done?",
     list: "Subtask List",
     untitled: "Untitled Subtask",
     delete: "Delete Subtask",
@@ -1383,6 +1398,7 @@ export const en = {
     deleted: "Deleted",
   },
   broadcast: {
+    sentToday: "Sent Today: {{sukses}}/{{total}} Successful",
     previewTemplate: "Preview Template",
     retry: "Retry Broadcast",
     templatePreview: "Template Preview",
@@ -1442,6 +1458,7 @@ export const en = {
     completed: "Completed",
   },
   issueQuick: {
+    add: "Add",
     placeholder: "What needs to be done? Type and press Enter to save...",
   },
   ui: {

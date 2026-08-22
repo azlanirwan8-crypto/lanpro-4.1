@@ -268,7 +268,7 @@ export function DashboardView(props: DashboardViewProps) {
       color: s.status === "active" ? "#F97316" : s.status === "completed" ? "#10B981" : "#3B82F6",
     }));
     return [allOption, ...list];
-  }, [props.sprints, tasks.length]);
+  }, [props.sprints, tasks.length, t]);
 
   const [meetings, setMeetings] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);

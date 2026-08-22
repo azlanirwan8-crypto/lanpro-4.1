@@ -145,7 +145,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
           <div className="space-y-1">
             <div className="flex justify-between items-center text-xs">
               <span className="text-content-muted font-medium">
-                Kirim Hari Ini: {successCount}/{totalCount} Berhasil
+                {t("broadcast.sentToday", { sukses: successCount, total: totalCount })}
               </span>
               <span className="text-content-body font-medium">{progressPercent}%</span>
             </div>

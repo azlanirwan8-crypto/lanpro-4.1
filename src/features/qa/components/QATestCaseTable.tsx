@@ -303,7 +303,12 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 value={statusFilter}
                 onChange={(val) => setStatusFilter(val as any)}
                 options={[
-                  { id: "ALL", label: "Semua Status", icon: "Layers", color: "#6366F1" },
+                  {
+                    id: "ALL",
+                    label: t("qaTable.allStatusFilter"),
+                    icon: "Layers",
+                    color: "#6366F1",
+                  },
                   { id: "Passed", label: "Passed", icon: "CheckCircle2", color: "#10B981" },
                   { id: "Failed", label: "Failed", icon: "XCircle", color: "#EF4444" },
                   { id: "Blocked", label: "Blocked", icon: "AlertOctagon", color: "#F59E0B" },

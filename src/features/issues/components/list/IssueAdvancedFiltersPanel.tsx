@@ -115,7 +115,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             <input
               value={issueSearch}
               onChange={(e) => setIssueSearch(e.target.value)}
-              placeholder="Search issues..."
+              placeholder={t("filters.searchIssues")}
               className={styles.searchInput}
             />
           </div>

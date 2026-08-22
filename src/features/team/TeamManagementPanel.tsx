@@ -84,7 +84,7 @@ export const TeamManagementPanel = ({
   const peranProyek = React.useMemo(() => katalogPeranProyek(masterData), [masterData]);
 
   const roleFilterOptions = React.useMemo(() => {
-    const allOpt = { id: "all", label: "Semua Role", icon: "Users", color: "#6366F1" };
+    const allOpt = { id: "all", label: t("teamPanel.allRoles"), icon: "Users", color: "#6366F1" };
     const list = peranProyek.map((p) => ({
       id: p.code,
       label: p.label,
@@ -97,7 +97,7 @@ export const TeamManagementPanel = ({
       color: p.code === "pm" || p.code === "owner" ? "#F59E0B" : "#3B82F6",
     }));
     return [allOpt, ...list];
-  }, [peranProyek]);
+  }, [peranProyek, t]);
 
   const getUserTasks = (person: any) => {
     if (!person) return [];

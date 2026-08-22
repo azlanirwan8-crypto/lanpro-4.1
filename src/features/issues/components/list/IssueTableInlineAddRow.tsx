@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion } from "motion/react";
 import { ChevronDown, Zap, CheckCircle2, X } from "lucide-react";
@@ -52,6 +53,7 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
   masterData,
   projectMembers,
 }) => {
+  const { t } = useTranslation();
   const mArr = masterData || [];
 
   return (
@@ -142,7 +144,7 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                       const val = e.target.value;
                       setInlineTitleMap((prev) => ({ ...prev, [taskId]: val }));
                     }}
-                    placeholder="What needs to be done?"
+                    placeholder={t("subtasks.whatToDo")}
                     onKeyDown={(e) => e.key === "Enter" && createSubtask(taskId)}
                     className={styles.inlineAddInput}
                   />

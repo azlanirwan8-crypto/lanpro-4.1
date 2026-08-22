@@ -297,6 +297,7 @@ export const id = {
     selectProject: "-- Pilih Proyek --",
   },
   filters: {
+    searchIssues: "Cari isu...",
     advancedFilters: "Saringan Lanjutan",
     allCategories: "Semua Kategori",
     allEnvironments: "Semua Lingkungan",
@@ -821,6 +822,10 @@ export const id = {
     deleteIssue: "Hapus Isu",
   },
   planning: {
+    allPriorities: "Semua Prioritas",
+    untitledSprint: "Fase Tanpa Judul",
+    sprintEmptyDrag:
+      "Belum ada task di sprint ini. Tarik task dari Backlog di sebelah kiri ke sini.",
     issues: "Isu",
     start: "MULAI",
     complete: "SELESAIKAN",
@@ -977,6 +982,8 @@ export const id = {
     pickAbove: "Silakan tarik / pilih diagram di atas",
   },
   audit: {
+    allEntities: "Semua Entitas",
+    allAccess: "Semua Akses",
     systemAudit: "Audit Sistem",
     title: "Dashboard Audit Perusahaan",
     totalLog: "Total Log:",
@@ -995,6 +1002,7 @@ export const id = {
     doneReviewing: "SELESAI MENINJAU",
   },
   dbExplorer: {
+    toolsSubtitle: "Kelola Penjelajah Basis Data, Koneksi, dan Cadangan.",
     backupRestore: "Cadangan & Pemulihan",
     connection: "Koneksi",
     explorer: "Penjelajah Basis Data",
@@ -1058,6 +1066,7 @@ export const id = {
     toLoginPage: "Ke Halaman Masuk",
   },
   qaTable: {
+    allStatusFilter: "Semua Status",
     pickModule: "Silakan Pilih Modul Testing",
     generateAi: "Buat test case dengan AI",
     passedRate: "Rasio Lulus",
@@ -1137,6 +1146,7 @@ export const id = {
     clearCanvas: "Bersihkan Kanvas",
   },
   teamPanel: {
+    allRoles: "Semua Role",
     assigned: "Ditugaskan",
     done: "Selesai",
     viewProfile: "Lihat Profil",
@@ -1234,6 +1244,10 @@ export const id = {
     noActiveLock: "Tidak ada kunci aktif. Membuka test suite akan mengunci otomatis.",
   },
   qaSuite: {
+    allPhases: "Semua Fase (ALL)",
+    phaseSit: "Fase SIT (Integration)",
+    phaseUat: "Fase UAT (Acceptance)",
+    phasePtr: "Fase PTR (Readiness)",
     moduleList: "Daftar Modul Testing",
     docScenario: "Dokumen & Skenario Pengujian",
     addModule: "Tambah Modul Testing Baru",
@@ -1367,6 +1381,7 @@ export const id = {
     saving: "Menyimpan...",
   },
   subtasks: {
+    whatToDo: "Apa yang perlu dikerjakan?",
     list: "Daftar Subtugas",
     untitled: "Subtugas Tanpa Judul",
     delete: "Hapus Subtugas",
@@ -1388,6 +1403,7 @@ export const id = {
     deleted: "Dihapus",
   },
   broadcast: {
+    sentToday: "Kirim Hari Ini: {{sukses}}/{{total}} Berhasil",
     previewTemplate: "Pratinjau Template",
     retry: "Ulangi Siaran",
     templatePreview: "Pratinjau Template",
@@ -1447,6 +1463,7 @@ export const id = {
     completed: "Selesai",
   },
   issueQuick: {
+    add: "Tambah",
     placeholder: "Apa yang perlu dikerjakan? Ketik lalu tekan Enter untuk menyimpan...",
   },
   ui: {
