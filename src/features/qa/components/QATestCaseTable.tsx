@@ -119,7 +119,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="w-10 h-10 bg-primary-surface/10 text-primary rounded-md flex items-center justify-center mx-auto mb-2.5">
           <FileSpreadsheet className="w-5 h-5" />
         </div>
-        <h3 className="text-sm font-medium text-content-strong">Silakan Pilih Modul Testing</h3>
+        <h3 className="text-sm font-medium text-content-strong">{t("qaTable.pickModule")}</h3>
         <p className="text-xs text-content-subtle font-medium mt-1">
           Pilih dokumen pengujian di panel sebelah kiri untuk menampilkan matriks eksekusi test
           case.
@@ -194,7 +194,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 onClick={handleGenerateWithAi}
                 disabled={isGeneratingAi}
                 className="px-3 py-1.5 bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-700 hover:to-indigo-800 disabled:opacity-50 text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
-                title="Generate test cases dengan AI"
+                title={t("qaTable.generateAi")}
               >
                 <Sparkles className={`w-3.5 h-3.5 ${isGeneratingAi ? "animate-spin" : ""}`} />
                 <span>{isGeneratingAi ? "Menganalisis..." : "Generate AI"}</span>
@@ -237,7 +237,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
           </div>
           <div className="bg-surface-sunken p-2 rounded-md border border-border-subtle/60 text-center">
             <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wider block">
-              Passed Rate
+              {t("qaTable.passedRate")}
             </span>
             <span className="text-base font-medium text-content-strong block mt-0.5">
               {passedPercent}%
@@ -290,7 +290,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-2 text-content-subtle" />
               <input
                 type="text"
-                placeholder="Cari scenario..."
+                placeholder={t("qaTable.searchScenario")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-7 pr-2.5 py-1 bg-surface-sunken border border-border-subtle/80 rounded-md text-xs font-medium text-content-body focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-36 sm:w-48"
@@ -431,7 +431,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-content-inverse text-xs font-medium rounded-md flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Hapus Terpilih</span>
+                <span>{t("qaTable.deleteSelected")}</span>
               </button>
             )}
           </div>
@@ -459,14 +459,14 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 <th className="py-2.5 px-4 min-w-[280px]">{t("qa.testScenario")}</th>
                 <th className="py-2.5 px-3 min-w-[90px] text-center">{t("qa.priority")}</th>
                 <th className="py-2.5 px-3 min-w-[180px] text-center">{t("qa.statusPic")}</th>
-                <th className="py-2.5 px-3 w-28 text-center">Actions</th>
+                <th className="py-2.5 px-3 w-28 text-center">{t("qaTable.actions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border-faint text-xs font-medium text-content-body">
               {searchedCases.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-10 text-content-subtle font-medium">
-                    Tidak ada test case yang sesuai dengan filter atau kata kunci pencarian.
+                    {t("qaTable.emptyFilter")}
                   </td>
                 </tr>
               ) : (
@@ -693,7 +693,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                           <button
                             onClick={() => setSelectedTestCase(tc)}
                             className="p-1 text-content-subtle hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all"
-                            title="Lihat Detail Skenario & Langkah Pengujian"
+                            title={t("qaTable.viewScenario")}
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
@@ -702,7 +702,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                             <button
                               onClick={() => handleOpenCreateBugModal(tc)}
                               className="p-1 text-danger-text hover:bg-rose-500/10 rounded-md transition-all"
-                              title="Buat Tiket Bug"
+                              title={t("qaTable.createBugTicket")}
                             >
                               <Bug className="w-3.5 h-3.5" />
                             </button>
@@ -729,7 +729,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                             <button
                               onClick={() => handleDeleteTestCase(tc)}
                               className="p-1 text-content-subtle hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all"
-                              title="Hapus Test Case"
+                              title={t("qaTable.deleteTestCase")}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>

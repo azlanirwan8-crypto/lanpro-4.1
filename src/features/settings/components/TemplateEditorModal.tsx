@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useRef, useEffect } from "react";
 import { X, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List } from "lucide-react";
 
@@ -26,6 +27,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   initialBody,
   onSave,
 }) => {
+  const { t } = useTranslation();
   const [subject, setSubject] = useState(initialSubject);
   const [body, setBody] = useState(initialBody);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -134,7 +136,9 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
 
         <div className="p-5 overflow-y-auto space-y-4">
           <div className="space-y-2">
-            <label className="text-xs font-medium text-content-body">Available Variables</label>
+            <label className="text-xs font-medium text-content-body">
+              {t("template.availableVariables")}
+            </label>
             <div className="flex flex-wrap gap-1.5">
               {VARIABLES.map((variable) => (
                 <button
@@ -152,18 +156,20 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
               ))}
             </div>
             <p className="text-xs sm:text-[11px] text-content-subtle">
-              Click a variable to insert it at your cursor position.
+              {t("template.clickVariable")}
             </p>
           </div>
 
           {mode === "email" && (
             <div className="space-y-1">
-              <label className="text-xs font-medium text-content-body">Email Subject</label>
+              <label className="text-xs font-medium text-content-body">
+                {t("template.emailSubject")}
+              </label>
               <input
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 className="w-full px-3 py-1.5 border border-border-subtle rounded-md shadow-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono text-xs bg-surface text-content-strong"
-                placeholder="Subject line..."
+                placeholder={t("template.subjectPlaceholder")}
               />
             </div>
           )}
@@ -173,14 +179,14 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
               <button
                 onClick={() => handleFormat("bold")}
                 className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
-                title="Bold"
+                title={t("template.bold")}
               >
                 <Bold size={14} />
               </button>
               <button
                 onClick={() => handleFormat("italic")}
                 className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
-                title="Italic"
+                title={t("template.italic")}
               >
                 <Italic size={14} />
               </button>
@@ -188,7 +194,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                 <button
                   onClick={() => handleFormat("underline")}
                   className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
-                  title="Underline"
+                  title={t("template.underline")}
                 >
                   <Underline size={14} />
                 </button>
@@ -199,21 +205,21 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                   <button
                     onClick={() => handleFormat("align-left")}
                     className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
-                    title="Align Left"
+                    title={t("template.alignLeft")}
                   >
                     <AlignLeft size={14} />
                   </button>
                   <button
                     onClick={() => handleFormat("align-center")}
                     className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
-                    title="Align Center"
+                    title={t("template.alignCenter")}
                   >
                     <AlignCenter size={14} />
                   </button>
                   <button
                     onClick={() => handleFormat("align-right")}
                     className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
-                    title="Align Right"
+                    title={t("template.alignRight")}
                   >
                     <AlignRight size={14} />
                   </button>
@@ -221,7 +227,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                   <button
                     onClick={() => handleFormat("list")}
                     className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"
-                    title="Bulleted List"
+                    title={t("template.bulletList")}
                   >
                     <List size={14} />
                   </button>
@@ -229,7 +235,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
               )}
               {mode === "whatsapp" && (
                 <span className="text-xs sm:text-[11px] text-content-subtle ml-2">
-                  Supports *bold*, _italic_
+                  {t("template.supportsFormat")}
                 </span>
               )}
             </div>
@@ -253,7 +259,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
             onClick={onClose}
             className="px-3.5 py-1.5 rounded-md text-xs font-medium text-content-secondary hover:bg-surface-muted transition-colors"
           >
-            Batal
+            {t("template.cancel")}
           </button>
           <button
             onClick={() => onSave(subject, body)}
@@ -263,7 +269,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                 : "bg-indigo-600 hover:bg-indigo-700"
             }`}
           >
-            Simpan Template
+            {t("template.saveTemplate")}
           </button>
         </div>
       </div>
