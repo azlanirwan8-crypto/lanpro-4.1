@@ -62,7 +62,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
           )}
           onClick={() => setActiveTab("comments")}
         >
-          Comments {comments.length > 0 && `(${comments.length})`}
+          {t("comments.tabComments")} {comments.length > 0 && `(${comments.length})`}
           {activeTab === "comments" && (
             <motion.div
               layoutId="activeTab"
@@ -79,7 +79,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
           )}
           onClick={() => setActiveTab("history")}
         >
-          History {filteredLogs.length > 0 && `(${filteredLogs.length})`}
+          {t("comments.tabHistory")} {filteredLogs.length > 0 && `(${filteredLogs.length})`}
           {activeTab === "history" && (
             <motion.div
               layoutId="activeTab"

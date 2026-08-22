@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from "react-i18next";
+import React, { useState, useEffect, useRef } from "react";
 
 interface Props {
   task: any;
@@ -8,11 +9,12 @@ interface Props {
 }
 
 export const DescriptionEditor: React.FC<Props> = ({ task, onSave, onCancel, onAutoSave }) => {
-  const [localDescription, setLocalDescription] = useState(task.description || '');
+  const { t } = useTranslation();
+  const [localDescription, setLocalDescription] = useState(task.description || "");
   const saveTimeout = useRef<any>(null);
 
   useEffect(() => {
-    if (onAutoSave && localDescription !== (task.description || '')) {
+    if (onAutoSave && localDescription !== (task.description || "")) {
       if (saveTimeout.current) clearTimeout(saveTimeout.current);
       saveTimeout.current = setTimeout(() => {
         onAutoSave(localDescription);
@@ -28,21 +30,24 @@ export const DescriptionEditor: React.FC<Props> = ({ task, onSave, onCancel, onA
       <textarea
         value={localDescription}
         onChange={(e) => setLocalDescription(e.target.value)}
-        placeholder="Add descriptive details here... (Markdown supported)"
+        placeholder={t("ui.descPlaceholder")}
         rows={8}
         className="w-full p-6 text-sm focus:outline-none resize-y leading-relaxed font-medium text-content-body"
         autoFocus
         onBlur={() => onSave(localDescription)}
         onKeyDown={(e) => {
-            if (e.key === 'Escape') onCancel();
-            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-                e.preventDefault();
-                onSave(localDescription);
-            }
+          if (e.key === "Escape") onCancel();
+          if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            onSave(localDescription);
+          }
         }}
       />
       <div className="bg-surface-sunken border-t border-border-faint px-4 py-3 flex justify-between items-center text-xs sm:text-[10px] font-medium text-content-subtle">
-        <span>Markdown fully supported. Auto-saves as you type. Press Ctrl+Enter to save & close, or Escape to cancel.</span>
+        <span>
+          Markdown fully supported. Auto-saves as you type. Press Ctrl+Enter to save & close, or
+          Escape to cancel.
+        </span>
       </div>
     </div>
   );

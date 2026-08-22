@@ -1,3 +1,4 @@
+import i18n from "../../i18n";
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -418,7 +419,7 @@ export const StyledDropdown = ({
                 })}
                 {safeOptions.length === 0 && (
                   <div className="p-4 text-center text-xs text-content-subtle italic font-medium">
-                    No options available
+                    {i18n.t("ui.noOptions")}
                   </div>
                 )}
               </div>

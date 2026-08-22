@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
@@ -9,6 +10,7 @@ interface SuccessModalProps {
 }
 
 export function SuccessModal({ isOpen, onClose, title = "Berhasil!", message }: SuccessModalProps) {
+  const { t } = useTranslation();
   return (
     <AnimatePresence>
       {isOpen && (
@@ -63,7 +65,7 @@ export function SuccessModal({ isOpen, onClose, title = "Berhasil!", message }: 
                 onClick={onClose}
                 className="px-6 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-md transition-colors"
               >
-                Tutup
+                {t("ui.close")}
               </button>
             </div>
           </motion.div>

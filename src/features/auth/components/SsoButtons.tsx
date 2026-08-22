@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { ambilProviderSso, urlMulaiSso, type ProviderSso } from "../services/sso.service";
 
@@ -56,6 +57,7 @@ const NAMA: Record<ProviderSso, string> = {
 };
 
 export const SsoButtons = ({ mode }: SsoButtonsProps) => {
+  const { t } = useTranslation();
   const [providers, setProviders] = useState<ProviderSso[]>([]);
   const [memuat, setMemuat] = useState(true);
 
@@ -81,7 +83,7 @@ export const SsoButtons = ({ mode }: SsoButtonsProps) => {
       {/* Pemisah dengan label, supaya jelas ini alternatif dari form di atasnya */}
       <div className="flex items-center gap-3 mb-4">
         <span className="h-px flex-1 bg-border-subtle" />
-        <span className="text-xs text-content-muted">atau</span>
+        <span className="text-xs text-content-muted">{t("ui.or")}</span>
         <span className="h-px flex-1 bg-border-subtle" />
       </div>
 

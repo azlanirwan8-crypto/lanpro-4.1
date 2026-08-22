@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Upload } from "lucide-react";
 
@@ -20,6 +21,7 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
   helperText,
   required,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="space-y-1.5">
       {label && (
@@ -31,7 +33,7 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
       <div className="border-2 border-dashed border-border-subtle hover:border-primary rounded-md p-8 text-center space-y-3 transition-colors bg-surface-sunken/50 cursor-pointer">
         <Upload className="w-10 h-10 text-primary mx-auto" />
         <div>
-          <p className="text-xs font-medium text-content-body">Upload file</p>
+          <p className="text-xs font-medium text-content-body">{t("ui.uploadFile")}</p>
           {helperText && (
             <p className="text-xs sm:text-[10px] text-content-subtle mt-1">{helperText}</p>
           )}

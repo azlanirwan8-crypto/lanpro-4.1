@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import React, { useState, useEffect, useCallback, createContext, useContext } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
@@ -489,7 +490,7 @@ const VelzonSweetAlertModal: React.FC<VelzonSweetAlertModalProps> = ({
       <button
         onClick={onDismiss}
         className="absolute top-4 right-4 text-content-subtle hover:text-content-secondary transition-colors p-1 rounded-md"
-        title="Close"
+        title={i18n.t("ui.close")}
       >
         <X className="w-5 h-5" />
       </button>

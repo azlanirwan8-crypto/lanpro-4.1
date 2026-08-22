@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Zap, ChevronDown, CheckCircle2 } from "lucide-react";
 import { RenderIcon } from "../../../../components/RenderIcon";
@@ -43,6 +44,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
   projectMembers,
   sprints,
 }) => {
+  const { t } = useTranslation();
   const mArr = masterData || [];
 
   return (
@@ -51,9 +53,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
         <div className="flex items-center gap-2 w-full sm:w-auto flex-1 min-w-0">
           <div className="relative pl-1 shrink-0">
             <button
-              onClick={() =>
-                setIsInlineTypeOpen(isInlineTypeOpen === "global" ? null : "global")
-              }
+              onClick={() => setIsInlineTypeOpen(isInlineTypeOpen === "global" ? null : "global")}
               className="flex items-center justify-center p-1.5 hover:bg-surface-strong rounded transition-colors text-content-secondary outline-none"
             >
               {(() => {
@@ -107,7 +107,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
             type="text"
             value={quickCreateTitle}
             onChange={(e) => setQuickCreateTitle(e.target.value)}
-            placeholder="What needs to be done? Type and press Enter to save..."
+            placeholder={t("issueQuick.placeholder")}
             onKeyDown={(e) => e.key === "Enter" && createGlobalIssue()}
             className="flex-1 min-w-0 bg-transparent border-none text-[12px] font-medium text-content-body placeholder:text-content-subtle focus:ring-0 outline-none px-2"
           />

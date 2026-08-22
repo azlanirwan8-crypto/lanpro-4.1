@@ -100,9 +100,9 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 className="w-full border border-border-subtle rounded-lg p-2 text-sm"
               >
                 <option value="Active">{t("editProject.active")}</option>
-                <option value="On Hold">On Hold</option>
+                <option value="On Hold">{t("ui.onHold")}</option>
                 <option value="Completed">Completed</option>
-                <option value="Archived">Archived</option>
+                <option value="Archived">{t("ui.archived")}</option>
               </select>
             </div>
             <div>
@@ -127,7 +127,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
           ) && (
             <div className="mt-6 pt-6 border-t border-red-50">
               <p className="text-xs sm:text-[10px] font-medium text-red-400 uppercase tracking-widest mb-3">
-                Danger Zone
+                {t("ui.dangerZone")}
               </p>
               <Button
                 onClick={() => deleteProject(editingProject)}

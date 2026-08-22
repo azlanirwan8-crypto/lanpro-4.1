@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Trash2 } from "lucide-react";
@@ -17,6 +18,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
   itemName,
   onConfirm,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return (
@@ -42,13 +44,13 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
               onClick={onClose}
               className="flex-1 py-2.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium rounded-md cursor-pointer transition-colors"
             >
-              Batal
+              {t("ui.cancel")}
             </button>
             <button
               onClick={onConfirm}
               className="flex-1 py-2.5 bg-danger-surface hover:bg-danger-hover text-content-inverse text-xs font-medium rounded-md cursor-pointer shadow-xs transition-colors"
             >
-              Ya, Hapus
+              {t("ui.yesDelete")}
             </button>
           </div>
         </motion.div>

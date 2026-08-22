@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 
@@ -38,7 +39,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <AlertTriangle className="w-8 h-8 text-rose-500" />
             </div>
             <h2 className="text-lg font-medium text-content-strong mb-2">
-              Terjadi Kesalahan Sistem
+              {i18n.t("ui.errorTitle")}
             </h2>
             <p className="text-sm text-content-muted mb-6">
               Maaf, widget atau komponen ini mengalami gangguan (Crash). Silakan muat ulang halaman.
@@ -53,7 +54,7 @@ export class ErrorBoundary extends Component<Props, State> {
               className="inline-flex items-center gap-2 bg-surface-inverse text-content-inverse px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-700 transition-colors shadow-soft"
             >
               <RefreshCw className="w-4 h-4" />
-              Muat Ulang Halaman
+              {i18n.t("ui.reloadPage")}
             </button>
           </div>
         </div>

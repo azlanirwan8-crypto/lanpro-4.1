@@ -50,9 +50,10 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2 border-t border-border-subtle bg-surface-sunken shrink-0">
         <div className="flex items-center gap-3">
           <span className="text-xs sm:text-[10px] font-medium text-content-muted">
-            Showing {displayRoots.length === 0 ? 0 : (listPage - 1) * itemsPerPage + 1} to{" "}
-            {Math.min(listPage * itemsPerPage, displayRoots.length)} of {displayRoots.length}{" "}
-            entries
+            {t("common.showing")}{" "}
+            {displayRoots.length === 0 ? 0 : (listPage - 1) * itemsPerPage + 1} {t("common.to")}{" "}
+            {Math.min(listPage * itemsPerPage, displayRoots.length)} {t("common.of")}{" "}
+            {displayRoots.length} {t("common.entries")}
           </span>
           <div className="flex items-center gap-1.5 pl-2 border-l border-border-subtle">
             <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
@@ -70,6 +71,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   iconColors,
   customIcon,
 }) => {
+  const { t } = useTranslation();
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -130,7 +132,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
               <button
                 onClick={onClose}
                 className="absolute top-3.5 right-3.5 text-content-muted hover:text-content-body transition-colors p-1 rounded cursor-pointer"
-                aria-label="Tutup"
+                aria-label={t("ui.close")}
               >
                 <X className="w-4 h-4" />
               </button>

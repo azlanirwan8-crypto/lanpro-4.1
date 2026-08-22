@@ -1,7 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import type { LoginSkeletonStateProps } from "../types";
 
 export const LoginSkeletonState = ({ loadingText }: LoginSkeletonStateProps) => {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -37,9 +39,7 @@ export const LoginSkeletonState = ({ loadingText }: LoginSkeletonStateProps) => 
             <span className="w-1.5 h-1.5 bg-primary-surface rounded-full animate-bounce [animation-delay:0.4s]" />
           </span>
         </h3>
-        <p className="text-xs text-content-subtle font-medium">
-          Memverifikasi sesi workspace Anda...
-        </p>
+        <p className="text-xs text-content-subtle font-medium">{t("ui.verifyingSession")}</p>
       </div>
 
       {/* Velzon Smooth Gradient Progress Bar */}

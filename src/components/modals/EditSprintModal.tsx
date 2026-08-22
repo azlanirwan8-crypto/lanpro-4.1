@@ -39,7 +39,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
           </div>
           <div>
             <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-              Goal
+              {t("ui.goal")}
             </label>
             <Textarea
               value={editingSprint.goal}

@@ -1,3 +1,4 @@
+import i18n from "../../../i18n";
 import { motion } from "framer-motion";
 import { VelzonFloatingParticles } from "../../../components/ui/CoreUI";
 
@@ -58,7 +59,7 @@ export const AuthHeroPanel = () => (
           LAN <span className="text-amber-400">PRO</span>
         </h1>
         <p className="text-xs font-medium text-content-inverse-muted mt-3 tracking-widest uppercase">
-          Project Management Platform
+          {i18n.t("ui.platformTagline")}
         </p>
       </motion.div>
     </div>

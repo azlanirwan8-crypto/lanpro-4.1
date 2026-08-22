@@ -1,3 +1,4 @@
+import i18n from "../../i18n";
 import React, { useRef, useEffect, useMemo, useState } from "react";
 import { format, differenceInDays } from "date-fns";
 import { Calendar, AlertCircle } from "lucide-react";
@@ -181,9 +182,9 @@ class ErrorBoundary extends React.Component<any, any> {
       return (
         <div className="h-screen flex flex-col items-center justify-center bg-surface-sunken p-4 text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-          <h2 className="text-2xl font-medium text-content mb-2">Oops! An error occurred</h2>
+          <h2 className="text-2xl font-medium text-content mb-2">{i18n.t("ui.oops")}</h2>
           <p className="text-content-secondary mb-6 max-w-md">{message}</p>
-          <Button onClick={() => window.location.reload()}>Refresh Page</Button>
+          <Button onClick={() => window.location.reload()}>{i18n.t("ui.refreshPage")}</Button>
         </div>
       );
     }
