@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { safeLocalStorage } from "../../lib/safeStorage";
 import React, { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
@@ -52,6 +53,7 @@ const defaultChartOrder = [
 ];
 
 export function DashboardView(props: DashboardViewProps) {
+  const { t } = useTranslation();
   const {
     tasks,
     nonEpicTasks,
@@ -650,10 +652,10 @@ export function DashboardView(props: DashboardViewProps) {
             berlabel, sehingga terbaca sebagai angka yang bertentangan. */}
         <div className="flex items-baseline justify-between mb-2">
           <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
-            Ringkasan Tugas
+            {t("dashboard.taskSummary")}
           </span>
           <span className="text-xs sm:text-[11px] font-medium text-content-muted">
-            Epic tidak dihitung
+            {t("dashboard.epicExcluded")}
           </span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
@@ -662,7 +664,7 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
-                  Total Tugas
+                  {t("dashboard.totalTasks")}
                 </span>
                 <h3 className="text-2xl font-medium text-content-strong mt-1">{totalTasks}</h3>
               </div>
@@ -684,13 +686,13 @@ export function DashboardView(props: DashboardViewProps) {
                 ) : (
                   <Minus className="w-3.5 h-3.5" />
                 )}{" "}
-                {completionPercentage}% Selesai
+                {t("dashboard.percentDone", { percent: completionPercentage })}
               </span>
               <button
                 onClick={() => props.setCurrentView("kanban")}
                 className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
-                Lihat semua tugas
+                {t("dashboard.viewAllTasks")}
               </button>
             </div>
           </div>
@@ -700,7 +702,7 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
-                  Tugas Berjalan
+                  {t("dashboard.runningTasks")}
                 </span>
                 <h3 className="text-2xl font-medium text-content-strong mt-1">
                   {nonEpicTasks.filter((t) => t.status !== "Done" && t.status !== "Selesai").length}
@@ -712,13 +714,13 @@ export function DashboardView(props: DashboardViewProps) {
             </div>
             <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
               <span className="font-medium text-info-text">
-                {inProgressTasks.length} belum selesai
+                {t("dashboard.notDoneYet", { count: inProgressTasks.length })}
               </span>
               <button
                 onClick={() => props.setCurrentView("kanban")}
                 className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
-                Lihat papan aktif
+                {t("dashboard.viewActiveBoard")}
               </button>
             </div>
           </div>
@@ -728,7 +730,7 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
-                  Tugas Selesai
+                  {t("dashboard.doneTasks")}
                 </span>
                 <h3 className="text-2xl font-medium text-content-strong mt-1">
                   {completedTasks.length}
@@ -748,11 +750,13 @@ export function DashboardView(props: DashboardViewProps) {
               >
                 {completionPercentage > 0 ? (
                   <>
-                    <ArrowUpRight className="w-3.5 h-3.5" /> +{completionPercentage}% Tuntas
+                    <ArrowUpRight className="w-3.5 h-3.5" />{" "}
+                    {t("dashboard.percentRate", { percent: completionPercentage })}
                   </>
                 ) : (
                   <>
-                    <Minus className="w-3.5 h-3.5" /> {completionPercentage}% Tuntas
+                    <Minus className="w-3.5 h-3.5" />{" "}
+                    {t("dashboard.percentRate", { percent: completionPercentage })}
                   </>
                 )}
               </span>
@@ -770,7 +774,7 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
-                  Tugas Tersumbat
+                  {t("dashboard.blockedTasks")}
                 </span>
                 {/* #111 — nol berarti TIDAK ADA yang tersumbat, itu kabar baik.
                     Mewarnainya merah membuat pemindaian sekilas menyimpulkan ada
@@ -839,7 +843,7 @@ export function DashboardView(props: DashboardViewProps) {
                           : "text-content-secondary hover:text-content"
                       )}
                     >
-                      {filter === "ALL" ? "SEMUA" : filter}
+                      {filter === "ALL" ? t("dashboard.rangeAll") : filter}
                     </button>
                   ))}
                 </div>
@@ -1364,7 +1368,7 @@ export function DashboardView(props: DashboardViewProps) {
                   onClick={() => props.setCurrentView("kanban")}
                   className="text-xs font-medium text-primary hover:underline inline-flex items-center min-h-11 py-2"
                 >
-                  Saring
+                  {t("dashboard.filter")}
                 </button>
               </div>
 

@@ -1,3 +1,4 @@
+import { LanguageSwitcher } from "./i18n/LanguageSwitcher";
 import { safeLocalStorage, safeSessionStorage } from "./lib/safeStorage";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -3505,6 +3506,8 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   <Maximize className="w-5 h-5" />
                 )}
               </button>
+
+              <LanguageSwitcher />
 
               {/* Velzon 1-Click Direct Theme Switcher Button */}
               <button

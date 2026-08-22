@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { ChevronRight, ChevronLeft, ChevronDown, Kanban, Plus, LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,6 +11,7 @@ import { getUserPermissions, normalizeModuleKey } from "../../lib/permissions";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 
 export const Sidebar: React.FC<SidebarProps> = (props) => {
+  const { t } = useTranslation();
   const {
     isMobileMenuOpen,
     isSidebarCollapsed,
@@ -41,7 +43,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
   const renderBadge = (badge?: string, badgeColor?: string) => {
     if (!badge) return null;
     let colorClasses = "bg-danger-surface text-content-inverse"; // default Hot orange-red
-    if (badgeColor === "emerald" || badge === "Baru")
+    if (badgeColor === "emerald" || badge === "sidebar.badgeNew")
       colorClasses = "bg-success-surface text-content-inverse";
     if (badgeColor === "blue") colorClasses = "bg-info-surface text-content-inverse";
     if (badgeColor === "purple") colorClasses = "bg-content-inverse-muted/20 text-content-inverse";
@@ -53,7 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
           colorClasses
         )}
       >
-        {badge}
+        {t(badge)}
       </span>
     );
   };
@@ -226,7 +228,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
               {!isSidebarCollapsed && (
                 <div className="flex items-center justify-between px-3 mt-5 mb-1.5">
                   <div className="text-xs sm:text-[11px] font-semibold text-sidebar-title uppercase tracking-wider">
-                    {section.title}
+                    {t(section.title)}
                   </div>
                 </div>
               )}
@@ -249,7 +251,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                           ? "bg-sidebar-item-active text-sidebar-text-active font-medium shadow-xs"
                           : "text-sidebar-text hover:bg-sidebar-item-hover hover:text-sidebar-text-active"
                       )}
-                      title={isSidebarCollapsed ? item.label : undefined}
+                      title={isSidebarCollapsed ? t(item.label) : undefined}
                     >
                       <div className="shrink-0 text-sidebar-text group-hover:text-sidebar-text-active transition-colors">
                         {item.icon}
@@ -257,7 +259,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                       {!isSidebarCollapsed && (
                         <>
                           <span className="flex-1 text-left font-medium truncate">
-                            {item.label}
+                            {t(item.label)}
                           </span>
                           {item.badge && renderBadge(item.badge, item.badgeColor)}
                           {hasChildren && (
@@ -298,7 +300,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                               )}
                             >
                               <span className="text-sidebar-title text-xs sm:text-[10px]">—</span>
-                              <span className="truncate">{subItem.label}</span>
+                              <span className="truncate">{t(subItem.label)}</span>
                             </button>
                           );
                         })}

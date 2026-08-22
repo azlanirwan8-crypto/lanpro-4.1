@@ -2,6 +2,8 @@ import React, { Component, ErrorInfo, ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+// Memuat konfigurasi i18next (item #134). Harus sebelum App dirender.
+import "./i18n";
 
 interface Props {
   children?: ReactNode;

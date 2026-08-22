@@ -1,0 +1,86 @@
+/**
+ * Kamus bahasa Inggris (item #134).
+ *
+ * Sebagian besar nilai di sini DIPANEN dari git history — teks aslinya memang
+ * Inggris sebelum item #132/#133 menerjemahkannya. Kapitalisasi yang semula
+ * tidak konsisten dirapikan di sini ("Kanban board" -> "Kanban Board",
+ * "DB EXplorer" -> "DB Explorer"), karena yang lama itu memang salah ketik,
+ * bukan gaya penulisan.
+ *
+ * Strukturnya WAJIB sama persis dengan `id.ts`. Kunci yang hilang di sini
+ * membuat i18next jatuh kembali ke teks Indonesia, dan itu terbaca sebagai
+ * layar setengah berganti bahasa.
+ */
+export const en = {
+  sidebar: {
+    menu: "Menu",
+    dashboard: "Dashboard",
+    collaboration: "Collaboration",
+    meetingNotes: "Meeting Notes",
+    documentation: "Documentation",
+    flowchartEditor: "Flowchart Editor",
+    projectManagement: "Project Management",
+    issueList: "Issue List",
+    planningSprint: "Planning & Sprint",
+    kanbanBoard: "Kanban Board",
+    qualityAssessment: "Quality Assessment",
+    roadmapTimeline: "Roadmap & Timeline",
+    team: "Team",
+    administration: "Administration",
+    masterData: "Master Data",
+    userManagement: "User Management",
+    enterpriseAudit: "Enterprise Audit",
+    dbExplorer: "DB Explorer",
+    settingIntegration: "Settings & Integration",
+    badgeNew: "New",
+    activeProjects: "Active Projects",
+    new: "New",
+    collapse: "Collapse Sidebar",
+  },
+  dashboard: {
+    greetingMorning: "Good Morning",
+    greetingAfternoon: "Good Afternoon",
+    greetingEvening: "Good Evening",
+    greetingNight: "Good Evening",
+    subtitle: "Team performance summary, sprint progress, and real-time task allocation.",
+    taskSummary: "Task Summary",
+    epicExcluded: "Epics excluded",
+    totalTasks: "Total Tasks",
+    runningTasks: "Active Tasks",
+    doneTasks: "Completed Tasks",
+    blockedTasks: "Blocked Tasks",
+    percentDone: "{{percent}}% Completed",
+    percentRate: "{{percent}}% Rate",
+    notDoneYet: "{{count}} not yet done",
+    blockedOverdue: "{{blocked}} Blocked • {{overdue}} Overdue",
+    viewAllTasks: "View all tasks",
+    viewActiveBoard: "View active board",
+    viewDoneList: "View done list",
+    handleBlockers: "Resolve issues",
+    allSprints: "All Sprints ({{count}} Tasks)",
+    activeSprintChip: "Active: {{name}} ({{days}} days left)",
+    filter: "Filter",
+    rangeAll: "ALL",
+  },
+  widgets: {
+    stoppersBlocked: "Stoppers / Blocked",
+    needsAttention: "Needs Attention",
+    dueSoon: "Due Soon (3 Days)",
+    recentMeetings: "Recent Meetings",
+    documentation: "Documentation",
+    liveActivity: "Live Activity (24h)",
+    noBlockedTasks: "No blocked tasks.",
+    noOverdueTasks: "All clear! No overdue tasks.",
+    noUrgentDeadlines: "No urgent deadlines in next 3 days.",
+    noMeetingNotes: "No meeting notes yet.",
+    noDocuments: "No documents uploaded.",
+    viewFullAuditLog: "View Full Audit Log",
+    hoursLeft: "{{hours}}h left",
+    dueSoonShort: "due soon",
+  },
+  language: {
+    switchTo: "Switch to Indonesian",
+    indonesian: "Indonesian",
+    english: "English",
+  },
+} as const;

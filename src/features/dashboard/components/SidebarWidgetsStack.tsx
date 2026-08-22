@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { format, formatDistanceToNow } from "date-fns";
 import { Zap, AlertCircle, Clock, FileText, ArrowRight, Video, Globe } from "lucide-react";
@@ -56,6 +57,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
   setIsTaskDetailModalOpen,
   setCurrentView,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 h-auto p-1 select-none">
       {/* My Active Tasks */}
@@ -118,8 +120,8 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       <div className="bg-surface shadow-soft border border-danger-border/40 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-danger flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-danger animate-bounce" /> Tersumbat / Terhambat (
-            {blockedTasks.length})
+            <AlertCircle className="w-4 h-4 text-danger animate-bounce" />{" "}
+            {t("widgets.stoppersBlocked")} ({blockedTasks.length})
           </h3>
           {blockedTasks.some((task) => isDueSoon24h(task.endDate)) && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
@@ -130,7 +132,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
         <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
           {blockedTasks.length === 0 ? (
             <div className="text-xs text-content-muted font-medium italic p-3 text-center">
-              Tidak ada tugas tersumbat.
+              {t("widgets.noBlockedTasks")}
             </div>
           ) : (
             blockedTasks.map((task) => (
@@ -174,13 +176,13 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       {/* Needs Attention / Overdue */}
       <div className="bg-surface shadow-soft border border-danger-border/30 rounded-xl p-5">
         <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2 mb-3">
-          <AlertCircle className="w-4 h-4 text-danger animate-pulse" /> Perlu Perhatian (
-          {overdueTasks.length})
+          <AlertCircle className="w-4 h-4 text-danger animate-pulse" />{" "}
+          {t("widgets.needsAttention")} ({overdueTasks.length})
         </h3>
         <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
           {overdueTasks.length === 0 ? (
             <div className="text-xs text-content-muted font-medium italic p-3 text-center">
-              Aman! Tidak ada tugas terlambat.
+              {t("widgets.noOverdueTasks")}
             </div>
           ) : (
             overdueTasks.map((task) => (
@@ -211,8 +213,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2">
-            <Zap className="w-4 h-4 text-warning" /> Segera Jatuh Tempo (3 Hari) (
-            {dueSoonTasks.length})
+            <Zap className="w-4 h-4 text-warning" /> {t("widgets.dueSoon")} ({dueSoonTasks.length})
           </h3>
           {dueSoonTasks.some((task) => isDueSoon24h(task.endDate)) && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
@@ -223,7 +224,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
         <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
           {dueSoonTasks.length === 0 ? (
             <div className="text-xs text-content-muted font-medium italic p-3 text-center">
-              Tidak ada tenggat mendesak dalam 3 hari ke depan.
+              {t("widgets.noUrgentDeadlines")}
             </div>
           ) : (
             dueSoonTasks.map((task) => (
@@ -270,13 +271,14 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2">
-            <Video className="w-4 h-4 text-info" /> Rapat Terbaru ({meetings.length})
+            <Video className="w-4 h-4 text-info" /> {t("widgets.recentMeetings")} ({meetings.length}
+            )
           </h3>
         </div>
         <div className="space-y-2.5 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
           {meetings.length === 0 ? (
             <div className="text-xs text-content-muted font-medium italic p-3 text-center">
-              Belum ada catatan rapat.
+              {t("widgets.noMeetingNotes")}
             </div>
           ) : (
             meetings.map((meeting: any) => (
@@ -306,13 +308,14 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2">
-            <FileText className="w-4 h-4 text-success" /> Dokumentasi ({documents.length})
+            <FileText className="w-4 h-4 text-success" /> {t("widgets.documentation")} (
+            {documents.length})
           </h3>
         </div>
         <div className="space-y-2.5 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
           {documents.length === 0 ? (
             <div className="text-xs text-content-muted font-medium italic p-3 text-center">
-              Belum ada dokumen diunggah.
+              {t("widgets.noDocuments")}
             </div>
           ) : (
             documents.map((doc: any) => (
@@ -344,7 +347,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
           <Globe className="w-32 h-32" />
         </div>
         <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-indigo-300 flex items-center gap-2 mb-3 relative z-10">
-          <Clock className="w-4 h-4 text-indigo-400" /> Aktivitas Langsung (24 Jam)
+          <Clock className="w-4 h-4 text-indigo-400" /> {t("widgets.liveActivity")}
         </h3>
         <div className="space-y-3 max-h-[260px] overflow-y-auto custom-scrollbar pr-1 relative z-10">
           {activityLogs.map((log) => {
@@ -372,7 +375,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
           onClick={() => setCurrentView("activity")}
           className="w-full mt-4 py-3 min-h-11 text-xs font-medium uppercase tracking-wider text-content-inverse bg-surface/10 hover:bg-surface/20 rounded-lg transition-colors border border-white/10 cursor-pointer"
         >
-          Lihat Log Audit Lengkap
+          {t("widgets.viewFullAuditLog")}
         </button>
       </div>
     </div>
