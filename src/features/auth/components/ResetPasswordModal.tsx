@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Lock, Eye, EyeOff, AlertCircle, CheckCircle2, ArrowRight, X } from "lucide-react";
 import { cn } from "../../../lib/utils";
@@ -15,6 +16,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const { t } = useTranslation();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -85,9 +87,9 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-3">
             <Lock className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-bold text-content-strong">Atur Kata Sandi Baru</h3>
+          <h3 className="text-lg font-bold text-content-strong">{t("resetPwd.title")}</h3>
           <p className="text-xs text-content-muted mt-1 max-w-xs mx-auto">
-            Buat kata sandi baru yang kuat untuk akun LanPro Anda.
+            {t("resetPwd.subtitle")}
           </p>
         </div>
 
@@ -96,10 +98,8 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
             <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-start gap-3">
               <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
               <div className="text-xs leading-relaxed">
-                <p className="font-semibold mb-0.5">Kata Sandi Berhasil Diperbarui!</p>
-                <p className="text-content-muted">
-                  Anda sekarang dapat masuk ke akun LanPro menggunakan kata sandi yang baru.
-                </p>
+                <p className="font-semibold mb-0.5">{t("resetPwd.successTitle")}</p>
+                <p className="text-content-muted">{t("resetPwd.successHint")}</p>
               </div>
             </div>
 
@@ -111,7 +111,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
               }}
               className="w-full py-2.5 px-4 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover font-semibold rounded-lg text-xs transition-colors cursor-pointer"
             >
-              Masuk Sekarang
+              {t("resetPwd.signInNow")}
             </button>
           </div>
         ) : (
@@ -123,7 +123,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Kata sandi baru"
+                  placeholder={t("resetPwd.newPlaceholder")}
                   value={newPassword}
                   onChange={(e) => {
                     setNewPassword(e.target.value);
@@ -153,7 +153,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
               </label>
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Ulangi kata sandi baru"
+                placeholder={t("resetPwd.repeatPlaceholder")}
                 value={confirmPassword}
                 onChange={(e) => {
                   setConfirmPassword(e.target.value);
@@ -176,9 +176,9 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
             </div>
 
             <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle text-[11px] text-content-subtle space-y-1">
-              <p className="font-semibold text-content-body">Syarat Kata Sandi:</p>
+              <p className="font-semibold text-content-body">{t("resetPwd.requirements")}</p>
               <ul className="list-disc pl-4 space-y-0.5 text-content-muted">
-                <li>Minimal 8 karakter</li>
+                <li>{t("resetPwd.minChars")}</li>
                 <li>Huruf besar (A-Z) & huruf kecil (a-z)</li>
                 <li>Minimal 1 angka (0-9)</li>
                 <li>Minimal 1 simbol khusus (@$!%*?&)</li>
@@ -192,7 +192,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
                 disabled={loading}
                 className="flex-1 py-2.5 px-4 bg-surface-sunken hover:bg-surface-elevated text-content font-medium rounded-lg text-xs transition-colors cursor-pointer disabled:opacity-50"
               >
-                Batal
+                {t("resetPwd.cancel")}
               </button>
               <button
                 type="submit"

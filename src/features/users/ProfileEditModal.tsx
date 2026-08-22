@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, Save } from "lucide-react";
 import { Input } from "../../components/ui/CoreUI";
@@ -18,6 +19,7 @@ export const ProfileEditModal = ({
   userProfile: UserProfile | null;
   onProfileUpdated?: (updatedProfile: Partial<UserProfile>) => void;
 }) => {
+  const { t } = useTranslation();
   const [selectedAvatar, setSelectedAvatar] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState(userProfile?.displayName || "");
@@ -187,7 +189,7 @@ export const ProfileEditModal = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Edit Profil">
+    <Modal isOpen={isOpen} onClose={onClose} title={t("profile.editProfile")}>
       <div className="space-y-6">
         <div className="flex gap-4 items-center bg-surface-sunken p-4 rounded-xl border border-border-faint relative">
           <div className="relative group cursor-pointer">
@@ -216,7 +218,7 @@ export const ProfileEditModal = ({
             />
             {previewUrl && (
               <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
-                Pratinjau
+                {t("profile.preview")}
               </span>
             )}
             <label className="absolute inset-0 bg-black/50 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
@@ -241,7 +243,7 @@ export const ProfileEditModal = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
-              Nama Lengkap
+              {t("profile.fullName")}
             </label>
             <Input
               value={displayName}
@@ -251,7 +253,7 @@ export const ProfileEditModal = ({
 
           <div className="space-y-1">
             <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
-              Username
+              {t("profile.username")}
             </label>
             <Input
               value={username}
@@ -261,7 +263,7 @@ export const ProfileEditModal = ({
 
           <div className="space-y-1 md:col-span-2">
             <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
-              Email
+              {t("profile.email")}
             </label>
             <Input
               value={email}
@@ -271,7 +273,7 @@ export const ProfileEditModal = ({
 
           <div className="space-y-1 md:col-span-2">
             <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
-              Nomor Telepon
+              {t("profile.phone")}
             </label>
             <Input
               value={phone}
@@ -281,11 +283,11 @@ export const ProfileEditModal = ({
         </div>
 
         <div className="pt-4 border-t border-border-faint space-y-3">
-          <h4 className="text-sm font-medium text-content-strong">Ubah Password</h4>
+          <h4 className="text-sm font-medium text-content-strong">{t("profile.changePassword")}</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1 relative">
               <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
-                Password Lama
+                {t("profile.oldPassword")}
               </label>
               <Input
                 type={showCurrentPassword ? "text" : "password"}
@@ -294,7 +296,7 @@ export const ProfileEditModal = ({
                   setCurrentPassword(e.target.value);
                   setError(null);
                 }}
-                placeholder="Kata sandi lama"
+                placeholder={t("profile.oldPlaceholder")}
                 className="pr-10"
               />
               {error && <p className="text-xs sm:text-[10px] text-red-500 font-medium">{error}</p>}
@@ -308,7 +310,7 @@ export const ProfileEditModal = ({
             </div>
             <div className="space-y-1 relative">
               <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
-                Password Baru
+                {t("profile.newPassword")}
               </label>
               <Input
                 type={showNewPassword ? "text" : "password"}
@@ -316,7 +318,7 @@ export const ProfileEditModal = ({
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setNewPassword(e.target.value)
                 }
-                placeholder="Kata sandi baru"
+                placeholder={t("profile.newPlaceholder")}
                 className="pr-10"
               />
               <button
@@ -341,7 +343,7 @@ export const ProfileEditModal = ({
           ) : (
             <>
               <Save className="w-4 h-4" />
-              Save Changes
+              {t("profile.saveChanges")}
             </>
           )}
         </button>
