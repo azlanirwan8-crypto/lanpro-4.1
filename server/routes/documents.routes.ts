@@ -50,7 +50,17 @@ router.post(
   async (req: any, res) => {
     try {
       const { projectId } = req.params;
-      const { title, description, type, link, fileData, fileName, fileType, createdBy } = req.body;
+      const {
+        title,
+        description,
+        type,
+        link,
+        fileData,
+        fileName,
+        fileType,
+        canvasData,
+        createdBy,
+      } = req.body;
       const currentUserId = req.user?.id || req.user?.uid || createdBy || "guest";
       const newId = crypto.randomUUID();
 
@@ -64,6 +74,7 @@ router.post(
         fileData: fileData || null,
         fileName: fileName || null,
         fileType: fileType || null,
+        canvasData: canvasData || null,
         createdBy: currentUserId,
       });
 
@@ -112,7 +123,7 @@ router.put(
         });
       }
 
-      const { title, description, type, link, fileData, fileName, fileType } = req.body;
+      const { title, description, type, link, fileData, fileName, fileType, canvasData } = req.body;
 
       await documentRepository.update(id, {
         title,
@@ -122,6 +133,7 @@ router.put(
         fileData,
         fileName,
         fileType,
+        canvasData,
       });
 
       res.json({ status: "success", message: "Document updated" });

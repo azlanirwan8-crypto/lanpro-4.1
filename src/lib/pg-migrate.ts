@@ -544,6 +544,26 @@ export async function runMigrations(pool: Pool): Promise<void> {
       ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS "fileSize" BIGINT DEFAULT 0;
       ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS "fileRef" TEXT;
       ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS "fileData" TEXT;
+      ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS "canvasData" TEXT;
+    `);
+
+    // Item #136 — payload kanvas flowchart pindah dari `description` ke kolom
+    // sendiri. Sebelumnya flowchart menumpang kolom `description`, sehingga
+    // daftar Dokumentasi (yang menampilkan description sebagai subjudul untuk
+    // SEMUA dokumen) memuntahkan JSON mentah ke layar.
+    //
+    // Backfill ini sengaja sempit: hanya baris flowchart yang description-nya
+    // benar-benar berbentuk payload kanvas. Deskripsi manusia yang kebetulan
+    // ada di baris flowchart lama tidak ikut terbawa atau terhapus.
+    //
+    // Idempoten: setelah dijalankan sekali, tidak ada lagi baris yang cocok.
+    await client.query(`
+      UPDATE "Documents"
+         SET "canvasData" = description,
+             description  = NULL
+       WHERE type = 'flowchart'
+         AND "canvasData" IS NULL
+         AND description LIKE '{%"nodes"%';
     `);
 
     // ── ai_learning_logs ──────────────────────────────────────────────────────

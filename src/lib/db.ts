@@ -14,18 +14,18 @@
  * PostgreSQL `$1, $2, ...` before execution.
  */
 
-import 'dotenv/config';
-import dotenvLocal from 'dotenv';
-dotenvLocal.config({ path: '.env.local', override: false });
+import "dotenv/config";
+import dotenvLocal from "dotenv";
+dotenvLocal.config({ path: ".env.local", override: false });
 
-import { Pool } from 'pg';
-import type { PoolClient } from 'pg';
+import { Pool } from "pg";
+import type { PoolClient } from "pg";
 
 // ─────────────────────────────────────────────
 // Case-insensitive helpers (kept for compatibility)
 // ─────────────────────────────────────────────
 export function getCaseInsensitiveVal(obj: any, key: string): any {
-  if (!obj || typeof obj !== 'object') return undefined;
+  if (!obj || typeof obj !== "object") return undefined;
   const lowerKey = key.toLowerCase();
   for (const actualKey of Object.keys(obj)) {
     if (actualKey.toLowerCase() === lowerKey) return obj[actualKey];
@@ -34,10 +34,13 @@ export function getCaseInsensitiveVal(obj: any, key: string): any {
 }
 
 export function setCaseInsensitiveVal(obj: any, key: string, val: any) {
-  if (!obj || typeof obj !== 'object') return;
+  if (!obj || typeof obj !== "object") return;
   const lowerKey = key.toLowerCase();
   for (const actualKey of Object.keys(obj)) {
-    if (actualKey.toLowerCase() === lowerKey) { obj[actualKey] = val; return; }
+    if (actualKey.toLowerCase() === lowerKey) {
+      obj[actualKey] = val;
+      return;
+    }
   }
   obj[key] = val;
 }
@@ -45,12 +48,15 @@ export function setCaseInsensitiveVal(obj: any, key: string, val: any) {
 // ─────────────────────────────────────────────
 // MySQL → PostgreSQL SQL converter
 // ─────────────────────────────────────────────
-export function convertToPostgres(sql: string, params: any[] = []): { text: string; values: any[] } {
+export function convertToPostgres(
+  sql: string,
+  params: any[] = []
+): { text: string; values: any[] } {
   // 1. Replace backtick-quoted identifiers with double-quote
   let text = sql.replace(/`([^`]+)`/g, '"$1"');
 
   // 2. Convert IN (?) to = ANY(?) for PostgreSQL array parameters compatibility
-  text = text.replace(/\bIN\s*\(\s*\?\s*\)/gi, '= ANY(?)');
+  text = text.replace(/\bIN\s*\(\s*\?\s*\)/gi, "= ANY(?)");
 
   // 3. Replace ? placeholders with $1, $2, ...
   let idx = 0;
@@ -58,63 +64,165 @@ export function convertToPostgres(sql: string, params: any[] = []): { text: stri
 
   // 3. DDL adaptations
   text = text
-    .replace(/TINYINT\(1\)/gi, 'BOOLEAN')
-    .replace(/LONGTEXT/gi, 'TEXT')
-    .replace(/\bJSON\b/g, 'JSONB')
-    .replace(/ENGINE\s*=\s*InnoDB[^;]*/gi, '')
-    .replace(/DEFAULT\s+CHARSET\s*=\s*\w+/gi, '')
-    .replace(/COLLATE\s+\w+/gi, '')
-    .replace(/AUTO_INCREMENT/gi, '')
-    .replace(/COMMENT\s+'[^']*'/gi, '');
+    .replace(/TINYINT\(1\)/gi, "BOOLEAN")
+    .replace(/LONGTEXT/gi, "TEXT")
+    .replace(/\bJSON\b/g, "JSONB")
+    .replace(/ENGINE\s*=\s*InnoDB[^;]*/gi, "")
+    .replace(/DEFAULT\s+CHARSET\s*=\s*\w+/gi, "")
+    .replace(/COLLATE\s+\w+/gi, "")
+    .replace(/AUTO_INCREMENT/gi, "")
+    .replace(/COMMENT\s+'[^']*'/gi, "");
 
   // 4. information_schema TABLE_SCHEMA = DATABASE() → table_schema = 'public'
   text = text.replace(/TABLE_SCHEMA\s*=\s*DATABASE\(\)/gi, "table_schema = 'public'");
 
   // 5. Convert INSERT IGNORE → INSERT
-  text = text.replace(/INSERT\s+IGNORE\s+/gi, 'INSERT ');
+  text = text.replace(/INSERT\s+IGNORE\s+/gi, "INSERT ");
 
   // 5b. Boolean comparisons
   text = text
-    .replace(/([\"'`]?\bread\b[\"'`]?)\s*=\s*0/gi, '$1 = FALSE')
-    .replace(/([\"'`]?\bread\b[\"'`]?)\s*=\s*1/gi, '$1 = TRUE');
+    .replace(/([\"'`]?\bread\b[\"'`]?)\s*=\s*0/gi, "$1 = FALSE")
+    .replace(/([\"'`]?\bread\b[\"'`]?)\s*=\s*1/gi, "$1 = TRUE");
 
   // 6. Auto-quote PascalCase table names
   const pgTables = [
-    'Users', 'Projects', 'ProjectMembers', 'ProjectInvites', 'MasterData', 'Sprints',
-    'Tasks', 'TaskExternalLinks', 'Attachments', 'LinkedTasks', 'Comments', 'TaskCustomFields',
-    'ActivityLogs', 'AuditLogs', 'Milestones', 'MilestoneSprints', 'Meetings', 'DiscussionPoints',
-    'Notifications', 'Messages', 'QATestSuites', 'QATestCases', 'QATestCaseExecutionLogs',
-    'ProjectModules', 'Documents', 'TokenBlacklist',
+    "Users",
+    "Projects",
+    "ProjectMembers",
+    "ProjectInvites",
+    "MasterData",
+    "Sprints",
+    "Tasks",
+    "TaskExternalLinks",
+    "Attachments",
+    "LinkedTasks",
+    "Comments",
+    "TaskCustomFields",
+    "ActivityLogs",
+    "AuditLogs",
+    "Milestones",
+    "MilestoneSprints",
+    "Meetings",
+    "DiscussionPoints",
+    "Notifications",
+    "Messages",
+    "QATestSuites",
+    "QATestCases",
+    "QATestCaseExecutionLogs",
+    "ProjectModules",
+    "Documents",
+    "TokenBlacklist",
   ];
   for (const tbl of pgTables) {
-    const re = new RegExp('(?<!"\\.)\\b' + tbl + '\\b(?!")', 'g');
+    const re = new RegExp('(?<!"\\.)\\b' + tbl + '\\b(?!")', "g");
     text = text.replace(re, '"' + tbl + '"');
   }
 
   // 7. Auto-quote camelCase column names
   const camelCaseCols = [
-    'passwordHash', 'displayName', 'avatarUrl', 'photoUrl', 'avatar_url', 'createdAt', 'updatedAt',
-    'ownerId', 'projectId', 'sprintId', 'taskKey', 'assigneeId', 'assigneeEmail',
-    'reporterId', 'projectRisk', 'storyPoints', 'orderIndex', 'isBlocked', 'dueDate',
-    'milestoneId', 'moduleId', 'linkedEpicId', 'parentTaskId', 'parentAdminId', 'parentId',
-    'userId', 'taskId', 'senderId', 'receiverId', 'recipientId', 'relatedId',
-    'entityId', 'entityName', 'actionType', 'ipAddress', 'userAgent',
-    'meetingId', 'authorId', 'uploadedBy', 'uploadedAt', 'fileName',
-    'createdBy', 'downloadCount', 'namaModul', 'tipeTesting', 'caseId',
-    'activeTesterId', 'activeTesterName', 'lockedAt', 'evidenceUrl', 'evidenceType',
-    'evidenceName', 'linkedBugKey', 'commentsList', 'suiteId', 'rowNum', 'modulId',
-    'testCaseId', 'runVersion', 'runLabel', 'executionStatus', 'linkedIssueKey',
-    'executedByUserId', 'executedByName', 'expiresAt', 'sourceTaskId', 'targetTaskId',
-    'linkType', 'originalName', 'projectKey', 'taskCounter', 'dashboard_layout',
-    'lastSeen', 'nama_lengkap', 'aiSummary', 'recording_url', 'file_size',
-    'upload_status', 'analysis_result', 'addedBy', 'addedAt',
-    'oldValues', 'newValues', 'fileRef', 'uploadedByUserId', 'uploadedByName',
-    'photoURL', 'fileType', 'fileSize', 'startDate', 'endDate', 'acceptanceCriteria', 'meetingLink',
-    'dropdownOptions', 'fieldType', 'fileData', 'scheduledAt', 'currentSessionToken',
+    "passwordHash",
+    "displayName",
+    "avatarUrl",
+    "photoUrl",
+    "avatar_url",
+    "createdAt",
+    "updatedAt",
+    "ownerId",
+    "projectId",
+    "sprintId",
+    "taskKey",
+    "assigneeId",
+    "assigneeEmail",
+    "reporterId",
+    "projectRisk",
+    "storyPoints",
+    "orderIndex",
+    "isBlocked",
+    "dueDate",
+    "milestoneId",
+    "moduleId",
+    "linkedEpicId",
+    "parentTaskId",
+    "parentAdminId",
+    "parentId",
+    "userId",
+    "taskId",
+    "senderId",
+    "receiverId",
+    "recipientId",
+    "relatedId",
+    "entityId",
+    "entityName",
+    "actionType",
+    "ipAddress",
+    "userAgent",
+    "meetingId",
+    "authorId",
+    "uploadedBy",
+    "uploadedAt",
+    "fileName",
+    "createdBy",
+    "downloadCount",
+    "namaModul",
+    "tipeTesting",
+    "caseId",
+    "activeTesterId",
+    "activeTesterName",
+    "lockedAt",
+    "evidenceUrl",
+    "evidenceType",
+    "evidenceName",
+    "linkedBugKey",
+    "commentsList",
+    "suiteId",
+    "rowNum",
+    "modulId",
+    "testCaseId",
+    "runVersion",
+    "runLabel",
+    "executionStatus",
+    "linkedIssueKey",
+    "executedByUserId",
+    "executedByName",
+    "expiresAt",
+    "sourceTaskId",
+    "targetTaskId",
+    "linkType",
+    "originalName",
+    "projectKey",
+    "taskCounter",
+    "dashboard_layout",
+    "lastSeen",
+    "nama_lengkap",
+    "aiSummary",
+    "recording_url",
+    "file_size",
+    "upload_status",
+    "analysis_result",
+    "addedBy",
+    "addedAt",
+    "oldValues",
+    "newValues",
+    "fileRef",
+    "uploadedByUserId",
+    "uploadedByName",
+    "photoURL",
+    "fileType",
+    "fileSize",
+    "startDate",
+    "endDate",
+    "acceptanceCriteria",
+    "meetingLink",
+    "dropdownOptions",
+    "fieldType",
+    "fileData",
+    "scheduledAt",
+    "currentSessionToken",
+    "canvasData",
   ];
   const sortedCamelCaseCols = [...camelCaseCols].sort((a, b) => b.length - a.length);
   for (const col of sortedCamelCaseCols) {
-    const re = new RegExp('(?<!"\\.)\\b' + col + '\\b(?!")', 'g');
+    const re = new RegExp('(?<!"\\.)\\b' + col + '\\b(?!")', "g");
     text = text.replace(re, '"' + col + '"');
   }
 
@@ -147,7 +255,9 @@ export function convertToPostgres(sql: string, params: any[] = []): { text: stri
 export const useLocalJSONDb = false; // LOCKED: always false
 
 export function executeSqlInMemory(_sql: string, _params?: any[]): never {
-  throw new Error('[DB] Local JSON DB is DISABLED. Application requires Neon PostgreSQL connection.');
+  throw new Error(
+    "[DB] Local JSON DB is DISABLED. Application requires Neon PostgreSQL connection."
+  );
 }
 
 // ─────────────────────────────────────────────
@@ -156,10 +266,12 @@ export function executeSqlInMemory(_sql: string, _params?: any[]): never {
 // Tidak ada fallback kredensial di sini secara sengaja: connection string yang
 // di-hardcode akan membocorkan rahasia produksi ke source control. Konfigurasi
 // yang hilang harus gagal secara terbuka, bukan diam-diam memakai kredensial lain.
-const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || '';
+const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
 
 if (!connectionString) {
-  console.error('[DB] DATABASE_URL/POSTGRES_URL belum di-set. Tidak ada kredensial fallback — semua query akan gagal.');
+  console.error(
+    "[DB] DATABASE_URL/POSTGRES_URL belum di-set. Tidak ada kredensial fallback — semua query akan gagal."
+  );
 }
 
 // Menyimpan string yang dipakai pool aktif, agar updatePoolConfig bisa melewati
@@ -169,19 +281,19 @@ let activeConnectionString = connectionString;
 let pgPool: Pool = createPgPool();
 
 function createPgPool(connStr?: string): Pool {
-  const cs = connStr || connectionString || '';
+  const cs = connStr || connectionString || "";
   const sslConfig = cs ? { rejectUnauthorized: false } : undefined;
   const pool = new Pool({
     connectionString: cs,
     ssl: sslConfig,
-    max: parseInt(process.env.DB_CONNECTION_LIMIT || '100', 10),
+    max: parseInt(process.env.DB_CONNECTION_LIMIT || "100", 10),
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
   });
 
   // Attach error listener to prevent unhandled background socket errors from crashing node
-  pool.on('error', (err) => {
-    console.error('❌ [PostgreSQL] Pool error (background reset):', err.message);
+  pool.on("error", (err) => {
+    console.error("❌ [PostgreSQL] Pool error (background reset):", err.message);
   });
 
   return pool;
@@ -189,34 +301,32 @@ function createPgPool(connStr?: string): Pool {
 
 // Verify connection on startup
 if (connectionString) {
-  pgPool.query('SELECT 1')
-    .catch((err) => {
-      console.warn('⚠️ [PostgreSQL] Startup check: Cannot connect to Neon PostgreSQL:', err.message);
-      console.warn('   → Will retry connection dynamically on request.');
-    });
+  pgPool.query("SELECT 1").catch((err) => {
+    console.warn("⚠️ [PostgreSQL] Startup check: Cannot connect to Neon PostgreSQL:", err.message);
+    console.warn("   → Will retry connection dynamically on request.");
+  });
 }
-
 
 // ─────────────────────────────────────────────
 // Pool Proxy — mimics mysql2 Pool API
 // ─────────────────────────────────────────────
 const poolProxy = new Proxy({} as any, {
   get(_target, prop) {
-    if (prop === 'getConnection') {
+    if (prop === "getConnection") {
       return async function () {
         let client: PoolClient;
         try {
           client = await pgPool.connect();
         } catch (err: any) {
           console.error(`[PostgreSQL] getConnection failed: ${err.message}`);
-          throw new Error('[DB] Cannot acquire PostgreSQL connection. Check Neon status.');
+          throw new Error("[DB] Cannot acquire PostgreSQL connection. Check Neon status.");
         }
 
         // Attach error handler to prevent unhandled Socket errors from crashing node.
         // Check listener count to avoid MaxListenersExceededWarning when clients are reused from pool.
-        if (client.listenerCount('error') === 0) {
-          client.on('error', (err) => {
-            console.error('[PostgreSQL] Acquired client socket error:', err.message);
+        if (client.listenerCount("error") === 0) {
+          client.on("error", (err) => {
+            console.error("[PostgreSQL] Acquired client socket error:", err.message);
           });
         }
 
@@ -244,22 +354,36 @@ const poolProxy = new Proxy({} as any, {
             }
           },
           beginTransaction: async () => {
-            try { await client.query('BEGIN'); } catch (e: any) { console.error('[PG] BEGIN error:', e.message); }
+            try {
+              await client.query("BEGIN");
+            } catch (e: any) {
+              console.error("[PG] BEGIN error:", e.message);
+            }
           },
           commit: async () => {
-            try { await client.query('COMMIT'); } catch (e: any) { console.error('[PG] COMMIT error:', e.message); }
+            try {
+              await client.query("COMMIT");
+            } catch (e: any) {
+              console.error("[PG] COMMIT error:", e.message);
+            }
           },
           rollback: async () => {
-            try { await client.query('ROLLBACK'); } catch (e: any) { console.error('[PG] ROLLBACK error:', e.message); }
+            try {
+              await client.query("ROLLBACK");
+            } catch (e: any) {
+              console.error("[PG] ROLLBACK error:", e.message);
+            }
           },
           release: () => {
-            try { client.release(); } catch {}
+            try {
+              client.release();
+            } catch {}
           },
         };
       };
     }
 
-    if (prop === 'query' || prop === 'execute') {
+    if (prop === "query" || prop === "execute") {
       return async (sqlStr: string, values?: any[]) => {
         try {
           const converted = convertToPostgres(sqlStr, values);
@@ -273,20 +397,24 @@ const poolProxy = new Proxy({} as any, {
       };
     }
 
-    if (prop === 'escape') {
+    if (prop === "escape") {
       return (val: any) => {
-        if (val === null || val === undefined) return 'NULL';
-        if (typeof val === 'number') return String(val);
-        if (typeof val === 'boolean') return val ? 'TRUE' : 'FALSE';
+        if (val === null || val === undefined) return "NULL";
+        if (typeof val === "number") return String(val);
+        if (typeof val === "boolean") return val ? "TRUE" : "FALSE";
         return "'" + String(val).replace(/'/g, "''") + "'";
       };
     }
 
-    if (prop === 'end') {
-      return async () => { try { await pgPool?.end(); } catch {} };
+    if (prop === "end") {
+      return async () => {
+        try {
+          await pgPool?.end();
+        } catch {}
+      };
     }
 
-    if (prop === 'on') {
+    if (prop === "on") {
       return (event: string, handler: any) => pgPool?.on(event as any, handler);
     }
 
@@ -313,13 +441,12 @@ export function getPgPool(): Pool {
   return pgPool;
 }
 
-export function getDbMode(): 'pg' | 'local' {
-  return 'pg'; // ALWAYS PostgreSQL
+export function getDbMode(): "pg" | "local" {
+  return "pg"; // ALWAYS PostgreSQL
 }
 
-export function setDbMode(_mode: 'mysql' | 'pg' | 'local') {
+export function setDbMode(_mode: "mysql" | "pg" | "local") {
   // Local mode is permanently disabled. This function is a no-op.
-
 }
 
 /**

@@ -1422,6 +1422,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             nodes: foundFlow?.nodes || [],
             edges: foundFlow?.edges || [],
             externalUrl: flowExternalUrl,
+            description: flowDescription,
           });
         } catch (apiErr) {
           console.warn("API sync error:", apiErr);

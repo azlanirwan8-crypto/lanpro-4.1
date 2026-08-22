@@ -10,6 +10,8 @@ export interface DocumentEntity {
   fileData?: string | null;
   fileName?: string | null;
   fileType?: string | null;
+  /** Payload kanvas flowchart ({nodes,edges}). Item #136 — dulu menumpang `description`. */
+  canvasData?: string | null;
   createdBy?: string;
   downloadCount?: number;
   createdAt?: string;
@@ -21,7 +23,7 @@ export class DocumentRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        "SELECT id, projectId, title, description, type, link, fileName, fileType, createdBy, downloadCount, createdAt, updatedAt FROM Documents WHERE projectId = ? ORDER BY createdAt DESC",
+        "SELECT id, projectId, title, description, type, link, fileName, fileType, canvasData, createdBy, downloadCount, createdAt, updatedAt FROM Documents WHERE projectId = ? ORDER BY createdAt DESC",
         [projectId]
       );
       return rows || [];
@@ -33,17 +35,16 @@ export class DocumentRepository {
   async findById(id: string): Promise<DocumentEntity | null> {
     const connection = await db.getConnection();
     try {
-      const [rows]: any = await connection.query(
-        "SELECT * FROM Documents WHERE id = ?",
-        [id]
-      );
+      const [rows]: any = await connection.query("SELECT * FROM Documents WHERE id = ?", [id]);
       return rows && rows.length > 0 ? rows[0] : null;
     } finally {
       connection.release();
     }
   }
 
-  async getFileAndIncrementDownload(id: string): Promise<{ fileData: string; fileName: string; fileType: string } | null> {
+  async getFileAndIncrementDownload(
+    id: string
+  ): Promise<{ fileData: string; fileName: string; fileType: string } | null> {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
@@ -67,7 +68,7 @@ export class DocumentRepository {
     const connection = await db.getConnection();
     try {
       await connection.query(
-        "INSERT INTO Documents (id, projectId, title, description, type, link, fileData, fileName, fileType, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO Documents (id, projectId, title, description, type, link, fileData, fileName, fileType, canvasData, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           doc.id,
           doc.projectId,
@@ -78,6 +79,7 @@ export class DocumentRepository {
           doc.fileData || null,
           doc.fileName || null,
           doc.fileType || null,
+          doc.canvasData || null,
           doc.createdBy || "guest",
         ]
       );
@@ -119,6 +121,10 @@ export class DocumentRepository {
       if (updates.fileType !== undefined) {
         sqlUpdates.push("fileType = ?");
         values.push(updates.fileType);
+      }
+      if (updates.canvasData !== undefined) {
+        sqlUpdates.push("canvasData = ?");
+        values.push(updates.canvasData);
       }
 
       if (sqlUpdates.length > 0) {
