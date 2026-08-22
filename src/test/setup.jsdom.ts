@@ -6,8 +6,15 @@
  * sonner) dan akan melempar TypeError bila tidak disediakan — kegagalan yang
  * tidak ada hubungannya dengan kode yang sedang diuji.
  */
-import '@testing-library/jest-dom';
-import { TextEncoder, TextDecoder } from 'util';
+import "@testing-library/jest-dom";
+// #135 — memuat konfigurasi i18next untuk SELURUH test jsdom.
+// Aplikasi menginisialisasinya di `main.tsx`, yang tidak ikut termuat saat
+// sebuah komponen dirender langsung di test. Tanpa baris ini `t()` memulangkan
+// nama kunci mentah ("flowchart.subtitle") alih-alih teksnya, dan setiap
+// assertion pada teks yang tampak di layar gagal dengan pesan yang menyesatkan.
+import "../i18n";
+
+import { TextEncoder, TextDecoder } from "util";
 
 // jsdom tidak memasang TextEncoder/TextDecoder sebagai global, padahal Node
 // punya keduanya. jspdf (lewat fast-png → iobuffer) memakainya saat modul
@@ -17,7 +24,7 @@ globalThis.TextDecoder ??= TextDecoder as unknown as typeof globalThis.TextDecod
 
 // Dipakai komponen yang bereaksi pada tema/breakpoint.
 if (!window.matchMedia) {
-  Object.defineProperty(window, 'matchMedia', {
+  Object.defineProperty(window, "matchMedia", {
     writable: true,
     value: (query: string) => ({
       matches: false,
@@ -41,7 +48,7 @@ class ResizeObserverStub {
 
 class IntersectionObserverStub {
   readonly root = null;
-  readonly rootMargin = '';
+  readonly rootMargin = "";
   readonly thresholds: ReadonlyArray<number> = [];
   observe() {}
   unobserve() {}
@@ -57,11 +64,11 @@ globalThis.IntersectionObserver ??=
 
 // jsdom tidak melakukan layout, jadi setiap elemen berukuran 0x0 dan recharts
 // menolak menggambar. Beri ukuran tetap supaya grafik ikut ter-render.
-Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
   configurable: true,
   value: 1024,
 });
-Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
   configurable: true,
   value: 768,
 });
@@ -70,11 +77,11 @@ window.scrollTo = () => {};
 
 // AppContainer memakai crypto.randomUUID untuk id sementara.
 if (!globalThis.crypto?.randomUUID) {
-  Object.defineProperty(globalThis, 'crypto', {
+  Object.defineProperty(globalThis, "crypto", {
     configurable: true,
     value: {
       ...globalThis.crypto,
-      randomUUID: () => '00000000-0000-4000-8000-000000000000',
+      randomUUID: () => "00000000-0000-4000-8000-000000000000",
     },
   });
 }

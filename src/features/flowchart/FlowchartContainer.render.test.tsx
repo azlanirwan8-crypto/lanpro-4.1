@@ -93,7 +93,10 @@ describe("FlowchartView", () => {
     await waitFor(() =>
       expect(screen.getByRole("heading", { name: /Flowchart Editor/i })).toBeInTheDocument()
     );
-    expect(screen.getByText(/Manage interactive diagrams, process flows/i)).toBeInTheDocument();
+    // #135 — subjudul kini datang dari kamus i18n. Bahasa bawaan aplikasi
+    // adalah Indonesia, jadi penandanya ikut Indonesia. Yang dijaga tetap
+    // sama: tampilan daftar benar-benar ter-render, bukan sisa kerangka.
+    expect(screen.getByText(/Kelola diagram interaktif, alur proses/i)).toBeInTheDocument();
   });
 
   // Tampilan kanvas adalah bagian yang dibelah pada Fase 5, jadi justru ia yang
@@ -119,7 +122,11 @@ describe("FlowchartView", () => {
 
     // Kerangka editor: hanya ada setelah sebuah flowchart dibuka.
     await waitFor(() => expect(screen.getByText(/Back to Flowchart List/i)).toBeInTheDocument());
-    expect(screen.getByText(/Daftar Dokumen/i)).toBeInTheDocument();
+    // #135 — tab dan judul panel kiri sama-sama berbunyi "Daftar Dokumen"
+    // karena keduanya menunjuk hal yang sama dan kini memakai satu kunci i18n.
+    // Sebelumnya lolos getByText hanya karena yang satu Inggris ("Document
+    // List") dan yang lain Indonesia — inkonsistensi yang justru diperbaiki.
+    expect(screen.getAllByText(/Daftar Dokumen/i).length).toBeGreaterThan(0);
 
     // Editor terbuka pada mode dokumen. Kanvasnya — bagian terbesar dari JSX
     // yang dibelah pada fase ini — baru ter-render setelah beralih ke

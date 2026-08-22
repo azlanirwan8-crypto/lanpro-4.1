@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { safeLocalStorage, safeSessionStorage } from "../../lib/safeStorage";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useFlowchartCanvas } from "../../hooks/useFlowchartCanvas";
@@ -83,6 +84,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   currentUserProfile,
   onSaveFlowcharts,
 }) => {
+  const { t } = useTranslation();
   // Get active logged in user author name dynamically
   const getResolvedAuthor = () => {
     if (currentUserProfile?.displayName) return currentUserProfile.displayName;
@@ -2528,7 +2530,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             : "text-content-muted hover:text-content-strong"
                         )}
                       >
-                        <BookOpen className="w-3.5 h-3.5" /> Document List
+                        <BookOpen className="w-3.5 h-3.5" /> {t("flowchart.documentList")}
                       </button>
                       <button
                         onClick={() => setRightViewMode("canvas")}
@@ -2549,14 +2551,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         <button
                           onClick={(e) => openEditModal(currentFlowMetadata, e)}
                           className="p-1.5 bg-surface hover:bg-surface-sunken text-content-secondary hover:text-primary rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"
-                          title="Edit document metadata"
+                          title={t("flowchart.editMetadata")}
                         >
                           <Edit3 className="w-4 h-4" />
                         </button>
                         <button
                           onClick={(e) => handleDeleteFlowchart(currentFlowMetadata.id, e)}
                           className="p-1.5 bg-surface hover:bg-rose-500/10 text-content-secondary hover:text-rose-600 rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"
-                          title="Delete document"
+                          title={t("flowchart.deleteDocument")}
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -2642,7 +2644,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         <div className="p-4 border-b border-border-subtle flex items-center justify-between bg-surface shrink-0">
                           <h4 className="text-sm font-medium text-content-strong flex items-center gap-2">
                             <FileText className="w-5 h-5 text-violet-600" />
-                            Daftar Dokumen
+                            {t("flowchart.documentList")}
                           </h4>
                           <button
                             onClick={openUploadDocumentModal}
@@ -2686,7 +2688,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                       download={doc.fileName}
                                       className="flex items-center gap-2 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-500/10 hover:bg-indigo-500/15 px-3 py-1.5 rounded-lg transition-colors"
                                     >
-                                      <Download className="w-3.5 h-3.5" /> Download
+                                      <Download className="w-3.5 h-3.5" /> {t("flowchart.download")}
                                     </a>
                                   </div>
                                 </div>
@@ -3517,7 +3519,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 }
                                 className="w-full text-xs bg-surface-sunken border border-border-subtle rounded p-1.5 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-medium"
                               >
-                                <option value="">-- Hubungkan Task --</option>
+                                <option value="">{t("flowchart.connectTask")}</option>
                                 {tasks.map((t) => (
                                   <option key={t.id} value={t.id}>
                                     [{t.key}] {t.title} ({t.status})
@@ -3784,7 +3786,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 <div className="w-8 h-8 rounded-md bg-primary-surface/10 text-primary flex items-center justify-center">
                   <FileText className="w-4 h-4" />
                 </div>
-                <h3 className="text-sm font-medium text-content">Upload Dokumen Baru</h3>
+                <h3 className="text-sm font-medium text-content">
+                  {t("flowchart.uploadNewDocument")}
+                </h3>
               </div>
               <button
                 onClick={closeUploadDocumentModal}
@@ -3810,7 +3814,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
               <div>
                 <label className="block text-xs sm:text-[11px] font-medium text-content-body mb-1.5">
-                  Upload File (Max 5MB)
+                  {t("flowchart.uploadFileMax")}
                 </label>
                 <div className="border border-dashed border-border-subtle rounded-md p-6 flex flex-col items-center justify-center bg-surface-sunken/50 relative overflow-hidden group hover:border-primary transition-colors">
                   <input
@@ -3823,7 +3827,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     <Upload className="w-4 h-4" />
                   </div>
                   <p className="text-xs font-medium text-content-body mb-0.5">
-                    Pilih atau Seret File Kesini
+                    {t("flowchart.pickOrDrag")}
                   </p>
                   <p className="text-xs sm:text-[10px] text-content-subtle font-medium">
                     Mendukung PDF, Word, Excel (Max. 5MB)
@@ -3858,7 +3862,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 disabled={!uploadDocName || !uploadDocFile}
                 className="px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-50 text-content-inverse text-xs font-medium rounded-md transition-all shadow-xs active:scale-95 cursor-pointer"
               >
-                Upload & Simpan
+                {t("flowchart.uploadAndSave")}
               </button>
             </div>
           </div>

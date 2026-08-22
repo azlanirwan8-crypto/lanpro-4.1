@@ -10,6 +10,7 @@
  * membacanya. Memindahkannya ke sini akan memecah satu sumber kebenaran
  * menjadi dua.
  */
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Workflow, Search, Plus, Eye, Edit3, Trash2 } from "lucide-react";
 import { ResponsiveTable } from "../../../components/ResponsiveTable";
@@ -56,6 +57,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
   canModifyFlowchart,
   handleDeleteFlowchart,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex-1 flex flex-col p-3 md:p-6 font-sans overflow-y-auto w-full bg-surface-muted animate-in fade-in duration-700">
       <div className="flex-1 flex flex-col bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
@@ -70,7 +72,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                 Flowchart Editor
               </h3>
               <p className="text-xs font-medium text-content-muted mt-0.5">
-                Manage interactive diagrams, process flows, and visual architecture.
+                {t("flowchart.subtitle")}
               </p>
             </div>
           </div>
@@ -79,7 +81,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
             <div className="relative flex-1 sm:w-72">
               <input
                 type="text"
-                placeholder="Search flowcharts by title..."
+                placeholder={t("flowchart.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -94,7 +96,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
               onClick={openCreateModal}
               className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs shadow-primary/20 cursor-pointer shrink-0"
             >
-              <Plus className="w-4 h-4" /> Add Flowchart
+              <Plus className="w-4 h-4" /> {t("flowchart.addFlowchart")}
             </button>
           </div>
         </div>
@@ -106,9 +108,13 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
               <thead>
                 <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-semibold text-primary uppercase tracking-wider whitespace-nowrap">
                   <th className="py-3.5 px-4 w-14 text-center">No</th>
-                  <th className="py-3.5 px-4 min-w-[180px] max-w-[280px]">Flowchart Title</th>
+                  <th className="py-3.5 px-4 min-w-[180px] max-w-[280px]">
+                    {t("flowchart.thTitle")}
+                  </th>
                   <th className="py-3.5 px-4 w-36">Category</th>
-                  <th className="py-3.5 px-4 min-w-[180px] max-w-[280px]">Description</th>
+                  <th className="py-3.5 px-4 min-w-[180px] max-w-[280px]">
+                    {t("flowchart.thDescription")}
+                  </th>
                   <th className="py-3.5 px-4 w-44">Linked Epic</th>
                   <th className="py-3.5 px-4 w-40">Author</th>
                   <th className="py-3.5 px-4 w-36">Last Updated</th>
@@ -122,15 +128,17 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                       <div className="w-14 h-14 rounded-md bg-primary-surface/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 shadow-2xs">
                         <Workflow className="w-6 h-6 text-primary" />
                       </div>
-                      <p className="font-medium text-content-strong text-sm">No flowcharts found</p>
+                      <p className="font-medium text-content-strong text-sm">
+                        {t("flowchart.emptyTitle")}
+                      </p>
                       <p className="text-xs text-content-subtle mt-1 mb-4">
-                        Create a new flowchart or adjust your search keyword.
+                        {t("flowchart.emptyHint")}
                       </p>
                       <button
                         onClick={openCreateModal}
                         className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs shadow-primary/20 cursor-pointer"
                       >
-                        <Plus className="w-4 h-4" /> Add Flowchart
+                        <Plus className="w-4 h-4" /> {t("flowchart.addFlowchart")}
                       </button>
                     </td>
                   </tr>
@@ -180,7 +188,9 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                           {fw.description ? (
                             fw.description
                           ) : (
-                            <span className="text-content-subtle italic">No description</span>
+                            <span className="text-content-subtle italic">
+                              {t("flowchart.noDescription")}
+                            </span>
                           )}
                         </td>
                         <td className="py-3 px-4 whitespace-nowrap">
@@ -217,7 +227,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                                 setIsEditorActive(true);
                               }}
                               className="p-1.5 text-content-muted hover:text-primary hover:bg-primary-surface/10 rounded-md transition-all cursor-pointer"
-                              title="View flowchart canvas"
+                              title={t("flowchart.viewCanvas")}
                             >
                               <Eye className="w-4 h-4" />
                             </button>
@@ -230,14 +240,14 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                                     setIsEditorActive(true);
                                   }}
                                   className="p-1.5 text-content-muted hover:text-primary hover:bg-primary-surface/10 rounded-md transition-all cursor-pointer"
-                                  title="Edit flowchart"
+                                  title={t("flowchart.editFlowchart")}
                                 >
                                   <Edit3 className="w-4 h-4" />
                                 </button>
                                 <button
                                   onClick={(e) => handleDeleteFlowchart(fw.id, e)}
                                   className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
-                                  title="Delete flowchart"
+                                  title={t("flowchart.deleteFlowchart")}
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -267,7 +277,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                   disabled={currentPage === 1}
                   className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs font-medium disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
                 >
-                  Previous
+                  {t("flowchart.previous")}
                 </button>
                 <span className="px-3.5 py-1.5 bg-primary-surface text-content-inverse rounded-md text-xs font-medium shadow-xs">
                   {currentPage}
@@ -277,7 +287,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                   disabled={currentPage === totalPages}
                   className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs font-medium disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
                 >
-                  Next
+                  {t("flowchart.next")}
                 </button>
               </div>
             )}
