@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import {
@@ -48,6 +49,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
   canUndo,
   canRedo,
 }) => {
+  const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Keep menu on screen bounds
@@ -108,17 +110,17 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
     >
       {/* Title */}
       <div className="px-3 py-1.5 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider text-content-subtle border-b border-border-faint mb-1 flex items-center justify-between">
-        <span>Aksi Kanvas</span>
+        <span>{t("canvasMenu.title")}</span>
         <span className="text-indigo-600 font-mono text-xs sm:text-[10px] sm:text-[8px] flex items-center gap-0.5">
           <MapPin className="w-2 h-2 text-indigo-400" />
-          KANVAS AKTIF
+          {t("canvasMenu.activeCanvas")}
         </span>
       </div>
 
       {/* Shapes Subheader */}
       <div className="px-3 py-1 flex items-center gap-1.5 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider text-content-subtle">
         <Plus className="w-3 h-3 text-content-subtle" />
-        <span>Tambah Komponen Baru</span>
+        <span>{t("canvasMenu.addComponent")}</span>
       </div>
 
       {/* Shapes List */}
@@ -158,10 +160,10 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
             onClose();
           }}
           className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-secondary hover:text-indigo-600 hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
-          title="Perbesar Tampilan (+10%)"
+          title={t("canvasMenu.zoomInTip")}
         >
           <ZoomIn className="w-3.5 h-3.5 text-content-muted" />
-          <span>Zoom In</span>
+          <span>{t("canvasMenu.zoomIn")}</span>
         </button>
         <button
           onClick={() => {
@@ -169,10 +171,10 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
             onClose();
           }}
           className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-secondary hover:text-indigo-600 hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
-          title="Perkecil Tampilan (-10%)"
+          title={t("canvasMenu.zoomOutTip")}
         >
           <ZoomOut className="w-3.5 h-3.5 text-content-muted" />
-          <span>Zoom Out</span>
+          <span>{t("canvasMenu.zoomOut")}</span>
         </button>
         <button
           onClick={() => {
@@ -180,10 +182,10 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
             onClose();
           }}
           className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-secondary hover:text-indigo-600 hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
-          title="Fokus Ulang Kanvas (100%)"
+          title={t("canvasMenu.resetTip")}
         >
           <RotateCcw className="w-3.5 h-3.5 text-content-muted" />
-          <span>Reset</span>
+          <span>{t("canvasMenu.reset")}</span>
         </button>
       </div>
 
@@ -205,7 +207,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
           )}
         >
           <Undo className="w-3 h-3" />
-          <span>Undo</span>
+          <span>{t("canvasMenu.undo")}</span>
         </button>
 
         <button
@@ -222,7 +224,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
           )}
         >
           <Redo className="w-3 h-3" />
-          <span>Redo</span>
+          <span>{t("canvasMenu.redo")}</span>
         </button>
       </div>
 
@@ -237,7 +239,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
         className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-rose-600 hover:bg-rose-500/10 transition-colors text-left"
       >
         <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-        <span>Bersihkan Kanvas</span>
+        <span>{t("canvasMenu.clearCanvas")}</span>
       </button>
     </motion.div>
   );

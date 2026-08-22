@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import {
   XCircle,
@@ -49,6 +50,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
   handleOpenCreateBugModal,
   handleStatusChange,
 }) => {
+  const { t } = useTranslation();
   if (!selectedTestCase) return null;
 
   return (
@@ -113,7 +115,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
               <button
                 onClick={() => setSelectedTestCase(null)}
                 className="p-1 rounded-md hover:bg-surface-strong/80 text-content-subtle hover:text-content-secondary transition-colors cursor-pointer"
-                title="Tutup (Atau klik di luar panel)"
+                title={t("qaDetail.closeTip")}
               >
                 <XCircle className="w-5 h-5" />
               </button>
@@ -137,7 +139,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
             }`}
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
-            Detail Case
+            {t("qaDetail.caseDetail")}
           </button>
           <button
             type="button"
@@ -169,10 +171,10 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                 <div>
                   <h4 className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
                     <History className="w-3.5 h-3.5 text-primary" />
-                    Execution History Timeline
+                    {t("qaDetail.executionTimeline")}
                   </h4>
                   <p className="text-xs sm:text-[10px] text-content-subtle">
-                    Audit Trail historis eksekusi pengujian
+                    {t("qaDetail.auditTrail")}
                   </p>
                 </div>
                 <button
@@ -186,13 +188,13 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
               {loadingHistory ? (
                 <div className="py-6 text-center text-xs text-content-subtle flex items-center justify-center gap-2">
                   <RefreshCw className="w-4 h-4 animate-spin text-primary" />
-                  Memuat riwayat eksekusi...
+                  {t("qaDetail.loadingHistory")}
                 </div>
               ) : executionLogs.length === 0 ? (
                 <div className="py-8 text-center bg-surface-sunken border border-border-faint rounded-md p-3">
                   <History className="w-6 h-6 text-content-subtle mx-auto mb-1.5" />
                   <p className="text-xs font-medium text-content-secondary">
-                    Belum Ada Catatan Run Eksekusi
+                    {t("qaDetail.noRunRecord")}
                   </p>
                 </div>
               ) : (
@@ -277,7 +279,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                   </h4>
                   <label className="px-2.5 py-1 bg-primary-surface/10 hover:bg-primary-surface/20 text-primary text-[10px] leading-none font-medium rounded-md transition-colors cursor-pointer flex items-center gap-1">
                     <Paperclip className="w-3 h-3" />
-                    <span>Upload Evidence</span>
+                    <span>{t("qaDetail.uploadEvidence")}</span>
                     <input
                       type="file"
                       multiple
@@ -303,7 +305,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                         <button
                           onClick={() => handleRemoveSpecificEvidenceFromDrawer(ev.id)}
                           className="absolute top-1 right-1 p-1 bg-danger-surface text-content-inverse rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                          title="Hapus Bukti"
+                          title={t("qaDetail.deleteEvidence")}
                         >
                           <Trash2 className="w-3 h-3" />
                         </button>
@@ -311,7 +313,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-content-subtle italic">Belum ada bukti pengujian.</p>
+                  <p className="text-xs text-content-subtle italic">{t("qaDetail.noEvidence")}</p>
                 )}
               </div>
 
@@ -347,7 +349,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                     type="text"
                     value={drawerNewComment}
                     onChange={(e) => setDrawerNewComment(e.target.value)}
-                    placeholder="Tulis komentar pengujian..."
+                    placeholder={t("qaDetail.commentPlaceholder")}
                     className="flex-1 px-3 py-2 bg-surface-sunken border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-primary"
                   />
                   <button
@@ -367,7 +369,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                     className="w-full py-2 bg-danger-surface hover:bg-danger-hover text-content-inverse font-medium rounded-md text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer active:scale-95"
                   >
                     <Bug className="w-4 h-4" />
-                    <span>Buat Tiket Bug dari Test Case Ini</span>
+                    <span>{t("qaDetail.createBugFromCase")}</span>
                   </button>
                 </div>
               )}

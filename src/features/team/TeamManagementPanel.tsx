@@ -456,7 +456,7 @@ export const TeamManagementPanel = ({
                           {userAssignedTasks.length}
                         </span>
                         <span className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase tracking-wider">
-                          Assigned
+                          {t("teamPanel.assigned")}
                         </span>
                       </div>
                       <div className="bg-surface-sunken p-2 rounded-md border border-border-faint">
@@ -464,7 +464,7 @@ export const TeamManagementPanel = ({
                           {completedTasks.length}
                         </span>
                         <span className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase tracking-wider">
-                          Done
+                          {t("teamPanel.done")}
                         </span>
                       </div>
                     </div>
@@ -575,7 +575,7 @@ export const TeamManagementPanel = ({
                             onClick={() => setSelectedProfileUser(person)}
                             className="px-3 py-1 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
                           >
-                            View Profile
+                            {t("teamPanel.viewProfile")}
                           </button>
                         </td>
                       </tr>
@@ -589,7 +589,7 @@ export const TeamManagementPanel = ({
 
         {filteredPeople.length === 0 && (
           <div className="bg-surface rounded-lg border border-border-subtle/80 p-12 text-center text-content-subtle text-xs font-medium">
-            Tidak ada anggota tim yang cocok dengan kriteria pencarian.
+            {t("teamPanel.noMatch")}
           </div>
         )}
       </div>
@@ -616,7 +616,7 @@ export const TeamManagementPanel = ({
                   className="w-20 h-20 border-4 border-surface shadow-md text-xl"
                 />
                 <span className="px-3 py-1 bg-emerald-500/10 text-emerald-700 text-xs font-medium rounded-full border border-emerald-500/30">
-                  Joined Project
+                  {t("teamPanel.joinedProject")}
                 </span>
               </div>
 
@@ -629,7 +629,9 @@ export const TeamManagementPanel = ({
 
               <div className="mt-4 p-3 bg-surface-sunken rounded-lg border border-border-subtle/80 space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-content-subtle font-medium">Project Role</span>
+                  <span className="text-content-subtle font-medium">
+                    {t("teamPanel.projectRole")}
+                  </span>
                   <span className="font-medium text-content-body capitalize">
                     {/* #82 — label dari katalog. */}
                     {labelPeran(
@@ -640,7 +642,9 @@ export const TeamManagementPanel = ({
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-content-subtle font-medium">Assigned Tasks</span>
+                  <span className="text-content-subtle font-medium">
+                    {t("teamPanel.assignedTasks")}
+                  </span>
                   <span className="font-medium text-content-body">
                     {getUserTasks(selectedProfileUser).length} Tasks
                   </span>
@@ -650,7 +654,7 @@ export const TeamManagementPanel = ({
               {/* Task list preview */}
               <div className="mt-4">
                 <h4 className="text-xs font-medium text-content-body uppercase tracking-wider mb-2">
-                  Tugas yang Ditugaskan
+                  {t("teamPanel.assignedTasksTitle")}
                 </h4>
                 <div className="max-h-40 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
                   {getUserTasks(selectedProfileUser).map((t) => (
@@ -671,7 +675,7 @@ export const TeamManagementPanel = ({
                   ))}
                   {getUserTasks(selectedProfileUser).length === 0 && (
                     <p className="text-xs text-content-subtle italic">
-                      Belum ada tugas yang ditugaskan ke anggota ini.
+                      {t("teamPanel.noAssignedTask")}
                     </p>
                   )}
                 </div>
@@ -682,7 +686,7 @@ export const TeamManagementPanel = ({
                   onClick={() => setSelectedProfileUser(null)}
                   className="px-4 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle cursor-pointer"
                 >
-                  Tutup
+                  {t("teamPanel.close")}
                 </button>
               </div>
             </div>

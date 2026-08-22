@@ -1,5 +1,13 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
-import { Sparkles, Layout, Link as LinkIcon, Paperclip as AttachmentIcon, MessageSquare, History } from "lucide-react";
+import {
+  Sparkles,
+  Layout,
+  Link as LinkIcon,
+  Paperclip as AttachmentIcon,
+  MessageSquare,
+  History,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "../../../../lib/utils";
 import { UserAvatar } from "../../../../components/ui/UserAvatar";
@@ -41,6 +49,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
   isLoggedIn,
   safeFormat,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6 pt-6 border-t border-border-faint">
       <div className="flex items-center gap-6 border-b border-border-faint">
@@ -94,12 +103,12 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                 <div className="flex items-center gap-1 p-1.5 border-b border-border-faint bg-surface-sunken/50 text-content-muted overflow-x-auto custom-scrollbar">
                   <button className="flex items-center gap-1.5 px-2 py-1 hover:bg-surface-strong rounded text-xs sm:text-[11px] font-medium text-content-secondary transition-colors shrink-0">
                     <Sparkles className="w-3 h-3 text-indigo-500" />
-                    Improve writing
+                    {t("comments.improveWriting")}
                   </button>
                   <div className="w-px h-4 bg-surface-strong mx-1 shrink-0" />
                   <button
                     className="p-1 hover:bg-surface-strong rounded text-content-secondary shrink-0"
-                    title="Text format"
+                    title={t("comments.textFormat")}
                   >
                     <span className="text-xs font-medium leading-none px-0.5 border border-border-subtle rounded font-serif">
                       Tt
@@ -107,19 +116,19 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                   </button>
                   <button
                     className="p-1 hover:bg-surface-strong rounded font-medium text-content-secondary shrink-0 text-sm leading-none"
-                    title="Bold"
+                    title={t("comments.bold")}
                   >
                     B
                   </button>
                   <button
                     className="p-1 hover:bg-surface-strong rounded italic text-content-secondary shrink-0 text-sm leading-none"
-                    title="Italic"
+                    title={t("comments.italic")}
                   >
                     I
                   </button>
                   <button
                     className="p-1 hover:bg-surface-strong rounded text-content-secondary shrink-0"
-                    title="List"
+                    title={t("comments.list")}
                   >
                     <Layout className="w-3.5 h-3.5" />
                   </button>
@@ -134,7 +143,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                 <Textarea
                   value={newCommentText}
                   onChange={handleCommentChange}
-                  placeholder="Type /ai to Ask AI, / to add elements, or @ to mention someone."
+                  placeholder={t("comments.editorPlaceholder")}
                   className="border-none shadow-none focus:ring-0 !ring-0 !outline-none p-4 resize-none bg-surface text-[13px] font-medium leading-relaxed min-h-[100px] w-full"
                 />
               </div>
@@ -142,16 +151,14 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
               {mentionState.active && (
                 <div className="absolute z-50 w-72 bg-surface rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden transform bottom-[110%] left-0 animate-in fade-in slide-in-from-bottom-2">
                   <div className="p-3 bg-surface-sunken border-b border-border-faint text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
-                    Suggested People
+                    {t("comments.suggestedPeople")}
                   </div>
                   <div className="max-h-60 overflow-y-auto py-1">
                     {projectMembers
                       .filter(
                         (m) =>
                           m?.username &&
-                          m?.username
-                            .toLowerCase()
-                            .includes(mentionState.query.toLowerCase())
+                          m?.username.toLowerCase().includes(mentionState.query.toLowerCase())
                       )
                       .map((member) => (
                         <button
@@ -181,12 +188,10 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                 <Button
                   size="sm"
                   onClick={wrapSubmit("addComment", handleAddComment)}
-                  disabled={
-                    isSubmitting["addComment"] || !newCommentText.trim() || !isLoggedIn
-                  }
+                  disabled={isSubmitting["addComment"] || !newCommentText.trim() || !isLoggedIn}
                   className="shadow-soft-lg shadow-indigo-500/20 px-6 font-medium uppercase tracking-widest text-xs sm:text-[10px]"
                 >
-                  Save
+                  {t("comments.save")}
                 </Button>
               </div>
             </div>
@@ -195,9 +200,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
           {/* Comment List */}
           <div className="space-y-4">
             {comments.map((comment, i) => {
-              const author = (projectMembers || []).find(
-                (m) => m.uid === comment.authorId
-              );
+              const author = (projectMembers || []).find((m) => m.uid === comment.authorId);
               return (
                 <motion.div
                   initial={{ opacity: 0, x: -10 }}
@@ -243,7 +246,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
               <div className="py-6 px-4 text-center space-y-1.5 bg-surface-sunken/50 rounded-lg border border-dashed border-border-subtle/80">
                 <MessageSquare className="w-6 h-6 mx-auto text-content-subtle" />
                 <p className="text-xs font-medium text-content-subtle">
-                  Belum ada diskusi / komentar. Ketik komentar di atas untuk memulai.
+                  {t("comments.noComments")}
                 </p>
               </div>
             )}
@@ -291,9 +294,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
           {filteredLogs.length === 0 && (
             <div className="py-6 px-4 text-center space-y-1.5 bg-surface-sunken/50 rounded-lg border border-dashed border-border-subtle/80">
               <History className="w-6 h-6 mx-auto text-content-subtle" />
-              <p className="text-xs font-medium text-content-subtle">
-                Belum ada riwayat aktivitas yang terekam.
-              </p>
+              <p className="text-xs font-medium text-content-subtle">{t("comments.noActivity")}</p>
             </div>
           )}
         </div>
