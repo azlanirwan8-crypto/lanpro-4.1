@@ -642,7 +642,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     {selectedUserIds.length}
                   </span>
                   <span className="text-sm font-medium text-indigo-950">
-                    pengguna terpilih untuk Aksi Massal
+                    {t("users.selectedForBulk")}
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -715,7 +715,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     disabled={isBulkActionPending}
                     className="px-3 py-1.5 bg-surface-strong hover:bg-surface-marker text-xs font-medium rounded-lg transition-all cursor-pointer"
                   >
-                    Batal
+                    {t("users.cancel")}
                   </button>
                 </div>
               </div>
@@ -765,13 +765,13 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       className="py-3.5 px-4 w-60 cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
                     >
                       <div className="flex items-center gap-1.5">
-                        <span>Department / Position</span>
+                        <span>{t("users.deptPosition")}</span>
                         <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-indigo-600">
                           {sortField === "department" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
                         </span>
                       </div>
                     </th>
-                    <th className="py-3.5 px-4 w-40">Proyek & Tugas</th>
+                    <th className="py-3.5 px-4 w-40">{t("users.projectsTasks")}</th>
                     <th
                       onClick={() => handleSort("role")}
                       className="py-3.5 px-4 w-28 cursor-pointer hover:bg-surface-muted/80 transition-colors select-none group"
@@ -794,7 +794,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         </span>
                       </div>
                     </th>
-                    <th className="py-3.5 px-4 w-28 text-center">Action</th>
+                    <th className="py-3.5 px-4 w-28 text-center">{t("users.action")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-faint/60">
@@ -946,7 +946,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               // lengkap. Modal beserta cabangnya ikut dihapus.
                               onClick={() => props.onSelectUserForDetail?.(user)}
                               className="p-1.5 bg-indigo-500/10 hover:bg-indigo-600 text-indigo-600 hover:text-content-inverse border border-indigo-500/30 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer font-medium flex items-center justify-center gap-1"
-                              title="Detail Pengguna"
+                              title={t("users.userDetail")}
                             >
                               <UserCog className="w-3.5 h-3.5 shrink-0" />
                             </button>
@@ -954,7 +954,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               onClick={() => handleDeleteUser(user)}
                               disabled={user.role === "admin"}
                               className="p-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-1"
-                              title="Hapus Pengguna"
+                              title={t("users.deleteUser")}
                             >
                               <Trash2 className="w-3.5 h-3.5 shrink-0" />
                             </button>
@@ -983,7 +983,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   {filteredUsers.length} entries
                 </span>
                 <div className="flex items-center gap-1.5 text-xs text-content-muted font-medium">
-                  <span>Rows per page:</span>
+                  <span>{t("users.rowsPerPage")}</span>
                   <select
                     value={itemsPerPage}
                     onChange={(e) => {
@@ -1046,19 +1046,19 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       >
         <div className="space-y-4">
           <div className="p-4 bg-violet-500/10 rounded-xl border border-violet-500/30 mb-2">
-            <p className="text-sm font-medium text-violet-900">Registrasi Pengguna</p>
+            <p className="text-sm font-medium text-violet-900">{t("users.userRegistration")}</p>
             <p className="text-xs text-violet-700 mt-1">{t("users.registerNew")}</p>
           </div>
 
           <div className="space-y-3">
             <div>
               <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Username
+                {t("users.username")}
               </label>
               <Input
                 value={addPeopleUsername}
                 onChange={(e: any) => handleUsernameChange(e.target.value)}
-                placeholder="e.g. john_doe"
+                placeholder={t("users.usernamePlaceholder")}
                 className={
                   usernameError
                     ? "border-rose-500 focus:ring-rose-500/10 focus:border-rose-500"
@@ -1073,22 +1073,22 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             </div>
             <div>
               <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Nama Lengkap
+                {t("users.fullName")}
               </label>
               <Input
                 value={addPeopleFullName}
                 onChange={(e: any) => setAddPeopleFullName(e.target.value)}
-                placeholder="e.g. John Doe"
+                placeholder={t("users.fullNamePlaceholder")}
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Email
+                {t("users.email")}
               </label>
               <Input
                 value={addPeopleEmail}
                 onChange={(e: any) => handleEmailChange(e.target.value)}
-                placeholder="john@example.com"
+                placeholder={t("users.emailPlaceholder")}
                 className={
                   emailError ? "border-rose-500 focus:ring-rose-500/10 focus:border-rose-500" : ""
                 }
@@ -1101,23 +1101,23 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             </div>
             <div>
               <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Nomor HP / WhatsApp
+                {t("users.phone")}
               </label>
               <Input
                 value={addPeoplePhone}
                 onChange={(e: any) => setAddPeoplePhone(e.target.value)}
-                placeholder="e.g. 081234567890"
+                placeholder={t("users.phonePlaceholder")}
               />
             </div>
             <div>
               <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Password
+                {t("users.password")}
               </label>
               <Input
                 type="password"
                 value={addPeoplePassword}
                 onChange={(e: any) => handlePasswordChange(e.target.value)}
-                placeholder="Kata sandi awal pengguna"
+                placeholder={t("users.passwordPlaceholder")}
               />
               {passwordStrength && (
                 <div className="mt-1.5 space-y-1">
@@ -1155,7 +1155,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             </div>
             <div>
               <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Departemen
+                {t("users.department")}
               </label>
               <div className="relative group/select">
                 <select
@@ -1163,7 +1163,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   onChange={(e) => setAddPeopleDepartment(e.target.value)}
                   className="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium appearance-none cursor-pointer focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 focus:bg-surface outline-none transition-all"
                 >
-                  <option value="">Pilih Departemen...</option>
+                  <option value="">{t("users.selectDept")}</option>
                   {masterData
                     .filter((d) => d.type === "department")
                     .map((dep) => (
@@ -1177,7 +1177,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             </div>
             <div>
               <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
-                Jabatan
+                {t("users.position")}
               </label>
               <div className="relative group/select">
                 <select
@@ -1185,7 +1185,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   onChange={(e) => setAddPeopleJabatan(e.target.value)}
                   className="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium appearance-none cursor-pointer focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 focus:bg-surface outline-none transition-all"
                 >
-                  <option value="">Pilih Jabatan...</option>
+                  <option value="">{t("users.selectPosition")}</option>
                   {masterData
                     .filter((d) => d.type === "jabatan")
                     .map((j) => (
@@ -1231,7 +1231,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               onClick={() => setIsInviteModalOpen(false)}
               className="flex-1 justify-center"
             >
-              Cancel
+              {t("users.cancel")}
             </Button>
             <Button
               onClick={handleAddPeople}
@@ -1257,14 +1257,14 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           setIsInviteSuccessModalOpen(false);
           fetchUsers();
         }}
-        title="Username Registration Successful"
+        title={t("users.regSuccessTitle")}
       >
         <div className="space-y-6 text-center py-4">
           <div className="w-16 h-16 bg-green-500/15 rounded-full flex items-center justify-center mx-auto mb-4">
             <UserPlus className="w-8 h-8 text-green-600" />
           </div>
           <div>
-            <h3 className="text-lg font-medium text-content">Username Tercatat!</h3>
+            <h3 className="text-lg font-medium text-content">{t("users.usernameRecorded")}</h3>
             <p className="text-sm text-content-muted mt-2">
               Username <span className="font-medium text-content">{addPeopleEmail}</span> has been
               saved in the system.
@@ -1291,7 +1291,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             }}
             className="text-sm font-medium text-content-subtle hover:text-content-secondary transition-colors"
           >
-            Tutup
+            {t("users.close")}
           </button>
         </div>
       </Modal>

@@ -11,6 +11,7 @@
  * Penjaga `isSelected` yang dulu ada di sisi pemanggil kini menjadi early
  * return di sini, sehingga kondisi tampil-tidaknya menjadi urusan komponen ini.
  */
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { AlignLeft, AlignCenter, AlignRight, Square, Copy, ArrowRight, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -38,6 +39,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
   setConnectSourceId,
   handleDeleteSelected,
 }) => {
+  const { t } = useTranslation();
   if (!isSelected) return null;
 
   return (
@@ -53,33 +55,33 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
           toast.success(`Bentuk bentuk diubah ke ${e.target.value.toUpperCase()}!`);
         }}
         className="bg-surface-sunken border border-border-subtle text-xs sm:text-[10px] font-medium text-content-body outline-none p-1 rounded-lg cursor-pointer hover:bg-surface-muted max-w-[120px]"
-        title="Ubah jenis bentuk"
+        title={t("shapes.changeShapeType")}
       >
-        <option value="rect">Rectangle</option>
+        <option value="rect">{t("shapes.rectangle")}</option>
         <option value="oval">Oval (Start/End)</option>
         <option value="diamond">Decision (Diamond)</option>
-        <option value="triangle">Triangle</option>
-        <option value="pentagon">Pentagon</option>
-        <option value="hexagon">Hexagon</option>
-        <option value="octagon">Octagon</option>
-        <option value="star">Star</option>
-        <option value="arrowRight">Arrow Right</option>
-        <option value="arrowLeft">Arrow Left</option>
-        <option value="arrowLeftRight">Arrow Left Right</option>
-        <option value="trapezoid">Trapezoid</option>
-        <option value="cross">Cross / Plus</option>
-        <option value="chevron">Chevron</option>
+        <option value="triangle">{t("shapes.triangle")}</option>
+        <option value="pentagon">{t("shapes.pentagon")}</option>
+        <option value="hexagon">{t("shapes.hexagon")}</option>
+        <option value="octagon">{t("shapes.octagon")}</option>
+        <option value="star">{t("shapes.star")}</option>
+        <option value="arrowRight">{t("shapes.arrowRight")}</option>
+        <option value="arrowLeft">{t("shapes.arrowLeft")}</option>
+        <option value="arrowLeftRight">{t("shapes.arrowLeftRight")}</option>
+        <option value="trapezoid">{t("shapes.trapezoid")}</option>
+        <option value="cross">{t("shapes.crossPlus")}</option>
+        <option value="chevron">{t("shapes.chevron")}</option>
         <option value="delay">Delay (Bullet)</option>
-        <option value="callout">Callout / Bubble</option>
-        <option value="cylinder">Database Server</option>
-        <option value="sticky">Sticky Note</option>
-        <option value="cloud">Cloud API</option>
-        <option value="circle">Circle</option>
-        <option value="card">Card Item</option>
-        <option value="document">Doc Page</option>
-        <option value="subprocess">Subprocess</option>
-        <option value="actor">Actor Icon</option>
-        <option value="folder">Folder Block</option>
+        <option value="callout">{t("shapes.calloutBubble")}</option>
+        <option value="cylinder">{t("shapes.databaseServer")}</option>
+        <option value="sticky">{t("shapes.stickyNote")}</option>
+        <option value="cloud">{t("shapes.cloudApi")}</option>
+        <option value="circle">{t("shapes.circle")}</option>
+        <option value="card">{t("shapes.cardItem")}</option>
+        <option value="document">{t("shapes.docPage")}</option>
+        <option value="subprocess">{t("shapes.subprocess")}</option>
+        <option value="actor">{t("shapes.actorIcon")}</option>
+        <option value="folder">{t("shapes.folderBlock")}</option>
         <option value="curlyLeft">{`Curly Left {`}</option>
         <option value="curlyRight">{`Curly Right }`}</option>
       </select>
@@ -124,7 +126,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
           handleUpdateActiveNode({ fontStyle: nextStyle });
         }}
         className="p-1 px-1.5 hover:bg-surface-muted text-xs sm:text-[10px] rounded font-medium uppercase"
-        title="Format Huruf (Sans / Serif / Mono)"
+        title={t("shapes.fontFamily")}
       >
         {node.fontStyle || "sans"}
       </button>
@@ -137,7 +139,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
           handleUpdateActiveNode({ align: nextAlign });
         }}
         className="p-1 hover:bg-surface-muted rounded text-content-secondary pointer-events-auto"
-        title="Rata Kiri/Tengah/Kanan"
+        title={t("shapes.textAlign")}
       >
         {node.align === "left" ? (
           <AlignLeft className="w-3.5 h-3.5" />
@@ -157,7 +159,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
             handleUpdateActiveNode({ fontSize: Math.max(9, (node.fontSize || 12) - 1) })
           }
           className="p-1 hover:bg-surface-muted text-xs rounded font-medium"
-          title="Perkecil Font"
+          title={t("shapes.fontSmaller")}
         >
           -
         </button>
@@ -169,7 +171,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
             handleUpdateActiveNode({ fontSize: Math.min(22, (node.fontSize || 12) + 1) })
           }
           className="p-1 hover:bg-surface-muted text-xs rounded font-medium"
-          title="Perbesar Font"
+          title={t("shapes.fontLarger")}
         >
           +
         </button>
@@ -190,7 +192,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
           toast.success(`Jenis garis diubah ke: ${(nextStyle || "solid").toUpperCase()}`);
         }}
         className="p-1 hover:bg-surface-muted rounded text-content-secondary"
-        title="Ubah garis tepian (Solid/Dashed/None)"
+        title={t("shapes.borderStyleTip")}
       >
         <Square
           className={cn(
@@ -205,7 +207,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
       <button
         onClick={() => handleDuplicateNode(node)}
         className="p-1 text-content-muted hover:text-indigo-600 rounded hover:bg-indigo-500/10"
-        title="Duplikat Bentuk (Ctrl+D)"
+        title={t("shapes.duplicateShape")}
       >
         <Copy className="w-3.5 h-3.5" />
       </button>
@@ -218,7 +220,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
           toast.info(`Sambungkan alur dari "${node.label}" ke shape berikutnya.`);
         }}
         className="p-1 text-content-muted hover:text-amber-500 rounded hover:bg-amber-500/10"
-        title="Mulai tarik panah hubungan"
+        title={t("shapes.startConnector")}
       >
         <ArrowRight className="w-3.5 h-3.5" />
       </button>
@@ -229,7 +231,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
       <button
         onClick={handleDeleteSelected}
         className="p-1 hover:text-rose-600 rounded hover:bg-rose-500/10"
-        title="Hapus shape"
+        title={t("shapes.deleteShape")}
       >
         <Trash2 className="w-3.5 h-3.5" />
       </button>

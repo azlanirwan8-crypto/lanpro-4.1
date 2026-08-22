@@ -164,12 +164,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   if (!user) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 bg-surface-sunken">
-        <h2 className="text-xl font-medium text-content-strong mb-2">Pengguna tidak ditemukan</h2>
+        <h2 className="text-xl font-medium text-content-strong mb-2">{t("userDetail.notFound")}</h2>
         <button
           onClick={onBack}
           className="px-4 py-2 bg-indigo-600 text-content-inverse rounded-md text-xs font-medium"
         >
-          Kembali
+          {t("userDetail.back")}
         </button>
       </div>
     );
@@ -508,12 +508,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               className="p-1.5 bg-surface-muted hover:bg-indigo-600 hover:text-content-inverse text-content-body rounded-md transition-all flex items-center gap-2 text-xs font-medium cursor-pointer shadow-xs"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Kembali ke Manajemen Pengguna</span>
+              <span>{t("userDetail.backToUserMgmt")}</span>
             </button>
             <div className="h-4 w-px bg-surface-strong " />
             <div className="flex flex-col">
               <span className="text-xs sm:text-[11px] font-medium text-indigo-600 tracking-wider uppercase">
-                DETAIL PROFIL & MATRIX HAK AKSES
+                {t("userDetail.profileMatrixTitle")}
               </span>
               <h1 className="text-sm font-medium text-content-strong ">
                 {user.displayName || user.username}
@@ -548,7 +548,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               />
               {previewUrl && (
                 <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
-                  Pratinjau
+                  {t("userDetail.preview")}
                 </span>
               )}
               <label className="absolute inset-0 bg-black/50 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity ring-2 ring-indigo-50 border-2 border-surface ">
@@ -622,7 +622,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   </div>
                   <div>
                     <div className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle">
-                      Email Address
+                      {t("userDetail.emailAddress")}
                     </div>
                     <div className="font-medium text-content-strong text-xs">
                       {editEmail || "Tidak tersedia"}
@@ -636,7 +636,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   </div>
                   <div>
                     <div className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle">
-                      WhatsApp / HP
+                      {t("userDetail.whatsapp")}
                     </div>
                     <div className="font-medium text-content-strong text-xs">
                       {editPhone || "Tidak tersedia"}
@@ -650,7 +650,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   </div>
                   <div>
                     <div className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle">
-                      Departemen / Posisi
+                      {t("userDetail.deptPosition")}
                     </div>
                     <div className="font-medium text-content-strong text-xs">
                       {getDeptName(editDepartment)} • {getPosName(editPosition)}
@@ -669,7 +669,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               <div className="bg-surface border border-border-subtle rounded-lg p-4 space-y-4 shadow-xs">
                 <h4 className="font-medium text-content-strong text-xs uppercase tracking-wider border-b border-border-subtle pb-2.5 flex items-center gap-2">
                   <Lock className="w-4 h-4 text-indigo-500" />
-                  Pengaturan Akun & Organisasi
+                  {t("userDetail.accountOrgSettings")}
                 </h4>
 
                 <div className="space-y-3">
@@ -678,7 +678,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       {/* System Role Selection */}
                       <div className="space-y-1">
                         <label className="text-xs font-medium text-content-body ">
-                          System Role
+                          {t("userDetail.systemRole")}
                         </label>
                         <select
                           value={editRole}
@@ -748,7 +748,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       <div className="grid grid-cols-2 gap-2.5">
                         <div className="space-y-1">
                           <label className="text-xs font-medium text-content-body ">
-                            Department
+                            {t("userDetail.department")}
                           </label>
                           <select
                             value={editDepartment}
@@ -768,7 +768,9 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         </div>
 
                         <div className="space-y-1">
-                          <label className="text-xs font-medium text-content-body ">Position</label>
+                          <label className="text-xs font-medium text-content-body ">
+                            {t("userDetail.position")}
+                          </label>
                           <select
                             value={editPosition}
                             onChange={(e) => setEditPosition(e.target.value)}
@@ -799,30 +801,32 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     <input
                       value={editFullName}
                       onChange={(e) => setEditFullName(e.target.value)}
-                      placeholder="Nama lengkap..."
+                      placeholder={t("userDetail.fullNamePlaceholder")}
                       className="w-full px-3 py-1.5 border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface text-content-strong "
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2.5">
                     <div className="space-y-1">
-                      <label className="text-xs font-medium text-content-body ">Email</label>
+                      <label className="text-xs font-medium text-content-body ">
+                        {t("userDetail.email")}
+                      </label>
                       <input
                         value={editEmail}
                         onChange={(e) => setEditEmail(e.target.value)}
-                        placeholder="email@domain.com"
+                        placeholder={t("userDetail.emailPlaceholder")}
                         className="w-full px-3 py-1.5 border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface text-content-strong "
                       />
                     </div>
 
                     <div className="space-y-1">
                       <label className="text-xs font-medium text-content-body ">
-                        Nomor HP / WhatsApp
+                        {t("userDetail.phone")}
                       </label>
                       <input
                         value={editPhone}
                         onChange={(e) => setEditPhone(e.target.value)}
-                        placeholder="08123456789"
+                        placeholder={t("userDetail.phonePlaceholder")}
                         className="w-full px-3 py-1.5 border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface text-content-strong "
                       />
                     </div>
@@ -846,7 +850,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       type="text"
                       value={editPassword}
                       onChange={(e) => setEditPassword(e.target.value)}
-                      placeholder="Kosongkan jika tidak diubah..."
+                      placeholder={t("userDetail.passwordPlaceholder")}
                       className="w-full px-3 py-1.5 border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface text-content-strong "
                     />
                   </div>
@@ -862,7 +866,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         {t("userDetail.activePermissions")}
                       </h4>
                       <p className="text-xs sm:text-[11px] text-content-muted font-normal mt-0.5">
-                        Konfigurasi hak akses modul spesifik untuk akun pengguna ini.
+                        {t("userDetail.permissionHint")}
                       </p>
                     </div>
                     <button
@@ -890,7 +894,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       <thead className="bg-surface-sunken border-b border-border-subtle ">
                         <tr>
                           <th className="py-2 px-3 font-medium text-xs sm:text-[10px] text-content-muted uppercase">
-                            Module
+                            {t("userDetail.module")}
                           </th>
                           {(["read", "create", "update", "delete"] as const).map((action) => (
                             <th
@@ -994,7 +998,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   </div>
                   <div>
                     <span className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase tracking-wider block">
-                      Tugas Ditugaskan
+                      {t("userDetail.assignedTasks")}
                     </span>
                     <span className="text-base font-medium text-content-strong leading-none">
                       {userTasks.length} Tugas
@@ -1009,10 +1013,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="space-y-0.5">
                     <h4 className="font-medium text-indigo-950 text-xs uppercase tracking-wider flex items-center gap-1.5">
                       <UserPlus className="w-4 h-4 text-indigo-600 shrink-0" />
-                      Delegasikan ke Proyek Baru
+                      {t("userDetail.delegateNewProject")}
                     </h4>
                     <p className="text-xs text-content-secondary ">
-                      Tambahkan akses proyek dan peranan pengguna ini dalam tim.
+                      {t("userDetail.delegateHint")}
                     </p>
                   </div>
 
@@ -1070,7 +1074,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         className="w-full flex items-center justify-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-md text-xs font-medium shadow-xs transition"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        <span>Delegasikan</span>
+                        <span>{t("userDetail.delegate")}</span>
                       </button>
                     </div>
                   </div>
@@ -1136,7 +1140,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                 {userProjectsList.length === 0 ? (
                   <p className="text-xs text-content-subtle italic py-6 text-center">
-                    Pengguna belum tergabung dalam proyek aktif.
+                    {t("userDetail.noActiveProject")}
                   </p>
                 ) : (
                   <div className="space-y-2 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
@@ -1250,7 +1254,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 </div>
                 {userTasks.length === 0 ? (
                   <p className="text-xs text-content-subtle italic py-6 text-center">
-                    Tidak ada tugas aktif yang ditugaskan kepada pengguna ini.
+                    {t("userDetail.noAssignedTask")}
                   </p>
                 ) : (
                   <div className="space-y-2 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
