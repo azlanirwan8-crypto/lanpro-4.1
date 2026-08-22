@@ -643,7 +643,19 @@ export function DashboardView(props: DashboardViewProps) {
           </div>
         </div>
 
-        {/* Real-time Agile Top 4 KPI Metric Cards */}
+        {/* Real-time Agile Top 4 KPI Metric Cards
+            #129 — keempat kartu ini menghitung `nonEpicTasks`, sedangkan
+            dropdown sprint dan kedua kartu "Rincian Tugas" menghitung `tasks`
+            (Epic ikut). Selisihnya nyata (3 lawan 12) dan sebelumnya tidak
+            berlabel, sehingga terbaca sebagai angka yang bertentangan. */}
+        <div className="flex items-baseline justify-between mb-2">
+          <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
+            Ringkasan Tugas
+          </span>
+          <span className="text-xs sm:text-[11px] font-medium text-content-muted">
+            Epic tidak dihitung
+          </span>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
           {/* Card 1: Total Tasks */}
           <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
@@ -700,7 +712,7 @@ export function DashboardView(props: DashboardViewProps) {
             </div>
             <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
               <span className="font-medium text-info-text">
-                {inProgressTasks.length} In Progress
+                {inProgressTasks.length} belum selesai
               </span>
               <button
                 onClick={() => props.setCurrentView("kanban")}
