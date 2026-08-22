@@ -565,6 +565,7 @@ export const id = {
     deleteKeyHint: "Delete / Backspace",
   },
   editProject: {
+    methodology: "Metodologi",
     completed: "Selesai",
     idRef: "ID (Ref)",
     title: "Ubah Proyek",

@@ -2340,6 +2340,9 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         name: editingProject.name,
         description: editingProject.description || "",
         status: editingProject.status || "Active",
+        // Item #138 — tanpa baris ini dropdown Metodologi tampil dan bisa
+        // diubah, tapi nilainya tidak pernah sampai ke backend.
+        category: editingProject.category || "Agile",
       });
 
       if (data.status === "success") {
@@ -3903,6 +3906,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
             currentUserProfile={currentUserProfile}
             hasPermission={hasPermission}
             deleteProject={deleteProject}
+            masterData={masterData}
           />
 
           {confirmAction?.isOpen && (

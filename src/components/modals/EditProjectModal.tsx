@@ -3,7 +3,7 @@ import React from "react";
 import { Trash2 } from "lucide-react";
 import { Modal } from "../ui/Modal";
 import { Input, Button } from "../ui/CoreUI";
-import { Project, PeranEfektif, UserProfile } from "../../types";
+import { Project, PeranEfektif, UserProfile, MasterData } from "../../types";
 
 interface EditProjectModalProps {
   isOpen: boolean;
@@ -18,7 +18,19 @@ interface EditProjectModalProps {
   currentUserProfile: UserProfile | null;
   hasPermission: any;
   deleteProject: (project: Project) => void;
+  /** Sumber pilihan Status dan Metodologi (item #138). */
+  masterData?: MasterData[];
 }
+
+/**
+ * Cadangan bila MasterData belum berisi tipe yang diminta.
+ *
+ * Tanpa ini, tabel MasterData yang kosong akan membuat dropdown-nya kosong
+ * juga — pengguna kehilangan kemampuan menyetel status sama sekali, yang
+ * lebih buruk daripada daftar keras yang digantikan.
+ */
+const CADANGAN_STATUS = ["Active", "On Hold", "Completed", "Archived"];
+const CADANGAN_METODOLOGI = ["Agile", "Scrum", "Kanban", "Waterfall", "Hybrid"];
 
 export const EditProjectModal: React.FC<EditProjectModalProps> = ({
   isOpen,
@@ -33,8 +45,16 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
   currentUserProfile,
   hasPermission,
   deleteProject,
+  masterData,
 }) => {
   const { t } = useTranslation();
+
+  const opsiDariMaster = (tipe: string, cadangan: string[]) => {
+    const dari = (masterData || []).filter((m) => m.type === tipe).map((m) => m.label);
+    return dari.length ? dari : cadangan;
+  };
+  const opsiStatus = opsiDariMaster("project_status", CADANGAN_STATUS);
+  const opsiMetodologi = opsiDariMaster("methodology", CADANGAN_METODOLOGI);
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t("editProject.title")} maxWidth="max-w-2xl">
       {editingProject && (
@@ -99,10 +119,32 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 }
                 className="w-full border border-border-subtle rounded-lg p-2 text-sm"
               >
-                <option value="Active">{t("editProject.active")}</option>
-                <option value="On Hold">{t("ui.onHold")}</option>
-                <option value="Completed">{t("editProject.completed")}</option>
-                <option value="Archived">{t("ui.archived")}</option>
+                {opsiStatus.map((nilai) => (
+                  <option key={nilai} value={nilai}>
+                    {nilai}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-content-body mb-1">
+                {t("editProject.methodology")}
+              </label>
+              <select
+                value={editingProject.category || "Agile"}
+                onChange={(e) =>
+                  setEditingProject({
+                    ...editingProject,
+                    category: e.target.value,
+                  })
+                }
+                className="w-full border border-border-subtle rounded-lg p-2 text-sm"
+              >
+                {opsiMetodologi.map((nilai) => (
+                  <option key={nilai} value={nilai}>
+                    {nilai}
+                  </option>
+                ))}
               </select>
             </div>
             <div>

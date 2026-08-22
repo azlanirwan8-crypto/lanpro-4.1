@@ -568,6 +568,7 @@ export const en = {
     deleteKeyHint: "Delete / Backspace",
   },
   editProject: {
+    methodology: "Methodology",
     completed: "Completed",
     idRef: "ID (Ref)",
     title: "Edit Project",

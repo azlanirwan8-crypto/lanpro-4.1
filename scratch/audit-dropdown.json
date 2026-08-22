@@ -1,0 +1,604 @@
+[
+  {
+    "berkas": "src\\components\\modals\\AddCaseModal.tsx",
+    "baris": 150,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": ["Critical Priority", "High Priority", "Medium Priority", "Low Priority"]
+  },
+  {
+    "berkas": "src\\components\\modals\\AddSuiteModal.tsx",
+    "baris": 73,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\components\\modals\\CreateBugTicketModal.tsx",
+    "baris": 194,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": ["Critical", "High", "Medium", "Low"]
+  },
+  {
+    "berkas": "src\\components\\modals\\CreateBugTicketModal.tsx",
+    "baris": 213,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": ["-- Belum Ditugaskan --"]
+  },
+  {
+    "berkas": "src\\components\\modals\\EditCaseModal.tsx",
+    "baris": 67,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": ["Critical Priority", "High Priority", "Medium Priority", "Low Priority"]
+  },
+  {
+    "berkas": "src\\components\\modals\\EditProjectModal.tsx",
+    "baris": 92,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\components\\modals\\EditSprintModal.tsx",
+    "baris": 53,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\components\\modals\\EditSprintModal.tsx",
+    "baris": 118,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\components\\modals\\NewTaskModal.tsx",
+    "baris": 281,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["{m?.displayName || m?.email || \"Anggota Tim\"}", "{email} (Pending)"]
+  },
+  {
+    "berkas": "src\\components\\modals\\NewTaskModal.tsx",
+    "baris": 344,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\components\\modals\\NewTaskModal.tsx",
+    "baris": 360,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\components\\modals\\NewTaskModal.tsx",
+    "baris": 182,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\components\\modals\\NewTaskModal.tsx",
+    "baris": 195,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\components\\modals\\NewTaskModal.tsx",
+    "baris": 210,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\components\\modals\\NewTaskModal.tsx",
+    "baris": 230,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\components\\modals\\NewTaskModal.tsx",
+    "baris": 246,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\components\\modals\\NewTaskModal.tsx",
+    "baris": 265,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\components\\modals\\NewTaskModal.tsx",
+    "baris": 303,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\components\\modals\\NewTaskModal.tsx",
+    "baris": 376,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": ["None"]
+  },
+  {
+    "berkas": "src\\components\\shared\\forms\\SelectField.tsx",
+    "baris": 35,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["{opt.label}"]
+  },
+  {
+    "berkas": "src\\features\\dashboard\\DashboardView.tsx",
+    "baris": 626,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\flowchart\\components\\NodePropertiesOverlay.tsx",
+    "baris": 51,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\flowchart\\FlowchartContainer.tsx",
+    "baris": 3355,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\flowchart\\FlowchartContainer.tsx",
+    "baris": 3513,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["[{t.key}] {t.title} ({t.status})"]
+  },
+  {
+    "berkas": "src\\features\\flowchart\\FlowchartContainer.tsx",
+    "baris": 3653,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\flowchart\\FlowchartContainer.tsx",
+    "baris": 3686,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["[{epic.key}] {epic.title}"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueAdvancedFiltersExpanded.tsx",
+    "baris": 93,
+    "jenis": "select",
+    "dariMaster": true,
+    "opsiKeras": ["{m.label}"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueAdvancedFiltersExpanded.tsx",
+    "baris": 114,
+    "jenis": "select",
+    "dariMaster": true,
+    "opsiKeras": ["{m.label}"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueAdvancedFiltersExpanded.tsx",
+    "baris": 135,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["Backlog", "{s.name}"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueAdvancedFiltersExpanded.tsx",
+    "baris": 155,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["{l}"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueAdvancedFiltersExpanded.tsx",
+    "baris": 177,
+    "jenis": "select",
+    "dariMaster": true,
+    "opsiKeras": ["{m.label}"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueAdvancedFiltersExpanded.tsx",
+    "baris": 198,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["{env}"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueAdvancedFiltersExpanded.tsx",
+    "baris": 217,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["{risk}"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueAdvancedFiltersExpanded.tsx",
+    "baris": 236,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["{rel}"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueAdvancedFiltersExpanded.tsx",
+    "baris": 255,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["{res}"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueAdvancedFiltersExpanded.tsx",
+    "baris": 277,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueBulkActionsBar.tsx",
+    "baris": 62,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["10", "20", "30", "50", "100"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueBulkActionsBar.tsx",
+    "baris": 138,
+    "jenis": "select",
+    "dariMaster": true,
+    "opsiKeras": ["{t(\"bulkActions.pickStatus\")}", "{m.label}"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueBulkActionsBar.tsx",
+    "baris": 169,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["{t(\"bulkActions.pickAssignee\")}", "{m.displayName || m.email || \"Unknown\"}"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueQuickCreateBar.tsx",
+    "baris": 118,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": ["Backlog"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueQuickCreateBar.tsx",
+    "baris": 136,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueQuickCreateBar.tsx",
+    "baris": 154,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueTableInlineAddRow.tsx",
+    "baris": 155,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueTableInlineAddRow.tsx",
+    "baris": 173,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueTableRow.tsx",
+    "baris": 382,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueTableRow.tsx",
+    "baris": 432,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueTableRow.tsx",
+    "baris": 449,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueTableRow.tsx",
+    "baris": 520,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueTableRow.tsx",
+    "baris": 539,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueTableRow.tsx",
+    "baris": 567,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": ["Backlog"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\list\\IssueTableRow.tsx",
+    "baris": 627,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\modal\\TaskDetailSidebar.tsx",
+    "baris": 85,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\modal\\TaskDetailSidebar.tsx",
+    "baris": 109,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\modal\\TaskDetailSidebar.tsx",
+    "baris": 134,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": ["None"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\modal\\TaskDetailSidebar.tsx",
+    "baris": 160,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\modal\\TaskDetailSidebar.tsx",
+    "baris": 241,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": ["No sprint assigned"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\modal\\TaskDetailSidebar.tsx",
+    "baris": 266,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": ["Select release..."]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\modal\\TaskLinksSection.tsx",
+    "baris": 96,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": ["Blocks", "Is blocked by", "Relates to"]
+  },
+  {
+    "berkas": "src\\features\\issues\\components\\modal\\TaskLinksSection.tsx",
+    "baris": 108,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": ["Select task..."]
+  },
+  {
+    "berkas": "src\\features\\kanban\\index.tsx",
+    "baris": 206,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\master\\MasterDataPanel.tsx",
+    "baris": 1112,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["Epic", "Standard", "Subtask"]
+  },
+  {
+    "berkas": "src\\features\\master\\MasterDataPanel.tsx",
+    "baris": 1129,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["To Do", "In Progress", "Done"]
+  },
+  {
+    "berkas": "src\\features\\master\\MasterDataPanel.tsx",
+    "baris": 1488,
+    "jenis": "select",
+    "dariMaster": true,
+    "opsiKeras": ["{p.name}"]
+  },
+  {
+    "berkas": "src\\features\\master\\MasterDataPanel.tsx",
+    "baris": 1558,
+    "jenis": "select",
+    "dariMaster": true,
+    "opsiKeras": ["{p.name}"]
+  },
+  {
+    "berkas": "src\\features\\meeting-notes\\DiscussionPointsTable.tsx",
+    "baris": 485,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\meeting-notes\\DiscussionPointsTable.tsx",
+    "baris": 499,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\meeting-notes\\DiscussionPointsTable.tsx",
+    "baris": 797,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\meeting-notes\\DiscussionPointsTable.tsx",
+    "baris": 816,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\planning\\BacklogSection\\index.tsx",
+    "baris": 74,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\qa\\components\\QASuiteSidebar.tsx",
+    "baris": 83,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\qa\\components\\QATestCaseTable.tsx",
+    "baris": 302,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": ["Passed", "Failed", "Blocked", "Retest", "Pending"]
+  },
+  {
+    "berkas": "src\\features\\settings\\components\\WhatsAppConfigForm.tsx",
+    "baris": 49,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["FlowKirim"]
+  },
+  {
+    "berkas": "src\\features\\users\\AdminUserPanel.tsx",
+    "baris": 553,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["{p.label}"]
+  },
+  {
+    "berkas": "src\\features\\users\\AdminUserPanel.tsx",
+    "baris": 567,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\users\\AdminUserPanel.tsx",
+    "baris": 665,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["{p.label}"]
+  },
+  {
+    "berkas": "src\\features\\users\\AdminUserPanel.tsx",
+    "baris": 990,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["10", "25", "50", "100"]
+  },
+  {
+    "berkas": "src\\features\\users\\AdminUserPanel.tsx",
+    "baris": 1164,
+    "jenis": "select",
+    "dariMaster": true,
+    "opsiKeras": ["{dep.label}"]
+  },
+  {
+    "berkas": "src\\features\\users\\AdminUserPanel.tsx",
+    "baris": 1186,
+    "jenis": "select",
+    "dariMaster": true,
+    "opsiKeras": ["{j.label}"]
+  },
+  {
+    "berkas": "src\\features\\users\\AdminUserPanel.tsx",
+    "baris": 1208,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["{p.label}"]
+  },
+  {
+    "berkas": "src\\features\\users\\UserDetailView.tsx",
+    "baris": 683,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["(katalog peran sistem kosong — isi di Master Data)", "{p.label}"]
+  },
+  {
+    "berkas": "src\\features\\users\\UserDetailView.tsx",
+    "baris": 736,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": []
+  },
+  {
+    "berkas": "src\\features\\users\\UserDetailView.tsx",
+    "baris": 753,
+    "jenis": "select",
+    "dariMaster": true,
+    "opsiKeras": ["{opt.name || opt.label}"]
+  },
+  {
+    "berkas": "src\\features\\users\\UserDetailView.tsx",
+    "baris": 774,
+    "jenis": "select",
+    "dariMaster": true,
+    "opsiKeras": ["{opt.name || opt.label}"]
+  },
+  {
+    "berkas": "src\\features\\users\\UserDetailView.tsx",
+    "baris": 1025,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["{p.name}"]
+  },
+  {
+    "berkas": "src\\features\\users\\UserDetailView.tsx",
+    "baris": 1048,
+    "jenis": "select",
+    "dariMaster": false,
+    "opsiKeras": ["(katalog peran proyek kosong — isi di Master Data)", "{p.label}"]
+  },
+  {
+    "berkas": "src\\features\\wiki\\WikiView.tsx",
+    "baris": 1543,
+    "jenis": "StyledDropdown",
+    "dariMaster": true,
+    "opsiKeras": []
+  }
+]
