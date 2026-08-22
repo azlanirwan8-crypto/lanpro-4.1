@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useRef } from "react";
 import {
   DragDropContext,
@@ -20,6 +21,7 @@ import { BacklogSection } from "./BacklogSection";
 import { SprintSection } from "./SprintSection";
 
 export const PlanningView: React.FC<PlanningViewProps> = (props) => {
+  const { t } = useTranslation();
   const {
     tasks,
     sprints,
@@ -236,10 +238,10 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
             <div className="bg-surface px-5 py-3.5 rounded-lg border border-border-subtle/80 mb-4 flex justify-between items-center shadow-2xs shrink-0">
               <div>
                 <h2 className="text-base font-medium text-content-strong tracking-tight">
-                  Sprint Planning
+                  {t("planning.sprintPlanning")}
                 </h2>
                 <p className="text-xs font-medium text-content-muted mt-0.5">
-                  Kelola lini masa proyek dan alokasi sprint tim
+                  {t("planning.subtitle")}
                 </p>
               </div>
               {canEditPlanning && (
@@ -249,7 +251,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                     className="h-8 px-3.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>NEW SPRINT</span>
+                    <span>{t("planning.newSprint")}</span>
                   </button>
                 </div>
               )}

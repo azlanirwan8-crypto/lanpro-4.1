@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -78,6 +79,7 @@ interface IssueTableRowProps {
 }
 
 export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
+  const { t } = useTranslation();
   const {
     task,
     depth = 0,
@@ -150,11 +152,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
         return false;
       if (listFilterPriority && listFilterPriority !== "All" && s.priority !== listFilterPriority)
         return false;
-      if (
-        listFilterAssignee &&
-        listFilterAssignee !== "All" &&
-        s.assigneeId !== listFilterAssignee
-      )
+      if (listFilterAssignee && listFilterAssignee !== "All" && s.assigneeId !== listFilterAssignee)
         return false;
       if (listFilterCategory && listFilterCategory !== "All" && s.category !== listFilterCategory)
         return false;
@@ -389,10 +387,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     type="member"
                     masterData={mArr}
                     disabled={!isEditable || blockMember}
-                    className={cn(
-                      "max-w-[150px]",
-                      blockMember && "pointer-events-none opacity-85"
-                    )}
+                    className={cn("max-w-[150px]", blockMember && "pointer-events-none opacity-85")}
                   />
                 );
                 break;
@@ -623,7 +618,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
 
               case "release":
                 const relOptions = [
-                  { id: "", label: "No Release", color: "#94a3b8" },
+                  { id: "", label: t("planning.noRelease"), color: "#94a3b8" },
                   ...mArr
                     .filter((m) => m.type === "release")
                     .map((m) => ({ id: m.label, label: m.label, color: m.color })),
@@ -691,9 +686,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setActiveContextMenuTaskId(
-                    activeContextMenuTaskId === task.id ? null : task.id
-                  );
+                  setActiveContextMenuTaskId(activeContextMenuTaskId === task.id ? null : task.id);
                 }}
                 className="p-1 bg-surface-muted hover:bg-indigo-600 text-content-secondary hover:text-content-inverse border border-border-subtle rounded-lg transition-all cursor-pointer shadow-xs font-medium"
                 title="Menu Aksi"

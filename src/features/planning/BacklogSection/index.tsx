@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Zap, Search, Target, LayoutGrid, Filter } from "lucide-react";
 import { Task, MasterData } from "../../../types";
@@ -14,6 +15,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
   masterData,
   renderDraggableTask,
 }) => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("All Priorities");
 
@@ -47,7 +49,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           <div className="flex items-center gap-2">
             <LayoutGrid className="w-4 h-4 text-content-muted" />
             <h3 className="font-medium text-content-strong text-sm tracking-tight">
-              Tugas Backlog
+              {t("planning.backlogTasks")}
             </h3>
           </div>
           <div className="px-2 py-[3px] bg-indigo-500/10 border border-indigo-500/30 rounded-md text-xs font-semibold text-primary">
@@ -59,7 +61,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           <div className="relative">
             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-content-subtle" />
             <input
-              placeholder="Search backlog tasks..."
+              placeholder={t("planning.searchBacklog")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-8 pr-3 h-[38px] bg-surface-sunken/70 border border-border-subtle/80 rounded-md text-xs font-medium outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-surface transition-all shadow-2xs"
@@ -120,7 +122,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
             <div key="header-standalone" className="flex items-center gap-2 px-1 mt-3 mb-2">
               <Target className="w-3.5 h-3.5 text-content-muted" />
               <span className="text-xs sm:text-[10px] font-medium text-content-secondary uppercase tracking-wider leading-none">
-                Standalone Backlog
+                {t("planning.standaloneBacklog")}
               </span>
               <div className="ml-auto text-xs sm:text-[10px] font-medium text-content-secondary bg-surface-muted px-2 py-0.2 rounded-md border border-border-subtle/60">
                 {items.length}
@@ -139,7 +141,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
 
         {filteredBacklogTasks.length === 0 && (
           <div className="py-12 text-center text-xs font-medium text-content-subtle italic">
-            Belum ada task di Backlog. Buat task baru atau sesuaikan filter.
+            {t("planning.emptyBacklog")}
           </div>
         )}
       </div>

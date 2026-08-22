@@ -3501,7 +3501,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                       setIsEditProjectModalOpen(true);
                     }}
                     className="p-2.5 min-w-11 min-h-11 flex items-center justify-center hover:bg-surface-sunken rounded-full text-content-subtle hover:text-content-secondary group transition-all"
-                    title="Pengaturan Proyek"
+                    title={t("common.projectSettings")}
                   >
                     <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform" />
                   </button>

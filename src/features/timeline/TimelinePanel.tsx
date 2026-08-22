@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect, useRef } from "react";
 import { Task, Project } from "../../types";
 import {
@@ -118,6 +119,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
   setSelectedTaskForDetail,
   setIsTaskDetailModalOpen,
 }) => {
+  const { t } = useTranslation();
   const [pixelsPerDay, setPixelsPerDay] = useState<number>(24);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const [timelineInteraction, setTimelineInteraction] = useState<{
@@ -1157,11 +1159,9 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
       <div className="bg-surface px-5 py-3.5 rounded-md border border-border-subtle/80 shadow-2xs flex items-center justify-between shrink-0">
         <div>
           <h2 className="text-base font-semibold text-content-strong tracking-tight">
-            Peta Jalan Proyek
+            {t("roadmap.title")}
           </h2>
-          <p className="text-xs font-medium text-content-muted mt-0.5">
-            Visualisasi lini masa proyek, epics, dan ketergantungan tugas
-          </p>
+          <p className="text-xs font-medium text-content-muted mt-0.5">{t("roadmap.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           {/* Quick Action Navigation Buttons */}
@@ -1174,10 +1174,10 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 toast.success("Berhasil fokus ke Task Pertama Aktif");
               }}
               className="flex items-center gap-1.5 px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-subtle/80 cursor-pointer active:scale-95"
-              title="Fokus ke Tugas Pertama"
+              title={t("roadmap.focusFirstTask")}
             >
               <Target className="w-3.5 h-3.5 text-primary" />
-              <span>Focus First Task</span>
+              <span>{t("roadmap.focusFirstTask")}</span>
             </button>
             <button
               type="button"
@@ -1186,10 +1186,10 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 toast.success("Berhasil melompat ke garis hari ini (Today)");
               }}
               className="flex items-center gap-1.5 px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-subtle/80 cursor-pointer active:scale-95"
-              title="Jump to Today"
+              title={t("roadmap.jumpToday")}
             >
               <Calendar className="w-3.5 h-3.5 text-success-text" />
-              <span>Today</span>
+              <span>{t("roadmap.today")}</span>
             </button>
           </div>
 
@@ -1198,7 +1198,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               type="button"
               onClick={() => setPixelsPerDay((prev) => Math.max(4, prev - 4))}
               className="p-1.5 text-xs text-content-muted hover:text-content-strong hover:bg-surface-muted rounded-md transition-colors cursor-pointer"
-              title="Zoom Out (Ctrl + Scroll Down)"
+              title={t("roadmap.zoomOut")}
             >
               <Minus className="w-3.5 h-3.5" />
             </button>
@@ -1228,7 +1228,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               type="button"
               onClick={() => setPixelsPerDay((prev) => Math.min(150, prev + 4))}
               className="p-1.5 text-xs text-content-muted hover:text-content-strong hover:bg-surface-muted rounded-md transition-colors cursor-pointer"
-              title="Zoom In (Ctrl + Scroll Up)"
+              title={t("roadmap.zoomIn")}
             >
               <Plus className="w-3.5 h-3.5" />
             </button>
@@ -1240,7 +1240,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               className="h-8 px-3.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>EKSPOR SEBAGAI</span> <ChevronDown className="w-3 h-3" />
+              <span>{t("roadmap.exportAs")}</span> <ChevronDown className="w-3 h-3" />
             </button>
             {isExportMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-surface rounded-md shadow-md border border-border-subtle/80 py-1.5 z-50">
@@ -1249,14 +1249,14 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   className="w-full text-left px-3.5 py-2 hover:bg-surface-sunken text-xs font-medium text-content-body flex items-center gap-2 cursor-pointer transition-colors"
                 >
                   <FileText className="w-4 h-4 text-danger-text" />
-                  <span>PDF Document</span>
+                  <span>{t("roadmap.pdfDocument")}</span>
                 </button>
                 <button
                   onClick={exportTimelineToPng}
                   className="w-full text-left px-3.5 py-2 hover:bg-surface-sunken text-xs font-medium text-content-body flex items-center gap-2 cursor-pointer transition-colors"
                 >
                   <ImageIcon className="w-4 h-4 text-secondary" />
-                  <span>PNG Image</span>
+                  <span>{t("roadmap.pngImage")}</span>
                 </button>
               </div>
             )}
@@ -1272,7 +1272,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
           <div className="w-64 md:w-80 shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative">
             <div className="sticky top-0 z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-subtle px-5 flex items-center justify-between">
               <span className="font-medium text-xs sm:text-[11px] text-content-muted uppercase tracking-widest">
-                Item & Hierarki
+                {t("roadmap.itemHierarchy")}
               </span>
             </div>
             <div
@@ -1600,7 +1600,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             className="absolute left-6 h-8 px-4 rounded-xl flex items-center bg-surface-sunken/60 border border-border-subtle border-dashed hover:border-indigo-400 hover:bg-surface group-hover/row:bg-surface text-xs sm:text-[10px] font-medium text-content-subtle hover:text-indigo-600 hover:shadow-soft transition-all cursor-pointer gap-2"
                           >
                             <span className="w-1.5 h-1.5 rounded-full bg-surface-marker group-hover/row:bg-indigo-500 animate-pulse transition-colors" />
-                            Belum diplot. Klik untuk config.
+                            {t("roadmap.notPlotted")}
                           </motion.button>
                         </motion.div>
                       );
@@ -1714,7 +1714,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                                 initialEnd: end,
                               });
                             }}
-                            title="Tarik ujung kiri untuk mengubah tanggal mulai"
+                            title={t("roadmap.dragLeft")}
                           >
                             <div
                               className={cn(
@@ -1770,7 +1770,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                                 initialEnd: end,
                               });
                             }}
-                            title="Tarik ujung kanan untuk mengubah tanggal selesai"
+                            title={t("roadmap.dragRight")}
                           >
                             <div
                               className={cn(
@@ -1795,7 +1795,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-surface opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-surface"></span>
                     </span>
-                    TODAY
+                    {t("roadmap.todayMarker")}
                   </div>
                   {/* Glowing pulsing indicator dot right below sticky header */}
                   <div className="absolute top-[73px] -translate-x-1/2 flex items-center justify-center w-4 h-4 z-30">

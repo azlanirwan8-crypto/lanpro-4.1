@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -17,7 +18,11 @@ import { DescriptionEditor } from "../../components/DescriptionEditor";
 import { TaskDetailModalProps } from "./types";
 import { Task } from "../../types";
 import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
-import { Button, UncontrolledInput, UncontrolledTextarea } from "./components/modal/TaskDetailPrimitives";
+import {
+  Button,
+  UncontrolledInput,
+  UncontrolledTextarea,
+} from "./components/modal/TaskDetailPrimitives";
 import { TaskAttachmentsSection } from "./components/modal/TaskAttachmentsSection";
 import { TaskLinksSection } from "./components/modal/TaskLinksSection";
 import { TaskSubtasksSection } from "./components/modal/TaskSubtasksSection";
@@ -64,6 +69,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   setNewLinkUrl,
   deleteTask,
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"comments" | "history" | "activity">("comments");
   const [isEditingDescription, setIsEditingDescription] = useState(false);
   const [isEditingAcceptanceCriteria, setIsEditingAcceptanceCriteria] = useState(false);
@@ -184,7 +190,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                     <div className="text-xs text-amber-900 space-y-0.5">
                       <p className="font-medium uppercase tracking-wider text-amber-800 text-xs sm:text-[11px]">
-                        Peringatan Jadwal Epic Timeline:
+                        {t("issueDetail.epicTimelineWarning")}
                       </p>
                       <p className="font-normal text-content-body">
                         Rentang tanggal Task berada di luar jadwal Epic induk "{parentEpic?.title}"
@@ -212,7 +218,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               >
                 <UncontrolledInput
                   className="text-2xl font-medium text-content-strong bg-transparent hover:bg-surface-sunken focus:bg-surface border border-transparent hover:border-border-subtle/80 focus:border-indigo-400 rounded-lg px-3 py-1.5 w-full transition-all outline-none focus:ring-2 focus:ring-indigo-500/10 placeholder:text-content-subtle tracking-tight"
-                  placeholder="Issue Title"
+                  placeholder={t("issueDetail.issueTitle")}
                   initialValue={task.title || (task as any).summary || (task as any).name || ""}
                   onSave={(val: string) => updateTaskField(task.id, "title", val)}
                   onAutoSave={(val: string) => updateTaskField(task.id, "title", val)}
@@ -231,7 +237,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     disabled={isSubmitting["addSubtask"]}
                   >
                     <Plus className="w-3.5 h-3.5 mr-1 text-indigo-500" />
-                    Add Child
+                    {t("issueDetail.addChild")}
                   </Button>
                   <Button
                     variant="secondary"
@@ -240,7 +246,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     onClick={() => setIsAddingTaskLinkLocal(!isAddingTaskLinkLocal)}
                   >
                     <Link2Icon className="w-3.5 h-3.5 mr-1 text-content-subtle" />
-                    Link Issue
+                    {t("issueDetail.linkIssue")}
                   </Button>
                   <div className="ml-auto flex items-center gap-2">
                     <div className="flex items-center gap-1.5 text-xs sm:text-[11px] font-medium text-content-muted bg-surface-sunken/80 px-2.5 py-1 rounded-md border border-border-subtle/60">
@@ -259,7 +265,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-medium text-content-body uppercase tracking-wider flex items-center gap-2">
                     <ListTodo className="w-4 h-4 text-indigo-500" />
-                    Description
+                    {t("issueDetail.description")}
                   </h3>
                 </div>
 
@@ -292,7 +298,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         </div>
                       ) : (
                         <span className="text-content-subtle text-xs italic font-normal">
-                          No description provided. Click here to add detailed context...
+                          {t("issueDetail.noDescription")}
                         </span>
                       )}
                     </div>
@@ -305,7 +311,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-medium text-content-body uppercase tracking-wider flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                    Acceptance Criteria
+                    {t("issueDetail.acceptanceCriteria")}
                   </h3>
                 </div>
 
@@ -327,14 +333,12 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                           updateTaskField(task.id, "acceptanceCriteria", val)
                         }
                         onCancel={() => setIsEditingAcceptanceCriteria(false)}
-                        placeholder="Define the acceptance criteria here... (Markdown supported)"
+                        placeholder={t("issueDetail.acceptancePlaceholder")}
                         rows={4}
                         className="w-full p-4 text-xs focus:outline-none resize-y leading-relaxed font-normal text-content-body"
                       />
                       <div className="bg-surface-sunken border-t border-border-faint px-3 py-2 flex justify-between items-center text-xs sm:text-[11px] font-medium text-content-subtle">
-                        <span>
-                          Markdown fully supported. Press Ctrl+Enter to save, or Escape to cancel.
-                        </span>
+                        <span>{t("issueDetail.markdownHint")}</span>
                       </div>
                     </div>
                   ) : (
@@ -350,7 +354,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         </div>
                       ) : (
                         <span className="text-content-subtle text-xs italic font-normal">
-                          No acceptance criteria defined. Click here to add...
+                          {t("issueDetail.noAcceptance")}
                         </span>
                       )}
                     </div>
@@ -364,7 +368,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-medium text-content uppercase tracking-widest flex items-center gap-2">
                       <Figma className="w-4 h-4 text-purple-500" />
-                      Design Specification
+                      {t("issueDetail.designSpec")}
                     </h3>
                     <a
                       href={task.figmaUrl}
@@ -373,7 +377,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       className="text-[10px] leading-none font-medium text-purple-600 bg-purple-500/10 px-2 py-1 rounded-lg hover:bg-purple-500/15 transition-all flex items-center gap-1"
                     >
                       <ExternalLink className="w-3 h-3" />
-                      Open Original
+                      {t("issueDetail.openOriginal")}
                     </a>
                   </div>
                   <div className="rounded-lg border border-border-subtle overflow-hidden shadow-md h-[480px] bg-surface-muted relative group">
@@ -382,7 +386,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                       height="100%"
                       src={`https://www.figma.com/embed?embed_host=share&url=${encodeURIComponent(task.figmaUrl)}`}
                       allowFullScreen
-                      title="Embed Figma"
+                      title={t("issueDetail.embedFigma")}
                       className="border-none"
                     ></iframe>
                   </div>
@@ -483,7 +487,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
       <ConfirmationModal
         isOpen={showDiscardConfirm}
         onClose={() => setShowDiscardConfirm(false)}
-        title="Buang Perubahan?"
+        title={t("issueDetail.discardChanges")}
         message="Terdapat perubahan form yang belum disimpan. Apakah Anda yakin ingin keluar dan membuang perubahan?"
         variant="warning"
         confirmText="Ya, Buang Perubahan"

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Calendar, ChevronDown, Edit2, Trash2, Zap, Target, CheckCircle2 } from "lucide-react";
@@ -35,6 +36,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
   setEditingSprint,
   setIsEditSprintModalOpen,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="flex-1 overflow-auto space-y-3.5 pb-16 pr-1 min-h-0 custom-scrollbar">
       {sprints
@@ -164,7 +166,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                     </div>
                     <div className="text-right hidden md:block">
                       <span className="text-xs sm:text-[10px] font-medium text-content-subtle block uppercase leading-none">
-                        Points
+                        {t("planning.points")}
                       </span>
                       <span className="text-xs font-medium text-primary">
                         {sprintTasks.reduce((acc, t) => acc + (t.storyPoints || 0), 0)}

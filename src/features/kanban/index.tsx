@@ -85,7 +85,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
   if (!boardStatuses || boardStatuses.length === 0) {
     return (
       <div className="flex items-center justify-center h-full text-content-muted">
-        Loading board...
+        {t("kanban.loadingBoard")}
       </div>
     );
   }
@@ -199,7 +199,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                     onChange={(e) => setShowEmptySwimlanes(e.target.checked)}
                     className="accent-primary rounded-md cursor-pointer"
                   />
-                  <span>Empty</span>
+                  <span>{t("kanban.empty")}</span>
                 </label>
               </div>
               <div className="relative shrink-0">
@@ -208,8 +208,8 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                   onChange={(e) => setGroupBy(e.target.value as any)}
                   className="bg-primary-surface/10 text-primary border border-primary/20 rounded-md text-[10px] leading-none font-semibold px-2 py-1 cursor-pointer outline-none focus:ring-1 focus:ring-primary/30 max-w-[110px]"
                 >
-                  <option value="epic">By Epic</option>
-                  <option value="assignee">By Assignee</option>
+                  <option value="epic">{t("kanban.byEpic")}</option>
+                  <option value="assignee">{t("kanban.byAssignee")}</option>
                 </select>
               </div>
             </div>

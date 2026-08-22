@@ -1,5 +1,18 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
-import { Activity, User, Zap, Sparkles, ShieldAlert, Layers, Tag, Calendar, Clock, LineChart, Trash2 } from "lucide-react";
+import {
+  Activity,
+  User,
+  Zap,
+  Sparkles,
+  ShieldAlert,
+  Layers,
+  Tag,
+  Calendar,
+  Clock,
+  LineChart,
+  Trash2,
+} from "lucide-react";
 import { format } from "date-fns";
 import { cn, ensureDate } from "../../../../lib/utils";
 import { StyledDropdown } from "../../../../components/ui/CommonComponents";
@@ -44,6 +57,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
   onClose,
   safeFormat,
 }) => {
+  const { t } = useTranslation();
   return (
     <div
       className={cn(
@@ -55,7 +69,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
       <div className="flex items-center justify-between pb-3 border-b border-border-subtle/80">
         <h4 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
           <Activity className="w-3.5 h-3.5 text-indigo-500" />
-          Issue Attributes
+          {t("issueDetail.issueAttributes")}
         </h4>
         <span className="text-xs sm:text-[10px] font-medium text-content-muted bg-surface-strong/60 px-2 py-0.5 rounded-md">
           {task.key || "ATTR"}
@@ -66,7 +80,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
       <div className="space-y-1.5">
         <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
           <Activity className="w-3 h-3 text-content-subtle" />
-          Lifecycle Status
+          {t("issueDetail.lifecycleStatus")}
         </label>
         <StyledDropdown
           value={task.status}
@@ -90,7 +104,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
         <div className="space-y-1">
           <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
             <User className="w-3 h-3 text-content-subtle" />
-            Assignee
+            {t("issueDetail.assignee")}
           </label>
           <StyledDropdown
             value={task.assigneeId || ""}
@@ -115,7 +129,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
         <div className="space-y-1">
           <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
             <User className="w-3 h-3 text-content-subtle" />
-            Reporter
+            {t("issueDetail.reporter")}
           </label>
           <StyledDropdown
             value={task.reporterId || ""}
@@ -141,7 +155,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           <div className="space-y-1">
             <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
               <Zap className="w-3 h-3 text-content-subtle" />
-              Priority
+              {t("issueDetail.priority")}
             </label>
             <StyledDropdown
               value={task.priority ?? ""}
@@ -164,7 +178,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           <div className="space-y-1">
             <div className="flex items-center justify-between mb-0.5">
               <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider">
-                Points
+                {t("issueDetail.points")}
               </label>
               {isEditable && (!isProjectMember || isReporter) && (
                 <button
@@ -178,9 +192,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             <UncontrolledInput
               type="number"
               initialValue={task.storyPoints || ""}
-              onSave={(val: any) =>
-                updateTaskField(task.id, "storyPoints", parseInt(val) || 0)
-              }
+              onSave={(val: any) => updateTaskField(task.id, "storyPoints", parseInt(val) || 0)}
               className="h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-3 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 transition-all shadow-2xs outline-none text-content-body"
               disabled={!isEditable || blockMember}
               placeholder="0"
@@ -192,7 +204,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
         <div className="space-y-1">
           <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
             <ShieldAlert className="w-3 h-3 text-content-subtle" />
-            Blocked Status
+            {t("issueDetail.blockedStatus")}
           </label>
           <button
             onClick={() => toggleBlockedStatus(task.id)}
@@ -206,9 +218,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             )}
           >
             <div className="flex items-center gap-2">
-              <ShieldAlert
-                className={cn("w-3.5 h-3.5", task.isBlocked && "animate-pulse")}
-              />
+              <ShieldAlert className={cn("w-3.5 h-3.5", task.isBlocked && "animate-pulse")} />
               {task.isBlocked ? "Blocked" : "Clear"}
             </div>
             <div
@@ -226,7 +236,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
         <div className="space-y-1">
           <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
             <Layers className="w-3 h-3 text-content-subtle" />
-            Current Sprint
+            {t("issueDetail.currentSprint")}
           </label>
           <StyledDropdown
             value={task.sprintId || ""}
@@ -251,7 +261,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
         <div className="space-y-1">
           <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
             <Tag className="w-3 h-3 text-content-subtle" />
-            Release / Milestone
+            {t("issueDetail.releaseMilestone")}
           </label>
           <StyledDropdown
             value={task.release || ""}
@@ -279,13 +289,11 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           <div className="space-y-1">
             <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
               <Calendar className="w-3 h-3 text-content-subtle" />
-              Start Date
+              {t("issueDetail.startDate")}
             </label>
             <UncontrolledInput
               type="date"
-              initialValue={
-                task.startDate ? format(ensureDate(task.startDate), "yyyy-MM-dd") : ""
-              }
+              initialValue={task.startDate ? format(ensureDate(task.startDate), "yyyy-MM-dd") : ""}
               onSave={(val: any) => updateTaskField(task.id, "startDate", val)}
               className={cn(
                 "h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body",
@@ -297,13 +305,11 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           <div className="space-y-1">
             <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
               <Calendar className="w-3 h-3 text-content-subtle" />
-              End Date
+              {t("issueDetail.endDate")}
             </label>
             <UncontrolledInput
               type="date"
-              initialValue={
-                task.endDate ? format(ensureDate(task.endDate), "yyyy-MM-dd") : ""
-              }
+              initialValue={task.endDate ? format(ensureDate(task.endDate), "yyyy-MM-dd") : ""}
               onSave={(val: any) => updateTaskField(task.id, "endDate", val)}
               className={cn(
                 "h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body",
@@ -318,13 +324,11 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           <div className="space-y-1">
             <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
               <Calendar className="w-3 h-3 text-content-subtle" />
-              Due Date
+              {t("issueDetail.dueDate")}
             </label>
             <UncontrolledInput
               type="date"
-              initialValue={
-                task.dueDate ? format(ensureDate(task.dueDate), "yyyy-MM-dd") : ""
-              }
+              initialValue={task.dueDate ? format(ensureDate(task.dueDate), "yyyy-MM-dd") : ""}
               onSave={(val: any) => updateTaskField(task.id, "dueDate", val)}
               className={cn(
                 "h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body",
@@ -336,7 +340,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           <div className="space-y-1">
             <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
               <Tag className="w-3 h-3 text-content-subtle" />
-              Labels
+              {t("issueDetail.labels")}
             </label>
             <UncontrolledInput
               initialValue={task.labels?.join(", ") || ""}
@@ -350,7 +354,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
                     .filter(Boolean)
                 )
               }
-              placeholder="Add tags..."
+              placeholder={t("issueDetail.addTags")}
               className="h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body"
               disabled={!isEditable}
             />
@@ -362,7 +366,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           <div className="space-y-1">
             <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
               <Clock className="w-3 h-3 text-content-subtle" />
-              Est. Hours
+              {t("issueDetail.estHours")}
             </label>
             <UncontrolledInput
               type="number"
@@ -374,25 +378,23 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               }
               className="h-[38px] w-full text-xs font-medium bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-3 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-content-body"
               disabled={!isEditable}
-              placeholder="e.g. 5"
+              placeholder={t("issueDetail.egHours")}
             />
           </div>
           <div className="space-y-1">
             <label className="text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
               <LineChart className="w-3 h-3 text-indigo-500" />
-              Logged Hours
+              {t("issueDetail.loggedHours")}
             </label>
             <UncontrolledInput
               type="number"
               min="0"
               step="0.5"
               initialValue={task.loggedHours || ""}
-              onSave={(val: any) =>
-                updateTaskField(task.id, "loggedHours", parseFloat(val) || 0)
-              }
+              onSave={(val: any) => updateTaskField(task.id, "loggedHours", parseFloat(val) || 0)}
               className="h-[38px] w-full text-xs font-medium bg-indigo-500/10 border border-indigo-500/30 hover:border-indigo-500/30 rounded-md px-3 focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 shadow-2xs outline-none text-indigo-700"
               disabled={!isEditable}
-              placeholder="e.g. 2.5"
+              placeholder={t("issueDetail.egLogged")}
             />
           </div>
         </div>
@@ -403,13 +405,13 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
       {/* Footer Metadata */}
       <div className="pt-2 space-y-2">
         <div className="flex items-center justify-between text-xs sm:text-[11px] text-content-muted">
-          <span>Created</span>
+          <span>{t("issueDetail.created")}</span>
           <span className="font-medium text-content-body">
             {safeFormat(task.createdAt, "MMM d, yyyy HH:mm")}
           </span>
         </div>
         <div className="flex items-center justify-between text-xs sm:text-[11px] text-content-muted">
-          <span>Updated</span>
+          <span>{t("issueDetail.updated")}</span>
           <span className="font-medium text-content-body">
             {safeFormat(task.updatedAt, "MMM d, yyyy HH:mm")}
           </span>
@@ -431,7 +433,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               }}
             >
               <Trash2 className="w-3.5 h-3.5" />
-              Delete Issue
+              {t("issueDetail.deleteIssue")}
             </button>
           </div>
         )}

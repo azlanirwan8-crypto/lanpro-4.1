@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { AnimatePresence } from "motion/react";
 import { Search, Filter, X, Calendar, Settings2, MoreHorizontal } from "lucide-react";
@@ -89,6 +90,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
   allResolutions,
   setIsConfigureColumnsOpen,
 }) => {
+  const { t } = useTranslation();
   let activeCount = 0;
   if (listFilterStatus !== "All") activeCount++;
   if (listFilterPriority !== "All") activeCount++;
@@ -129,7 +131,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             title="Toggle Advanced Filtering Panel"
           >
             <Filter className="w-3.5 h-3.5 text-content-muted shrink-0" />
-            <span className="hidden sm:inline">Saringan Lanjutan</span>
+            <span className="hidden sm:inline">{t("filters.advancedFilters")}</span>
             <span className="sm:hidden">Filters</span>
             {activeCount > 0 && (
               <span className="ml-1 bg-primary-surface text-content-inverse rounded-full px-1.5 py-0.5 flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-semibold leading-none">
