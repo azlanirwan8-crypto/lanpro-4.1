@@ -840,6 +840,7 @@ export const en = {
     deleteIssue: "Delete Issue",
   },
   planning: {
+    issueCount: "{{count}} Issues",
     allPriorities: "All Priorities",
     untitledSprint: "Untitled Phase",
     sprintEmptyDrag:

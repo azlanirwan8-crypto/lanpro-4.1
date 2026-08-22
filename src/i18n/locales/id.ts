@@ -843,6 +843,7 @@ export const id = {
     deleteIssue: "Hapus Isu",
   },
   planning: {
+    issueCount: "{{count}} Isu",
     allPriorities: "Semua Prioritas",
     untitledSprint: "Fase Tanpa Judul",
     sprintEmptyDrag:
