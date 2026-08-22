@@ -110,7 +110,10 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       );
       showSuccessAlert(
         t("alerts.successTitle"),
-        `Status diubah menjadi ${nextStatus === "completed" ? "DONE" : "PENDING"}`
+        t("alerts.statusChanged", {
+          status:
+            nextStatus === "completed" ? t("discussion.statusDone") : t("discussion.statusPending"),
+        })
       );
     } catch (e: any) {
       toast.error("Gagal mengubah status: " + e.message);

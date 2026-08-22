@@ -556,7 +556,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
     e.stopPropagation();
     const isConfirmed = await confirmDeleteAlert(
       t("alerts.confirmTitle"),
-      `Dokumen "${doc.title}" akan dihapus secara permanen dan tidak dapat dikembalikan!`
+      t("alerts.deleteDocText", { title: doc.title })
     );
     if (!isConfirmed) return;
 
@@ -759,7 +759,10 @@ export const WikiView: React.FC<WikiViewProps> = ({
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setEditFile(e.dataTransfer.files[0]);
       setShouldRemoveFile(false);
-      showSuccessAlert(t("alerts.successTitle"), `File terpilih: ${e.dataTransfer.files[0].name}`);
+      showSuccessAlert(
+        t("alerts.successTitle"),
+        t("alerts.fileSelected", { name: e.dataTransfer.files[0].name })
+      );
     }
   };
 

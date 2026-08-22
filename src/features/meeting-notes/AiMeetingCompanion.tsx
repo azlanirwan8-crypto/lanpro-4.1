@@ -703,7 +703,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     setImportingIds([]);
     showSuccessAlert(
       t("alerts.successTitle"),
-      `Berhasil mengimpor ${successCount} butir tindak lanjut ke Poin Diskusi resmi.`
+      t("alerts.actionImportedCount", { count: successCount })
     );
     if (onPointsImported) {
       onPointsImported();

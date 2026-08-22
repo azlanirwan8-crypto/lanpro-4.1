@@ -160,15 +160,15 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
   const handleRemoveProject = async (projectId: string, userId: string) => {
     const isConfirmed = await confirmDeleteAlert(
-      "Keluarkan dari Project?",
-      "Apakah Anda yakin ingin mengeluarkan user dari project ini?"
+      t("alerts.removeUserTitle"),
+      t("alerts.removeUserText")
     );
     if (!isConfirmed) return;
 
     try {
       const data = await removeUserFromProject(projectId, props.currentUserId, userId);
       if (data.status === "success") {
-        showSuccessAlert("Berhasil!", "User berhasil dikeluarkan dari Project.");
+        showSuccessAlert(t("alerts.successTitle"), t("alerts.userRemoved"));
         if (props.onRefreshProjects) {
           props.onRefreshProjects();
         } else {
@@ -471,8 +471,8 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
       if (action === "delete") {
         showSuccessAlert(
-          "Berhasil!",
-          `Hapus massal selesai: ${successCount} pengguna berhasil dihapus.`
+          t("alerts.successTitle"),
+          t("alerts.bulkDeleteDone", { count: successCount })
         );
       } else {
         toast.success(`Aksi Massal Selesai! Berhasil: ${successCount}, Gagal: ${failCount}`);
@@ -698,8 +698,8 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       }
 
                       const isConfirmed = await confirmDeleteAlert(
-                        "Hapus Pengguna Massal?",
-                        `Apakah Anda yakin ingin menghapus ${selectedUserIds.length} pengguna terpilih secara massal? Tindakan ini tidak dapat dibatalkan.`
+                        t("alerts.bulkDeleteUsersTitle"),
+                        t("alerts.bulkDeleteUsersText", { count: selectedUserIds.length })
                       );
                       if (!isConfirmed) return;
 

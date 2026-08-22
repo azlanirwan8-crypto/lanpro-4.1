@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./i18n/LanguageSwitcher";
 import { safeLocalStorage, safeSessionStorage } from "./lib/safeStorage";
 import ReactMarkdown from "react-markdown";
@@ -154,6 +155,7 @@ import { ProfileEditModal } from "./features/users/ProfileEditModal";
 const BROWSER_SESSION_ID = Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
 
 function AppContainer() {
+  const { t } = useTranslation();
   // Store & Notification Hooks
   const {
     currentView,
@@ -285,7 +287,7 @@ function AppContainer() {
   // username+password tanpa berpindah halaman.
   useEffect(() => {
     if (hasilSso.jenis !== "galat") return;
-    showErrorAlert("Tidak Dapat Masuk", hasilSso.pesan);
+    showErrorAlert(t("alerts.cannotSignIn"), hasilSso.pesan);
     bersihkanSso();
   }, [hasilSso]);
 
@@ -1658,8 +1660,8 @@ function AppContainer() {
     if (!sprintToComplete) return;
 
     const isConfirmed = await confirmDeleteAlert(
-      "Selesaikan Fase?",
-      `Apakah Anda yakin ingin menyelesaikan "${sprintToComplete.name}"? Tugas yang belum selesai akan dipindahkan ke backlog secara otomatis.`
+      t("alerts.completeSprintTitle"),
+      t("alerts.completeSprintText", { name: sprintToComplete.name })
     );
 
     if (!isConfirmed) return;
@@ -1687,7 +1689,10 @@ function AppContainer() {
         fetchSprints();
 
         await logActivity("sprint_completed", `Fase ${sprintToComplete.name} telah diselesaikan.`);
-        showSuccessAlert("Berhasil!", `Fase "${sprintToComplete.name}" berhasil diselesaikan.`);
+        showSuccessAlert(
+          t("alerts.successTitle"),
+          t("alerts.sprintCompleted", { name: sprintToComplete.name })
+        );
       }
     } catch (e: any) {
       console.error(e);
@@ -1704,8 +1709,13 @@ function AppContainer() {
     const sprintTasks = tasks.filter((t) => t.sprintId === sprintId);
 
     const isConfirmed = await confirmDeleteAlert(
-      "Hapus Fase?",
-      `Apakah Anda yakin ingin menghapus fase ini? ${sprintTasks.length > 0 ? `${sprintTasks.length} tugas di dalamnya akan dipindahkan kembali ke backlog.` : ""}`
+      t("alerts.deleteSprintTitle"),
+      t("alerts.deleteSprintText", {
+        extra:
+          sprintTasks.length > 0
+            ? t("alerts.deleteSprintExtra", { count: sprintTasks.length })
+            : "",
+      })
     );
 
     if (!isConfirmed) return;
@@ -1725,7 +1735,7 @@ function AppContainer() {
       await fetchTasks();
       fetchSprints();
 
-      showSuccessAlert("Berhasil!", "Fase berhasil dihapus.");
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.sprintDeleted"));
     } catch (e: any) {
       console.error(e);
       toast.error(e.message || "Gagal menghapus fase");
@@ -2386,8 +2396,8 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
     if (!attachment) return;
 
     const isConfirmed = await confirmDeleteAlert(
-      "Hapus Lampiran?",
-      `Apakah Anda yakin ingin menghapus lampiran "${attachment.name}"?`
+      t("alerts.deleteAttachmentTitle"),
+      t("alerts.deleteAttachmentText", { name: attachment.name })
     );
 
     if (!isConfirmed) return;
@@ -2401,7 +2411,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         ...selectedTaskForDetail,
         attachments: updatedAttachments,
       });
-      showSuccessAlert("Berhasil!", "Lampiran berhasil dihapus.");
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.attachmentDeleted"));
     } catch (error: any) {
       console.error(error);
       toast.error("Gagal menghapus lampiran: " + (error.message || error));
@@ -2916,8 +2926,8 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
     if (!linkToRemove) return;
 
     const isConfirmed = await confirmDeleteAlert(
-      "Hapus Tautan Tugas?",
-      "Apakah Anda yakin ingin menghapus tautan hubungan antar-tugas ini?"
+      t("alerts.deleteTaskLinkTitle"),
+      t("alerts.deleteTaskLinkText")
     );
 
     if (!isConfirmed) return;
@@ -2940,7 +2950,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           : null
       );
 
-      showSuccessAlert("Berhasil!", "Hubungan tugas berhasil dihapus.");
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.taskLinkDeleted"));
     } catch (e: any) {
       console.error(e);
       toast.error("Gagal menghapus hubungan tugas: " + (e.message || e));
@@ -3114,8 +3124,8 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
     }
 
     const isConfirmed = await confirmDeleteAlert(
-      "Hapus Proyek Secara Permanen?",
-      `Anda akan menghapus "${project.name}" secara PERMANEN beserta SELURUH datanya (tugas, komentar, fase, log). Tindakan ini tidak dapat dibatalkan.`
+      t("alerts.deleteProjectTitle"),
+      t("alerts.deleteProjectText", { name: project.name })
     );
 
     if (!isConfirmed) return;
@@ -3134,10 +3144,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       // Optimistic update
       setProjects((prev) => prev.filter((p) => p.id !== project.id));
 
-      showSuccessAlert(
-        "Berhasil!",
-        `Proyek "${project.name}" dan seluruh data terkait telah berhasil dihapus.`
-      );
+      showSuccessAlert("Berhasil!", t("alerts.projectDeleted", { name: project.name }));
     } catch (e: any) {
       console.error(e);
       toast.error("Gagal menghapus proyek: " + (e.message || e));
@@ -3179,7 +3186,10 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       setTasks((prev) => prev.filter((t) => t.id !== taskId));
       await fetchTasks(); // Refresh explicitly
 
-      showSuccessAlert("Berhasil!", `Tugas "${taskToDelete.title}" telah berhasil dihapus.`);
+      showSuccessAlert(
+        t("alerts.successTitle"),
+        t("alerts.taskDeleted", { title: taskToDelete.title })
+      );
     } catch (e: any) {
       console.error(e);
       toast.error("Gagal menghapus tugas: " + (e.message || e));
@@ -3215,7 +3225,10 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       setAllProjectTasksForStats((prev) => prev.filter((t) => !deletedSet.has(t.id)));
       await fetchTasks();
 
-      showSuccessAlert("Berhasil!", `Berhasil menghapus ${deletedSet.size} tugas terpilih.`);
+      showSuccessAlert(
+        t("alerts.successTitle"),
+        `Berhasil menghapus ${deletedSet.size} tugas terpilih.`
+      );
     } catch (e: any) {
       console.error(e);
       toast.error("Gagal menghapus beberapa tugas: " + (e.message || e));

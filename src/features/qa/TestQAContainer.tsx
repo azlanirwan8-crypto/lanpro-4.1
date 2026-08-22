@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { safeLocalStorage } from "../../lib/safeStorage";
 import React, { useState, useEffect, useRef } from "react";
 import { ShieldAlert } from "lucide-react";
@@ -35,6 +36,7 @@ export function TestQAPanel({
   user,
   initialStatusFilter,
 }: TestQAPanelProps) {
+  const { t } = useTranslation();
   if (!selectedProject) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-6 bg-surface rounded-md border border-border-subtle shadow-soft max-w-lg mx-auto mt-12">
@@ -335,7 +337,7 @@ export function TestQAPanel({
   const handleBulkDeleteCases = async () => {
     if (selectedCaseIds.length === 0) return;
     const isConfirmed = await confirmDeleteAlert(
-      "Apakah Anda Yakin?",
+      t("alerts.confirmTitle"),
       `${selectedCaseIds.length} test case terpilih akan dihapus secara permanen dan tidak dapat dikembalikan!`
     );
     if (!isConfirmed) return;
@@ -493,8 +495,8 @@ export function TestQAPanel({
   // Delete Handlers
   const handleDeleteSuite = async (suite: QATestSuite) => {
     const isConfirmed = await confirmDeleteAlert(
-      "Apakah Anda Yakin?",
-      `Test suite "${suite.name}" akan dihapus secara permanen dan tidak dapat dikembalikan!`
+      t("alerts.confirmTitle"),
+      t("alerts.deleteSuiteText", { name: suite.name })
     );
     if (!isConfirmed) return;
 
@@ -504,7 +506,7 @@ export function TestQAPanel({
 
     try {
       await deleteSuite(selectedProject.id, suite.id);
-      showSuccessAlert("Berhasil!", "Test suite berhasil dihapus.");
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.suiteDeleted"));
     } catch (e: any) {
       toast.error(e?.message || "Gagal menghapus test suite.");
     }
@@ -512,8 +514,8 @@ export function TestQAPanel({
 
   const handleDeleteTestCase = async (tc: QATestCase) => {
     const isConfirmed = await confirmDeleteAlert(
-      "Apakah Anda Yakin?",
-      `Test case "${tc.title}" akan dihapus secara permanen dan tidak dapat dikembalikan!`
+      t("alerts.confirmTitle"),
+      t("alerts.deleteCaseText", { title: tc.title })
     );
     if (!isConfirmed) return;
 
@@ -525,7 +527,7 @@ export function TestQAPanel({
 
     try {
       await deleteCase(selectedProject.id, tc.id);
-      showSuccessAlert("Berhasil!", "Test case berhasil dihapus.");
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.caseDeleted"));
     } catch (e: any) {
       toast.error(e?.message || "Gagal menghapus test case.");
     }
