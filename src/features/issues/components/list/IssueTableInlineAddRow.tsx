@@ -178,6 +178,8 @@ export const IssueTableInlineAddRow: React.FC<IssueTableInlineAddRowProps> = ({
                     .map((p) => ({
                       id: p.label,
                       label: p.label,
+                      icon: p.icon,
+                      color: p.color,
                     }))}
                   type="priority"
                   masterData={mArr}

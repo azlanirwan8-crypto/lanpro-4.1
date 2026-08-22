@@ -6,7 +6,7 @@
  * `Archived` bisa dipilih walau tidak ada di MasterData sama sekali.
  */
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { EditProjectModal } from "./EditProjectModal";
 
 const PROYEK: any = {
@@ -52,34 +52,48 @@ const tampilkan = (masterData?: any[]) =>
     />
   );
 
-const nilaiOpsi = () => screen.getAllByRole("option").map((o) => (o as HTMLOptionElement).value);
+/**
+ * Item #146 — dropdown ini bukan lagi `<select>` HTML melainkan StyledDropdown,
+ * supaya bisa menampilkan ikon MasterData seperti dropdown lain. Pilihannya
+ * karena itu baru ada di DOM setelah tombolnya diklik.
+ *
+ * Yang dijaga tidak berubah: dari MANA pilihannya berasal.
+ */
+const nilaiOpsi = (penanda: RegExp) => {
+  const tombol = screen.getAllByRole("button").find((b) => penanda.test(b.textContent || ""));
+  if (!tombol) throw new Error("tombol dropdown tidak ditemukan: " + String(penanda));
+  fireEvent.click(tombol);
+  return screen
+    .getAllByRole("button")
+    .map((b) => (b.textContent || "").trim())
+    .filter(Boolean);
+};
 
 describe("EditProjectModal — Status & Metodologi dari MasterData (#138)", () => {
   it("menawarkan status dari MasterData, termasuk Planning dan Cancelled", () => {
     tampilkan(MASTER);
-    const opsi = nilaiOpsi();
+    const opsi = nilaiOpsi(/Active/);
     expect(opsi).toEqual(expect.arrayContaining(["Planning", "Active", "Cancelled"]));
   });
 
   it("tidak lagi menawarkan Archived yang tidak ada di MasterData", () => {
     tampilkan(MASTER);
-    expect(nilaiOpsi()).not.toContain("Archived");
+    expect(nilaiOpsi(/Active/)).not.toContain("Archived");
   });
 
   it("menawarkan metodologi dari MasterData", () => {
     tampilkan(MASTER);
-    expect(nilaiOpsi()).toEqual(expect.arrayContaining(["Scrum", "Waterfall"]));
+    expect(nilaiOpsi(/Agile|Scrum/)).toEqual(expect.arrayContaining(["Scrum", "Waterfall"]));
   });
 
   it("tidak membocorkan tipe MasterData lain ke dropdown", () => {
     tampilkan(MASTER);
-    expect(nilaiOpsi()).not.toContain("High");
+    expect(nilaiOpsi(/Active/)).not.toContain("High");
   });
 
   it("jatuh ke daftar cadangan bila MasterData kosong, bukan dropdown kosong", () => {
     tampilkan([]);
-    const opsi = nilaiOpsi();
-    expect(opsi).toEqual(expect.arrayContaining(["Active", "On Hold", "Completed"]));
-    expect(opsi).toEqual(expect.arrayContaining(["Agile", "Scrum"]));
+    expect(nilaiOpsi(/Active/)).toEqual(expect.arrayContaining(["Active", "On Hold", "Completed"]));
+    expect(nilaiOpsi(/Agile/)).toEqual(expect.arrayContaining(["Agile", "Scrum"]));
   });
 });

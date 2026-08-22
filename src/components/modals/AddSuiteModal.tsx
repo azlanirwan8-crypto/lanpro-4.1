@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { useMasterOptions } from "../../hooks/useMasterOptions";
+import { StyledDropdown } from "../ui/CommonComponents";
+import { useMasterOptionItems } from "../../hooks/useMasterOptions";
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus } from "lucide-react";
@@ -17,7 +18,11 @@ interface AddSuiteModalProps {
 }
 
 /** Dipakai hanya bila MasterData belum memuat tipe qa_phase. */
-const CADANGAN_FASE = ["SIT", "UAT", "PTR"];
+const CADANGAN_FASE = [
+  { id: "SIT", label: "SIT", icon: "Cpu", color: "#3B82F6" },
+  { id: "UAT", label: "UAT", icon: "CheckCircle2", color: "#10B981" },
+  { id: "PTR", label: "PTR", icon: "ShieldCheck", color: "#F59E0B" },
+];
 
 export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
   isOpen,
@@ -29,7 +34,7 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
   onSubmit,
 }) => {
   const { t } = useTranslation();
-  const opsiFase = useMasterOptions("qa_phase", CADANGAN_FASE);
+  const opsiFase = useMasterOptionItems("qa_phase", CADANGAN_FASE);
   if (!isOpen) return null;
 
   return (
@@ -75,17 +80,15 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
               <label className="text-xs sm:text-[11px] text-content-body font-medium block">
                 {t("addSuite.testPhase")}
               </label>
-              <select
+              <StyledDropdown
                 value={phase}
-                onChange={(e) => onPhaseChange(e.target.value as any)}
-                className="w-full text-xs p-3 bg-surface-sunken/80 border border-border-subtle rounded-md focus:border-primary focus:outline-none font-medium text-primary cursor-pointer"
-              >
-                {opsiFase.map((f) => (
-                  <option key={f} value={f}>
-                    {f}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => onPhaseChange(val as any)}
+                options={opsiFase}
+                type="qa_phase"
+                masterData={[]}
+                className="w-full"
+                buttonClassName="w-full text-xs p-3 bg-surface-sunken/80 border border-border-subtle rounded-md font-medium text-primary"
+              />
             </div>
 
             <div className="flex justify-end gap-2.5 pt-3">

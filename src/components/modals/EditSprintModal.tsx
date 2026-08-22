@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { useMasterOptions } from "../../hooks/useMasterOptions";
+import { StyledDropdown } from "../ui/CommonComponents";
+import { useMasterOptionItems } from "../../hooks/useMasterOptions";
 import React from "react";
 import { format } from "date-fns";
 import { ensureDate } from "../../lib/utils";
@@ -21,7 +22,11 @@ interface EditSprintModalProps {
  *
  * HURUF KECIL disengaja: itulah yang tersimpan di kolom Sprints.status.
  */
-const CADANGAN_STATUS_SPRINT = ["planned", "active", "completed"];
+const CADANGAN_STATUS_SPRINT = [
+  { id: "planned", label: "planned", icon: "CalendarClock", color: "#8B5CF6" },
+  { id: "active", label: "active", icon: "PlayCircle", color: "#10B981" },
+  { id: "completed", label: "completed", icon: "CheckCircle2", color: "#3B82F6" },
+];
 
 export const EditSprintModal: React.FC<EditSprintModalProps> = ({
   isOpen,
@@ -32,7 +37,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
   isSubmitting,
 }) => {
   const { t } = useTranslation();
-  const opsiStatus = useMasterOptions("sprint_status", CADANGAN_STATUS_SPRINT);
+  const opsiStatus = useMasterOptionItems("sprint_status", CADANGAN_STATUS_SPRINT);
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t("editSprint.title")} maxWidth="max-w-xl">
       {editingSprint && (
@@ -59,22 +64,15 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
             <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
               {t("editSprint.status")}
             </label>
-            <select
-              value={editingSprint.status}
-              onChange={(e: any) =>
-                setEditingSprint({
-                  ...editingSprint,
-                  status: e.target.value as "planned" | "active" | "completed",
-                })
-              }
-              className="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface"
-            >
-              {opsiStatus.map((st) => (
-                <option key={st} value={st}>
-                  {st}
-                </option>
-              ))}
-            </select>
+            <StyledDropdown
+              value={editingSprint.status || "planned"}
+              onChange={(val) => setEditingSprint({ ...editingSprint, status: val as any })}
+              options={opsiStatus}
+              type="sprint_status"
+              masterData={[]}
+              className="w-full"
+              buttonClassName="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface"
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -126,22 +124,15 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
             <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
               {t("editSprint.status")}
             </label>
-            <select
-              value={editingSprint.status}
-              onChange={(e: any) =>
-                setEditingSprint({
-                  ...editingSprint,
-                  status: e.target.value as any,
-                })
-              }
-              className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium outline-none"
-            >
-              {opsiStatus.map((st) => (
-                <option key={st} value={st}>
-                  {st}
-                </option>
-              ))}
-            </select>
+            <StyledDropdown
+              value={editingSprint.status || "planned"}
+              onChange={(val) => setEditingSprint({ ...editingSprint, status: val as any })}
+              options={opsiStatus}
+              type="sprint_status"
+              masterData={[]}
+              className="w-full"
+              buttonClassName="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface"
+            />
           </div>
 
           <div className="flex gap-3 pt-4 border-t border-border-subtle">

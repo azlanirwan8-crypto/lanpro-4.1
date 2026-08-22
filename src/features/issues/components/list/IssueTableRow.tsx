@@ -514,7 +514,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                   { id: "Unresolved", label: "Unresolved", color: "#94a3b8" },
                   ...mArr
                     .filter((m) => m.type === "resolution")
-                    .map((m) => ({ id: m.label, label: m.label, color: m.color })),
+                    .map((m) => ({ id: m.label, label: m.label, color: m.color, icon: m.icon })),
                 ];
                 content = (
                   <StyledDropdown
@@ -533,7 +533,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                   { id: "", label: "No Category", color: "#94a3b8" },
                   ...mArr
                     .filter((m) => m.type === "category")
-                    .map((m) => ({ id: m.label, label: m.label, color: m.color })),
+                    .map((m) => ({ id: m.label, label: m.label, color: m.color, icon: m.icon })),
                 ];
                 content = (
                   <StyledDropdown
@@ -621,7 +621,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                   { id: "", label: t("planning.noRelease"), color: "#94a3b8" },
                   ...mArr
                     .filter((m) => m.type === "release")
-                    .map((m) => ({ id: m.label, label: m.label, color: m.color })),
+                    .map((m) => ({ id: m.label, label: m.label, color: m.color, icon: m.icon })),
                 ];
                 content = (
                   <StyledDropdown

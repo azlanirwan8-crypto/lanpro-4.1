@@ -3,6 +3,7 @@ import React from "react";
 import { Trash2 } from "lucide-react";
 import { Modal } from "../ui/Modal";
 import { Input, Button } from "../ui/CoreUI";
+import { StyledDropdown } from "../ui/CommonComponents";
 import { Project, PeranEfektif, UserProfile, MasterData } from "../../types";
 
 interface EditProjectModalProps {
@@ -29,8 +30,16 @@ interface EditProjectModalProps {
  * juga — pengguna kehilangan kemampuan menyetel status sama sekali, yang
  * lebih buruk daripada daftar keras yang digantikan.
  */
-const CADANGAN_STATUS = ["Active", "On Hold", "Completed", "Archived"];
-const CADANGAN_METODOLOGI = ["Agile", "Scrum", "Kanban", "Waterfall", "Hybrid"];
+const CADANGAN_STATUS = [
+  { id: "Active", label: "Active", icon: "PlayCircle", color: "#10B981" },
+  { id: "On Hold", label: "On Hold", icon: "PauseCircle", color: "#F59E0B" },
+  { id: "Completed", label: "Completed", icon: "CheckCircle2", color: "#3B82F6" },
+];
+const CADANGAN_METODOLOGI = [
+  { id: "Agile", label: "Agile", icon: "Repeat", color: "#10B981" },
+  { id: "Scrum", label: "Scrum", icon: "Users", color: "#3B82F6" },
+  { id: "Kanban", label: "Kanban", icon: "Columns3", color: "#8B5CF6" },
+];
 
 export const EditProjectModal: React.FC<EditProjectModalProps> = ({
   isOpen,
@@ -49,8 +58,19 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const opsiDariMaster = (tipe: string, cadangan: string[]) => {
-    const dari = (masterData || []).filter((m) => m.type === tipe).map((m) => m.label);
+  // Item #146 — ikon dan warna ikut diteruskan supaya tampilannya sama dengan
+  // dropdown MasterData lain (JENIS KATEGORI). Sumbernya tetap prop
+  // `masterData`, bukan store: komponen ini sudah menerimanya, dan mengambil
+  // dari store akan membuat prop yang ia deklarasikan diam-diam diabaikan.
+  const opsiDariMaster = (tipe: string, cadangan: typeof CADANGAN_STATUS) => {
+    const dari = (masterData || [])
+      .filter((m) => m.type === tipe && m.label)
+      .map((m) => ({
+        id: m.label as string,
+        label: m.label as string,
+        icon: (m as { icon?: string }).icon,
+        color: (m as { color?: string }).color,
+      }));
     return dari.length ? dari : cadangan;
   };
   const opsiStatus = opsiDariMaster("project_status", CADANGAN_STATUS);
@@ -109,43 +129,29 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
               <label className="block text-sm font-medium text-content-body mb-1">
                 {t("editProject.status")}
               </label>
-              <select
+              <StyledDropdown
                 value={editingProject.status || "Active"}
-                onChange={(e) =>
-                  setEditingProject({
-                    ...editingProject,
-                    status: e.target.value as any,
-                  })
-                }
-                className="w-full border border-border-subtle rounded-lg p-2 text-sm"
-              >
-                {opsiStatus.map((nilai) => (
-                  <option key={nilai} value={nilai}>
-                    {nilai}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setEditingProject({ ...editingProject, status: val })}
+                options={opsiStatus}
+                type="project_status"
+                masterData={masterData || []}
+                className="w-full"
+                buttonClassName="w-full border border-border-subtle rounded-lg p-2 text-sm"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-content-body mb-1">
                 {t("editProject.methodology")}
               </label>
-              <select
+              <StyledDropdown
                 value={editingProject.category || "Agile"}
-                onChange={(e) =>
-                  setEditingProject({
-                    ...editingProject,
-                    category: e.target.value,
-                  })
-                }
-                className="w-full border border-border-subtle rounded-lg p-2 text-sm"
-              >
-                {opsiMetodologi.map((nilai) => (
-                  <option key={nilai} value={nilai}>
-                    {nilai}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setEditingProject({ ...editingProject, category: val })}
+                options={opsiMetodologi}
+                type="methodology"
+                masterData={masterData || []}
+                className="w-full"
+                buttonClassName="w-full border border-border-subtle rounded-lg p-2 text-sm"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-content-body mb-1">

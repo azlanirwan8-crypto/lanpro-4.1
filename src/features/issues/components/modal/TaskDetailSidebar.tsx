@@ -273,7 +273,8 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
                 .map((d) => ({
                   id: d.label,
                   label: d.label,
-                  icon: "Box",
+                  // Item #146 — ikon diambil dari MasterData, bukan dikeraskan "Box".
+                  icon: d.icon,
                 })),
             ]}
             type="release"

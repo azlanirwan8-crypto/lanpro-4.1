@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { useMasterOptions } from "../../hooks/useMasterOptions";
+import { useMasterOptionItems } from "../../hooks/useMasterOptions";
+import { StyledDropdown } from "../../components/ui/CommonComponents";
 import { safeLocalStorage, safeSessionStorage } from "../../lib/safeStorage";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useFlowchartCanvas } from "../../hooks/useFlowchartCanvas";
@@ -83,7 +84,11 @@ interface FlowchartViewProps {
  * Isinya sengaja tiga nilai lama (PRD/Panduan/Laporan) supaya diagram yang
  * terlanjur menyimpan salah satunya tetap punya pilihan yang cocok.
  */
-const CADANGAN_KATEGORI_DOKUMEN = ["PRD", "Panduan", "Laporan"];
+const CADANGAN_KATEGORI_DOKUMEN = [
+  { id: "PRD", label: "PRD", icon: "FileText", color: "#8B5CF6" },
+  { id: "Panduan", label: "Panduan", icon: "BookOpen", color: "#3B82F6" },
+  { id: "Laporan", label: "Laporan", icon: "FileBarChart", color: "#F59E0B" },
+];
 
 export const FlowchartView: React.FC<FlowchartViewProps> = ({
   selectedProject,
@@ -98,7 +103,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   // ini punya daftar kerasnya sendiri (PRD/Panduan/Laporan), jadi dua dropdown
   // "Kategori Dokumen" pada tabel Documents yang sama menawarkan pilihan
   // berbeda: 3 di sini, 9 di Dokumentasi.
-  const opsiKategoriDokumen = useMasterOptions("jenis_dokumen", CADANGAN_KATEGORI_DOKUMEN);
+  const opsiKategoriDokumen = useMasterOptionItems("jenis_dokumen", CADANGAN_KATEGORI_DOKUMEN);
   // Get active logged in user author name dynamically
   const getResolvedAuthor = () => {
     if (currentUserProfile?.displayName) return currentUserProfile.displayName;
@@ -3669,17 +3674,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 <label className="text-xs sm:text-[11px] font-medium text-content-body">
                   {t("flowchart.docCategoryLabel")} <span className="text-rose-500">*</span>
                 </label>
-                <select
+                <StyledDropdown
                   value={flowCategory}
-                  onChange={(e) => setFlowCategory(e.target.value)}
-                  className="w-full text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
-                >
-                  {opsiKategoriDokumen.map((k) => (
-                    <option key={k} value={k}>
-                      {k}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val: string) => setFlowCategory(val)}
+                  options={opsiKategoriDokumen}
+                  type="jenis_dokumen"
+                  masterData={[]}
+                  className="w-full"
+                  buttonClassName="w-full text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong"
+                />
               </div>
 
               {/* Tautan Eksternal Input */}

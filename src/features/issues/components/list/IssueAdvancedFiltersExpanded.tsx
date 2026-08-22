@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "motion/react";
 import { X } from "lucide-react";
 import { MasterData, Sprint } from "../../../../types";
+import { StyledDropdown } from "../../../../components/ui/CommonComponents";
 
 interface IssueAdvancedFiltersExpandedProps {
   listFilterStatus: string;
@@ -90,20 +91,20 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
               {t("filters.status")}
             </label>
-            <select
+            <StyledDropdown
               value={listFilterStatus}
-              onChange={(e) => setListFilterStatus(e.target.value)}
-              className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
-            >
-              <option value="All">{t("filters.allStatuses")}</option>
-              {mArr
-                .filter((m) => m.type === "status")
-                .map((m, idx) => (
-                  <option key={m.id ? `opt-st-${m.id}-${idx}` : `opt-st-${idx}`} value={m.label}>
-                    {m.label}
-                  </option>
-                ))}
-            </select>
+              onChange={(val) => setListFilterStatus(val)}
+              options={[
+                { id: "All", label: t("filters.allStatuses"), icon: "Layers", color: "#6366F1" },
+                ...mArr
+                  .filter((m) => m.type === "status")
+                  .map((m) => ({ id: m.label, label: m.label, icon: m.icon, color: m.color })),
+              ]}
+              type="status"
+              masterData={mArr}
+              className="w-full"
+              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 hover:border-border-subtle"
+            />
           </div>
 
           {/* Priority Filter */}
@@ -111,20 +112,25 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
               {t("filters.priority")}
             </label>
-            <select
+            <StyledDropdown
               value={listFilterPriority}
-              onChange={(e) => setListFilterPriority(e.target.value)}
-              className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
-            >
-              <option value="All">{t("issueColumns.allPriorities")}</option>
-              {mArr
-                .filter((m) => m.type === "priority")
-                .map((m, idx) => (
-                  <option key={m.id ? `flt-p-${m.id}-${idx}` : `flt-p-${idx}`} value={m.label}>
-                    {m.label}
-                  </option>
-                ))}
-            </select>
+              onChange={(val) => setListFilterPriority(val)}
+              options={[
+                {
+                  id: "All",
+                  label: t("issueColumns.allPriorities"),
+                  icon: "Layers",
+                  color: "#6366F1",
+                },
+                ...mArr
+                  .filter((m) => m.type === "priority")
+                  .map((m) => ({ id: m.label, label: m.label, icon: m.icon, color: m.color })),
+              ]}
+              type="priority"
+              masterData={mArr}
+              className="w-full"
+              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 hover:border-border-subtle"
+            />
           </div>
 
           {/* Sprint Filter */}
@@ -174,20 +180,20 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
               Category (Custom)
             </label>
-            <select
+            <StyledDropdown
               value={listFilterCategory}
-              onChange={(e) => setListFilterCategory(e.target.value)}
-              className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
-            >
-              <option value="All">{t("filters.allCategories")}</option>
-              {mArr
-                .filter((m) => m.type === "category")
-                .map((m) => (
-                  <option key={m.id} value={m.label}>
-                    {m.label}
-                  </option>
-                ))}
-            </select>
+              onChange={(val) => setListFilterCategory(val)}
+              options={[
+                { id: "All", label: t("filters.allCategories"), icon: "Layers", color: "#6366F1" },
+                ...mArr
+                  .filter((m) => m.type === "category")
+                  .map((m) => ({ id: m.label, label: m.label, icon: m.icon, color: m.color })),
+              ]}
+              type="category"
+              masterData={mArr}
+              className="w-full"
+              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 hover:border-border-subtle"
+            />
           </div>
 
           {/* Environment Filter */}

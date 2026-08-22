@@ -159,6 +159,8 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
                 .map((p) => ({
                   id: p.label,
                   label: p.label,
+                  icon: p.icon,
+                  color: p.color,
                 }))}
               type="priority"
               masterData={mArr}
