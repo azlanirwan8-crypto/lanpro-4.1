@@ -1085,7 +1085,7 @@ export function DashboardView(props: DashboardViewProps) {
                           <tr key={idx} className="hover:bg-surface-sunken transition">
                             <td className="py-3 px-2">
                               <div className="flex items-center gap-2.5">
-                                <div className="w-7 h-7 rounded-full bg-indigo-500/15 text-indigo-700 flex items-center justify-center font-medium text-xs">
+                                <div className="w-7 h-7 rounded-full bg-indigo-700 text-content-inverse flex items-center justify-center font-medium text-xs">
                                   {user.name.slice(0, 2).toUpperCase()}
                                 </div>
                                 <span className="font-medium text-content-strong ">

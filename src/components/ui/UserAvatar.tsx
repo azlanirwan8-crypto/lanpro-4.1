@@ -5,16 +5,30 @@ import { UserProfile } from "../../types";
 // #122 — URL avatar yang sudah terbukti 404, dibagi seluruh instance.
 const avatarGagal = new Set<string>();
 
+// #125 — SEMULA `bg-{warna}-500/15` + `text-{warna}-600`. Lapisan 15% di atas
+// kartu GELAP nyaris lenyap, jadi teks `-600` yang gelap berdiri di atas latar
+// yang praktis tetap gelap: inisial terbaca 1,85.
+//
+// Arahnya dipilih pemilik proyek: latar PEKAT dengan teks putih. Itu juga pola
+// peran `-surface` di §22.3 — latar berwarna pekat selalu bersanding dengan
+// teks putih, dan karena itu tidak perlu berubah antar mode. `content-inverse`
+// bernilai #ffffff di KEDUA mode, jadi tidak ada override varian gelap yang
+// perlu ditambah (§22.4 poin 2 melarangnya).
+//
+// Tingkat `-700`, bukan `-600`: dengan teks putih, `amber-600` hanya mencapai
+// 3,48 dan gagal AA. Seluruh delapan warna di `-700` lolos:
+//   blue 6,70 · emerald 6,45 · violet 7,10 · amber 5,02
+//   rose 6,29 · indigo 7,90 · cyan 5,36 · fuchsia 6,32
 export const getUserAvatarColors = (idOrName: string = "") => {
   const colors = [
-    { bg: "bg-blue-500/15", text: "text-blue-600", border: "border-blue-500/30" },
-    { bg: "bg-emerald-500/15", text: "text-emerald-600", border: "border-emerald-500/30" },
-    { bg: "bg-violet-500/15", text: "text-violet-600", border: "border-violet-500/30" },
-    { bg: "bg-amber-500/15", text: "text-amber-600", border: "border-amber-500/30" },
-    { bg: "bg-rose-500/15", text: "text-rose-600", border: "border-rose-500/30" },
-    { bg: "bg-indigo-500/15", text: "text-indigo-600", border: "border-indigo-500/30" },
-    { bg: "bg-cyan-500/15", text: "text-cyan-600", border: "border-cyan-500/30" },
-    { bg: "bg-fuchsia-500/15", text: "text-fuchsia-600", border: "border-fuchsia-500/30" },
+    { bg: "bg-blue-700", text: "text-content-inverse", border: "border-blue-700" },
+    { bg: "bg-emerald-700", text: "text-content-inverse", border: "border-emerald-700" },
+    { bg: "bg-violet-700", text: "text-content-inverse", border: "border-violet-700" },
+    { bg: "bg-amber-700", text: "text-content-inverse", border: "border-amber-700" },
+    { bg: "bg-rose-700", text: "text-content-inverse", border: "border-rose-700" },
+    { bg: "bg-indigo-700", text: "text-content-inverse", border: "border-indigo-700" },
+    { bg: "bg-cyan-700", text: "text-content-inverse", border: "border-cyan-700" },
+    { bg: "bg-fuchsia-700", text: "text-content-inverse", border: "border-fuchsia-700" },
   ];
 
   let hash = 0;
