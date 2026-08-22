@@ -475,7 +475,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 7 BELUM · 113 SELESAI · 3 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 7 BELUM · 114 SELESAI · 3 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -502,7 +502,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 | 121 | `POST /api/auth/forgot-password` mengembalikan 404 untuk email tak dikenal (orakel enumerasi) DAN mereset kata sandi pengguna atas permintaan TANPA autentikasi — siapa pun yang tahu sebuah email bisa mengunci akunnya | **F2**  | 🔴  | Rendah        |   Ya (keamanan)    | `BELUM`           | §6     |
 | 122 | `GET /uploads/avatar-1-1786840166479.jpg` mengembalikan 404 berulang-ulang di konsol; berkas avatar hilang dan komponennya terus mencoba lagi tanpa henti                                                                | **F5**  | 🟡  | Sangat rendah |       Tidak        | `BELUM`           | §5     |
 
-### 1.2 SUDAH SELESAI — 113 item
+### 1.2 SUDAH SELESAI — 114 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -617,6 +617,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 108 | ~~Token `content-subtle` 2,56:1 di mode terang~~ `#94a3b8` → `#64748b` (4,76:1, lolos AA); 641 pemakaian ikut terbawa sekaligus                                                                               | **F12**  | 🔴  | Tinggi        |         Tidak          | `SELESAI` 21 Agu | §21.4  |
 | 109 | ~~Mode terang lebih buruk daripada mode gelap~~ tertutup oleh #108; terukur 44 → 12 di mode terang, keadaannya kini terbalik                                                                                  | **F12**  | 🟠  | Tinggi        |         Tidak          | `SELESAI` 21 Agu | §21.4  |
 | 110 | ~~Panel merek layar auth membalik jadi lebih terang di mode gelap~~ gradasi pindah ke peran `-surface` yang mode-stabil; token `primary-surface-active` ditambahkan supaya tampilan mode terang tidak berubah | **F12**  | 🟠  | Sedang        |         Tidak          | `SELESAI` 21 Agu | §22.3  |
+| 124 | ~~`bgOf` melewati lapisan semi-transparan~~ lapisan beralpha kini dikomposisikan ke latar pekat di bawahnya; tombol nonaktif 1,00 → 2,90 sesuai catatan §21.4                                                 | **F12**  | 🟠  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §21.3  |
 | 115 | ~~Tiga kontrol layar masuk di bawah rentang sentuh #14~~ `py-2.5 -my-2.5`; terukur 36px tanpa menggeser tata letak                                                                                            | **F12**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §14    |
 | 116 | ~~Panel merek hilang di 768–1023px~~ breakpoint turun ke `md`; diverifikasi di 375/768/1024/1440 tanpa scroll horizontal                                                                                      |  **F3**  | 🟡  | Rendah        |         Tidak          | `SELESAI` 21 Agu | §14    |
 | 118 | ~~Placeholder kata sandi berupa karakter bulatan~~ diganti teks bermakna di 7 tempat (4 layar auth + 3 panel pengguna); nol bulatan tersisa                                                                   |  **F3**  | 🟢  | Sangat rendah |         Tidak          | `SELESAI` 21 Agu | §14    |
@@ -6711,14 +6712,32 @@ await (async function () {
     });
     return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
   }
+  // #124 — lapisan semi-transparan harus DIKOMPOSISIKAN ke latar di bawahnya,
+  // bukan dilewati. Tanpa ini tombol nonaktif (`disabled:opacity-60` di atas
+  // kartu putih) terbaca 1,00 padahal nilainya ~2,9: `bgOf` menolak latarnya
+  // lalu mendarat di kartu putih, sehingga teks putih diadu dengan putih.
+  function komposit(lapis, dasar) {
+    var r = dasar[0],
+      g = dasar[1],
+      b = dasar[2];
+    for (var i = lapis.length - 1; i >= 0; i--) {
+      var a = lapis[i][3] / 255;
+      r = Math.round(lapis[i][0] * a + r * (1 - a));
+      g = Math.round(lapis[i][1] * a + g * (1 - a));
+      b = Math.round(lapis[i][2] * a + b * (1 - a));
+    }
+    return [r, g, b, 255];
+  }
   function bgOf(el) {
+    var lapis = [];
     var e = el;
     while (e) {
       var st = getComputedStyle(e);
       var c = st.backgroundColor;
       if (c && c !== "rgba(0, 0, 0, 0)" && c !== "transparent") {
         var m = rgb(c);
-        if (m[3] > 200) return m;
+        if (m[3] > 200) return komposit(lapis, m);
+        if (m[3] > 0) lapis.push(m);
       }
       // #107 — panel gradasi mengecat lewat `background-image`; `backgroundColor`
       // -nya transparan, jadi tanpa cabang ini ia DILEWATI dan pengukuran
@@ -6743,12 +6762,13 @@ await (async function () {
               n++;
             }
           }
-          if (n) return [Math.round(r / n), Math.round(g / n), Math.round(b / n), 255];
+          if (n)
+            return komposit(lapis, [Math.round(r / n), Math.round(g / n), Math.round(b / n), 255]);
         }
       }
       e = e.parentElement;
     }
-    return [255, 255, 255, 255];
+    return komposit(lapis, [255, 255, 255, 255]);
   }
   function ukur() {
     var r = [];
@@ -6806,7 +6826,7 @@ await (async function () {
 })();
 ```
 
-**Tujuh hal yang WAJIB diperhatikan:**
+**Delapan hal yang WAJIB diperhatikan:**
 
 1. **Periksa `masuk` pada hasilnya.** Bila `false`, itu layar login dan angkanya
    TIDAK sebanding dengan layar yang sudah login. Kesalahan ini terjadi **tiga
@@ -6848,6 +6868,13 @@ await (async function () {
    rata-rata seluruh perhentian gradasi. Warna tepat di bawah satu elemen
    bergantung posisinya, jadi angka pada elemen di atas gradasi harus dibaca
    sebagai indikasi, bukan vonis.
+8. **Lapisan semi-transparan DIKOMPOSISIKAN, jangan dilewati** (#124). Versi
+   lama menolak latar beralpha lalu naik ke induk, sehingga tombol nonaktif
+   (`disabled:opacity-60` di atas kartu putih) terbaca **1,00** — teks putih
+   diadu dengan putih. `bgOf` kini menumpuk setiap lapisan beralpha ke latar
+   pekat di bawahnya: biru 60% di atas putih menghasilkan `rgb(140,151,184)`,
+   dan angkanya menjadi **2,90**, persis nilai yang §21.4 catat. Ini juga
+   berlaku untuk seluruh pola `bg-{warna}/10` dan `/15` di kartu.
 
 ### 21.4 Sisa pekerjaan tema, sejauh yang diketahui
 
