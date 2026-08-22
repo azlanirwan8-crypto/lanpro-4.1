@@ -396,7 +396,7 @@ export function DashboardView(props: DashboardViewProps) {
     if (!selectedProject) return;
     const isAuthorized = userRole === "admin" || userRole === "manager" || userRole === "head";
     if (!isAuthorized) {
-      toast.error("Hanya Admin, Project Manager, atau Head yang dapat menyetujui gate ini.");
+      toast.error(t("toast.gateApprovalDenied"));
       return;
     }
 

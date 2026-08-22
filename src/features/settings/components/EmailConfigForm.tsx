@@ -56,7 +56,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
   const handleTestEmail = async (targetEmail: string) => {
     const trimmed = targetEmail.trim();
     if (!trimmed || !trimmed.includes("@") || !trimmed.includes(".")) {
-      toast.error("Silakan masukkan alamat email tujuan yang valid.");
+      toast.error(t("toast.enterValidEmail"));
       return;
     }
 
@@ -93,7 +93,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
       );
     } catch (e) {}
     setIsTemplateModalOpen(false);
-    toast.success("Template email berhasil disimpan.");
+    toast.success(t("toast.emailTemplateSaved"));
   };
 
   const handleSaveConfig = () => {
@@ -105,9 +105,9 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
           bodyTemplate: formData.bodyTemplate,
         })
       );
-      toast.success("Konfigurasi integrasi email & template berhasil disimpan.");
+      toast.success(t("toast.emailConfigSaved"));
     } catch (e) {
-      toast.error("Gagal menyimpan konfigurasi email.");
+      toast.error(t("toast.emailConfigFailed"));
     }
   };
 

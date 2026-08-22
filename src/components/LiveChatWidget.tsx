@@ -195,7 +195,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             ? "Grup Chat Tim"
             : allUsers.find((u) => u.id === msg.senderId)?.displayName || "Rekan Tim";
 
-        toast.info(`Pesan baru di ${displaySenderName}`);
+        toast.info(t("toast.newChatMessage", { nama: displaySenderName }));
       }
     };
 
@@ -397,7 +397,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
       }
     } catch (err) {
       console.error("Gagal mengirim pesan:", err);
-      toast.error("Gagal mengirim pesan, silakan coba lagi.");
+      toast.error(t("toast.chatSendFailed"));
     }
   };
 
@@ -469,7 +469,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
         }
       } catch (err) {
         console.error("Gagal mengirim lampiran:", err);
-        toast.error("Gagal mengirim lampiran.");
+        toast.error(t("toast.chatAttachFailed"));
       } finally {
         setIsUploading(false);
       }

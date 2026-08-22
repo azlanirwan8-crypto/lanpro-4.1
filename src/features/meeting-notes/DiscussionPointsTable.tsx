@@ -116,7 +116,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
         })
       );
     } catch (e: any) {
-      toast.error("Gagal mengubah status: " + e.message);
+      toast.error(t("toast.statusChangeFailed") + e.message);
       fetchPoints();
     }
   };
@@ -167,15 +167,15 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   const handleLiveQuickAdd = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!currentUser) {
-      toast.error("Silakan login terlebih dahulu.");
+      toast.error(t("toast.pleaseLoginFirst"));
       return;
     }
     if (!canAdd) {
-      toast.error("Anda tidak memiliki izin untuk menambah poin diskusi.");
+      toast.error(t("toast.noPermAddPoint"));
       return;
     }
     if (!quickConcern.trim()) {
-      toast.error("Concern / Topic wajib diisi.");
+      toast.error(t("toast.concernRequired"));
       return;
     }
 
@@ -201,7 +201,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       fetchPoints();
     } catch (error: any) {
       console.error("Error saving point:", error);
-      toast.error("Gagal menambah poin: " + error.message);
+      toast.error(t("toast.pointAddFailed") + error.message);
     } finally {
       setIsSaving(false);
     }
@@ -210,7 +210,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   const startEdit = (point: DiscussionPoint) => {
     const isOwner = point.authorId === (currentUser?.uid || "");
     if (!hasPermission(userRole, "meetingNotes", "update", isOwner, permissions)) {
-      toast.error("Anda tidak memiliki izin untuk mengedit poin ini.");
+      toast.error(t("toast.noPermEditPoint"));
       return;
     }
     setEditingId(point.id!);
@@ -247,7 +247,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   const handleSendThreadComment = async () => {
     if (!activeThreadPoint?.id) return;
     if (!newCommentText.trim()) {
-      toast.error("Tulis balasan atau komentar terlebih dahulu.");
+      toast.error(t("toast.writeReplyFirst"));
       return;
     }
 
@@ -281,7 +281,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       const updated = await fetchCommentsForPoint(activeThreadPoint.id);
       setThreadComments(updated);
     } catch (e: any) {
-      toast.error("Gagal mengirim balasan: " + e.message);
+      toast.error(t("toast.replySendFailed") + e.message);
     } finally {
       setIsSendingComment(false);
     }
@@ -325,12 +325,12 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
     const isOwner = point.authorId === (currentUser?.uid || "");
     if (!hasPermission(userRole, "meetingNotes", "update", isOwner, permissions)) {
-      toast.error("Anda tidak memiliki izin untuk mengedit poin ini.");
+      toast.error(t("toast.noPermEditPoint"));
       return;
     }
 
     if (!editForm.concern?.trim()) {
-      toast.error("Concern / Topic cannot be empty.");
+      toast.error(t("toast.concernEmpty"));
       return;
     }
 

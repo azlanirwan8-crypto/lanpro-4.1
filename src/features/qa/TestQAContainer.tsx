@@ -218,14 +218,14 @@ export function TestQAPanel({
 
   const handleForceUnlock = () => {
     acquireLockForCurrentUser();
-    toast.success("Force Unlock berhasil! Anda memegang kontrol pengujian.");
+    toast.success(t("toast.forceUnlockOk"));
   };
 
   const releaseLockManually = () => {
     const lockKey = `lanpro_qa_lock_${selectedSuiteId}`;
     safeLocalStorage.removeItem(lockKey);
     setLockState({ lockedBy: null, userName: null, lockedAt: null });
-    toast.info("Lock dilepaskan.");
+    toast.info(t("toast.lockReleased"));
   };
 
   // Status Change Handler
@@ -241,7 +241,7 @@ export function TestQAPanel({
 
     try {
       await updateCaseStatus(selectedProject.id, caseId, { status: newStatus });
-      toast.success(`Status berhasil diubah menjadi ${newStatus}`);
+      toast.success(t("toast.qaStatusChanged", { status: newStatus }));
     } catch (e: any) {
       console.warn("Status update fallback:", e.message);
     }
@@ -256,7 +256,7 @@ export function TestQAPanel({
     saveSuitesToStorage(updatedSuites);
     const targetSuite = updatedSuites.find((s) => s.id === suiteId);
     if (targetSuite) {
-      toast.success("PIC Modul berhasil diperbarui.");
+      toast.success(t("toast.picModuleUpdated"));
       try {
         await updateSuite(selectedProject.id, suiteId, targetSuite);
       } catch (err) {
@@ -280,7 +280,7 @@ export function TestQAPanel({
     const targetSuite = updatedSuites.find((s) => s.id === suiteId);
     const targetCase = targetSuite?.cases.find((c) => c.id === caseId);
     if (targetCase) {
-      toast.success("PIC Task berhasil diperbarui.");
+      toast.success(t("toast.picTaskUpdated"));
       try {
         await updateCase(selectedProject.id, caseId, targetCase);
       } catch (err) {
@@ -315,7 +315,7 @@ export function TestQAPanel({
       ),
     }));
     saveSuitesToStorage(updatedSuites);
-    toast.success(`Berhasil menetapkan PIC ke ${selectedCaseIds.length} task sekaligus.`);
+    toast.success(t("toast.picBulkAssigned", { count: selectedCaseIds.length }));
     setSelectedCaseIds([]);
   };
 
@@ -330,7 +330,7 @@ export function TestQAPanel({
       ),
     }));
     saveSuitesToStorage(updatedSuites);
-    toast.success(`Berhasil mengubah status ${selectedCaseIds.length} task ke ${newStatus}.`);
+    toast.success(t("toast.qaStatusBulk", { count: selectedCaseIds.length, status: newStatus }));
     setSelectedCaseIds([]);
   };
 
@@ -375,7 +375,7 @@ export function TestQAPanel({
 
     try {
       await createSuite(selectedProject.id, newSuite);
-      toast.success("Dokumen skrip berhasil ditambahkan.");
+      toast.success(t("toast.scriptDocAdded"));
     } catch (err) {
       console.warn("Failed to add suite:", err);
     }
@@ -418,7 +418,7 @@ export function TestQAPanel({
     setNewCaseSteps("");
     setNewCaseExpected("");
     setIsAddCaseOpen(false);
-    toast.success("Test case berhasil ditambahkan.");
+    toast.success(t("toast.testCaseAdded"));
   };
 
   // Bulk Upload Handler
@@ -436,12 +436,12 @@ export function TestQAPanel({
     try {
       const response = await bulkUploadCases(formData);
       if (response.ok) {
-        toast.success("Bulk upload berhasil.");
+        toast.success(t("toast.bulkUploadOk"));
         setIsAddCaseOpen(false);
         loadSuitesFromBackend();
       }
     } catch (err) {
-      toast.error("Gagal bulk upload file.");
+      toast.error(t("toast.bulkUploadFailed"));
     }
   };
 
@@ -458,7 +458,7 @@ export function TestQAPanel({
 
     try {
       await updateSuite(selectedProject.id, suiteToEdit.id, updatedSuite);
-      toast.success("Suite berhasil diperbarui.");
+      toast.success(t("toast.suiteUpdated"));
     } catch (err) {
       console.warn("Failed to update suite:", err);
     }
@@ -485,7 +485,7 @@ export function TestQAPanel({
 
     try {
       await updateCase(selectedProject.id, caseToEditInfo.id, updatedTc);
-      toast.success("Test case berhasil diperbarui.");
+      toast.success(t("toast.testCaseUpdated"));
     } catch (err) {
       console.warn("Failed to update case:", err);
     }
@@ -569,11 +569,11 @@ export function TestQAPanel({
           ),
         }));
         saveSuitesToStorage(updatedSuites);
-        toast.success(`Tiket bug ${createdKey} berhasil dibuat.`);
+        toast.success(t("toast.bugTicketCreated", { kunci: createdKey }));
         setIsCreateBugModalOpen(false);
       }
     } catch (err: any) {
-      toast.error("Gagal membuat tiket bug.");
+      toast.error(t("toast.bugTicketFailed"));
     } finally {
       setIsSubmittingBug(false);
     }
@@ -601,7 +601,7 @@ export function TestQAPanel({
     }));
     saveSuitesToStorage(updatedSuites);
     setDrawerNewComment("");
-    toast.success("Komentar ditambahkan.");
+    toast.success(t("toast.commentAdded"));
   };
 
   const handleEvidenceUploadFromDrawer = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -624,7 +624,7 @@ export function TestQAPanel({
       cases: s.cases.map((c) => (c.id === selectedTestCase.id ? updatedCase : c)),
     }));
     saveSuitesToStorage(updatedSuites);
-    toast.success("Bukti pengujian diupload.");
+    toast.success(t("toast.evidenceUploaded"));
   };
 
   const handleRemoveSpecificEvidenceFromDrawer = (evidenceId: string) => {
@@ -638,7 +638,7 @@ export function TestQAPanel({
       cases: s.cases.map((c) => (c.id === selectedTestCase.id ? updatedCase : c)),
     }));
     saveSuitesToStorage(updatedSuites);
-    toast.info("Bukti pengujian dihapus.");
+    toast.info(t("toast.evidenceDeleted"));
   };
 
   const fetchExecutionHistory = async (caseId: string) => {
@@ -666,7 +666,7 @@ export function TestQAPanel({
     a.href = url;
     a.download = `QA_Report_${activeSuite.name}.txt`;
     a.click();
-    toast.success("Report exported.");
+    toast.success(t("toast.reportExported"));
   };
 
   const handleMigrateSuitePhase = async () => {
@@ -682,11 +682,11 @@ export function TestQAPanel({
     };
     saveSuitesToStorage([newSuite, ...suites]);
     setSelectedSuiteId(newSuite.id);
-    toast.success(`Modul dimigrasikan ke ${nextPhase}`);
+    toast.success(t("toast.moduleMigrated", { fase: nextPhase }));
   };
 
   const handleGenerateWithAi = () => {
-    toast.info("AI Test Case Generator disimulasikan.");
+    toast.info(t("toast.aiGeneratorSimulated"));
   };
 
   const activeSuiteObj = suites.find((s) => s.id === selectedSuiteId);

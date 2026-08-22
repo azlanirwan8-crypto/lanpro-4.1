@@ -54,13 +54,13 @@ export const ConnectPanel = () => {
 
       if (data.status === "success") {
         setTestResult({ status: "success", message: "Koneksi Berhasil tersambung ke MySQL!" });
-        toast.success("Kredensial database valid.");
+        toast.success(t("toast.dbCredsValid"));
       } else {
         throw new Error(data.message || "Koneksi gagal.");
       }
     } catch (err: any) {
       setTestResult({ status: "error", message: err.message });
-      toast.error("Gagal menghubungkan dengan konfigurasi yang dimasukkan");
+      toast.error(t("toast.dbConnectFailed"));
     } finally {
       setLoading(false);
     }
@@ -78,13 +78,13 @@ export const ConnectPanel = () => {
           status: "success",
           message: "Konfigurasi database berhasil disimpan & diubah secara Live!",
         });
-        toast.success("Kredensial berhasil disimpan dan diaplikasikan ke server.");
+        toast.success(t("toast.dbCredsSaved"));
       } else {
         throw new Error(data.message || "Gagal menyimpan konfigurasi.");
       }
     } catch (err: any) {
       setTestResult({ status: "error", message: err.message });
-      toast.error("Gagal menyimpan konfigurasi: " + err.message);
+      toast.error(t("toast.configSaveFailed") + err.message);
     } finally {
       setSaveLoading(false);
     }

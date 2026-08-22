@@ -141,7 +141,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                   if (val) {
                     const ids = Array.from(selectedTaskIds);
                     ids.forEach((id) => updateTaskField(id, "status", val));
-                    toast.success(`Berhasil mengubah status ${ids.length} tugas menjadi "${val}"`);
+                    toast.success(t("toast.bulkStatusChanged", { count: ids.length, status: val }));
                     setSelectedTaskIds(new Set());
                   }
                 }}
@@ -172,7 +172,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                   const effectiveAssignee = val === "unassigned" ? null : val;
                   const ids = Array.from(selectedTaskIds);
                   ids.forEach((id) => updateTaskField(id, "assigneeId", effectiveAssignee));
-                  toast.success(`Berhasil memperbarui assignee untuk ${ids.length} tugas`);
+                  toast.success(t("toast.bulkAssigneeUpdated", { count: ids.length }));
                   setSelectedTaskIds(new Set());
                 }}
                 defaultValue=""

@@ -87,7 +87,7 @@ export const BackupPanel = (_props: {
     };
 
     setExportHistory((prev) => [newItem, ...prev]);
-    toast.info("Memulai proses export database...");
+    toast.info(t("toast.dbExportStarting"));
 
     try {
       const result = await createBackup();
@@ -118,7 +118,7 @@ export const BackupPanel = (_props: {
       a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("System Backup berhasil diexport & diunduh");
+      toast.success(t("toast.backupExported"));
     } catch (e: any) {
       console.error(e);
       setExportHistory((prev) =>
@@ -132,7 +132,7 @@ export const BackupPanel = (_props: {
             : item
         )
       );
-      toast.error("Gagal export backup: " + e.message);
+      toast.error(t("toast.backupExportFailed") + e.message);
     }
   };
 
@@ -145,12 +145,12 @@ export const BackupPanel = (_props: {
     a.download = item.filename;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("File backup berhasil diunduh");
+    toast.success(t("toast.backupDownloaded"));
   };
 
   const handleDeleteItem = (id: string) => {
     setExportHistory((prev) => prev.filter((item) => item.id !== id));
-    toast.success("Riwayat backup berhasil dihapus");
+    toast.success(t("toast.backupHistoryCleared"));
   };
 
   const handleRestoreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,11 +171,11 @@ export const BackupPanel = (_props: {
 
       if (result.status !== "success") throw new Error(result.message);
 
-      toast.success("System restore berhasil! Memuat ulang aplikasi...");
+      toast.success(t("toast.restoreOk"));
       setTimeout(() => window.location.reload(), 1500);
     } catch (err: any) {
       console.error(err);
-      toast.error("Gagal restore backup: " + err.message);
+      toast.error(t("toast.restoreFailed") + err.message);
     } finally {
       setIsRestoring(false);
       setIsRestoreConfirmOpen(false);

@@ -1,3 +1,4 @@
+import i18n from "../../i18n";
 import { useMemo, useState } from "react";
 import { Task } from "../../types";
 import { IssueListViewProps } from "./types";
@@ -253,7 +254,7 @@ export const useIssueList = (props: IssueListViewProps) => {
     const activeUid = user?.uid;
     const titleToUse = customTitle !== undefined ? customTitle : inlineAddTitle;
     if (!selectedProject || !titleToUse.trim() || !activeUid) {
-      if (selectedProject && !titleToUse.trim()) toast.error("Judul tugas tidak boleh kosong");
+      if (selectedProject && !titleToUse.trim()) toast.error(i18n.t("toast.bulkTitleEmpty"));
       setInlineAddingTaskId(null);
       if (customTitle === undefined) {
         setInlineAddTitle("");
@@ -297,7 +298,7 @@ export const useIssueList = (props: IssueListViewProps) => {
           return next;
         });
       }
-      toast.success("Berhasil menambahkan tugas baru");
+      toast.success(i18n.t("toast.taskAdded"));
 
       // OPTIMISTIC UPDATE / RE-FETCH DATA
       if (props.fetchTasks) {
@@ -305,7 +306,7 @@ export const useIssueList = (props: IssueListViewProps) => {
       }
     } catch (error) {
       console.error(error);
-      toast.error("Gagal menambahkan subtask");
+      toast.error(i18n.t("toast.subtaskAddFailed"));
     } finally {
       setIsCreating(false);
     }

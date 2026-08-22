@@ -315,7 +315,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
       ROLE_DEFAULT_PERMISSIONS.viewer ||
       (ROLE_DEFAULT_PERMISSIONS.owner as UserPermissions);
     setEditPermissions(defaultPerms);
-    toast.success(`Matrix hak akses di-reset ke default role "${editRole}".`);
+    toast.success(t("toast.permissionMatrixReset", { peran: editRole }));
   };
 
   // Handler Input File (Local Preview Only - Deferred Upload)
@@ -326,13 +326,13 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     // Client-side validation
     const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Format file tidak didukung (gunakan JPG, PNG, atau WEBP)");
+      toast.error(t("toast.avatarFormatUnsupported"));
       return;
     }
 
     const maxSize = 2 * 1024 * 1024; // 2MB
     if (file.size > maxSize) {
-      toast.error("Ukuran file maksimal 2MB");
+      toast.error(t("toast.fileMax2MB"));
       return;
     }
 
@@ -350,7 +350,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   // Handler Submit Utama (Simpan Perubahan User)
   const handleSaveUser = async () => {
     if (!editFullName.trim()) {
-      toast.error("Nama Lengkap wajib diisi.");
+      toast.error(t("toast.fullNameRequired"));
       return;
     }
 
@@ -412,7 +412,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
       const res = await updateUser(user.id || user.uid, payload);
 
       if (res.status === "success" || res.data) {
-        toast.success(`Data & Hak Akses Pengguna ${editFullName} Berhasil Diperbarui!`);
+        toast.success(t("toast.userPermissionsUpdated", { nama: editFullName }));
         if (onUserUpdated) onUserUpdated();
       } else {
         toast.error(res.message || "Gagal memperbarui data user.");
@@ -427,7 +427,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
   const handleAssignToProject = async () => {
     if (!selectedAssignProjectId) {
-      toast.error("Pilih project terlebih dahulu");
+      toast.error(t("toast.pickProjectFirst"));
       return;
     }
 
@@ -446,7 +446,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
         throw new Error(res.message);
       }
 
-      toast.success(`Pengguna berhasil ditugaskan ke project ${p.name}`);
+      toast.success(t("toast.userAssignedProject", { proyek: p.name }));
       setSelectedAssignProjectId("");
 
       setUserProjectsList((prev) => [
@@ -459,7 +459,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
       if (onUserUpdated) onUserUpdated();
     } catch (e: any) {
-      toast.error("Gagal menugaskan pengguna ke project: " + (e.message || e));
+      toast.error(t("toast.assignProjectFailed") + (e.message || e));
     }
   };
 
@@ -476,13 +476,13 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
         throw new Error(res.message);
       }
 
-      toast.success(`Pengguna berhasil dikeluarkan dari project ${p.name}`);
+      toast.success(t("toast.userRemovedProject", { proyek: p.name }));
 
       setUserProjectsList((prev) => prev.filter((proj) => proj.id !== projectId));
 
       if (onUserUpdated) onUserUpdated();
     } catch (e: any) {
-      toast.error("Gagal mengeluarkan pengguna dari project: " + (e.message || e));
+      toast.error(t("toast.removeProjectFailed") + (e.message || e));
     }
   };
 
@@ -494,7 +494,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     }
     setEditPassword(pass);
     navigator.clipboard.writeText(pass);
-    toast.success(`Password acak dibuat: "${pass}". Berhasil disalin ke clipboard!`);
+    toast.success(t("toast.randomPasswordCreated", { sandi: pass }));
   };
 
   return (

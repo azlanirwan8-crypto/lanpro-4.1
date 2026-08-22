@@ -126,7 +126,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   };
 
   const handleDownloadMeeting = async (meetingId: string, fName: string) => {
-    toast.info("Mengunduh berkas lampiran...");
+    toast.info(t("toast.downloadingAttachment"));
     try {
       const data = await downloadMeetingFile(projectId, meetingId, resolveUserId(currentUser));
       if (data.status === "success" && data.data && data.data.fileData) {
@@ -139,7 +139,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
         document.body.removeChild(link);
         showSuccessAlert(t("alerts.successTitle"), t("alerts.fileDownloaded"));
       } else {
-        toast.error("Berkas lampiran tidak ditemukan.");
+        toast.error(t("toast.attachmentNotFound"));
       }
     } catch (error: any) {
       toast.error(error.message || "Gagal mengunduh berkas.");
@@ -207,11 +207,11 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   const handleCreateMeeting = async () => {
     const trimmedTitle = newTitle.trim();
     if (!trimmedTitle) {
-      toast.error("Meeting title cannot be empty.");
+      toast.error(t("toast.meetingTitleEmpty"));
       return;
     }
     if (!currentUser) {
-      toast.error("Please login first.");
+      toast.error(t("toast.pleaseLoginFirst"));
       return;
     }
 
@@ -220,12 +220,16 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
     const permissionAction = isEdit ? "update" : "create";
 
     if (!hasPermission(userRole, "meetingNotes", permissionAction, isOwner, permissions)) {
-      toast.error(`You do not have permission to ${isEdit ? "update" : "add"} the meeting.`);
+      toast.error(
+        t("toast.noPermMeeting", {
+          aksi: isEdit ? t("toast.meetingActionUpdate") : t("toast.meetingActionAdd"),
+        })
+      );
       return;
     }
 
     if (!projectId) {
-      toast.error("Project ID not found.");
+      toast.error(t("toast.projectIdNotFound"));
       return;
     }
     setLoading(true);
@@ -244,7 +248,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
       if (newMeetingFile) {
         if (newMeetingFile.size > 5 * 1024 * 1024) {
-          toast.error("Ukuran berkas melebihi batas maksimal 5 MB.");
+          toast.error(t("toast.fileTooLarge5"));
           setLoading(false);
           return;
         }
@@ -297,7 +301,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
       await fetchMeetings();
     } catch (error) {
       console.error("Failed to save meeting:", error);
-      toast.error("Failed to save meeting: " + (error as Error).message);
+      toast.error(t("toast.meetingSaveFailed") + (error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -867,7 +871,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                       const file = e.target.files?.[0];
                       if (file) {
                         if (file.size > 5 * 1024 * 1024) {
-                          toast.error("Ukuran berkas maksimal 5 MB.");
+                          toast.error(t("toast.fileMax5"));
                           return;
                         }
                         setNewMeetingFile(file);

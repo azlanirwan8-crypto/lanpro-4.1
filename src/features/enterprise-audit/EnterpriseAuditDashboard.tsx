@@ -71,7 +71,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
           setLogs(data.data);
           setNewActivityIncoming(false);
         } else {
-          toast.error("Gagal memuat log audit enterprise");
+          toast.error(t("toast.auditLoadFailed"));
         }
       } catch (err: any) {
         console.error(err);

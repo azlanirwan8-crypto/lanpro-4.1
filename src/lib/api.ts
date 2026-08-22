@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { safeLocalStorage, safeSessionStorage } from "./safeStorage";
 import { toast } from "sonner";
 
@@ -175,7 +176,7 @@ export async function apiRequest(
           detail: { active: false, url },
         })
       );
-      toast.success(`Berhasil terhubung kembali ke server!`, {
+      toast.success(i18n.t("toast.reconnected"), {
         id: `rate-limit-${url}`,
         duration: 2000,
       });
@@ -195,7 +196,7 @@ export async function apiRequest(
         detail: { active: false, url, failed: true },
       })
     );
-    toast.error(`Batas percobaan habis. Silakan tunggu beberapa saat lagi.`, {
+    toast.error(i18n.t("toast.retryLimitReached"), {
       id: `rate-limit-${url}`,
       duration: 4000,
     });

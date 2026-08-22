@@ -66,13 +66,13 @@ export const ProfileEditModal = ({
     // Client-side validation
     const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Format file tidak didukung (gunakan JPG, PNG, WEBP, GIF, atau SVG)");
+      toast.error(t("toast.imageFormatUnsupported"));
       return;
     }
 
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      toast.error("Ukuran file maksimal 5MB");
+      toast.error(t("toast.fileMax5MB"));
       return;
     }
 
@@ -173,7 +173,7 @@ export const ProfileEditModal = ({
         });
       }
 
-      toast.success("Profile updated successfully.");
+      toast.success(t("toast.profileUpdated"));
       onClose();
     } catch (error: any) {
       console.error("Error updating profile", error);
@@ -181,7 +181,7 @@ export const ProfileEditModal = ({
       if (errorMessage === "Password lama yang Anda masukkan salah!") {
         setError(errorMessage);
       } else {
-        toast.error(`Failed to update profile: ${errorMessage}`);
+        toast.error(t("toast.profileUpdateFailed", { pesan: errorMessage }));
       }
     } finally {
       setLoading(false);

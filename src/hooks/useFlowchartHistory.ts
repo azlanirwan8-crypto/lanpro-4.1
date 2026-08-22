@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
 
@@ -40,14 +41,14 @@ export function useFlowchartHistory() {
 
   // Record a state snapshot into history (called after mutations)
   const recordHistory = (nodes: FlowNode[], edges: FlowEdge[]) => {
-    setHistoryStack(prevStack => {
+    setHistoryStack((prevStack) => {
       // Trim stack to current index (discard redo history if we make new changes)
       const cleanStack = prevStack.slice(0, historyIndex + 1);
 
       // Create deep copy and add to stack
       const newSnapshot: HistorySnapshot = {
         nodes: JSON.parse(JSON.stringify(nodes)),
-        edges: JSON.parse(JSON.stringify(edges))
+        edges: JSON.parse(JSON.stringify(edges)),
       };
 
       const updatedStack = [...cleanStack, newSnapshot];
@@ -69,13 +70,13 @@ export function useFlowchartHistory() {
       const prevIdx = historyIndex - 1;
       setHistoryIndex(prevIdx);
       const snapshot = historyStack[prevIdx];
-      toast.info("Aksi dibatalkan (Undo) ◀");
+      toast.info(i18n.t("toast.undoDone"));
       return {
         nodes: JSON.parse(JSON.stringify(snapshot.nodes)),
-        edges: JSON.parse(JSON.stringify(snapshot.edges))
+        edges: JSON.parse(JSON.stringify(snapshot.edges)),
       };
     } else {
-      toast.warning("Tidak ada riwayat untuk di-Undo!");
+      toast.warning(i18n.t("toast.noUndoHistory"));
       return null;
     }
   };
@@ -86,13 +87,13 @@ export function useFlowchartHistory() {
       const nextIdx = historyIndex + 1;
       setHistoryIndex(nextIdx);
       const snapshot = historyStack[nextIdx];
-      toast.info("Aksi diulang (Redo) ▶");
+      toast.info(i18n.t("toast.redoDone"));
       return {
         nodes: JSON.parse(JSON.stringify(snapshot.nodes)),
-        edges: JSON.parse(JSON.stringify(snapshot.edges))
+        edges: JSON.parse(JSON.stringify(snapshot.edges)),
       };
     } else {
-      toast.warning("Tidak ada riwayat untuk di-Redo!");
+      toast.warning(i18n.t("toast.noRedoHistory"));
       return null;
     }
   };
@@ -113,7 +114,7 @@ export function useFlowchartHistory() {
   const initializeHistory = (nodes: FlowNode[], edges: FlowEdge[]) => {
     const initialSnapshot: HistorySnapshot = {
       nodes: JSON.parse(JSON.stringify(nodes)),
-      edges: JSON.parse(JSON.stringify(edges))
+      edges: JSON.parse(JSON.stringify(edges)),
     };
     setHistoryStack([initialSnapshot]);
     setHistoryIndex(0);
@@ -172,6 +173,6 @@ export function useFlowchartHistory() {
     // Simulation control
     startSimulation,
     stopSimulation,
-    cancelSimulation
+    cancelSimulation,
   };
 }

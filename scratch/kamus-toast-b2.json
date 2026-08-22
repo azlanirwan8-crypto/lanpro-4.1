@@ -1,0 +1,161 @@
+{
+  "evalNoteEmpty": ["Catatan evaluasi tidak boleh kosong.", "The evaluation note cannot be empty."],
+  "feedbackSendFailed": ["Gagal mengirim masukan: ", "Failed to send feedback: "],
+  "recording": ["Merekam...", "Recording..."],
+  "micAccessFailed": ["Gagal mengakses mikrofon.", "Could not access the microphone."],
+  "recordingDone": [
+    "Rekaman selesai, memulai pemrosesan...",
+    "Recording finished; starting processing..."
+  ],
+  "transcriptAnalyzed": [
+    "Transkrip berhasil dianalisis oleh Asisten AI!",
+    "The transcript was analysed by the AI assistant!"
+  ],
+  "recordingUploaded": [
+    "File rekaman rapat berhasil diunggah!",
+    "The meeting recording was uploaded!"
+  ],
+  "extractingAudio": [
+    "Mengekstrak audio & menganalisis rapat dengan AI (STT & LLM)...",
+    "Extracting audio and analysing the meeting with AI (STT & LLM)..."
+  ],
+  "uploadFailed": ["Gagal mengunggah: ", "Upload failed: "],
+  "processingCancelled": [
+    "Pemrosesan rapat berhasil dibatalkan dan di-reset.",
+    "Meeting processing was cancelled and reset."
+  ],
+  "cancelFailed": ["Gagal membatalkan pemrosesan.", "Failed to cancel processing."],
+  "minutesSynced": [
+    "Notulen Rapat otomatis berhasil disinkronisasi dalam waktu riil!",
+    "Automatic meeting minutes synced in real time!"
+  ],
+  "minutesLoaded": ["Notulen Rapat otomatis berhasil dimuat!", "Automatic meeting minutes loaded!"],
+  "autoAnalysisFailed": [
+    "Gagal memproses analisis otomatis di server.",
+    "The server failed to run the automatic analysis."
+  ],
+  "enterTranscript": [
+    "Silakan masukkan teks transkrip rapat terlebih dahulu.",
+    "Please enter the meeting transcript text first."
+  ],
+  "loginPickProject": [
+    "Harap login & pilih project terlebih dahulu.",
+    "Please sign in and pick a project first."
+  ],
+  "noActionItems": [
+    "Tidak ada butir tindak lanjut untuk diimpor.",
+    "There are no action items to import."
+  ],
+  "loginFirst": ["Harap login terlebih dahulu.", "Please sign in first."],
+  "importFailed": ["Gagal mengimpor: ", "Import failed: "],
+  "transcriptEmpty": ["Transkrip tidak boleh kosong.", "The transcript cannot be empty."],
+  "meetingAnalysisFailed": [
+    "Gagal menganalisis rapat: {{pesan}}",
+    "Failed to analyse the meeting: {{pesan}}"
+  ],
+
+  "pickProjectFirst": ["Pilih project terlebih dahulu", "Please pick a project first"],
+  "moduleNameEmpty": ["Nama modul tidak boleh kosong", "The module name cannot be empty"],
+  "moduleAdded": ["Modul berhasil ditambahkan", "Module added successfully"],
+  "moduleAddFailed": ["Gagal menambahkan modul: ", "Failed to add module: "],
+  "moduleUpdated": ["Modul berhasil diperbarui", "Module updated successfully"],
+  "moduleUpdateFailed": ["Gagal memperbarui modul: ", "Failed to update module: "],
+  "masterLabelEmpty": [
+    "Label Master Data tidak boleh kosong",
+    "The Master Data label cannot be empty"
+  ],
+  "roleNameTooShort": [
+    "Nama Role minimal harus 3 karakter",
+    "The role name must be at least 3 characters"
+  ],
+  "roleNameRepeated": [
+    "Nama Role tidak boleh berisi karakter sampah atau berulang",
+    "The role name must not be junk or repeated characters"
+  ],
+  "roleNameJunk": [
+    "Nama Role tidak boleh berupa karakter sampah atau acak",
+    "The role name must not be junk or random characters"
+  ],
+  "masterAdded": ["Master Data Berhasil Ditambahkan", "Master Data added successfully"],
+  "masterAddFailed": ["Gagal menambahkan master data: ", "Failed to add master data: "],
+  "masterUpdated": ["Master Data Berhasil Diperbarui", "Master Data updated successfully"],
+  "masterUpdateFailed": ["Gagal memperbarui master data: ", "Failed to update master data: "],
+  "orderUpdated": ["Urutan berhasil diperbarui", "Order updated successfully"],
+  "orderSaveFailed": ["Gagal menyimpan urutan", "Failed to save the order"],
+
+  "forceUnlockOk": [
+    "Force Unlock berhasil! Anda memegang kontrol pengujian.",
+    "Force unlock succeeded. You now hold testing control."
+  ],
+  "lockReleased": ["Lock dilepaskan.", "Lock released."],
+  "picModuleUpdated": ["PIC Modul berhasil diperbarui.", "Module PIC updated successfully."],
+  "picTaskUpdated": ["PIC Task berhasil diperbarui.", "Task PIC updated successfully."],
+  "scriptDocAdded": ["Dokumen skrip berhasil ditambahkan.", "Script document added successfully."],
+  "testCaseAdded": ["Test case berhasil ditambahkan.", "Test case added successfully."],
+  "bulkUploadOk": ["Bulk upload berhasil.", "Bulk upload succeeded."],
+  "bulkUploadFailed": ["Gagal bulk upload file.", "Bulk file upload failed."],
+  "suiteUpdated": ["Suite berhasil diperbarui.", "Suite updated successfully."],
+  "testCaseUpdated": ["Test case berhasil diperbarui.", "Test case updated successfully."],
+  "bugTicketFailed": ["Gagal membuat tiket bug.", "Failed to create the bug ticket."],
+  "commentAdded": ["Komentar ditambahkan.", "Comment added."],
+  "evidenceUploaded": ["Bukti pengujian diunggah.", "Test evidence uploaded."],
+  "evidenceDeleted": ["Bukti pengujian dihapus.", "Test evidence deleted."],
+  "reportExported": ["Laporan diekspor.", "Report exported."],
+  "aiGeneratorSimulated": [
+    "AI Test Case Generator disimulasikan.",
+    "AI Test Case Generator simulated."
+  ],
+  "qaStatusChanged": [
+    "Status berhasil diubah menjadi {{status}}",
+    "Status changed to {{status}} successfully"
+  ],
+  "picBulkAssigned": [
+    "Berhasil menetapkan PIC ke {{count}} task sekaligus.",
+    "PIC assigned to {{count}} tasks at once."
+  ],
+  "qaStatusBulk": [
+    "Berhasil mengubah status {{count}} task ke {{status}}.",
+    "Changed the status of {{count}} tasks to {{status}}."
+  ],
+  "bugTicketCreated": [
+    "Tiket bug {{kunci}} berhasil dibuat.",
+    "Bug ticket {{kunci}} created successfully."
+  ],
+  "moduleMigrated": ["Modul dimigrasikan ke {{fase}}", "Module migrated to {{fase}}"],
+
+  "userAddedToProject": [
+    "User berhasil ditambahkan ke Project!",
+    "User added to the project successfully!"
+  ],
+  "addToProjectFailed": [
+    "Terjadi kesalahan saat menambahkan ke project",
+    "Something went wrong while adding to the project"
+  ],
+  "removeFromProjectFailed": [
+    "Terjadi kesalahan saat menghapus user dari project",
+    "Something went wrong while removing the user from the project"
+  ],
+  "allFieldsRequired": ["Semua kolom wajib diisi", "All fields are required"],
+  "addUserFailed": ["Gagal menambahkan user", "Failed to add user"],
+  "noUserToExport": ["Tidak ada data user untuk diekspor", "There is no user data to export"],
+  "csvExportFailed": ["Gagal mengekspor CSV", "Failed to export the CSV"],
+  "pickAtLeastOneUser": ["Pilih setidaknya satu user", "Please select at least one user"],
+  "cannotBulkDeleteAdmin": [
+    "Tidak dapat menghapus user dengan role Admin secara massal",
+    "Users with the Admin role cannot be deleted in bulk"
+  ],
+  "cannotBulkDeleteSelf": [
+    "Tidak dapat menghapus akun Anda sendiri secara massal",
+    "You cannot delete your own account in bulk"
+  ],
+  "bulkActionFailed": ["Gagal menjalankan aksi massal", "Failed to run the bulk action"],
+  "linkCopied": ["Tautan berhasil disalin!", "Link successfully copied!"],
+  "usersExported": [
+    "Berhasil mengekspor {{count}} user ke CSV!",
+    "Exported {{count}} users to CSV!"
+  ],
+  "bulkActionDone": [
+    "Aksi Massal Selesai! Berhasil: {{sukses}}, Gagal: {{gagal}}",
+    "Bulk action finished. Succeeded: {{sukses}}, failed: {{gagal}}"
+  ]
+}

@@ -98,7 +98,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
 
   const handleManualRetry = (id: string) => {
     setRetryingIds((prev) => new Set(prev).add(id));
-    toast.info("Sedang melakukan retry...");
+    toast.info(t("toast.retrying"));
 
     // Simulate retry delay
     setTimeout(() => {

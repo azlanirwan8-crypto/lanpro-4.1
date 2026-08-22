@@ -595,7 +595,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
   // Handle Form Submission (Save or Update)
   const handleSave = async () => {
     if (!editTitle.trim()) {
-      toast.error("Judul dokumen wajib diisi");
+      toast.error(t("toast.docTitleRequired"));
       return;
     }
     setLoading(true);
@@ -669,7 +669,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
   // Download logic for attached files
   const handleDownload = async (docId: string, fName: string) => {
-    toast.info("Mendownload berkas lampiran...");
+    toast.info(t("toast.downloadingFile"));
     const effectiveUserId = resolveUserId(currentUser);
     try {
       const data = await downloadDocumentApi(projectId, effectiveUserId, docId);
@@ -680,7 +680,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
         link.click();
         fetchDocuments(); // Update download statistics
       } else {
-        toast.error("File tidak ditemukan di server");
+        toast.error(t("toast.fileNotFoundServer"));
       }
     } catch (e: any) {
       toast.error(e.message || "Gagal mengunduh file");
@@ -1621,7 +1621,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             onClick={(e) => {
                               e.stopPropagation();
                               setShouldRemoveFile(true);
-                              toast.info("Lampiran lama akan terhapus setelah disimpan");
+                              toast.info(t("toast.oldAttachmentWillBeRemoved"));
                             }}
                             className="text-[10px] leading-none sm:text-[8px] font-medium text-rose-600 bg-rose-500/10 border border-rose-500/30 p-0.5 px-1.5 rounded hover:bg-rose-500/15 transition-colors"
                           >

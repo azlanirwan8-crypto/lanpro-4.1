@@ -390,27 +390,27 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
   const exportTimelineToPng = async () => {
     if (!timelineContainerRef.current) return;
-    const toastId = toast.loading("Memproses export PNG...");
+    const toastId = toast.loading(t("toast.exportingPng"));
     try {
       const canvas = await html2canvas(timelineContainerRef.current, { scale: 2 });
       const link = document.createElement("a");
       link.download = `Roadmap_${selectedProject?.key || "Export"}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
-      toast.success("Successfully exported to PNG", { id: toastId });
+      toast.success(t("toast.pngExported"), { id: toastId });
     } catch (err) {
       console.error(err);
-      toast.error("Failed to export PNG", { id: toastId });
+      toast.error(t("toast.pngExportFailed"), { id: toastId });
     }
   };
 
   const exportTimelineToPdf = async () => {
     if (!timelineContainerRef.current) {
-      toast.error("Elemen bagan Gantt tidak ditemukan.");
+      toast.error(t("toast.ganttNotFound"));
       return;
     }
 
-    const toastId = toast.loading("Sedang menghasilkan laporan PDF eksekutif...");
+    const toastId = toast.loading(t("toast.generatingPdf"));
 
     try {
       // First, render the Gantt chart to canvas so we have it ready
@@ -978,10 +978,10 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
       // Save the generated document
       doc.save(`Roadmap_Laporan_Eksekutif_${selectedProject?.key || "Export"}.pdf`);
-      toast.success("Berhasil mengekspor ringkasan PDF eksekutif!", { id: toastId });
+      toast.success(t("toast.pdfExported"), { id: toastId });
     } catch (err) {
       console.error(err);
-      toast.error("Gagal memproses ekspor PDF.", { id: toastId });
+      toast.error(t("toast.pdfExportFailed"), { id: toastId });
     }
   };
 
@@ -1171,7 +1171,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               onClick={() => {
                 const earliest = getEarliestTaskDate();
                 scrollToDate(earliest, "smooth");
-                toast.success("Berhasil fokus ke Task Pertama Aktif");
+                toast.success(t("toast.focusFirstTask"));
               }}
               className="flex items-center gap-1.5 px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-subtle/80 cursor-pointer active:scale-95"
               title={t("roadmap.focusFirstTask")}
@@ -1183,7 +1183,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               type="button"
               onClick={() => {
                 scrollToDate(new Date(), "smooth");
-                toast.success("Berhasil melompat ke garis hari ini (Today)");
+                toast.success(t("toast.jumpToToday"));
               }}
               className="flex items-center gap-1.5 px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-subtle/80 cursor-pointer active:scale-95"
               title={t("roadmap.jumpToday")}

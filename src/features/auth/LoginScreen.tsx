@@ -100,7 +100,7 @@ export const LoginScreen = ({
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
-      toast.error("Gagal Masuk", {
+      toast.error(t("toast.loginFailedTitle"), {
         description: "Username dan Password wajib diisi terlebih dahulu.",
       });
       return;
@@ -262,7 +262,7 @@ export const LoginScreen = ({
           } catch {}
         }}
         onSuccess={() => {
-          toast.success("Kata sandi berhasil diperbarui. Silakan masuk.");
+          toast.success(t("toast.passwordUpdated"));
         }}
       />
     </div>

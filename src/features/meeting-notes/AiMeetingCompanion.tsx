@@ -137,7 +137,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
   const handleSubmitFeedback = async () => {
     if (!feedbackText.trim()) {
-      toast.error("Catatan evaluasi tidak boleh kosong.");
+      toast.error(t("toast.evalNoteEmpty"));
       return;
     }
     setSubmittingFeedback(true);
@@ -157,7 +157,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       }
     } catch (err: any) {
       console.error("[FEEDBACK SUBMIT ERROR]", err);
-      toast.error("Gagal mengirim masukan: " + (err.response?.data?.message || err.message));
+      toast.error(t("toast.feedbackSendFailed") + (err.response?.data?.message || err.message));
     } finally {
       setSubmittingFeedback(false);
     }
@@ -240,10 +240,10 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
       mediaRecorder.start();
       setIsRecording(true);
-      toast.info("Merekam...");
+      toast.info(t("toast.recording"));
     } catch (err) {
       console.error(err);
-      toast.error("Gagal mengakses mikrofon.");
+      toast.error(t("toast.micAccessFailed"));
     }
   };
 
@@ -252,7 +252,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       // Removed premature toast.dismiss() to avoid clearing potential loading state
-      toast.success("Rekaman selesai, memulai pemrosesan...");
+      toast.success(t("toast.recordingDone"));
     }
   };
 
@@ -268,7 +268,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
       if (response.status === "success") {
         setAiData(response.data);
-        toast.success("Transkrip berhasil dianalisis oleh Asisten AI!");
+        toast.success(t("toast.transcriptAnalyzed"));
         setActiveTab("summary");
       } else {
         toast.error(response.message || "Gagal menganalisis transkrip.");
@@ -404,8 +404,8 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
           (lastResponse.data && lastResponse.data.status === "success"))
       ) {
         setUploadState("PROCESSING_AI");
-        toast.success("File rekaman rapat berhasil diunggah!");
-        toast.loading("Mengekstrak audio & menganalisis rapat dengan AI (STT & LLM)...", {
+        toast.success(t("toast.recordingUploaded"));
+        toast.loading(t("toast.extractingAudio"), {
           id: "ai-analyze-toast",
         });
         setTimeout(() => {
@@ -418,7 +418,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     } catch (err: any) {
       setUploadState("IDLE");
       console.error("Error uploading file:", err);
-      toast.error("Gagal mengunggah: " + (err.response?.data?.message || err.message));
+      toast.error(t("toast.uploadFailed") + (err.response?.data?.message || err.message));
     } finally {
       setUploading(false);
     }
@@ -443,10 +443,10 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       setUploadState("IDLE");
       setUploadPercentage(0);
       setUploading(false);
-      toast.success("Pemrosesan rapat berhasil dibatalkan dan di-reset.");
+      toast.success(t("toast.processingCancelled"));
     } catch (err: any) {
       console.error("Cancel processing error:", err);
-      toast.error("Gagal membatalkan pemrosesan.");
+      toast.error(t("toast.cancelFailed"));
     }
   };
 
@@ -536,7 +536,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
           setUploadPercentage(100);
           setUploadState("IDLE");
           setUploading(false);
-          toast.success("Notulen Rapat otomatis berhasil disinkronisasi dalam waktu riil!");
+          toast.success(t("toast.minutesSynced"));
           setActiveTab("summary");
         }
       });
@@ -544,7 +544,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       socket.on("meeting_ai_failed", (data: any) => {
         if (data.meetingId === meeting.id) {
           console.error("[SOCKET] AI Processing failed:", data.error);
-          toast.error(`Gagal menganalisis rapat: ${data.error}`);
+          toast.error(t("toast.meetingAnalysisFailed", { pesan: data.error }));
           setUploadPercentage(0);
           setUploadState("IDLE");
           setUploading(false);
@@ -585,11 +585,11 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               setUploadPercentage(100);
               setUploadState("IDLE");
               setUploading(false);
-              toast.success("Notulen Rapat otomatis berhasil dimuat!");
+              toast.success(t("toast.minutesLoaded"));
               setActiveTab("summary");
               if (pollInterval) clearInterval(pollInterval);
             } else if (status === "FAILED") {
-              toast.error("Gagal memproses analisis otomatis di server.");
+              toast.error(t("toast.autoAnalysisFailed"));
               setUploadPercentage(0);
               setUploadState("IDLE");
               setUploading(false);
@@ -617,7 +617,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
   const handleAnalyze = async () => {
     if (!transcript.trim()) {
-      toast.error("Silakan masukkan teks transkrip rapat terlebih dahulu.");
+      toast.error(t("toast.enterTranscript"));
       return;
     }
     runAnalysisApi(transcript, meetingLink);
@@ -625,7 +625,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
   const handleConvertToTask = async (item: any, index: number) => {
     if (!currentUser || !projectId) {
-      toast.error("Harap login & pilih project terlebih dahulu.");
+      toast.error(t("toast.loginPickProject"));
       return;
     }
 
@@ -664,12 +664,12 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   const handleImportAllActionItems = async () => {
     const itemsToImport = activeMeetingData?.tab_tindak_lanjut || [];
     if (itemsToImport.length === 0) {
-      toast.error("Tidak ada butir tindak lanjut untuk diimpor.");
+      toast.error(t("toast.noActionItems"));
       return;
     }
 
     if (!currentUser) {
-      toast.error("Harap login terlebih dahulu.");
+      toast.error(t("toast.loginFirst"));
       return;
     }
 
@@ -712,7 +712,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
   const handleImportSingle = async (item: any, index: number) => {
     if (!currentUser) {
-      toast.error("Harap login terlebih dahulu.");
+      toast.error(t("toast.loginFirst"));
       return;
     }
 
@@ -738,7 +738,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
         onPointsImported();
       }
     } catch (err: any) {
-      toast.error("Gagal mengimpor: " + err.message);
+      toast.error(t("toast.importFailed") + err.message);
     } finally {
       setImportingIds((prev) => prev.filter((id) => id !== index));
     }
@@ -1032,7 +1032,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           <button
                             onClick={async () => {
                               if (!editedTranscriptText.trim()) {
-                                toast.error("Transkrip tidak boleh kosong.");
+                                toast.error(t("toast.transcriptEmpty"));
                                 return;
                               }
                               setIsEditingTranscript(false);

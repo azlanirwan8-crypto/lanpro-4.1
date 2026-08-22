@@ -452,7 +452,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
               setNodes((prev) => [...prev, newNode]);
               setEdges((prev) => [...prev, newRelation]);
               setSelectedNodeId(nextNodeId);
-              toast.success("Otomatis menambahkan & menghubungkan alur langkah baru!");
+              toast.success(t("toast.autoConnectStep"));
             }}
             className="absolute -right-11 top-1/2 -translate-y-1/2 w-7 h-7 bg-surface hover:bg-violet-600 border shadow-soft-lg text-violet-600 hover:text-content-inverse rounded-full flex items-center justify-center font-medium text-base transition-all scale-90 hover:scale-110 z-30"
             title={t("flowNode.instantConnector")}
@@ -482,7 +482,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
               setNodes((prev) => [...prev, newNode]);
               setEdges((prev) => [...prev, newRelation]);
               setSelectedNodeId(nextNodeId);
-              toast.success("Otomatis menambahkan & menghubungkan alur ke bawah!");
+              toast.success(t("toast.autoConnectDown"));
             }}
             className="absolute -bottom-11 left-1/2 -translate-x-1/2 w-7 h-7 bg-surface hover:bg-indigo-600 border shadow-soft-lg text-indigo-600 hover:text-content-inverse rounded-full flex items-center justify-center font-medium text-base transition-all scale-90 hover:scale-110 z-30"
             title={t("flowNode.instantDownConnector")}

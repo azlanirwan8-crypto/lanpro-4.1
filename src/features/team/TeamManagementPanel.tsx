@@ -197,7 +197,7 @@ export const TeamManagementPanel = ({
   const handleExportTeamCSV = () => {
     try {
       if (filteredPeople.length === 0) {
-        toast.error("Tidak ada data tim untuk di-export");
+        toast.error(t("toast.noTeamToExport"));
         return;
       }
 
@@ -242,10 +242,10 @@ export const TeamManagementPanel = ({
       link.click();
       document.body.removeChild(link);
 
-      toast.success(`Berhasil meng-export ${filteredPeople.length} anggota tim ke CSV!`);
+      toast.success(t("toast.teamExported", { count: filteredPeople.length }));
     } catch (e) {
       console.error(e);
-      toast.error("Gagal meng-export CSV");
+      toast.error(t("toast.csvExportFailed"));
     }
   };
 

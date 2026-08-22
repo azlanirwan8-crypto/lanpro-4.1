@@ -121,7 +121,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
   const handleAssignProject = async (userId: string) => {
     if (!selectedAssignProjectId) {
-      toast.error("Pilih project terlebih dahulu");
+      toast.error(t("toast.pickProjectFirst"));
       return;
     }
     setIsAssigningProject(true);
@@ -136,7 +136,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
       const data = await assignUserToProject(selectedAssignProjectId, props.currentUserId, payload);
       if (data.status === "success") {
-        toast.success("User berhasil ditambahkan ke Project!");
+        toast.success(t("toast.userAddedToProject"));
         setSelectedAssignProjectId("");
         setSelectedAssignProjectRole("member");
         setSelectedTeamMemberIds([]);
@@ -152,7 +152,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       }
     } catch (e) {
       console.error(e);
-      toast.error("Terjadi kesalahan saat menambahkan ke project");
+      toast.error(t("toast.addToProjectFailed"));
     } finally {
       setIsAssigningProject(false);
     }
@@ -181,7 +181,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       }
     } catch (e) {
       console.error(e);
-      toast.error("Terjadi kesalahan saat menghapus user dari project");
+      toast.error(t("toast.removeFromProjectFailed"));
     }
   };
 
@@ -200,7 +200,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
   const handleAddPeople = async () => {
     if (!addPeopleUsername || !addPeopleFullName || !addPeopleEmail || !addPeoplePassword) {
-      toast.error("Semua kolom wajib diisi");
+      toast.error(t("toast.allFieldsRequired"));
       return;
     }
 
@@ -242,7 +242,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       setAddPeopleStatus("approved");
     } catch (e) {
       console.error("Error adding user:", e);
-      toast.error("Failed to add user");
+      toast.error(t("toast.addUserFailed"));
     }
   };
 
@@ -363,7 +363,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const handleExportCSV = () => {
     try {
       if (filteredUsers.length === 0) {
-        toast.error("Tidak ada data user untuk di-export");
+        toast.error(t("toast.noUserToExport"));
         return;
       }
 
@@ -410,17 +410,17 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       link.click();
       document.body.removeChild(link);
 
-      toast.success(`Berhasil meng-export ${filteredUsers.length} user ke CSV!`);
+      toast.success(t("toast.usersExported", { count: filteredUsers.length }));
     } catch (e) {
       console.error(e);
-      toast.error("Gagal meng-export CSV");
+      toast.error(t("toast.csvExportFailed"));
     }
   };
 
   // Point 1: Bulk Action executor calling existing backend PUT/DELETE
   const handleBulkAction = async (action: "approve" | "reject" | "delete" | AppRole) => {
     if (selectedUserIds.length === 0) {
-      toast.error("Pilih setidaknya satu user");
+      toast.error(t("toast.pickAtLeastOneUser"));
       return;
     }
 
@@ -429,12 +429,12 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
         (u) => selectedUserIds.includes(u.id) && u.role === "admin"
       );
       if (hasAdmins) {
-        toast.error("Tidak dapat menghapus user dengan role Admin secara massal");
+        toast.error(t("toast.cannotBulkDeleteAdmin"));
         return;
       }
       const hasSelf = selectedUserIds.includes(props.currentUserId || "");
       if (hasSelf) {
-        toast.error("Tidak dapat menghapus akun Anda sendiri secara massal");
+        toast.error(t("toast.cannotBulkDeleteSelf"));
         return;
       }
     }
@@ -475,13 +475,13 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           t("alerts.bulkDeleteDone", { count: successCount })
         );
       } else {
-        toast.success(`Aksi Massal Selesai! Berhasil: ${successCount}, Gagal: ${failCount}`);
+        toast.success(t("toast.bulkActionDone", { sukses: successCount, gagal: failCount }));
       }
       setSelectedUserIds([]);
       fetchUsers();
     } catch (e) {
       console.error(e);
-      toast.error("Gagal menjalankan aksi massal");
+      toast.error(t("toast.bulkActionFailed"));
     } finally {
       setIsBulkActionPending(false);
     }
@@ -688,12 +688,12 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         (u) => selectedUserIds.includes(u.id) && u.role === "admin"
                       );
                       if (hasAdmins) {
-                        toast.error("Tidak dapat menghapus user dengan role Admin secara massal");
+                        toast.error(t("toast.cannotBulkDeleteAdmin"));
                         return;
                       }
                       const hasSelf = selectedUserIds.includes(props.currentUserId || "");
                       if (hasSelf) {
-                        toast.error("Tidak dapat menghapus akun Anda sendiri secara massal");
+                        toast.error(t("toast.cannotBulkDeleteSelf"));
                         return;
                       }
 
@@ -1279,7 +1279,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               variant="secondary"
               onClick={() => {
                 navigator.clipboard.writeText(window.location.origin);
-                toast.success("Link successfully copied!");
+                toast.success(t("toast.linkCopied"));
               }}
               className="w-full justify-center py-3"
             >

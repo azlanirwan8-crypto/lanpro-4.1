@@ -180,11 +180,11 @@ export const MasterDataPanel = ({
 
   const handleCreateModule = async () => {
     if (!newModuleProjectId) {
-      toast.error("Pilih project terlebih dahulu");
+      toast.error(t("toast.pickProjectFirst"));
       return;
     }
     if (!newModuleNamaModul.trim()) {
-      toast.error("Nama modul tidak boleh kosong");
+      toast.error(t("toast.moduleNameEmpty"));
       return;
     }
 
@@ -197,13 +197,13 @@ export const MasterDataPanel = ({
       };
       const res = await createProjectModule(payload);
       if (res.status !== "success") throw new Error(res.message);
-      toast.success("Modul berhasil ditambahkan");
+      toast.success(t("toast.moduleAdded"));
       setIsNewModuleModalOpen(false);
       setNewModuleNamaModul("");
       setNewModuleKeterangan("");
       fetchProjectModules();
     } catch (e: any) {
-      toast.error("Gagal menambahkan modul: " + (e.message || e));
+      toast.error(t("toast.moduleAddFailed") + (e.message || e));
     } finally {
       setIsSaving(false);
     }
@@ -211,11 +211,11 @@ export const MasterDataPanel = ({
 
   const handleUpdateModule = async () => {
     if (!editingModuleProjectId) {
-      toast.error("Pilih project terlebih dahulu");
+      toast.error(t("toast.pickProjectFirst"));
       return;
     }
     if (!editingModuleNamaModul.trim()) {
-      toast.error("Nama modul tidak boleh kosong");
+      toast.error(t("toast.moduleNameEmpty"));
       return;
     }
 
@@ -228,11 +228,11 @@ export const MasterDataPanel = ({
       };
       const res = await updateProjectModule(editingModuleId, payload);
       if (res.status !== "success") throw new Error(res.message);
-      toast.success("Modul berhasil diperbarui");
+      toast.success(t("toast.moduleUpdated"));
       setIsEditModuleModalOpen(false);
       fetchProjectModules();
     } catch (e: any) {
-      toast.error("Gagal memperbarui modul: " + (e.message || e));
+      toast.error(t("toast.moduleUpdateFailed") + (e.message || e));
     } finally {
       setIsSaving(false);
     }
@@ -318,18 +318,18 @@ export const MasterDataPanel = ({
 
   const handleCreateMasterData = async () => {
     if (!newMasterLabel) {
-      toast.error("Label Master Data tidak boleh kosong");
+      toast.error(t("toast.masterLabelEmpty"));
       return;
     }
 
     if (newMasterType === "project_role") {
       const trimmedLabel = newMasterLabel.trim();
       if (trimmedLabel.length < 3) {
-        toast.error("Nama Role minimal harus 3 karakter");
+        toast.error(t("toast.roleNameTooShort"));
         return;
       }
       if (/^(.)\1+$/i.test(trimmedLabel)) {
-        toast.error("Nama Role tidak boleh berisi karakter sampah atau berulang");
+        toast.error(t("toast.roleNameRepeated"));
         return;
       }
       const lowerLabel = trimmedLabel.toLowerCase();
@@ -342,7 +342,7 @@ export const MasterDataPanel = ({
         lowerLabel === "testing" ||
         lowerLabel === "dd"
       ) {
-        toast.error("Nama Role tidak boleh berupa karakter sampah atau acak");
+        toast.error(t("toast.roleNameJunk"));
         return;
       }
     }
@@ -377,7 +377,7 @@ export const MasterDataPanel = ({
       const data = await createMasterData(payload);
       if (data.status !== "success") throw new Error(data.message);
 
-      toast.success("Master Data Berhasil Ditambahkan");
+      toast.success(t("toast.masterAdded"));
       setIsNewMasterModalOpen(false);
       setNewMasterLabel("");
       setNewMasterShortCode("");
@@ -385,7 +385,7 @@ export const MasterDataPanel = ({
       onRefresh();
     } catch (e: any) {
       console.error(e);
-      toast.error("Gagal menambahkan master data: " + (e.message || e));
+      toast.error(t("toast.masterAddFailed") + (e.message || e));
     } finally {
       setIsSaving(false);
     }
@@ -397,11 +397,11 @@ export const MasterDataPanel = ({
     if (editingMaster.type === "project_role") {
       const trimmedLabel = (editingMaster.label || "").trim();
       if (trimmedLabel.length < 3) {
-        toast.error("Nama Role minimal harus 3 karakter");
+        toast.error(t("toast.roleNameTooShort"));
         return;
       }
       if (/^(.)\1+$/i.test(trimmedLabel)) {
-        toast.error("Nama Role tidak boleh berisi karakter sampah atau berulang");
+        toast.error(t("toast.roleNameRepeated"));
         return;
       }
       const lowerLabel = trimmedLabel.toLowerCase();
@@ -414,7 +414,7 @@ export const MasterDataPanel = ({
         lowerLabel === "testing" ||
         lowerLabel === "dd"
       ) {
-        toast.error("Nama Role tidak boleh berupa karakter sampah atau acak");
+        toast.error(t("toast.roleNameJunk"));
         return;
       }
     }
@@ -433,13 +433,13 @@ export const MasterDataPanel = ({
       });
       if (data.status !== "success") throw new Error(data.message);
 
-      toast.success("Master Data Berhasil Diperbarui");
+      toast.success(t("toast.masterUpdated"));
       setIsEditMasterModalOpen(false);
       setEditingMaster(null);
       onRefresh();
     } catch (e: any) {
       console.error(e);
-      toast.error("Gagal memperbarui master data: " + (e.message || e));
+      toast.error(t("toast.masterUpdateFailed") + (e.message || e));
     } finally {
       setIsSaving(false);
     }
@@ -813,10 +813,10 @@ export const MasterDataPanel = ({
                     try {
                       await reorderMasterData(currentList);
                       onRefresh();
-                      toast.success("Urutan berhasil diperbarui");
+                      toast.success(t("toast.orderUpdated"));
                     } catch (error) {
                       console.error("Reorder error", error);
-                      toast.error("Gagal menyimpan urutan");
+                      toast.error(t("toast.orderSaveFailed"));
                       setLocalMasterData(masterData);
                     }
                   }}

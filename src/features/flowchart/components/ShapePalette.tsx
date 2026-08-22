@@ -102,7 +102,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                     key={colName}
                     onClick={() => {
                       setSelectedAddColor(colName);
-                      toast.info(`Warna default bentuk baru diset ke ${colName.toUpperCase()}`);
+                      toast.info(t("toast.defaultColorSet", { warna: colName.toUpperCase() }));
                     }}
                     className={cn(
                       "w-3.5 h-3.5 rounded-full border transition-all active:scale-75",

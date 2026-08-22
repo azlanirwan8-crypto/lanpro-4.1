@@ -101,7 +101,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             onClick={() => {
               const nextSnap = !isSnapToGrid;
               setIsSnapToGrid(nextSnap);
-              toast.success(`Snap to Grid: ${nextSnap ? "AKTIF" : "NON-AKTIF"}`);
+              toast.success(t("toast.snapToGrid", { keadaan: nextSnap ? "AKTIF" : "NON-AKTIF" }));
             }}
             className={cn(
               "p-1.5 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer",

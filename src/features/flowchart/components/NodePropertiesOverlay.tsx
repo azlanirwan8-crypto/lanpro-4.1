@@ -52,7 +52,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
         value={node.type}
         onChange={(e) => {
           handleUpdateActiveNode({ type: e.target.value as FlowNode["type"] });
-          toast.success(`Bentuk bentuk diubah ke ${e.target.value.toUpperCase()}!`);
+          toast.success(t("toast.shapeChanged", { bentuk: e.target.value.toUpperCase() }));
         }}
         className="bg-surface-sunken border border-border-subtle text-xs sm:text-[10px] font-medium text-content-body outline-none p-1 rounded-lg cursor-pointer hover:bg-surface-muted max-w-[120px]"
         title={t("shapes.changeShapeType")}
@@ -189,7 +189,9 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
                 ? "solid"
                 : "dashed";
           handleUpdateActiveNode({ borderStyle: nextStyle as FlowNode["borderStyle"] });
-          toast.success(`Jenis garis diubah ke: ${(nextStyle || "solid").toUpperCase()}`);
+          toast.success(
+            t("toast.lineStyleChanged", { gaya: (nextStyle || "solid").toUpperCase() })
+          );
         }}
         className="p-1 hover:bg-surface-muted rounded text-content-secondary"
         title={t("shapes.borderStyleTip")}
@@ -217,7 +219,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
         onClick={() => {
           setActiveTool("connect");
           setConnectSourceId(node.id);
-          toast.info(`Sambungkan alur dari "${node.label}" ke shape berikutnya.`);
+          toast.info(t("toast.connectFromShape", { nama: node.label }));
         }}
         className="p-1 text-content-muted hover:text-amber-500 rounded hover:bg-amber-500/10"
         title={t("shapes.startConnector")}

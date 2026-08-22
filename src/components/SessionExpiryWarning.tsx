@@ -72,7 +72,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
   const handleExtendSession = async () => {
     if (isExtending) return;
     setIsExtending(true);
-    const toastId = toast.loading("Memperpanjang sesi aktif Anda...");
+    const toastId = toast.loading(t("toast.sessionExtending"));
 
     try {
       const data = await apiRequest("/api/auth/refresh", { method: "POST" });
@@ -97,7 +97,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
 
         setShowWarningModal(false);
         setIsPopoverOpen(false);
-        toast.success("Sesi Anda berhasil diperpanjang!", { id: toastId });
+        toast.success(t("toast.sessionExtended"), { id: toastId });
       } else {
         throw new Error(data?.message || "Gagal memperbarui token");
       }
@@ -116,7 +116,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
     isSimulatingRef.current = false;
     setSimulatedTimeLeft(null);
     simulatedTimeLeftRef.current = null;
-    toast.error("Sesi Anda telah berakhir untuk keamanan data. Silakan login kembali.", {
+    toast.error(t("toast.sessionEndedSecurity"), {
       duration: 5000,
     });
     await onLogout(true);
@@ -128,7 +128,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
     simulatedTimeLeftRef.current = 60; // Start with 60 seconds countdown
     setSimulatedTimeLeft(60);
     setIsPopoverOpen(false);
-    toast.success("Peringatan sesi berakhir disimulasikan (60 Detik)!", {
+    toast.success(t("toast.sessionWarnSimulated"), {
       description: "Sesi akan berakhir otomatis jika Anda tidak merespons dalam 60 detik.",
     });
   };

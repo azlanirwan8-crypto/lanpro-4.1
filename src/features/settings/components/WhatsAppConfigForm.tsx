@@ -26,7 +26,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
     // Mock API Call
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setIsTesting(false);
-    toast.success(`Koneksi WA Gateway Berhasil! Pesan simulasi sukses dikirim ke ${targetNumber}.`);
+    toast.success(t("toast.waTestOk", { nomor: targetNumber }));
   };
 
   const handleSaveTemplate = (subject: string, body: string) => {
@@ -35,7 +35,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
       messageTemplate: body,
     }));
     setIsTemplateModalOpen(false);
-    toast.success("Template WhatsApp berhasil disimpan sementara.");
+    toast.success(t("toast.waTemplateSaved"));
   };
 
   const inputStyle =

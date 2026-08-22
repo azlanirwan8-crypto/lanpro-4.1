@@ -1,3 +1,4 @@
+import i18n from "../../i18n";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { UserProfile, UserPermissions } from "../../types";
@@ -98,7 +99,7 @@ export const useAdminUsers = () => {
       const data = await updateUser(selectedUser.id, payload);
       if (data.status !== "success") throw new Error(data.message);
 
-      toast.success("User updated successfully");
+      toast.success(i18n.t("toast.userUpdated"));
       setIsEditModalOpen(false);
 
       const updatedProfile = {
@@ -121,7 +122,7 @@ export const useAdminUsers = () => {
 
   const handleDeleteUser = async (user: UserProfile) => {
     if (user.role === "admin") {
-      toast.error("Cannot delete admin users");
+      toast.error(i18n.t("toast.cannotDeleteAdmin"));
       return;
     }
     const isConfirmed = await confirmDeleteAlert(

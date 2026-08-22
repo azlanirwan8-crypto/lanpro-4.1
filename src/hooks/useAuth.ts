@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import type { AppView } from "../store/useAppStore";
@@ -81,7 +82,7 @@ export function useAuth(
 ): UseAuthReturn {
   const handleAuthApiResponse = (status: number, data: any) => {
     if (status === 429) {
-      toast.error("Terlalu banyak percobaan. Silakan tunggu beberapa menit.");
+      toast.error(i18n.t("toast.tooManyAttempts"));
     } else if (status === 401) {
       toast.error(data?.message || "Username atau password salah.");
     } else {
@@ -179,7 +180,7 @@ export function useAuth(
     setAuthView("login");
 
     if (wasLoggedIn && !silent) {
-      toast.success("Logged out successfully");
+      toast.success(i18n.t("toast.loggedOut"));
     }
 
     // Hard check to ensure we are back at login if state doesn't trigger immediately
@@ -213,7 +214,7 @@ export function useAuth(
     force: boolean = false
   ) => {
     if (!username || !password) {
-      toast.error("Username/Email dan Password wajib diisi.");
+      toast.error(i18n.t("toast.credentialsRequired"));
       return;
     }
     if (isAuthLoading && !force) return;
@@ -324,7 +325,7 @@ export function useAuth(
         safeLocalStorage.removeItem("rememberUser");
       }
 
-      toast.success(`Selamat datang kembali, ${userData?.displayName || username}`);
+      toast.success(i18n.t("toast.welcomeBack", { nama: userData?.displayName || username }));
     } catch (e: any) {
       if (e instanceof ApiError && e.status === 409) {
         console.warn("Session collision detected");
@@ -399,7 +400,7 @@ export function useAuth(
         (e.message.toLowerCase().includes("gagal terhubung") ||
           e.message.toLowerCase().includes("failed to fetch"))
       ) {
-        toast.error("Gagal terhubung ke server. Silakan periksa koneksi Anda dan coba lagi.");
+        toast.error(i18n.t("toast.serverUnreachable"));
       } else {
         handleAuthApiResponse(errStatus, { message: e.message || "Terjadi kesalahan saat login." });
       }

@@ -147,7 +147,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
   const createSubtask = async (parentId: string) => {
     const title = inlineTitleMap[parentId] || "";
     if (!title.trim()) {
-      toast.error("Judul tugas tidak boleh kosong");
+      toast.error(t("toast.bulkTitleEmpty"));
       return;
     }
     await handleInlineAdd(parentId, title);
@@ -156,7 +156,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
 
   const createGlobalIssue = async () => {
     if (!quickCreateTitle.trim()) {
-      toast.error("Judul tugas tidak boleh kosong");
+      toast.error(t("toast.bulkTitleEmpty"));
       return;
     }
     await handleInlineAdd(null, quickCreateTitle);
@@ -175,14 +175,14 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
     const [removed] = reorderedRoots.splice(absoluteSourceIndex, 1);
     reorderedRoots.splice(absoluteDestinationIndex, 0, removed);
 
-    const toastId = toast.loading("Reordering backlog tasks...");
+    const toastId = toast.loading(t("toast.reorderingBacklog"));
     try {
       const orderedIds = reorderedRoots.map((r) => r.id);
 
       const response = await reorderTasks(selectedProject.id, orderedIds);
 
       if (response.status === "success") {
-        toast.success("Backlog tasks prioritized successfully!", { id: toastId });
+        toast.success(t("toast.backlogPrioritized"), { id: toastId });
         if (fetchTasks) {
           fetchTasks();
         }
