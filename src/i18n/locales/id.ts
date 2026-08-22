@@ -427,6 +427,10 @@ export const id = {
     exportReport: "Ekspor Laporan Eksekusi QA",
   },
   kanban: {
+    loadingBoard: "Memuat papan...",
+    empty: "Kosong",
+    byEpic: "Per Epic",
+    byAssignee: "Per Penanggung Jawab",
     otherTasks: "Tugas Lainnya",
     otherTasksHint: "Tugas yang tidak terhubung ke Epic mana pun",
     swimlanes: "Jalur",

@@ -429,6 +429,10 @@ export const en = {
     exportReport: "Export QA Execution Report",
   },
   kanban: {
+    loadingBoard: "Loading board...",
+    empty: "Empty",
+    byEpic: "By Epic",
+    byAssignee: "By Assignee",
     otherTasks: "Other Tasks",
     otherTasksHint: "Tasks not assigned to any Epic",
     swimlanes: "Swimlanes",
