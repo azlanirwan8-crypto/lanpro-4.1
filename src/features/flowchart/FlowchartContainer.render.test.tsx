@@ -28,6 +28,28 @@ jest.mock("./services/flowchart.service", () => ({
 // dipakai saat pengguna menekan Export JPG.
 jest.mock("html-to-image", () => ({ toJpeg: jest.fn().mockResolvedValue("") }));
 
+/**
+ * Item #142 — anggaran waktu untuk suite ini.
+ *
+ * Bawaan Jest 5 detik per test. Suite ini me-mount FlowchartContainer — ±3.700
+ * baris JSX — sebanyak empat kali. Diukur sendirian: 5,3 detik untuk KESELURUHAN
+ * suite, jadi satu mount ±1,3 detik. Di bawah beban (jest menjalankan 70 suite
+ * paralel; mesin juga sedang membangun atau menjalankan server dev) satu test
+ * bisa melewati 5 detik dan tumbang.
+ *
+ * Yang tumbang selalu berbeda-beda dan bukan karena asersinya salah — pesannya
+ * `Exceeded timeout of 5000 ms`. Peringatan "A worker process has failed to
+ * exit gracefully" yang menyertainya ternyata AKIBAT timeout itu, bukan sebab
+ * terpisah: test yang diputus di tengah render meninggalkan pekerjaan React
+ * menggantung. Dijalankan dengan --detectOpenHandles, baik suite ini sendirian
+ * maupun seluruh 71 suite, tidak melaporkan satu pun handle bocor.
+ *
+ * 30 detik dipilih sebagai ±6x waktu solo seluruh suite: cukup longgar untuk
+ * mesin yang sibuk, tetapi tetap berbatas sehingga komponen yang benar-benar
+ * menggantung masih gagal alih-alih membeku tanpa akhir.
+ */
+jest.setTimeout(30_000);
+
 import { FlowchartView } from "./FlowchartContainer";
 import {
   fetchFlowcharts,
@@ -143,5 +165,5 @@ describe("FlowchartView", () => {
     expect(renderErrors).toHaveLength(0);
 
     errorSpy.mockRestore();
-  }, 15000);
+  });
 });
