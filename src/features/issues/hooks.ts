@@ -30,23 +30,23 @@ export const useIssueList = (props: IssueListViewProps) => {
 
   // Columns state
   const [issueTableColumns, setIssueTableColumns] = useState([
-    { id: "work", label: "WORK", width: 450, visible: true },
-    { id: "assignee", label: "ASSIGNEE", width: 150, visible: true },
-    { id: "reporter", label: "REPORTER", width: 150, visible: true },
-    { id: "priority", label: "PRIORITY", width: 120, visible: true },
+    { id: "work", label: "PEKERJAAN", width: 450, visible: true },
+    { id: "assignee", label: "DITUGASKAN", width: 150, visible: true },
+    { id: "reporter", label: "PELAPOR", width: 150, visible: true },
+    { id: "priority", label: "PRIORITAS", width: 120, visible: true },
     { id: "status", label: "STATUS", width: 130, visible: true },
-    { id: "progress", label: "PROGRESS", width: 130, visible: true },
-    { id: "storyPoints", label: "STORY POINTS", width: 100, visible: true },
+    { id: "progress", label: "PROGRES", width: 130, visible: true },
+    { id: "storyPoints", label: "POIN STORY", width: 100, visible: true },
     { id: "sprint", label: "SPRINT", width: 130, visible: true },
-    { id: "labels", label: "LABELS", width: 160, visible: false },
-    { id: "resolution", label: "RESOLUTION", width: 120, visible: true },
-    { id: "category", label: "CATEGORY", width: 120, visible: true },
-    { id: "startDate", label: "START DATE", width: 120, visible: true },
-    { id: "endDate", label: "END DATE", width: 120, visible: true },
-    { id: "release", label: "RELEASE", width: 120, visible: true },
-    { id: "dueDate", label: "DUE DATE", width: 120, visible: true },
-    { id: "updated", label: "UPDATED", width: 120, visible: true },
-    { id: "created", label: "CREATED", width: 120, visible: true },
+    { id: "labels", label: "LABEL", width: 160, visible: false },
+    { id: "resolution", label: "RESOLUSI", width: 120, visible: true },
+    { id: "category", label: "KATEGORI", width: 120, visible: true },
+    { id: "startDate", label: "TANGGAL MULAI", width: 120, visible: true },
+    { id: "endDate", label: "TANGGAL SELESAI", width: 120, visible: true },
+    { id: "release", label: "RILIS", width: 120, visible: true },
+    { id: "dueDate", label: "TENGGAT", width: 120, visible: true },
+    { id: "updated", label: "DIPERBARUI", width: 120, visible: true },
+    { id: "created", label: "DIBUAT", width: 120, visible: true },
   ]);
   const [isConfigureColumnsOpen, setIsConfigureColumnsOpen] = useState(false);
 

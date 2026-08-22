@@ -47,7 +47,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           <div className="flex items-center gap-2">
             <LayoutGrid className="w-4 h-4 text-content-muted" />
             <h3 className="font-medium text-content-strong text-sm tracking-tight">
-              Backlog Tasks
+              Tugas Backlog
             </h3>
           </div>
           <div className="px-2 py-[3px] bg-indigo-500/10 border border-indigo-500/30 rounded-md text-xs font-semibold text-primary">

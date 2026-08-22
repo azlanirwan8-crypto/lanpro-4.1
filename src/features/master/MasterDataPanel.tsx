@@ -534,10 +534,10 @@ export const MasterDataPanel = ({
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
-                  System Master
+                  Master Sistem
                 </span>
                 <span className="text-xs text-content-subtle font-medium">
-                  • Enterprise Control Center
+                  • Pusat Kendali Perusahaan
                 </span>
               </div>
               <h2 className="text-base font-medium text-content-strong tracking-tight">

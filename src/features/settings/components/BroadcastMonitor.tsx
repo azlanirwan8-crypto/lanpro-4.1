@@ -132,7 +132,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
         <div className="space-y-2 flex-1 pr-4">
           <div className="flex items-center gap-2.5">
             <h2 className="text-base font-medium text-content-strong">
-              Daily Broadcast Live Monitor
+              Monitor Siaran Harian Langsung
             </h2>
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>

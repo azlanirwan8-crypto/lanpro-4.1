@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { TestTube, Loader2, Save, FileEdit, CheckCircle2, AlertTriangle, ShieldCheck, Mail } from "lucide-react";
+import {
+  TestTube,
+  Loader2,
+  Save,
+  FileEdit,
+  CheckCircle2,
+  AlertTriangle,
+  ShieldCheck,
+  Mail,
+} from "lucide-react";
 import { toast } from "sonner";
 import { TemplateEditorModal } from "./TemplateEditorModal";
-import { fetchEmailSettings, testEmailConnection, EmailStatusData } from "../services/settings.service";
+import {
+  fetchEmailSettings,
+  testEmailConnection,
+  EmailStatusData,
+} from "../services/settings.service";
 
 interface EmailConfigFormProps {
   formData: any;
@@ -106,7 +119,9 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Mail size={16} className="text-content-strong" />
-            <span className="text-xs font-semibold text-content-strong">Status Integrasi Email</span>
+            <span className="text-xs font-semibold text-content-strong">
+              Status Integrasi Email
+            </span>
           </div>
           {isLoadingStatus ? (
             <div className="flex items-center gap-1 text-xs text-content-muted">
@@ -128,7 +143,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
           <div className="p-2.5 rounded bg-surface border border-border-subtle/60">
-            <span className="text-content-muted block text-[11px]">Provider Backend</span>
+            <span className="text-content-muted block text-[11px]">Penyedia Backend</span>
             <span className="font-medium text-content-strong">
               {emailStatus?.provider || "Resend (REST API)"}
             </span>
@@ -151,7 +166,9 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
       {/* Template Notifikasi Assignment */}
       <div className="space-y-3 pt-1">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-content-body">Subjek Email Default (Task Assignment)</label>
+          <label className="text-xs font-medium text-content-body">
+            Subjek Email Default (Task Assignment)
+          </label>
           <input
             value={formData.subjectTemplate || ""}
             onChange={(e) => setFormData({ ...formData, subjectTemplate: e.target.value })}
@@ -205,7 +222,9 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
           <div className="bg-surface p-5 rounded-lg shadow-xl max-w-sm w-full space-y-3 border border-border-subtle">
             <div className="flex items-center gap-2">
               <ShieldCheck size={18} className="text-emerald-600" />
-              <h3 className="font-semibold text-sm text-content-strong">Uji Coba Pengiriman Email</h3>
+              <h3 className="font-semibold text-sm text-content-strong">
+                Uji Coba Pengiriman Email
+              </h3>
             </div>
             <p className="text-xs text-content-muted">
               Kirim email simulasi uji coba untuk memverifikasi koneksi integrasi layanan email.
@@ -256,4 +275,3 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
     </div>
   );
 };
-

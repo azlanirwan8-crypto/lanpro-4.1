@@ -515,7 +515,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     User Management
                   </h3>
                   <p className="text-content-subtle font-medium text-xs sm:text-[11px] mt-1">
-                    Manage user access, roles, and permissions.
+                    Kelola akses, peran, dan izin pengguna.
                   </p>
                 </div>
               </div>

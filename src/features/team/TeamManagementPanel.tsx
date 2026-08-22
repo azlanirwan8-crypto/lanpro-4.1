@@ -255,7 +255,7 @@ export const TeamManagementPanel = ({
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-xl font-medium text-content-strong tracking-tight">
-              Team Management
+              Manajemen Tim
             </h1>
             <p className="text-xs text-content-muted font-medium mt-0.5">
               Daftar anggota tim yang bergabung dalam proyek{" "}
@@ -279,7 +279,7 @@ export const TeamManagementPanel = ({
               </div>
               <div>
                 <div className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider">
-                  Active Team
+                  Tim Aktif
                 </div>
                 <div className="text-xl font-medium text-content-strong mt-0.5">
                   {activeTeamCount}
@@ -311,7 +311,7 @@ export const TeamManagementPanel = ({
               </div>
               <div>
                 <div className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider">
-                  Pending Invites
+                  Undangan Tertunda
                 </div>
                 <div className="text-xl font-medium text-content-strong mt-0.5">
                   {pendingInvitesCount}

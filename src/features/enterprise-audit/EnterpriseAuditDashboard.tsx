@@ -218,7 +218,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
               System Audit
             </span>
             <span className="text-xs text-content-subtle font-medium">
-              • Enterprise Control Center
+              • Pusat Kendali Perusahaan
             </span>
           </div>
           <h1 className="text-base font-medium text-content-strong tracking-tight">

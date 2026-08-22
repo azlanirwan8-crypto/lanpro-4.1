@@ -41,7 +41,7 @@ export const QATopBar: React.FC<QATopBarProps> = ({
         </div>
         <div>
           <h1 className="text-base font-bold text-content-strong tracking-tight">
-            QA Test Cases & Execution Matrix
+            Kasus Uji QA & Matriks Eksekusi
           </h1>
           <p className="text-xs text-content-muted font-medium mt-0.5">
             Manajemen kasus pengujian dan matriks eksekusi QA

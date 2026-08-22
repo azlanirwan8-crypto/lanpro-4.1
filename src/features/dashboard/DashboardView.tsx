@@ -839,7 +839,7 @@ export function DashboardView(props: DashboardViewProps) {
                           : "text-content-secondary hover:text-content"
                       )}
                     >
-                      {filter}
+                      {filter === "ALL" ? "SEMUA" : filter}
                     </button>
                   ))}
                 </div>
@@ -860,7 +860,7 @@ export function DashboardView(props: DashboardViewProps) {
                     Progres Sprint
                   </span>
                   <p className="text-sm font-medium text-success-text mt-0.5">
-                    {sprintProgress}% ({sprintCompletedTasks}/{sprintTotalTasks} tasks)
+                    {sprintProgress}% ({sprintCompletedTasks}/{sprintTotalTasks} tugas)
                   </p>
                 </div>
                 <div>
@@ -868,7 +868,7 @@ export function DashboardView(props: DashboardViewProps) {
                     Kecepatan Mingguan
                   </span>
                   <p className="text-sm font-medium text-primary mt-0.5">
-                    {weeklyVelocity ? weeklyVelocity : "0.0"} pts/sprint
+                    {weeklyVelocity ? weeklyVelocity : "0.0"} poin/sprint
                   </p>
                 </div>
                 <div>
@@ -1159,7 +1159,7 @@ export function DashboardView(props: DashboardViewProps) {
                     Status Pencapaian Epic & Peta Jalan
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
-                    Progress pencapaian Epic & milestone utama proyek
+                    Progres pencapaian Epic & milestone utama proyek
                   </p>
                 </div>
                 <button
@@ -1266,7 +1266,7 @@ export function DashboardView(props: DashboardViewProps) {
                     7-Day Activity & Task Completion Trend
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
-                    Tren pembuatan vs penyelesaian task 7 hari terakhir
+                    Tren pembuatan vs penyelesaian tugas 7 hari terakhir
                   </p>
                 </div>
               </div>
@@ -1330,7 +1330,7 @@ export function DashboardView(props: DashboardViewProps) {
                     <Area
                       type="monotone"
                       dataKey="Completed"
-                      name="Tasks Selesai"
+                      name="Tugas Selesai"
                       stroke="#10b981"
                       fill="#10b981"
                       fillOpacity={0.15}
@@ -1339,7 +1339,7 @@ export function DashboardView(props: DashboardViewProps) {
                     <Area
                       type="monotone"
                       dataKey="Created"
-                      name="Tasks Dibuat"
+                      name="Tugas Dibuat"
                       stroke="#6366f1"
                       fill="#6366f1"
                       fillOpacity={0.15}
@@ -1364,7 +1364,7 @@ export function DashboardView(props: DashboardViewProps) {
                   onClick={() => props.setCurrentView("kanban")}
                   className="text-xs font-medium text-primary hover:underline inline-flex items-center min-h-11 py-2"
                 >
-                  Filter
+                  Saring
                 </button>
               </div>
 

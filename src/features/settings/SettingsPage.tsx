@@ -34,7 +34,7 @@ export const SettingsPage: React.FC = () => {
       <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
         <div className="px-5 py-3.5 border-b border-border-subtle/80 bg-surface-sunken/80 shrink-0 flex items-center justify-between">
           <h1 className="text-xs font-medium text-content-strong uppercase tracking-wide">
-            System Configuration & Integrations
+            Konfigurasi Sistem & Integrasi
           </h1>
         </div>
 

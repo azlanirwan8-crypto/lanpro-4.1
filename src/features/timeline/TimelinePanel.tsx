@@ -1157,7 +1157,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
       <div className="bg-surface px-5 py-3.5 rounded-md border border-border-subtle/80 shadow-2xs flex items-center justify-between shrink-0">
         <div>
           <h2 className="text-base font-semibold text-content-strong tracking-tight">
-            Project Roadmap
+            Peta Jalan Proyek
           </h2>
           <p className="text-xs font-medium text-content-muted mt-0.5">
             Visualisasi lini masa proyek, epics, dan ketergantungan tugas
@@ -1174,7 +1174,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 toast.success("Berhasil fokus ke Task Pertama Aktif");
               }}
               className="flex items-center gap-1.5 px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-subtle/80 cursor-pointer active:scale-95"
-              title="Focus First Task"
+              title="Fokus ke Tugas Pertama"
             >
               <Target className="w-3.5 h-3.5 text-primary" />
               <span>Focus First Task</span>
@@ -1240,7 +1240,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               className="h-8 px-3.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>EXPORT AS</span> <ChevronDown className="w-3 h-3" />
+              <span>EKSPOR SEBAGAI</span> <ChevronDown className="w-3 h-3" />
             </button>
             {isExportMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-surface rounded-md shadow-md border border-border-subtle/80 py-1.5 z-50">

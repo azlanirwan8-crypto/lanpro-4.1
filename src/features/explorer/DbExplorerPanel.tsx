@@ -5,10 +5,7 @@ import { ConnectPanel } from "../connect/ConnectPanel";
 import { cn } from "../../lib/utils";
 import { toast } from "sonner";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
-import {
-  runQuery,
-  fetchSchema as fetchSchemaApi,
-} from "./services/explorer.service";
+import { runQuery, fetchSchema as fetchSchemaApi } from "./services/explorer.service";
 
 export const DbExplorerPanel: React.FC<any> = ({
   selectedProject,
@@ -100,17 +97,17 @@ export const DbExplorerPanel: React.FC<any> = ({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
-              System Tools
+              Perkakas Sistem
             </span>
             <span className="text-xs text-content-subtle font-medium">
-              • Enterprise Control Center
+              • Pusat Kendali Perusahaan
             </span>
           </div>
           <h1 className="text-base font-medium text-content-strong tracking-tight flex items-center gap-2">
-            Database Tools
+            Perkakas Basis Data
           </h1>
           <p className="text-xs text-content-muted font-medium mt-0.5">
-            Manage Database Explorer, Connection, and Backups.
+            Kelola Penjelajah Basis Data, Koneksi, dan Cadangan.
           </p>
         </div>
 

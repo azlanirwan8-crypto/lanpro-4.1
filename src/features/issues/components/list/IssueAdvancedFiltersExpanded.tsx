@@ -97,10 +97,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               {mArr
                 .filter((m) => m.type === "status")
                 .map((m, idx) => (
-                  <option
-                    key={m.id ? `opt-st-${m.id}-${idx}` : `opt-st-${idx}`}
-                    value={m.label}
-                  >
+                  <option key={m.id ? `opt-st-${m.id}-${idx}` : `opt-st-${idx}`} value={m.label}>
                     {m.label}
                   </option>
                 ))}
@@ -117,14 +114,11 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               onChange={(e) => setListFilterPriority(e.target.value)}
               className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
             >
-              <option value="All">All Priorities</option>
+              <option value="All">Semua Prioritas</option>
               {mArr
                 .filter((m) => m.type === "priority")
                 .map((m, idx) => (
-                  <option
-                    key={m.id ? `flt-p-${m.id}-${idx}` : `flt-p-${idx}`}
-                    value={m.label}
-                  >
+                  <option key={m.id ? `flt-p-${m.id}-${idx}` : `flt-p-${idx}`} value={m.label}>
                     {m.label}
                   </option>
                 ))}
