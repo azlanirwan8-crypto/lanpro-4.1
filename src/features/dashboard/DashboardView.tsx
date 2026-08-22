@@ -256,7 +256,7 @@ export function DashboardView(props: DashboardViewProps) {
   const sprintFilterOptions = useMemo(() => {
     const allOption = {
       id: "ALL",
-      label: `Semua Sprint (${tasks.length} tugas)`,
+      label: t("dashboard.allSprints", { count: tasks.length }),
       icon: "Layers",
       color: "#6366F1",
     };
@@ -577,9 +577,9 @@ export function DashboardView(props: DashboardViewProps) {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Selamat Pagi";
-    if (hour < 18) return "Selamat Siang";
-    return "Selamat Malam";
+    if (hour < 12) return t("dashboard.greetingMorning");
+    if (hour < 18) return t("dashboard.greetingAfternoon");
+    return t("dashboard.greetingNight");
   };
 
   const realVelocityChartData = useMemo(() => {
@@ -618,9 +618,7 @@ export function DashboardView(props: DashboardViewProps) {
             <h2 className="text-xl font-medium text-content-strong flex items-center gap-2">
               {getGreeting()}, {currentUser?.displayName || "Administrator"}!
             </h2>
-            <p className="text-xs text-content-muted mt-1">
-              Ringkasan performa tim, progres sprint, dan alokasi tugas real-time.
-            </p>
+            <p className="text-xs text-content-muted mt-1">{t("dashboard.subtitle")}</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             {/* Global Filter by Sprint */}
@@ -638,8 +636,10 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="flex items-center gap-2 bg-info/10 px-3 py-2 rounded-lg border border-info/20 text-xs font-medium text-info-text">
               <Zap className="w-3.5 h-3.5 text-info-text" />
               <span>
-                Aktif: {activeSprint?.name || "Tidak ada Sprint Aktif"} ({sprintDaysLeft} hari
-                tersisa)
+                {t("dashboard.activeSprintChip", {
+                  name: activeSprint?.name || t("dashboard.noActiveSprint"),
+                  days: sprintDaysLeft,
+                })}
               </span>
             </div>
           </div>
@@ -764,7 +764,7 @@ export function DashboardView(props: DashboardViewProps) {
                 onClick={() => props.setCurrentView("kanban")}
                 className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
-                Lihat daftar selesai
+                {t("dashboard.viewDoneListLink")}
               </button>
             </div>
           </div>
@@ -806,13 +806,16 @@ export function DashboardView(props: DashboardViewProps) {
                     : "text-content-muted"
                 }`}
               >
-                {blockedTasks.length} Tersumbat • {overdueTasks.length} Terlambat
+                {t("dashboard.blockedOverdueChip", {
+                  blocked: blockedTasks.length,
+                  overdue: overdueTasks.length,
+                })}
               </span>
               <button
                 onClick={() => props.setCurrentView("kanban")}
                 className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
-                Tangani hambatan
+                {t("dashboard.handleBlockersLink")}
               </button>
             </div>
           </div>
@@ -828,7 +831,7 @@ export function DashboardView(props: DashboardViewProps) {
                 <div>
                   <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-indigo-500" />
-                    Ringkasan Progres & Kecepatan Sprint
+                    {t("dashboard.sprintOverview")}
                   </h3>
                 </div>
                 <div className="flex items-center gap-1 bg-surface-muted p-1 rounded-md">
@@ -853,7 +856,7 @@ export function DashboardView(props: DashboardViewProps) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 p-4 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
                 <div>
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
-                    Sprint Aktif
+                    {t("dashboard.activeSprint")}
                   </span>
                   <p className="text-sm font-medium text-content-strong mt-0.5 truncate">
                     {activeSprint?.name || "No Sprint"}
@@ -861,15 +864,19 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
                 <div>
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
-                    Progres Sprint
+                    {t("dashboard.sprintProgress")}
                   </span>
                   <p className="text-sm font-medium text-success-text mt-0.5">
-                    {sprintProgress}% ({sprintCompletedTasks}/{sprintTotalTasks} tugas)
+                    {t("dashboard.sprintProgressValue", {
+                      percent: sprintProgress,
+                      done: sprintCompletedTasks,
+                      total: sprintTotalTasks,
+                    })}
                   </p>
                 </div>
                 <div>
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
-                    Kecepatan Mingguan
+                    {t("dashboard.weeklyVelocity")}
                   </span>
                   <p className="text-sm font-medium text-primary mt-0.5">
                     {weeklyVelocity ? weeklyVelocity : "0.0"} poin/sprint
@@ -877,7 +884,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
                 <div>
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
-                    Sisa Hari
+                    {t("dashboard.daysLeft")}
                   </span>
                   <p className="text-sm font-medium text-content-strong mt-0.5">
                     {sprintDaysLeft} days
@@ -933,14 +940,14 @@ export function DashboardView(props: DashboardViewProps) {
                     />
                     <Bar
                       dataKey="Completed"
-                      name="Tugas Selesai / Poin"
+                      name={t("dashboard.seriesCompleted")}
                       fill="#10b981"
                       radius={[4, 4, 0, 0]}
                       maxBarSize={24}
                     />
                     <Bar
                       dataKey="Planned"
-                      name="Total Tugas Direncanakan / Poin"
+                      name={t("dashboard.seriesPlanned")}
                       fill="#6366f1"
                       radius={[4, 4, 0, 0]}
                       maxBarSize={24}
@@ -952,12 +959,12 @@ export function DashboardView(props: DashboardViewProps) {
 
             {/* Task Breakdown Grid (Jenis Task & Status Breakdown) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Rincian Tugas per Jenis (Epic, Story, Task, Bug, Subtask) */}
+              {/* {t("dashboard.breakdownByType")} (Epic, Story, Task, Bug, Subtask) */}
               <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                   <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <LayoutGrid className="w-4 h-4 text-purple-500" />
-                    Rincian Tugas per Jenis
+                    {t("dashboard.breakdownByType")}
                   </h3>
                   {/* #112 — judul WAJIB menjumlahkan isi yang ditampilkan.
                       Sebelumnya ia memakai `totalTasks` sementara isinya
@@ -998,12 +1005,12 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
               </div>
 
-              {/* Rincian Tugas per Status (To Do, In Progress, Review, Done, Blocked) */}
+              {/* {t("dashboard.breakdownByStatus")} (To Do, In Progress, Review, Done, Blocked) */}
               <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                   <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <PieChartIcon className="w-4 h-4 text-emerald-500" />
-                    Rincian Tugas per Status
+                    {t("dashboard.breakdownByStatus")}
                   </h3>
                   {/* #112 — idem, dijumlahkan dari isinya sendiri. */}
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle">
@@ -1047,17 +1054,17 @@ export function DashboardView(props: DashboardViewProps) {
                 <div>
                   <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <Users className="w-4 h-4 text-indigo-500" />
-                    Sebaran Beban Tugas per Anggota
+                    {t("dashboard.workloadTitle")}
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
-                    Alokasi & penyelesaian task tiap anggota tim dengan indikator beban kerja
+                    {t("dashboard.workloadSubtitle")}
                   </p>
                 </div>
                 <button
                   onClick={() => props.setCurrentView("team")}
                   className="text-xs font-medium text-primary hover:underline cursor-pointer inline-flex items-center min-h-11 py-2"
                 >
-                  Kelola Tim
+                  {t("dashboard.manageTeam")}
                 </button>
               </div>
 
@@ -1065,12 +1072,12 @@ export function DashboardView(props: DashboardViewProps) {
                 <ResponsiveTable className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-border-faint text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
-                      <th className="py-2.5 px-2">Anggota Tim</th>
-                      <th className="py-2.5 px-2">Tugas Berjalan</th>
-                      <th className="py-2.5 px-2">Tugas Selesai</th>
-                      <th className="py-2.5 px-2">Total Dialokasikan</th>
-                      <th className="py-2.5 px-2">Status Beban</th>
-                      <th className="py-2.5 px-2 text-right">Progres</th>
+                      <th className="py-2.5 px-2">{t("dashboard.thMember")}</th>
+                      <th className="py-2.5 px-2">{t("dashboard.thRunning")}</th>
+                      <th className="py-2.5 px-2">{t("dashboard.thDone")}</th>
+                      <th className="py-2.5 px-2">{t("dashboard.thAllocated")}</th>
+                      <th className="py-2.5 px-2">{t("dashboard.thLoadStatus")}</th>
+                      <th className="py-2.5 px-2 text-right">{t("dashboard.thProgress")}</th>
                     </tr>
                   </thead>
                   <tbody className="text-xs divide-y divide-border-faint font-medium text-content-body ">
@@ -1160,17 +1167,17 @@ export function DashboardView(props: DashboardViewProps) {
                 <div>
                   <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <Target className="w-4 h-4 text-purple-500" />
-                    Status Pencapaian Epic & Peta Jalan
+                    {t("dashboard.epicTitle")}
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
-                    Progres pencapaian Epic & milestone utama proyek
+                    {t("dashboard.epicSubtitle")}
                   </p>
                 </div>
                 <button
                   onClick={() => props.setCurrentView("roadmap")}
                   className="text-xs font-medium text-primary hover:underline inline-flex items-center min-h-11 py-2"
                 >
-                  Lihat Peta Jalan
+                  {t("dashboard.viewRoadmap")}
                 </button>
               </div>
 
@@ -1191,7 +1198,8 @@ export function DashboardView(props: DashboardViewProps) {
                           </span>
                         </div>
                         <span className="text-xs sm:text-[11px] font-medium text-content-muted shrink-0">
-                          {epic.childCompleted}/{epic.childTotal} Tugas Anak ({epic.progress}%)
+                          {epic.childCompleted}/{epic.childTotal} {t("dashboard.childTasks")} (
+                          {epic.progress}%)
                         </span>
                       </div>
                       <div className="w-full h-2 bg-surface-strong/80 rounded-full overflow-hidden">
@@ -1220,41 +1228,41 @@ export function DashboardView(props: DashboardViewProps) {
                 <div>
                   <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <Clock className="w-4 h-4 text-blue-500" />
-                    Pencatatan Waktu & Estimasi Upaya
+                    {t("dashboard.timeTitle")}
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
-                    Perbandingan estimasi jam pengerjaan vs jam terpakai
+                    {t("dashboard.timeSubtitle")}
                   </p>
                 </div>
                 <span className="text-[10px] leading-none font-medium text-primary bg-indigo-500/10 px-2 py-[3px] rounded border border-indigo-500/30">
-                  {timeTrackingStats.accuracy}% Akurasi
+                  {t("dashboard.accuracy", { percent: timeTrackingStats.accuracy })}
                 </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
                   <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase">
-                    Jam Diperkirakan
+                    {t("dashboard.estimatedHours")}
                   </span>
                   <p className="text-lg font-medium text-content-strong mt-0.5">
-                    {timeTrackingStats.totalEst} Jam
+                    {timeTrackingStats.totalEst} {t("dashboard.hours")}
                   </p>
                 </div>
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
                   <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase">
-                    Jam Tercatat
+                    {t("dashboard.loggedHours")}
                   </span>
                   <p className="text-lg font-medium text-primary mt-0.5">
-                    {timeTrackingStats.totalLog} Jam
+                    {timeTrackingStats.totalLog} {t("dashboard.hours")}
                   </p>
                 </div>
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
                   <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase">
-                    Selisih Tersisa
+                    {t("dashboard.remainingDiff")}
                   </span>
                   <p className="text-lg font-medium text-success-text mt-0.5">
                     {timeTrackingStats.diff >= 0
-                      ? `${timeTrackingStats.diff} Jam Tersisa`
+                      ? `${timeTrackingStats.diff} ${t("dashboard.hoursLeftLabel")}`
                       : `${Math.abs(timeTrackingStats.diff)} Hours Over`}
                   </p>
                 </div>
@@ -1267,10 +1275,10 @@ export function DashboardView(props: DashboardViewProps) {
                 <div>
                   <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <Activity className="w-4 h-4 text-emerald-500" />
-                    7-Day Activity & Task Completion Trend
+                    {t("dashboard.trendTitle")}
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
-                    Tren pembuatan vs penyelesaian tugas 7 hari terakhir
+                    {t("dashboard.trendSubtitle")}
                   </p>
                 </div>
               </div>
@@ -1334,7 +1342,7 @@ export function DashboardView(props: DashboardViewProps) {
                     <Area
                       type="monotone"
                       dataKey="Completed"
-                      name="Tugas Selesai"
+                      name={t("dashboard.tasksCompleted")}
                       stroke="#10b981"
                       fill="#10b981"
                       fillOpacity={0.15}
@@ -1343,7 +1351,7 @@ export function DashboardView(props: DashboardViewProps) {
                     <Area
                       type="monotone"
                       dataKey="Created"
-                      name="Tugas Dibuat"
+                      name={t("dashboard.tasksCreated")}
                       stroke="#6366f1"
                       fill="#6366f1"
                       fillOpacity={0.15}
@@ -1362,7 +1370,7 @@ export function DashboardView(props: DashboardViewProps) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                   <Zap className="w-4 h-4 text-amber-500" />
-                  Rincian Prioritas Tugas
+                  {t("dashboard.priorityBreakdown")}
                 </h3>
                 <button
                   onClick={() => props.setCurrentView("kanban")}
@@ -1412,10 +1420,10 @@ export function DashboardView(props: DashboardViewProps) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-rose-500" />
-                  Hambatan & Tugas Terlambat
+                  {t("dashboard.blockedOverdueTitle")}
                 </h3>
                 <span className="text-[10px] leading-none font-medium text-rose-600 bg-rose-500/10 px-2 py-[3px] rounded border border-rose-500/30">
-                  {blockedTasks.length + overdueTasks.length} Perlu Tindakan
+                  {t("dashboard.needAction", { count: blockedTasks.length + overdueTasks.length })}
                 </span>
               </div>
 
@@ -1449,7 +1457,7 @@ export function DashboardView(props: DashboardViewProps) {
                 ))}
                 {blockedTasks.length === 0 && overdueTasks.length === 0 && (
                   <div className="py-4 text-center text-xs text-content-subtle italic">
-                    Tidak ada isu tersumbat atau terlambat.
+                    {t("dashboard.noBlockedOverdue")}
                   </div>
                 )}
               </div>

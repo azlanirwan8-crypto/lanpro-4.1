@@ -64,7 +64,8 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-primary flex items-center gap-2">
-            <Zap className="w-4 h-4 text-primary" /> My Active Tasks ({myActiveTasks.length})
+            <Zap className="w-4 h-4 text-primary" /> {t("widgets.myActiveTasks")} (
+            {myActiveTasks.length})
           </h3>
           {myActiveTasks.some((task) => isDueSoon24h(task.endDate)) && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">

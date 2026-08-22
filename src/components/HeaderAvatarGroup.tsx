@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { safeLocalStorage } from "../lib/safeStorage";
 import React from "react";
 import { usePresence } from "../contexts/PresenceContext";
@@ -13,6 +14,7 @@ export const HeaderAvatarGroup: React.FC<HeaderAvatarGroupProps> = ({
   allUsers,
   currentUserUid,
 }) => {
+  const { t } = useTranslation();
   const { onlineUsers } = usePresence();
 
   // Retain the last stable list of online users to prevent flashing/flickering back to 1 avatar
@@ -84,7 +86,7 @@ export const HeaderAvatarGroup: React.FC<HeaderAvatarGroupProps> = ({
             <div className="absolute top-10 left-1/2 -translate-x-1/2 px-2.5 py-1.5 bg-surface-inverse text-content-inverse text-xs sm:text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-30 flex flex-col items-center">
               <span className="font-medium">
                 {member.displayName || member.name || member.username || "Anggota Tim"}{" "}
-                {isCurrentUser ? "(Anda)" : ""}
+                {isCurrentUser ? t("dashboard.youSuffix") : ""}
               </span>
               <span className="text-xs sm:text-[10px] sm:text-[8px] text-content-subtle capitalize mt-0.5">
                 {member.role || "User"}

@@ -123,7 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
             animate={{ opacity: 1 }}
             className={styles.sectionLabelWrapper}
           >
-            <div className={styles.sectionLabel}>PROYEK AKTIF</div>
+            <div className={styles.sectionLabel}>{t("sidebar.activeProjects")}</div>
             {canCreateProject && (
               <motion.button
                 whileHover={{ scale: 1.05 }}
