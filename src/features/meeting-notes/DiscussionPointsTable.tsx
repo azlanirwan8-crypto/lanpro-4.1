@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import React, { useState, useEffect } from "react";
 import io from "socket.io-client";
@@ -62,6 +63,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   projectMembers = [],
   masterData = [],
 }) => {
+  const { t } = useTranslation();
   const [points, setPoints] = useState<DiscussionPoint[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -361,7 +363,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               Poin Diskusi & Keputusan
             </h3>
             <p className="text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider">
-              Discussion points & action items
+              {t("discussion.heading")}
             </p>
           </div>
         </div>
@@ -398,7 +400,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               </>
             ) : (
               <>
-                <Sparkles className="w-3.5 h-3.5 text-primary" /> ✨ AI Meeting Assistant
+                <Sparkles className="w-3.5 h-3.5 text-primary" /> {t("discussion.aiAssistant")}
               </>
             )}
           </button>
@@ -504,7 +506,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
-                    Target Date
+                    {t("discussion.targetDate")}
                   </label>
                   <input
                     type="date"
@@ -570,8 +572,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                     <th className="py-3 px-4 min-w-[140px]">PIC</th>
                     <th className="py-3 px-4 min-w-[130px]">Target Date</th>
                     <th className="py-3 px-4 w-24 text-center">Thread</th>
-                    <th className="py-3 px-4 w-28 text-center">Status</th>
-                    <th className="py-3 px-4 w-24 text-center">Action</th>
+                    <th className="py-3 px-4 w-28 text-center">{t("discussion.status")}</th>
+                    <th className="py-3 px-4 w-24 text-center">{t("discussion.action")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-faint text-content-body">
@@ -809,7 +811,10 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                         <StyledDropdown
                           value={quickAssignTo}
                           onChange={(val) => setQuickAssignTo(val)}
-                          options={[{ id: "Unassigned", label: "Assign PIC" }, ...userOptions]}
+                          options={[
+                            { id: "Unassigned", label: t("discussion.assignPic") },
+                            ...userOptions,
+                          ]}
                           members={projectMembers}
                           type="member"
                           masterData={masterData}
@@ -849,7 +854,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           title="Tambah Poin"
                         >
                           <Plus className="w-3.5 h-3.5" />
-                          <span>Add</span>
+                          <span>{t("discussion.add")}</span>
                         </button>
                       </td>
                     </tr>

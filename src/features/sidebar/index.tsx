@@ -76,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         className={styles.collapseButton}
-        title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+        title={isSidebarCollapsed ? t("common.expandSidebar") : t("common.collapseSidebar")}
       >
         {isSidebarCollapsed ? (
           <ChevronRight className="w-4 h-4" />
@@ -130,7 +130,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsNewProjectModalOpen(true)}
                 className={styles.newButton}
-                title="Buat Proyek Baru"
+                title={t("sidebar.newProject")}
               >
                 <Plus className="w-3.5 h-3.5 text-sidebar-text" />
                 <span className="text-xs sm:text-[10px] font-medium uppercase text-sidebar-text">

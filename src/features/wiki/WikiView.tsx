@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { safeLocalStorage, safeSessionStorage } from "../../lib/safeStorage";
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { UserAvatar } from "../../components/ui/UserAvatar";
@@ -54,6 +55,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
   currentUser,
   masterData = [],
 }) => {
+  const { t } = useTranslation();
   // Core states for storing documents and loading feedback
   const [documents, setDocuments] = useState<DocumentModel[]>([]);
   const [loading, setLoading] = useState(false);
@@ -856,7 +858,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-content tracking-tight">
-                      Documentation
+                      {t("wiki.title")}
                     </h3>
                     <p className="text-xs font-medium text-content-muted mt-0.5">
                       Kelola dokumentasi proyek, PRD, spesifikasi teknis, dan panduan tim.
@@ -868,7 +870,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   <div className="relative flex-1 sm:w-72">
                     <input
                       type="text"
-                      placeholder="Cari dokumentasi..."
+                      placeholder={t("wiki.searchPlaceholder")}
                       value={search}
                       onChange={(e) => {
                         setSearch(e.target.value);
@@ -884,7 +886,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       onClick={handleCreateNew}
                       className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer shrink-0"
                     >
-                      <Plus className="w-4 h-4" /> Add Document
+                      <Plus className="w-4 h-4" /> {t("wiki.addDocument")}
                     </button>
                   )}
                 </div>
@@ -896,12 +898,12 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   <thead>
                     <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-semibold text-primary uppercase tracking-wider whitespace-nowrap">
                       <th className="py-3 px-4 w-14 text-center">No</th>
-                      <th className="py-3 px-4 min-w-[200px] max-w-[320px]">Document Title</th>
-                      <th className="py-3 px-4 w-44">Category</th>
-                      <th className="py-3 px-4 w-44">Document File</th>
-                      <th className="py-3 px-4 w-40">Author</th>
-                      <th className="py-3 px-4 w-36">Last Updated</th>
-                      <th className="py-3 px-4 w-28 text-center">Action</th>
+                      <th className="py-3 px-4 min-w-[200px] max-w-[320px]">{t("wiki.thTitle")}</th>
+                      <th className="py-3 px-4 w-44">{t("wiki.thCategory")}</th>
+                      <th className="py-3 px-4 w-44">{t("wiki.thFile")}</th>
+                      <th className="py-3 px-4 w-40">{t("meetings.thAuthor")}</th>
+                      <th className="py-3 px-4 w-36">{t("wiki.thLastUpdated")}</th>
+                      <th className="py-3 px-4 w-28 text-center">{t("discussion.action")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-faint text-xs font-medium text-content-body">
@@ -963,7 +965,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                 <button
                                   onClick={() => handleDownload(doc.id, doc.fileName)}
                                   className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
-                                  title="Klik untuk mengunduh berkas"
+                                  title={t("wiki.clickToDownload")}
                                 >
                                   <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
                                   <span className="truncate max-w-[130px]">{doc.fileName}</span>
@@ -997,7 +999,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                     setMobileActiveView("detail");
                                   }}
                                   className="p-1.5 text-content-subtle hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
-                                  title="Lihat detail dokumen"
+                                  title={t("wiki.viewDetail")}
                                 >
                                   <Eye className="w-4 h-4" />
                                 </button>
@@ -1006,14 +1008,14 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                     <button
                                       onClick={(e) => handleEditClick(doc, e)}
                                       className="p-1.5 text-content-subtle hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
-                                      title="Edit dokumen"
+                                      title={t("wiki.editDocument")}
                                     >
                                       <Edit2 className="w-4 h-4" />
                                     </button>
                                     <button
                                       onClick={(e) => handleDeleteClick(doc, e)}
                                       className="p-1.5 text-content-subtle hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
-                                      title="Hapus dokumen"
+                                      title={t("wiki.deleteDocument")}
                                     >
                                       <Trash2 className="w-4 h-4" />
                                     </button>
@@ -1032,8 +1034,10 @@ export const WikiView: React.FC<WikiViewProps> = ({
               {/* Table Footer / Pagination */}
               <div className="px-6 py-4 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
                 <div className="text-xs text-content-muted font-medium">
-                  Showing {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} to{" "}
-                  {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} entries
+                  {t("common.showing")}{" "}
+                  {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} {t("common.to")}{" "}
+                  {Math.min(currentPage * itemsPerPage, totalItems)} {t("common.of")} {totalItems}{" "}
+                  {t("common.entries")}
                 </div>
 
                 {totalPages > 1 && (

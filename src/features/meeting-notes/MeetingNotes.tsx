@@ -507,7 +507,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                                 title={meeting.meetingLink}
                               >
                                 <Video className="w-3.5 h-3.5 shrink-0" />
-                                <span className="truncate">Join Room</span>
+                                <span className="truncate">{t("meetings.joinRoom")}</span>
                               </a>
                             ) : (
                               <span className="px-2 py-0.5 bg-surface-muted text-content-muted rounded-md text-xs sm:text-[10px] font-medium">
@@ -522,7 +522,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                                   handleDownloadMeeting(meeting.id!, meeting.fileName!)
                                 }
                                 className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
-                                title="Klik untuk mengunduh berkas"
+                                title={t("meetings.clickToDownload")}
                               >
                                 <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
                                 <span className="truncate max-w-[140px]">{meeting.fileName}</span>
@@ -562,7 +562,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                                   setMobileViewMode("detail");
                                 }}
                                 className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
-                                title="View meeting details and discussion points"
+                                title={t("meetings.viewDetails")}
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
@@ -570,7 +570,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                                 <button
                                   onClick={() => startEdit(meeting)}
                                   className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
-                                  title="Edit meeting"
+                                  title={t("meetings.editMeeting")}
                                 >
                                   <Edit2 className="w-4 h-4" />
                                 </button>
@@ -579,7 +579,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                                 <button
                                   onClick={() => handleDeleteMeeting(meeting.id!)}
                                   className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
-                                  title="Delete meeting"
+                                  title={t("meetings.deleteMeeting")}
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
@@ -597,9 +597,10 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
             {/* Table Footer / Pagination */}
             <div className="px-6 py-3.5 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
               <div className="text-xs text-content-muted font-medium">
-                Showing {filteredMeetings.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
-                to {Math.min(currentPage * itemsPerPage, filteredMeetings.length)} of{" "}
-                {filteredMeetings.length} entries
+                {t("common.showing")}{" "}
+                {filteredMeetings.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
+                {t("common.to")} {Math.min(currentPage * itemsPerPage, filteredMeetings.length)}{" "}
+                {t("common.of")} {filteredMeetings.length} {t("common.entries")}
               </div>
 
               {totalPages > 1 && (
@@ -749,7 +750,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 setSelectedAttendees([]);
               }}
               className="absolute top-4 right-4 sm:top-5 sm:right-5 p-1.5 text-content-subtle hover:text-content-body hover:bg-surface-muted rounded-md transition-all cursor-pointer"
-              title="Close"
+              title={t("common.close")}
             >
               <X className="w-5 h-5" />
             </button>
@@ -760,7 +761,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
               </div>
               <div>
                 <h3 className="text-base font-medium text-content tracking-tight">
-                  {editingMeeting ? "Edit Meeting Note" : "Create New Meeting Note"}
+                  {editingMeeting ? t("meetings.editNote") : t("meetings.createNewNote")}
                 </h3>
               </div>
             </div>
@@ -797,7 +798,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 <div>
                   <label className="block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-content-subtle" />
-                    Meeting Time
+                    {t("meetings.meetingTime")}
                   </label>
                   <input
                     type="time"
@@ -812,7 +813,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
               <div>
                 <label className="block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5 flex items-center gap-1.5">
                   <Video className="w-3.5 h-3.5 text-content-subtle" />
-                  Meeting Link
+                  {t("meetings.meetingLink")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-content-subtle">
@@ -835,7 +836,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 <textarea
                   disabled={!canModify}
                   className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none transition-all resize-none min-h-[80px] placeholder:text-content-subtle shadow-2xs"
-                  placeholder="Outline key discussion topics..."
+                  placeholder={t("meetings.agendaPlaceholder")}
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
                 />
@@ -844,7 +845,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
               {/* Upload Document Section */}
               <div>
                 <label className="block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5 flex items-center justify-between">
-                  <span>Upload Document (PDF, Word, Excel • Max 5MB)</span>
+                  <span>{t("meetings.uploadDocument")}</span>
                   {newMeetingFile && canModify && (
                     <button
                       type="button"
@@ -914,7 +915,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         {t("meetings.uploadHint")}
                       </p>
                       <p className="text-xs sm:text-[10px] text-content-subtle">
-                        PDF, Word (.doc, .docx), Excel (.xls, .xlsx) hingga 5MB
+                        {t("meetings.uploadFormats")}
                       </p>
                     </div>
                   )}
@@ -937,7 +938,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   setSelectedAttendees([]);
                 }}
               >
-                Close
+                {t("common.close")}
               </button>
               {!canModify ? (
                 <div className="text-xs font-medium text-rose-600 flex items-center gap-1.5 bg-rose-500/10 px-3.5 py-2 rounded-md border border-rose-500/30 shadow-2xs">
