@@ -903,7 +903,18 @@ export function DashboardView(props: DashboardViewProps) {
                         fontSize: "11px",
                       }}
                     />
-                    <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "10px" }} />
+                    {/* #126 — Recharts mewarnai TEKS legenda sama dengan warna
+                        serinya lewat inline style, jadi labelnya terbaca 2,54 di
+                        KEDUA mode. Yang diperbaiki hanya teksnya; KOTAK penanda
+                        tetap memakai warna seri apa adanya, karena §22.5
+                        menyatakan palet chart adalah warna DATA, bukan tema.
+                        `content-body` lolos jauh: 10,4 terang · 11,7 gelap. */}
+                    <Legend
+                      wrapperStyle={{ fontSize: "11px", paddingTop: "10px" }}
+                      formatter={(value: string) => (
+                        <span className="text-content-body">{value}</span>
+                      )}
+                    />
                     <Bar
                       dataKey="Completed"
                       name="Completed Tasks / Points"
@@ -1292,7 +1303,18 @@ export function DashboardView(props: DashboardViewProps) {
                         fontSize: "11px",
                       }}
                     />
-                    <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "10px" }} />
+                    {/* #126 — Recharts mewarnai TEKS legenda sama dengan warna
+                        serinya lewat inline style, jadi labelnya terbaca 2,54 di
+                        KEDUA mode. Yang diperbaiki hanya teksnya; KOTAK penanda
+                        tetap memakai warna seri apa adanya, karena §22.5
+                        menyatakan palet chart adalah warna DATA, bukan tema.
+                        `content-body` lolos jauh: 10,4 terang · 11,7 gelap. */}
+                    <Legend
+                      wrapperStyle={{ fontSize: "11px", paddingTop: "10px" }}
+                      formatter={(value: string) => (
+                        <span className="text-content-body">{value}</span>
+                      )}
+                    />
                     <Area
                       type="monotone"
                       dataKey="Completed"
