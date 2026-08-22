@@ -23,9 +23,9 @@ const getRemainingHours = (endDate?: string | Date | null) => {
     const now = new Date();
     const diffMs = d.getTime() - now.getTime();
     const hours = Math.ceil(diffMs / (60 * 60 * 1000));
-    return hours > 0 ? `${hours}h left` : "due soon";
+    return hours > 0 ? `${hours} jam lagi` : "segera jatuh tempo";
   } catch (e) {
-    return "due soon";
+    return "segera jatuh tempo";
   }
 };
 
@@ -118,7 +118,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       <div className="bg-surface shadow-soft border border-danger-border/40 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-danger flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-danger animate-bounce" /> Stoppers / Blocked (
+            <AlertCircle className="w-4 h-4 text-danger animate-bounce" /> Tersumbat / Terhambat (
             {blockedTasks.length})
           </h3>
           {blockedTasks.some((task) => isDueSoon24h(task.endDate)) && (
@@ -174,7 +174,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       {/* Needs Attention / Overdue */}
       <div className="bg-surface shadow-soft border border-danger-border/30 rounded-xl p-5">
         <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2 mb-3">
-          <AlertCircle className="w-4 h-4 text-danger animate-pulse" /> Needs Attention (
+          <AlertCircle className="w-4 h-4 text-danger animate-pulse" /> Perlu Perhatian (
           {overdueTasks.length})
         </h3>
         <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
@@ -211,7 +211,8 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2">
-            <Zap className="w-4 h-4 text-warning" /> Due Soon (3 Days) ({dueSoonTasks.length})
+            <Zap className="w-4 h-4 text-warning" /> Segera Jatuh Tempo (3 Hari) (
+            {dueSoonTasks.length})
           </h3>
           {dueSoonTasks.some((task) => isDueSoon24h(task.endDate)) && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
@@ -269,7 +270,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2">
-            <Video className="w-4 h-4 text-info" /> Recent Meetings ({meetings.length})
+            <Video className="w-4 h-4 text-info" /> Rapat Terbaru ({meetings.length})
           </h3>
         </div>
         <div className="space-y-2.5 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
@@ -305,7 +306,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2">
-            <FileText className="w-4 h-4 text-success" /> Documentation ({documents.length})
+            <FileText className="w-4 h-4 text-success" /> Dokumentasi ({documents.length})
           </h3>
         </div>
         <div className="space-y-2.5 max-h-[280px] overflow-y-auto custom-scrollbar pr-1">
@@ -343,7 +344,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
           <Globe className="w-32 h-32" />
         </div>
         <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-indigo-300 flex items-center gap-2 mb-3 relative z-10">
-          <Clock className="w-4 h-4 text-indigo-400" /> Live Activity (24h)
+          <Clock className="w-4 h-4 text-indigo-400" /> Aktivitas Langsung (24 Jam)
         </h3>
         <div className="space-y-3 max-h-[260px] overflow-y-auto custom-scrollbar pr-1 relative z-10">
           {activityLogs.map((log) => {
