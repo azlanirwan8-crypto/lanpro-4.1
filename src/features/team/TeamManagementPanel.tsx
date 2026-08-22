@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useMemo, useEffect } from "react";
 import { katalogPeranProyek, labelPeran } from "../../lib/roleCatalog";
 import {
@@ -40,6 +41,7 @@ export const TeamManagementPanel = ({
   masterData?: MasterData[];
   onRefreshProjects?: () => void;
 }) => {
+  const { t } = useTranslation();
   const [teamSearch, setTeamSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -200,12 +202,12 @@ export const TeamManagementPanel = ({
       }
 
       const headers = [
-        "UID/Email",
-        "Nama Lengkap",
-        "Username",
-        "Project Role",
-        "Status",
-        "Jumlah Tugas",
+        t("team.csvUidEmail"),
+        t("team.csvFullName"),
+        t("team.csvUsername"),
+        t("team.projectRole"),
+        t("team.status"),
+        t("team.csvTaskCount"),
       ];
       const rows = filteredPeople.map((p) => {
         const role = selectedProject?.memberRoles?.[p.uid] || (p as any)?.role || "viewer";
@@ -255,7 +257,7 @@ export const TeamManagementPanel = ({
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-xl font-medium text-content-strong tracking-tight">
-              Manajemen Tim
+              {t("team.title")}
             </h1>
             <p className="text-xs text-content-muted font-medium mt-0.5">
               Daftar anggota tim yang bergabung dalam proyek{" "}
@@ -279,7 +281,7 @@ export const TeamManagementPanel = ({
               </div>
               <div>
                 <div className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider">
-                  Tim Aktif
+                  {t("team.activeTeam")}
                 </div>
                 <div className="text-xl font-medium text-content-strong mt-0.5">
                   {activeTeamCount}
@@ -295,7 +297,7 @@ export const TeamManagementPanel = ({
               </div>
               <div>
                 <div className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider">
-                  Assigned Tasks
+                  {t("team.assignedTasks")}
                 </div>
                 <div className="text-xl font-medium text-content-strong mt-0.5">
                   {assignedTasksCount}
@@ -311,7 +313,7 @@ export const TeamManagementPanel = ({
               </div>
               <div>
                 <div className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider">
-                  Undangan Tertunda
+                  {t("team.pendingInvites")}
                 </div>
                 <div className="text-xl font-medium text-content-strong mt-0.5">
                   {pendingInvitesCount}
@@ -327,7 +329,7 @@ export const TeamManagementPanel = ({
               </div>
               <div>
                 <div className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider">
-                  Project Tasks
+                  {t("team.projectTasks")}
                 </div>
                 <div className="text-xl font-medium text-content-strong mt-0.5">
                   {projectTasksCount}
@@ -343,7 +345,7 @@ export const TeamManagementPanel = ({
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-content-subtle" />
             <input
               type="text"
-              placeholder="Search for name, designation, or email..."
+              placeholder={t("team.searchPlaceholder")}
               value={teamSearch}
               onChange={(e) => setTeamSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-1.5 bg-surface-sunken border border-border-subtle rounded-md text-xs focus:ring-1 focus:ring-indigo-500 focus:bg-surface outline-none text-content-body font-medium transition-all"
@@ -367,14 +369,14 @@ export const TeamManagementPanel = ({
               <button
                 onClick={() => setViewMode("grid")}
                 className={`p-1.5 rounded transition-all ${viewMode === "grid" ? "bg-indigo-600 text-content-inverse shadow-2xs" : "text-content-muted hover:text-content-strong"}`}
-                title="Grid View"
+                title={t("team.gridView")}
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
                 className={`p-1.5 rounded transition-all ${viewMode === "list" ? "bg-indigo-600 text-content-inverse shadow-2xs" : "text-content-muted hover:text-content-strong"}`}
-                title="List View"
+                title={t("team.listView")}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -384,7 +386,7 @@ export const TeamManagementPanel = ({
               onClick={handleExportTeamCSV}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body border border-border-subtle rounded-md text-xs font-medium shadow-2xs transition-all cursor-pointer"
             >
-              <Download className="w-3.5 h-3.5" /> Export CSV
+              <Download className="w-3.5 h-3.5" /> {t("team.exportCsv")}
             </button>
           </div>
         </div>
@@ -472,7 +474,7 @@ export const TeamManagementPanel = ({
                       onClick={() => setSelectedProfileUser(person)}
                       className="w-full py-2 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
                     >
-                      View Profile
+                      {t("team.viewProfile")}
                     </button>
                   </div>
                 </div>
@@ -488,12 +490,12 @@ export const TeamManagementPanel = ({
               <ResponsiveTable className="w-full text-left">
                 <thead>
                   <tr className="bg-surface-sunken/80 border-b border-border-subtle/80 text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider">
-                    <th className="px-5 py-3">Member</th>
-                    <th className="px-5 py-3">Role</th>
-                    <th className="px-5 py-3 text-center">Assigned Tasks</th>
-                    <th className="px-5 py-3 text-center">Completed</th>
-                    <th className="px-5 py-3 text-center">Status</th>
-                    <th className="px-5 py-3 text-right">Action</th>
+                    <th className="px-5 py-3">{t("team.member")}</th>
+                    <th className="px-5 py-3">{t("team.role")}</th>
+                    <th className="px-5 py-3 text-center">{t("team.assignedTasks")}</th>
+                    <th className="px-5 py-3 text-center">{t("team.completed")}</th>
+                    <th className="px-5 py-3 text-center">{t("team.status")}</th>
+                    <th className="px-5 py-3 text-right">{t("team.action")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-faint">

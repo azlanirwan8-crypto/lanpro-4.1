@@ -361,11 +361,12 @@ Urutan saran setelah domain siap: **F6.2** fondasi `email.service.ts` →
 ⚠️ **Dua hal yang WAJIB beres sebelum production** (sesudah #46 selesai 17 Agu 2026), semuanya menunggu
 keputusan pemilik proyek:
 
-| #   | Hal                                   | Akibat bila terlewat                                                                                            |
-| --- | ------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| 30  | Storage drive-per-user (F11)          | Berkas unggahan hilang tiap deploy di Vercel. Driver `s3` (#2) DITAHAN 16 Agu 2026 — jalan rilis kini lewat F11 |
-| 44  | Domain email belum terverifikasi      | Email tidak sampai ke user, gagal senyap                                                                        |
-| 15  | Dua Google API key lama belum dicabut | **±5 menit kerja Anda, nol kode.** ROI tertinggi di seluruh papan (F1)                                          |
+| #   | Hal                                                                                                                                                                                                                                     | Akibat bila terlewat                                                                                            |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| 30  | Storage drive-per-user (F11)                                                                                                                                                                                                            | Berkas unggahan hilang tiap deploy di Vercel. Driver `s3` (#2) DITAHAN 16 Agu 2026 — jalan rilis kini lewat F11 |
+| 135 | **Dwibahasa fase 2** — seluruh UI ikut tombol bahasa, kecuali data dari basis data. 410 string Inggris di 73 berkas, ditambah teks Indonesia yang juga harus dipindah ke kamus. Progres: halaman Tim selesai (17 string). Sisanya belum | **F12**                                                                                                         | 🟡  | Tinggi | Tidak | `BELUM` | §12 |
+| 44  | Domain email belum terverifikasi                                                                                                                                                                                                        | Email tidak sampai ke user, gagal senyap                                                                        |
+| 15  | Dua Google API key lama belum dicabut                                                                                                                                                                                                   | **±5 menit kerja Anda, nol kode.** ROI tertinggi di seluruh papan (F1)                                          |
 
 ### 0.5 Aturan yang WAJIB dipatuhi penerus
 
@@ -486,15 +487,16 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 1 item
+### 1.1 BELUM SELESAI — 2 item
 
-**Sebaran per fase:** F1 0 · F2 0 · F3 0 · F5 0 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 0 · F3 0 · F5 0 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 1
 
 **Masih menahan rilis production:** #30
 
-| #   | Temuan                                                                      |  Fase   | Sev | Biaya  | Blokir modul baru? | Status            | Detail |
-| --- | --------------------------------------------------------------------------- | :-----: | :-: | ------ | :----------------: | ----------------- | ------ |
-| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2) | **F11** | 🔴  | Tinggi | Blokir production  | `MENUNGGU` desain | §1.5   |
+| #   | Temuan                                                                                                                                                                                                                                  |  Fase   | Sev | Biaya  | Blokir modul baru? | Status            | Detail |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----: | :-: | ------ | :----------------: | ----------------- | ------ |
+| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)                                                                                                                                                             | **F11** | 🔴  | Tinggi | Blokir production  | `MENUNGGU` desain | §1.5   |
+| 135 | **Dwibahasa fase 2** — seluruh UI ikut tombol bahasa, kecuali data dari basis data. 410 string Inggris di 73 berkas, ditambah teks Indonesia yang juga harus dipindah ke kamus. Progres: halaman Tim selesai (17 string). Sisanya belum | **F12** | 🟡  | Tinggi |       Tidak        | `BELUM`           | §12    |
 
 ### 1.2 SUDAH SELESAI — 130 item
 
