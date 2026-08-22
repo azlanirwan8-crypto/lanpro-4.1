@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { AlertTriangle, LogOut, X, Monitor, Globe, Activity } from "lucide-react";
 
@@ -22,6 +23,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
   onForceLogout,
   isLoading,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen || !activeSession) return null;
 
   return (
@@ -40,7 +42,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
             <AlertTriangle className="w-8 h-8 text-rose-500" />
           </div>
           <h2 className="text-xl font-medium text-content-strong text-center">
-            Akun Anda Masih Aktif
+            {t("collision.stillActive")}
           </h2>
           <p className="text-sm text-content-muted text-center mt-2 max-w-[280px]">
             Sistem mendeteksi bahwa akun ini sedang digunakan di perangkat atau browser lain.
@@ -52,7 +54,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
             <div className="flex items-center gap-2 mb-3">
               <Activity className="w-4 h-4 text-emerald-500" />
               <span className="text-xs font-medium text-content-secondary uppercase tracking-wider">
-                Sesi Aktif Saat Ini
+                {t("collision.currentSession")}
               </span>
             </div>
             <div className="space-y-3">
@@ -60,7 +62,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
                 <Globe className="w-4 h-4 text-content-subtle mt-0.5 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <div className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase">
-                    IP Address
+                    {t("collision.ipAddress")}
                   </div>
                   <div className="text-sm font-medium text-content-body truncate">
                     {activeSession?.ip || "Tidak diketahui"}
@@ -72,7 +74,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
                 <Monitor className="w-4 h-4 text-content-subtle mt-0.5 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <div className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase">
-                    Perangkat & Browser
+                    {t("collision.deviceBrowser")}
                   </div>
                   <div className="text-sm font-medium text-content-body truncate">
                     {activeSession?.device || "Perangkat Tidak Diketahui"}
@@ -91,7 +93,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
               disabled={isLoading}
               className="flex-1 px-4 py-2.5 bg-surface border border-border-subtle text-content-secondary rounded-xl font-medium text-sm hover:bg-surface-sunken transition-colors disabled:opacity-50"
             >
-              Batalkan
+              {t("collision.cancel")}
             </button>
             <button
               onClick={onForceLogout}

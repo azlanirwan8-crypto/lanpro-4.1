@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Zap, LayoutGrid, UserCircle } from "lucide-react";
 import {
@@ -29,6 +30,7 @@ export const SprintPhaseAnalysis: React.FC<SprintPhaseAnalysisProps> = ({
   statusData,
   COLORS,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="w-full h-full bg-surface p-6 rounded-xl border border-border-subtle/80 shadow-soft flex flex-col justify-between overflow-y-auto no-scrollbar select-none">
       <div className="space-y-6">

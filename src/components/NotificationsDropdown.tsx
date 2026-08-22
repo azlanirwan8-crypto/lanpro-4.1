@@ -6,6 +6,7 @@
  * Tanpa state sendiri: daftar notifikasi dan status buka-tutupnya tetap tinggal
  * di AppContainer karena header dan penghitung lonceng juga membacanya.
  */
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { format } from "date-fns";
@@ -44,6 +45,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
   fetchNotifications,
   tasks,
 }) => {
+  const { t } = useTranslation();
   return (
     <>
       <AnimatePresence>
@@ -57,14 +59,14 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
           >
             {/* Dropdown Header */}
             <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-surface">
-              <h3 className="font-medium text-content text-[16px]">Notification</h3>
+              <h3 className="font-medium text-content text-[16px]">{t("notifications.title")}</h3>
               <div className="flex items-center gap-2.5">
                 <span className="bg-violet-500/15 text-violet-700 text-xs font-medium px-2.5 py-1 rounded-md">
                   {notifications.filter((n) => !n.read).length} New
                 </span>
                 <button
                   className="p-1 text-content-muted hover:text-content-secondary hover:bg-surface-muted rounded-full transition-all"
-                  title="Mark all read"
+                  title={t("notifications.markAllRead")}
                   onClick={async () => {
                     try {
                       const unread = notifications.filter((n) => !n.read);
@@ -84,7 +86,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
             <div className="max-h-[380px] overflow-y-auto">
               {notifications.length === 0 ? (
                 <div className="p-8 text-center text-content-muted text-sm italic">
-                  Belum ada notifikasi
+                  {t("notifications.empty")}
                 </div>
               ) : (
                 <div className="flex flex-col">
@@ -194,7 +196,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                 }}
                 className="w-full bg-indigo-600 hover:bg-indigo-700 text-content-inverse py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-150 text-center block shadow-xs"
               >
-                View all notifications
+                {t("notifications.viewAll")}
               </button>
             </div>
           </motion.div>

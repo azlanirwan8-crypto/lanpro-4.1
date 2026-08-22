@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Mail, AlertCircle, CheckCircle2, ArrowRight, X } from "lucide-react";
 import { cn } from "../../../lib/utils";
@@ -8,6 +9,7 @@ interface ForgotPasswordModalProps {
 }
 
 export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +69,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-3">
             <Mail className="w-6 h-6" />
           </div>
-          <h3 className="text-lg font-bold text-content-strong">Lupa Kata Sandi?</h3>
+          <h3 className="text-lg font-bold text-content-strong">{t("forgotPwd.title")}</h3>
           <p className="text-xs text-content-muted mt-1 max-w-xs mx-auto">
             Masukkan alamat email akun Anda. Kami akan mengirim tautan untuk mengatur ulang kata
             sandi. Tautannya berlaku 15 menit.
@@ -79,7 +81,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
             <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-start gap-3">
               <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
               <div className="text-xs leading-relaxed">
-                <p className="font-semibold mb-0.5">Periksa Kotak Masuk Anda</p>
+                <p className="font-semibold mb-0.5">{t("forgotPwd.checkInbox")}</p>
                 {/* #121 — Pesan ini SENGAJA netral. Menyebut "berhasil dikirim ke
                     alamat ini" akan mengonfirmasi bahwa alamat itu punya akun,
                     dan membocorkan lagi hal yang baru saja ditutup di backend. */}
@@ -95,7 +97,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
               onClick={handleModalClose}
               className="w-full py-2.5 px-4 bg-surface-sunken hover:bg-surface-elevated text-content font-medium rounded-lg text-xs transition-colors cursor-pointer"
             >
-              Kembali ke Halaman Masuk
+              {t("forgotPwd.backToLogin")}
             </button>
           </div>
         ) : (
@@ -106,7 +108,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
               </label>
               <input
                 type="email"
-                placeholder="nama@perusahaan.com"
+                placeholder={t("forgotPwd.emailPlaceholder")}
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -135,7 +137,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
                 disabled={loading}
                 className="flex-1 py-2.5 px-4 bg-surface-sunken hover:bg-surface-elevated text-content font-medium rounded-lg text-xs transition-colors cursor-pointer disabled:opacity-50"
               >
-                Batal
+                {t("forgotPwd.cancel")}
               </button>
               <button
                 type="submit"

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ShieldAlert, RefreshCw } from "lucide-react";
@@ -38,6 +39,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
   onLogout,
   onSessionExtended,
 }) => {
+  const { t } = useTranslation();
   const [realTimeLeft, setRealTimeLeft] = useState<number | null>(null);
   const [simulatedTimeLeft, setSimulatedTimeLeft] = useState<number | null>(null);
   const [showWarningModal, setShowWarningModal] = useState(false);
@@ -222,7 +224,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
 
               {/* Header Text */}
               <h3 className="text-xl font-medium text-content tracking-tight mb-2">
-                Sesi Anda Hampir Berakhir!
+                {t("session.expiring")}
               </h3>
               <p className="text-sm text-content-muted px-2 mb-6">
                 Sesi Anda akan otomatis ditutup demi keamanan akun. Simpan pekerjaan Anda atau
@@ -232,7 +234,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
               {/* Countdown Progress Card */}
               <div className="bg-surface-sunken rounded-xl border border-border-faint p-5 mb-6 relative">
                 <div className="text-xs text-content-subtle font-medium mb-1">
-                  OTOMATIS KELUAR DALAM
+                  {t("session.autoLogout")}
                 </div>
                 <div className="text-4xl font-medium font-mono text-rose-500 tracking-wider">
                   {formatTime(activeTimeLeft)}
@@ -270,14 +272,14 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
                   className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-xl text-sm font-medium tracking-wide shadow-soft-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <RefreshCw className={`w-4 h-4 ${isExtending ? "animate-spin" : ""}`} />
-                  Perpanjang Sesi Aktif
+                  {t("session.extend")}
                 </button>
 
                 <button
                   onClick={() => onLogout(false)}
                   className="w-full py-3.5 bg-surface-sunken hover:bg-surface-muted border border-border-subtle text-content-body rounded-xl text-sm font-medium active:scale-[0.99] transition-all"
                 >
-                  Keluar Sekarang
+                  {t("session.logoutNow")}
                 </button>
               </div>
             </motion.div>

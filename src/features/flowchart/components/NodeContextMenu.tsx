@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useRef } from "react";
 import { motion } from "motion/react";
 import { Trash2, Edit3, Palette, Copy, Check } from "lucide-react";
@@ -26,6 +27,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
   onChangeColor,
   onDuplicate,
 }) => {
+  const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
 
   const colorsList = [
@@ -85,7 +87,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
     >
       {/* Node Info Header */}
       <div className="px-3 py-1.5 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider text-content-subtle border-b border-border-faint mb-1 flex items-center justify-between">
-        <span>Aksi Komponen</span>
+        <span>{t("nodeMenu.title")}</span>
         <span className="text-violet-600 font-mono text-xs sm:text-[10px] sm:text-[8px]">
           ID: {nodeId.split("_")[1] || "Active"}
         </span>
@@ -100,7 +102,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
         className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-content-body hover:text-violet-600 hover:bg-violet-500/10 transition-colors text-left"
       >
         <Edit3 className="w-3.5 h-3.5 text-content-subtle group-hover:text-violet-500" />
-        <span>Sunting Properti</span>
+        <span>{t("nodeMenu.editProperties")}</span>
       </button>
 
       {/* Duplicate Button */}
@@ -112,7 +114,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
         className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-content-body hover:text-indigo-600 hover:bg-indigo-500/10 transition-colors text-left"
       >
         <Copy className="w-3.5 h-3.5 text-content-subtle" />
-        <span>Duplikat Komponen</span>
+        <span>{t("nodeMenu.duplicate")}</span>
       </button>
 
       <div className="h-px bg-surface-muted my-1" />
@@ -120,7 +122,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
       {/* Change Color Palette Title */}
       <div className="px-3 py-1 flex items-center gap-1.5 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider text-content-subtle">
         <Palette className="w-3 h-3 text-content-subtle" />
-        <span>Ubah Warna</span>
+        <span>{t("nodeMenu.changeColor")}</span>
       </div>
 
       {/* Color Circle Grid Picker */}
@@ -162,7 +164,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
         className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-rose-600 hover:bg-rose-500/10 transition-colors text-left"
       >
         <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-        <span>Hapus Komponen</span>
+        <span>{t("nodeMenu.delete")}</span>
       </button>
     </motion.div>
   );

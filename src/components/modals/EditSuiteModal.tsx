@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { QATestSuite } from "../../features/qa/types";
@@ -19,6 +20,7 @@ export const EditSuiteModal: React.FC<EditSuiteModalProps> = ({
   onNameChange,
   onSubmit,
 }) => {
+  const { t } = useTranslation();
   if (!suite) return null;
 
   return (
@@ -31,12 +33,12 @@ export const EditSuiteModal: React.FC<EditSuiteModalProps> = ({
           className="bg-surface border border-border-subtle/80 rounded-md p-6 max-w-sm w-full shadow-2xl space-y-4"
         >
           <h3 className="text-sm font-medium text-content-strong uppercase tracking-wider">
-            Ubah Info Dokumen Suite
+            {t("editSuite.title")}
           </h3>
           <div className="space-y-3">
             <div className="space-y-1">
               <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
-                Nama Dokumen
+                {t("editSuite.docName")}
               </label>
               <input
                 type="text"
@@ -51,13 +53,13 @@ export const EditSuiteModal: React.FC<EditSuiteModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 bg-surface-muted text-content-secondary text-xs font-medium rounded-md cursor-pointer"
             >
-              Batal
+              {t("editSuite.cancel")}
             </button>
             <button
               onClick={onSubmit}
               className="px-4 py-2 bg-primary-surface text-content-inverse text-xs font-medium rounded-md cursor-pointer shadow-xs active:scale-95"
             >
-              Simpan Perubahan
+              {t("editSuite.save")}
             </button>
           </div>
         </motion.div>
