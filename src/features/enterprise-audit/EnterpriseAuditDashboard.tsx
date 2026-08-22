@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -38,6 +39,7 @@ interface EnterpriseAuditDashboardProps {
 export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> = ({
   selectedProject,
 }) => {
+  const { t } = useTranslation();
   // --- STATE MANAGEMENT ---
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -215,14 +217,14 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
-              System Audit
+              {t("audit.systemAudit")}
             </span>
             <span className="text-xs text-content-subtle font-medium">
               • Pusat Kendali Perusahaan
             </span>
           </div>
           <h1 className="text-base font-medium text-content-strong tracking-tight">
-            Dashboard Audit Enterprise
+            {t("audit.title")}
           </h1>
           <p className="text-xs text-content-muted font-medium mt-0.5">
             Riwayat aktivitas infrastruktur LanPro (Real-time & Immutable)
@@ -233,18 +235,18 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
           <div className="flex bg-surface-sunken rounded-md p-2 border border-border-subtle/80 items-center gap-4 text-xs">
             <div className="flex items-center gap-1.5">
               <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
-                Total Log:
+                {t("audit.totalLog")}
               </span>
               <span className="font-medium text-content-strong">{logs.length}</span>
             </div>
             <div className="h-4 w-px bg-surface-strong" />
             <div className="flex items-center gap-1.5">
               <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
-                Status:
+                {t("audit.status")}
               </span>
               <div className="flex items-center gap-1 text-emerald-600 font-medium">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Live</span>
+                <span>{t("audit.live")}</span>
               </div>
             </div>
           </div>
@@ -255,7 +257,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
             }}
             disabled={isRefreshing}
             className="h-8 w-8 bg-surface hover:bg-surface-sunken border border-border-subtle/80 rounded-md text-content-secondary flex items-center justify-center shadow-2xs transition-all cursor-pointer disabled:opacity-50"
-            title="Refresh Audit Logs"
+            title={t("audit.refreshLogs")}
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
           </button>
@@ -268,7 +270,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle" />
           <input
             type="text"
-            placeholder="Cari berdasarkan User, Entity ID, atau Kata Kunci..."
+            placeholder={t("audit.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-1.5 bg-surface-sunken border border-border-subtle rounded-md text-xs font-medium focus:bg-surface focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
@@ -320,7 +322,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 className="bg-indigo-600 text-content-inverse px-4 py-1.5 rounded-full text-xs font-medium shadow-md flex items-center gap-1.5 hover:bg-indigo-700 transition-all border border-indigo-400 cursor-pointer"
               >
                 <ArrowDown className="w-3.5 h-3.5" />
-                <span>Log Baru Terdeteksi</span>
+                <span>{t("audit.newLogDetected")}</span>
               </button>
             </motion.div>
           )}
@@ -337,16 +339,14 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 <div className="absolute inset-0 w-12 h-12 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin" />
               </div>
               <p className="text-xs font-medium animate-pulse uppercase tracking-wider text-content-secondary">
-                Menyinkronkan Gudang Data
+                {t("audit.syncing")}
               </p>
             </div>
           ) : filteredLogs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-content-subtle">
               <Activity className="w-12 h-12 mb-3 opacity-20" />
-              <p className="text-sm font-medium text-content-body">Data Log Kosong</p>
-              <p className="text-xs text-content-subtle">
-                Belum ada aktivitas yang tercatat untuk proyek/filter ini.
-              </p>
+              <p className="text-sm font-medium text-content-body">{t("audit.emptyLog")}</p>
+              <p className="text-xs text-content-subtle">{t("audit.emptyLogHint")}</p>
             </div>
           ) : (
             <div className="space-y-2.5">
@@ -475,7 +475,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                   </div>
                   <div>
                     <h3 className="text-2xl font-medium text-content-strong tracking-tight">
-                      Detail Perubahan Audit
+                      {t("audit.changeDetail")}
                     </h3>
                     <div className="flex items-center gap-3 mt-1">
                       <span className="text-xs font-medium text-content-muted uppercase tracking-widest">
@@ -499,7 +499,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
               <div className="grid grid-cols-2 bg-surface-sunken/30 border-b border-border-faint">
                 <div className="p-6 border-r border-border-faint">
                   <p className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-2">
-                    Aktivitas Penulis
+                    {t("audit.authorActivity")}
                   </p>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-indigo-500/15 rounded-full flex items-center justify-center text-indigo-600 font-medium">
@@ -510,7 +510,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                         {selectedLog.userName || "Unknown User"}
                       </p>
                       <p className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-tighter">
-                        Akses Auditor Sistem
+                        {t("audit.auditorAccess")}
                       </p>
                     </div>
                   </div>
@@ -535,7 +535,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 <div className="mb-6 flex items-center gap-2">
                   <div className="h-5 w-1 bg-indigo-500 rounded-full" />
                   <h4 className="text-xs font-medium text-content uppercase tracking-widest">
-                    Komparasi Perubahan Objek
+                    {t("audit.objectComparison")}
                   </h4>
                 </div>
                 <DiffViewer oldValues={selectedLog.oldValues} newValues={selectedLog.newValues} />
@@ -559,7 +559,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                   onClick={() => setSelectedLog(null)}
                   className="px-8 py-3 bg-surface-inverse-strong text-content-inverse text-xs font-medium rounded-xl hover:bg-surface-inverse-strong transition-all shadow-xl hover:shadow-2xl shadow-slate-200 active:scale-95"
                 >
-                  SELESAI MENINJAU
+                  {t("audit.doneReviewing")}
                 </button>
               </div>
             </motion.div>

@@ -11,6 +11,7 @@
  * tampilan dan interaksi. Berkasnya sendiri dibaca oleh `handleProcessImportFile`
  * di container, karena ia perlu menulis ke state hasil parse.
  */
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Upload, X } from "lucide-react";
 import { cn } from "../../../lib/utils";
@@ -53,6 +54,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
   handleApplyImportMerge,
   handleApplyImportReplace,
 }) => {
+  const { t } = useTranslation();
   if (!isImportModalOpen) return null;
 
   return (
@@ -64,7 +66,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             <div className="w-8 h-8 rounded-lg bg-primary-surface/10 text-primary flex items-center justify-center">
               <Upload className="w-4 h-4" />
             </div>
-            <h3 className="font-medium text-sm text-content">Integrasi & Impor File Alur Kerja</h3>
+            <h3 className="font-medium text-sm text-content">{t("importDiagram.title")}</h3>
           </div>
           <button
             onClick={() => {
@@ -99,7 +101,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                 Draw.io / XML
               </div>
               <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium">
-                File .xml / .drawio
+                {t("importDiagram.drawioFile")}
               </div>
             </button>
 
@@ -122,7 +124,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                 Miro Board
               </div>
               <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium">
-                Miro .json / .csv
+                {t("importDiagram.miroFile")}
               </div>
             </button>
 
@@ -142,10 +144,10 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             >
               <span className="text-xl">🔮</span>
               <div className="text-xs sm:text-[10px] font-medium uppercase tracking-wider">
-                Format Cadangan
+                {t("importDiagram.backupFormat")}
               </div>
               <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium">
-                Bawaan File .json
+                {t("importDiagram.defaultJson")}
               </div>
             </button>
           </div>
@@ -154,23 +156,24 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
           <div className="bg-surface-sunken p-3 rounded-xl border border-border-subtle text-xs sm:text-[11px] leading-relaxed">
             {importType === "drawio" && (
               <p>
-                💡 <strong>Petunjuk Draw.io</strong>: Anda dapat mengekspor diagram dari Draw.io
-                sebagai berkas <strong>XML Terkompresi maupun Mentah (.xml / .drawio)</strong>.
-                Sistem kami secara otomatis mengonversi bentuk dasar, warna, label, serta garis
-                penghubung agar kompatibel di whiteboard.
+                💡 <strong>{t("importDiagram.drawioHint")}</strong>: Anda dapat mengekspor diagram
+                dari Draw.io sebagai berkas{" "}
+                <strong>XML Terkompresi maupun Mentah (.xml / .drawio)</strong>. Sistem kami secara
+                otomatis mengonversi bentuk dasar, warna, label, serta garis penghubung agar
+                kompatibel di whiteboard.
               </p>
             )}
             {importType === "miro" && (
               <p>
-                💡 <strong>Petunjuk Miro</strong>: Ekspor papan Miro Anda dalam format{" "}
-                <strong>JSON</strong> atau <strong>Metadata CSV</strong>. Bentuk geometri, koordinat
-                posisi, teks konten, serta panah logic (connectors) akan dipetakan secara cerdas ke
-                bentuk alur whiteboard.
+                💡 <strong>{t("importDiagram.miroHint")}</strong>: Ekspor papan Miro Anda dalam
+                format <strong>JSON</strong> atau <strong>{t("importDiagram.csvMetadata")}</strong>.
+                Bentuk geometri, koordinat posisi, teks konten, serta panah logic (connectors) akan
+                dipetakan secara cerdas ke bentuk alur whiteboard.
               </p>
             )}
             {importType === "native" && (
               <p>
-                💡 <strong>Petunjuk Format Cadangan</strong>: Unggah file backup ruang kerja
+                💡 <strong>{t("importDiagram.backupHint")}</strong>: Unggah file backup ruang kerja
                 berformat <strong>JSON</strong> yang diunduh dari aplikasi ini untuk memulihkan
                 keseluruhan kondisi kanvas (bentuk, relasi, tema, dan status).
               </p>
@@ -224,10 +227,10 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             <div className="text-center font-medium font-sans">
               {parsedImportData ? (
                 <span className="text-emerald-700 text-xs sm:text-[11px] uppercase tracking-wider font-medium block mb-1">
-                  Struktur File Berhasil Dimuat!
+                  {t("importDiagram.loaded")}
                 </span>
               ) : (
-                <span>Tarik & lepas file di sini atau klik untuk memilih file</span>
+                <span>{t("importDiagram.dragDrop")}</span>
               )}
               {parsedFilename && (
                 <span className="text-xs sm:text-[10px] text-content-secondary font-mono block mt-2 bg-surface-muted p-1 px-2.5 rounded-lg border border-border-subtle inline-block">
@@ -299,7 +302,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             }}
             className="p-2 px-4 rounded-xl bg-surface-strong/80 hover:bg-surface-marker font-medium border border-border-subtle text-content-secondary hover:text-content-strong transition-all text-xs sm:text-[11px] active:scale-95"
           >
-            Tutup
+            {t("importDiagram.close")}
           </button>
 
           {parsedImportData ? (
@@ -321,7 +324,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             </div>
           ) : (
             <div className="text-xs sm:text-[10px] text-content-subtle italic font-medium">
-              Silakan tarik / pilih diagram di atas
+              {t("importDiagram.pickAbove")}
             </div>
           )}
         </div>

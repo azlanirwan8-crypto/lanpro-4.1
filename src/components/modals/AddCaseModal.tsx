@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus, XCircle, Upload, Download } from "lucide-react";
@@ -51,6 +52,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
   onSubmitBulk,
   onDownloadTemplate,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return (
@@ -69,10 +71,10 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
               </div>
               <div>
                 <h3 className="text-sm font-medium text-content-strong uppercase tracking-wider">
-                  Tambah Test Case Baru
+                  {t("testCase.addTitle")}
                 </h3>
                 <p className="text-xs sm:text-[11px] text-content-subtle font-medium">
-                  Input manual atau bulk upload Excel
+                  {t("testCase.addHint")}
                 </p>
               </div>
             </div>
@@ -129,21 +131,21 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 <div className="space-y-3">
                   <div className="space-y-1.5">
                     <label className="text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider block">
-                      Judul Test Case *
+                      {t("testCase.caseTitle")} *
                     </label>
                     <input
                       type="text"
                       required
                       value={caseTitle}
                       onChange={(e) => onTitleChange(e.target.value)}
-                      placeholder="Masukkan judul skenario pengujian..."
+                      placeholder={t("testCase.caseTitlePlaceholder")}
                       className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-medium"
                     />
                   </div>
 
                   <div className="space-y-1.5">
                     <label className="text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider block">
-                      Tingkat Prioritas *
+                      {t("testCase.priorityLevel")} *
                     </label>
                     <StyledDropdown
                       value={casePriority}
@@ -174,28 +176,28 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 <div className="space-y-3">
                   <div className="space-y-1.5">
                     <label className="text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider block">
-                      Langkah Pengujian *
+                      {t("testCase.testSteps")} *
                     </label>
                     <textarea
                       required
                       rows={3}
                       value={caseSteps}
                       onChange={(e) => onStepsChange(e.target.value)}
-                      placeholder="Tuliskan urutan aksi pengujian..."
+                      placeholder={t("testCase.testStepsPlaceholder")}
                       className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-medium"
                     />
                   </div>
 
                   <div className="space-y-1.5">
                     <label className="text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider block">
-                      Hasil yang Diharapkan *
+                      {t("testCase.expectedResult")} *
                     </label>
                     <textarea
                       required
                       rows={2}
                       value={caseExpected}
                       onChange={(e) => onExpectedChange(e.target.value)}
-                      placeholder="Tuliskan ekspektasi hasil akhir..."
+                      placeholder={t("testCase.expectedPlaceholder")}
                       className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-medium"
                     />
                   </div>
@@ -208,7 +210,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   onClick={onClose}
                   className="px-4 py-2 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium uppercase tracking-wider rounded-md cursor-pointer"
                 >
-                  Batal
+                  {t("testCase.cancel")}
                 </button>
                 <button
                   type="submit"
@@ -224,9 +226,9 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
               {/* Download Template Banner */}
               <div className="flex items-center justify-between bg-indigo-500/10 border border-indigo-500/30 p-3 rounded-md">
                 <div>
-                  <h4 className="text-xs font-medium text-primary">Butuh Berkas Template Excel?</h4>
+                  <h4 className="text-xs font-medium text-primary">{t("testCase.needTemplate")}</h4>
                   <p className="text-xs sm:text-[10px] text-content-muted font-medium">
-                    Unduh contoh struktur kolom resmi
+                    {t("testCase.downloadStructure")}
                   </p>
                 </div>
                 <button
@@ -235,7 +237,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   className="px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  <span>Download Template Excel</span>
+                  <span>{t("testCase.downloadTemplate")}</span>
                 </button>
               </div>
 
@@ -246,7 +248,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                     Unggah berkas Excel (.xlsx / .csv)
                   </p>
                   <p className="text-xs sm:text-[10px] text-content-subtle mt-1">
-                    Format kolom: Judul, Deskripsi_Langkah, Hasil_Ekspektasi, Prioritas
+                    {t("testCase.columnFormat")}
                   </p>
                 </div>
                 <input
@@ -270,14 +272,14 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   onClick={onClose}
                   className="px-4 py-2 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium uppercase tracking-wider rounded-md cursor-pointer"
                 >
-                  Batal
+                  {t("testCase.cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={!uploadFile}
                   className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md shadow-xs disabled:opacity-50 cursor-pointer active:scale-95"
                 >
-                  Proses Bulk Upload
+                  {t("testCase.processBulk")}
                 </button>
               </div>
             </form>

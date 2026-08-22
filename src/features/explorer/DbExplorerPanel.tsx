@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
 import { Play, Database, Table as TableIcon, HardDrive, Wifi, Code } from "lucide-react";
 import { BackupPanel } from "../backup/BackupPanel";
@@ -15,6 +16,7 @@ export const DbExplorerPanel: React.FC<any> = ({
   activityLogs,
   masterData,
 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"explorer" | "backup" | "connect">("explorer");
   const [schema, setSchema] = useState<any>(null);
   const [tableStats, setTableStats] = useState<any[]>([]);
@@ -122,7 +124,7 @@ export const DbExplorerPanel: React.FC<any> = ({
             )}
           >
             <HardDrive className="w-3.5 h-3.5" />
-            <span>Backup & Restore</span>
+            <span>{t("dbExplorer.backupRestore")}</span>
           </button>
           <button
             onClick={() => setActiveTab("connect")}
@@ -134,7 +136,7 @@ export const DbExplorerPanel: React.FC<any> = ({
             )}
           >
             <Wifi className="w-3.5 h-3.5" />
-            <span>Connection</span>
+            <span>{t("dbExplorer.connection")}</span>
           </button>
           <button
             onClick={() => setActiveTab("explorer")}
@@ -146,7 +148,7 @@ export const DbExplorerPanel: React.FC<any> = ({
             )}
           >
             <Code className="w-3.5 h-3.5" />
-            <span>DB Explorer</span>
+            <span>{t("dbExplorer.explorer")}</span>
           </button>
         </div>
       </div>
@@ -188,7 +190,7 @@ export const DbExplorerPanel: React.FC<any> = ({
             <div className="flex items-center gap-4">
               <button
                 onClick={fetchSchema}
-                title="Refresh Table Schema"
+                title={t("dbExplorer.refreshSchemaTip")}
                 className="p-1 hover:bg-black/5 rounded transition-all text-content-secondary hover:text-content flex items-center gap-1 text-xs font-medium cursor-pointer"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -199,7 +201,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 4.75L18 8"
                   />
                 </svg>
-                Refresh Schema
+                {t("dbExplorer.refreshSchema")}
               </button>
             </div>
           </div>
@@ -208,7 +210,7 @@ export const DbExplorerPanel: React.FC<any> = ({
             {/* Sidebar: Table List */}
             <div className="w-[240px] bg-surface-sunken/50 border-r border-border-subtle/80 flex flex-col overflow-y-auto shrink-0 custom-scrollbar">
               <div className="px-3.5 py-2.5 text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider sticky top-0 bg-surface-sunken border-b border-border-subtle/80 flex justify-between items-center z-10">
-                Tables
+                {t("dbExplorer.tables")}
               </div>
               <div className="p-2 flex flex-col gap-1">
                 {schema &&
@@ -234,7 +236,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                   })}
                 {!schema && (
                   <div className="text-xs text-content-subtle px-3 py-2 font-medium">
-                    Loading tables...
+                    {t("dbExplorer.loadingTables")}
                   </div>
                 )}
               </div>
@@ -248,7 +250,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                   <textarea
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="SELECT * FROM Users;"
+                    placeholder={t("dbExplorer.queryPlaceholder")}
                     className="w-full text-content-strong bg-surface border border-border-subtle rounded-md p-3 font-mono text-xs min-h-[90px] focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none resize-y"
                   />
                   <button
@@ -257,7 +259,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                     className="absolute bottom-3 right-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse h-8 px-3.5 rounded-md shadow-2xs font-medium text-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
                   >
                     <Play className="w-3.5 h-3.5" />
-                    <span>Run Query</span>
+                    <span>{t("dbExplorer.runQuery")}</span>
                   </button>
                 </div>
               </div>
@@ -267,14 +269,14 @@ export const DbExplorerPanel: React.FC<any> = ({
                 {!loading && !result && !error && (
                   <div className="h-full flex flex-col items-center justify-center text-content-subtle">
                     <Database className="w-12 h-12 mb-4 opacity-20" />
-                    <p>Select a table or run a query to view data.</p>
+                    <p>{t("dbExplorer.pickTable")}</p>
                   </div>
                 )}
 
                 {loading && (
                   <div className="flex items-center gap-3 text-content-muted mt-4 ml-4">
                     <div className="w-4 h-4 rounded-full border-2 border-indigo-600 top-border-transparent animate-spin" />
-                    Executing query...
+                    {t("dbExplorer.executing")}
                   </div>
                 )}
 
@@ -327,7 +329,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                         ) : (
                           <tr>
                             <td className="p-8 text-center text-content-subtle">
-                              Tidak ada data ditemukan
+                              {t("dbExplorer.noData")}
                             </td>
                           </tr>
                         )}
