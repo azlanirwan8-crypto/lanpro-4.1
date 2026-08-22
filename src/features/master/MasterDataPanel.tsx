@@ -281,6 +281,11 @@ export const MasterDataPanel = ({
     surrounding: "Surrounding",
     jenis_dokumen: "Jenis Dokumen",
     modul_aplikasi: "Modul / Aplikasi",
+    sprint_status: "Sprint Status",
+    qa_phase: "QA Phase",
+    qa_status: "QA Status",
+    project_risk: "Project Risk",
+    resolution: "Resolution",
   };
 
   const URUTAN_TIPE = Object.keys(LABEL_TIPE);

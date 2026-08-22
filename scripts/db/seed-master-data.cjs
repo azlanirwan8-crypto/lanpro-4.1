@@ -163,6 +163,74 @@ const METHODOLOGY = [
 ];
 
 /**
+ * sprint_status — TIPE BARU (item #140).
+ *
+ * PERHATIAN pada huruf besar-kecil. `Sprints.status` menyimpan `planned`,
+ * `active`, dan `completed` HURUF KECIL. Labelnya ditulis persis seperti itu,
+ * bukan dikapitalisasi, karena aturan 1 di atas: label yang sedang dipakai
+ * data hidup tidak diubah. Mengubahnya menjadi `Planned` akan membuat setiap
+ * sprint kehilangan statusnya.
+ */
+const SPRINT_STATUS = [
+  { slug: "sprint-planned", code: "planned", label: "planned", order: 1, color: "#8B5CF6", icon: "CalendarClock", description: "Sudah dijadwalkan, belum dimulai." },
+  { slug: "sprint-active", code: "active", label: "active", order: 2, color: "#10B981", icon: "PlayCircle", description: "Sedang berjalan." },
+  { slug: "sprint-completed", code: "completed", label: "completed", order: 3, color: "#3B82F6", icon: "CheckCircle2", description: "Sudah ditutup." },
+];
+
+/**
+ * qa_phase — TIPE BARU (item #140).
+ *
+ * SIT/UAT/PTR ditulis keras di DUA tempat (AddSuiteModal dan QASuiteSidebar),
+ * jadi menambah fase baru selama ini menuntut penyuntingan keduanya sekaligus.
+ * `QATestSuites.phase` dan `QATestCases.tipeTesting` sama-sama menyimpan `SIT`.
+ */
+const QA_PHASE = [
+  { slug: "qa-sit", code: "sit", label: "SIT", order: 1, color: "#3B82F6", icon: "Cpu", description: "System Integration Test — antar modul dan antar sistem." },
+  { slug: "qa-uat", code: "uat", label: "UAT", order: 2, color: "#10B981", icon: "CheckCircle2", description: "User Acceptance Test — penerimaan oleh pengguna." },
+  { slug: "qa-ptr", code: "ptr", label: "PTR", order: 3, color: "#F59E0B", icon: "ShieldCheck", description: "Production Readiness Test — kesiapan rilis." },
+];
+
+/**
+ * qa_status — TIPE BARU (item #140).
+ * `QATestCases.status` menyimpan `Pending`; labelnya dipertahankan persis.
+ */
+const QA_STATUS = [
+  { slug: "qa-pending", code: "pending", label: "Pending", order: 1, color: "#94A3B8", icon: "Clock", description: "Belum dijalankan." },
+  { slug: "qa-passed", code: "passed", label: "Passed", order: 2, color: "#10B981", icon: "CheckCircle2", description: "Hasil sesuai yang diharapkan." },
+  { slug: "qa-failed", code: "failed", label: "Failed", order: 3, color: "#EF4444", icon: "XCircle", description: "Hasil tidak sesuai; perlu perbaikan." },
+  { slug: "qa-blocked", code: "blocked", label: "Blocked", order: 4, color: "#F59E0B", icon: "AlertOctagon", description: "Tidak dapat dijalankan karena ada penghalang." },
+  { slug: "qa-retest", code: "retest", label: "Retest", order: 5, color: "#6366F1", icon: "RotateCcw", description: "Menunggu pengujian ulang setelah perbaikan." },
+];
+
+/**
+ * project_risk — TIPE BARU (item #140).
+ * `Tasks.projectRisk` menyimpan `Low`; labelnya dipertahankan persis.
+ */
+const PROJECT_RISK = [
+  { slug: "risk-low", code: "low", label: "Low", order: 1, color: "#10B981", icon: "ShieldCheck", description: "Dampak kecil bila meleset." },
+  { slug: "risk-medium", code: "medium", label: "Medium", order: 2, color: "#F59E0B", icon: "ShieldAlert", description: "Perlu diawasi; dampak menengah." },
+  { slug: "risk-high", code: "high", label: "High", order: 3, color: "#EF4444", icon: "ShieldX", description: "Dampak besar; perlu rencana mitigasi." },
+];
+
+/**
+ * resolution — TIPE BARU (item #139).
+ *
+ * `IssueTableRow` sudah menyaring MasterData bertipe `resolution`, tetapi
+ * tabelnya tidak punya satu pun baris bertipe itu — dropdown tampil kosong.
+ *
+ * CATATAN PENTING: mengisi master ini TIDAK membuat nilainya bisa disimpan.
+ * Tabel `Tasks` belum punya kolom `resolution`, dan rute update tugas hanya
+ * mengizinkan 15 field yang tidak memuatnya. Lihat item #139.
+ */
+const RESOLUTION = [
+  { slug: "res-done", code: "done", label: "Done", order: 1, color: "#10B981", icon: "CheckCircle2", description: "Dikerjakan dan selesai." },
+  { slug: "res-wontdo", code: "wont_do", label: "Won't Do", order: 2, color: "#64748B", icon: "MinusCircle", description: "Diputuskan tidak dikerjakan." },
+  { slug: "res-duplicate", code: "duplicate", label: "Duplicate", order: 3, color: "#8B5CF6", icon: "Copy", description: "Sudah tercakup isu lain." },
+  { slug: "res-cannot-reproduce", code: "cannot_reproduce", label: "Cannot Reproduce", order: 4, color: "#F59E0B", icon: "SearchX", description: "Gejalanya tidak dapat dimunculkan kembali." },
+  { slug: "res-incomplete", code: "incomplete", label: "Incomplete", order: 5, color: "#94A3B8", icon: "FileQuestion", description: "Keterangan tidak cukup untuk ditindaklanjuti." },
+];
+
+/**
  * category — area teknis murni (item #85).
  *
  * Entri yang menduplikasi `issue_type` (Bug/Enhancement/New Feature/
@@ -305,6 +373,11 @@ const KODE_SAJA = {
     await semai(JENIS_DOKUMEN, "jenis_dokumen");
     await semai(PROJECT_STATUS, "project_status");
     await semai(METHODOLOGY, "methodology");
+    await semai(SPRINT_STATUS, "sprint_status");
+    await semai(QA_PHASE, "qa_phase");
+    await semai(QA_STATUS, "qa_status");
+    await semai(PROJECT_RISK, "project_risk");
+    await semai(RESOLUTION, "resolution");
     await semai(CATEGORY, "category");
 
     // ── MIGRASI category #85 ───────────────────────────────────────────────
