@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { X, Grid, Check } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
@@ -19,6 +20,7 @@ export const ConfigureColumnsModal: React.FC<ConfigureColumnsModalProps> = ({
   setIssueTableColumns,
   handleReorderColumns,
 }) => {
+  const { t } = useTranslation();
   if (!isOpen) return null;
 
   return (
@@ -95,7 +97,7 @@ export const ConfigureColumnsModal: React.FC<ConfigureColumnsModalProps> = ({
                                     )}
                                   </div>
                                   <span className="text-xs font-medium text-content-strong">
-                                    {col.label}
+                                    {t(col.label)}
                                   </span>
                                 </label>
                               </div>

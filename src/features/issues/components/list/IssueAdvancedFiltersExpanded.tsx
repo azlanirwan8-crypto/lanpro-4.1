@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion } from "motion/react";
 import { X } from "lucide-react";
@@ -70,6 +71,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
   allReleases,
   allResolutions,
 }) => {
+  const { t } = useTranslation();
   const mArr = masterData || [];
 
   return (
@@ -86,14 +88,14 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
           {/* Status Filter */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
-              Status
+              {t("filters.status")}
             </label>
             <select
               value={listFilterStatus}
               onChange={(e) => setListFilterStatus(e.target.value)}
               className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
             >
-              <option value="All">All Statuses</option>
+              <option value="All">{t("filters.allStatuses")}</option>
               {mArr
                 .filter((m) => m.type === "status")
                 .map((m, idx) => (
@@ -107,7 +109,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
           {/* Priority Filter */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
-              Priority
+              {t("filters.priority")}
             </label>
             <select
               value={listFilterPriority}
@@ -128,14 +130,14 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
           {/* Sprint Filter */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
-              Sprint
+              {t("filters.sprint")}
             </label>
             <select
               value={listFilterSprint}
               onChange={(e) => setListFilterSprint(e.target.value)}
               className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
             >
-              <option value="All">All Sprints</option>
+              <option value="All">{t("filters.allSprints")}</option>
               <option value="Backlog">Backlog</option>
               {sprints?.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -155,7 +157,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               onChange={(e) => setListFilterLabel(e.target.value)}
               className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
             >
-              <option value="All">All Labels</option>
+              <option value="All">{t("filters.allLabels")}</option>
               {allLabels.map((l) => (
                 <option key={l} value={l}>
                   {l}
@@ -177,7 +179,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               onChange={(e) => setListFilterCategory(e.target.value)}
               className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
             >
-              <option value="All">All Categories</option>
+              <option value="All">{t("filters.allCategories")}</option>
               {mArr
                 .filter((m) => m.type === "category")
                 .map((m) => (
@@ -198,7 +200,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               onChange={(e) => setListFilterEnvironment(e.target.value)}
               className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
             >
-              <option value="All">All Environments</option>
+              <option value="All">{t("filters.allEnvironments")}</option>
               {allEnvironments.map((env) => (
                 <option key={env} value={env}>
                   {env}
@@ -210,14 +212,14 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
           {/* Project Risk Filter */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
-              Project Risk (Custom)
+              {t("filters.projectRisk")}
             </label>
             <select
               value={listFilterProjectRisk}
               onChange={(e) => setListFilterProjectRisk(e.target.value)}
               className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
             >
-              <option value="All">All Risks</option>
+              <option value="All">{t("filters.allRisks")}</option>
               {allProjectRisks.map((risk) => (
                 <option key={risk} value={risk}>
                   {risk}
@@ -236,7 +238,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               onChange={(e) => setListFilterRelease(e.target.value)}
               className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
             >
-              <option value="All">All Releases</option>
+              <option value="All">{t("filters.allReleases")}</option>
               {allReleases.map((rel) => (
                 <option key={rel} value={rel}>
                   {rel}
@@ -255,7 +257,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               onChange={(e) => setListFilterResolution(e.target.value)}
               className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
             >
-              <option value="All">All Resolutions</option>
+              <option value="All">{t("filters.allResolutions")}</option>
               {allResolutions.map((res) => (
                 <option key={res} value={res}>
                   {res}
@@ -270,25 +272,25 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
           {/* Date Column Selector */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
-              Date Range Type
+              {t("filters.dateRangeType")}
             </label>
             <select
               value={listFilterDateType}
               onChange={(e) => setListFilterDateType(e.target.value)}
               className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none text-left"
             >
-              <option value="dueDate">Due Date</option>
-              <option value="startDate">Start Date</option>
-              <option value="endDate">End Date</option>
-              <option value="createdAt">Created Date</option>
-              <option value="any">Any of the Above</option>
+              <option value="dueDate">{t("filters.dueDate")}</option>
+              <option value="startDate">{t("filters.startDate")}</option>
+              <option value="endDate">{t("filters.endDate")}</option>
+              <option value="createdAt">{t("filters.createdDate")}</option>
+              <option value="any">{t("filters.anyOfAbove")}</option>
             </select>
           </div>
 
           {/* Start Date */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
-              From Date
+              {t("filters.fromDate")}
             </label>
             <input
               type="date"
@@ -302,7 +304,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
           <div className="flex items-center gap-3">
             <div className="flex flex-col gap-1.5 flex-1 font-sans">
               <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
-                To Date
+                {t("filters.toDate")}
               </label>
               <input
                 type="date"
@@ -328,7 +330,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
                 setListFilterEndDate("");
               }}
               className="px-4 h-[34px] bg-surface-muted hover:bg-surface-strong text-content-secondary rounded-xl text-xs font-medium transition-all shrink-0 flex items-center justify-center gap-1.5 select-none"
-              title="Clear all fields"
+              title={t("filters.clearAllFields")}
             >
               <X className="w-3.5 h-3.5" />
               Reset

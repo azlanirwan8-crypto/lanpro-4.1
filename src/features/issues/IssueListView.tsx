@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, List } from "lucide-react";
@@ -17,6 +18,7 @@ import { IssueQuickCreateBar } from "./components/list/IssueQuickCreateBar";
 import { IssueBulkActionsBar } from "./components/list/IssueBulkActionsBar";
 
 export const IssueListView: React.FC<IssueListViewProps> = (props) => {
+  const { t } = useTranslation();
   const { density, setCurrentView } = useAppStore();
   const isCompact = density === "compact";
   const {
@@ -308,9 +310,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                     >
                       <thead>
                         <tr className={styles.tableHeader}>
-                          {canReorder && (
-                            <th className="w-8 px-1 text-center bg-surface-sunken" />
-                          )}
+                          {canReorder && <th className="w-8 px-1 text-center bg-surface-sunken" />}
                           <th className={cn("w-12 px-4", isCompact ? "py-1" : "py-2.5")}>
                             <div className="flex justify-center">
                               <input
@@ -336,7 +336,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                 style={{ width: col.width }}
                               >
                                 <div className="flex items-center justify-between">
-                                  <span>{col.label}</span>
+                                  <span>{t(col.label)}</span>
                                 </div>
                                 <div className="absolute right-0 top-1/4 bottom-1/4 w-px bg-surface-strong" />
                               </th>

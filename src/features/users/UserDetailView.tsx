@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { safeLocalStorage } from "../../lib/safeStorage";
 import React, { useState, useEffect } from "react";
 import { UserProfile, Project, Task, AppRole, UserPermissions } from "../../types";
@@ -144,6 +145,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   onUserUpdated,
   currentUser,
 }) => {
+  const { t } = useTranslation();
   const effectiveCurrentUser =
     currentUser ||
     (() => {
@@ -529,7 +531,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
             ) : (
               <Save className="w-3.5 h-3.5" />
             )}
-            <span>Simpan Perubahan User</span>
+            <span>{t("userDetail.saveUserChanges")}</span>
           </button>
         </div>
 
@@ -729,16 +731,16 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       {/* Account Status */}
                       <div className="space-y-1">
                         <label className="text-xs font-medium text-content-body ">
-                          Account Status
+                          {t("userDetail.accountStatus")}
                         </label>
                         <select
                           value={editStatus}
                           onChange={(e) => setEditStatus(e.target.value as any)}
                           className="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-indigo-500 transition-all cursor-pointer"
                         >
-                          <option value="approved">Active / Approved</option>
-                          <option value="pending">Waiting for Approval</option>
-                          <option value="rejected">Suspended / Rejected</option>
+                          <option value="approved">{t("userDetail.activeApproved")}</option>
+                          <option value="pending">{t("userDetail.waitingApproval")}</option>
+                          <option value="rejected">{t("userDetail.suspendedRejected")}</option>
                         </select>
                       </div>
 
@@ -753,7 +755,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             onChange={(e) => setEditDepartment(e.target.value)}
                             className="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-indigo-500 transition-all cursor-pointer"
                           >
-                            <option value="">Select Department</option>
+                            <option value="">{t("userDetail.selectDepartment")}</option>
                             {(departments.length > 0
                               ? departments
                               : masterData.filter((d) => d.type === "department")
@@ -772,7 +774,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             onChange={(e) => setEditPosition(e.target.value)}
                             className="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-indigo-500 transition-all cursor-pointer"
                           >
-                            <option value="">Select Position</option>
+                            <option value="">{t("userDetail.selectPosition")}</option>
                             {(positions.length > 0
                               ? positions
                               : masterData.filter(
@@ -791,7 +793,9 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                   {/* Full Name & Email */}
                   <div className="space-y-1">
-                    <label className="text-xs font-medium text-content-body ">Full Name</label>
+                    <label className="text-xs font-medium text-content-body ">
+                      {t("userDetail.fullName")}
+                    </label>
                     <input
                       value={editFullName}
                       onChange={(e) => setEditFullName(e.target.value)}
@@ -828,7 +832,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="space-y-1 pt-1 border-t border-border-faint ">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-medium text-content-body ">
-                        Update Password
+                        {t("userDetail.updatePassword")}
                       </label>
                       <button
                         type="button"
@@ -855,7 +859,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="flex items-center justify-between border-b border-border-subtle pb-2.5">
                     <div>
                       <h4 className="font-medium text-content-strong text-xs uppercase tracking-wider">
-                        Active System Permissions & Overrides
+                        {t("userDetail.activePermissions")}
                       </h4>
                       <p className="text-xs sm:text-[11px] text-content-muted font-normal mt-0.5">
                         Konfigurasi hak akses modul spesifik untuk akun pengguna ini.
@@ -865,9 +869,9 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       type="button"
                       onClick={handleResetToRoleDefaults}
                       className="px-2.5 py-1 text-xs sm:text-[11px] bg-surface-muted hover:bg-surface-strong text-content-body rounded-md font-medium transition flex items-center gap-1 shrink-0"
-                      title="Reset to role default permissions"
+                      title={t("userDetail.resetRoleDefaultHint")}
                     >
-                      <RotateCcw className="w-3 h-3" /> Reset Role Default
+                      <RotateCcw className="w-3 h-3" /> {t("userDetail.resetRoleDefault")}
                     </button>
                   </div>
 
@@ -976,7 +980,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   </div>
                   <div>
                     <span className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase tracking-wider block">
-                      Total Proyek Terkait
+                      {t("userDetail.totalRelatedProjects")}
                     </span>
                     <span className="text-base font-medium text-content-strong leading-none">
                       {userProjectsList.length} Proyek
@@ -1077,7 +1081,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   ) && (
                     <div className="pt-2 space-y-1.5 border-t border-indigo-500/30 ">
                       <label className="text-xs sm:text-[11px] font-medium text-indigo-950 uppercase tracking-wider block">
-                        Pilih Sub-Tim / PIC Bawahan (Tim di bawah Project Admin ini):
+                        {t("userDetail.selectSubTeam")}
                       </label>
                       <div className="max-h-36 overflow-y-auto bg-surface border border-border-subtle rounded-md p-2 space-y-1 custom-scrollbar">
                         {availableUsers
@@ -1196,7 +1200,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                   type="button"
                                   onClick={() => handleRemoveFromProject(p.id)}
                                   className="p-1 text-content-subtle hover:text-rose-500 hover:bg-rose-500/10 rounded-md transition-colors"
-                                  title="Keluarkan dari project"
+                                  title={t("userDetail.removeFromProject")}
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
