@@ -29,11 +29,11 @@
     [183, "teks", "PostgreSQL (Neon Cloud)"],
     [318, "teks", "null"]
   ],
-  "src\\features\\flowchart\\components\\ImportDiagramModal.tsx": [[169, "teks", "atau"]],
+  "src\\features\\flowchart\\components\\ImportDiagramModal.tsx": [[168, "teks", "atau"]],
   "src\\features\\flowchart\\FlowchartContainer.tsx": [
-    [76, "teks", "Promise"],
-    [2171, "teks", "canvasLeft && n.x"],
-    [2171, "teks", "canvasTop && n.y"]
+    [77, "teks", "Promise"],
+    [2189, "teks", "canvasLeft && n.x"],
+    [2189, "teks", "canvasTop && n.y"]
   ],
   "src\\features\\flowchart\\lib\\routing.ts": [
     [18, "teks", "= Math.min(p.x, r.x) && q.x"],
@@ -70,10 +70,10 @@
   "src\\features\\issues\\TaskDetailModal.tsx": [[86, "teks", "Promise"]],
   "src\\features\\issues\\types.ts": [[50, "teks", "void | Promise"]],
   "src\\features\\master\\MasterDataPanel.tsx": [
-    [927, "aria-label", "lock"],
-    [1117, "teks", "Epic"],
-    [1118, "teks", "Standard"],
-    [1119, "teks", "Subtask"]
+    [932, "aria-label", "lock"],
+    [1122, "teks", "Epic"],
+    [1123, "teks", "Standard"],
+    [1124, "teks", "Subtask"]
   ],
   "src\\features\\meeting-notes\\AiMeetingCompanion.tsx": [
     [1012, "teks", "\"Simpan & Mulai Analisis Ulang\""],
@@ -95,7 +95,7 @@
     [20, "teks", "Promise"],
     [464, "teks", "= 0 && todayLeft"]
   ],
-  "src\\features\\users\\UserDetailView.tsx": [[887, "teks", "Administrator"]],
+  "src\\features\\users\\UserDetailView.tsx": [[886, "teks", "Administrator"]],
   "src\\hooks\\useAuth.ts": [
     [41, "teks", "Promise"],
     [48, "teks", "Promise"],
@@ -103,7 +103,7 @@
     [65, "teks", "Promise"]
   ],
   "src\\hooks\\useFlowchartHistory.ts": [[104, "teks", "historyIndex"]],
-  "src\\lib\\db.ts": [[300, "teks", "(sql: string, values?: any[]): Promise"]],
+  "src\\lib\\db.ts": [[428, "teks", "(sql: string, values?: any[]): Promise"]],
   "src\\routes\\AppRoutes.tsx": [
     [26, "teks", "Promise"],
     [137, "teks", "void | Promise"],

@@ -503,10 +503,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             `Berhasil memuat file "${file.name}"! Ditemukan ${result.nodes.length} bentuk & ${result.edges.length} garis.`
           );
         } else {
-          toast.error("Tidak ditemukan bentuk atau garis alur di dalam file ini.");
+          toast.error(t("toast.noShapesInFile"));
         }
       } catch (err: any) {
-        toast.error(`Gagal membaca file: ${err.message || err}`);
+        toast.error(t("toast.fileReadFailed", { pesan: err.message || err }));
         console.error(err);
       }
     };
@@ -538,7 +538,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setSelectedEdgeId(null);
     setIsImportModalOpen(false);
     setParsedImportData(null);
-    toast.success("Berhasil menggantikan kanvas dengan alur kerja yang diimpor! 🎉");
+    toast.success(t("toast.canvasReplaced"));
   };
 
   const handleApplyImportMerge = () => {
@@ -578,7 +578,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
     setIsImportModalOpen(false);
     setParsedImportData(null);
-    toast.success("Berhasil menggabungkan diagram yang diimpor ke dalam kanvas Anda! 🚀");
+    toast.success(t("toast.canvasMerged"));
   };
 
   // Wrapper handlers for undo/redo that apply to state
@@ -601,7 +601,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   // Auto layout mathematical alignment helper
   const handleAutoAlignNodes = () => {
     if (nodes.length === 0) {
-      toast.error("Kanvas kosong, tidak ada bentuk untuk dirapikan.");
+      toast.error(t("toast.canvasEmptyTidy"));
       return;
     }
 
@@ -679,13 +679,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
     setNodes(alignedNodes);
     recordHistory(alignedNodes, edges);
-    toast.success("Auto-Layout Sukses! Diagram alur Anda berhasil dirapikan secara otomatis ✨");
+    toast.success(t("toast.autoLayoutOk"));
   };
 
   // Sequential Live Flow Simulator Trace
   const handleSimulateFlow = async () => {
     if (nodes.length === 0) {
-      toast.error("Kanvas kosong, tidak ada alur yang bisa disimulasikan.");
+      toast.error(t("toast.canvasEmptySim"));
       return;
     }
 
@@ -693,13 +693,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       simCancelRef.current = true;
       setIsSimulating(false);
       setActiveSimNodeId(null);
-      toast.info("Simulasi Alur Kerja Dihentikan.");
+      toast.info(t("toast.simStopped"));
       return;
     }
 
     simCancelRef.current = false;
     setIsSimulating(true);
-    toast.success("Memulai Simulasi Langkah Hubungan Alur Kerja...", {
+    toast.success(t("toast.simStarting"), {
       description: "Sistem menelusuri alur kerja dari titik awal hingga akhir.",
     });
 
@@ -740,7 +740,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setActiveSimNodeId(null);
     setIsSimulating(false);
     if (!simCancelRef.current) {
-      toast.success("Simulasi Alur Kerja Selesai!");
+      toast.success(t("toast.simDone"));
     }
   };
 
@@ -769,14 +769,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
-    toast.success("JSON Workspace Berhasil Diunduh!");
+    toast.success(t("toast.jsonDownloaded"));
   };
 
   // Download JPG Snapshot
   const handleExportJPG = async () => {
     if (!canvasContainerRef.current) return;
     try {
-      toast.info("Menyiapkan gambar...");
+      toast.info(t("toast.preparingImage"));
       const dataUrl = await toJpeg(canvasContainerRef.current, {
         backgroundColor: "#f4f7f9",
         quality: 0.95,
@@ -785,10 +785,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       link.download = `${currentFlowMetadata?.name || "flow_workspace"}.jpg`;
       link.href = dataUrl;
       link.click();
-      toast.success("Gambar JPG Berhasil Diunduh!");
+      toast.success(t("toast.jpgDownloaded"));
     } catch (err) {
       console.error(err);
-      toast.error("Gagal mendownload gambar.");
+      toast.error(t("toast.imageDownloadFailed"));
     }
   };
 
@@ -820,12 +820,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           setSelectedNodeId(null);
           setSelectedEdgeId(null);
 
-          toast.success("Workspace Diagram Berhasil Di-import! 🎉");
+          toast.success(t("toast.workspaceImported"));
         } else {
-          toast.error("Format JSON tidak valid untuk Diagram Flowchart.");
+          toast.error(t("toast.jsonInvalid"));
         }
       } catch (err) {
-        toast.error("Gagal membaca file JSON!");
+        toast.error(t("toast.jsonReadFailed"));
         console.error(err);
       }
     };
@@ -836,7 +836,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   // Clear entire whiteboard canvas with confirmation
   const handleClearWhiteboard = async () => {
     if (nodes.length === 0 && edges.length === 0) {
-      toast.info("Kanvas sudah kosong.");
+      toast.info(t("toast.canvasAlreadyEmpty"));
       return;
     }
 
@@ -947,7 +947,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
         e.preventDefault();
         setCopiedNodes(nodes);
-        toast.info(nodes.length + " objek diblok siap disalin (Tekan Ctrl+C lalu Ctrl+V).");
+        toast.info(t("toast.nodesSelectedCopy", { count: nodes.length }));
       }
 
       // Add: Ctrl+C / Cmd+C - Copy
@@ -957,7 +957,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           const nodeToCopy = nodes.find((n) => n.id === selectedNodeId);
           if (nodeToCopy) {
             setCopiedNodes([nodeToCopy]);
-            toast.success("Objek disalin!");
+            toast.success(t("toast.objectCopied"));
           }
         } else if (copiedNodes.length > 0) {
           e.preventDefault();
@@ -1179,13 +1179,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       const fileExtension = file.name.split(".").pop()?.toLowerCase();
 
       if (!fileExtension || !allowedExtensions.includes(fileExtension)) {
-        toast.error("Format dokumen tidak sesuai! Harap unggah format Excel, Word, atau PDF.");
+        toast.error(t("toast.docFormatInvalid"));
         return;
       }
 
       // Validasi max 5MB
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("Ukuran dokumen tidak boleh melebihi 5 MB");
+        toast.error(t("toast.docTooLarge"));
         return;
       }
       setUploadDocFile(file);
@@ -1203,12 +1203,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
   const handleSaveDocument = () => {
     if (!uploadDocName.trim() || !uploadDocFile || !uploadDocBase64) {
-      toast.error("Nama dokumen dan file dokumen wajib diisi!");
+      toast.error(t("toast.docNameFileRequired"));
       return;
     }
 
     if (!selectedFlowId) {
-      toast.error("Pilih flowchart terlebih dahulu!");
+      toast.error(t("toast.pickFlowchartFirst"));
       return;
     }
 
@@ -1244,7 +1244,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       return updatedList;
     });
 
-    toast.success("Dokumen berhasil diunggah!");
+    toast.success(t("toast.docUploaded"));
     closeUploadDocumentModal();
   };
 
@@ -1301,7 +1301,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         }
       }
 
-      toast.success("Berhasil menyimpan seluruh skema alur flowchart Anda!");
+      toast.success(t("toast.schemaSaved"));
     }
   };
 
@@ -1346,7 +1346,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const handleModalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!flowName.trim()) {
-      toast.error("Nama flowchart wajib diisi.");
+      toast.error(t("toast.flowNameRequired"));
       return;
     }
 
@@ -1395,7 +1395,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setCurrentPage(1);
       setSearchQuery("");
       setIsModalOpen(false);
-      toast.success(`Berhasil membuat flowchart: ${flowName}`);
+      toast.success(t("toast.flowCreated", { nama: flowName }));
 
       // Async sync with backend API
       if (selectedProject?.id) {
@@ -1425,7 +1425,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
       setFlowcharts(updated);
       safeLocalStorage.setItem(listKey, JSON.stringify(updated));
-      toast.success("Dokumentasi berhasil diperbarui!");
+      toast.success(t("toast.docUpdated"));
       setIsModalOpen(false);
 
       if (selectedProject?.id && editingFlowId && !editingFlowId.startsWith("flow_")) {
@@ -1934,7 +1934,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setSelectedNodeId(id);
     setSelectedEdgeId(null);
     setIsShapeDropdownOpen(false);
-    toast.success(`Ditambahkan: ${type === "sticky" ? "Miro Sticky Note" : type.toUpperCase()}`);
+    toast.success(
+      t("toast.shapeAdded", { nama: type === "sticky" ? "Miro Sticky Note" : type.toUpperCase() })
+    );
   };
 
   const handleAddNewNodeAtPosition = (
@@ -2018,7 +2020,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     recordHistory(nextNodes, edges);
     setSelectedNodeId(id);
     setSelectedEdgeId(null);
-    toast.success(`Ditambahkan: ${label}`);
+    toast.success(t("toast.shapeAdded", { nama: label }));
   };
 
   // Node Drags & Canvas Window Pans
@@ -2128,7 +2130,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setNodes(nextNodes);
     setSelectedNodeId(newNodeId);
     recordHistory(nextNodes, edges);
-    toast.success("Catatan Miro-style ditambahkan via klik ganda! 💡");
+    toast.success(t("toast.miroNoteAdded"));
   };
 
   const handleResizeMouseDown = (
@@ -2290,7 +2292,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const handleCanvasMouseUp = () => {
     if (marqueeBox && canvasContainerRef.current) {
       if (copiedNodes.length > 0) {
-        toast.info(`${copiedNodes.length} objek diblok (siap digeser/disalin/dihapus).`);
+        toast.info(t("toast.nodesSelected", { count: copiedNodes.length }));
       }
       setMarqueeBox(null);
     }
@@ -2317,10 +2319,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const handleConnectClick = (nodeId: string) => {
     if (!connectSourceId) {
       setConnectSourceId(nodeId);
-      toast.info("Pilih bentuk TUJUAN untuk menyambung alur.");
+      toast.info(t("toast.pickTargetShape"));
     } else {
       if (connectSourceId === nodeId) {
-        toast.error("Tidak dapat menghubungkan bentuk ke dirinya sendiri.");
+        toast.error(t("toast.connectSelf"));
         setConnectSourceId(null);
         return;
       }
@@ -2329,13 +2331,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         (edge) => edge.fromNodeId === connectSourceId && edge.toNodeId === nodeId
       );
       if (relationExists) {
-        toast.info("Hubungan sudah ada.");
+        toast.info(t("toast.connectionExists"));
       } else {
         const id = "edge_" + Date.now();
         const nextEdges = [...edges, { id, fromNodeId: connectSourceId, toNodeId: nodeId }];
         setEdges(nextEdges);
         recordHistory(nodes, nextEdges);
-        toast.success("Anak panah alur berhasil ditambahkan!");
+        toast.success(t("toast.arrowAdded"));
       }
 
       setConnectSourceId(null);
@@ -2354,7 +2356,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setEdges(updatedEdges);
       recordHistory(updatedNodes, updatedEdges);
       setSelectedNodeId(null);
-      toast.success("Komponen berhasil dikosongkan.");
+      toast.success(t("toast.componentCleared"));
     } else if (copiedNodes.length > 0) {
       const copiedIds = copiedNodes.map((n) => n.id);
       const updatedNodes = nodes.filter((n) => !copiedIds.includes(n.id));
@@ -2365,15 +2367,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setEdges(updatedEdges);
       recordHistory(updatedNodes, updatedEdges);
       setCopiedNodes([]);
-      toast.success(`${copiedIds.length} blok komponen berhasil dihapus.`);
+      toast.success(t("toast.nodesDeleted", { count: copiedIds.length }));
     } else if (selectedEdgeId) {
       const updatedEdges = edges.filter((edge) => edge.id !== selectedEdgeId);
       setEdges(updatedEdges);
       recordHistory(nodes, updatedEdges);
       setSelectedEdgeId(null);
-      toast.success("Hubungan alur dibatalkan.");
+      toast.success(t("toast.connectionCancelled"));
     } else {
-      toast.info("Pilih bentuk atau garir alur terlebih dahulu untuk menghapusnya.");
+      toast.info(t("toast.pickShapeToDelete"));
     }
   };
 
@@ -2391,7 +2393,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setNodes(nextNodes);
     recordHistory(nextNodes, edges);
     setSelectedNodeId(id);
-    toast.success("Simbol diduplikat!");
+    toast.success(t("toast.symbolDuplicated"));
   };
 
   // Right-click context menu specific handlers
@@ -2406,7 +2408,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     if (selectedNodeId === nodeId) {
       setSelectedNodeId(null);
     }
-    toast.success("Komponen berhasil dihapus.");
+    toast.success(t("toast.componentDeleted"));
   };
 
   const handleContextMenuEditProperties = (nodeId: string) => {
@@ -2419,7 +2421,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     const updated = nodes.map((n) => (n.id === nodeId ? { ...n, color: newColor } : n));
     setNodes(updated);
     recordHistory(updated, edges);
-    toast.success(`Warna komponen berhasil diubah ke ${newColor.toUpperCase()}.`);
+    toast.success(t("toast.colorChanged", { warna: newColor.toUpperCase() }));
   };
 
   const handleContextMenuDuplicate = (nodeId: string) => {

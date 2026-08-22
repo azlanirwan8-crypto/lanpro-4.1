@@ -1,0 +1,118 @@
+{
+  "noTasksToExport": ["Tidak ada tugas untuk diexport.", "No tasks to export."],
+  "exportCsvOk": ["Tugas berhasil diekspor ke CSV", "Successfully exported tasks to CSV"],
+  "sessionEndedElsewhere": [
+    "Sesi Anda telah diakhiri karena login di perangkat/browser lain.",
+    "Your session was ended because of a sign-in on another device or browser."
+  ],
+  "syncStarting": [
+    "Memulai sinkronisasi data dengan server...",
+    "Starting data sync with the server..."
+  ],
+  "syncDone": ["Sinkronisasi data berhasil diselesaikan!", "Data sync completed successfully!"],
+  "syncFailed": ["Gagal sinkronisasi: ", "Sync failed: "],
+  "sprintCreated": ["Fase berhasil dibuat", "Sprint created successfully"],
+  "sprintUpdated": ["Fase berhasil diperbarui", "Sprint updated successfully"],
+  "sprintUpdateFailed": ["Gagal memperbarui fase: ", "Failed to update sprint: "],
+  "noPermStartSprint": [
+    "Anda tidak memiliki izin untuk memulai sprint.",
+    "You do not have permission to start a sprint."
+  ],
+  "sprintStarted": ["Fase berhasil dimulai.", "Sprint successfully started."],
+  "noPermCompleteSprint": [
+    "Anda tidak memiliki izin untuk menyelesaikan sprint.",
+    "You do not have permission to complete a sprint."
+  ],
+  "completingSprint": ["Sedang menyelesaikan fase...", "Completing sprint..."],
+  "deletingSprint": ["Sedang menghapus fase...", "Deleting sprint..."],
+  "noPermMoveTask": [
+    "Gagal: Anda tidak memiliki izin untuk memindahkan tugas ini.",
+    "Failed: You do not have permission to move this task."
+  ],
+  "noPermAction": [
+    "Gagal: Anda tidak memiliki izin untuk melakukan tindakan ini.",
+    "Failed: You do not have permission to perform this action."
+  ],
+  "tasksMoved": ["{{count}} tugas berhasil dipindahkan", "{{count}} tasks moved successfully"],
+  "sessionNotFound": ["Sesi tidak ditemukan", "Session not found"],
+  "projectCreated": ["Proyek berhasil dibuat", "Project created successfully"],
+  "noPermAddTask": [
+    "Anda tidak memiliki izin untuk menambahkan tugas baru.",
+    "You do not have permission to add a new task."
+  ],
+  "dataAdded": ["Data berhasil ditambahkan", "Data added successfully"],
+  "taskCreated": ["Tugas {{key}} berhasil dibuat", "Task {{key}} created successfully"],
+  "aiNeedTitleDesc": [
+    "Isi judul dan deskripsi dulu untuk estimasi AI.",
+    "Please provide title and description for AI estimation."
+  ],
+  "aiCalculating": ["Menghitung poin story...", "Calculating story points..."],
+  "aiSuggestion": [
+    "AI menyarankan {{points}} poin: {{reasoning}}",
+    "AI suggests {{points}} points: {{reasoning}}"
+  ],
+  "aiEstimationFailed": ["Estimasi AI gagal", "AI Estimation failed"],
+  "memberRoleUpdateFailed": ["Gagal memperbarui peran anggota: ", "Failed to update member role: "],
+  "memberRemoved": [
+    "Anggota berhasil dikeluarkan dari proyek",
+    "Member removed from project successfully"
+  ],
+  "memberRemoveFailed": ["Gagal mengeluarkan anggota: ", "Failed to remove member: "],
+  "noProjectSelected": ["Belum ada proyek yang dipilih", "No project selected"],
+  "enterEmail": ["Masukkan alamat email", "Please enter an email address"],
+  "sendingInvite": ["Mengirim undangan...", "Sending invitation..."],
+  "inviteAlreadyPending": [
+    "Undangan untuk email ini sudah menunggu.",
+    "An invitation is already pending for this email."
+  ],
+  "inviteSaved": ["Undangan untuk {{email}} tersimpan!", "Invitation saved for {{email}}!"],
+  "userAlreadyMember": ["Pengguna sudah ada di proyek ini", "User is already in the project"],
+  "memberAdded": ["{{email}} ditambahkan ke proyek!", "Added {{email}} to the project!"],
+  "inviteFailed": [
+    "Gagal mengirim undangan. Periksa izin Anda.",
+    "Failed to send invitation. Please check your permissions."
+  ],
+  "projectUpdated": ["Proyek berhasil diperbarui", "Project updated successfully"],
+  "linkAdded": ["Tautan berhasil ditambahkan", "Link added successfully"],
+  "linkAddFailed": ["Gagal menambahkan tautan", "Failed to add link"],
+  "attachmentDeleteFailed": ["Gagal menghapus lampiran: ", "Failed to delete attachment: "],
+  "attachmentsDisabled": [
+    "Lampiran berkas dinonaktifkan untuk backend MySQL.",
+    "File attachments are disabled for MySQL backend."
+  ],
+  "taskUnblocked": [
+    "Tugas {{key}} kini tidak terhalang karena {{selesai}} selesai",
+    "Task {{key}} is now unblocked by completion of {{selesai}}"
+  ],
+  "noPermEditTask": [
+    "Gagal: Anda tidak memiliki izin untuk menyunting tugas ini.",
+    "Failed: You do not have permission to edit this task."
+  ],
+  "relationNeedTask": [
+    "Gagal menambahkan relasi, pastikan sebuah tugas dipilih.",
+    "Failed to add relation, make sure a task is selected."
+  ],
+  "relationSelf": [
+    "Tidak bisa membuat relasi ke tugas ini sendiri.",
+    "Cannot create a relation to this task itself."
+  ],
+  "relationExists": ["Relasi ini sudah ada.", "This relation already exists."],
+  "linkedTaskAdded": ["Tugas terkait berhasil ditambahkan", "Linked task added successfully"],
+  "relationDeleteFailed": ["Gagal menghapus hubungan tugas: ", "Failed to delete task relation: "],
+  "statusUpdateFailed": ["Gagal memperbarui status: ", "Failed to update status: "],
+  "reorderFailed": ["Gagal mengubah urutan", "Failed to change order"],
+  "onlyOwnerDeleteProject": [
+    "Hanya pemilik proyek atau administrator workspace yang dapat menghapus proyek ini.",
+    "Only project owners or workspace administrators can delete this project."
+  ],
+  "deletingPermanently": ["Sedang menghapus secara permanen...", "Deleting permanently..."],
+  "projectDeleteFailed": ["Gagal menghapus proyek: ", "Failed to delete project: "],
+  "onlyReporterDeleteTask": [
+    "Hanya pelapor (reporter) asli yang memiliki izin untuk menghapus tugas ini.",
+    "Only the original reporter may delete this task."
+  ],
+  "deletingTask": ["Sedang menghapus tugas...", "Deleting task..."],
+  "taskDeleteFailed": ["Gagal menghapus tugas: ", "Failed to delete task: "],
+  "deletingTasks": ["Sedang menghapus {{count}} tugas...", "Deleting {{count}} tasks..."],
+  "tasksDeleteFailed": ["Gagal menghapus beberapa tugas: ", "Failed to delete some tasks: "]
+}

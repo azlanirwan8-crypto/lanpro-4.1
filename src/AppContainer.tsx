@@ -794,7 +794,7 @@ function AppContainer() {
 
   const exportTasksToCSV = () => {
     if (!selectedProject || tasks.length === 0) {
-      toast.error("Tidak ada tugas untuk diexport.");
+      toast.error(t("toast.noTasksToExport"));
       return;
     }
     const headers = [
@@ -850,7 +850,7 @@ function AppContainer() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    toast.success("Successfully exported tasks to CSV");
+    toast.success(t("toast.exportCsvOk"));
   };
 
   // Auth functions (handleManualLogin, handleRegister) are now managed by useAuth hook
@@ -1165,7 +1165,7 @@ function AppContainer() {
       }
 
       if (sidikTokenSaya !== data.sidikTokenBaru) {
-        toast.error("Sesi Anda telah diakhiri karena login di perangkat/browser lain.");
+        toast.error(t("toast.sessionEndedElsewhere"));
         handleLogout(true);
       }
     });
@@ -1496,7 +1496,7 @@ function AppContainer() {
 
   const handleSyncAll = async () => {
     setIsSyncing(true);
-    toast.info("Memulai sinkronisasi data dengan server...");
+    toast.info(t("toast.syncStarting"));
     try {
       await Promise.all([fetchProjects(), fetchMasterData(), fetchAllUsers()]);
       if (selectedProject) {
@@ -1504,9 +1504,9 @@ function AppContainer() {
       }
       setLastSyncedTime(new Date().toLocaleTimeString());
       setCacheStats(CacheManager.getStats());
-      toast.success("Sinkronisasi data berhasil diselesaikan!");
+      toast.success(t("toast.syncDone"));
     } catch (e: any) {
-      toast.error("Gagal sinkronisasi: " + (e?.message || e));
+      toast.error(t("toast.syncFailed") + (e?.message || e));
     } finally {
       setIsSyncing(false);
     }
@@ -1570,7 +1570,7 @@ function AppContainer() {
       setSelectedSprintBacklog(new Set());
       setIsNewSprintModalOpen(false);
       fetchSprints();
-      toast.success("Sprint created successfully");
+      toast.success(t("toast.sprintCreated"));
     } catch (e: any) {
       console.error(e);
       toast.error(e.message || "Failed to create sprint");
@@ -1607,10 +1607,10 @@ function AppContainer() {
       fetchSprints();
 
       setIsEditSprintModalOpen(false);
-      toast.success("Sprint updated successfully");
+      toast.success(t("toast.sprintUpdated"));
     } catch (e: any) {
       console.error(e);
-      toast.error("Failed to update sprint: " + (e.message || e));
+      toast.error(t("toast.sprintUpdateFailed") + (e.message || e));
     }
   };
 
@@ -1625,7 +1625,7 @@ function AppContainer() {
         currentUserProfile?.permissions
       )
     ) {
-      toast.error("Anda tidak memiliki izin untuk memulai sprint.");
+      toast.error(t("toast.noPermStartSprint"));
       return;
     }
 
@@ -1633,7 +1633,7 @@ function AppContainer() {
       const data = await updateSprint(selectedProject.id, sprintId, { status: "active" });
       if (data.status === "success") {
         fetchSprints();
-        toast.success("Sprint successfully started.");
+        toast.success(t("toast.sprintStarted"));
       }
     } catch (e: any) {
       console.error(e);
@@ -1652,7 +1652,7 @@ function AppContainer() {
         currentUserProfile?.permissions
       )
     ) {
-      toast.error("Anda tidak memiliki izin untuk menyelesaikan sprint.");
+      toast.error(t("toast.noPermCompleteSprint"));
       return;
     }
 
@@ -1666,7 +1666,7 @@ function AppContainer() {
 
     if (!isConfirmed) return;
 
-    const loadingToast = toast.loading("Sedang menyelesakan fase...");
+    const loadingToast = toast.loading(t("toast.completingSprint"));
 
     try {
       const sprintTasks = tasks.filter((t) => t.sprintId === sprintId);
@@ -1720,7 +1720,7 @@ function AppContainer() {
 
     if (!isConfirmed) return;
 
-    const loadingToast = toast.loading("Sedang menghapus fase...");
+    const loadingToast = toast.loading(t("toast.deletingSprint"));
 
     try {
       // 1. Move tasks back to backlog
@@ -1777,7 +1777,7 @@ function AppContainer() {
       const isAuthorizedSprint = isDirectReporter || isParentReporter || isAdmin;
 
       if (!isAuthorizedSprint) {
-        toast.error("Failed: You do not have permission to move this task.");
+        toast.error(t("toast.noPermMoveTask"));
         return;
       }
 
@@ -1862,7 +1862,7 @@ function AppContainer() {
         currentUserProfile?.permissions
       )
     ) {
-      toast.error("Failed: You do not have permission to perform this action.");
+      toast.error(t("toast.noPermAction"));
       return;
     }
 
@@ -1923,7 +1923,7 @@ function AppContainer() {
       );
       await Promise.all(promises);
       await fetchTasks();
-      toast.success(`${taskIds.length} tasks moved successfully`);
+      toast.success(t("toast.tasksMoved", { count: taskIds.length }));
       setSelectedTaskIds(new Set());
     } catch (e: any) {
       console.error(e);
@@ -1934,7 +1934,7 @@ function AppContainer() {
   const handleCreateProject = async () => {
     const effectiveUserId = currentUser?.uid || user?.uid;
     if (!effectiveUserId || !newProjectName.trim() || !newProjectKey.trim()) {
-      if (!effectiveUserId) toast.error("Sesi tidak ditemukan");
+      if (!effectiveUserId) toast.error(t("toast.sessionNotFound"));
       return;
     }
     try {
@@ -1949,7 +1949,7 @@ function AppContainer() {
       if (data.status === "success") {
         resetNewProjectForm();
         setIsNewProjectModalOpen(false);
-        toast.success("Project created successfully");
+        toast.success(t("toast.projectCreated"));
         fetchProjects();
       }
     } catch (e: any) {
@@ -1971,7 +1971,7 @@ function AppContainer() {
         currentUserProfile?.permissions
       )
     ) {
-      toast.error("Anda tidak memiliki izin untuk menambahkan tugas baru.");
+      toast.error(t("toast.noPermAddTask"));
       return;
     }
 
@@ -2081,7 +2081,7 @@ function AppContainer() {
 
       resetNewTaskForm();
       setIsNewTaskModalOpen(false);
-      toast.success("Data added successfully");
+      toast.success(t("toast.dataAdded"));
     } catch (e: any) {
       console.error(e, "error", `projects/${selectedProject.id}/tasks`);
       const errMessage = e?.message || "";
@@ -2122,7 +2122,7 @@ function AppContainer() {
         setTasks((prev) => [newTask, ...prev.filter((t) => t.id !== newTask.id)]);
         setAllProjectTasksForStats((prev) => [newTask, ...prev.filter((t) => t.id !== newTask.id)]);
         await fetchTasks();
-        toast.success(`Task ${data.data.taskKey} created successfully`);
+        toast.success(t("toast.taskCreated", { key: data.data.taskKey }));
       }
     } catch (e: any) {
       console.error(e);
@@ -2132,11 +2132,11 @@ function AppContainer() {
 
   const handleSuggestStoryPoints = async (task: Task) => {
     if (!task.title || !task.description) {
-      toast.warning("Please provide title and description for AI estimation.");
+      toast.warning(t("toast.aiNeedTitleDesc"));
       return;
     }
 
-    const toastId = toast.loading("Calculating story points...");
+    const toastId = toast.loading(t("toast.aiCalculating"));
     try {
       const { GoogleGenAI } = await import("@google/genai");
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -2158,9 +2158,12 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
       const result = JSON.parse(response.text || "{}");
       if (result.points) {
-        toast.success(`AI suggests ${result.points} points: ${result.reasoning}`, {
-          duration: 5000,
-        });
+        toast.success(
+          t("toast.aiSuggestion", { points: result.points, reasoning: result.reasoning }),
+          {
+            duration: 5000,
+          }
+        );
 
         // Simpan hasil estimasi AI ke task.
         //
@@ -2176,7 +2179,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       }
     } catch (e) {
       console.error(e);
-      toast.error("AI Estimation failed");
+      toast.error(t("toast.aiEstimationFailed"));
     } finally {
       toast.dismiss(toastId);
     }
@@ -2220,7 +2223,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       fetchProjects();
     } catch (e: any) {
       console.error(e);
-      toast.error("Failed to update member role: " + (e.message || e));
+      toast.error(t("toast.memberRoleUpdateFailed") + (e.message || e));
     }
   };
 
@@ -2229,28 +2232,28 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
     try {
       const data = await removeMember(selectedProject.id, userId);
       if (data.status === "success") {
-        toast.success("Member removed from project successfully");
+        toast.success(t("toast.memberRemoved"));
         fetchProjects();
       } else {
         toast.error(data.message || "Failed to remove member");
       }
     } catch (e: any) {
       console.error(e);
-      toast.error("Failed to remove member: " + (e.message || e));
+      toast.error(t("toast.memberRemoveFailed") + (e.message || e));
     }
   };
 
   const handleInviteMember = async () => {
     if (!selectedProject) {
-      toast.error("No project selected");
+      toast.error(t("toast.noProjectSelected"));
       return;
     }
     if (!inviteEmail.trim()) {
-      toast.error("Please enter an email address");
+      toast.error(t("toast.enterEmail"));
       return;
     }
 
-    const toastId = toast.loading("Sending invitation...");
+    const toastId = toast.loading(t("toast.sendingInvite"));
     try {
       const emailToInvite = inviteEmail.trim().toLowerCase();
       // allUsers is available locally from the /api/users fetch
@@ -2260,7 +2263,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         // User not found, add to pending invites
         const pending = selectedProject.pendingInvites || [];
         if (pending.includes(emailToInvite)) {
-          toast.error("An invitation is already pending for this email.", {
+          toast.error(t("toast.inviteAlreadyPending"), {
             id: toastId,
           });
           return;
@@ -2271,7 +2274,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           `Invited ${emailToInvite} to the project (pending registration)`
         );
 
-        toast.success(`Invitation saved for ${emailToInvite}!`, {
+        toast.success(t("toast.inviteSaved", { email: emailToInvite }), {
           id: toastId,
         });
         setLastInvitedEmail(emailToInvite);
@@ -2285,7 +2288,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       const uid = userToInvite.uid;
 
       if ((selectedProject.members || []).includes(uid)) {
-        toast.error("User is already in the project", { id: toastId });
+        toast.error(t("toast.userAlreadyMember"), { id: toastId });
         return;
       }
 
@@ -2293,7 +2296,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       await addMember(selectedProject.id, effectiveUserId, uid);
       await logActivity("user_added", `Added ${emailToInvite} to the project`);
 
-      toast.success(`Added ${emailToInvite} to the project!`, { id: toastId });
+      toast.success(t("toast.memberAdded", { email: emailToInvite }), { id: toastId });
       setLastInvitedEmail(emailToInvite);
       setIsInviteModalOpen(false);
       setIsInviteSuccessModalOpen(true);
@@ -2301,7 +2304,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       fetchProjects();
     } catch (e) {
       console.error("Invite error:", e);
-      toast.error("Failed to send invitation. Please check your permissions.", {
+      toast.error(t("toast.inviteFailed"), {
         id: toastId,
       });
     }
@@ -2348,7 +2351,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       if (data.status === "success") {
         setIsEditProjectModalOpen(false);
         setEditingProject(null);
-        toast.success("Project updated successfully");
+        toast.success(t("toast.projectUpdated"));
         fetchProjects();
       }
     } catch (e: any) {
@@ -2386,10 +2389,10 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       setNewLinkTitle("");
       setNewLinkUrl("");
       setIsAddingLink(false);
-      toast.success("Link added successfully");
+      toast.success(t("toast.linkAdded"));
     } catch (error) {
       console.error(error);
-      toast.error("Failed to add link");
+      toast.error(t("toast.linkAddFailed"));
     }
   };
 
@@ -2417,12 +2420,12 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       showSuccessAlert(t("alerts.successTitle"), t("alerts.attachmentDeleted"));
     } catch (error: any) {
       console.error(error);
-      toast.error("Gagal menghapus lampiran: " + (error.message || error));
+      toast.error(t("toast.attachmentDeleteFailed") + (error.message || error));
     }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    toast.error("File attachments are disabled for MySQL backend.");
+    toast.error(t("toast.attachmentsDisabled"));
     e.target.value = "";
   };
 
@@ -2440,7 +2443,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         `Task ${task.key} is now unblocked by completion of ${completedTaskId}`
       );
       // Notify via toast
-      toast.info(`Task ${task.key} is now unblocked by completion of ${completedTaskId}`);
+      toast.info(t("toast.taskUnblocked", { key: task.key, selesai: completedTaskId }));
     }
   };
 
@@ -2593,7 +2596,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         currentUserProfile?.permissions
       )
     ) {
-      toast.error("Failed: You do not have permission to edit this task.");
+      toast.error(t("toast.noPermEditTask"));
       return;
     }
 
@@ -2842,13 +2845,13 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
   const handleAddLinkedTask = async () => {
     if (!selectedProject || !selectedTaskForDetail || !taskLinkTargetId) {
-      toast.error("Failed to add relation, make sure a task is selected.");
+      toast.error(t("toast.relationNeedTask"));
       return;
     }
 
     // Validasi ngga boleh link ke diri sendiri
     if (taskLinkTargetId === selectedTaskForDetail.id) {
-      toast.error("Tidak bisa membuat relasi ke task ini sendiri.");
+      toast.error(t("toast.relationSelf"));
       return;
     }
 
@@ -2883,7 +2886,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         (t) => t.targetTaskId === targetId && t.relationType === taskLinkRelation
       );
       if (existingSourceRelation) {
-        toast.error("Relasi ini sudah ada.");
+        toast.error(t("toast.relationExists"));
         return;
       }
 
@@ -2911,7 +2914,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       setIsAddingTaskLink(false);
       setTaskLinkTargetId("");
       setTaskLinkRelation("blocks");
-      toast.success("Linked task added successfully");
+      toast.success(t("toast.linkedTaskAdded"));
 
       await logActivity(
         "task_linked",
@@ -2919,7 +2922,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       );
     } catch (e) {
       console.error(e);
-      toast.error("Failed to add link");
+      toast.error(t("toast.linkAddFailed"));
     }
   };
 
@@ -2956,7 +2959,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       showSuccessAlert(t("alerts.successTitle"), t("alerts.taskLinkDeleted"));
     } catch (e: any) {
       console.error(e);
-      toast.error("Gagal menghapus hubungan tugas: " + (e.message || e));
+      toast.error(t("toast.relationDeleteFailed") + (e.message || e));
     }
   };
 
@@ -3029,7 +3032,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       await fetchTasks();
     } catch (e: any) {
       console.error(e);
-      toast.error("Failed to update status: " + (e.message || e));
+      toast.error(t("toast.statusUpdateFailed") + (e.message || e));
     }
   };
 
@@ -3051,7 +3054,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       fetchMasterData();
     } catch (e) {
       console.error(e);
-      toast.error("Failed to change order");
+      toast.error(t("toast.reorderFailed"));
     }
   };
 
@@ -3107,7 +3110,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
   const deleteProject = async (project: Project) => {
     const effectiveUserId = currentUser?.uid || user?.uid;
     if (!effectiveUserId) {
-      toast.error("Sesi tidak ditemukan");
+      toast.error(t("toast.sessionNotFound"));
       return;
     }
 
@@ -3122,7 +3125,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         currentUserProfile?.permissions
       )
     ) {
-      toast.error("Only project owners or workspace administrators can delete this project.");
+      toast.error(t("toast.onlyOwnerDeleteProject"));
       return;
     }
 
@@ -3133,7 +3136,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
     if (!isConfirmed) return;
 
-    const loadingToast = toast.loading("Sedang menghapus secara permanen...");
+    const loadingToast = toast.loading(t("toast.deletingPermanently"));
 
     try {
       setIsEditProjectModalOpen(false);
@@ -3150,7 +3153,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       showSuccessAlert("Berhasil!", t("alerts.projectDeleted", { name: project.name }));
     } catch (e: any) {
       console.error(e);
-      toast.error("Gagal menghapus proyek: " + (e.message || e));
+      toast.error(t("toast.projectDeleteFailed") + (e.message || e));
     } finally {
       toast.dismiss(loadingToast);
     }
@@ -3168,7 +3171,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
     const isReporter =
       taskToDelete.reporterId === effectiveUserId || taskToDelete.reporterId === effectiveUsername;
     if (!isReporter) {
-      toast.error("Hanya pelapor (reporter) asli yang memiliki izin untuk menghapus tugas ini.");
+      toast.error(t("toast.onlyReporterDeleteTask"));
       return;
     }
 
@@ -3179,7 +3182,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
     if (!isConfirmed) return;
 
-    const loadingToast = toast.loading("Sedang menghapus tugas...");
+    const loadingToast = toast.loading(t("toast.deletingTask"));
 
     try {
       const effectiveUserId = currentUser?.uid || user?.uid || "guest";
@@ -3195,7 +3198,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       );
     } catch (e: any) {
       console.error(e);
-      toast.error("Gagal menghapus tugas: " + (e.message || e));
+      toast.error(t("toast.taskDeleteFailed") + (e.message || e));
     } finally {
       toast.dismiss(loadingToast);
       if (selectedTaskForDetail?.id === taskId) {
@@ -3215,7 +3218,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
     if (!isConfirmed) return;
 
-    const loadingToast = toast.loading(`Sedang menghapus ${taskIds.length} tugas...`);
+    const loadingToast = toast.loading(t("toast.deletingTasks", { count: taskIds.length }));
 
     try {
       const effectiveUserId = currentUser?.uid || user?.uid || "guest";
@@ -3234,7 +3237,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       );
     } catch (e: any) {
       console.error(e);
-      toast.error("Gagal menghapus beberapa tugas: " + (e.message || e));
+      toast.error(t("toast.tasksDeleteFailed") + (e.message || e));
     } finally {
       toast.dismiss(loadingToast);
     }
