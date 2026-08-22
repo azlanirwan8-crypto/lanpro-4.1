@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Settings, Plus, Trash2, Edit, Search, Layers, GripVertical, Tag } from "lucide-react";
 import {
@@ -98,6 +99,7 @@ export const MasterDataPanel = ({
   hasPermission: (...args: any[]) => boolean;
   onRefresh: () => void;
 }) => {
+  const { t } = useTranslation();
   const [selectedType, setSelectedType] = React.useState<string>("priority");
   const [isNewMasterModalOpen, setIsNewMasterModalOpen] = React.useState(false);
   const [editingMaster, setEditingMaster] = React.useState<MasterData | null>(null);
@@ -645,7 +647,7 @@ export const MasterDataPanel = ({
                                 setIsEditModuleModalOpen(true);
                               }}
                               className="w-7 h-7 bg-surface-sunken hover:bg-indigo-500/10 text-content-muted hover:text-indigo-600 border border-border-subtle/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
-                              title="Edit Modul"
+                              title={t("master.editModule")}
                             >
                               <Edit className="w-3.5 h-3.5 shrink-0" />
                             </button>
@@ -677,10 +679,10 @@ export const MasterDataPanel = ({
                 <div className="bg-surface p-3 rounded-lg border border-border-subtle/80 mb-3 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
                   <div>
                     <span className="text-xs font-medium text-content-body block">
-                      Scope Filter
+                      {t("master.scopeFilter")}
                     </span>
                     <span className="text-xs sm:text-[10px] text-content-subtle font-medium block">
-                      Filter berdasarkan jenis jangkauan peran
+                      {t("master.scopeFilterHint")}
                     </span>
                   </div>
                   <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0 self-start sm:self-auto overflow-x-auto max-w-full">
@@ -694,7 +696,7 @@ export const MasterDataPanel = ({
                           : "text-content-muted hover:text-content-strong"
                       )}
                     >
-                      <span>All Roles</span>
+                      <span>{t("master.allRoles")}</span>
                       <span
                         className={cn(
                           "text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded-full",
@@ -716,7 +718,7 @@ export const MasterDataPanel = ({
                           : "text-content-muted hover:text-content-strong"
                       )}
                     >
-                      <span>Project Roles</span>
+                      <span>{t("master.projectRoles")}</span>
                       <span
                         className={cn(
                           "text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded-full",
@@ -746,7 +748,7 @@ export const MasterDataPanel = ({
                           : "text-content-muted hover:text-content-strong"
                       )}
                     >
-                      <span>System Roles</span>
+                      <span>{t("master.systemRoles")}</span>
                       <span
                         className={cn(
                           "text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded-full",
@@ -910,17 +912,17 @@ export const MasterDataPanel = ({
                                                 <div className="flex items-center gap-1 shrink-0 select-none">
                                                   {rType === "PROJECT" ? (
                                                     <span className="text-[10px] leading-none sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-blue-500/10 text-blue-700 border border-blue-500/30 uppercase">
-                                                      PROJECT ROLE
+                                                      {t("master.projectRole")}
                                                     </span>
                                                   ) : (
                                                     <span className="text-[10px] leading-none sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-purple-500/10 text-purple-700 border border-purple-500/30 uppercase">
-                                                      SYSTEM ROLE
+                                                      {t("master.systemRole")}
                                                     </span>
                                                   )}
                                                   {isSystemReserved && (
                                                     <span
                                                       className="text-xs"
-                                                      title="Reserved System Role"
+                                                      title={t("master.reservedSystemRole")}
                                                       role="img"
                                                       aria-label="lock"
                                                     >
@@ -960,7 +962,7 @@ export const MasterDataPanel = ({
                                               setIsEditMasterModalOpen(true);
                                             }}
                                             className="w-7 h-7 bg-surface-sunken hover:bg-indigo-500/10 text-content-muted hover:text-indigo-600 border border-border-subtle/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
-                                            title="Edit Master Data"
+                                            title={t("master.editMasterData")}
                                           >
                                             <Edit className="w-3.5 h-3.5 shrink-0" />
                                           </button>
@@ -1034,7 +1036,7 @@ export const MasterDataPanel = ({
           {selectedType === "project_role" && (
             <div className="space-y-2">
               <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest ml-1">
-                TIPE ROLE / SCOPE
+                {t("master.roleTypeScope")}
               </label>
               <div className="grid grid-cols-2 gap-2 p-1.5 bg-surface-muted rounded-xl border border-border-subtle">
                 <button
@@ -1047,7 +1049,7 @@ export const MasterDataPanel = ({
                       : "text-content-secondary hover:text-content"
                   )}
                 >
-                  <span>Project Role</span>
+                  <span>{t("master.projectRole")}</span>
                 </button>
                 <button
                   type="button"
@@ -1059,7 +1061,7 @@ export const MasterDataPanel = ({
                       : "text-content-secondary hover:text-content"
                   )}
                 >
-                  <span>System Role</span>
+                  <span>{t("master.systemRole")}</span>
                 </button>
               </div>
               <p className="text-xs sm:text-[10px] text-content-muted font-medium ml-1">
@@ -1073,7 +1075,7 @@ export const MasterDataPanel = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-                Label Name
+                {t("master.labelName")}
               </label>
               <Input
                 value={newMasterLabel}
@@ -1122,7 +1124,7 @@ export const MasterDataPanel = ({
             {selectedType === "status" && (
               <div>
                 <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-                  Status Group
+                  {t("master.statusGroup")}
                 </label>
                 <select
                   value={newMasterStatusGroup}
@@ -1320,7 +1322,7 @@ export const MasterDataPanel = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-                  Label Name
+                  {t("master.labelName")}
                 </label>
                 <Input
                   value={editingMaster.label}
@@ -1481,14 +1483,14 @@ export const MasterDataPanel = ({
         <div className="space-y-4">
           <div>
             <label className="block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-              Nama Project
+              {t("master.projectName")}
             </label>
             <select
               value={newModuleProjectId}
               onChange={(e) => setNewModuleProjectId(e.target.value)}
               className="w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium text-content-strong focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all"
             >
-              <option value="">-- Pilih Project --</option>
+              <option value="">{t("master.selectProject")}</option>
               {projects.map((p: any) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
@@ -1545,7 +1547,7 @@ export const MasterDataPanel = ({
       <Modal
         isOpen={isEditModuleModalOpen}
         onClose={() => setIsEditModuleModalOpen(false)}
-        title="Edit Modul / Aplikasi"
+        title={t("master.editModuleApp")}
         maxWidth="max-w-xl"
       >
         <div className="space-y-4">

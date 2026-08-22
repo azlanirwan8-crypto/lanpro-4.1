@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import React, { useState, useEffect } from "react";
 import {
@@ -54,6 +55,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   projectMembers = [],
   masterData = [],
 }) => {
+  const { t } = useTranslation();
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(false);
@@ -400,11 +402,9 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-content-strong tracking-tight">
-                    Meeting Notes
+                    {t("meetings.title")}
                   </h3>
-                  <p className="text-xs text-content-muted mt-0.5">
-                    Kelola catatan rapat proyek, agenda, datetime, dan poin diskusi.
-                  </p>
+                  <p className="text-xs text-content-muted mt-0.5">{t("meetings.subtitle")}</p>
                 </div>
               </div>
 
@@ -412,7 +412,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 <div className="relative flex-1 sm:w-72">
                   <input
                     type="text"
-                    placeholder="Search meetings by title..."
+                    placeholder={t("meetings.searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
@@ -428,7 +428,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     onClick={startAddMeeting}
                     className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer shrink-0"
                   >
-                    <Plus className="w-4 h-4" /> Add Meeting
+                    <Plus className="w-4 h-4" /> {t("meetings.addMeeting")}
                   </button>
                 )}
               </div>
@@ -439,14 +439,18 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
               <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
                   <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-medium uppercase tracking-wider text-primary whitespace-nowrap">
-                    <th className="py-3 px-4 w-14 text-center">No</th>
-                    <th className="py-3 px-4 min-w-[180px] max-w-[260px]">Meeting Title</th>
-                    <th className="py-3 px-4 w-44">Datetime Meeting</th>
-                    <th className="py-3 px-4 w-40">Meeting Link</th>
-                    <th className="py-3 px-4 w-40">Document File</th>
-                    <th className="py-3 px-4 w-36">Author</th>
-                    <th className="py-3 px-4 min-w-[180px] max-w-[260px]">Description</th>
-                    <th className="py-3 px-4 w-28 text-center">Action</th>
+                    <th className="py-3 px-4 w-14 text-center">{t("meetings.thNo")}</th>
+                    <th className="py-3 px-4 min-w-[180px] max-w-[260px]">
+                      {t("meetings.thTitle")}
+                    </th>
+                    <th className="py-3 px-4 w-44">{t("meetings.thDatetime")}</th>
+                    <th className="py-3 px-4 w-40">{t("meetings.thLink")}</th>
+                    <th className="py-3 px-4 w-40">{t("meetings.thDocument")}</th>
+                    <th className="py-3 px-4 w-36">{t("meetings.thAuthor")}</th>
+                    <th className="py-3 px-4 min-w-[180px] max-w-[260px]">
+                      {t("meetings.thDescription")}
+                    </th>
+                    <th className="py-3 px-4 w-28 text-center">{t("meetings.thAction")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-faint text-xs text-content-body">
@@ -456,9 +460,11 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         <div className="w-12 h-12 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-3 shadow-2xs">
                           <MessageSquare className="w-6 h-6 text-primary" />
                         </div>
-                        <p className="font-medium text-content-strong text-sm">No meetings found</p>
+                        <p className="font-medium text-content-strong text-sm">
+                          {t("meetings.emptyTitle")}
+                        </p>
                         <p className="text-xs text-content-subtle mt-1">
-                          Create a new meeting or adjust your search keyword.
+                          {t("meetings.emptyHint")}
                         </p>
                       </td>
                     </tr>
@@ -505,7 +511,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                               </a>
                             ) : (
                               <span className="px-2 py-0.5 bg-surface-muted text-content-muted rounded-md text-xs sm:text-[10px] font-medium">
-                                No link
+                                {t("meetings.noLink")}
                               </span>
                             )}
                           </td>
@@ -540,7 +546,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             <div className="line-clamp-1 max-w-xs">
                               {meeting.description || (
                                 <span className="text-content-subtle text-xs sm:text-[11px] italic">
-                                  No description
+                                  {t("meetings.noDescription")}
                                 </span>
                               )}
                             </div>
@@ -630,7 +636,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     onClick={() => setActiveMeetingId(null)}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken rounded-md text-xs font-medium text-content-body transition-all cursor-pointer shadow-2xs"
                   >
-                    <ChevronLeft className="w-4 h-4" /> Back to Meeting List
+                    <ChevronLeft className="w-4 h-4" /> {t("meetings.backToList")}
                   </button>
 
                   <div className="flex items-center gap-2">
@@ -678,7 +684,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     <div className="mt-4 p-4 border border-indigo-500/30 bg-indigo-500/10 rounded-lg border-l-4 border-l-primary flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <span className="text-xs sm:text-[10px] font-medium text-primary tracking-wider uppercase block mb-1">
-                          Meeting Description / Agenda
+                          {t("meetings.meetingDescriptionAgenda")}
                         </span>
                         <div className="flex items-center gap-2 text-xs sm:text-[11px] text-content-muted mb-2 not-italic">
                           <Calendar className="w-3.5 h-3.5 text-content-subtle" />
@@ -762,12 +768,12 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
             <div className="space-y-4 mb-5">
               <div>
                 <label className="block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5">
-                  Meeting Title <span className="text-rose-500">*</span>
+                  {t("meetings.meetingTitle")} <span className="text-rose-500">*</span>
                 </label>
                 <input
                   disabled={!canModify}
                   className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
-                  placeholder="e.g., Sprint 4 Planning & Architecture Review"
+                  placeholder={t("meetings.titlePlaceholder")}
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                 />
@@ -777,7 +783,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 <div>
                   <label className="block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5 flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-content-subtle" />
-                    Meeting Date
+                    {t("meetings.meetingDate")}
                   </label>
                   <input
                     type="date"
@@ -815,7 +821,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   <input
                     disabled={!canModify}
                     className="w-full pl-9 pr-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
-                    placeholder="https://zoom.us/j/... or Google Meet"
+                    placeholder={t("meetings.linkPlaceholder")}
                     value={newMeetingLink}
                     onChange={(e) => setNewMeetingLink(e.target.value)}
                   />
@@ -824,7 +830,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
               <div>
                 <label className="block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5">
-                  Description / Agenda
+                  {t("meetings.descriptionAgenda")}
                 </label>
                 <textarea
                   disabled={!canModify}
@@ -905,7 +911,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   ) : (
                     <div className="space-y-1">
                       <p className="text-xs font-medium text-content-secondary">
-                        Klik atau seret berkas ke sini untuk upload
+                        {t("meetings.uploadHint")}
                       </p>
                       <p className="text-xs sm:text-[10px] text-content-subtle">
                         PDF, Word (.doc, .docx), Excel (.xls, .xlsx) hingga 5MB
@@ -951,7 +957,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                       <span>Saving...</span>
                     </>
                   ) : (
-                    <span>Save Meeting</span>
+                    <span>{t("meetings.saveMeeting")}</span>
                   )}
                 </button>
               )}
