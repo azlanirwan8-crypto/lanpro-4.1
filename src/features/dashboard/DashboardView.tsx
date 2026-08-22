@@ -654,7 +654,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </span>
                 <h3 className="text-2xl font-medium text-content-strong mt-1">{totalTasks}</h3>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-500/30">
+              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-success-text border border-emerald-500/30">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
             </div>
@@ -664,7 +664,7 @@ export function DashboardView(props: DashboardViewProps) {
                   hijau "bertumbuh". */}
               <span
                 className={`flex items-center gap-1 font-medium ${
-                  completionPercentage > 0 ? "text-emerald-600" : "text-content-muted"
+                  completionPercentage > 0 ? "text-success-text" : "text-content-muted"
                 }`}
               >
                 {completionPercentage > 0 ? (
@@ -676,7 +676,7 @@ export function DashboardView(props: DashboardViewProps) {
               </span>
               <button
                 onClick={() => props.setCurrentView("kanban")}
-                className="text-content-subtle hover:text-indigo-600 text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
+                className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
                 View all tasks
               </button>
@@ -694,17 +694,17 @@ export function DashboardView(props: DashboardViewProps) {
                   {nonEpicTasks.filter((t) => t.status !== "Done" && t.status !== "Selesai").length}
                 </h3>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 border border-blue-500/30">
+              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-info-text border border-blue-500/30">
                 <Activity className="w-5 h-5 animate-pulse" />
               </div>
             </div>
             <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
-              <span className="font-medium text-blue-600">
+              <span className="font-medium text-info-text">
                 {inProgressTasks.length} In Progress
               </span>
               <button
                 onClick={() => props.setCurrentView("kanban")}
-                className="text-content-subtle hover:text-indigo-600 text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
+                className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
                 View active board
               </button>
@@ -722,7 +722,7 @@ export function DashboardView(props: DashboardViewProps) {
                   {completedTasks.length}
                 </h3>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-600 border border-indigo-500/30">
+              <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-primary border border-indigo-500/30">
                 <PackageOpen className="w-5 h-5" />
               </div>
             </div>
@@ -731,7 +731,7 @@ export function DashboardView(props: DashboardViewProps) {
                   membaca seperti pertumbuhan yang tidak terjadi. */}
               <span
                 className={`flex items-center gap-1 font-medium ${
-                  completionPercentage > 0 ? "text-emerald-600" : "text-content-muted"
+                  completionPercentage > 0 ? "text-success-text" : "text-content-muted"
                 }`}
               >
                 {completionPercentage > 0 ? (
@@ -746,7 +746,7 @@ export function DashboardView(props: DashboardViewProps) {
               </span>
               <button
                 onClick={() => props.setCurrentView("kanban")}
-                className="text-content-subtle hover:text-indigo-600 text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
+                className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
                 View done list
               </button>
@@ -794,7 +794,7 @@ export function DashboardView(props: DashboardViewProps) {
               </span>
               <button
                 onClick={() => props.setCurrentView("kanban")}
-                className="text-content-subtle hover:text-indigo-600 text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
+                className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
                 Resolve issues
               </button>
@@ -847,7 +847,7 @@ export function DashboardView(props: DashboardViewProps) {
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
                     Sprint Progress
                   </span>
-                  <p className="text-sm font-medium text-emerald-600 mt-0.5">
+                  <p className="text-sm font-medium text-success-text mt-0.5">
                     {sprintProgress}% ({sprintCompletedTasks}/{sprintTotalTasks} tasks)
                   </p>
                 </div>
@@ -855,7 +855,7 @@ export function DashboardView(props: DashboardViewProps) {
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
                     Weekly Velocity
                   </span>
-                  <p className="text-sm font-medium text-indigo-600 mt-0.5">
+                  <p className="text-sm font-medium text-primary mt-0.5">
                     {weeklyVelocity ? weeklyVelocity : "0.0"} pts/sprint
                   </p>
                 </div>
@@ -1028,7 +1028,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
                 <button
                   onClick={() => props.setCurrentView("team")}
-                  className="text-xs font-medium text-indigo-600 hover:underline cursor-pointer inline-flex items-center min-h-11 py-2"
+                  className="text-xs font-medium text-primary hover:underline cursor-pointer inline-flex items-center min-h-11 py-2"
                 >
                   Manage Team
                 </button>
@@ -1093,8 +1093,8 @@ export function DashboardView(props: DashboardViewProps) {
                                 </span>
                               </div>
                             </td>
-                            <td className="py-3 px-2 font-medium text-blue-600">{user.Active}</td>
-                            <td className="py-3 px-2 font-medium text-emerald-600">{user.Done}</td>
+                            <td className="py-3 px-2 font-medium text-info-text">{user.Active}</td>
+                            <td className="py-3 px-2 font-medium text-success-text">{user.Done}</td>
                             <td className="py-3 px-2 font-medium text-content-strong ">
                               {totalUserTasks}
                             </td>
@@ -1141,7 +1141,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </div>
                 <button
                   onClick={() => props.setCurrentView("roadmap")}
-                  className="text-xs font-medium text-indigo-600 hover:underline inline-flex items-center min-h-11 py-2"
+                  className="text-xs font-medium text-primary hover:underline inline-flex items-center min-h-11 py-2"
                 >
                   View Roadmap
                 </button>
@@ -1199,7 +1199,7 @@ export function DashboardView(props: DashboardViewProps) {
                     Perbandingan estimasi jam pengerjaan vs jam terpakai
                   </p>
                 </div>
-                <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2 py-[3px] rounded border border-indigo-500/30">
+                <span className="text-[10px] leading-none font-medium text-primary bg-indigo-500/10 px-2 py-[3px] rounded border border-indigo-500/30">
                   {timeTrackingStats.accuracy}% Accuracy Rate
                 </span>
               </div>
@@ -1217,7 +1217,7 @@ export function DashboardView(props: DashboardViewProps) {
                   <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase">
                     Logged Hours
                   </span>
-                  <p className="text-lg font-medium text-indigo-600 mt-0.5">
+                  <p className="text-lg font-medium text-primary mt-0.5">
                     {timeTrackingStats.totalLog} Hours
                   </p>
                 </div>
@@ -1225,7 +1225,7 @@ export function DashboardView(props: DashboardViewProps) {
                   <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase">
                     Remaining Variance
                   </span>
-                  <p className="text-lg font-medium text-emerald-600 mt-0.5">
+                  <p className="text-lg font-medium text-success-text mt-0.5">
                     {timeTrackingStats.diff >= 0
                       ? `${timeTrackingStats.diff} Hours Left`
                       : `${Math.abs(timeTrackingStats.diff)} Hours Over`}
@@ -1328,7 +1328,7 @@ export function DashboardView(props: DashboardViewProps) {
                 </h3>
                 <button
                   onClick={() => props.setCurrentView("kanban")}
-                  className="text-xs font-medium text-indigo-600 hover:underline inline-flex items-center min-h-11 py-2"
+                  className="text-xs font-medium text-primary hover:underline inline-flex items-center min-h-11 py-2"
                 >
                   Filter
                 </button>
@@ -1402,11 +1402,11 @@ export function DashboardView(props: DashboardViewProps) {
                           </span>
                         )}
                       </div>
-                      <p className="text-xs font-medium text-content-strong truncate mt-0.5 group-hover:text-indigo-600 transition">
+                      <p className="text-xs font-medium text-content-strong truncate mt-0.5 group-hover:text-primary transition">
                         {issue.title}
                       </p>
                     </div>
-                    <ArrowUpRight className="w-4 h-4 text-content-subtle group-hover:text-indigo-600 transition shrink-0" />
+                    <ArrowUpRight className="w-4 h-4 text-content-subtle group-hover:text-primary transition shrink-0" />
                   </div>
                 ))}
                 {blockedTasks.length === 0 && overdueTasks.length === 0 && (
