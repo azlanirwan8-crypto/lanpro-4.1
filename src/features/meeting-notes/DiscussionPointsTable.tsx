@@ -360,10 +360,10 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
           </div>
           <div>
             <h3 className="text-sm font-medium text-content-strong tracking-tight">
-              Poin Diskusi & Keputusan
+              {t("discussion.heading2")}
             </h3>
             <p className="text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider">
-              {t("discussion.heading")}
+              {t("discussion.subheading")}
             </p>
           </div>
         </div>
@@ -374,7 +374,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Cari poin diskusi..."
+                placeholder={t("discussion.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -396,7 +396,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
           >
             {showAiAssistant ? (
               <>
-                <ArrowLeft className="w-3.5 h-3.5" /> Tutup Asisten AI
+                <ArrowLeft className="w-3.5 h-3.5" /> {t("discussion.closeAiAssistant")}
               </>
             ) : (
               <>
@@ -418,10 +418,10 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-content-strong tracking-tight">
-                    Edit Poin Diskusi
+                    {t("discussion.editPoint")}
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-muted font-medium">
-                    Ubah detail, catatan, atau penanggung jawab
+                    {t("discussion.editPointHint")}
                   </p>
                 </div>
               </div>
@@ -440,7 +440,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             <div className="p-5 overflow-y-auto flex-1 space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
-                  Concern / Topic *
+                  {t("discussion.concernTopic")} *
                 </label>
                 <textarea
                   className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 min-h-[80px] shadow-2xs"
@@ -452,7 +452,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
-                    Catatan / Keterangan
+                    {t("discussion.notesLabel")}
                   </label>
                   <input
                     type="text"
@@ -463,7 +463,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
-                    Tindakan Lanjut
+                    {t("discussion.followUp")}
                   </label>
                   <input
                     type="text"
@@ -477,7 +477,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
-                    PIC (Assigned To)
+                    {t("discussion.picAssignedTo")}
                   </label>
                   <StyledDropdown
                     value={editForm.assignTo || "Unassigned"}
@@ -491,7 +491,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
-                    Fitur
+                    {t("discussion.feature")}
                   </label>
                   <StyledDropdown
                     value={editForm.fitur || ""}
@@ -527,7 +527,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 }}
                 className="px-4 py-2 text-xs font-medium text-content-secondary hover:bg-surface-muted rounded-md border border-border-subtle bg-surface transition-all cursor-pointer shadow-2xs"
               >
-                Batal
+                {t("discussion.cancel")}
               </button>
               <button
                 type="button"
@@ -565,13 +565,13 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               <ResponsiveTable className="w-full border-collapse text-left text-xs">
                 <thead>
                   <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-medium uppercase tracking-wider text-primary">
-                    <th className="py-3 px-4 w-12 text-center">No</th>
-                    <th className="py-3 px-4 min-w-[220px]">Concern</th>
-                    <th className="py-3 px-4 min-w-[200px]">Catatan / Keterangan</th>
-                    <th className="py-3 px-4 min-w-[150px]">Context / Tags</th>
-                    <th className="py-3 px-4 min-w-[140px]">PIC</th>
-                    <th className="py-3 px-4 min-w-[130px]">Target Date</th>
-                    <th className="py-3 px-4 w-24 text-center">Thread</th>
+                    <th className="py-3 px-4 w-12 text-center">{t("discussion.thNo")}</th>
+                    <th className="py-3 px-4 min-w-[220px]">{t("discussion.thConcern")}</th>
+                    <th className="py-3 px-4 min-w-[200px]">{t("discussion.thNotes")}</th>
+                    <th className="py-3 px-4 min-w-[150px]">{t("discussion.thContextTags")}</th>
+                    <th className="py-3 px-4 min-w-[140px]">{t("discussion.thPic")}</th>
+                    <th className="py-3 px-4 min-w-[130px]">{t("discussion.thTargetDate")}</th>
+                    <th className="py-3 px-4 w-24 text-center">{t("discussion.thThread")}</th>
                     <th className="py-3 px-4 w-28 text-center">{t("discussion.status")}</th>
                     <th className="py-3 px-4 w-24 text-center">{t("discussion.action")}</th>
                   </tr>
@@ -604,7 +604,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           {(p.tindakanLanjut || p.next_action) && (
                             <div className="text-primary text-xs sm:text-[11px] font-medium flex items-center gap-1 mt-1 pt-1 border-t border-border-faint">
                               <span className="uppercase text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
-                                Next:
+                                {t("discussion.next")}
                               </span>
                               {p.tindakanLanjut || p.next_action}
                             </div>
@@ -615,7 +615,9 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                         <td className="py-3 px-4 align-middle">
                           <div className="text-content-secondary text-xs font-normal leading-relaxed">
                             {p.keterangan || p.comment || (
-                              <span className="text-content-subtle italic">No notes</span>
+                              <span className="text-content-subtle italic">
+                                {t("discussion.noNotes")}
+                              </span>
                             )}
                           </div>
                         </td>
@@ -640,7 +642,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                             )}
                             {!p.fitur && !p.system && !p.surrounding && (
                               <span className="text-content-subtle text-xs sm:text-[11px] italic">
-                                No tags
+                                {t("discussion.noTags")}
                               </span>
                             )}
                           </div>
@@ -680,7 +682,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                                     ? "bg-indigo-500/10 hover:bg-indigo-500/15 text-primary border-indigo-500/30"
                                     : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
                                 }`}
-                                title="Buka Thread Komentar & Balasan"
+                                title={t("discussion.openThread")}
                               >
                                 <MessageSquare
                                   className={`w-3.5 h-3.5 ${count > 0 ? "text-primary fill-indigo-100" : "text-content-subtle"}`}
@@ -697,17 +699,17 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                             type="button"
                             onClick={() => handleToggleStatus(p)}
                             className="cursor-pointer transition-all active:scale-95 inline-block"
-                            title="Klik untuk ubah status PENDING / DONE"
+                            title={t("discussion.toggleStatus")}
                           >
                             {isCompleted ? (
                               <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-medium uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 shadow-2xs hover:bg-emerald-500/15">
                                 <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                                DONE
+                                {t("discussion.statusDone")}
                               </span>
                             ) : (
                               <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-medium uppercase tracking-wider bg-amber-500/10 text-amber-700 border border-amber-500/30 shadow-2xs hover:bg-amber-500/15">
                                 <Clock className="w-3 h-3 text-amber-600" />
-                                PENDING
+                                {t("discussion.statusPending")}
                               </span>
                             )}
                           </button>
@@ -726,7 +728,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                               <button
                                 onClick={() => startEdit(p)}
                                 className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
-                                title="Edit"
+                                title={t("discussion.editRow")}
                               >
                                 <Edit2 className="w-4 h-4" />
                               </button>
@@ -741,7 +743,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                               <button
                                 onClick={() => handleDelete(p.id!)}
                                 className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
-                                title="Hapus"
+                                title={t("discussion.deleteRow")}
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -763,7 +765,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                       <td className="py-2.5 px-4 align-middle">
                         <input
                           type="text"
-                          placeholder="Ketik concern baru..."
+                          placeholder={t("discussion.newConcernPlaceholder")}
                           value={quickConcern}
                           onChange={(e) => setQuickConcern(e.target.value)}
                           onKeyDown={(e) => {
@@ -777,7 +779,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                       <td className="py-2.5 px-4 align-middle">
                         <input
                           type="text"
-                          placeholder="Catatan / Keterangan..."
+                          placeholder={t("discussion.notesPlaceholder")}
                           value={quickCatatan}
                           onChange={(e) => setQuickCatatan(e.target.value)}
                           onKeyDown={(e) => {
@@ -840,7 +842,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                       {/* Status */}
                       <td className="py-2.5 px-4 text-center align-middle">
                         <span className="px-2.5 py-1 rounded-md text-[10px] leading-none font-medium uppercase tracking-wider bg-amber-500/10 text-amber-700 border border-amber-500/30">
-                          PENDING
+                          {t("discussion.statusPending")}
                         </span>
                       </td>
 
@@ -851,7 +853,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           onClick={() => handleLiveQuickAdd()}
                           disabled={isSaving || !quickConcern.trim()}
                           className="px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
-                          title="Tambah Poin"
+                          title={t("discussion.addPoint")}
                         >
                           <Plus className="w-3.5 h-3.5" />
                           <span>{t("discussion.add")}</span>
@@ -867,8 +869,11 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
           {/* Pagination Footer */}
           <div className="px-6 py-3.5 bg-surface-sunken/60 border-t border-border-subtle flex items-center justify-between text-xs  text-content-secondary">
             <div>
-              Menampilkan {paginatedPoints.length} dari {filteredPoints.length} poin (Total:{" "}
-              {points.length})
+              {t("discussion.showingPoints", {
+                shown: paginatedPoints.length,
+                filtered: filteredPoints.length,
+                total: points.length,
+              })}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -876,17 +881,17 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 disabled={currentPage === 1}
                 className="px-3 py-1.5 bg-surface border border-border-subtle rounded-lg text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer"
               >
-                <ChevronLeft className="w-3.5 h-3.5" /> Prev
+                <ChevronLeft className="w-3.5 h-3.5" /> {t("discussion.prev")}
               </button>
               <span className="px-3 py-1  bg-surface border border-border-subtle rounded-lg text-indigo-600 shadow-2xs">
-                {currentPage} of {totalPages}
+                {currentPage} {t("common.of")} {totalPages}
               </span>
               <button
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage >= totalPages}
                 className="px-3 py-1.5 bg-surface border border-border-subtle rounded-lg text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer"
               >
-                Next <ChevronRight className="w-3.5 h-3.5" />
+                {t("discussion.nextPage")} <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
@@ -905,7 +910,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 </div>
                 <div className="min-w-0">
                   <span className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-indigo-600 block">
-                    Thread Discussions
+                    {t("discussion.threadDiscussions")}
                   </span>
                   <h3 className="text-sm font-medium text-content truncate">
                     {activeThreadPoint.concern}
@@ -915,7 +920,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               <button
                 onClick={() => setActiveThreadPoint(null)}
                 className="p-2 text-content-subtle hover:text-content-body hover:bg-surface-strong/60 rounded-xl transition-colors cursor-pointer shrink-0"
-                title="Tutup Thread"
+                title={t("discussion.closeThread")}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -927,10 +932,9 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-3 text-indigo-400">
                     <MessageSquare className="w-6 h-6" />
                   </div>
-                  <h4 className="text-xs  text-content-body">Belum Ada Balasan Komentar</h4>
+                  <h4 className="text-xs  text-content-body">{t("discussion.noReplies")}</h4>
                   <p className="text-xs sm:text-[11px] text-content-subtle  mt-1 leading-normal">
-                    Jadilah yang pertama memberikan balasan atau instruksi tambahan untuk PIC topik
-                    ini!
+                    {t("discussion.noRepliesHint")}
                   </p>
                 </div>
               ) : (
@@ -1017,7 +1021,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               <div className="flex items-center gap-2 bg-surface-muted rounded-full px-4 py-2">
                 <input
                   type="text"
-                  placeholder="Tulis balasan atau instruksi untuk PIC..."
+                  placeholder={t("discussion.replyPlaceholder")}
                   value={newCommentText}
                   onChange={(e) => setNewCommentText(e.target.value)}
                   onKeyDown={(e) => {
@@ -1031,7 +1035,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   onClick={handleSendThreadComment}
                   disabled={isSendingComment || !newCommentText.trim()}
                   className="p-2 text-indigo-600 hover:text-indigo-700 disabled:opacity-40 cursor-pointer rounded-full transition-colors shrink-0"
-                  title="Kirim Balasan"
+                  title={t("discussion.sendReply")}
                 >
                   <Send className="w-4 h-4" />
                 </button>

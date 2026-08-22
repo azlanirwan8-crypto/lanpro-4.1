@@ -861,7 +861,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       {t("wiki.title")}
                     </h3>
                     <p className="text-xs font-medium text-content-muted mt-0.5">
-                      Kelola dokumentasi proyek, PRD, spesifikasi teknis, dan panduan tim.
+                      {t("wiki.subtitle")}
                     </p>
                   </div>
                 </div>
@@ -914,11 +914,9 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             <FileText className="w-5 h-5" />
                           </div>
                           <p className="font-medium text-content-strong text-sm">
-                            Dokumen tidak ditemukan
+                            {t("wiki.emptyTitle")}
                           </p>
-                          <p className="text-xs text-content-subtle mt-1">
-                            Buat dokumen baru atau sesuaikan kata kunci pencarian Anda.
-                          </p>
+                          <p className="text-xs text-content-subtle mt-1">{t("wiki.emptyHint")}</p>
                         </td>
                       </tr>
                     ) : (
@@ -1047,7 +1045,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       disabled={currentPage === 1}
                       className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs font-medium disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
                     >
-                      Previous
+                      {t("wiki.previous")}
                     </button>
                     <span className="text-xs font-medium px-2 text-content-secondary">
                       Page {currentPage} of {totalPages}
@@ -1057,7 +1055,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       disabled={currentPage === totalPages}
                       className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs font-medium disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
                     >
-                      Next
+                      {t("wiki.next")}
                     </button>
                   </div>
                 )}
@@ -1075,9 +1073,9 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   <button
                     onClick={() => setActiveDocId(null)}
                     className="flex items-center gap-1.5 text-xs font-medium text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/30 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
-                    title="Kembali ke Daftar Dokumen"
+                    title={t("wiki.backToList")}
                   >
-                    <ChevronLeft className="w-4 h-4" /> Daftar
+                    <ChevronLeft className="w-4 h-4" /> {t("wiki.list")}
                   </button>
 
                   <div className="flex items-center gap-2 shrink-0 z-10 select-none">
@@ -1086,10 +1084,10 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       <button
                         onClick={() => handleDownload(activeDoc.id, activeDoc.fileName)}
                         className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 font-medium text-xs border border-emerald-500/30 rounded-md transition-all cursor-pointer whitespace-nowrap shadow-2xs"
-                        title="Unduh Lampiran Berkas"
+                        title={t("wiki.downloadAttachment")}
                       >
                         <Download className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">Unduh</span>
+                        <span className="hidden sm:inline">{t("wiki.download")}</span>
                       </button>
                     )}
 
@@ -1122,14 +1120,14 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         <button
                           onClick={(e) => handleEditClick(activeDoc, e)}
                           className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer border border-border-subtle bg-surface shadow-2xs"
-                          title="Ubah Judul & Kategori"
+                          title={t("wiki.editTitleCategory")}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={(e) => handleDeleteClick(activeDoc, e)}
                           className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer border border-border-subtle bg-surface shadow-2xs"
-                          title="Hapus Dokumentasi"
+                          title={t("wiki.deleteDoc")}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -1173,11 +1171,13 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     <div className="px-4 py-2.5 bg-surface-sunken border-b border-border-subtle/80 flex items-center justify-between shrink-0 select-none">
                       <span className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider flex items-center gap-1.5">
                         <Eye className="w-3.5 h-3.5 text-primary" />
-                        Pratinjau Dokumen Utama
+                        {t("wiki.mainPreview")}
                       </span>
                       {activeDoc.fileName && (
                         <span className="text-[10px] leading-none sm:text-[8px] font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 px-2 py-[3px] rounded-md uppercase tracking-wider">
-                          Disematkan: {activeDoc.fileType.split("/")[1]?.toUpperCase() || "FILE"}
+                          {t("wiki.pinned", {
+                            type: activeDoc.fileType.split("/")[1]?.toUpperCase() || "FILE",
+                          })}
                         </span>
                       )}
                     </div>
@@ -1188,7 +1188,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center select-none">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3"></div>
                           <p className="text-xs font-medium text-content-muted">
-                            Memuat pratinjau dokumen...
+                            {t("wiki.loadingPreview")}
                           </p>
                         </div>
                       ) : previewFileData ? (
@@ -1202,7 +1202,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               </span>
                               <div>
                                 <p className="font-medium text-amber-950 leading-tight">
-                                  Pratinjau PDF Terbatas di Iframe
+                                  {t("wiki.pdfLimited")}
                                 </p>
                                 <p className="text-xs sm:text-[10px] text-amber-800/90 font-medium mt-0.5 leading-normal">
                                   Keamanan browser memblokir pratinjau PDF blob langsung. Klik
@@ -1219,7 +1219,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                 className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse font-medium text-xs sm:text-[10px] uppercase tracking-wide rounded-md shadow-xs transition-all cursor-pointer whitespace-nowrap"
                               >
                                 <ExternalLink className="w-3 h-3" />
-                                Buka di Tab Baru
+                                {t("wiki.openNewTab")}
                               </a>
 
                               <button
@@ -1227,7 +1227,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                 className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-surface hover:bg-surface-sunken text-content-body font-medium text-xs sm:text-[10px] uppercase tracking-wide border border-border-subtle rounded-md shadow-2xs transition-all cursor-pointer whitespace-nowrap"
                               >
                                 <Download className="w-3 h-3 text-primary" />
-                                Unduh PDF
+                                {t("wiki.downloadPdf")}
                               </button>
                             </div>
                           </div>
@@ -1274,7 +1274,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             </div>
                             <div>
                               <h4 className="text-xs font-medium text-content-strong tracking-tight group-hover:text-primary transition-colors">
-                                Belum Ada Lampiran Berkas
+                                {t("wiki.noAttachment")}
                               </h4>
                               <p className="text-xs sm:text-[10px] text-content-subtle font-medium leading-normal mt-1 max-w-xs mx-auto">
                                 {canUpdate
@@ -1322,10 +1322,12 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     <div className="px-4 py-3 bg-surface-sunken border-b border-border-subtle/80 flex items-center justify-between shrink-0 select-none">
                       <span className="text-xs sm:text-[11px] font-medium text-content-body uppercase tracking-wider flex items-center gap-1.5">
                         <MessageSquare className="w-4 h-4 text-primary" />
-                        Catatan & Komentar Diskusi
+                        {t("wiki.notesComments")}
                       </span>
                       <span className="text-xs sm:text-[10px] font-medium text-content-muted bg-surface-strong/60 px-2 py-0.5 rounded-full">
-                        {(activeDocId ? docCommentsMap[activeDocId] || [] : []).length} Catatan
+                        {t("wiki.notesCount", {
+                          count: (activeDocId ? docCommentsMap[activeDocId] || [] : []).length,
+                        })}
                       </span>
                     </div>
 
@@ -1337,11 +1339,10 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             <MessageSquare className="w-6 h-6" />
                           </div>
                           <h4 className="text-xs font-medium text-content-strong">
-                            Belum Ada Catatan / Komentar
+                            {t("wiki.noNotesComments")}
                           </h4>
                           <p className="text-xs sm:text-[11px] text-content-subtle font-medium mt-1 leading-normal">
-                            Siapa pun dapat memberikan catatan teknis, instruksi rilis, atau umpan
-                            balik untuk dokumen ini.
+                            {t("wiki.anyoneCanComment")}
                           </p>
                         </div>
                       ) : (
@@ -1405,7 +1406,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       <div className="flex items-center gap-2 bg-surface-sunken rounded-md px-3 py-1 border border-border-subtle focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all">
                         <input
                           type="text"
-                          placeholder="Tulis catatan atau komentar..."
+                          placeholder={t("wiki.notePlaceholder")}
                           value={newDocCommentText}
                           onChange={(e) => setNewDocCommentText(e.target.value)}
                           onKeyDown={(e) => {
@@ -1423,7 +1424,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           onClick={handleSendDocComment}
                           disabled={!newDocCommentText.trim()}
                           className="p-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse disabled:opacity-40 cursor-pointer rounded-md transition-all shrink-0 shadow-2xs flex items-center justify-center"
-                          title="Kirim Catatan"
+                          title={t("wiki.sendNote")}
                         >
                           <Send className="w-3.5 h-3.5" />
                         </button>
@@ -1439,7 +1440,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   <BookOpen className="w-7 h-7" />
                 </div>
                 <h2 className="text-sm font-medium text-content-strong tracking-tight">
-                  Pilih atau Buat Dokumentasi
+                  {t("wiki.pickOrCreate")}
                 </h2>
                 <p className="text-xs font-medium text-content-subtle mt-1 max-w-sm leading-relaxed mx-auto">
                   Pilih salah satu dokumen di panel kiri atau klik tombol tambah untuk membuat
@@ -1450,7 +1451,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     onClick={handleCreateNew}
                     className="mt-5 px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-2 cursor-pointer"
                   >
-                    <Plus className="w-4 h-4" /> TAMBAH DOKUMEN BARU
+                    <Plus className="w-4 h-4" /> {t("wiki.addNewDocument")}
                   </button>
                 )}
               </div>
@@ -1481,10 +1482,10 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   </div>
                   <div>
                     <h3 className="text-xs md:text-sm font-medium text-content tracking-tight">
-                      {isNew ? "Tambah Dokumen Baru" : "Ubah Data Dokumentasi"}
+                      {isNew ? t("wiki.addNewDocTitle") : t("wiki.editDocTitle")}
                     </h3>
                     <p className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider mt-0.5">
-                      Formulir Dokumentasi Proyek
+                      {t("wiki.formTitle")}
                     </p>
                   </div>
                 </div>
@@ -1501,13 +1502,13 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 {/* Title Input */}
                 <div className="space-y-1">
                   <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
-                    Judul Dokumen <span className="text-rose-500">*</span>
+                    {t("wiki.docTitleLabel")} <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    placeholder="Contoh: PRD Fitur Pembayaran, SOP Server Production, dll"
+                    placeholder={t("wiki.titlePlaceholder")}
                     className="w-full bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-medium text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
                   />
                 </div>
@@ -1516,16 +1517,16 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 <div className="space-y-1">
                   <div className="flex justify-between items-center select-none">
                     <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
-                      Rangkuman / Catatan Dokumentasi
+                      {t("wiki.summaryLabel")}
                     </label>
                     <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-subtle bg-surface-sunken px-1.5 py-0.5 rounded border border-border-subtle">
-                      Mendukung Markdown 📝
+                      {t("wiki.markdownSupport")}
                     </span>
                   </div>
                   <textarea
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
-                    placeholder="Tuliskan spesifikasi detail, instruksi instalasi, atau memo kerja di sini..."
+                    placeholder={t("wiki.summaryPlaceholder")}
                     className="w-full bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-medium text-content-body outline-none transition-all placeholder:text-content-subtle min-h-[100px] resize-y font-sans shadow-2xs"
                   />
                 </div>
@@ -1535,7 +1536,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   {/* Type drop-down selection */}
                   <div className="space-y-1">
                     <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
-                      Jenis Kategori
+                      {t("wiki.categoryType")}
                     </label>
                     <StyledDropdown
                       value={editType}
@@ -1550,13 +1551,13 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   {/* External URL Link */}
                   <div className="space-y-1">
                     <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
-                      Tautan Google Docs / Slides (Opsional)
+                      {t("wiki.googleLink")}
                     </label>
                     <input
                       type="url"
                       value={editLink}
                       onChange={(e) => setEditLink(e.target.value)}
-                      placeholder="https://docs.google.com/document/..."
+                      placeholder={t("wiki.googleLinkPlaceholder")}
                       className="w-full bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-medium text-content-body outline-none transition-all placeholder:text-content-subtle font-mono shadow-2xs"
                     />
                   </div>
@@ -1565,7 +1566,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 {/* File Uploading Drag-Drop Sandbox */}
                 <div className="space-y-1">
                   <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
-                    Lampiran Berkas (PDF / DOCX / XLSX)
+                    {t("wiki.attachment")}
                   </label>
 
                   <div
@@ -1595,7 +1596,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           {editFile.name}
                         </p>
                         <p className="text-xs sm:text-[10px] sm:text-[8px] font-medium text-content-subtle uppercase tracking-wider mt-1">
-                          Klik untuk mengganti berkas lampiran
+                          {t("wiki.clickToReplace")}
                         </p>
                       </div>
                     ) : isNew === false &&
@@ -1611,7 +1612,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         </div>
                         <div className="flex items-center justify-center gap-2">
                           <p className="text-xs sm:text-[10px] sm:text-[8px] font-medium text-content-subtle uppercase tracking-wider">
-                            Klik area untuk mengunggah berkas baru
+                            {t("wiki.clickToUpload")}
                           </p>
                           <button
                             type="button"
@@ -1622,24 +1623,24 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             }}
                             className="text-[10px] leading-none sm:text-[8px] font-medium text-rose-600 bg-rose-500/10 border border-rose-500/30 p-0.5 px-1.5 rounded hover:bg-rose-500/15 transition-colors"
                           >
-                            Hapus
+                            {t("wiki.remove")}
                           </button>
                         </div>
                       </div>
                     ) : (
                       <div className="space-y-0.5">
                         <h4 className="text-xs font-medium text-content-body group-hover:text-primary transition-colors">
-                          Pilih berkas dari komputer Anda
+                          {t("wiki.pickFromComputer")}
                         </h4>
                         <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium leading-normal">
-                          Seret & lepaskan berkas di sini (Maks 10MB)
+                          {t("wiki.dragDrop")}
                         </p>
                       </div>
                     )}
 
                     {shouldRemoveFile && !editFile && (
                       <div className="p-0.5 px-2 bg-rose-500/10 text-rose-700 border border-rose-500/30 rounded text-[10px] leading-none sm:text-[8px] font-medium">
-                        Lampiran lama akan terhapus
+                        {t("wiki.oldAttachmentRemoved")}
                       </div>
                     )}
 
@@ -1674,7 +1675,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   onClick={() => setShowFormModal(false)}
                   className="px-4 py-2 bg-surface hover:bg-surface-muted border border-border-subtle text-content-secondary hover:text-content rounded-md text-xs font-medium transition-all cursor-pointer shadow-2xs"
                 >
-                  Batal
+                  {t("wiki.cancel")}
                 </button>
                 <button
                   onClick={handleSave}
@@ -1682,7 +1683,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   className="px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
                 >
                   <Save className="w-3.5 h-3.5" />
-                  <span>{loading ? "Menyimpan..." : "Simpan Dokumen"}</span>
+                  <span>{loading ? t("wiki.saving") : t("wiki.saveDocument")}</span>
                 </button>
               </div>
             </motion.div>

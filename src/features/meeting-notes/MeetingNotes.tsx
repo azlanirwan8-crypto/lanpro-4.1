@@ -661,7 +661,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         onClick={() => startEdit(activeMeeting)}
                         className="px-3.5 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken text-content-body rounded-md text-xs font-medium transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
                       >
-                        <Edit2 className="w-3.5 h-3.5 text-primary" /> Edit
+                        <Edit2 className="w-3.5 h-3.5 text-primary" /> {t("meetings.edit")}
                       </button>
                     )}
                     {canDeleteMeeting(activeMeeting) && (
@@ -669,7 +669,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         onClick={() => handleDeleteMeeting(activeMeeting.id!)}
                         className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 rounded-md text-xs font-medium transition-all cursor-pointer border border-rose-500/30 flex items-center gap-1.5"
                       >
-                        <Trash2 className="w-3.5 h-3.5" /> Delete
+                        <Trash2 className="w-3.5 h-3.5" /> {t("meetings.delete")}
                       </button>
                     )}
                   </div>

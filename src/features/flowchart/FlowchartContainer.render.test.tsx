@@ -91,7 +91,7 @@ describe("FlowchartView", () => {
     // Assertion pada isi nyata: "body tidak kosong" akan tetap hijau meski yang
     // ter-render hanya sisa kerangka.
     await waitFor(() =>
-      expect(screen.getByRole("heading", { name: /Flowchart Editor/i })).toBeInTheDocument()
+      expect(screen.getByRole("heading", { name: /Editor Diagram Alur/i })).toBeInTheDocument()
     );
     // #135 — subjudul kini datang dari kamus i18n. Bahasa bawaan aplikasi
     // adalah Indonesia, jadi penandanya ikut Indonesia. Yang dijaga tetap

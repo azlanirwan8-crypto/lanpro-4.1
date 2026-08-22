@@ -69,7 +69,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
             </div>
             <div>
               <h3 className="text-base font-medium text-content tracking-tight">
-                Flowchart Editor
+                {t("flowchart.editorTitle")}
               </h3>
               <p className="text-xs font-medium text-content-muted mt-0.5">
                 {t("flowchart.subtitle")}
@@ -111,14 +111,14 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                   <th className="py-3.5 px-4 min-w-[180px] max-w-[280px]">
                     {t("flowchart.thTitle")}
                   </th>
-                  <th className="py-3.5 px-4 w-36">Category</th>
+                  <th className="py-3.5 px-4 w-36">{t("flowchart.thCategory")}</th>
                   <th className="py-3.5 px-4 min-w-[180px] max-w-[280px]">
                     {t("flowchart.thDescription")}
                   </th>
-                  <th className="py-3.5 px-4 w-44">Linked Epic</th>
-                  <th className="py-3.5 px-4 w-40">Author</th>
-                  <th className="py-3.5 px-4 w-36">Last Updated</th>
-                  <th className="py-3.5 px-4 w-28 text-center">Action</th>
+                  <th className="py-3.5 px-4 w-44">{t("flowchart.thLinkedEpic")}</th>
+                  <th className="py-3.5 px-4 w-40">{t("flowchart.thAuthor")}</th>
+                  <th className="py-3.5 px-4 w-36">{t("wiki.thLastUpdated")}</th>
+                  <th className="py-3.5 px-4 w-28 text-center">{t("flowchart.thAction")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border-faint text-xs font-medium text-content-body">
@@ -266,8 +266,9 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
           {/* Pagination Footer */}
           <div className="px-6 py-4 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
             <div className="text-xs text-content-muted font-medium">
-              Showing {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} to{" "}
-              {Math.min(currentPage * itemsPerPage, totalItems)} of {totalItems} entries
+              {t("common.showing")} {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
+              {t("common.to")} {Math.min(currentPage * itemsPerPage, totalItems)} {t("common.of")}{" "}
+              {totalItems} {t("common.entries")}
             </div>
 
             {totalPages > 1 && (
