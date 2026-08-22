@@ -141,7 +141,7 @@ export const CompleteRegistrationScreen = ({
         <div>
           <label className="mb-1.5 block text-sm font-medium text-content-body">
             Username <span className="text-danger-text">*</span>{" "}
-            <span className="font-normal text-content-muted">(Huruf saja, maks 10)</span>
+            <span className="font-normal text-content-muted">{t("completeReg.usernameHint")}</span>
           </label>
           <input
             type="text"

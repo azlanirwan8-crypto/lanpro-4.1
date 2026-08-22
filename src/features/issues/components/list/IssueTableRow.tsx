@@ -725,7 +725,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                         className="w-full text-left px-3 py-1.5 text-xs sm:text-[11px] font-medium text-red-600 hover:bg-red-500/10 flex items-center gap-2 cursor-pointer border-t border-border-faint"
                       >
                         <Trash className="w-3.5 h-3.5 text-red-400" />
-                        <span>Delete Issue</span>
+                        <span>{t("issueRow.deleteIssue")}</span>
                       </button>
                     )}
                   </div>

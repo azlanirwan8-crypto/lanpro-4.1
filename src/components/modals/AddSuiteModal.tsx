@@ -75,9 +75,9 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
                 onChange={(e) => onPhaseChange(e.target.value as any)}
                 className="w-full text-xs p-3 bg-surface-sunken/80 border border-border-subtle rounded-md focus:border-primary focus:outline-none font-medium text-primary cursor-pointer"
               >
-                <option value="SIT">Fase SIT (System Integration Test)</option>
-                <option value="UAT">Fase UAT (User Acceptance Test)</option>
-                <option value="PTR">Fase PTR (Production Readiness Test)</option>
+                <option value="SIT">{t("addSuite.phaseSitFull")}</option>
+                <option value="UAT">{t("addSuite.phaseUatFull")}</option>
+                <option value="PTR">{t("addSuite.phasePtrFull")}</option>
               </select>
             </div>
 

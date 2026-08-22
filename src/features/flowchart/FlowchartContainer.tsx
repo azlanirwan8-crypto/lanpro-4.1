@@ -2514,7 +2514,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     }}
                     className="flex items-center gap-1.5 text-xs font-medium text-primary bg-primary-surface/10 hover:bg-primary-surface/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
                   >
-                    ← Back to Flowchart List
+                    {t("flowchart.backToList")}
                   </button>
 
                   {/* Action Buttons & View Mode Toggle */}
@@ -3362,24 +3362,20 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 }}
                                 className="w-full text-xs bg-surface-sunken border border-border-subtle rounded-lg p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 font-medium transition-all"
                               >
-                                <option value="rect">🔲 Proses (Rectangle)</option>
-                                <option value="decision">🔶 Decision / Keputusan (Diamond)</option>
-                                <option value="predefined">
-                                  📋 Predefined Process (Double Border)
-                                </option>
-                                <option value="database">🛢️ Database Server (Cylinder)</option>
-                                <option value="oval">🟢 Start / End (Oval Boundary)</option>
-                                <option value="circle">⚪ Bulatan Kategori (Circle)</option>
-                                <option value="sticky">💛 Catatan Tempel Miro (Sticky)</option>
-                                <option value="cloud">☁️ Arsitektur Awan (Cloud)</option>
-                                <option value="parallelogram">
-                                  📐 Input / Output (Parallelogram)
-                                </option>
-                                <option value="document">📄 Dokumen Laporan (Document)</option>
-                                <option value="actor">👤 Aktor Pengguna (User Actor)</option>
-                                <option value="folder">📂 Folder Penyimpanan (Folder)</option>
-                                <option value="card">🗂️ Story Backlog Card</option>
-                                <option value="text">✏️ Tulisan Bebas (Plain Text)</option>
+                                <option value="rect">{t("shapes.shRect")}</option>
+                                <option value="decision">{t("shapes.shDecision")}</option>
+                                <option value="predefined">{t("shapes.shPredefined")}</option>
+                                <option value="database">{t("shapes.shDatabase")}</option>
+                                <option value="oval">{t("shapes.shOval")}</option>
+                                <option value="circle">{t("shapes.shCircle")}</option>
+                                <option value="sticky">{t("shapes.shSticky")}</option>
+                                <option value="cloud">{t("shapes.shCloud")}</option>
+                                <option value="parallelogram">{t("shapes.shParallelogram")}</option>
+                                <option value="document">{t("shapes.shDocument")}</option>
+                                <option value="actor">{t("shapes.shActor")}</option>
+                                <option value="folder">{t("shapes.shFolder")}</option>
+                                <option value="card">{t("shapes.shCard")}</option>
+                                <option value="text">{t("shapes.shText")}</option>
                               </select>
                             </div>
 
@@ -3658,9 +3654,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   onChange={(e) => setFlowCategory(e.target.value)}
                   className="w-full text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
                 >
-                  <option value="PRD">PRD (Product Requirements Document)</option>
-                  <option value="Panduan">Panduan (Technical Guideline)</option>
-                  <option value="Laporan">Laporan (Report / Audit)</option>
+                  <option value="PRD">{t("shapes.docPrd")}</option>
+                  <option value="Panduan">{t("shapes.docGuide")}</option>
+                  <option value="Laporan">{t("shapes.docReport")}</option>
                 </select>
               </div>
 

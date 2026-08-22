@@ -145,7 +145,9 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
           <div className="p-2.5 rounded bg-surface border border-border-subtle/60">
-            <span className="text-content-muted block text-[11px]">Penyedia Backend</span>
+            <span className="text-content-muted block text-[11px]">
+              {t("emailCfg.backendProvider")}
+            </span>
             <span className="font-medium text-content-strong">
               {emailStatus?.provider || "Resend (REST API)"}
             </span>
@@ -182,7 +184,9 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium text-content-body">Isi Pesan Template (Body)</label>
+          <label className="text-xs font-medium text-content-body">
+            {t("emailCfg.bodyTemplate")}
+          </label>
           <textarea
             rows={4}
             value={formData.bodyTemplate || ""}

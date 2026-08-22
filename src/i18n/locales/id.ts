@@ -11,6 +11,10 @@
  */
 export const id = {
   sidebar: {
+    yourProfile: "Profil Anda",
+    logout: "Keluar",
+    profileMenuHint: "Klik untuk opsi profil & keluar",
+    profileOptions: "Opsi Profil",
     menu: "Menu",
     dashboard: "Dashboard",
     collaboration: "Kolaborasi",
@@ -148,6 +152,8 @@ export const id = {
     searchPlaceholder: "Cari nama, jabatan, atau email...",
   },
   users: {
+    waPhone: "WA/HP:",
+    emptyRoleCatalog: "(katalog peran sistem kosong)",
     projectsCount: "{{count}} Proyek",
     tasksCount: "{{count}} Tugas",
     selectedForBulk: "pengguna terpilih untuk Aksi Massal",
@@ -248,6 +254,7 @@ export const id = {
     previous: "Sebelumnya",
   },
   master: {
+    pickProject: "-- Pilih Project --",
     enterpriseControl: "Pusat Kendali Perusahaan",
     moduleHint: "Kelola master data modul / aplikasi yang dipetakan ke proyek aktif enterprise.",
     configHint: "Kelola konfigurasi standar untuk {{type}} dengan penguncian integritas data.",
@@ -297,6 +304,8 @@ export const id = {
     selectProject: "-- Pilih Proyek --",
   },
   filters: {
+    filtersShort: "Filter",
+    configureColumns: "Atur Kolom",
     searchIssues: "Cari isu...",
     advancedFilters: "Saringan Lanjutan",
     allCategories: "Semua Kategori",
@@ -322,6 +331,10 @@ export const id = {
     projectRisk: "Risiko Proyek (Kustom)",
   },
   userDetail: {
+    adminAccessPrefix: "Role",
+    adminAccessSuffix:
+      "memiliki akses penuh secara default, namun override per-modul di bawah akan diberlakukan secara eksplisit.",
+    pickProject: "-- Pilih Proyek --",
     notFound: "Pengguna tidak ditemukan",
     back: "Kembali",
     backToUserMgmt: "Kembali ke Manajemen Pengguna",
@@ -366,6 +379,7 @@ export const id = {
     selectSubTeam: "Pilih Sub-Tim / PIC Bawahan (Tim di bawah Admin Proyek ini):",
   },
   issueColumns: {
+    allPriorities: "Semua Prioritas",
     work: "PEKERJAAN",
     assignee: "DITUGASKAN",
     reporter: "PELAPOR",
@@ -438,6 +452,7 @@ export const id = {
     exportReport: "Ekspor Laporan Eksekusi QA",
   },
   kanban: {
+    blockedCardHint: "Kartu terbelenggu: Selesaikan semua subtask sebelum memindahkan ke Done",
     loadingBoard: "Memuat papan...",
     empty: "Kosong",
     byEpic: "Per Epic",
@@ -447,6 +462,7 @@ export const id = {
     swimlanes: "Jalur",
   },
   flowchart: {
+    backToList: "← Kembali ke Daftar Diagram Alur",
     subtitle: "Kelola diagram interaktif, alur proses, dan arsitektur visual.",
     addFlowchart: "Tambah Diagram Alur",
     searchPlaceholder: "Cari diagram alur berdasarkan judul...",
@@ -549,6 +565,8 @@ export const id = {
     deleteKeyHint: "Delete / Backspace",
   },
   editProject: {
+    completed: "Selesai",
+    idRef: "ID (Ref)",
     title: "Ubah Proyek",
     projectName: "Nama Proyek",
     projectKey: "Kunci Proyek",
@@ -560,6 +578,8 @@ export const id = {
     terminate: "Hentikan Proyek (Hapus Permanen)",
   },
   editSprint: {
+    planned: "Direncanakan",
+    completedOpt: "Selesai",
     title: "Ubah Fase",
     name: "Nama",
     startDate: "Tanggal Mulai",
@@ -582,6 +602,7 @@ export const id = {
     processStatus: "Status Proses",
   },
   wiki: {
+    clearSearch: "Bersihkan Pencarian",
     title: "Dokumentasi",
     addDocument: "Tambah Dokumen",
     thTitle: "Judul Dokumen",
@@ -894,6 +915,23 @@ export const id = {
     howItWorks: "Bagaimana Cara Kerjanya?",
   },
   shapes: {
+    shRect: "🔲 Proses (Rectangle)",
+    shDecision: "🔶 Decision / Keputusan (Diamond)",
+    shPredefined: "📋 Predefined Process (Double Border)",
+    shDatabase: "🛢️ Database Server (Cylinder)",
+    shOval: "🟢 Start / End (Oval Boundary)",
+    shCircle: "⚪ Bulatan Kategori (Circle)",
+    shSticky: "💛 Catatan Tempel Miro (Sticky)",
+    shCloud: "☁️ Arsitektur Awan (Cloud)",
+    shParallelogram: "📐 Input / Output (Parallelogram)",
+    shDocument: "📄 Dokumen Laporan (Document)",
+    shActor: "👤 Aktor Pengguna (User Actor)",
+    shFolder: "📂 Folder Penyimpanan (Folder)",
+    shCard: "🗂️ Story Backlog Card",
+    shText: "✏️ Tulisan Bebas (Plain Text)",
+    docPrd: "PRD (Product Requirements Document)",
+    docGuide: "Panduan (Technical Guideline)",
+    docReport: "Laporan (Report / Audit)",
     changeShapeType: "Ubah jenis bentuk",
     rectangle: "Persegi Panjang",
     triangle: "Segitiga",
@@ -966,6 +1004,10 @@ export const id = {
     sendMessage: "Kirim Pesan",
   },
   importDiagram: {
+    xmlHint: "XML Terkompresi maupun Mentah (.xml / .drawio)",
+    orSep: "atau",
+    mergeCanvas: "➕ Gabungkan ke Kanvas",
+    replaceCanvas: "🔥 Ganti Kanvas Aktif",
     title: "Integrasi & Impor Berkas Alur Kerja",
     drawioFile: "Berkas .xml / .drawio",
     miroFile: "Miro .json / .csv",
@@ -1079,6 +1121,10 @@ export const id = {
     deleteTestCase: "Hapus Test Case",
   },
   whatsapp: {
+    providerLocal: "Local Open-Source (WAHA/Localhost)",
+    apiToken: "API Token / Auth Key",
+    deviceIdOptional: "Device ID (Opsional)",
+    targetNumber: "Nomor Tujuan (Format: 628xxx)",
     provider: "Penyedia API Gateway",
     customHttp: "HTTP POST Kustom",
     baseUrl: "Endpoint API Base URL",
@@ -1107,6 +1153,8 @@ export const id = {
     saveChanges: "Simpan Perubahan",
   },
   emailCfg: {
+    backendProvider: "Penyedia Backend",
+    bodyTemplate: "Isi Pesan Template (Body)",
     integrationStatus: "Status Integrasi Email",
     checking: "Memeriksa...",
     providerBackend: "Penyedia Backend",
@@ -1120,6 +1168,9 @@ export const id = {
     cancel: "Batal",
   },
   resetPwd: {
+    ruleCase: "Huruf besar (A-Z) & huruf kecil (a-z)",
+    ruleDigit: "Minimal 1 angka (0-9)",
+    ruleSymbol: "Minimal 1 simbol khusus (@$!%*?&)",
     title: "Atur Kata Sandi Baru",
     subtitle: "Buat kata sandi baru yang kuat untuk akun LanPro Anda.",
     successTitle: "Kata Sandi Berhasil Diperbarui!",
@@ -1132,6 +1183,7 @@ export const id = {
     cancel: "Batal",
   },
   canvasMenu: {
+    toggleConfigPanel: "Alihkan Panel Konfigurasi",
     title: "Aksi Kanvas",
     activeCanvas: "KANVAS AKTIF",
     addComponent: "Tambah Komponen Baru",
@@ -1187,6 +1239,11 @@ export const id = {
     createBugFromCase: "Buat Tiket Bug dari Test Case Ini",
   },
   flowNode: {
+    dragToPan: "Geser untuk menggeser tampilan",
+    minimap: "Peta Mini",
+    shapeOval: "Oval (Start/End)",
+    shapeDecision: "Keputusan (Diamond)",
+    shapeDelay: "Jeda (Bullet)",
     dragTop: "Tarik panah dari sisi atas",
     dragRight: "Tarik panah dari sisi kanan",
     dragBottom: "Tarik panah dari sisi bawah",
@@ -1212,6 +1269,7 @@ export const id = {
     confirmRestore: "Konfirmasi Pemulihan Basis Data",
   },
   bulkActions: {
+    unassignedClear: "Tanpa Penerima (Kosongkan)",
     perPage: "Per Halaman:",
     all: "Semua",
     prev: "Sebelumnya",
@@ -1244,6 +1302,7 @@ export const id = {
     noActiveLock: "Tidak ada kunci aktif. Membuka test suite akan mengunci otomatis.",
   },
   qaSuite: {
+    allProjectPic: "Semua PIC Proyek (Semua Anggota)",
     allPhases: "Semua Fase (ALL)",
     phaseSit: "Fase SIT (Integration)",
     phaseUat: "Fase UAT (Acceptance)",
@@ -1348,6 +1407,10 @@ export const id = {
     testConnection: "Uji Koneksi",
   },
   appShell: {
+    loading: "Memuat...",
+    forbidden: "403 Terlarang",
+    forbiddenIntegration:
+      "Anda tidak memiliki izin untuk melihat Pengaturan Integrasi. Hubungi administrator bila memerlukan akses.",
     viewBug: "LIHAT BUG",
     notifications: "Notifikasi",
     back: "Kembali",
@@ -1356,6 +1419,7 @@ export const id = {
     createNewProject: "Buat Proyek Baru",
   },
   completeReg: {
+    usernameHint: "(Huruf saja, maks 10)",
     regSuccess: "Pendaftaran Berhasil",
     backToLogin: "Kembali ke Halaman Masuk",
     completeReg: "Lengkapi Pendaftaran",
@@ -1372,6 +1436,7 @@ export const id = {
     noActivityLog: "Belum ada log aktivitas tercatat.",
   },
   meetingExtra: {
+    readOnlyMode: "Mode Baca Saja (Bukan Author/Admin)",
     previous: "Sebelumnya",
     next: "Berikutnya",
     downloadAttachment: "Unduh Berkas Lampiran",
@@ -1411,6 +1476,9 @@ export const id = {
     whatsappPreview: "Pratinjau WhatsApp",
   },
   addSuite: {
+    phaseSitFull: "Fase SIT (System Integration Test)",
+    phaseUatFull: "Fase UAT (User Acceptance Test)",
+    phasePtrFull: "Fase PTR (Production Readiness Test)",
     createDocument: "Buat Dokumen",
     title: "Tambah Dokumen Skrip",
     subtitle: "Buat modul skenario pengujian baru",
@@ -1426,6 +1494,9 @@ export const id = {
     viewAll: "Lihat semua notifikasi",
   },
   session: {
+    sec60: "60 DETIK",
+    sec0: "0 DETIK",
+    timeLeftPct: "SISA WAKTU",
     expiring: "Sesi Anda Hampir Berakhir!",
     autoLogout: "OTOMATIS KELUAR DALAM",
     extend: "Perpanjang Sesi Aktif",

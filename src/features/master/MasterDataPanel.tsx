@@ -1560,7 +1560,7 @@ export const MasterDataPanel = ({
               onChange={(e) => setEditingModuleProjectId(e.target.value)}
               className="w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium text-content-strong focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all"
             >
-              <option value="">-- Pilih Project --</option>
+              <option value="">{t("master.pickProject")}</option>
               {projects.map((p: any) => (
                 <option key={p.id} value={p.id}>
                   {p.name}

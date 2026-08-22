@@ -101,12 +101,14 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
               >
                 <option value="Active">{t("editProject.active")}</option>
                 <option value="On Hold">{t("ui.onHold")}</option>
-                <option value="Completed">Completed</option>
+                <option value="Completed">{t("editProject.completed")}</option>
                 <option value="Archived">{t("ui.archived")}</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-body mb-1">ID (Ref)</label>
+              <label className="block text-sm font-medium text-content-body mb-1">
+                {t("editProject.idRef")}
+              </label>
               <div className="px-3 py-2 bg-surface-sunken rounded-lg text-sm text-content-muted font-mono border border-border-faint italic">
                 #{editingProject.id.slice(-6).toUpperCase()}
               </div>

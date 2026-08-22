@@ -34,7 +34,7 @@ export const ConfigureColumnsModal: React.FC<ConfigureColumnsModalProps> = ({
           onClick={(e) => e.stopPropagation()}
         >
           <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-surface">
-            <h2 className="text-sm font-semibold text-content">Configure Columns</h2>
+            <h2 className="text-sm font-semibold text-content">{t("filters.configureColumns")}</h2>
             <button
               onClick={onClose}
               className="p-1 rounded-md text-content-subtle hover:text-content-secondary hover:bg-surface-muted transition-colors"

@@ -275,7 +275,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                                   : "text-content-body"
                               }`}
                             >
-                              <span>Semua PIC Proyek (All Members)</span>
+                              <span>{t("qaSuite.allProjectPic")}</span>
                               {!suite.assignedTo && (
                                 <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
                               )}

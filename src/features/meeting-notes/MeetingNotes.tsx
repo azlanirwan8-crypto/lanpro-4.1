@@ -943,7 +943,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
               {!canModify ? (
                 <div className="text-xs font-medium text-rose-600 flex items-center gap-1.5 bg-rose-500/10 px-3.5 py-2 rounded-md border border-rose-500/30 shadow-2xs">
                   <Eye className="w-4 h-4 text-rose-500" />
-                  <span>Mode Baca Saja (Bukan Author/Admin)</span>
+                  <span>{t("meetingExtra.readOnlyMode")}</span>
                 </div>
               ) : (
                 <button

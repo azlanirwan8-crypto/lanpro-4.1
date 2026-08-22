@@ -13,6 +13,10 @@
  */
 export const en = {
   sidebar: {
+    yourProfile: "Your Profile",
+    logout: "Log Out",
+    profileMenuHint: "Click for profile options & logout",
+    profileOptions: "Profile Options",
     menu: "Menu",
     dashboard: "Dashboard",
     collaboration: "Collaboration",
@@ -150,6 +154,8 @@ export const en = {
     searchPlaceholder: "Search for name, designation, or email...",
   },
   users: {
+    waPhone: "WA/Phone:",
+    emptyRoleCatalog: "(system role catalog is empty)",
     projectsCount: "{{count}} Projects",
     tasksCount: "{{count}} Tasks",
     selectedForBulk: "users selected for bulk action",
@@ -250,6 +256,7 @@ export const en = {
     previous: "Previous",
   },
   master: {
+    pickProject: "-- Select Project --",
     enterpriseControl: "Enterprise Control Center",
     moduleHint:
       "Manage master data of modules / applications mapped to the active enterprise project.",
@@ -300,6 +307,8 @@ export const en = {
     selectProject: "-- Select Project --",
   },
   filters: {
+    filtersShort: "Filters",
+    configureColumns: "Configure Columns",
     searchIssues: "Search issues...",
     advancedFilters: "Advanced Filters",
     allCategories: "All Categories",
@@ -325,6 +334,10 @@ export const en = {
     projectRisk: "Project Risk (Custom)",
   },
   userDetail: {
+    adminAccessPrefix: "The",
+    adminAccessSuffix:
+      "role has full access by default, but the per-module overrides below are applied explicitly.",
+    pickProject: "-- Select Project --",
     notFound: "User not found",
     back: "Back",
     backToUserMgmt: "Back to User Management",
@@ -369,6 +382,7 @@ export const en = {
     selectSubTeam: "Select Sub-Team / Subordinate PIC (Team under this Project Admin):",
   },
   issueColumns: {
+    allPriorities: "All Priorities",
     work: "WORK",
     assignee: "ASSIGNEE",
     reporter: "REPORTER",
@@ -441,6 +455,7 @@ export const en = {
     exportReport: "Export QA Execution Report",
   },
   kanban: {
+    blockedCardHint: "Card blocked: finish all subtasks before moving it to Done",
     loadingBoard: "Loading board...",
     empty: "Empty",
     byEpic: "By Epic",
@@ -450,6 +465,7 @@ export const en = {
     swimlanes: "Swimlanes",
   },
   flowchart: {
+    backToList: "← Back to Flowchart List",
     subtitle: "Manage interactive diagrams, process flows, and visual architecture.",
     addFlowchart: "Add Flowchart",
     searchPlaceholder: "Search flowcharts by title...",
@@ -552,6 +568,8 @@ export const en = {
     deleteKeyHint: "Delete / Backspace",
   },
   editProject: {
+    completed: "Completed",
+    idRef: "ID (Ref)",
     title: "Edit Project",
     projectName: "Project Name",
     projectKey: "Project Key",
@@ -563,6 +581,8 @@ export const en = {
     terminate: "Terminate Project (Permanent Delete)",
   },
   editSprint: {
+    planned: "Planned",
+    completedOpt: "Completed",
     title: "Edit Phase",
     name: "Name",
     startDate: "Start Date",
@@ -585,6 +605,7 @@ export const en = {
     processStatus: "Process Status",
   },
   wiki: {
+    clearSearch: "Clear Search",
     title: "Documentation",
     addDocument: "Add Document",
     thTitle: "Document Title",
@@ -891,6 +912,23 @@ export const en = {
     howItWorks: "How Does It Work?",
   },
   shapes: {
+    shRect: "🔲 Process (Rectangle)",
+    shDecision: "🔶 Decision (Diamond)",
+    shPredefined: "📋 Predefined Process (Double Border)",
+    shDatabase: "🛢️ Database Server (Cylinder)",
+    shOval: "🟢 Start / End (Oval Boundary)",
+    shCircle: "⚪ Category Circle",
+    shSticky: "💛 Miro Sticky Note",
+    shCloud: "☁️ Cloud Architecture",
+    shParallelogram: "📐 Input / Output (Parallelogram)",
+    shDocument: "📄 Report Document",
+    shActor: "👤 User Actor",
+    shFolder: "📂 Storage Folder",
+    shCard: "🗂️ Story Backlog Card",
+    shText: "✏️ Free Text (Plain Text)",
+    docPrd: "PRD (Product Requirements Document)",
+    docGuide: "Guideline (Technical Guideline)",
+    docReport: "Report (Report / Audit)",
     changeShapeType: "Change shape type",
     rectangle: "Rectangle",
     triangle: "Triangle",
@@ -963,6 +1001,10 @@ export const en = {
     sendMessage: "Send Message",
   },
   importDiagram: {
+    xmlHint: "Compressed or Raw XML (.xml / .drawio)",
+    orSep: "or",
+    mergeCanvas: "➕ Merge into Canvas",
+    replaceCanvas: "🔥 Replace Active Canvas",
     title: "Workflow File Integration & Import",
     drawioFile: "File .xml / .drawio",
     miroFile: "Miro .json / .csv",
@@ -1076,6 +1118,10 @@ export const en = {
     deleteTestCase: "Delete Test Case",
   },
   whatsapp: {
+    providerLocal: "Local Open-Source (WAHA/Localhost)",
+    apiToken: "API Token / Auth Key",
+    deviceIdOptional: "Device ID (Optional)",
+    targetNumber: "Target Number (Format: 628xxx)",
     provider: "API Gateway Provider",
     customHttp: "Custom HTTP POST",
     baseUrl: "API Base URL Endpoint",
@@ -1104,6 +1150,8 @@ export const en = {
     saveChanges: "Save Changes",
   },
   emailCfg: {
+    backendProvider: "Backend Provider",
+    bodyTemplate: "Message Body Template",
     integrationStatus: "Email Integration Status",
     checking: "Checking...",
     providerBackend: "Provider Backend",
@@ -1117,6 +1165,9 @@ export const en = {
     cancel: "Cancel",
   },
   resetPwd: {
+    ruleCase: "Uppercase (A-Z) & lowercase (a-z)",
+    ruleDigit: "At least 1 digit (0-9)",
+    ruleSymbol: "At least 1 special symbol (@$!%*?&)",
     title: "Set a New Password",
     subtitle: "Create a strong new password for your LanPro account.",
     successTitle: "Password Updated Successfully!",
@@ -1129,6 +1180,7 @@ export const en = {
     cancel: "Cancel",
   },
   canvasMenu: {
+    toggleConfigPanel: "Toggle Configuration Panel",
     title: "Canvas Actions",
     activeCanvas: "ACTIVE CANVAS",
     addComponent: "Add New Component",
@@ -1183,6 +1235,11 @@ export const en = {
     createBugFromCase: "Create a Bug Ticket from This Test Case",
   },
   flowNode: {
+    dragToPan: "Drag to pan",
+    minimap: "Minimap",
+    shapeOval: "Oval (Start/End)",
+    shapeDecision: "Decision (Diamond)",
+    shapeDelay: "Delay (Bullet)",
     dragTop: "Drag an arrow from the top edge",
     dragRight: "Drag an arrow from the right edge",
     dragBottom: "Drag an arrow from the bottom edge",
@@ -1208,6 +1265,7 @@ export const en = {
     confirmRestore: "Confirm Database Restore",
   },
   bulkActions: {
+    unassignedClear: "Unassigned (Clear)",
     perPage: "Per Page:",
     all: "All",
     prev: "Prev",
@@ -1240,6 +1298,7 @@ export const en = {
     noActiveLock: "No active lock. Opening a test suite locks it automatically.",
   },
   qaSuite: {
+    allProjectPic: "All Project PICs (All Members)",
     allPhases: "All Phases (ALL)",
     phaseSit: "SIT Phase (Integration)",
     phaseUat: "UAT Phase (Acceptance)",
@@ -1343,6 +1402,10 @@ export const en = {
     testConnection: "Test Connection",
   },
   appShell: {
+    loading: "Loading...",
+    forbidden: "403 Forbidden",
+    forbiddenIntegration:
+      "You do not have permission to view Integration Settings. Please contact your administrator if you need access.",
     viewBug: "VIEW BUG",
     notifications: "Notifications",
     back: "Back",
@@ -1351,6 +1414,7 @@ export const en = {
     createNewProject: "Create New Project",
   },
   completeReg: {
+    usernameHint: "(Letters only, max 10)",
     regSuccess: "Registration Successful",
     backToLogin: "Back to Sign In Page",
     completeReg: "Complete Registration",
@@ -1367,6 +1431,7 @@ export const en = {
     noActivityLog: "No activity log recorded yet.",
   },
   meetingExtra: {
+    readOnlyMode: "Read-Only Mode (Not Author/Admin)",
     previous: "Previous",
     next: "Next",
     downloadAttachment: "Download attached file",
@@ -1406,6 +1471,9 @@ export const en = {
     whatsappPreview: "WhatsApp Preview",
   },
   addSuite: {
+    phaseSitFull: "SIT Phase (System Integration Test)",
+    phaseUatFull: "UAT Phase (User Acceptance Test)",
+    phasePtrFull: "PTR Phase (Production Readiness Test)",
     createDocument: "Create Document",
     title: "Add Script Document",
     subtitle: "Create a new test scenario module",
@@ -1421,6 +1489,9 @@ export const en = {
     viewAll: "View all notifications",
   },
   session: {
+    sec60: "60 SECONDS",
+    sec0: "0 SECONDS",
+    timeLeftPct: "TIME LEFT",
     expiring: "Your Session Is About to Expire!",
     autoLogout: "AUTO LOGOUT IN",
     extend: "Extend Active Session",

@@ -116,7 +116,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               onChange={(e) => setListFilterPriority(e.target.value)}
               className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
             >
-              <option value="All">Semua Prioritas</option>
+              <option value="All">{t("issueColumns.allPriorities")}</option>
               {mArr
                 .filter((m) => m.type === "priority")
                 .map((m, idx) => (

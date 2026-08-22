@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion } from "motion/react";
 import { Plus, SearchX, BookOpen, Sparkles, RefreshCw } from "lucide-react";
@@ -15,6 +16,7 @@ export const WikiEmptyState: React.FC<WikiEmptyStateProps> = ({
   selectedCategory,
   onResetFilters,
 }) => {
+  const { t } = useTranslation();
   const isFiltered = searchQuery || selectedCategory !== "SEMUA";
 
   return (
@@ -196,7 +198,7 @@ export const WikiEmptyState: React.FC<WikiEmptyStateProps> = ({
             className="flex items-center gap-2 px-4 py-2.5 bg-surface hover:bg-surface-sunken text-content-secondary border border-border-subtle rounded-md font-medium text-xs transition-all cursor-pointer shadow-2xs"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>Bersihkan Pencarian</span>
+            <span>{t("wiki.clearSearch")}</span>
           </button>
         )}
 

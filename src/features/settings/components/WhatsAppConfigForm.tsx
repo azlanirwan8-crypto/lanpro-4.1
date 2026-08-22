@@ -51,7 +51,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
             onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
             className={inputStyle}
           >
-            <option>Local Open-Source (WAHA/Localhost)</option>
+            <option>{t("whatsapp.providerLocal")}</option>
             <option>FlowKirim</option>
             <option>{t("whatsapp.customHttp")}</option>
           </select>
@@ -69,7 +69,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
 
         <div>
           <PasswordInput
-            label="API Token / Auth Key"
+            label={t("whatsapp.apiToken")}
             value={formData.token}
             onChange={(val) => setFormData({ ...formData, token: val })}
           />
@@ -88,7 +88,9 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs font-medium text-content-body">Device ID (Optional)</label>
+            <label className="text-xs font-medium text-content-body">
+              {t("whatsapp.deviceIdOptional")}
+            </label>
             <input
               value={formData.deviceId}
               onChange={(e) => setFormData({ ...formData, deviceId: e.target.value })}
@@ -129,7 +131,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
               {t("whatsapp.testConnection")}
             </h3>
             <div className="space-y-1">
-              <label className="text-xs text-content-muted">Nomor Tujuan (Format: 628xxx)</label>
+              <label className="text-xs text-content-muted">{t("whatsapp.targetNumber")}</label>
               <input
                 value={testTargetNumber}
                 onChange={(e) => setTestTargetNumber(e.target.value)}

@@ -1,34 +1,9 @@
 {
   "src\\AppContainer.tsx": [[656, "teks", "Promise"]],
-  "src\\components\\modals\\AddSuiteModal.tsx": [
-    [78, "teks", "Fase SIT (System Integration Test)"],
-    [79, "teks", "Fase UAT (User Acceptance Test)"],
-    [80, "teks", "Fase PTR (Production Readiness Test)"]
-  ],
-  "src\\components\\modals\\EditProjectModal.tsx": [
-    [104, "teks", "Completed"],
-    [109, "teks", "ID (Ref)"]
-  ],
-  "src\\components\\modals\\EditSprintModal.tsx": [
-    [63, "teks", "Planned"],
-    [65, "teks", "Completed"],
-    [128, "teks", "Planned"],
-    [130, "teks", "Completed"]
-  ],
   "src\\components\\NotificationsDropdown.tsx": [[24, "teks", "Promise"]],
-  "src\\components\\SessionExpiryWarning.tsx": [
-    [15, "teks", "Promise"],
-    [257, "teks", "60 DETIK"],
-    [263, "teks", "0 DETIK"]
-  ],
+  "src\\components\\SessionExpiryWarning.tsx": [[15, "teks", "Promise"]],
   "src\\contexts\\PresenceContext.tsx": [[11, "teks", "Promise"]],
-  "src\\features\\auth\\CompleteRegistrationScreen.tsx": [[144, "teks", "(Huruf saja, maks 10)"]],
   "src\\features\\auth\\components\\AuthHeroPanel.tsx": [[59, "teks", "PRO"]],
-  "src\\features\\auth\\components\\ResetPasswordModal.tsx": [
-    [182, "teks", "Huruf besar (A-Z) & huruf kecil (a-z)"],
-    [183, "teks", "Minimal 1 angka (0-9)"],
-    [184, "teks", "Minimal 1 simbol khusus (@$!%*?&)"]
-  ],
   "src\\features\\auth\\types.ts": [[11, "teks", "Promise"]],
   "src\\features\\connect\\ConnectPanel.tsx": [
     [178, "teks", "defaultdb"],
@@ -54,43 +29,11 @@
     [183, "teks", "PostgreSQL (Neon Cloud)"],
     [318, "teks", "null"]
   ],
-  "src\\features\\flowchart\\components\\CanvasToolbar.tsx": [
-    [150, "title", "Toggle Panel Konfigurasi"]
-  ],
-  "src\\features\\flowchart\\components\\FlowchartMinimap.tsx": [
-    [259, "teks", "Drag to pan"],
-    [283, "teks", "Minimap"]
-  ],
-  "src\\features\\flowchart\\components\\ImportDiagramModal.tsx": [
-    [161, "teks", "XML Terkompresi maupun Mentah (.xml / .drawio)"],
-    [169, "teks", "atau"],
-    [315, "teks", "➕ Gabungkan ke Kanvas"],
-    [322, "teks", "🔥 Ganti Kanvas Aktif"]
-  ],
-  "src\\features\\flowchart\\components\\NodePropertiesOverlay.tsx": [
-    [61, "teks", "Oval (Start/End)"],
-    [62, "teks", "Decision (Diamond)"],
-    [74, "teks", "Delay (Bullet)"]
-  ],
+  "src\\features\\flowchart\\components\\ImportDiagramModal.tsx": [[169, "teks", "atau"]],
   "src\\features\\flowchart\\FlowchartContainer.tsx": [
     [76, "teks", "Promise"],
     [2171, "teks", "canvasLeft && n.x"],
-    [2171, "teks", "canvasTop && n.y"],
-    [3365, "teks", "🔲 Proses (Rectangle)"],
-    [3366, "teks", "🔶 Decision / Keputusan (Diamond)"],
-    [3370, "teks", "🛢️ Database Server (Cylinder)"],
-    [3371, "teks", "🟢 Start / End (Oval Boundary)"],
-    [3372, "teks", "⚪ Bulatan Kategori (Circle)"],
-    [3373, "teks", "💛 Catatan Tempel Miro (Sticky)"],
-    [3374, "teks", "☁️ Arsitektur Awan (Cloud)"],
-    [3378, "teks", "📄 Dokumen Laporan (Document)"],
-    [3379, "teks", "👤 Aktor Pengguna (User Actor)"],
-    [3380, "teks", "📂 Folder Penyimpanan (Folder)"],
-    [3381, "teks", "🗂️ Story Backlog Card"],
-    [3382, "teks", "✏️ Tulisan Bebas (Plain Text)"],
-    [3661, "teks", "PRD (Product Requirements Document)"],
-    [3662, "teks", "Panduan (Technical Guideline)"],
-    [3663, "teks", "Laporan (Report / Audit)"]
+    [2171, "teks", "canvasTop && n.y"]
   ],
   "src\\features\\flowchart\\lib\\routing.ts": [
     [18, "teks", "= Math.min(p.x, r.x) && q.x"],
@@ -98,30 +41,12 @@
     [47, "teks", "= rect.x1 + buffer && p.x"],
     [48, "teks", "= rect.y1 + buffer && p.y"]
   ],
-  "src\\features\\issues\\components\\list\\IssueAdvancedFiltersExpanded.tsx": [
-    [119, "teks", "Semua Prioritas"]
-  ],
   "src\\features\\issues\\components\\list\\IssueAdvancedFiltersPanel.tsx": [
-    [118, "placeholder", "Search issues..."],
-    [131, "title", "Toggle Advanced Filtering Panel"],
-    [135, "teks", "Filters"],
-    [312, "title", "Configure Columns"]
+    [131, "title", "Toggle Advanced Filtering Panel"]
   ],
-  "src\\features\\issues\\components\\list\\IssueBulkActionsBar.tsx": [
-    [184, "teks", "Unassigned (Kosongkan)"]
-  ],
-  "src\\features\\issues\\components\\list\\IssueQuickCreateBar.tsx": [
-    [11, "teks", "Promise"],
-    [180, "teks", "Add"]
-  ],
-  "src\\features\\issues\\components\\list\\IssueTableInlineAddRow.tsx": [
-    [28, "teks", "Promise"],
-    [145, "placeholder", "What needs to be done?"]
-  ],
-  "src\\features\\issues\\components\\list\\IssueTableRow.tsx": [
-    [51, "teks", "Promise"],
-    [728, "teks", "Delete Issue"]
-  ],
+  "src\\features\\issues\\components\\list\\IssueQuickCreateBar.tsx": [[11, "teks", "Promise"]],
+  "src\\features\\issues\\components\\list\\IssueTableInlineAddRow.tsx": [[29, "teks", "Promise"]],
+  "src\\features\\issues\\components\\list\\IssueTableRow.tsx": [[51, "teks", "Promise"]],
   "src\\features\\issues\\components\\modal\\TaskAttachmentsSection.tsx": [
     [21, "teks", "Promise"],
     [21, "teks", "Promise"]
@@ -142,18 +67,13 @@
     [16, "teks", "Promise"],
     [17, "teks", "Promise"]
   ],
-  "src\\features\\issues\\ConfigureColumnsModal.tsx": [[37, "teks", "Configure Columns"]],
   "src\\features\\issues\\TaskDetailModal.tsx": [[86, "teks", "Promise"]],
   "src\\features\\issues\\types.ts": [[50, "teks", "void | Promise"]],
-  "src\\features\\kanban\\components\\KanbanCard.tsx": [
-    [173, "title", "Kartu terbelenggu: Selesaikan semua subtask sebelum memindahkan ke Done"]
-  ],
   "src\\features\\master\\MasterDataPanel.tsx": [
     [927, "aria-label", "lock"],
     [1117, "teks", "Epic"],
     [1118, "teks", "Standard"],
-    [1119, "teks", "Subtask"],
-    [1563, "teks", "-- Pilih Project --"]
+    [1119, "teks", "Subtask"]
   ],
   "src\\features\\meeting-notes\\AiMeetingCompanion.tsx": [
     [1012, "teks", "\"Simpan & Mulai Analisis Ulang\""],
@@ -164,29 +84,7 @@
       "Contoh: AI kurang detail menangkap argumen teknis bagian API Hashing. Tolong jelaskan lebih rinci arsitektur keamanan datanya di rapat berikutnya."
     ]
   ],
-  "src\\features\\meeting-notes\\MeetingNotes.tsx": [
-    [946, "teks", "Mode Baca Saja (Bukan Author/Admin)"]
-  ],
-  "src\\features\\qa\\components\\QASuiteSidebar.tsx": [
-    [278, "teks", "Semua PIC Proyek (All Members)"]
-  ],
-  "src\\features\\settings\\components\\EmailConfigForm.tsx": [
-    [148, "teks", "Penyedia Backend"],
-    [185, "teks", "Isi Pesan Template (Body)"]
-  ],
-  "src\\features\\settings\\components\\WhatsAppConfigForm.tsx": [
-    [54, "teks", "Local Open-Source (WAHA/Localhost)"],
-    [55, "teks", "FlowKirim"],
-    [72, "label", "API Token / Auth Key"],
-    [91, "teks", "Device ID (Optional)"],
-    [132, "teks", "Nomor Tujuan (Format: 628xxx)"]
-  ],
-  "src\\features\\sidebar\\index.tsx": [
-    [329, "teks", "Profil Anda"],
-    [340, "teks", "Keluar"],
-    [352, "title", "Klik untuk opsi profil & keluar"],
-    [383, "title", "Opsi Profil"]
-  ],
+  "src\\features\\settings\\components\\WhatsAppConfigForm.tsx": [[55, "teks", "FlowKirim"]],
   "src\\features\\team\\TeamManagementPanel.tsx": [[40, "teks", "Promise"]],
   "src\\features\\timeline\\TimelinePanel.tsx": [
     [37, "teks", "Promise"],
@@ -197,15 +95,7 @@
     [20, "teks", "Promise"],
     [464, "teks", "= 0 && todayLeft"]
   ],
-  "src\\features\\users\\AdminUserPanel.tsx": [
-    [852, "teks", "WA/HP:"],
-    [1218, "teks", "(katalog peran sistem kosong)"]
-  ],
-  "src\\features\\users\\UserDetailView.tsx": [
-    [886, "teks", "Administrator"],
-    [1030, "teks", "-- Pilih Proyek --"]
-  ],
-  "src\\features\\wiki\\components\\WikiEmptyState.tsx": [[199, "teks", "Bersihkan Pencarian"]],
+  "src\\features\\users\\UserDetailView.tsx": [[887, "teks", "Administrator"]],
   "src\\hooks\\useAuth.ts": [
     [41, "teks", "Promise"],
     [48, "teks", "Promise"],
@@ -215,10 +105,8 @@
   "src\\hooks\\useFlowchartHistory.ts": [[104, "teks", "historyIndex"]],
   "src\\lib\\db.ts": [[300, "teks", "(sql: string, values?: any[]): Promise"]],
   "src\\routes\\AppRoutes.tsx": [
-    [25, "teks", "Promise"],
-    [104, "teks", "Memuat..."],
-    [133, "teks", "void | Promise"],
-    [139, "teks", "Promise"],
-    [479, "teks", "403 Forbidden"]
+    [26, "teks", "Promise"],
+    [137, "teks", "void | Promise"],
+    [143, "teks", "Promise"]
   ]
 }

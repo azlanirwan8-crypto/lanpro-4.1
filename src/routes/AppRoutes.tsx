@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { Suspense } from "react";
 import { ShieldAlert, FolderKanban } from "lucide-react";
 import type { PeranEfektif } from "../types/roles";
@@ -98,12 +99,15 @@ const SettingsPage = lazyWithRetry(() =>
  * belum siap. Bentuknya sengaja tenang — indikator yang berisik justru terasa
  * seperti kerusakan pada pemuatan yang biasanya hanya sepersekian detik.
  */
-const MemuatTampilan = () => (
-  <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8">
-    <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
-    <p className="mt-3 text-sm text-content-muted">Memuat...</p>
-  </div>
-);
+const MemuatTampilan = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
+      <p className="mt-3 text-sm text-content-muted">{t("appShell.loading")}</p>
+    </div>
+  );
+};
 
 export interface AppRoutesProps {
   currentView?: string;
@@ -163,6 +167,7 @@ export interface AppRoutesProps {
  * komponen lazy tanpa fallback.
  */
 const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
+  const { t } = useTranslation();
   const store = useAppStore();
   const projectStore = useProjectStore();
 
@@ -476,11 +481,10 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
           return (
             <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center bg-surface-sunken min-h-[calc(100vh-theme(spacing.16))]">
               <ShieldAlert className="w-16 h-16 text-rose-500 mb-4" />
-              <h2 className="text-2xl font-medium text-content-strong mb-2">403 Forbidden</h2>
-              <p className="text-content-muted max-w-md">
-                You do not have permission to view Integration Settings. Please contact your
-                administrator if you need access.
-              </p>
+              <h2 className="text-2xl font-medium text-content-strong mb-2">
+                {t("appShell.forbidden")}
+              </h2>
+              <p className="text-content-muted max-w-md">{t("appShell.forbiddenIntegration")}</p>
             </div>
           );
         }

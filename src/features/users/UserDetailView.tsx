@@ -883,8 +883,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     <div className="flex items-center gap-2 text-amber-700 bg-amber-500/10 border border-amber-500/30 p-2.5 rounded-md text-xs">
                       <ShieldAlert className="w-4 h-4 shrink-0 text-amber-500" />
                       <span>
-                        Role <strong>Administrator</strong> memiliki akses penuh secara default,
-                        namun override per-modul di bawah akan diberlakukan secara eksplisit.
+                        {t("userDetail.adminAccessPrefix")} <strong>Administrator</strong>{" "}
+                        {t("userDetail.adminAccessSuffix")}
                       </span>
                     </div>
                   )}
@@ -1027,7 +1027,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         onChange={(e) => setSelectedAssignProjectId(e.target.value)}
                         className="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-indigo-500 truncate"
                       >
-                        <option value="">-- Pilih Proyek --</option>
+                        <option value="">{t("userDetail.pickProject")}</option>
                         {projects
                           .filter((p) => {
                             const r = p.memberRoles || {};

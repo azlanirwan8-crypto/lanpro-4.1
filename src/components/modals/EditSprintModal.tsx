@@ -60,9 +60,9 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
               }
               className="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface"
             >
-              <option value="planned">Planned</option>
+              <option value="planned">{t("editSprint.planned")}</option>
               <option value="active">{t("editSprint.active")}</option>
-              <option value="completed">Completed</option>
+              <option value="completed">{t("editSprint.completedOpt")}</option>
             </select>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -125,9 +125,9 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
               }
               className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium outline-none"
             >
-              <option value="planned">Planned</option>
+              <option value="planned">{t("editSprint.planned")}</option>
               <option value="active">{t("editSprint.active")}</option>
-              <option value="completed">Completed</option>
+              <option value="completed">{t("editSprint.completedOpt")}</option>
             </select>
           </div>
 

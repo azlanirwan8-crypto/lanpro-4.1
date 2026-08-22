@@ -121,7 +121,9 @@ describe("FlowchartView", () => {
     fireEvent.click(baris);
 
     // Kerangka editor: hanya ada setelah sebuah flowchart dibuka.
-    await waitFor(() => expect(screen.getByText(/Back to Flowchart List/i)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText(/Kembali ke Daftar Diagram Alur/i)).toBeInTheDocument()
+    );
     // #135 — tab dan judul panel kiri sama-sama berbunyi "Daftar Dokumen"
     // karena keduanya menunjuk hal yang sama dan kini memakai satu kunci i18n.
     // Sebelumnya lolos getByText hanya karena yang satu Inggris ("Document

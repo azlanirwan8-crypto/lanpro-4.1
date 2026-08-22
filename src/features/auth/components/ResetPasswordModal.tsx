@@ -179,9 +179,9 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
               <p className="font-semibold text-content-body">{t("resetPwd.requirements")}</p>
               <ul className="list-disc pl-4 space-y-0.5 text-content-muted">
                 <li>{t("resetPwd.minChars")}</li>
-                <li>Huruf besar (A-Z) & huruf kecil (a-z)</li>
-                <li>Minimal 1 angka (0-9)</li>
-                <li>Minimal 1 simbol khusus (@$!%*?&)</li>
+                <li>{t("resetPwd.ruleCase")}</li>
+                <li>{t("resetPwd.ruleDigit")}</li>
+                <li>{t("resetPwd.ruleSymbol")}</li>
               </ul>
             </div>
 

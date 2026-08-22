@@ -132,7 +132,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
           >
             <Filter className="w-3.5 h-3.5 text-content-muted shrink-0" />
             <span className="hidden sm:inline">{t("filters.advancedFilters")}</span>
-            <span className="sm:hidden">Filters</span>
+            <span className="sm:hidden">{t("filters.filtersShort")}</span>
             {activeCount > 0 && (
               <span className="ml-1 bg-primary-surface text-content-inverse rounded-full px-1.5 py-0.5 flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-semibold leading-none">
                 {activeCount}
@@ -309,7 +309,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
           <button
             onClick={() => setIsConfigureColumnsOpen(true)}
             className="p-2 bg-surface border border-border-subtle rounded-lg text-content-muted hover:text-indigo-600 hover:border-indigo-500/30 transition-all shadow-soft"
-            title="Configure Columns"
+            title={t("filters.configureColumns")}
           >
             <Settings2 className="w-4 h-4" />
           </button>

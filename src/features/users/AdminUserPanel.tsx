@@ -849,7 +849,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               </div>
                               {user.phone && (
                                 <div className="text-xs sm:text-[10px] font-medium text-emerald-600 flex items-center gap-1 mt-0.5">
-                                  <span>WA/HP:</span>
+                                  <span>{t("users.waPhone")}</span>
                                   <span>{user.phone}</span>
                                 </div>
                               )}
@@ -1215,7 +1215,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       pengecualian yang harus dijaga manual; setiap peran baru
                       menuntut daftar itu ikut disunting. */}
                   {peranSistem.length === 0 && (
-                    <option value="">(katalog peran sistem kosong)</option>
+                    <option value="">{t("users.emptyRoleCatalog")}</option>
                   )}
                   {peranSistem.map((p) => (
                     <option key={p.code} value={p.code}>

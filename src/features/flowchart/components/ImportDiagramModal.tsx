@@ -157,10 +157,9 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             {importType === "drawio" && (
               <p>
                 💡 <strong>{t("importDiagram.drawioHint")}</strong>: Anda dapat mengekspor diagram
-                dari Draw.io sebagai berkas{" "}
-                <strong>XML Terkompresi maupun Mentah (.xml / .drawio)</strong>. Sistem kami secara
-                otomatis mengonversi bentuk dasar, warna, label, serta garis penghubung agar
-                kompatibel di whiteboard.
+                dari Draw.io sebagai berkas <strong>{t("importDiagram.xmlHint")}</strong>. Sistem
+                kami secara otomatis mengonversi bentuk dasar, warna, label, serta garis penghubung
+                agar kompatibel di whiteboard.
               </p>
             )}
             {importType === "miro" && (
@@ -312,14 +311,14 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                 onClick={handleApplyImportMerge}
                 className="p-2 px-3 bg-surface hover:bg-indigo-500/10 border border-indigo-500/30 hover:border-indigo-500/30 text-indigo-700 hover:text-indigo-900 font-medium rounded-xl transition-all text-[10px] leading-none shadow-soft flex items-center gap-1 active:scale-95"
               >
-                <span>➕ Gabungkan ke Kanvas</span>
+                <span>{t("importDiagram.mergeCanvas")}</span>
               </button>
               <button
                 type="button"
                 onClick={handleApplyImportReplace}
                 className="p-2 px-4 bg-gradient-to-tr from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-content-inverse font-medium rounded-xl transition-all text-xs sm:text-[11px] shadow-soft flex items-center gap-1 active:scale-95"
               >
-                <span>🔥 Ganti Kanvas Aktif</span>
+                <span>{t("importDiagram.replaceCanvas")}</span>
               </button>
             </div>
           ) : (

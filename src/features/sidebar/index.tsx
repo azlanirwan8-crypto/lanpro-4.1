@@ -326,7 +326,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
               className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-sidebar-item-hover flex items-center gap-2.5 transition-colors text-sidebar-text hover:text-sidebar-text-active cursor-pointer"
             >
               <User className="w-4 h-4 text-sidebar-title" />
-              <span>Profil Anda</span>
+              <span>{t("sidebar.yourProfile")}</span>
             </button>
             <div className="h-px bg-sidebar-border my-1" />
             <button
@@ -337,7 +337,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
               className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-danger-surface/20 flex items-center gap-2.5 transition-colors text-danger-hover hover:text-danger cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
-              <span>Keluar</span>
+              <span>{t("sidebar.logout")}</span>
             </button>
           </div>
         )}
@@ -349,7 +349,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
             "flex items-center p-2 rounded-lg hover:bg-sidebar-item-hover transition-all cursor-pointer group",
             isSidebarCollapsed ? "justify-center" : "gap-3"
           )}
-          title="Klik untuk opsi profil & keluar"
+          title={t("sidebar.profileMenuHint")}
         >
           <UserAvatar
             user={user || currentUserProfile || currentUser}
@@ -380,7 +380,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
             className="w-full mt-2 flex justify-center p-2 text-sidebar-text hover:text-sidebar-text-active transition-colors"
-            title="Opsi Profil"
+            title={t("sidebar.profileOptions")}
           >
             <User className="w-4 h-4" />
           </motion.button>

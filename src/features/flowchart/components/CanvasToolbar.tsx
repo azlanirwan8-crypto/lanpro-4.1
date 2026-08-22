@@ -8,6 +8,7 @@
  * yang berubah hanya cara ia memperoleh data — dari closure atas state induk
  * menjadi props eksplisit. Tanpa state sendiri.
  */
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Workflow, Sun, Moon, LayoutGrid, Download, Database, Activity } from "lucide-react";
 import { toast } from "sonner";
@@ -38,6 +39,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   isRightSidebarOpen,
   setIsRightSidebarOpen,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-none">
       <div className="flex items-center gap-3 pointer-events-auto">
@@ -147,7 +149,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
               ? "bg-violet-600 text-content-inverse border-violet-600"
               : "text-content-secondary hover:text-violet-600"
           )}
-          title="Toggle Panel Konfigurasi"
+          title={t("canvasMenu.toggleConfigPanel")}
         >
           <Activity className="w-4 h-4" />
         </button>

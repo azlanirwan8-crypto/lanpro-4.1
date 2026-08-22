@@ -181,7 +181,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                 <option value="" disabled>
                   {t("bulkActions.pickAssignee")}
                 </option>
-                <option value="unassigned">Unassigned (Kosongkan)</option>
+                <option value="unassigned">{t("bulkActions.unassignedClear")}</option>
                 {projectMembers.map((m) => (
                   <option key={m.uid} value={m.uid}>
                     {m.displayName || m.email || "Unknown"}

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { safeLocalStorage } from "../../../lib/safeStorage";
 import React, { useState } from "react";
 import { motion } from "motion/react";
@@ -18,6 +19,7 @@ interface KanbanCardProps {
 
 export const KanbanCard = React.memo<KanbanCardProps>(
   ({ task, mArr, pArr, onClick, isDragging, shakingTaskId }) => {
+    const { t } = useTranslation();
     // ...
     // Line 94 (approx):
     // ...
@@ -168,10 +170,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
               </span>
             )}
             {hasUnfinishedSubtasks && (
-              <div
-                className="text-danger-text cursor-help"
-                title="Kartu terbelenggu: Selesaikan semua subtask sebelum memindahkan ke Done"
-              >
+              <div className="text-danger-text cursor-help" title={t("kanban.blockedCardHint")}>
                 <AlertTriangle className={cn(isCompact ? "w-3 h-3" : "w-3.5 h-3.5")} />
               </div>
             )}

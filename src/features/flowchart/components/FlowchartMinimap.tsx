@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Map, ChevronDown, ChevronUp, Move } from "lucide-react";
@@ -39,6 +40,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
   canvasContainerRef,
   canvasTheme,
 }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
   const minimapRef = useRef<HTMLDivElement>(null);
@@ -256,7 +258,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
             <div className="flex justify-between items-center mt-1 px-1 text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider text-content-subtle">
               <span className="flex items-center gap-1">
                 <Move className="w-2.5 h-2.5 text-indigo-500" />
-                <span>Drag to pan</span>
+                <span>{t("flowNode.dragToPan")}</span>
               </span>
               <span>{nodes.length} Items</span>
             </div>
@@ -280,7 +282,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
             isOpen ? "text-indigo-500 animate-pulse" : "text-content-subtle"
           )}
         />
-        <span>Minimap</span>
+        <span>{t("flowNode.minimap")}</span>
         {isOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
       </button>
     </div>
