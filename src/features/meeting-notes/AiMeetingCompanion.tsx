@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { safeLocalStorage } from "../../lib/safeStorage";
 import { getAuthToken } from "../../lib/api";
 import { showSuccessAlert } from "../../lib/sweetalert";
@@ -45,6 +46,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   projectMembers = [],
   onPointsImported,
 }) => {
+  const { t } = useTranslation();
   const [transcript, setTranscript] = useState("");
   const [meetingLink, setMeetingLink] = useState("");
   const [loading, setLoading] = useState(false);
@@ -257,7 +259,12 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   const runAnalysisApi = async (transcriptText: string, link: string) => {
     setLoading(true);
     try {
-      const response = await analyzeTranscript(projectId || "", meeting.id || "", transcriptText, link);
+      const response = await analyzeTranscript(
+        projectId || "",
+        meeting.id || "",
+        transcriptText,
+        link
+      );
 
       if (response.status === "success") {
         setAiData(response.data);
@@ -638,7 +645,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       const data = await createTaskFromMeeting(projectId, payload);
 
       if (data.status === "success") {
-        showSuccessAlert("Berhasil!", "Berhasil membuat Task Issue baru di Backlog!");
+        showSuccessAlert(t("alerts.successTitle"), t("alerts.taskCreated"));
         // No refresh callback needed if websocket is active
         // if (onRefreshTasks) {
         //   onRefreshTasks();
@@ -695,7 +702,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
     setImportingIds([]);
     showSuccessAlert(
-      "Berhasil!",
+      t("alerts.successTitle"),
       `Berhasil mengimpor ${successCount} butir tindak lanjut ke Poin Diskusi resmi.`
     );
     if (onPointsImported) {
@@ -726,7 +733,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       };
 
       await createDiscussionPoint(projectId, meeting.id!, payload, currentUser.uid);
-      showSuccessAlert("Berhasil!", "Butir tindak lanjut berhasil diimpor.");
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.actionImported"));
       if (onPointsImported) {
         onPointsImported();
       }

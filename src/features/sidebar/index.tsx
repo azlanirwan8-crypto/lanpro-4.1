@@ -134,7 +134,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
               >
                 <Plus className="w-3.5 h-3.5 text-sidebar-text" />
                 <span className="text-xs sm:text-[10px] font-medium uppercase text-sidebar-text">
-                  Baru
+                  {t("sidebar.new")}
                 </span>
               </motion.button>
             )}

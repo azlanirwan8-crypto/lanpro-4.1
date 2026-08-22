@@ -196,7 +196,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
       console.error(e);
     }
     setNewDocCommentText("");
-    showSuccessAlert("Berhasil!", "Catatan / komentar berhasil dikirim!");
+    showSuccessAlert(t("alerts.successTitle"), t("alerts.noteSent"));
   };
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewFileData, setPreviewFileData] = useState<string | null>(null);
@@ -244,7 +244,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
       const effectiveUserId = resolveUserId(currentUser);
       const data = await updateDocumentApi(projectId, effectiveUserId, activeDocObj.id, payload);
       if (data.status === "success") {
-        showSuccessAlert("Berhasil!", "Berkas spesifikasi berhasil diunggah!");
+        showSuccessAlert(t("alerts.successTitle"), t("alerts.specUploaded"));
         await fetchDocuments();
       } else {
         toast.error(data.message || "Gagal mengunggah berkas");
@@ -377,7 +377,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
       const effectiveUserId = resolveUserId(currentUser);
       const data = await updateDocumentApi(projectId, effectiveUserId, activeDoc.id, payload);
       if (data.status === "success") {
-        showSuccessAlert("Berhasil!", "Catatan berhasil disimpan!");
+        showSuccessAlert(t("alerts.successTitle"), t("alerts.noteSaved"));
         await fetchDocuments();
         setIsEditingNotes(false);
       } else {
@@ -555,7 +555,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
   const handleDeleteClick = async (doc: DocumentModel, e: React.MouseEvent) => {
     e.stopPropagation();
     const isConfirmed = await confirmDeleteAlert(
-      "Apakah Anda Yakin?",
+      t("alerts.confirmTitle"),
       `Dokumen "${doc.title}" akan dihapus secara permanen dan tidak dapat dikembalikan!`
     );
     if (!isConfirmed) return;
@@ -565,7 +565,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
     try {
       const data = await deleteDocumentApi(projectId, effectiveUserId, doc.id);
       if (data.status === "success") {
-        showSuccessAlert("Berhasil!", "Data dokumen berhasil dihapus.");
+        showSuccessAlert(t("alerts.successTitle"), t("alerts.docDeleted"));
         if (activeDocId === doc.id) {
           const remaining = documents.filter((d) => d.id !== doc.id);
           setActiveDocId(remaining.length > 0 ? remaining[0].id : null);
@@ -640,7 +640,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
       if (isNew) {
         const data = await createDocumentApi(projectId, effectiveUserId, payload);
         if (data.status === "success") {
-          showSuccessAlert("Berhasil!", "Dokumen baru berhasil dibuat!");
+          showSuccessAlert(t("alerts.successTitle"), t("alerts.docCreated"));
           setShowFormModal(false);
           setActiveDocId(null);
           setCurrentPage(1);
@@ -651,7 +651,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
       } else if (editId) {
         const data = await updateDocumentApi(projectId, effectiveUserId, editId, payload);
         if (data.status === "success") {
-          showSuccessAlert("Berhasil!", "Dokumen berhasil diperbarui!");
+          showSuccessAlert(t("alerts.successTitle"), t("alerts.docUpdated"));
           setShowFormModal(false);
           setActiveDocId(null);
           setCurrentPage(1);
@@ -759,7 +759,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setEditFile(e.dataTransfer.files[0]);
       setShouldRemoveFile(false);
-      showSuccessAlert("Berhasil!", `File terpilih: ${e.dataTransfer.files[0].name}`);
+      showSuccessAlert(t("alerts.successTitle"), `File terpilih: ${e.dataTransfer.files[0].name}`);
     }
   };
 
@@ -1205,8 +1205,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                   {t("wiki.pdfLimited")}
                                 </p>
                                 <p className="text-xs sm:text-[10px] text-amber-800/90 font-medium mt-0.5 leading-normal">
-                                  Keamanan browser memblokir pratinjau PDF blob langsung. Klik
-                                  tombol di samping untuk membuka atau mengunduh.
+                                  {t("wiki.pdfBlockedHint")}
                                 </p>
                               </div>
                             </div>

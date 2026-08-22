@@ -109,7 +109,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
         currentUser?.uid
       );
       showSuccessAlert(
-        "Berhasil!",
+        t("alerts.successTitle"),
         `Status diubah menjadi ${nextStatus === "completed" ? "DONE" : "PENDING"}`
       );
     } catch (e: any) {
@@ -189,7 +189,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       };
 
       await createDiscussionPoint(projectId, meetingId, payload, currentUser.uid);
-      showSuccessAlert("Berhasil!", "Poin diskusi berhasil ditambahkan!");
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.pointAdded"));
       setQuickConcern("");
       setQuickCatatan("");
       setQuickAssignTo("Unassigned");
@@ -298,7 +298,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   const handleDelete = async (pointId: string) => {
     const isConfirmed = await confirmDeleteAlert(
-      "Apakah Anda Yakin?",
+      t("alerts.confirmTitle"),
       "Data poin diskusi ini akan dihapus secara permanen!"
     );
     if (!isConfirmed) return;
@@ -306,7 +306,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     setIsSaving(true);
     try {
       await deleteDiscussionPoint(projectId, meetingId, pointId, currentUser?.uid);
-      showSuccessAlert("Berhasil!", "Poin diskusi berhasil dihapus.");
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.pointDeleted"));
       fetchPoints();
     } catch (error: any) {
       toast.error(error.message || "Failed to delete point.");
@@ -334,7 +334,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     setIsSaving(true);
     try {
       await updateDiscussionPoint(projectId, meetingId, editingId, editForm, currentUser?.uid);
-      showSuccessAlert("Berhasil!", "Perubahan poin diskusi berhasil disimpan.");
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.pointSaved"));
       setEditingId(null);
       setEditForm({});
       fetchPoints();
@@ -553,7 +553,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             onPointsImported={() => {
               setShowAiAssistant(false);
               fetchPoints();
-              showSuccessAlert("Berhasil!", "Poin diskusi AI berhasil diimpor!");
+              showSuccessAlert(t("alerts.successTitle"), t("alerts.pointImported"));
             }}
           />
         </div>

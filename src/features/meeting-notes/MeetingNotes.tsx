@@ -137,7 +137,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        showSuccessAlert("Berhasil!", "Berkas berhasil diunduh.");
+        showSuccessAlert(t("alerts.successTitle"), t("alerts.fileDownloaded"));
       } else {
         toast.error("Berkas lampiran tidak ditemukan.");
       }
@@ -270,7 +270,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
         }
 
         await updateMeeting(projectId, editingMeeting.id!, payload, currentUser.uid);
-        showSuccessAlert("Berhasil!", "Data catatan rapat berhasil diubah.");
+        showSuccessAlert(t("alerts.successTitle"), t("alerts.meetingUpdated"));
       } else {
         const payload: Partial<Meeting> = {
           projectId,
@@ -285,7 +285,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
           payload.fileType = fileTypeStr;
         }
         await createMeeting(projectId, trimmedTitle, currentUser.uid, payload, currentUser.uid);
-        showSuccessAlert("Berhasil!", "Data catatan rapat berhasil ditambahkan.");
+        showSuccessAlert(t("alerts.successTitle"), t("alerts.meetingAdded"));
       }
       setNewTitle("");
       setNewDescription("");
@@ -325,8 +325,8 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
   const handleDeleteMeeting = async (meetingId: string) => {
     const isConfirmed = await confirmDeleteAlert(
-      "Apakah Anda Yakin?",
-      "Data catatan rapat ini akan dihapus secara permanen dan tidak dapat dikembalikan!"
+      t("alerts.confirmTitle"),
+      t("alerts.confirmMeetingText")
     );
     if (!isConfirmed) return;
 
@@ -337,7 +337,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
       if (activeMeetingId === meetingId) {
         setActiveMeetingId(null);
       }
-      showSuccessAlert("Berhasil!", "Data catatan rapat berhasil dihapus.");
+      showSuccessAlert(t("alerts.successTitle"), t("alerts.meetingDeleted"));
       fetchMeetings();
     } catch (error: any) {
       toast.error(error.message || "Failed to delete meeting.");

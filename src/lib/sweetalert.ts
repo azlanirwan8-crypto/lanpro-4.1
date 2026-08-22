@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import Swal from "sweetalert2";
 import "./sweetalert.css";
 
@@ -63,22 +64,19 @@ const velzonPopupConfig = {
   backdrop: true,
 };
 
-export const confirmDeleteAlert = async (
-  title: string = "Apakah Anda Yakin?",
-  text: string = "Data ini akan dihapus secara permanen dan tidak dapat dikembalikan!"
-): Promise<boolean> => {
+export const confirmDeleteAlert = async (title?: string, text?: string): Promise<boolean> => {
   const result = await Swal.fire({
     ...velzonPopupConfig,
     html: buildVelzonHtml(
       VELZON_ICONS.delete,
       "primary:#f7b84b,secondary:#f06548",
       100,
-      title,
-      text
+      title ?? i18n.t("alerts.confirmTitle"),
+      text ?? i18n.t("alerts.confirmText")
     ),
     showCancelButton: true,
-    confirmButtonText: "Ya, Hapus!",
-    cancelButtonText: "Batal",
+    confirmButtonText: i18n.t("alerts.yesDelete"),
+    cancelButtonText: i18n.t("alerts.cancel"),
     customClass: {
       ...velzonPopupConfig.customClass,
       confirmButton: `${VELZON_BTN.primary} me-2 mb-1`,
@@ -91,21 +89,18 @@ export const confirmDeleteAlert = async (
   return result.isConfirmed;
 };
 
-export const showSuccessAlert = (
-  title: string = "Berhasil!",
-  text: string = "Data berhasil dihapus."
-) => {
+export const showSuccessAlert = (title?: string, text?: string) => {
   Swal.fire({
     ...velzonPopupConfig,
     html: buildVelzonHtml(
       VELZON_ICONS.success,
       "primary:#0ab39c,secondary:#405189",
       120,
-      title,
-      text
+      title ?? i18n.t("alerts.successTitle"),
+      text ?? i18n.t("alerts.successDefault")
     ),
     showConfirmButton: true,
-    confirmButtonText: "Tutup",
+    confirmButtonText: i18n.t("alerts.close"),
     customClass: {
       ...velzonPopupConfig.customClass,
       confirmButton: `${VELZON_BTN.primary} mb-1`,
@@ -133,7 +128,7 @@ export const showErrorAlert = (
     ...velzonPopupConfig,
     html: buildVelzonHtmlGalat(96, title, text),
     showConfirmButton: true,
-    confirmButtonText: "Tutup",
+    confirmButtonText: i18n.t("alerts.close"),
     customClass: {
       ...velzonPopupConfig.customClass,
       popup: `velzon-swal-popup velzon-swal-${severity}`,
