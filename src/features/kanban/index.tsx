@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { DragDropContext } from "@hello-pangea/dnd";
 import { KanbanColumn } from "./components/KanbanColumn";
@@ -63,6 +64,7 @@ const getStatusStyle = (label: string) => {
 };
 
 export const BoardView: React.FC<KanbanBoardProps> = (props) => {
+  const { t } = useTranslation();
   const { density } = useAppStore();
   const isCompact = density === "compact";
   const [groupBy, setGroupBy] = useState<"epic" | "assignee">("epic");
@@ -187,7 +189,9 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
           <div className="sticky left-0 z-50 bg-surface border-r border-border-subtle/80 h-[56px] flex items-center px-3.5 relative">
             <div className="text-xs font-medium text-content-body tracking-wider flex items-center justify-between w-full gap-2">
               <div className="flex items-center gap-2">
-                <span className="font-medium text-xs text-content-strong">Jalur</span>
+                <span className="font-medium text-xs text-content-strong">
+                  {t("kanban.swimlanes")}
+                </span>
                 <label className="flex items-center gap-1 cursor-pointer bg-surface-muted px-2 py-0.5 rounded-md text-xs sm:text-[10px] font-medium text-content-secondary hover:bg-surface-sunken transition-colors select-none">
                   <input
                     type="checkbox"
@@ -324,10 +328,10 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                       )}
                     >
                       <h3 className="font-medium text-content-body text-xs leading-snug">
-                        Tugas Lainnya
+                        {t("kanban.otherTasks")}
                       </h3>
                       <p className="mt-0.5 text-xs sm:text-[10px] font-medium text-content-subtle">
-                        Tasks not assigned to any Epic
+                        {t("kanban.otherTasksHint")}
                       </p>
                     </div>
                   </div>

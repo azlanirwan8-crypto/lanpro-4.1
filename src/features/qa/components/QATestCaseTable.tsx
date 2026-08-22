@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import {
   Plus,
@@ -108,6 +109,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   handleBulkChangeStatus,
   handleBulkDeleteCases,
 }) => {
+  const { t } = useTranslation();
   const [isBulkPicDropdownOpen, setIsBulkPicDropdownOpen] = useState(false);
   const [isBulkStatusDropdownOpen, setIsBulkStatusDropdownOpen] = useState(false);
 
@@ -183,7 +185,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 className="px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Tambah Task</span>
+                <span>{t("qa.addTask")}</span>
               </button>
             )}
 
@@ -202,10 +204,10 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             <button
               onClick={handleExportQAReport}
               className="px-2.5 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body font-medium rounded-md text-xs flex items-center gap-1 transition-all cursor-pointer"
-              title="Export Laporan Eksekusi QA"
+              title={t("qa.exportReport")}
             >
               <Download className="w-3.5 h-3.5 text-primary" />
-              <span>Export</span>
+              <span>{t("qa.export")}</span>
             </button>
 
             {passedPercent === 100 &&
@@ -227,7 +229,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
           <div className="bg-primary-surface/5 border border-primary/10 p-2 rounded-md text-center">
             <span className="text-xs sm:text-[11px] sm:text-[9px] text-primary font-medium uppercase tracking-wider block">
-              Total Case
+              {t("qa.totalCase")}
             </span>
             <span className="text-base font-medium text-primary block mt-0.5">
               {totalCasesCount}
@@ -335,7 +337,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-content-inverse text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-white/20"
               >
                 <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Bulk Assign PIC</span>
+                <span>{t("qa.bulkAssignPic")}</span>
                 <ChevronDown className="w-3 h-3 opacity-70" />
               </button>
 
@@ -356,7 +358,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       }}
                       className="w-full text-left px-3.5 py-2 text-xs font-medium hover:bg-indigo-500/10 hover:text-primary transition-colors"
                     >
-                      Semua PIC Proyek (All Members)
+                      {t("qa.allProjectPic")}
                     </button>
                     <div className="max-h-44 overflow-y-auto custom-scrollbar">
                       {(projectMembers || []).map((m: any) => {
@@ -394,7 +396,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-content-inverse text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-white/20"
               >
                 <Layers className="w-3.5 h-3.5 text-amber-300" />
-                <span>Bulk Status</span>
+                <span>{t("qa.bulkStatus")}</span>
                 <ChevronDown className="w-3 h-3 opacity-70" />
               </button>
 
@@ -454,9 +456,9 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                   )}
                 </th>
                 <th className="py-2.5 px-3 w-8 text-center">#</th>
-                <th className="py-2.5 px-4 min-w-[280px]">Test Scenario / Title</th>
-                <th className="py-2.5 px-3 min-w-[90px] text-center">Priority</th>
-                <th className="py-2.5 px-3 min-w-[180px] text-center">Status & PIC Assignee</th>
+                <th className="py-2.5 px-4 min-w-[280px]">{t("qa.testScenario")}</th>
+                <th className="py-2.5 px-3 min-w-[90px] text-center">{t("qa.priority")}</th>
+                <th className="py-2.5 px-3 min-w-[180px] text-center">{t("qa.statusPic")}</th>
                 <th className="py-2.5 px-3 w-28 text-center">Actions</th>
               </tr>
             </thead>
@@ -626,7 +628,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                 />
                                 <div className="absolute right-0 top-full mt-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                                   <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-medium uppercase tracking-wider text-primary border-b border-border-faint mb-1">
-                                    Assign PIC Task (Tim Proyek)
+                                    {t("qa.assignPicTask")}
                                   </div>
                                   <button
                                     onClick={(e) => {
@@ -639,7 +641,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                         : "text-content-body"
                                     }`}
                                   >
-                                    <span>Semua PIC Proyek (All Members)</span>
+                                    <span>{t("qa.allProjectPic")}</span>
                                     {!tc.assignedTo && (
                                       <CheckCircle2 className="w-4 h-4 text-primary" />
                                     )}
@@ -717,7 +719,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                 setCaseEditAssignedTo(tc.assignedTo || "");
                               }}
                               className="p-1 text-content-subtle hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all"
-                              title="Edit Test Case"
+                              title={t("qa.editTestCase")}
                             >
                               <Edit3 className="w-3.5 h-3.5" />
                             </button>

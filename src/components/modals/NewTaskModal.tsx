@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { toast } from "sonner";
 import { Modal } from "../ui/Modal";
@@ -111,6 +112,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
   onSubmit,
   isSubmitting,
 }) => {
+  const { t } = useTranslation();
   const issueTypeOptions = React.useMemo(() => {
     const masterTypes = masterData.filter((m) => m.type === "issue_type");
     if (masterTypes.length > 0) {
@@ -158,16 +160,18 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
   }, [tasks]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add New Issue" maxWidth="max-w-3xl">
+    <Modal isOpen={isOpen} onClose={onClose} title={t("newTask.title")} maxWidth="max-w-3xl">
       <div className="space-y-4">
         {/* Group 1: Basic Info */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">Issue Title</label>
+            <label className="block text-sm font-medium text-content-body mb-1">
+              {t("newTask.issueTitle")}
+            </label>
             <Input
               value={newTaskTitle}
               onChange={(e: any) => setNewTaskTitle(e.target.value)}
-              placeholder="What needs to be done?"
+              placeholder={t("newTask.titlePlaceholder")}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -183,7 +187,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-content-body mb-1">Sprint</label>
+              <label className="block text-sm font-medium text-content-body mb-1">
+                {t("newTask.sprint")}
+              </label>
               <StyledDropdown
                 value={newTaskSprintId}
                 onChange={(val) => setNewTaskSprintId(val)}
@@ -196,7 +202,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">Initial Status</label>
+          <label className="block text-sm font-medium text-content-body mb-1">
+            {t("newTask.initialStatus")}
+          </label>
           <StyledDropdown
             value={newTaskStatus}
             onChange={(val) => setNewTaskStatus(val)}
@@ -215,7 +223,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
         {newTaskType === "subtask" && (
           <div>
             <label className="block text-sm font-medium text-content-body mb-1">
-              Parent Task / Epic
+              {t("newTask.parentTask")}
             </label>
             <StyledDropdown
               value={newTaskParentId}
@@ -230,7 +238,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
         {/* Group 2: Assignment & Categorization */}
         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border-faint">
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">Priority</label>
+            <label className="block text-sm font-medium text-content-body mb-1">
+              {t("newTask.priority")}
+            </label>
             <StyledDropdown
               value={newTaskPriority}
               onChange={(val) => setNewTaskPriority(val)}
@@ -326,7 +336,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               onChange={(e: any) => setNewTaskBusinessValue(e.target.value)}
               className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
             >
-              <option value="">Not Set</option>
+              <option value="">{t("newTask.notSet")}</option>
               <option value="critical">Critical</option>
               <option value="high">High</option>
               <option value="medium">Medium</option>
@@ -340,7 +350,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               onChange={(e: any) => setNewTaskProjectRisk(e.target.value)}
               className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
             >
-              <option value="">Not Set</option>
+              <option value="">{t("newTask.notSet")}</option>
               <option value="high">High Risk</option>
               <option value="medium">Medium Risk</option>
               <option value="low">Low Risk</option>
@@ -376,17 +386,19 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           <textarea
             value={newTaskAcceptanceCriteria}
             onChange={(e: any) => setNewTaskAcceptanceCriteria(e.target.value)}
-            placeholder="What are the conditions for completion?"
+            placeholder={t("newTask.acceptancePlaceholder")}
             className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
             rows={3}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">Description</label>
+          <label className="block text-sm font-medium text-content-body mb-1">
+            {t("newTask.description")}
+          </label>
           <textarea
             value={newTaskDescription}
             onChange={(e: any) => setNewTaskDescription(e.target.value)}
-            placeholder="Add description..."
+            placeholder={t("newTask.descriptionPlaceholder")}
             className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             rows={4}
           />
@@ -417,7 +429,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
         </div>
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">Start Date</label>
+            <label className="block text-sm font-medium text-content-body mb-1">
+              {t("newTask.startDate")}
+            </label>
             <Input
               type="date"
               value={newTaskStartDate}
@@ -425,7 +439,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">End Date</label>
+            <label className="block text-sm font-medium text-content-body mb-1">
+              {t("newTask.endDate")}
+            </label>
             <Input
               type="date"
               value={newTaskEndDate}
@@ -433,7 +449,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-content-body mb-1">Due Date</label>
+            <label className="block text-sm font-medium text-content-body mb-1">
+              {t("newTask.dueDate")}
+            </label>
             <Input
               type="date"
               value={newTaskDueDate}
@@ -442,7 +460,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           </div>
         </div>
         <Button onClick={onSubmit} disabled={isSubmitting} className="w-full justify-center">
-          Create Issue
+          {t("newTask.createIssue")}
         </Button>
       </div>
     </Modal>
