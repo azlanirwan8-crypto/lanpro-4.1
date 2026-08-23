@@ -76,8 +76,6 @@ export const SsoButtons = ({ mode }: SsoButtonsProps) => {
 
   if (memuat || providers.length === 0) return null;
 
-  const kataKerja = mode === "login" ? "Masuk" : "Daftar";
-
   return (
     <div className="mt-5">
       {/* Pemisah dengan label, supaya jelas ini alternatif dari form di atasnya */}

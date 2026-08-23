@@ -488,7 +488,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         isOpen={showDiscardConfirm}
         onClose={() => setShowDiscardConfirm(false)}
         title={t("issueDetail.discardChanges")}
-        message="Terdapat perubahan form yang belum disimpan. Apakah Anda yakin ingin keluar dan membuang perubahan?"
+        message={t("issueDetail.discardChangesMessage")}
         variant="warning"
         confirmText={t("ui2.yesDiscard")}
         cancelText={t("ui2.cancel")}

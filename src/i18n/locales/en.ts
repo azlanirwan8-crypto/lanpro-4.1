@@ -243,6 +243,7 @@ export const en = {
       "Hello {{nama}}, the password you entered is incorrect. Please check your credentials.",
   },
   jsx: {
+    j27akhir: "button above to create a new backup.",
     m1: "Turns the meeting speech-to-text transcript into a structured summary and action items.",
     m2: "No raw transcript available; the multimodal analysis was extracted straight from the video or audio recording.",
     m3: "Records the meeting through your device microphone; only what the microphone picks up is captured.",
@@ -1218,6 +1219,7 @@ export const en = {
     allRoles: "All Roles",
     allStatus: "All Status",
     approved: "Approved",
+    administrator: "Administrator",
     pending: "Pending",
     rejected: "Rejected",
     pendingReject: "Pending/Reject",
@@ -1281,6 +1283,7 @@ export const en = {
     previous: "Previous",
   },
   master: {
+    tambahJenis: "Add {{jenis}}",
     addType: "Add {{type}}",
     pickProject: "-- Select Project --",
     enterpriseControl: "Enterprise Control Center",
@@ -1492,6 +1495,8 @@ export const en = {
     swimlanes: "Swimlanes",
   },
   flowchart: {
+    mulaiDenganWarna: "Start with the colour {{warna}}",
+    tambahKeKanvas: "Add {{bentuk}} to the canvas",
     uncategorized: "Uncategorized",
     backToList: "← Back to Flowchart List",
     subtitle: "Manage interactive diagrams, process flows, and visual architecture.",
@@ -1831,6 +1836,8 @@ export const en = {
     errorTitle: "An Error Occurred",
   },
   issueDetail: {
+    discardChangesMessage:
+      "There are unsaved form changes. Are you sure you want to leave and discard them?",
     egHours: "e.g. 5",
     egLogged: "e.g. 2.5",
     epicTimelineWarning: "Epic Timeline Schedule Warning:",
@@ -2119,6 +2126,10 @@ export const en = {
     saveTemplate: "Save Template",
   },
   register: {
+    strengthEmpty: "Not filled in",
+    strengthStrong: "Strong",
+    strengthMedium: "Medium",
+    strengthWeak: "Weak",
     createAccount: "Create New Account",
     subtitle: "Join LanPro to manage projects and workflows",
     namePlaceholder: "John Doe",

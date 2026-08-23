@@ -627,7 +627,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               </div>
               <div>
                 <div className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
-                  Administrator
+                  {t("users.administrator")}
                 </div>
                 <div className="text-lg font-medium text-content-strong leading-none mt-1">
                   {adminUsersCount}

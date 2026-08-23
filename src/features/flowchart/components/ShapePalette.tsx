@@ -111,7 +111,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                         ? "ring-2 ring-indigo-500 ring-offset-1 scale-110 "
                         : "border-black/5"
                     )}
-                    title={`Mulai dengan warna ${colName}`}
+                    title={t("flowchart.mulaiDenganWarna", { warna: colName })}
                   />
                 );
               })}
@@ -208,7 +208,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                             handleAddNewNode(item.type as FlowNode["type"], selectedAddColor)
                           }
                           className="flex items-center gap-2 p-1.5 bg-surface hover:bg-indigo-500/10 border border-border-faint hover:border-indigo-500/30 hover:shadow-[0_2px_8px_rgba(99,102,241,0.06)] text-left rounded-xl transition-all group pointer-events-auto w-full"
-                          title={`Tambahkan ${item.name} ke canvas`}
+                          title={t("flowchart.tambahKeKanvas", { bentuk: item.name })}
                         >
                           <div className="w-8 h-8 flex items-center justify-center shrink-0 border border-border-faint rounded-lg bg-surface-sunken/30 group-hover:bg-indigo-500/10 group-hover:border-indigo-500/30 transition-all duration-150">
                             {renderMiniPreviewIcon(item.type)}

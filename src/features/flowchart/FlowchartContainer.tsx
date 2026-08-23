@@ -3900,7 +3900,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         message={confirmModal.message}
         onConfirm={confirmModal.onConfirm}
         confirmText={t("ui2.yesDelete")}
-        cancelText="Batal"
+        cancelText={t("ui2.cancel")}
         variant="danger"
       />
     </div>

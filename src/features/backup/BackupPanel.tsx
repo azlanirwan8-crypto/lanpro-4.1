@@ -353,8 +353,8 @@ export const BackupPanel = (_props: {
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-content-subtle italic text-xs">
                     {t("jsx.j27")}{" "}
-                    <strong className="font-medium text-content-secondary">{t("jsx.m5")}</strong> di
-                    atas untuk membuat backup baru.
+                    <strong className="font-medium text-content-secondary">{t("jsx.m5")}</strong>{" "}
+                    {t("jsx.j27akhir")}
                   </td>
                 </tr>
               )}

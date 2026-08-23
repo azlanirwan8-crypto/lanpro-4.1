@@ -231,7 +231,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             <div className="mt-2 space-y-1.5 p-2.5 bg-surface-sunken border border-border-subtle/80 rounded-lg">
               <div className="flex items-center justify-between text-xs sm:text-[11px] font-medium">
                 <span className="text-content-secondary">{t("register.passwordStrength")}</span>
-                <span className={passStrength.color}>{passStrength.label}</span>
+                <span className={passStrength.color}>{t(passStrength.label)}</span>
               </div>
               <div className="w-full bg-surface-strong rounded-full h-1.5 overflow-hidden">
                 <div

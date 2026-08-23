@@ -26,6 +26,11 @@ export interface PasswordCriteria {
   special: boolean;
 }
 
+/**
+ * `label` memulangkan KUNCI i18n, bukan teks. Hasilnya dihitung di dalam
+ * useMemo di RegisterScreen, sehingga teks jadi akan membeku saat bahasa
+ * diganti; kuncinya diterjemahkan di tempat render.
+ */
 export function evaluatePasswordStrength(password: string): {
   score: "weak" | "medium" | "strong";
   percentage: number;
@@ -48,7 +53,7 @@ export function evaluatePasswordStrength(password: string): {
     return {
       score: "weak",
       percentage: 0,
-      label: "Belum Diisi",
+      label: "register.strengthEmpty",
       color: "text-content-subtle",
       barColor: "bg-surface-marker",
       criteria,
@@ -66,7 +71,7 @@ export function evaluatePasswordStrength(password: string): {
     return {
       score: "strong",
       percentage: 100,
-      label: "Strong (Kuat)",
+      label: "register.strengthStrong",
       color: "text-emerald-500",
       barColor: "bg-emerald-500",
       criteria,
@@ -78,7 +83,7 @@ export function evaluatePasswordStrength(password: string): {
     return {
       score: "medium",
       percentage: 65,
-      label: "Medium (Sedang)",
+      label: "register.strengthMedium",
       color: "text-amber-500",
       barColor: "bg-amber-500",
       criteria,
@@ -89,7 +94,7 @@ export function evaluatePasswordStrength(password: string): {
   return {
     score: "weak",
     percentage: 30,
-    label: "Weak (Lemah)",
+    label: "register.strengthWeak",
     color: "text-rose-500",
     barColor: "bg-rose-500",
     criteria,

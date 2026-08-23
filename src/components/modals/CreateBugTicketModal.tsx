@@ -215,7 +215,12 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
                   value={assigneeInput}
                   onChange={(val) => onAssigneeChange(val)}
                   options={[
-                    { id: "", label: "-- Belum Ditugaskan --", icon: "User", color: "#64748B" },
+                    {
+                      id: "",
+                      label: `-- ${t("newTask.unassigned")} --`,
+                      icon: "User",
+                      color: "#64748B",
+                    },
                     ...(projectMembers || []).map((m: any) => ({
                       id: m.id || m.uid,
                       label: m.displayName || m.name || m.email || "Member",

@@ -7,3 +7,5 @@ export { SsoButtons } from "./components/SsoButtons";
 export { AuthHeroPanel } from "./components/AuthHeroPanel";
 export { LoginSkeletonState } from "./components/LoginSkeletonState";
 export type { LoginScreenProps, RegisterScreenProps, LoginSkeletonStateProps } from "./types";
+export { AuthLayout } from "./components/AuthLayout";
+export type { AuthLayoutVariant } from "./components/AuthLayout";

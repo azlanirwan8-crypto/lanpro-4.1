@@ -105,7 +105,6 @@ import {
   Trash2,
   FolderKanban,
   Bug,
-  ShieldCheck,
   Sun,
   PieChart as PieIcon,
   Moon,
@@ -145,7 +144,7 @@ const chunkArray = <T,>(arr: T[], size: number): T[][] => {
 // --- Recharts ---
 import { ensureDate, safeFormat, Button, Input, Textarea } from "./components/ui/CoreUI";
 import {
-  AuthHeroPanel,
+  AuthLayout,
   RegisterScreen,
   LoginScreen,
   CompleteRegistrationScreen,
@@ -813,8 +812,12 @@ function AppContainer() {
     const csvContent = [
       headers.join(","),
       ...tasks.map((t) => {
+        // Ekspor CSV sengaja seluruhnya berbahasa Inggris, tidak mengikuti tombol
+        // bahasa: seluruh headernya Inggris dan sel lain memakai "Unknown", jadi
+        // satu sel berbahasa Indonesia membuat berkasnya campur. Menerjemahkan
+        // headernya pun bukan pilihan — alat yang mem-parsing kolom akan pecah.
         const assigneeName =
-          projectMembers.find((m) => m.uid === t.assigneeId)?.displayName || "Belum Ditugaskan";
+          projectMembers.find((m) => m.uid === t.assigneeId)?.displayName || "Unassigned";
         const reporterName =
           (t as any).reporter?.name ||
           (t as any).reporter?.displayName ||
@@ -3323,76 +3326,59 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen flex flex-col md:flex-row font-sans bg-surface-sunken overflow-x-hidden">
-        <Toaster position="top-right" richColors />
-        <RateLimitIndicator />
-
-        {/* Visual Hero Side (Desktop) - Stationary across login/register transitions */}
-        <AuthHeroPanel />
-
-        {/* Form Side with Watermark & Animated Form Switching */}
-        <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-12 bg-surface-muted relative overflow-y-auto min-h-screen">
-          {/* #135 — pemilih bahasa HARUS tersedia sebelum login. Tanpa ini
-              pengguna terkunci pada bahasa tersimpan dan tidak punya cara
-              menggantinya dari layar masuk. */}
-          <div className="absolute top-4 right-4 z-20">
-            <LanguageSwitcher />
-          </div>
-          <AnimatePresence mode="wait">
-            {hasilSso.jenis === "lengkapi" ? (
-              <CompleteRegistrationScreen
-                key="sso-lengkapi-view"
-                email={hasilSso.email}
-                onSelesai={bersihkanSso}
-                onBatal={bersihkanSso}
-              />
-            ) : authView === "login" ? (
-              <LoginScreen
-                key="login-screen-view"
-                onLogin={handleManualLogin}
-                onRegisterClick={() => setAuthView("register")}
-                loading={isAuthLoading}
-                loadingText={loginStatusText}
-              />
-            ) : (
-              <RegisterScreen
-                key="register-screen-view"
-                onRegister={handleRegister}
-                onBackToLogin={() => setAuthView("login")}
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Micro logo for mobile (<1024px) */}
-          <div className="absolute top-6 left-6 lg:hidden flex items-center gap-2">
-            <div className="w-7 h-7 bg-primary-surface rounded-lg flex items-center justify-center shadow-md shadow-primary/20">
-              <ShieldCheck className="text-content-inverse w-4 h-4" />
-            </div>
-            <span className="text-sm font-medium text-content tracking-tight">LANPRO</span>
-          </div>
-        </div>
-
-        {/* Single Login Collision Modal */}
-        <SingleLoginCollisionModal
-          isOpen={showCollisionModal}
-          activeSession={activeSessionData}
-          onClose={() => {
-            setShowCollisionModal(false);
-            setPendingLoginCredentials(null);
-          }}
-          onForceLogout={() => {
-            if (pendingLoginCredentials) {
-              handleManualLogin(
-                pendingLoginCredentials.username,
-                pendingLoginCredentials.password,
-                pendingLoginCredentials.remember,
-                true
-              );
-            }
-          }}
-          isLoading={loading}
-        />
-      </div>
+      <AuthLayout
+        overlays={
+          <>
+            <Toaster position="top-right" richColors />
+            <RateLimitIndicator />
+            {/* Modal tabrakan sesi tunggal. */}
+            <SingleLoginCollisionModal
+              isOpen={showCollisionModal}
+              activeSession={activeSessionData}
+              onClose={() => {
+                setShowCollisionModal(false);
+                setPendingLoginCredentials(null);
+              }}
+              onForceLogout={() => {
+                if (pendingLoginCredentials) {
+                  handleManualLogin(
+                    pendingLoginCredentials.username,
+                    pendingLoginCredentials.password,
+                    pendingLoginCredentials.remember,
+                    true
+                  );
+                }
+              }}
+              isLoading={loading}
+            />
+          </>
+        }
+      >
+        <AnimatePresence mode="wait">
+          {hasilSso.jenis === "lengkapi" ? (
+            <CompleteRegistrationScreen
+              key="sso-lengkapi-view"
+              email={hasilSso.email}
+              onSelesai={bersihkanSso}
+              onBatal={bersihkanSso}
+            />
+          ) : authView === "login" ? (
+            <LoginScreen
+              key="login-screen-view"
+              onLogin={handleManualLogin}
+              onRegisterClick={() => setAuthView("register")}
+              loading={isAuthLoading}
+              loadingText={loginStatusText}
+            />
+          ) : (
+            <RegisterScreen
+              key="register-screen-view"
+              onRegister={handleRegister}
+              onBackToLogin={() => setAuthView("login")}
+            />
+          )}
+        </AnimatePresence>
+      </AuthLayout>
     );
   }
 

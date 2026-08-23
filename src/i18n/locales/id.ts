@@ -246,6 +246,7 @@ export const id = {
       "Halo {{nama}}, kata sandi yang Anda masukkan salah. Silakan periksa kembali kredensial Anda.",
   },
   jsx: {
+    j27akhir: "di atas untuk membuat cadangan baru.",
     m1: "Analisis transkrip suara rapat menjadi ringkasan dan butir tindak lanjut yang terstruktur.",
     m2: "Transkrip mentah tidak tersedia; analisis multimodal diekstrak langsung dari rekaman video atau audio.",
     m3: "Merekam suara rapat lewat mikrofon perangkat Anda; hanya suara yang tertangkap mikrofon.",
@@ -1221,6 +1222,7 @@ export const id = {
     allRoles: "Semua Peran",
     allStatus: "Semua Status",
     approved: "Disetujui",
+    administrator: "Administrator",
     pending: "Menunggu",
     rejected: "Ditolak",
     pendingReject: "Menunggu/Tolak",
@@ -1284,6 +1286,7 @@ export const id = {
     previous: "Sebelumnya",
   },
   master: {
+    tambahJenis: "Tambah {{jenis}}",
     addType: "Tambah {{type}}",
     pickProject: "-- Pilih Project --",
     enterpriseControl: "Pusat Kendali Perusahaan",
@@ -1494,6 +1497,8 @@ export const id = {
     swimlanes: "Jalur",
   },
   flowchart: {
+    mulaiDenganWarna: "Mulai dengan warna {{warna}}",
+    tambahKeKanvas: "Tambahkan {{bentuk}} ke kanvas",
     uncategorized: "Tanpa Kategori",
     backToList: "← Kembali ke Daftar Diagram Alur",
     subtitle: "Kelola diagram interaktif, alur proses, dan arsitektur visual.",
@@ -1838,6 +1843,8 @@ export const id = {
     errorTitle: "Terjadi Kesalahan",
   },
   issueDetail: {
+    discardChangesMessage:
+      "Terdapat perubahan formulir yang belum disimpan. Yakin ingin keluar dan membuang perubahan?",
     egHours: "mis. 5",
     egLogged: "mis. 2,5",
     epicTimelineWarning: "Peringatan Jadwal Epic Timeline:",
@@ -2127,6 +2134,10 @@ export const id = {
     saveTemplate: "Simpan Template",
   },
   register: {
+    strengthEmpty: "Belum Diisi",
+    strengthStrong: "Kuat",
+    strengthMedium: "Sedang",
+    strengthWeak: "Lemah",
     createAccount: "Buat Akun Baru",
     subtitle: "Bergabung dengan LanPro untuk mengelola proyek dan alur kerja",
     namePlaceholder: "John Doe",

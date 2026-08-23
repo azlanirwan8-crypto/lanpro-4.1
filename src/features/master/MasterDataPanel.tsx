@@ -1036,7 +1036,9 @@ export const MasterDataPanel = ({
           setIsNewMasterModalOpen(false);
           setIconSearch("");
         }}
-        title={`Tambah ${masterDataTypes.find((t) => t.type === selectedType)?.label}`}
+        title={t("master.tambahJenis", {
+          jenis: masterDataTypes.find((x) => x.type === selectedType)?.label ?? "",
+        })}
         maxWidth="max-w-xl"
       >
         <div className="space-y-6">
