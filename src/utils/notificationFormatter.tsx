@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import React from "react";
 import {
   UserPlus,
@@ -36,24 +37,24 @@ export interface ParsedNotification {
  */
 const translateFieldName = (field: string): string => {
   const mapping: { [key: string]: string } = {
-    status: "Status Tugas",
-    assigneeId: "Penerima Tugas",
-    reporterId: "Pelapor Tugas",
-    description: "Deskripsi",
-    deskripsi: "Deskripsi",
-    title: "Judul Tugas",
-    acceptanceCriteria: "Kriteria Penerimaan (AC)",
-    dueDate: "Tenggat Waktu",
-    startDate: "Tanggal Mulai",
-    endDate: "Tanggal Selesai",
-    storyPoints: "Story Points",
-    priority: "Prioritas",
-    estimatedHours: "Estimasi Jam Kerja",
-    loggedHours: "Log Jam Kerja",
-    release: "Rilis",
+    status: i18n.t("notif.nTaskStatus"),
+    assigneeId: i18n.t("notif.nAssignee"),
+    reporterId: i18n.t("notif.nReporter"),
+    description: i18n.t("notif.nDescription"),
+    deskripsi: i18n.t("notif.nDescription"),
+    title: i18n.t("notif.nTaskTitle"),
+    acceptanceCriteria: i18n.t("notif.nAcceptance"),
+    dueDate: i18n.t("notif.nDueDate"),
+    startDate: i18n.t("notif.nStartDate"),
+    endDate: i18n.t("notif.nEndDate"),
+    storyPoints: i18n.t("notif.nStoryPoints"),
+    priority: i18n.t("notif.nPriority"),
+    estimatedHours: i18n.t("notif.nEstHours"),
+    loggedHours: i18n.t("notif.nLoggedHours"),
+    release: i18n.t("notif.nRelease"),
     sprintId: "Sprint",
-    projectRisk: "Risiko Proyek",
-    labels: "Label/Tag",
+    projectRisk: i18n.t("notif.nProjectRisk"),
+    labels: i18n.t("notif.nLabelTag"),
   };
   return mapping[field] || field;
 };
@@ -103,7 +104,7 @@ export const formatNotification = (
   message: string | undefined
 ): ParsedNotification => {
   // Clean raw inputs
-  const rawTitle = title || "Notifikasi Baru";
+  const rawTitle = title || i18n.t("notif.nNewNotif");
   let rawMessage = message || "";
 
   // Clean up any UUIDs
@@ -112,7 +113,7 @@ export const formatNotification = (
   // Initialize output fields
   let icon = <HelpCircle className="w-4 h-4" />;
   let iconBgClass = "bg-surface-muted text-content-muted";
-  let badgeText = "NOTIFIKASI";
+  let badgeText = i18n.t("notif.nNotifCap");
   let badgeClass = "bg-surface-sunken text-content-secondary border-border-subtle";
   let formattedTitleStr = rawTitle;
   let activityType: ParsedNotification["activityType"] = "general";
@@ -168,70 +169,70 @@ export const formatNotification = (
     case "bug_retest":
       icon = <Bug className="w-4 h-4 text-emerald-600" />;
       iconBgClass = "bg-emerald-500/10 border border-emerald-500/30 text-emerald-600";
-      badgeText = "BUG RETEST";
+      badgeText = i18n.t("notif.nBugRetest");
       badgeClass = "bg-emerald-500/10 text-emerald-700 border-emerald-500/30";
-      formattedTitleStr = "Bug Ready for Retest";
+      formattedTitleStr = i18n.t("notif.nBugReady");
       break;
     case "create":
       icon = <PlusCircle className="w-4 h-4 text-emerald-600" />;
       iconBgClass = "bg-emerald-500/10 border border-emerald-500/30 text-emerald-600";
-      badgeText = "TUGAS BARU";
+      badgeText = i18n.t("notif.nNewTaskCap");
       badgeClass = "bg-emerald-500/10 text-emerald-700 border-emerald-500/30";
-      formattedTitleStr = "Tugas Baru Ditambahkan";
+      formattedTitleStr = i18n.t("notif.nTaskAdded");
       break;
 
     case "status":
       icon = <ArrowRightLeft className="w-4 h-4 text-indigo-600" />;
       iconBgClass = "bg-indigo-500/10 border border-indigo-500/30 text-indigo-600";
-      badgeText = "PERUBAHAN STATUS";
+      badgeText = i18n.t("notif.nStatusCap");
       badgeClass = "bg-indigo-500/10 text-indigo-700 border-indigo-500/30";
-      formattedTitleStr = "Update Status Tugas";
+      formattedTitleStr = i18n.t("notif.nTaskStatusUpdate");
       break;
 
     case "assignee":
       icon = <UserPlus className="w-4 h-4 text-sky-600" />;
       iconBgClass = "bg-sky-500/10 border border-sky-500/30 text-sky-600";
-      badgeText = "PENUGASAN";
+      badgeText = i18n.t("notif.nAssignCap");
       badgeClass = "bg-sky-500/10 text-sky-700 border-sky-500/30";
-      formattedTitleStr = "Penugasan Tugas";
+      formattedTitleStr = i18n.t("notif.nTaskAssign");
       break;
 
     case "comment":
       icon = <MessageSquare className="w-4 h-4 text-violet-600" />;
       iconBgClass = "bg-violet-500/10 border border-violet-500/30 text-violet-600";
-      badgeText = "KOMENTAR";
+      badgeText = i18n.t("notif.nCommentCap");
       badgeClass = "bg-violet-500/10 text-violet-700 border-violet-500/30";
-      formattedTitleStr = "Komentar Baru";
+      formattedTitleStr = i18n.t("notif.nNewComment");
       break;
 
     case "update":
       icon = <Edit3 className="w-4 h-4 text-content-secondary" />;
       iconBgClass = "bg-surface-muted border border-border-subtle text-content-secondary";
-      badgeText = "PEMBARUAN";
+      badgeText = i18n.t("notif.nUpdateCap");
       badgeClass = "bg-surface-muted text-content-body border-border-subtle";
-      formattedTitleStr = "Detail Tugas Diperbarui";
+      formattedTitleStr = i18n.t("notif.nTaskUpdated");
       break;
 
     case "deadline":
       icon = <Clock className="w-4 h-4 text-amber-600" />;
       iconBgClass = "bg-amber-500/10 border border-amber-500/30 text-amber-600 animate-pulse";
-      badgeText = "DEADLINE";
+      badgeText = i18n.t("notif.nDeadline");
       badgeClass = "bg-amber-500/10 text-amber-800 border-amber-500/30";
-      formattedTitleStr = "Mendekati Tenggat Waktu";
+      formattedTitleStr = i18n.t("notif.nDueSoon");
       break;
 
     case "blocked":
       icon = <ShieldAlert className="w-4 h-4 text-rose-600" />;
       iconBgClass = "bg-rose-500/10 border border-rose-500/30 text-rose-600";
-      badgeText = "TERBLOKIR";
+      badgeText = i18n.t("notif.nBlockedCap");
       badgeClass = "bg-rose-500/10 text-rose-700 border-rose-500/30";
-      formattedTitleStr = "Tugas Terblokir / Issue";
+      formattedTitleStr = i18n.t("notif.nTaskBlocked");
       break;
 
     default:
       icon = <FileText className="w-4 h-4 text-content-muted" />;
       iconBgClass = "bg-surface-sunken border border-border-faint text-content-muted";
-      badgeText = "PROYEK";
+      badgeText = i18n.t("notif.nProjectCap");
       badgeClass = "bg-surface-sunken text-content-secondary border-border-subtle";
       break;
   }
@@ -268,7 +269,7 @@ export const formatNotification = (
 
   // Terapkan UX Copywriting yang Konsisten untuk Assignee: "[Nama Pengubah] menugaskan tugas ke Ribka"
   if (activityType === "assignee") {
-    let actor = "Seorang anggota tim";
+    let actor = i18n.t("notif.nSomeMember");
     let assignee = "penerima";
 
     // Extract actor: everything before "menugaskan" or "assigned"
@@ -277,7 +278,7 @@ export const formatNotification = (
       actor = actorMatch[1].trim();
     }
 
-    // Extract assignee: search for ke "Nama" or ke Nama or to "Nama" or to Nama
+    // Extract assignee: search for ke i18n.t("notif.nName") or ke Nama or to i18n.t("notif.nName") or to Nama
     const assigneeMatch = rawMessage.match(/(?:ke|to)\s+"?([^"\.\s]+(?:\s+[^"\.\s]+)?)"?/i);
     if (assigneeMatch) {
       assignee = assigneeMatch[1].trim();

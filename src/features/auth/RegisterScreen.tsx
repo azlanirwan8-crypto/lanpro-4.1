@@ -121,7 +121,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* FULL NAME INPUT */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            Nama Lengkap <span className="text-rose-500">*</span>
+            {t("ui2.fullName")} <span className="text-rose-500">*</span>
           </label>
           <input
             type="text"
@@ -147,7 +147,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* EMAIL ADDRESS INPUT */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            Alamat Email <span className="text-rose-500">*</span>
+            {t("ui2.emailAddress")} <span className="text-rose-500">*</span>
           </label>
           <input
             type="email"
@@ -201,7 +201,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* PASSWORD INPUT & STRENGTH METER */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            Password <span className="text-rose-500">*</span>
+            {t("ui2.password")} <span className="text-rose-500">*</span>
           </label>
           <div className="relative">
             <input
@@ -253,7 +253,8 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
                       : "text-content-subtle"
                   )}
                 >
-                  <span>{passStrength.criteria.minLength ? "[✓]" : "[ ]"}</span> Min 8 Karakter
+                  <span>{passStrength.criteria.minLength ? "[✓]" : "[ ]"}</span>{" "}
+                  {t("ui2.min8Chars")}
                 </div>
                 <div
                   className={cn(

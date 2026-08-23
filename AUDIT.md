@@ -487,15 +487,16 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 1 item
+### 1.1 BELUM SELESAI — 2 item
 
-**Sebaran per fase:** F1 0 · F2 0 · F3 0 · F5 0 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 0
+**Sebaran per fase:** F1 0 · F2 0 · F3 0 · F5 0 · F6 0 · F7 0 · F8 0 · F9 0 · F10 0 · F11 1 · F12 1
 
 **Masih menahan rilis production:** #30
 
-| #   | Temuan                                                                      |  Fase   | Sev | Biaya  | Blokir modul baru? | Status            | Detail |
-| --- | --------------------------------------------------------------------------- | :-----: | :-: | ------ | :----------------: | ----------------- | ------ |
-| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2) | **F11** | 🔴  | Tinggi | Blokir production  | `MENUNGGU` desain | §1.5   |
+| #   | Temuan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |  Fase   | Sev | Biaya  | Blokir modul baru? | Status            | Detail |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----: | :-: | ------ | :----------------: | ----------------- | ------ |
+| 30  | **Drive-per-user** — kini ARAH RESMI storage, menggantikan driver `s3` (#2)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | **F11** | 🔴  | Tinggi | Blokir production  | `MENUNGGU` desain | §1.5   |
+| 149 | **Teks JSX yang terpotong beberapa baris tidak pernah terpindai** — ditemukan pemilik proyek di modal Lupa Kata Sandi: badan modalnya Indonesia sementara judul dan tombolnya Inggris. Akarnya bukan satu berkas melainkan cara pemindaian: SEMUA pemindai sebelumnya membaca berkas BARIS DEMI BARIS, sedangkan prettier memotong teks panjang menjadi beberapa baris dengan tag pembuka di baris sendiri — tidak ada satu baris pun yang cocok dengan pola `>teks<`. Pemindai baru membaca isi berkas utuh dan menemukan 176 teks unik di 53 berkas. Ditambah `lib/utils.ts` (11 frasa aktivitas) dan `utils/notificationFormatter.tsx` (37 label notifikasi) yang merakit teks di luar JSX | **F12** | 🟡  | Tinggi |       Tidak        | `BELUM`           | §12    |
 
 ### 1.2 SUDAH SELESAI — 144 item
 

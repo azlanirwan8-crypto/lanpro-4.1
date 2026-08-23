@@ -70,10 +70,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
             <Mail className="w-6 h-6" />
           </div>
           <h3 className="text-lg font-bold text-content-strong">{t("forgotPwd.title")}</h3>
-          <p className="text-xs text-content-muted mt-1 max-w-xs mx-auto">
-            Masukkan alamat email akun Anda. Kami akan mengirim tautan untuk mengatur ulang kata
-            sandi. Tautannya berlaku 15 menit.
-          </p>
+          <p className="text-xs text-content-muted mt-1 max-w-xs mx-auto">{t("ui2.fpIntro")}</p>
         </div>
 
         {isSuccess ? (
@@ -86,8 +83,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
                     alamat ini" akan mengonfirmasi bahwa alamat itu punya akun,
                     dan membocorkan lagi hal yang baru saja ditutup di backend. */}
                 <p className="text-content-muted">
-                  Bila <strong>{email}</strong> terdaftar, tautan untuk mengatur ulang kata sandi
-                  sudah dikirim ke sana. Tautannya berlaku 15 menit.
+                  {t("ui2.fpSentPrefix")} <strong>{email}</strong> {t("ui2.fpSentSuffix")}
                 </p>
               </div>
             </div>
@@ -104,7 +100,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-content-body block">
-                Alamat Email <span className="text-rose-500">*</span>
+                {t("ui2.emailAddress")} <span className="text-rose-500">*</span>
               </label>
               <input
                 type="email"

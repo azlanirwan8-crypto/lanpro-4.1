@@ -118,7 +118,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-content-body block">
-                Kata Sandi Baru <span className="text-rose-500">*</span>
+                {t("ui2.newPassword")} <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -149,7 +149,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
 
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-content-body block">
-                Konfirmasi Kata Sandi Baru <span className="text-rose-500">*</span>
+                {t("ui2.confirmNewPassword")} <span className="text-rose-500">*</span>
               </label>
               <input
                 type={showPassword ? "text" : "password"}
