@@ -135,7 +135,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             value={task.reporterId || ""}
             onChange={(val) => updateTaskField(task.id, "reporterId", val)}
             options={[
-              { id: "", label: "None" },
+              { id: "", label: t("ui2.linkNone") },
               ...(projectMembers || []).map((m) => ({
                 id: m?.uid || "",
                 label: m?.displayName || m?.email || "Unknown",
@@ -219,7 +219,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           >
             <div className="flex items-center gap-2">
               <ShieldAlert className={cn("w-3.5 h-3.5", task.isBlocked && "animate-pulse")} />
-              {task.isBlocked ? "Blocked" : "Clear"}
+              {task.isBlocked ? t("ui2.blocked") : t("ui2.clear")}
             </div>
             <div
               className={cn(
@@ -242,7 +242,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             value={task.sprintId || ""}
             onChange={(val) => updateTaskField(task.id, "sprintId", val || null)}
             options={[
-              { id: "", label: "No sprint assigned", icon: "Box" },
+              { id: "", label: t("ui2.noSprintAssigned"), icon: "Box" },
               ...sprints.map((s) => ({
                 id: s.id,
                 label: `${s.name} (${s.status})`,
@@ -267,7 +267,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             value={task.release || ""}
             onChange={(val) => updateTaskField(task.id, "release", val)}
             options={[
-              { id: "", label: "Select release...", icon: "Box" },
+              { id: "", label: t("ui2.selectRelease"), icon: "Box" },
               ...masterData
                 .filter((d) => d.type === "release")
                 .map((d) => ({

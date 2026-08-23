@@ -6,24 +6,6 @@
     "teks": "useAuthNotification must be used within an AuthNotificationProvider"
   },
   {
-    "bentuk": "objek-label",
-    "berkas": "src/components/AuthToastContainer.tsx",
-    "baris": 93,
-    "teks": "Akun Belum Aktif"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/AuthToastContainer.tsx",
-    "baris": 105,
-    "teks": "Pendaftaran Berhasil!"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/AuthToastContainer.tsx",
-    "baris": 116,
-    "teks": "Gagal Autentikasi"
-  },
-  {
     "bentuk": "ternary-jsx",
     "berkas": "src/components/LiveChatWidget.tsx",
     "baris": 824,
@@ -97,42 +79,6 @@
   },
   {
     "bentuk": "objek-label",
-    "berkas": "src/components/modals/AddCaseModal.tsx",
-    "baris": 120,
-    "teks": "Belum ada modul terpilih"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/AddCaseModal.tsx",
-    "baris": 156,
-    "teks": "Critical Priority"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/AddCaseModal.tsx",
-    "baris": 160,
-    "teks": "High Priority"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/AddCaseModal.tsx",
-    "baris": 163,
-    "teks": "Medium Priority"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/AddCaseModal.tsx",
-    "baris": 167,
-    "teks": "Low Priority"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/AddCaseModal.tsx",
-    "baris": 265,
-    "teks": "Pilih Berkas Excel"
-  },
-  {
-    "bentuk": "objek-label",
     "berkas": "src/components/modals/CreateBugTicketModal.tsx",
     "baris": 198,
     "teks": "Critical"
@@ -142,30 +88,6 @@
     "berkas": "src/components/modals/CreateBugTicketModal.tsx",
     "baris": 217,
     "teks": "-- Belum Ditugaskan --"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/EditCaseModal.tsx",
-    "baris": 71,
-    "teks": "Critical Priority"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/EditCaseModal.tsx",
-    "baris": 72,
-    "teks": "High Priority"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/EditCaseModal.tsx",
-    "baris": 73,
-    "teks": "Medium Priority"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/EditCaseModal.tsx",
-    "baris": 74,
-    "teks": "Low Priority"
   },
   {
     "bentuk": "objek-label",
@@ -222,24 +144,6 @@
     "teks": "completed"
   },
   {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/NewTaskModal.tsx",
-    "baris": 131,
-    "teks": "Meeting"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/NewTaskModal.tsx",
-    "baris": 132,
-    "teks": "Document"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/NewTaskModal.tsx",
-    "baris": 133,
-    "teks": "Approval"
-  },
-  {
     "bentuk": "ternary-jsx",
     "berkas": "src/components/modals/NewTaskModal.tsx",
     "baris": 143,
@@ -252,12 +156,6 @@
     "teks": "Calendar"
   },
   {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/NewTaskModal.tsx",
-    "baris": 150,
-    "teks": "Select Parent..."
-  },
-  {
     "bentuk": "ternary-jsx",
     "berkas": "src/components/modals/NewTaskModal.tsx",
     "baris": 156,
@@ -268,12 +166,6 @@
     "berkas": "src/components/modals/NewTaskModal.tsx",
     "baris": 156,
     "teks": "CheckSquare"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/components/modals/NewTaskModal.tsx",
-    "baris": 380,
-    "teks": "None"
   },
   {
     "bentuk": "objek-label",
@@ -2670,90 +2562,6 @@
     "teks": "text-content-secondary hover:bg-surface-muted font-medium"
   },
   {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 82,
-    "teks": "Mulai / Selesai"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 82,
-    "teks": "Start/End"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 83,
-    "teks": "Langkah Proses"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 83,
-    "teks": "Proses"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 84,
-    "teks": "Keputusan Alur"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 84,
-    "teks": "Keputusan"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 87,
-    "teks": "Catatan Tempel"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 90,
-    "teks": "Memo/Sticky"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 92,
-    "teks": "Kartu Informasi"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 92,
-    "teks": "Kartu"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 93,
-    "teks": "Dokumen Cetak"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 93,
-    "teks": "Dokumen"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 94,
-    "teks": "Basis Data"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/flowchart/components/CanvasContextMenu.tsx",
-    "baris": 94,
-    "teks": "Database"
-  },
-  {
     "bentuk": "ternary-jsx",
     "berkas": "src/features/flowchart/components/CanvasToolbar.tsx",
     "baris": 66,
@@ -3790,30 +3598,6 @@
     "berkas": "src/features/issues/components/modal/TaskDetailPrimitives.tsx",
     "baris": 7,
     "teks": "primary"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/issues/components/modal/TaskDetailSidebar.tsx",
-    "baris": 138,
-    "teks": "None"
-  },
-  {
-    "bentuk": "ternary-jsx",
-    "berkas": "src/features/issues/components/modal/TaskDetailSidebar.tsx",
-    "baris": 222,
-    "teks": "Clear"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/issues/components/modal/TaskDetailSidebar.tsx",
-    "baris": 245,
-    "teks": "No sprint assigned"
-  },
-  {
-    "bentuk": "objek-label",
-    "berkas": "src/features/issues/components/modal/TaskDetailSidebar.tsx",
-    "baris": 270,
-    "teks": "Select release..."
   },
   {
     "bentuk": "objek-label",
@@ -4940,49 +4724,49 @@
   {
     "bentuk": "ternary-jsx",
     "berkas": "src/features/wiki/WikiView.tsx",
-    "baris": 1320,
+    "baris": 1322,
     "teks": "hidden md:hidden"
   },
   {
     "bentuk": "ternary-jsx",
     "berkas": "src/features/wiki/WikiView.tsx",
-    "baris": 1320,
+    "baris": 1322,
     "teks": "flex"
   },
   {
     "bentuk": "ternary-jsx",
     "berkas": "src/features/wiki/WikiView.tsx",
-    "baris": 1362,
+    "baris": 1364,
     "teks": "justify-end"
   },
   {
     "bentuk": "ternary-jsx",
     "berkas": "src/features/wiki/WikiView.tsx",
-    "baris": 1362,
+    "baris": 1364,
     "teks": "justify-start"
   },
   {
     "bentuk": "ternary-jsx",
     "berkas": "src/features/wiki/WikiView.tsx",
-    "baris": 1368,
+    "baris": 1370,
     "teks": "items-end"
   },
   {
     "bentuk": "ternary-jsx",
     "berkas": "src/features/wiki/WikiView.tsx",
-    "baris": 1368,
+    "baris": 1370,
     "teks": "items-start"
   },
   {
     "bentuk": "ternary-jsx",
     "berkas": "src/features/wiki/WikiView.tsx",
-    "baris": 1390,
+    "baris": 1392,
     "teks": "text-indigo-200"
   },
   {
     "bentuk": "ternary-jsx",
     "berkas": "src/features/wiki/WikiView.tsx",
-    "baris": 1390,
+    "baris": 1392,
     "teks": "text-content-subtle"
   },
   {

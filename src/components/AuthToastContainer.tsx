@@ -90,7 +90,7 @@ export const AuthNotificationProvider: React.FC<AuthNotificationProviderProps> =
           // Case 2: Akun Belum Aktif / Pending Approval (Kondisi Peringatan - Warning Alert)
           triggerNotification({
             type: "warning",
-            title: "Akun Belum Aktif",
+            title: i18n.t("ui2.accountInactive"),
             message: payload?.message || "Akun Anda belum aktif, silakan hubungi admin.",
             actionLabel: "Lihat Instruksi Aktivasi",
             onAction: onActivationClick || (() => {}),
@@ -102,7 +102,7 @@ export const AuthNotificationProvider: React.FC<AuthNotificationProviderProps> =
           // Case 3: Berhasil Daftar Akun Baru (Kondisi Sukses - Success Alert)
           triggerNotification({
             type: "success",
-            title: "Pendaftaran Berhasil!",
+            title: i18n.t("ui2.registrationOk"),
             message:
               "Akun Anda telah berhasil didaftarkan di platform LanPro. Silakan menunggu persetujuan admin untuk aktivasi.",
             duration: 8000,
@@ -113,7 +113,7 @@ export const AuthNotificationProvider: React.FC<AuthNotificationProviderProps> =
           // Fallback dynamic error alert
           triggerNotification({
             type: "error",
-            title: "Gagal Autentikasi",
+            title: i18n.t("ui2.authFailed"),
             message,
             duration: 5000,
           });
@@ -466,7 +466,7 @@ const VelzonSweetAlertModal: React.FC<VelzonSweetAlertModalProps> = ({
   const defaultTitles = {
     success: "Well done !",
     error: "Oops...! Something went Wrong !",
-    warning: "Akun Belum Aktif",
+    warning: i18n.t("ui2.accountInactive"),
   };
 
   const defaultButtonLabels = {

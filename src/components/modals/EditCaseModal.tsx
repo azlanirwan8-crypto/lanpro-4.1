@@ -68,10 +68,20 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
                 value={editPriority}
                 onChange={(val) => onPriorityChange(val as any)}
                 options={[
-                  { id: "Critical", label: "Critical Priority", icon: "Flame", color: "#EF4444" },
-                  { id: "High", label: "High Priority", icon: "ChevronUp", color: "#F97316" },
-                  { id: "Medium", label: "Medium Priority", icon: "Circle", color: "#F59E0B" },
-                  { id: "Low", label: "Low Priority", icon: "ChevronDown", color: "#10B981" },
+                  {
+                    id: "Critical",
+                    label: t("ui2.criticalPriority"),
+                    icon: "Flame",
+                    color: "#EF4444",
+                  },
+                  { id: "High", label: t("ui2.highPriority"), icon: "ChevronUp", color: "#F97316" },
+                  {
+                    id: "Medium",
+                    label: t("ui2.mediumPriority"),
+                    icon: "Circle",
+                    color: "#F59E0B",
+                  },
+                  { id: "Low", label: t("ui2.lowPriority"), icon: "ChevronDown", color: "#10B981" },
                 ]}
                 masterData={[]}
                 className="w-full"

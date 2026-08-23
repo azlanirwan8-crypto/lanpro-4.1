@@ -117,7 +117,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
           <div className="bg-primary-surface/5 border border-primary/10 px-4 py-2.5 rounded-md flex items-center justify-between text-xs">
             <span className="font-medium text-primary">
               Modul Target:{" "}
-              <strong>{activeSuite ? activeSuite.name : "Belum ada modul terpilih"}</strong>
+              <strong>{activeSuite ? activeSuite.name : t("ui2.noModuleSelected")}</strong>
             </span>
             <span className="px-2.5 py-0.5 bg-primary-surface text-content-inverse font-medium rounded-full text-xs sm:text-[10px]">
               {activeSuite ? activeSuite.phase : "SIT"}
@@ -153,18 +153,28 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                       options={[
                         {
                           id: "Critical",
-                          label: "Critical Priority",
+                          label: t("ui2.criticalPriority"),
                           icon: "Flame",
                           color: "#EF4444",
                         },
-                        { id: "High", label: "High Priority", icon: "ChevronUp", color: "#F97316" },
+                        {
+                          id: "High",
+                          label: t("ui2.highPriority"),
+                          icon: "ChevronUp",
+                          color: "#F97316",
+                        },
                         {
                           id: "Medium",
-                          label: "Medium Priority",
+                          label: t("ui2.mediumPriority"),
                           icon: "Circle",
                           color: "#F59E0B",
                         },
-                        { id: "Low", label: "Low Priority", icon: "ChevronDown", color: "#10B981" },
+                        {
+                          id: "Low",
+                          label: t("ui2.lowPriority"),
+                          icon: "ChevronDown",
+                          color: "#10B981",
+                        },
                       ]}
                       masterData={[]}
                       className="w-full"
@@ -262,7 +272,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   htmlFor="bulk_upload_input"
                   className="inline-block px-4 py-2 bg-primary-surface/10 hover:bg-primary-surface/20 text-primary text-xs font-medium rounded-md cursor-pointer transition-colors"
                 >
-                  {uploadFile ? uploadFile.name : "Pilih Berkas Excel"}
+                  {uploadFile ? uploadFile.name : t("ui2.chooseExcel")}
                 </label>
               </div>
 

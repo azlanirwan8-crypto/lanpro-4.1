@@ -79,19 +79,55 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
   }, [onClose]);
 
   const shapeCategories = [
-    { type: "oval", label: "Mulai / Selesai", icon: Circle, color: "emerald", text: "Start/End" },
-    { type: "rect", label: "Langkah Proses", icon: Square, color: "indigo", text: "Proses" },
-    { type: "diamond", label: "Keputusan Alur", icon: Diamond, color: "amber", text: "Keputusan" },
+    {
+      type: "oval",
+      label: t("ui2.shapeStartEnd"),
+      icon: Circle,
+      color: "emerald",
+      text: t("ui2.shapeStartEnd"),
+    },
+    {
+      type: "rect",
+      label: t("ui2.shapeProcessStep"),
+      icon: Square,
+      color: "indigo",
+      text: t("ui2.nodeProcess"),
+    },
+    {
+      type: "diamond",
+      label: t("ui2.shapeDecisionFlow"),
+      icon: Diamond,
+      color: "amber",
+      text: t("ui2.nodeDecision"),
+    },
     {
       type: "sticky",
-      label: "Catatan Tempel",
+      label: t("ui2.shapeStickyNote"),
       icon: StickyNote,
       color: "yellow",
-      text: "Memo/Sticky",
+      text: t("ui2.shapeMemo"),
     },
-    { type: "card", label: "Kartu Informasi", icon: CreditCard, color: "slate", text: "Kartu" },
-    { type: "document", label: "Dokumen Cetak", icon: FileText, color: "sky", text: "Dokumen" },
-    { type: "database", label: "Basis Data", icon: Database, color: "violet", text: "Database" },
+    {
+      type: "card",
+      label: t("ui2.shapeInfoCard"),
+      icon: CreditCard,
+      color: "slate",
+      text: t("ui2.nodeCard"),
+    },
+    {
+      type: "document",
+      label: t("ui2.shapePrintDoc"),
+      icon: FileText,
+      color: "sky",
+      text: t("ui2.nodeDocument"),
+    },
+    {
+      type: "database",
+      label: t("ui2.shapeDatabase"),
+      icon: Database,
+      color: "violet",
+      text: t("ui2.nodeDatabase"),
+    },
   ];
 
   return (
