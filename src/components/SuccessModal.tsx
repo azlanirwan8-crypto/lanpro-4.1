@@ -1,3 +1,4 @@
+import i18n from "../i18n";
 import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,7 +10,12 @@ interface SuccessModalProps {
   message: string;
 }
 
-export function SuccessModal({ isOpen, onClose, title = "Berhasil!", message }: SuccessModalProps) {
+export function SuccessModal({
+  isOpen,
+  onClose,
+  title = i18n.t("ui2.success"),
+  message,
+}: SuccessModalProps) {
   const { t } = useTranslation();
   return (
     <AnimatePresence>

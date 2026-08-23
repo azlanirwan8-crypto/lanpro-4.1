@@ -78,7 +78,7 @@ export const AuthNotificationProvider: React.FC<AuthNotificationProviderProps> =
           // Dynamic error message for incorrect credentials or account lockout
           triggerNotification({
             type: "error",
-            title: status === 429 ? "Akun Terblokir" : "Gagal Masuk",
+            title: status === 429 ? i18n.t("ui2.accountBlocked") : i18n.t("ui2.signInFailed"),
             message:
               payload?.message ||
               "Kata sandi atau nama pengguna yang Anda masukkan salah. Silakan periksa kembali kredensial Anda.",

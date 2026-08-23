@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,7 +16,7 @@ export const LoginScreen = ({
   onLogin,
   onRegisterClick,
   loading,
-  loadingText = "Mengautentikasi...",
+  loadingText = i18n.t("ui2.authenticating"),
 }: LoginScreenProps) => {
   const { t } = useTranslation();
   const [username, setUsername] = useState(() => {

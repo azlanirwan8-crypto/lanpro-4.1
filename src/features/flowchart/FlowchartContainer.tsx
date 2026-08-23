@@ -490,7 +490,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               detectedType = "miro";
             }
           } catch (e) {
-            throw new Error("File JSON tidak dapat dibaca atau rusak.");
+            throw new Error(t("ui2.jsonUnreadable"));
           }
         } else if (fileName.endsWith(".csv")) {
           result = parseMiroContent(text, true);
@@ -3135,7 +3135,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             )}
                             title={
                               isSimulating
-                                ? "Hentikan Simulasi"
+                                ? t("ui2.stopSim")
                                 : "Jalankan Simulasi Alur Kerja Visual"
                             }
                           >
@@ -3903,7 +3903,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         title={confirmModal.title}
         message={confirmModal.message}
         onConfirm={confirmModal.onConfirm}
-        confirmText="Ya, Hapus"
+        confirmText={t("ui2.yesDelete")}
         cancelText="Batal"
         variant="danger"
       />

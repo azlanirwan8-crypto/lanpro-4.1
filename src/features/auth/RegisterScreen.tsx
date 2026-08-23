@@ -220,7 +220,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-content-subtle hover:text-primary focus:outline-none cursor-pointer transition-colors"
-              title={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+              title={showPassword ? t("ui2.hidePassword") : t("ui2.showPassword")}
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>

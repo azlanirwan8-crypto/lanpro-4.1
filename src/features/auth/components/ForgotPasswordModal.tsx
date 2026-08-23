@@ -144,7 +144,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
                 disabled={loading || !email.trim()}
                 className="flex-1 py-2.5 px-4 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover font-semibold rounded-lg text-xs transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <span>{loading ? "Mengirim..." : "Kirim Tautan"}</span>
+                <span>{loading ? t("ui2.sending") : t("ui2.sendLink")}</span>
                 {!loading && <ArrowRight className="w-3.5 h-3.5" />}
               </button>
             </div>

@@ -490,8 +490,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         title={t("issueDetail.discardChanges")}
         message="Terdapat perubahan form yang belum disimpan. Apakah Anda yakin ingin keluar dan membuang perubahan?"
         variant="warning"
-        confirmText="Ya, Buang Perubahan"
-        cancelText="Batal"
+        confirmText={t("ui2.yesDiscard")}
+        cancelText={t("ui2.cancel")}
         onConfirm={() => {
           setShowDiscardConfirm(false);
           setIsEditingDescription(false);
@@ -508,8 +508,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         title={confirmModalState.title}
         message={confirmModalState.message}
         variant={confirmModalState.variant || "danger"}
-        confirmText={confirmModalState.confirmText || "Hapus"}
-        cancelText="Batal"
+        confirmText={confirmModalState.confirmText || t("ui2.delete")}
+        cancelText={t("ui2.cancel")}
         onConfirm={() => {
           confirmModalState.onConfirm();
           setConfirmModalState((prev) => ({ ...prev, isOpen: false }));

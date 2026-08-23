@@ -199,7 +199,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
                 disabled={loading || !newPassword || !confirmPassword}
                 className="flex-1 py-2.5 px-4 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover font-semibold rounded-lg text-xs transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <span>{loading ? "Menyimpan..." : "Simpan Kata Sandi"}</span>
+                <span>{loading ? t("ui2.saving") : t("ui2.savePassword")}</span>
                 {!loading && <ArrowRight className="w-3.5 h-3.5" />}
               </button>
             </div>

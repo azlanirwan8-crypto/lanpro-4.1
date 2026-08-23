@@ -1104,7 +1104,9 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             ? "bg-surface-inverse-strong border-slate-900 text-content-inverse hover:bg-surface-inverse-strong"
                             : "bg-surface border-border-subtle text-content-body hover:bg-surface-sunken"
                         )}
-                        title={isFullscreenPreview ? "Keluar Layar Penuh" : "Pratinjau Layar Penuh"}
+                        title={
+                          isFullscreenPreview ? t("ui2.exitFullscreen") : t("ui2.fullscreenPreview")
+                        }
                       >
                         {isFullscreenPreview ? (
                           <Minimize2 className="w-3.5 h-3.5" />
@@ -1112,7 +1114,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           <Maximize2 className="w-3.5 h-3.5" />
                         )}
                         <span className="hidden sm:inline">
-                          {isFullscreenPreview ? "Normal" : "Layar Penuh"}
+                          {isFullscreenPreview ? "Normal" : t("ui2.fullscreen")}
                         </span>
                       </button>
                     )}

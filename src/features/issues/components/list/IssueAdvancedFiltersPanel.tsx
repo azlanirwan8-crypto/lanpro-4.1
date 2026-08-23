@@ -128,7 +128,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               isFiltersPanelOpen &&
                 "bg-primary-surface/10 border-primary/30 text-primary hover:bg-primary-surface/15"
             )}
-            title="Toggle Advanced Filtering Panel"
+            title={t("ui2.toggleFilterPanel")}
           >
             <Filter className="w-3.5 h-3.5 text-content-muted shrink-0" />
             <span className="hidden sm:inline">{t("filters.advancedFilters")}</span>

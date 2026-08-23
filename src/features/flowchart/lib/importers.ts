@@ -1,3 +1,4 @@
+import i18n from "../../../i18n";
 /**
  * Parser impor diagram: Draw.io (XML) dan Miro (JSON/CSV) → node & edge LanPro.
  *
@@ -18,7 +19,7 @@
  * Konsekuensinya: fungsi-fungsi ini butuh lingkungan ber-DOM. Di Jest artinya
  * proyek `jsdom` (berkas `*.test.tsx`), bukan proyek `node`.
  */
-import type { FlowNode, FlowEdge } from '../types';
+import type { FlowNode, FlowEdge } from "../types";
 
 /** Hasil parse yang sama bentuknya untuk semua format asal. */
 export interface ParsedDiagram {
@@ -47,7 +48,7 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
 
   const parseError = xmlDoc.getElementsByTagName("parsererror");
   if (parseError.length > 0) {
-    throw new Error("Format XML Draw.io tidak valid atau rusak.");
+    throw new Error(i18n.t("ui2.xmlInvalid"));
   }
 
   const cells = xmlDoc.getElementsByTagName("mxCell");
@@ -177,10 +178,15 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
   if (isCsv) {
     const lines = fileContent.split(/\r?\n/);
     if (lines.length < 2) {
-      throw new Error("File CSV kosong atau tidak memiliki data.");
+      throw new Error(i18n.t("ui2.csvEmpty"));
     }
 
-    const headers = lines[0].split(",").map(h => h.trim().replace(/^["']|["']$/g, "").toLowerCase());
+    const headers = lines[0].split(",").map((h) =>
+      h
+        .trim()
+        .replace(/^["']|["']$/g, "")
+        .toLowerCase()
+    );
     const rows: any[] = [];
 
     for (let i = 1; i < lines.length; i++) {
@@ -195,7 +201,7 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
         const char = line[j];
         if (char === '"' || char === "'") {
           inQuotes = !inQuotes;
-        } else if (char === ',' && !inQuotes) {
+        } else if (char === "," && !inQuotes) {
           cells.push(currentCell.trim().replace(/^["']|["']$/g, ""));
           currentCell = "";
         } else {
@@ -228,13 +234,16 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
           label: row.label || row.text || row.value || undefined,
         });
       } else {
-        const x = parseFloat(row.x || row.left || "150") || (idx * 60 + 100);
-        const y = parseFloat(row.y || row.top || "150") || (idx * 40 + 120);
+        const x = parseFloat(row.x || row.left || "150") || idx * 60 + 100;
+        const y = parseFloat(row.y || row.top || "150") || idx * 40 + 120;
         const width = parseFloat(row.width || "120") || 120;
         const height = parseFloat(row.height || "80") || 80;
 
-        let labelText = row.text || row.label || row.content || row.title || `Komponen Miro ${idx + 1}`;
-        labelText = decodeHtmlEntity(labelText).replace(/<[^>]*>/g, "").trim();
+        let labelText =
+          row.text || row.label || row.content || row.title || `Komponen Miro ${idx + 1}`;
+        labelText = decodeHtmlEntity(labelText)
+          .replace(/<[^>]*>/g, "")
+          .trim();
 
         let type: FlowNode["type"] = "rect";
         const parsedShape = (row.shape || row.type || "").toLowerCase();
@@ -271,7 +280,6 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
     );
 
     return { nodes: extractedNodes, edges: validEdges };
-
   } else {
     const parsed = JSON.parse(fileContent);
     let items: any[] = [];
@@ -302,14 +310,25 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
       const id = item.id || `miro-item-${idx}`;
       const typeStr = (item.type || "").toLowerCase();
 
-      const isConnector = typeStr === "connector" || typeStr === "line" || typeStr === "link" || item.start || item.from;
+      const isConnector =
+        typeStr === "connector" ||
+        typeStr === "line" ||
+        typeStr === "link" ||
+        item.start ||
+        item.from;
 
       if (!isConnector) {
         let x = 150;
         let y = 150;
         if (item.position) {
-          x = typeof item.position.x === "number" ? item.position.x : parseFloat(item.position.x || "150");
-          y = typeof item.position.y === "number" ? item.position.y : parseFloat(item.position.y || "150");
+          x =
+            typeof item.position.x === "number"
+              ? item.position.x
+              : parseFloat(item.position.x || "150");
+          y =
+            typeof item.position.y === "number"
+              ? item.position.y
+              : parseFloat(item.position.y || "150");
         } else if (typeof item.x === "number") {
           x = item.x;
           y = item.y ?? 150;
@@ -391,7 +410,11 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
             id: `miro-edge-${id}`,
             fromNodeId: `miro-${fromNode}`,
             toNodeId: `miro-${toNode}`,
-            label: label ? decodeHtmlEntity(label).replace(/<[^>]*>/g, "").trim() : undefined,
+            label: label
+              ? decodeHtmlEntity(label)
+                  .replace(/<[^>]*>/g, "")
+                  .trim()
+              : undefined,
           });
         }
       }

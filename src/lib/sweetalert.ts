@@ -120,7 +120,7 @@ export const showSuccessAlert = (title?: string, text?: string) => {
  * berbeda dari dua lainnya.
  */
 export const showErrorAlert = (
-  title: string = "Terjadi Kesalahan",
+  title: string = i18n.t("ui2.errorTitle"),
   text: string = "",
   severity: "error" | "warning" = "error"
 ) => {

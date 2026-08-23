@@ -149,7 +149,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                       ? "bg-success/10 hover:bg-success/15 text-success-text border-success/20"
                       : "bg-primary-surface/10 hover:bg-primary-surface/15 text-primary border-primary/20"
                   }`}
-                  title={`Insert ${variable}`}
+                  title={t("ui2.insertVar", { nama: variable })}
                 >
                   {variable}
                 </button>

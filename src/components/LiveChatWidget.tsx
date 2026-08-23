@@ -691,7 +691,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     <button
                       onClick={() => setSoundEnabled(!soundEnabled)}
                       className="text-content-subtle hover:text-content-inverse transition-colors"
-                      title={soundEnabled ? "Matikan Suara" : "Aktifkan Suara"}
+                      title={soundEnabled ? t("ui2.muteSound") : t("ui2.unmuteSound")}
                     >
                       {soundEnabled ? (
                         <Volume2 className="w-4 h-4" />
@@ -980,7 +980,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     <div className="h-full flex flex-col items-center justify-center text-center p-4">
                       <MessageSquare className="w-8 h-8 text-content-inverse-muted mb-1.5" />
                       <p className="text-xs text-content-subtle font-medium">
-                        {msgSearchQuery ? "Tidak ada pesan cocok." : "Belum ada percakapan."}
+                        {msgSearchQuery ? t("ui2.noMatchingMessage") : t("ui2.noConversation")}
                       </p>
                     </div>
                   ) : (
@@ -1217,7 +1217,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
                   <input
                     type="text"
-                    placeholder={isUploading ? "Mengunggah file..." : "Ketik pesan..."}
+                    placeholder={isUploading ? t("ui2.uploadingFile") : t("ui2.typeMessage")}
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     disabled={isUploading}

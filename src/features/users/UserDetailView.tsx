@@ -62,49 +62,30 @@ interface UserDetailViewProps {
   currentUser?: UserProfile | null;
 }
 
+/**
+ * Item #148 — label dan deskripsi modul kini KUNCI kamus, bukan teks.
+ *
+ * Konstanta ini berada di tingkat modul sehingga tidak bisa memakai hook,
+ * dan `i18n.t()` di sini akan dievaluasi sekali saat impor — membekukan
+ * bahasanya. Jadi yang disimpan adalah kunci; penerjemahannya dilakukan di
+ * tempat pemakaian, yang memang berada di dalam komponen.
+ */
 const MODULE_DESCRIPTIONS: Record<string, { label: string; desc: string }> = {
-  dashboard: {
-    label: "Dashboard Executive",
-    desc: "Akses ke executive KPI summary & analytics widget",
-  },
-  meetingNotes: {
-    label: "Notulensi Rapat (Notes)",
-    desc: "Membuat & mengelola catatan rapat serta AI Companion",
-  },
-  wiki: { label: "Wiki & Dokumentasi", desc: "Dokumentasi internal, SOP, dan pengetahuan tim" },
-  list: {
-    label: "Pengelolaan Issue / Tugas",
-    desc: "Daftar tugas, pembuatan issue, dan pelacakan status",
-  },
-  sprints: {
-    label: "Sprint & Planning",
-    desc: "Sprint planning, backlog management, dan alokasi tugas",
-  },
-  board: {
-    label: "Papan Kanban",
-    desc: "Visualisasi alur kerja papan Kanban dan drag & drop task",
-  },
-  qa: {
-    label: "Pengujian QA & Test Case",
-    desc: "Membuat test suite, test case, dan melacak hasil pengujian",
-  },
-  timeline: { label: "Roadmap & Timeline", desc: "Visualisasi linimasa proyek dan milestone" },
-  access: { label: "Akses Tim & Proyek", desc: "Manajemen anggota tim dan delegasi proyek" },
-  userManagement: {
-    label: "Manajemen Pengguna System",
-    desc: "Mengelola profil user, role, dan clearance status",
-  },
-  masterData: {
-    label: "Master Data Setup",
-    desc: "Konfigurasi master data departemen, jabatan, dan role",
-  },
-  auditLog: { label: "Log Audit Sistem", desc: "Riwayat aktivitas user dan catatan keamanan" },
-  dbExplorer: { label: "Database Explorer", desc: "Inspeksi tabel dan query database" },
-  settings: {
-    label: "Konfigurasi Sistem",
-    desc: "Pengaturan Email SMTP, WhatsApp Gateway, & Template",
-  },
-  flowchart: { label: "Diagram & Flowchart", desc: "Pembuatan diagram proses dan flowchart kerja" },
+  dashboard: { label: "permModul.dashboardLabel", desc: "permModul.dashboardDesc" },
+  meetingNotes: { label: "permModul.meetingNotesLabel", desc: "permModul.meetingNotesDesc" },
+  wiki: { label: "permModul.wikiLabel", desc: "permModul.wikiDesc" },
+  list: { label: "permModul.listLabel", desc: "permModul.listDesc" },
+  sprints: { label: "permModul.sprintsLabel", desc: "permModul.sprintsDesc" },
+  board: { label: "permModul.boardLabel", desc: "permModul.boardDesc" },
+  qa: { label: "permModul.qaLabel", desc: "permModul.qaDesc" },
+  timeline: { label: "permModul.timelineLabel", desc: "permModul.timelineDesc" },
+  access: { label: "permModul.accessLabel", desc: "permModul.accessDesc" },
+  userManagement: { label: "permModul.userManagementLabel", desc: "permModul.userManagementDesc" },
+  masterData: { label: "permModul.masterDataLabel", desc: "permModul.masterDataDesc" },
+  auditLog: { label: "permModul.auditLogLabel", desc: "permModul.auditLogDesc" },
+  dbExplorer: { label: "permModul.dbExplorerLabel", desc: "permModul.dbExplorerDesc" },
+  settings: { label: "permModul.settingsLabel", desc: "permModul.settingsDesc" },
+  flowchart: { label: "permModul.flowchartLabel", desc: "permModul.flowchartDesc" },
 };
 
 const ROLE_DESCRIPTIONS: Record<string, { label: string; desc: string; icon: React.ReactNode }> = {
@@ -554,7 +535,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               )}
               <label className="absolute inset-0 bg-black/50 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity ring-2 ring-indigo-50 border-2 border-surface ">
                 <span className="text-xs sm:text-[10px] font-medium uppercase tracking-wider">
-                  {isUploading ? "..." : "Pilih Foto"}
+                  {isUploading ? "..." : t("ui2.choosePhoto")}
                 </span>
                 <input
                   type="file"
@@ -926,10 +907,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       <tbody className="divide-y divide-border-faint bg-surface ">
                         {(Object.keys(MODULE_DESCRIPTIONS) as Array<keyof UserPermissions>).map(
                           (module) => {
-                            const moduleInfo = MODULE_DESCRIPTIONS[module] || {
-                              label: module,
-                              desc: "",
-                            };
+                            // Item #148 — nilainya kunci kamus; modul di luar
+                            // daftar memakai namanya sendiri apa adanya.
+                            const info = MODULE_DESCRIPTIONS[module];
+                            const moduleInfo = info
+                              ? { label: t(info.label), desc: t(info.desc) }
+                              : { label: module as string, desc: "" };
                             return (
                               <tr
                                 key={module}
@@ -963,8 +946,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                         )}
                                         title={
                                           isChecked
-                                            ? `Granted (${isOverride ? "Explicit Override" : "Role Default"}). Click to revoke.`
-                                            : `Revoked (${isOverride ? "Explicit Override" : "Role Default"}). Click to grant.`
+                                            ? `Granted (${isOverride ? t("ui2.explicitOverride") : t("ui2.roleDefault")}). Click to revoke.`
+                                            : `Revoked (${isOverride ? t("ui2.explicitOverride") : t("ui2.roleDefault")}). Click to grant.`
                                         }
                                       >
                                         <Check

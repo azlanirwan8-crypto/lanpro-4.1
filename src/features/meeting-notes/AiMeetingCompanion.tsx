@@ -308,7 +308,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       ]);
 
       if (exitCode !== 0) {
-        throw new Error("FFmpeg failed to extract audio.");
+        throw new Error(t("ui2.ffmpegFailed"));
       }
 
       const data = await ffmpeg.readFile(outputFileName);
@@ -1087,7 +1087,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               }`}
                             >
                               <Filter className="w-3.5 h-3.5" />
-                              {filterOnlyMatches ? "Hanya Baris Cocok" : "Tampilkan Semua"}
+                              {filterOnlyMatches ? t("ui2.onlyMatchingRows") : t("ui2.showAll")}
                             </button>
                           </div>
 
@@ -1173,7 +1173,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         className={`px-8 py-4 ${isRecording ? "bg-surface-inverse" : "bg-red-600"} hover:opacity-90 text-content-inverse rounded-xl text-sm font-medium shadow-soft-lg  flex items-center gap-3 cursor-pointer transition-transform hover:scale-[1.02]`}
                       >
                         <Brain className="w-5 h-5" />{" "}
-                        {isRecording ? "Hentikan Rekaman" : "Mulai Merekam"}
+                        {isRecording ? t("ui2.stopRecording") : t("ui2.startRecording")}
                       </button>
                       <span className="text-sm font-mono text-content-muted">
                         {formatTime(recordingTime)}

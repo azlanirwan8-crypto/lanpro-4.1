@@ -379,7 +379,7 @@ export function useAuth(
 
         const isRejected = cleanMsg.toLowerCase().includes("ditolak");
         showErrorAlert(
-          isRejected ? "Pendaftaran Ditolak" : "Akses Ditolak",
+          isRejected ? i18n.t("ui2.registrationRejected") : i18n.t("ui2.accessDenied"),
           cleanMsg,
           isRejected ? "error" : "warning"
         );

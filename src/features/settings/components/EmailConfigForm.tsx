@@ -267,7 +267,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-emerald-600 text-content-inverse text-xs font-medium hover:bg-emerald-700 shadow-xs transition-colors cursor-pointer disabled:opacity-50"
               >
                 {isTesting ? <Loader2 size={13} className="animate-spin" /> : <Mail size={13} />}
-                {isTesting ? "Mengirim..." : "Kirim Uji Coba"}
+                {isTesting ? t("ui2.sending") : t("ui2.sendTest")}
               </button>
             </div>
           </div>

@@ -372,8 +372,8 @@ export const BackupPanel = (_props: {
           onConfirm={executeRestore}
           title={t("backupPanel.confirmRestore")}
           message="Apakah Anda yakin ingin melakukan restore? Tindakan ini akan menimpa seluruh data saat ini dengan data dari file backup. Tindakan ini tidak dapat dibatalkan!"
-          confirmText="Ya, Restore Sekarang"
-          cancelText="Batal"
+          confirmText={t("ui2.yesRestoreNow")}
+          cancelText={t("ui2.cancel")}
           variant="danger"
           isLoading={isRestoring}
         />

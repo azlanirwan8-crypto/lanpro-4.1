@@ -1527,7 +1527,7 @@ function AppContainer() {
       if (new Date(newSprintStartDate) > new Date(newSprintEndDate)) {
         setConfirmAction({
           isOpen: true,
-          title: "Validasi Tanggal",
+          title: t("ui2.dateValidation"),
           message:
             "Tanggal selesari target fase tidak boleh sebelum tanggal mulai target fase (tidak bisa backdate).",
           onConfirm: () => {},
@@ -1584,7 +1584,7 @@ function AppContainer() {
       if (ensureDate(editingSprint.startDate) > ensureDate(editingSprint.endDate)) {
         setConfirmAction({
           isOpen: true,
-          title: "Validasi Tanggal",
+          title: t("ui2.dateValidation"),
           message:
             "Tanggal selesai target fase tidak boleh sebelum tanggal mulai target fase (tidak bisa backdate).",
           onConfirm: () => {},
@@ -1803,7 +1803,7 @@ function AppContainer() {
               if (tStart < sprintStart || tEnd > sprintEnd) {
                 setConfirmAction({
                   isOpen: true,
-                  title: "Validasi Tanggal",
+                  title: t("ui2.dateValidation"),
                   message: `Tanggal task (${format(tStart, "dd MMM")} - ${format(tEnd, "dd MMM")}) di luar periode fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
                   onConfirm: () => {},
                   isAlert: true,
@@ -1814,7 +1814,7 @@ function AppContainer() {
               if (tStart < sprintStart || tStart > sprintEnd) {
                 setConfirmAction({
                   isOpen: true,
-                  title: "Validasi Tanggal",
+                  title: t("ui2.dateValidation"),
                   message: `Waktu mulai task (${format(tStart, "dd MMM")}) di luar periode fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
                   onConfirm: () => {},
                   isAlert: true,
@@ -1825,7 +1825,7 @@ function AppContainer() {
               if (tEnd < sprintStart || tEnd > sprintEnd) {
                 setConfirmAction({
                   isOpen: true,
-                  title: "Validasi Tanggal",
+                  title: t("ui2.dateValidation"),
                   message: `Eksekusi task melebih timeline fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
                   onConfirm: () => {},
                   isAlert: true,
@@ -1887,7 +1887,7 @@ function AppContainer() {
             if (tStart && tEnd && (tStart < sprintStart || tEnd > sprintEnd)) {
               setConfirmAction({
                 isOpen: true,
-                title: "Validasi Tanggal",
+                title: t("ui2.dateValidation"),
                 message: `Ada task yang melewati timeline fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
                 onConfirm: () => {},
                 isAlert: true,
@@ -1896,7 +1896,7 @@ function AppContainer() {
             } else if (tStart && (tStart < sprintStart || tStart > sprintEnd)) {
               setConfirmAction({
                 isOpen: true,
-                title: "Validasi Tanggal",
+                title: t("ui2.dateValidation"),
                 message: `Waktu mulai task di luar periode fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
                 onConfirm: () => {},
                 isAlert: true,
@@ -1905,7 +1905,7 @@ function AppContainer() {
             } else if (tEnd && (tEnd < sprintStart || tEnd > sprintEnd)) {
               setConfirmAction({
                 isOpen: true,
-                title: "Validasi Tanggal",
+                title: t("ui2.dateValidation"),
                 message: `Eksekusi task melebih timeline fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
                 onConfirm: () => {},
                 isAlert: true,
@@ -1986,7 +1986,7 @@ function AppContainer() {
         if (epicStart && taskStart && taskStart < epicStart) {
           setConfirmAction({
             isOpen: true,
-            title: "Validasi Batas Jadwal Epic Timeline",
+            title: t("ui2.epicTimelineLimit"),
             message:
               "Peringatan: Tanggal mulai task tidak boleh lebih awal dari rentang tanggal Epic induk.",
             onConfirm: () => {},
@@ -1997,7 +1997,7 @@ function AppContainer() {
         if (epicEnd && taskStart && taskStart > epicEnd) {
           setConfirmAction({
             isOpen: true,
-            title: "Validasi Batas Jadwal Epic Timeline",
+            title: t("ui2.epicTimelineLimit"),
             message:
               "Peringatan: Tanggal mulai task tidak boleh melebihi rentang tanggal Epic induk.",
             onConfirm: () => {},
@@ -2008,7 +2008,7 @@ function AppContainer() {
         if (epicStart && taskEnd && taskEnd < epicStart) {
           setConfirmAction({
             isOpen: true,
-            title: "Validasi Batas Jadwal Epic Timeline",
+            title: t("ui2.epicTimelineLimit"),
             message:
               "Peringatan: Tanggal selesai task tidak boleh lebih awal dari rentang tanggal Epic induk.",
             onConfirm: () => {},
@@ -2019,7 +2019,7 @@ function AppContainer() {
         if (epicEnd && taskEnd && taskEnd > epicEnd) {
           setConfirmAction({
             isOpen: true,
-            title: "Validasi Batas Jadwal Epic Timeline",
+            title: t("ui2.epicTimelineLimit"),
             message:
               "Peringatan: Tanggal selesai task tidak boleh melebihi rentang tanggal Epic induk.",
             onConfirm: () => {},
@@ -2034,7 +2034,7 @@ function AppContainer() {
       if (new Date(newTaskStartDate) > new Date(newTaskEndDate)) {
         setConfirmAction({
           isOpen: true,
-          title: "Validasi Tanggal",
+          title: t("ui2.dateValidation"),
           message:
             "Tanggal selesai tugas tidak boleh sebelum tanggal mulai tugas (tidak bisa backdate).",
           onConfirm: () => {},
@@ -2093,7 +2093,7 @@ function AppContainer() {
       ) {
         setConfirmAction({
           isOpen: true,
-          title: "Validasi Batas Jadwal Epic Timeline",
+          title: t("ui2.epicTimelineLimit"),
           message: "Peringatan: Tanggal task tidak boleh melewati rentang tanggal Epic induk!",
           onConfirm: () => {},
           isAlert: true,
@@ -2175,7 +2175,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         await updateTask(selectedProject!.id, task.id, { storyPoints: result.points });
         await fetchTasks();
       } else {
-        throw new Error("Invalid response from AI");
+        throw new Error(t("ui2.aiInvalidResponse"));
       }
     } catch (e) {
       console.error(e);
@@ -2630,7 +2630,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       if (tStart && tEnd && tStart > tEnd) {
         setConfirmAction({
           isOpen: true,
-          title: "Validasi Tanggal",
+          title: t("ui2.dateValidation"),
           message:
             "Tanggal selesai tugas tidak boleh sebelum tanggal mulai tugas (tidak bisa backdate).",
           onConfirm: () => {},
@@ -2652,7 +2652,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           if (epicStart && taskStart && taskStart < epicStart) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Batas Jadwal Epic Timeline",
+              title: t("ui2.epicTimelineLimit"),
               message:
                 "Peringatan: Tanggal mulai task tidak boleh lebih awal dari rentang tanggal Epic induk.",
               onConfirm: () => {},
@@ -2663,7 +2663,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           if (epicEnd && taskStart && taskStart > epicEnd) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Batas Jadwal Epic Timeline",
+              title: t("ui2.epicTimelineLimit"),
               message:
                 "Peringatan: Tanggal mulai task tidak boleh melebihi rentang tanggal Epic induk.",
               onConfirm: () => {},
@@ -2674,7 +2674,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           if (epicStart && taskEnd && taskEnd < epicStart) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Batas Jadwal Epic Timeline",
+              title: t("ui2.epicTimelineLimit"),
               message:
                 "Peringatan: Tanggal selesai task tidak boleh lebih awal dari rentang tanggal Epic induk.",
               onConfirm: () => {},
@@ -2685,7 +2685,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           if (epicEnd && taskEnd && taskEnd > epicEnd) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Batas Jadwal Epic Timeline",
+              title: t("ui2.epicTimelineLimit"),
               message:
                 "Peringatan: Tanggal selesai task tidak boleh melebihi rentang tanggal Epic induk.",
               onConfirm: () => {},
@@ -2707,7 +2707,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           if (tStart && tEnd && (tStart < sprintStart || tEnd > sprintEnd)) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Tanggal",
+              title: t("ui2.dateValidation"),
               message: `Range tanggal tugas (${format(tStart, "dd MMM")} - ${format(tEnd, "dd MMM")}) di luar periode fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
               onConfirm: () => {},
               isAlert: true,
@@ -2716,7 +2716,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           } else if (tStart && (tStart < sprintStart || tStart > sprintEnd)) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Tanggal",
+              title: t("ui2.dateValidation"),
               message: `Waktu mulai tugas (${format(tStart, "dd MMM")}) di luar periode fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
               onConfirm: () => {},
               isAlert: true,
@@ -2725,7 +2725,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           } else if (tEnd && (tEnd < sprintStart || tEnd > sprintEnd)) {
             setConfirmAction({
               isOpen: true,
-              title: "Validasi Tanggal",
+              title: t("ui2.dateValidation"),
               message: `Eksekusi tugas melebihi timeline fase ini (${format(sprintStart, "dd MMM")} - ${format(sprintEnd, "dd MMM")}).`,
               onConfirm: () => {},
               isAlert: true,
@@ -2805,7 +2805,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       ) {
         setConfirmAction({
           isOpen: true,
-          title: "Validasi Batas Jadwal Epic Timeline",
+          title: t("ui2.epicTimelineLimit"),
           message: "Peringatan: Tanggal task tidak boleh melewati rentang tanggal Epic induk!",
           onConfirm: () => {},
           isAlert: true,
@@ -3297,7 +3297,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
         for (const u of mentionedUsers) {
           await createNotification(u.uid, {
             senderId: activeUid,
-            title: "Anda di-mention",
+            title: t("ui2.youWereMentioned"),
             message: `${authorName} me-mention Anda di komentar tugas "${selectedTaskForDetail.title}"`,
             type: "mention",
             relatedId: selectedTaskForDetail.id,
@@ -3523,7 +3523,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               <button
                 onClick={toggleFullscreen}
                 className="hidden sm:flex p-2.5 min-w-11 min-h-11 items-center justify-center text-content-subtle hover:text-primary hover:bg-surface-sunken rounded-full transition-all"
-                title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh"}
+                title={isFullscreen ? t("ui2.exitFullscreen") : t("ui2.fullscreen")}
               >
                 {isFullscreen ? (
                   <Minimize2 className="w-5 h-5" />
@@ -3538,8 +3538,8 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               <button
                 onClick={toggleTheme}
                 className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-content-strong hover:bg-surface-sunken rounded-full transition-all cursor-pointer relative"
-                title={isDarkMode() ? "Beralih ke Mode Terang" : "Beralih ke Mode Gelap"}
-                aria-label={isDarkMode() ? "Beralih ke Mode Terang" : "Beralih ke Mode Gelap"}
+                title={isDarkMode() ? t("ui2.toLightMode") : t("ui2.toDarkMode")}
+                aria-label={isDarkMode() ? t("ui2.toLightMode") : t("ui2.toDarkMode")}
               >
                 {isDarkMode() ? (
                   <Sun className="w-5 h-5 text-warning transition-transform hover:rotate-45 duration-200" />

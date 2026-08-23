@@ -1226,17 +1226,17 @@ export const MasterDataPanel = ({
             </label>
             <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-xl">
               {[
-                { hex: "#ef4444", label: "Merah" },
-                { hex: "#f97316", label: "Oranye" },
-                { hex: "#eab308", label: "Kuning" },
-                { hex: "#22c55e", label: "Hijau" },
-                { hex: "#06b6d4", label: "Cyan" },
-                { hex: "#3b82f6", label: "Biru" },
-                { hex: "#6366f1", label: "Indigo" },
-                { hex: "#a855f7", label: "Ungu" },
-                { hex: "#ec4899", label: "Pink" },
-                { hex: "#64748b", label: "Slate" },
-                { hex: "#0f172a", label: "Gelap" },
+                { hex: "#ef4444", label: t("ui2.colorRed") },
+                { hex: "#f97316", label: t("ui2.colorOrange") },
+                { hex: "#eab308", label: t("ui2.colorYellow") },
+                { hex: "#22c55e", label: t("ui2.colorGreen") },
+                { hex: "#06b6d4", label: t("ui2.colorCyan") },
+                { hex: "#3b82f6", label: t("ui2.colorBlue") },
+                { hex: "#6366f1", label: t("ui2.colorIndigo") },
+                { hex: "#a855f7", label: t("ui2.colorPurple") },
+                { hex: "#ec4899", label: t("ui2.colorPink") },
+                { hex: "#64748b", label: t("ui2.colorSlate") },
+                { hex: "#0f172a", label: t("ui2.colorDark") },
               ].map((p) => (
                 <button
                   key={p.hex}
@@ -1408,17 +1408,17 @@ export const MasterDataPanel = ({
               </label>
               <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-xl">
                 {[
-                  { hex: "#ef4444", label: "Merah" },
-                  { hex: "#f97316", label: "Oranye" },
-                  { hex: "#eab308", label: "Kuning" },
-                  { hex: "#22c55e", label: "Hijau" },
-                  { hex: "#06b6d4", label: "Cyan" },
-                  { hex: "#3b82f6", label: "Biru" },
-                  { hex: "#6366f1", label: "Indigo" },
-                  { hex: "#a855f7", label: "Ungu" },
-                  { hex: "#ec4899", label: "Pink" },
-                  { hex: "#64748b", label: "Slate" },
-                  { hex: "#0f172a", label: "Gelap" },
+                  { hex: "#ef4444", label: t("ui2.colorRed") },
+                  { hex: "#f97316", label: t("ui2.colorOrange") },
+                  { hex: "#eab308", label: t("ui2.colorYellow") },
+                  { hex: "#22c55e", label: t("ui2.colorGreen") },
+                  { hex: "#06b6d4", label: t("ui2.colorCyan") },
+                  { hex: "#3b82f6", label: t("ui2.colorBlue") },
+                  { hex: "#6366f1", label: t("ui2.colorIndigo") },
+                  { hex: "#a855f7", label: t("ui2.colorPurple") },
+                  { hex: "#ec4899", label: t("ui2.colorPink") },
+                  { hex: "#64748b", label: t("ui2.colorSlate") },
+                  { hex: "#0f172a", label: t("ui2.colorDark") },
                 ].map((p) => (
                   <button
                     key={p.hex}
@@ -1497,7 +1497,7 @@ export const MasterDataPanel = ({
                 disabled={isSaving}
                 className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
               >
-                {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+                {isSaving ? t("ui2.saving") : t("ui2.saveChanges2")}
               </Button>
             </div>
           </div>
@@ -1568,7 +1568,7 @@ export const MasterDataPanel = ({
               disabled={isSaving}
               className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
             >
-              {isSaving ? "Menyimpan..." : "Tambah Modul"}
+              {isSaving ? t("ui2.saving") : t("ui2.addModule")}
             </Button>
           </div>
         </div>
@@ -1638,7 +1638,7 @@ export const MasterDataPanel = ({
               disabled={isSaving}
               className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
             >
-              {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+              {isSaving ? t("ui2.saving") : t("ui2.saveChanges2")}
             </Button>
           </div>
         </div>

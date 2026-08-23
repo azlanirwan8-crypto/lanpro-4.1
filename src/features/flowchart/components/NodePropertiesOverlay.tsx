@@ -110,7 +110,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
                 colorClassMap[colName],
                 node.color === colName && "ring-2 ring-violet-500 scale-110"
               )}
-              title={`Ubah warna ke: ${colName}`}
+              title={t("ui2.changeColorTo", { warna: colName })}
             />
           );
         })}

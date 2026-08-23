@@ -75,7 +75,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                 ? "bg-surface-muted hover:bg-surface-strong text-content-body"
                 : "bg-blue-950/40 hover:bg-blue-900/40 text-blue-400"
             )}
-            title={`Ubah Tema Kanvas (Saat ini: ${canvasTheme === "miro" ? "Miro Terang" : "Blueprint Gelap"})`}
+            title={`Ubah Tema Kanvas (Saat ini: ${canvasTheme === "miro" ? t("ui2.miroLight") : t("ui2.blueprintDark")})`}
           >
             {canvasTheme === "miro" ? (
               <>
@@ -118,7 +118,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
               )}
             />
             <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider hidden sm:inline px-0.5">
-              {isSnapToGrid ? "Snap Grid" : "Free Move"}
+              {isSnapToGrid ? t("ui2.snapGrid") : t("ui2.freeMove")}
             </span>
           </button>
         </div>

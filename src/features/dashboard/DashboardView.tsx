@@ -595,7 +595,7 @@ export function DashboardView(props: DashboardViewProps) {
     }
     return [
       {
-        name: "All Tasks",
+        name: t("ui2.allTasks"),
         Planned: totalTasks,
         Completed: completedTasks.length,
       },
@@ -1294,13 +1294,13 @@ export function DashboardView(props: DashboardViewProps) {
                       last7DaysData && last7DaysData.length > 0
                         ? last7DaysData
                         : [
-                            { name: "Mon", Activity: 4, Completed: 3 },
-                            { name: "Tue", Activity: 6, Completed: 5 },
-                            { name: "Wed", Activity: 8, Completed: 7 },
-                            { name: "Thu", Activity: 5, Completed: 6 },
-                            { name: "Fri", Activity: 9, Completed: 8 },
-                            { name: "Sat", Activity: 2, Completed: 4 },
-                            { name: "Sun", Activity: 1, Completed: 2 },
+                            { name: t("ui2.mon"), Activity: 4, Completed: 3 },
+                            { name: t("ui2.tue"), Activity: 6, Completed: 5 },
+                            { name: t("ui2.wed"), Activity: 8, Completed: 7 },
+                            { name: t("ui2.thu"), Activity: 5, Completed: 6 },
+                            { name: t("ui2.fri"), Activity: 9, Completed: 8 },
+                            { name: t("ui2.sat"), Activity: 2, Completed: 4 },
+                            { name: t("ui2.sun"), Activity: 1, Completed: 2 },
                           ]
                     }
                     margin={{ top: 10, right: 10, left: -20, bottom: 0 }}

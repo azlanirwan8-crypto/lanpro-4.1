@@ -175,7 +175,7 @@ export const CompleteRegistrationScreen = ({
                      transition-colors duration-150 hover:bg-primary-surface-hover
                      disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {mengirim ? "Memproses..." : "Selesaikan Pendaftaran"}
+          {mengirim ? t("ui2.processing") : t("ui2.finishRegistration")}
           {!mengirim && <ArrowRight className="h-4 w-4" />}
         </button>
 

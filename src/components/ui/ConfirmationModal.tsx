@@ -1,3 +1,4 @@
+import i18n from "../../i18n";
 import { useTranslation } from "react-i18next";
 import React, { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -61,8 +62,8 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = "Ya, Hapus!",
-  cancelText = "Batal",
+  confirmText = i18n.t("ui2.yesDeleteBang"),
+  cancelText = i18n.t("ui2.cancel"),
   variant = "danger",
   isLoading = false,
   isAlert = false,
