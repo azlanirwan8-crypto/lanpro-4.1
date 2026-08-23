@@ -14,6 +14,15 @@ npx lint-staged
 npm run audit:papan || exit 1
 npm run audit:warna || exit 1
 npm run audit:tema || exit 1
+# Item #157 — menangkap kelas warna garis yang namanya terpotong
+# (`border-subtle` alih-alih `border-border-subtle`). Kelas semacam itu tidak
+# menghasilkan CSS, dan di Tailwind v4 garisnya jatuh ke `currentColor` —
+# terbaca HITAM PEKAT, bukan hilang. Tiga gerbang di atas tidak melihatnya.
+npm run audit:kelas || exit 1
+# Item #159 — menangkap `setCurrentView("...")` yang tidak punya cabang di
+# AppRoutes. `switch`-nya berakhir `default: return null`, jadi tujuan yang
+# salah ketik merender LAYAR KOSONG tanpa melempar apa pun.
+npm run audit:navigasi || exit 1
 
 # CATATAN. Ketiga gerbang di atas TIDAK membuktikan aplikasinya benar.
 # `npm test` dan `npm run build` sengaja TIDAK dijalankan di sini agar commit

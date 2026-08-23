@@ -1,8 +1,8 @@
 export const styles = {
   container:
-    "flex flex-col bg-surface dark:bg-surface-inverse rounded-md border border-subtle/80 dark:border-border-inverse shadow-xs font-sans relative flex-1 min-h-[500px] overflow-hidden",
+    "flex flex-col bg-surface dark:bg-surface-inverse rounded-md border border-border-subtle/80 dark:border-border-inverse shadow-xs font-sans relative flex-1 min-h-[500px] overflow-hidden",
   toolbar:
-    "flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-subtle/80 bg-slate-50/50 dark:bg-slate-800/30 shrink-0",
+    "flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-border-subtle/80 bg-slate-50/50 dark:bg-slate-800/30 shrink-0",
   searchWrapper: "relative group",
   searchInput:
     "pl-9 pr-4 py-2 bg-surface dark:bg-slate-950 border border-border-subtle dark:border-border-inverse rounded-md text-xs font-medium text-content-body dark:text-content-inverse-muted w-full sm:w-64 placeholder:font-normal placeholder:text-content-subtle focus:ring-1 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-2xs",

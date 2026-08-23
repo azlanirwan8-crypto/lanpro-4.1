@@ -689,7 +689,7 @@ export function DashboardView(props: DashboardViewProps) {
                 {t("dashboard.percentDone", { percent: completionPercentage })}
               </span>
               <button
-                onClick={() => props.setCurrentView("kanban")}
+                onClick={() => props.setCurrentView("board")}
                 className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
                 {t("dashboard.viewAllTasks")}
@@ -717,7 +717,7 @@ export function DashboardView(props: DashboardViewProps) {
                 {t("dashboard.notDoneYet", { count: inProgressTasks.length })}
               </span>
               <button
-                onClick={() => props.setCurrentView("kanban")}
+                onClick={() => props.setCurrentView("board")}
                 className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
                 {t("dashboard.viewActiveBoard")}
@@ -761,7 +761,7 @@ export function DashboardView(props: DashboardViewProps) {
                 )}
               </span>
               <button
-                onClick={() => props.setCurrentView("kanban")}
+                onClick={() => props.setCurrentView("board")}
                 className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
                 {t("dashboard.viewDoneListLink")}
@@ -812,7 +812,7 @@ export function DashboardView(props: DashboardViewProps) {
                 })}
               </span>
               <button
-                onClick={() => props.setCurrentView("kanban")}
+                onClick={() => props.setCurrentView("board")}
                 className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
               >
                 {t("dashboard.handleBlockersLink")}
@@ -1178,7 +1178,7 @@ export function DashboardView(props: DashboardViewProps) {
                   </p>
                 </div>
                 <button
-                  onClick={() => props.setCurrentView("roadmap")}
+                  onClick={() => props.setCurrentView("timeline")}
                   className="text-xs font-medium text-primary hover:underline inline-flex items-center min-h-11 py-2"
                 >
                   {t("dashboard.viewRoadmap")}
@@ -1376,7 +1376,7 @@ export function DashboardView(props: DashboardViewProps) {
                   {t("dashboard.priorityBreakdown")}
                 </h3>
                 <button
-                  onClick={() => props.setCurrentView("kanban")}
+                  onClick={() => props.setCurrentView("board")}
                   className="text-xs font-medium text-primary hover:underline inline-flex items-center min-h-11 py-2"
                 >
                   {t("dashboard.filter")}

@@ -63,7 +63,7 @@ export const getShapeThemeClasses = (node: FlowNode, isSelected: boolean): strin
   }
 
   if (node.type === "card") {
-    return `${base} border border-subtle/80 rounded-xl text-left items-start p-4 bg-white/95 backdrop-blur-sm shadow-sm ${palette.text} ${ringClass}`;
+    return `${base} border border-border-subtle/80 rounded-xl text-left items-start p-4 bg-white/95 backdrop-blur-sm shadow-sm ${palette.text} ${ringClass}`;
   }
 
   if (node.type === "document") {

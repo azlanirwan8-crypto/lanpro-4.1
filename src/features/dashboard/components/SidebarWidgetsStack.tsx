@@ -286,7 +286,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
               <div
                 key={meeting.id}
                 className="group p-3 rounded-xl border border-border-subtle/70 hover:border-info-border/60 transition-all cursor-pointer bg-surface shadow-2xs"
-                onClick={() => setCurrentView("meetings")}
+                onClick={() => setCurrentView("meetingNotes")}
               >
                 <div className="text-xs font-medium text-content-strong line-clamp-1 mb-1 leading-normal">
                   {meeting.title}
