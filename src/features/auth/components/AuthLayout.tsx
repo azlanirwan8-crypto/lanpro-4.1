@@ -84,7 +84,7 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
   return (
     <div className="min-h-screen flex flex-col font-sans bg-surface-sunken overflow-x-hidden">
       {/* BANNER — brand terpusat di atas gelombang. */}
-      <div className="relative select-none overflow-hidden bg-gradient-to-br from-primary-surface-hover via-primary-surface to-primary-surface-active pt-16 pb-44 sm:pt-20 sm:pb-52">
+      <div className="relative select-none overflow-hidden bg-gradient-to-b from-primary-surface-active via-primary-surface-hover to-primary-surface pt-16 pb-44 sm:pt-20 sm:pb-52">
         <VelzonFloatingParticles />
 
         {/* Mesh gradient ambien — sama dengan panel hero varian split. */}
@@ -116,6 +116,15 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
           terlihat sebagai garis pucat memanjang. `var(--color-surface-sunken)`
           dipakai langsung, bukan kelas Tailwind, supaya nilainya ikut berganti
           di mode gelap tanpa override tema tambahan.
+
+          BENTUKNYA: RATA DI TEPI, MELENGKUNG DI TENGAH. Versi pertama memakai
+          satu kurva dengan titik kendali jauh di luar (`C 400 120, 1040 120`),
+          dan hasilnya terbalik dari yang dimaksud: paling curam justru di tepi
+          kiri-kanan (turun 36px hanya dalam 240px pertama) lalu mendatar di
+          tengah. Terbaca sebagai patahan, bukan gelombang. Sekarang dipakai DUA
+          kurva simetris yang garis singgungnya mendatar di ketiga titik ujung
+          (0, 720, 1440), sehingga peralihannya mulus dan tepinya menyatu rata
+          dengan sisi banner.
         */}
         <svg
           className="absolute bottom-0 left-0 w-full h-[70px] sm:h-[100px] pointer-events-none z-20"
@@ -125,7 +134,7 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M0 0 C 400 120, 1040 120, 1440 0 L1440 120 L0 120 Z"
+            d="M0 0 C 300 0, 420 95, 720 95 C 1020 95, 1140 0, 1440 0 L1440 120 L0 120 Z"
             fill="var(--color-surface-sunken)"
           />
         </svg>
