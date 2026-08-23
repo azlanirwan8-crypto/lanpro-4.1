@@ -40,7 +40,12 @@ describe("dropdown mengambil pilihan dari MasterData (#140)", () => {
 
   it("IssueListView menyemai Project Risk dari MasterData", () => {
     const isi = baca("features/issues/IssueListView.tsx");
-    expect(isi).toContain('m.type === "project_risk"');
+    // Item #146 — tipe MasterData kini diteruskan sebagai argumen ke
+    // `opsiFilter`, bukan ditulis sebagai perbandingan literal di empat blok
+    // yang nyaris sama. Yang dijaga tetap sama: Project Risk disemai dari
+    // MasterData, bukan dari daftar keras.
+    expect(isi).toContain('opsiFilter("project_risk"');
+    expect(isi).toContain("m.type === tipeMaster");
     // Benih daftar keras lamanya harus benar-benar hilang.
     expect(isi).not.toContain('new Set<string>(["Low", "Medium", "High"])');
   });

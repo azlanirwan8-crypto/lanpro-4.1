@@ -33,10 +33,10 @@ interface IssueAdvancedFiltersExpandedProps {
   sprints: Sprint[];
   masterData: MasterData[];
   allLabels: string[];
-  allEnvironments: string[];
-  allProjectRisks: string[];
-  allReleases: string[];
-  allResolutions: string[];
+  allEnvironments: { id: string; label: string; icon?: string; color?: string }[];
+  allProjectRisks: { id: string; label: string; icon?: string; color?: string }[];
+  allReleases: { id: string; label: string; icon?: string; color?: string }[];
+  allResolutions: { id: string; label: string; icon?: string; color?: string }[];
 }
 
 export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpandedProps> = ({
@@ -201,18 +201,23 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
               Environment (Custom)
             </label>
-            <select
+            <StyledDropdown
               value={listFilterEnvironment}
-              onChange={(e) => setListFilterEnvironment(e.target.value)}
-              className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
-            >
-              <option value="All">{t("filters.allEnvironments")}</option>
-              {allEnvironments.map((env) => (
-                <option key={env} value={env}>
-                  {env}
-                </option>
-              ))}
-            </select>
+              onChange={(val: string) => setListFilterEnvironment(val)}
+              options={[
+                {
+                  id: "All",
+                  label: t("filters.allEnvironments"),
+                  icon: "Layers",
+                  color: "#6366F1",
+                },
+                ...allEnvironments,
+              ]}
+              type="environment"
+              masterData={mArr}
+              className="w-full"
+              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5"
+            />
           </div>
 
           {/* Project Risk Filter */}
@@ -220,18 +225,18 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
               {t("filters.projectRisk")}
             </label>
-            <select
+            <StyledDropdown
               value={listFilterProjectRisk}
-              onChange={(e) => setListFilterProjectRisk(e.target.value)}
-              className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
-            >
-              <option value="All">{t("filters.allRisks")}</option>
-              {allProjectRisks.map((risk) => (
-                <option key={risk} value={risk}>
-                  {risk}
-                </option>
-              ))}
-            </select>
+              onChange={(val: string) => setListFilterProjectRisk(val)}
+              options={[
+                { id: "All", label: t("filters.allRisks"), icon: "Layers", color: "#6366F1" },
+                ...allProjectRisks,
+              ]}
+              type="project_risk"
+              masterData={mArr}
+              className="w-full"
+              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5"
+            />
           </div>
 
           {/* Release Filter */}
@@ -239,18 +244,18 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
               Release (Custom)
             </label>
-            <select
+            <StyledDropdown
               value={listFilterRelease}
-              onChange={(e) => setListFilterRelease(e.target.value)}
-              className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
-            >
-              <option value="All">{t("filters.allReleases")}</option>
-              {allReleases.map((rel) => (
-                <option key={rel} value={rel}>
-                  {rel}
-                </option>
-              ))}
-            </select>
+              onChange={(val: string) => setListFilterRelease(val)}
+              options={[
+                { id: "All", label: t("filters.allReleases"), icon: "Layers", color: "#6366F1" },
+                ...allReleases,
+              ]}
+              type="release"
+              masterData={mArr}
+              className="w-full"
+              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5"
+            />
           </div>
 
           {/* Resolution Filter */}
@@ -258,18 +263,18 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
               Resolution (Custom)
             </label>
-            <select
+            <StyledDropdown
               value={listFilterResolution}
-              onChange={(e) => setListFilterResolution(e.target.value)}
-              className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
-            >
-              <option value="All">{t("filters.allResolutions")}</option>
-              {allResolutions.map((res) => (
-                <option key={res} value={res}>
-                  {res}
-                </option>
-              ))}
-            </select>
+              onChange={(val: string) => setListFilterResolution(val)}
+              options={[
+                { id: "All", label: t("filters.allResolutions"), icon: "Layers", color: "#6366F1" },
+                ...allResolutions,
+              ]}
+              type="resolution"
+              masterData={mArr}
+              className="w-full"
+              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5"
+            />
           </div>
         </div>
 

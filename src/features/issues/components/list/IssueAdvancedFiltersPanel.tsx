@@ -42,10 +42,10 @@ interface IssueAdvancedFiltersPanelProps {
   sprints: Sprint[];
   masterData: MasterData[];
   allLabels: string[];
-  allEnvironments: string[];
-  allProjectRisks: string[];
-  allReleases: string[];
-  allResolutions: string[];
+  allEnvironments: { id: string; label: string; icon?: string; color?: string }[];
+  allProjectRisks: { id: string; label: string; icon?: string; color?: string }[];
+  allReleases: { id: string; label: string; icon?: string; color?: string }[];
+  allResolutions: { id: string; label: string; icon?: string; color?: string }[];
   setIsConfigureColumnsOpen: (val: boolean) => void;
 }
 

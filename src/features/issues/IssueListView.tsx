@@ -207,46 +207,53 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
     return Array.from(labelSet).sort();
   }, [rawTasks]);
 
-  const allEnvironments = useMemo(() => {
-    const envSet = new Set<string>();
-    mArr.filter((m) => m.type === "environment").forEach((m) => envSet.add(m.label));
-    rawTasks.forEach((t) => {
-      if (t.environment) envSet.add(t.environment);
-    });
-    return Array.from(envSet).sort();
-  }, [rawTasks, mArr]);
+  /**
+   * Item #146 — pilihan filter dibentuk sebagai objek, bukan lagi daftar teks,
+   * supaya ikon MasterData bisa ikut ditampilkan.
+   *
+   * Sumbernya SENGAJA dua: MasterData sebagai benih, lalu nilai yang benar-
+   * benar dipakai tugas. Yang kedua tidak selalu ada di MasterData — nilai
+   * lama bisa saja tertinggal di sana — sehingga baris seperti itu MEMANG
+   * tidak punya ikon. Filter ini karena itu berikon SEBAGIAN, dan itu jujur:
+   * ikon hanya muncul untuk nilai yang benar-benar dikenal MasterData.
+   *
+   * Empat filter sebelumnya menulis blok yang nyaris sama satu per satu.
+   */
+  const opsiFilter = React.useCallback(
+    (tipeMaster: string, ambilNilai: (t: Task) => string | undefined | null) => {
+      const peta = new Map<string, { id: string; label: string; icon?: string; color?: string }>();
+      mArr
+        .filter((m) => m.type === tipeMaster && m.label)
+        .forEach((m) =>
+          peta.set(m.label as string, {
+            id: m.label as string,
+            label: m.label as string,
+            icon: (m as { icon?: string }).icon,
+            color: (m as { color?: string }).color,
+          })
+        );
+      rawTasks.forEach((t) => {
+        const nilai = ambilNilai(t);
+        if (nilai && !peta.has(nilai)) peta.set(nilai, { id: nilai, label: nilai });
+      });
+      return Array.from(peta.values()).sort((a, b) => a.label.localeCompare(b.label));
+    },
+    [rawTasks, mArr]
+  );
 
-  // Item #140 — dulu benihnya daftar keras ["Low","Medium","High"] di sini,
-  // satu-satunya filter Daftar Isu yang tidak berbasis MasterData. Sekarang
-  // sepola dengan environment/release/resolution di sekitarnya: disemai dari
-  // MasterData, lalu ditambah nilai yang sudah dipakai data hidup supaya
-  // tugas lama tidak hilang dari filter.
-  const allProjectRisks = useMemo(() => {
-    const riskSet = new Set<string>();
-    mArr.filter((m) => m.type === "project_risk").forEach((m) => riskSet.add(m.label));
-    rawTasks.forEach((t) => {
-      if (t.projectRisk) riskSet.add(t.projectRisk);
-    });
-    return Array.from(riskSet).sort();
-  }, [rawTasks, mArr]);
-
-  const allReleases = useMemo(() => {
-    const releaseSet = new Set<string>();
-    mArr.filter((m) => m.type === "release").forEach((m) => releaseSet.add(m.label));
-    rawTasks.forEach((t) => {
-      if (t.release) releaseSet.add(t.release);
-    });
-    return Array.from(releaseSet).sort();
-  }, [rawTasks, mArr]);
-
-  const allResolutions = useMemo(() => {
-    const resSet = new Set<string>();
-    mArr.filter((m) => m.type === "resolution").forEach((m) => resSet.add(m.label));
-    rawTasks.forEach((t) => {
-      if (t.resolution) resSet.add(t.resolution);
-    });
-    return Array.from(resSet).sort();
-  }, [rawTasks, mArr]);
+  const allEnvironments = useMemo(
+    () => opsiFilter("environment", (t) => t.environment),
+    [opsiFilter]
+  );
+  const allProjectRisks = useMemo(
+    () => opsiFilter("project_risk", (t) => (t as { projectRisk?: string }).projectRisk),
+    [opsiFilter]
+  );
+  const allReleases = useMemo(() => opsiFilter("release", (t) => t.release), [opsiFilter]);
+  const allResolutions = useMemo(
+    () => opsiFilter("resolution", (t) => (t as { resolution?: string }).resolution),
+    [opsiFilter]
+  );
 
   return (
     <div className="flex-1 p-2 sm:p-4 md:p-6 bg-surface-sunken overflow-hidden flex flex-col w-full h-full">
