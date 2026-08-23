@@ -10,12 +10,7 @@ interface SuccessModalProps {
   message: string;
 }
 
-export function SuccessModal({
-  isOpen,
-  onClose,
-  title = i18n.t("ui2.success"),
-  message,
-}: SuccessModalProps) {
+export function SuccessModal({ isOpen, onClose, title, message }: SuccessModalProps) {
   const { t } = useTranslation();
   return (
     <AnimatePresence>
@@ -65,7 +60,7 @@ export function SuccessModal({
                   <path d="M32 18L33 16" stroke="#4F46E5" strokeWidth="3" strokeLinecap="round" />
                 </svg>
               </div>
-              <h2 className="text-xl font-medium text-content mb-2">{title}</h2>
+              <h2 className="text-xl font-medium text-content mb-2">{title || t("ui2.success")}</h2>
               <p className="text-content-muted mb-8">{message}</p>
               <button
                 onClick={onClose}

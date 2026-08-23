@@ -1114,7 +1114,7 @@ export function DashboardView(props: DashboardViewProps) {
                         } else {
                           capacityBadge = (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-medium bg-surface-muted text-content-secondary border border-border-subtle">
-                              <Minus className="w-3 h-3" /> Available
+                              <Minus className="w-3 h-3" /> {t("jsx.j35")}
                             </span>
                           );
                         }
@@ -1156,7 +1156,7 @@ export function DashboardView(props: DashboardViewProps) {
                     ) : (
                       <tr>
                         <td colSpan={6} className="py-6 text-center text-content-subtle italic">
-                          Belum ada alokasi task untuk anggota tim.
+                          {t("jsx.j36")}
                         </td>
                       </tr>
                     )}
@@ -1219,8 +1219,7 @@ export function DashboardView(props: DashboardViewProps) {
                   ))
                 ) : (
                   <div className="p-4 text-center bg-surface-sunken/50 rounded-lg border border-dashed border-border-subtle text-xs text-content-subtle">
-                    Belum ada Epic yang dikonfigurasi. Buat Epic baru di papan Kanban/Roadmap untuk
-                    melacak Milestone.
+                    {t("jsx.j37")}
                   </div>
                 )}
               </div>

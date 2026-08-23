@@ -36,7 +36,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
               {title}
             </h3>
             <p className="text-xs text-content-muted mt-1">
-              Apakah Anda yakin ingin menghapus <strong>{itemName}</strong>?
+              {t("jsx.j14")} <strong>{itemName}</strong>?
             </p>
           </div>
           <div className="flex gap-2.5 pt-2">

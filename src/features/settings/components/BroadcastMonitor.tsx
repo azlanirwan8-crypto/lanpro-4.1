@@ -133,9 +133,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
       <div className="flex justify-between items-start">
         <div className="space-y-2 flex-1 pr-4">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-base font-medium text-content-strong">
-              Monitor Siaran Harian Langsung
-            </h2>
+            <h2 className="text-base font-medium text-content-strong">{t("jsx.j148")}</h2>
             <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
@@ -276,7 +274,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
                 </div>
                 <div className="bg-surface-sunken border border-border-faint rounded-xl p-4 text-sm font-mono text-content-body whitespace-pre-wrap shadow-soft">
                   <div className="font-medium border-b border-border-subtle pb-3 mb-3 text-content-strong">
-                    Subject: {replaceMockData(emailTemplate.subject)}
+                    {t("jsx.j149")} {replaceMockData(emailTemplate.subject)}
                   </div>
                   <div className="leading-relaxed">{replaceMockData(emailTemplate.body)}</div>
                 </div>

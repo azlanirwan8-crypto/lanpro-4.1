@@ -19,6 +19,7 @@
  */
 const fs = require("fs");
 const path = require("path");
+const { teksUntukPengguna } = require("./saring.cjs");
 
 const AKRONIM =
   /^(?:[\s\d.,:;%/+\-–—•·|()[\]{}#*?!]*|To Do|In Progress|In Review|Done|Blocked|Backlog|Cancelled|ID|EN|OK|QA|API|UI|UX|AI|PDF|CSV|XML|JSON|SQL|SVG|PNG|JPG|MB|KB|GB|SIT|UAT|PTR|DEV|PROD|STG|BRD|FSD|TSD|PRD|WA|HP|LANPRO|LAN PRO|Miro|Neon|PostgreSQL|MySQL|Redis|Resend|WhatsApp|Google|Microsoft|Figma|Excel|Word|Vercel|GitHub|Jira)$/i;
@@ -48,11 +49,7 @@ for (const p of berkas) {
   while ((m = re.exec(s))) {
     const mentah = m[1];
     const teks = mentah.replace(/\s+/g, " ").trim();
-    if (!teks || teks.length < 3 || teks.length > 200) continue;
-    if (AKRONIM.test(teks)) continue;
-    if (!/[A-Za-zÀ-ÿ]{3,}/.test(teks)) continue;
-    // buang sisa kode yang kebetulan lolos
-    if (/[=;]|=>|\breturn\b|\bconst\b|\bimport\b|className|https?:/.test(teks)) continue;
+    if (!teksUntukPengguna(teks)) continue;
     const baris = s.slice(0, m.index).split("\n").length;
     hasil.push({ berkas: p.split(path.sep).join("/"), baris, teks });
   }

@@ -131,10 +131,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
           <FileSpreadsheet className="w-5 h-5" />
         </div>
         <h3 className="text-sm font-medium text-content-strong">{t("qaTable.pickModule")}</h3>
-        <p className="text-xs text-content-subtle font-medium mt-1">
-          Pilih dokumen pengujian di panel sebelah kiri untuk menampilkan matriks eksekusi test
-          case.
-        </p>
+        <p className="text-xs text-content-subtle font-medium mt-1">{t("jsx.j141")}</p>
       </div>
     );
   }
@@ -180,7 +177,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               </h2>
             </div>
             <p className="text-xs sm:text-[11px] text-content-subtle font-medium mt-0.5">
-              Diupload oleh: {activeSuite.uploadedBy} •{" "}
+              {t("jsx.j142")} {activeSuite.uploadedBy} •{" "}
               {new Date(activeSuite.uploadedAt).toLocaleDateString("id-ID")}
             </p>
           </div>
@@ -256,7 +253,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
           </div>
           <div className="bg-emerald-500/10 p-2 rounded-md border border-emerald-500/30 text-center">
             <span className="text-xs sm:text-[11px] sm:text-[9px] text-success-text font-medium uppercase tracking-wider block">
-              PASSED
+              {t("jsx.kPassed")}
             </span>
             <span className="text-base font-medium text-success-text block mt-0.5">
               {passedCasesCount}
@@ -264,7 +261,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
           </div>
           <div className="bg-rose-500/10 p-2 rounded-md border border-rose-500/30 text-center">
             <span className="text-xs sm:text-[11px] sm:text-[9px] text-danger-text font-medium uppercase tracking-wider block">
-              FAILED
+              {t("jsx.kFailed")}
             </span>
             <span className="text-base font-medium text-danger-text block mt-0.5">
               {failedCasesCount}
@@ -280,7 +277,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
           </div>
           <div className="bg-surface-sunken p-2 rounded-md border border-border-subtle/60 text-center">
             <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wider block">
-              RETEST/PEND
+              {t("jsx.kRetestPend")}
             </span>
             <span className="text-base font-medium text-content-body block mt-0.5">
               {retestCasesCount + pendingCasesCount}

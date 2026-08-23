@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 import React, { useState, useEffect, useCallback, createContext, useContext } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -454,6 +455,7 @@ const VelzonSweetAlertModal: React.FC<VelzonSweetAlertModalProps> = ({
   notification,
   onDismiss,
 }) => {
+  const { t } = useTranslation();
   const { type, title, message, actionLabel, onAction, duration } = notification;
 
   // Auto Dismiss Timer if duration provided
@@ -463,10 +465,13 @@ const VelzonSweetAlertModal: React.FC<VelzonSweetAlertModalProps> = ({
     return () => clearTimeout(timer);
   }, [duration, onDismiss]);
 
+  // Item #151 — `i18n.t()` TIDAK berlangganan perubahan bahasa. Di dalam
+  // komponen ia benar saat render pertama lalu membeku; hanya `useTranslation`
+  // yang memicu render ulang saat bahasa diganti.
   const defaultTitles = {
-    success: "Well done !",
-    error: "Oops...! Something went Wrong !",
-    warning: i18n.t("ui2.accountInactive"),
+    success: t("ui2.wellDone"),
+    error: t("ui2.oopsWrong"),
+    warning: t("ui2.accountInactive"),
   };
 
   const defaultButtonLabels = {
@@ -490,7 +495,7 @@ const VelzonSweetAlertModal: React.FC<VelzonSweetAlertModalProps> = ({
       <button
         onClick={onDismiss}
         className="absolute top-4 right-4 text-content-subtle hover:text-content-secondary transition-colors p-1 rounded-md"
-        title={i18n.t("ui.close")}
+        title={t("ui.close")}
       >
         <X className="w-5 h-5" />
       </button>

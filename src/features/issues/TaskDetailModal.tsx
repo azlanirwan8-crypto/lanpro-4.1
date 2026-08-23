@@ -193,8 +193,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         {t("issueDetail.epicTimelineWarning")}
                       </p>
                       <p className="font-normal text-content-body">
-                        Rentang tanggal Task berada di luar jadwal Epic induk "{parentEpic?.title}"
-                        (
+                        {t("jsx.j99")}
+                        {parentEpic?.title}" (
                         {parentEpic?.startDate
                           ? format(ensureDate(parentEpic.startDate), "yyyy-MM-dd")
                           : "∞"}{" "}

@@ -154,7 +154,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
             }`}
           >
             <History className="w-3.5 h-3.5" />
-            Execution History
+            {t("jsx.j140")}
             {executionLogs.length > 0 && (
               <span className="bg-primary-surface/10 text-primary text-[10px] leading-none sm:text-[9px] px-1.5 py-0.2 rounded-full font-medium">
                 {executionLogs.length}
@@ -254,7 +254,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
               {/* Steps Box */}
               <div>
                 <h4 className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider mb-1">
-                  Langkah-Langkah Pengujian (Steps)
+                  {t("jsx.k90")}
                 </h4>
                 <div className="bg-surface-sunken p-3 rounded-md border border-border-subtle/60 text-xs font-medium text-content-body whitespace-pre-line leading-relaxed">
                   {selectedTestCase.steps}
@@ -264,7 +264,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
               {/* Expected Result Box */}
               <div>
                 <h4 className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider mb-1">
-                  Hasil yang Diharapkan (Expected Result)
+                  {t("jsx.k91")}
                 </h4>
                 <div className="bg-emerald-500/10 p-3 rounded-md border border-emerald-500/30 text-xs font-medium text-success-text leading-relaxed">
                   {selectedTestCase.expectedResult}

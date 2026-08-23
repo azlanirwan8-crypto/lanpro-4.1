@@ -1447,8 +1447,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   {t("wiki.pickOrCreate")}
                 </h2>
                 <p className="text-xs font-medium text-content-subtle mt-1 max-w-sm leading-relaxed mx-auto">
-                  Pilih salah satu dokumen di panel kiri atau klik tombol tambah untuk membuat
-                  dokumen baru.
+                  {t("jsx.j164")}
                 </p>
                 {canCreate && (
                   <button

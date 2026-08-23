@@ -62,8 +62,8 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = i18n.t("ui2.yesDeleteBang"),
-  cancelText = i18n.t("ui2.cancel"),
+  confirmText,
+  cancelText,
   variant = "danger",
   isLoading = false,
   isAlert = false,
@@ -194,7 +194,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                       ></path>
                     </svg>
                   )}
-                  {confirmText}
+                  {confirmText || t("ui2.yesDeleteBang")}
                 </button>
 
                 {!isAlert && (
@@ -205,7 +205,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     onClick={onClose}
                     className="min-w-[5rem] px-4 py-2 bg-danger-surface hover:bg-danger-hover text-content-inverse font-normal rounded text-[0.8125rem] shadow-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
                   >
-                    {cancelText}
+                    {cancelText || t("ui2.cancel")}
                   </button>
                 )}
               </div>

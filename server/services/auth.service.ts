@@ -53,8 +53,22 @@ export type AuthResultSuccess = { success: true; user: any };
 export type AuthResultFailure = {
   success: false;
   status: number;
+  /**
+   * Kode stabil untuk klien — item #150.
+   *
+   * Server tidak tahu bahasa antarmuka pengguna, jadi ia TIDAK boleh memutuskan
+   * bahasanya. Kode ini yang diterjemahkan klien; `message` tetap dikirim
+   * sebagai cadangan agar pesan tidak pernah hilang bila kodenya belum dikenal.
+   *
+   * Kode juga memperbaiki hal lain: `useAuth.ts` sebelumnya bercabang dengan
+   * mencocokkan SUBSTRING berbahasa Indonesia ("terblokir", "belum aktif").
+   * Menerjemahkan pesannya akan diam-diam mematahkan percabangan itu.
+   */
+  code: string;
   message: string;
   remainingMs?: number;
+  /** Nilai untuk disisipkan ke terjemahan di sisi klien. */
+  params?: Record<string, string | number>;
 };
 export type AuthResult = AuthResultSuccess | AuthResultFailure;
 
@@ -92,6 +106,7 @@ export async function handleUserAuthentication(
     return {
       success: false,
       status: 500,
+      code: "auth.dbError",
       message: "Terjadi kesalahan koneksi database.",
     };
   } finally {
@@ -103,6 +118,7 @@ export async function handleUserAuthentication(
     return {
       success: false,
       status: 401,
+      code: "auth.badCredentials",
       message:
         "Kata sandi atau nama pengguna yang Anda masukkan salah. Silakan periksa kembali kredensial Anda.",
     };
@@ -150,6 +166,8 @@ export async function handleUserAuthentication(
     return {
       success: false,
       status: 429,
+      code: "auth.blocked",
+      params: { nama: matchedUsername, waktu: timeStr },
       message: `halo ${matchedUsername} akun anda terblokir, Silahkan menunggu ${timeStr} lagi untuk coba kembali`,
       remainingMs,
     };
@@ -200,6 +218,8 @@ export async function handleUserAuthentication(
       return {
         success: false,
         status: 429,
+        code: "auth.blockedFive",
+        params: { nama: matchedUsername },
         message: `halo ${matchedUsername} akun anda terblokir, Silahkan menunggu 5 menit lagi untuk coba kembali`,
         remainingMs: blockDurationMs,
       };
@@ -209,6 +229,8 @@ export async function handleUserAuthentication(
     return {
       success: false,
       status: 401,
+      code: "auth.wrongPassword",
+      params: { nama: matchedUsername },
       message: `halo ${matchedUsername} password yang anda masukan salah, Silakan periksa kembali kredensial Anda.`,
     };
   }

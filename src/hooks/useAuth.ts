@@ -338,9 +338,25 @@ export function useAuth(
 
       setIsAuthLoading(false);
       const errStatus = e.status || 500;
+      // Item #150 — dahulukan KODE dari server; pencocokan kata hanya cadangan.
+      //
+      // Versi lama HANYA mencocokkan substring berbahasa Indonesia
+      // ("terblokir", "belum aktif", "salah"). Begitu pesan servernya
+      // diterjemahkan — atau sekadar diubah kata-katanya — percabangan ini
+      // patah tanpa satu pun tanda: galat yang wajar akan tercatat sebagai
+      // galat tak terduga.
+      const kodeGalat: string = e?.data?.code || "";
+      const KODE_WAJAR = [
+        "auth.badCredentials",
+        "auth.wrongPassword",
+        "auth.blocked",
+        "auth.blockedFive",
+        "auth.dbError",
+      ];
       const isExpectedAuthError =
         errStatus === 429 ||
         errStatus === 403 ||
+        KODE_WAJAR.includes(kodeGalat) ||
         (e.message &&
           (e.message.includes("belum aktif") ||
             e.message.includes("belum di aktifkan") ||

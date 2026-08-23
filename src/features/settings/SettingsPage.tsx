@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import { Mail, MessageSquare } from "lucide-react";
 import { EmailConfigForm } from "./components/EmailConfigForm";
@@ -5,6 +6,7 @@ import { WhatsAppConfigForm } from "./components/WhatsAppConfigForm";
 import { BroadcastMonitor } from "./components/BroadcastMonitor";
 
 export const SettingsPage: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<"email" | "whatsapp">("email");
 
   const [emailConfig, setEmailConfig] = useState({
@@ -34,7 +36,7 @@ export const SettingsPage: React.FC = () => {
       <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
         <div className="px-5 py-3.5 border-b border-border-subtle/80 bg-surface-sunken/80 shrink-0 flex items-center justify-between">
           <h1 className="text-xs font-medium text-content-strong uppercase tracking-wide">
-            Konfigurasi Sistem & Integrasi
+            {t("jsx.k99")}
           </h1>
         </div>
 
@@ -50,7 +52,7 @@ export const SettingsPage: React.FC = () => {
               }`}
             >
               <Mail size={15} />
-              Email Configuration
+              {t("jsx.j152")}
             </button>
             <button
               onClick={() => setActiveTab("whatsapp")}
@@ -61,7 +63,7 @@ export const SettingsPage: React.FC = () => {
               }`}
             >
               <MessageSquare size={15} />
-              WhatsApp Gateway
+              {t("jsx.j153")}
             </button>
           </div>
 

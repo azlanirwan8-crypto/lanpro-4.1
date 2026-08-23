@@ -584,7 +584,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
       } catch (e) {
         return (
           <span className="italic text-rose-500 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" /> Gagal memuat gambar
+            <AlertCircle className="w-3 h-3" /> {t("jsx.j5")}
           </span>
         );
       }
@@ -621,7 +621,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
       } catch (e) {
         return (
           <span className="italic text-rose-500 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" /> Gagal memuat berkas
+            <AlertCircle className="w-3 h-3" /> {t("jsx.j6")}
           </span>
         );
       }
@@ -791,7 +791,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                   {/* Direct Message Section */}
                   <div className="bg-surface">
                     <p className="px-4 pt-3 pb-1 text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-widest text-content-subtle uppercase">
-                      Rekan Kerja (DM)
+                      {t("jsx.k4")}
                     </p>
                     {filteredUsers.length === 0 ? (
                       <div className="p-6 text-center text-content-subtle text-xs">

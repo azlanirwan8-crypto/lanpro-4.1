@@ -364,7 +364,7 @@ export const formatNotification = (
             return (
               <div className="mt-1 flex items-center gap-1 text-content-muted bg-surface-sunken border border-border-faint rounded-md p-1 px-1.5 max-w-fit">
                 <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-subtle">
-                  Transisi:
+                  {i18n.t("jsx.kTransition")}
                 </span>
                 <div className="flex items-center gap-0.5">
                   {renderStatusBadge(statusMatch[1])}
@@ -379,7 +379,7 @@ export const formatNotification = (
             return (
               <div className="mt-1 flex items-center gap-1 text-content-muted bg-surface-sunken border border-border-faint rounded-md p-1 px-1.5 max-w-fit">
                 <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-subtle">
-                  Transisi:
+                  {i18n.t("jsx.kTransition")}
                 </span>
                 <div className="flex items-center gap-0.5">
                   <span className="text-content-subtle text-xs sm:text-[11px] sm:text-[9px] font-medium">

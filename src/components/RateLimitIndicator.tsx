@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React, { useEffect, useState } from "react";
 import { ShieldAlert, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -8,6 +9,7 @@ interface ActiveLimitItem {
 }
 
 export function RateLimitIndicator() {
+  const { t } = useTranslation();
   const [activeLimits, setActiveLimits] = useState<Record<string, ActiveLimitItem>>({});
 
   useEffect(() => {
@@ -68,17 +70,17 @@ export function RateLimitIndicator() {
           </div>
           <div className="flex-1 min-w-0">
             <h4 className="text-xs font-medium uppercase tracking-wider text-amber-50">
-              Antrean Server (Rate Limit)
+              {t("jsx.k15")}
             </h4>
             <p className="text-xs sm:text-[11px] text-amber-100/90 leading-tight mt-0.5 font-medium">
-              Koneksi tertunda, mencoba kembali dalam{" "}
+              {t("jsx.j15")}{" "}
               <span className="font-medium underline">{(maxLimit.backoff / 1000).toFixed(1)}s</span>
               ...
             </p>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider bg-surface/15 px-2 py-1 rounded-lg border border-white/5 whitespace-nowrap">
-              Sisa: {maxLimit.retriesLeft}x
+              {t("jsx.j16")} {maxLimit.retriesLeft}x
             </span>
             <Loader2 className="w-4 h-4 animate-spin text-white/80 shrink-0" />
           </div>

@@ -99,14 +99,12 @@ export const DbExplorerPanel: React.FC<any> = ({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
-              Perkakas Sistem
+              {t("jsx.j44")}
             </span>
-            <span className="text-xs text-content-subtle font-medium">
-              • Pusat Kendali Perusahaan
-            </span>
+            <span className="text-xs text-content-subtle font-medium">{t("jsx.j39")}</span>
           </div>
           <h1 className="text-base font-medium text-content-strong tracking-tight flex items-center gap-2">
-            Perkakas Basis Data
+            {t("jsx.j45")}
           </h1>
           <p className="text-xs text-content-muted font-medium mt-0.5">
             {t("dbExplorer.toolsSubtitle")}
@@ -179,11 +177,11 @@ export const DbExplorerPanel: React.FC<any> = ({
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full animate-pulse bg-emerald-500" />
               <span className="text-xs font-medium flex items-center gap-1.5">
-                Mode Database:{" "}
+                {t("jsx.j46")}{" "}
                 <span className="underline font-medium">PostgreSQL (Neon Cloud)</span>
               </span>
               <span className="text-xs sm:text-[11px] opacity-75 hidden sm:inline">
-                (Primary Engine Active)
+                {t("jsx.k38")}
               </span>
             </div>
 
@@ -302,7 +300,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                             ))
                           ) : (
                             <th className="p-3 border-b border-border-subtle font-medium text-content-subtle">
-                              Result (0 rows)
+                              {t("jsx.k39")}
                             </th>
                           )}
                         </tr>
@@ -340,7 +338,7 @@ export const DbExplorerPanel: React.FC<any> = ({
 
                 {!loading && result && !Array.isArray(result) && (
                   <div className="bg-surface-sunken border border-border-subtle text-content-body p-4 rounded-lg font-mono text-sm break-words">
-                    Query OK. <br />
+                    {t("jsx.j48")} <br />
                     {JSON.stringify(result, null, 2)}
                   </div>
                 )}

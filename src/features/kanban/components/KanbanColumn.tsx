@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { cn } from "../../../lib/utils";
@@ -19,6 +20,7 @@ interface KanbanColumnProps {
 
 export const KanbanColumn = React.memo<KanbanColumnProps>(
   ({ status, tasks, mArr, pArr, onTaskClick, columnId, showHeader = true, shakingTaskId }) => {
+    const { t } = useTranslation();
     const { density } = useAppStore();
     const isCompact = density === "compact";
 
@@ -101,7 +103,7 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                 {tasks.length === 0 && snapshot.isDraggingOver && (
                   <div className="flex items-center justify-center p-3 rounded-md border border-dashed border-primary bg-primary-surface/10 min-h-[50px] select-none">
                     <span className="text-xs sm:text-[10px] font-semibold text-primary uppercase tracking-wider">
-                      Drop here
+                      {t("jsx.j100")}
                     </span>
                   </div>
                 )}

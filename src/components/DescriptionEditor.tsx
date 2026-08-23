@@ -44,10 +44,7 @@ export const DescriptionEditor: React.FC<Props> = ({ task, onSave, onCancel, onA
         }}
       />
       <div className="bg-surface-sunken border-t border-border-faint px-4 py-3 flex justify-between items-center text-xs sm:text-[10px] font-medium text-content-subtle">
-        <span>
-          Markdown fully supported. Auto-saves as you type. Press Ctrl+Enter to save & close, or
-          Escape to cancel.
-        </span>
+        <span>{t("jsx.k2")}</span>
       </div>
     </div>
   );

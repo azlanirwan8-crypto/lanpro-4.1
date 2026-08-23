@@ -1,0 +1,303 @@
+(node:20548) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL jsdom src/features/flowchart/FlowchartContainer.render.test.tsx (10.15 s)
+  ● FlowchartView › me-render kanvas editor setelah sebuah flowchart dibuka
+
+    TestingLibraryElementError: Unable to find an element with the text: /Flow Diagram/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex-1 flex flex-col h-full min-h-0 w-full overflow-hidden relative"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex-1 flex flex-col min-h-0 overflow-y-auto bg-surface-sunken p-4 md:p-6 space-y-4 animate-in fade-in duration-500 font-sans"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex-1 flex flex-col min-h-[600px] bg-transparent relative mb-8"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex-1 flex flex-col min-h-0 relative space-y-4"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"bg-surface border border-border-subtle rounded-md p-4 flex items-center justify-between shadow-xs shrink-0"[39m
+                [36m>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"flex items-center gap-1.5 text-xs font-medium text-primary bg-primary-surface/10 hover:bg-primary-surface/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"[39m
+                  [36m>[39m
+                    [0m← Kembali ke Daftar Diagram Alur[0m
+                  [36m</button>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex items-center flex-wrap gap-3 shrink-0"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"bg-surface-muted p-1 rounded-md flex items-center border border-border-subtle/60 shadow-inner"[39m
+                    [36m>[39m
+                      [36m<button[39m
+                        [33mclass[39m=[32m"px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 bg-surface text-content shadow-2xs font-semibold"[39m
+                      [36m>[39m
+                        [36m<svg[39m
+                          [33maria-hidden[39m=[32m"true"[39m
+                          [33mclass[39m=[32m"lucide lucide-book-open w-3.5 h-3.5"[39m
+                          [33mfill[39m=[32m"none"[39m
+                          [33mheight[39m=[32m"24"[39m
+                          [33mstroke[39m=[32m"currentColor"[39m
+                          [33mstroke-linecap[39m=[32m"round"[39m
+                          [33mstroke-linejoin[39m=[32m"round"[39m
+                          [33mstroke-width[39m=[32m"2"[39m
+                          [33mviewBox[39m=[32m"0 0 24 24"[39m
+                          [33mwidth[39m=[32m"24"[39m
+                          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                        [36m>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M12 7v14"[39m
+                          [36m/>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"[39m
+                          [36m/>[39m
+                        [36m</svg>[39m
+                        [0m [0m
+                        [0mDaftar Dokumen[0m
+                      [36m</button>[39m
+                      [36m<button[39m
+                        [33mclass[39m=[32m"px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 text-content-muted hover:text-content-strong"[39m
+                      [36m>[39m
+                        [36m<svg[39m
+                          [33maria-hidden[39m=[32m"true"[39m
+                          [33mclass[39m=[32m"lucide lucide-workflow w-3.5 h-3.5"[39m
+                          [33mfill[39m=[32m"none"[39m
+                          [33mheight[39m=[32m"24"[39m
+                          [33mstroke[39m=[32m"currentColor"[39m
+                          [33mstroke-linecap[39m=[32m"round"[39m
+                          [33mstroke-linejoin[39m=[32m"round"[39m
+                          [33mstroke-width[39m=[32m"2"[39m
+                          [33mviewBox[39m=[32m"0 0 24 24"[39m
+                          [33mwidth[39m=[32m"24"[39m
+                          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                        [36m>[39m
+                          [36m<rect[39m
+                            [33mheight[39m=[32m"8"[39m
+                            [33mrx[39m=[32m"2"[39m
+                            [33mwidth[39m=[32m"8"[39m
+                            [33mx[39m=[32m"3"[39m
+                            [33my[39m=[32m"3"[39m
+                          [36m/>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M7 11v4a2 2 0 0 0 2 2h4"[39m
+                          [36m/>[39m
+                          [36m<rect[39m
+                            [33mheight[39m=[32m"8"[39m
+                            [33mrx[39m=[32m"2"[39m
+                            [33mwidth[39m=[32m"8"[39m
+                            [33mx[39m=[32m"13"[39m
+                            [33my[39m=[32m"13"[39m
+                          [36m/>[39m
+                        [36m</svg>[39m
+                        [0m [0m
+                        [0mDiagram Alur[0m
+                      [36m</button>[39m
+                    [36m</div>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"flex items-center gap-1.5 bg-surface-muted p-1 rounded-md border border-border-subtle/60"[39m
+                    [36m>[39m
+                      [36m<button[39m
+                        [33mclass[39m=[32m"p-1.5 bg-surface hover:bg-surface-sunken text-content-secondary hover:text-primary rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"[39m
+                        [33mtitle[39m=[32m"Ubah metadata dokumen"[39m
+                      [36m>[39m
+                        [36m<svg[39m
+                          [33maria-hidden[39m=[32m"true"[39m
+                          [33mclass[39m=[32m"lucide lucide-pen-line w-4 h-4"[39m
+                          [33mfill[39m=[32m"none"[39m
+                          [33mheight[39m=[32m"24"[39m
+                          [33mstroke[39m=[32m"currentColor"[39m
+                          [33mstroke-linecap[39m=[32m"round"[39m
+                          [33mstroke-linejoin[39m=[32m"round"[39m
+                          [33mstroke-width[39m=[32m"2"[39m
+                          [33mviewBox[39m=[32m"0 0 24 24"[39m
+                          [33mwidth[39m=[32m"24"[39m
+                          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                        [36m>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M13 21h8"[39m
+                          [36m/>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"[39m
+                          [36m/>[39m
+                        [36m</svg>[39m
+                      [36m</button>[39m
+                      [36m<button[39m
+                        [33mclass[39m=[32m"p-1.5 bg-surface ho...
+
+    [0m [90m 156 |[39m     [90m// yang dibelah pada fase ini — baru ter-render setelah beralih ke[39m
+     [90m 157 |[39m     [90m// "Flow Diagram", jadi peralihan itu ikut dijalankan di sini.[39m
+    [31m[1m>[22m[39m[90m 158 |[39m     fireEvent[33m.[39mclick(screen[33m.[39mgetByText([35m/Flow Diagram/i[39m))[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 159 |[39m
+     [90m 160 |[39m     [36mawait[39m waitFor(() [33m=>[39m expect(screen[33m.[39mgetByTitle([35m/Snap to Grid|Snapping/i[39m))[33m.[39mtoBeInTheDocument())[33m;[39m
+     [90m 161 |[39m[0m
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/features/flowchart/FlowchartContainer.render.test.tsx:158:28)
+
+
+Summary of all failing tests
+FAIL src/features/flowchart/FlowchartContainer.render.test.tsx (10.15 s)
+  ● FlowchartView › me-render kanvas editor setelah sebuah flowchart dibuka
+
+    TestingLibraryElementError: Unable to find an element with the text: /Flow Diagram/i. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex-1 flex flex-col h-full min-h-0 w-full overflow-hidden relative"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex-1 flex flex-col min-h-0 overflow-y-auto bg-surface-sunken p-4 md:p-6 space-y-4 animate-in fade-in duration-500 font-sans"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex-1 flex flex-col min-h-[600px] bg-transparent relative mb-8"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex-1 flex flex-col min-h-0 relative space-y-4"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"bg-surface border border-border-subtle rounded-md p-4 flex items-center justify-between shadow-xs shrink-0"[39m
+                [36m>[39m
+                  [36m<button[39m
+                    [33mclass[39m=[32m"flex items-center gap-1.5 text-xs font-medium text-primary bg-primary-surface/10 hover:bg-primary-surface/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"[39m
+                  [36m>[39m
+                    [0m← Kembali ke Daftar Diagram Alur[0m
+                  [36m</button>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex items-center flex-wrap gap-3 shrink-0"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"bg-surface-muted p-1 rounded-md flex items-center border border-border-subtle/60 shadow-inner"[39m
+                    [36m>[39m
+                      [36m<button[39m
+                        [33mclass[39m=[32m"px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 bg-surface text-content shadow-2xs font-semibold"[39m
+                      [36m>[39m
+                        [36m<svg[39m
+                          [33maria-hidden[39m=[32m"true"[39m
+                          [33mclass[39m=[32m"lucide lucide-book-open w-3.5 h-3.5"[39m
+                          [33mfill[39m=[32m"none"[39m
+                          [33mheight[39m=[32m"24"[39m
+                          [33mstroke[39m=[32m"currentColor"[39m
+                          [33mstroke-linecap[39m=[32m"round"[39m
+                          [33mstroke-linejoin[39m=[32m"round"[39m
+                          [33mstroke-width[39m=[32m"2"[39m
+                          [33mviewBox[39m=[32m"0 0 24 24"[39m
+                          [33mwidth[39m=[32m"24"[39m
+                          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                        [36m>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M12 7v14"[39m
+                          [36m/>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"[39m
+                          [36m/>[39m
+                        [36m</svg>[39m
+                        [0m [0m
+                        [0mDaftar Dokumen[0m
+                      [36m</button>[39m
+                      [36m<button[39m
+                        [33mclass[39m=[32m"px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 text-content-muted hover:text-content-strong"[39m
+                      [36m>[39m
+                        [36m<svg[39m
+                          [33maria-hidden[39m=[32m"true"[39m
+                          [33mclass[39m=[32m"lucide lucide-workflow w-3.5 h-3.5"[39m
+                          [33mfill[39m=[32m"none"[39m
+                          [33mheight[39m=[32m"24"[39m
+                          [33mstroke[39m=[32m"currentColor"[39m
+                          [33mstroke-linecap[39m=[32m"round"[39m
+                          [33mstroke-linejoin[39m=[32m"round"[39m
+                          [33mstroke-width[39m=[32m"2"[39m
+                          [33mviewBox[39m=[32m"0 0 24 24"[39m
+                          [33mwidth[39m=[32m"24"[39m
+                          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                        [36m>[39m
+                          [36m<rect[39m
+                            [33mheight[39m=[32m"8"[39m
+                            [33mrx[39m=[32m"2"[39m
+                            [33mwidth[39m=[32m"8"[39m
+                            [33mx[39m=[32m"3"[39m
+                            [33my[39m=[32m"3"[39m
+                          [36m/>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M7 11v4a2 2 0 0 0 2 2h4"[39m
+                          [36m/>[39m
+                          [36m<rect[39m
+                            [33mheight[39m=[32m"8"[39m
+                            [33mrx[39m=[32m"2"[39m
+                            [33mwidth[39m=[32m"8"[39m
+                            [33mx[39m=[32m"13"[39m
+                            [33my[39m=[32m"13"[39m
+                          [36m/>[39m
+                        [36m</svg>[39m
+                        [0m [0m
+                        [0mDiagram Alur[0m
+                      [36m</button>[39m
+                    [36m</div>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"flex items-center gap-1.5 bg-surface-muted p-1 rounded-md border border-border-subtle/60"[39m
+                    [36m>[39m
+                      [36m<button[39m
+                        [33mclass[39m=[32m"p-1.5 bg-surface hover:bg-surface-sunken text-content-secondary hover:text-primary rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"[39m
+                        [33mtitle[39m=[32m"Ubah metadata dokumen"[39m
+                      [36m>[39m
+                        [36m<svg[39m
+                          [33maria-hidden[39m=[32m"true"[39m
+                          [33mclass[39m=[32m"lucide lucide-pen-line w-4 h-4"[39m
+                          [33mfill[39m=[32m"none"[39m
+                          [33mheight[39m=[32m"24"[39m
+                          [33mstroke[39m=[32m"currentColor"[39m
+                          [33mstroke-linecap[39m=[32m"round"[39m
+                          [33mstroke-linejoin[39m=[32m"round"[39m
+                          [33mstroke-width[39m=[32m"2"[39m
+                          [33mviewBox[39m=[32m"0 0 24 24"[39m
+                          [33mwidth[39m=[32m"24"[39m
+                          [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                        [36m>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M13 21h8"[39m
+                          [36m/>[39m
+                          [36m<path[39m
+                            [33md[39m=[32m"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"[39m
+                          [36m/>[39m
+                        [36m</svg>[39m
+                      [36m</button>[39m
+                      [36m<button[39m
+                        [33mclass[39m=[32m"p-1.5 bg-surface ho...
+
+    [0m [90m 156 |[39m     [90m// yang dibelah pada fase ini — baru ter-render setelah beralih ke[39m
+     [90m 157 |[39m     [90m// "Flow Diagram", jadi peralihan itu ikut dijalankan di sini.[39m
+    [31m[1m>[22m[39m[90m 158 |[39m     fireEvent[33m.[39mclick(screen[33m.[39mgetByText([35m/Flow Diagram/i[39m))[33m;[39m
+     [90m     |[39m                            [31m[1m^[22m[39m
+     [90m 159 |[39m
+     [90m 160 |[39m     [36mawait[39m waitFor(() [33m=>[39m expect(screen[33m.[39mgetByTitle([35m/Snap to Grid|Snapping/i[39m))[33m.[39mtoBeInTheDocument())[33m;[39m
+     [90m 161 |[39m[0m
+
+      at Object.getElementError (node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+      at Object.<anonymous> (src/features/flowchart/FlowchartContainer.render.test.tsx:158:28)
+
+
+Test Suites: 1 failed, 71 passed, 72 total
+Tests:       1 failed, 578 passed, 579 total
+Snapshots:   0 total
+Time:        25.077 s, estimated 66 s
+Ran all test suites in 2 projects.

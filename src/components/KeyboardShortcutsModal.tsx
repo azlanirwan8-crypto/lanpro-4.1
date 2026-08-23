@@ -27,9 +27,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
       maxWidth="max-w-md"
     >
       <div className="space-y-4">
-        <p className="text-xs text-content-muted font-medium">
-          Use these global shortcuts to navigate and perform common actions more efficiently.
-        </p>
+        <p className="text-xs text-content-muted font-medium">{t("jsx.j3")}</p>
         <div className="divide-y divide-border-faint">
           <div className="flex justify-between items-center py-2.5">
             <span className="text-sm font-medium text-content-body">

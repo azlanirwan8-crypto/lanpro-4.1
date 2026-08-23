@@ -654,7 +654,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     disabled={isBulkActionPending}
                     className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    <CheckCircle className="w-3.5 h-3.5" /> Setujui
+                    <CheckCircle className="w-3.5 h-3.5" /> {t("jsx.j156")}
                   </button>
                   <button
                     onClick={() => handleBulkAction("reject")}
@@ -717,7 +717,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     disabled={isBulkActionPending}
                     className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Trash2 className="w-3.5 h-3.5" /> Hapus Massal
+                    <Trash2 className="w-3.5 h-3.5" /> {t("jsx.j157")}
                   </button>
                   <button
                     onClick={() => setSelectedUserIds([])}
@@ -1020,7 +1020,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   disabled={currentPage === 1}
                   className="rounded-lg h-8 px-2.5 text-xs font-medium"
                 >
-                  <ChevronLeft className="w-4 h-4 mr-1" /> Prev
+                  <ChevronLeft className="w-4 h-4 mr-1" /> {t("jsx.j158")}
                 </Button>
                 {Array.from({ length: totalPages }).map((_, i) => (
                   <button
@@ -1043,7 +1043,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   disabled={currentPage === totalPages || totalPages === 0}
                   className="rounded-lg h-8 px-2.5 text-xs font-medium"
                 >
-                  Next <ChevronRight className="w-4 h-4 ml-1" />
+                  {t("jsx.j159")} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
             </div>
@@ -1155,7 +1155,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           : "text-emerald-500"
                     )}
                   >
-                    Kekuatan Password:{" "}
+                    {t("jsx.j160")}{" "}
                     {passwordStrength === "weak"
                       ? "Lemah"
                       : passwordStrength === "medium"
@@ -1284,8 +1284,8 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           <div>
             <h3 className="text-lg font-medium text-content">{t("users.usernameRecorded")}</h3>
             <p className="text-sm text-content-muted mt-2">
-              Username <span className="font-medium text-content">{addPeopleEmail}</span> has been
-              saved in the system.
+              {t("jsx.k18")} <span className="font-medium text-content">{addPeopleEmail}</span>{" "}
+              {t("jsx.j161")}
             </p>
           </div>
 
@@ -1298,7 +1298,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               }}
               className="w-full justify-center py-3"
             >
-              <Copy className="w-4 h-4" /> Salin Link Bergabung
+              <Copy className="w-4 h-4" /> {t("jsx.j162")}
             </Button>
           </div>
 

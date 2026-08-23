@@ -1,0 +1,12 @@
+{
+  "Password": "jsx.kPassword",
+  "📄 PRD": "jsx.kCatPrd",
+  "📖 Panduan": "jsx.kCatGuide",
+  "📊 Laporan": "jsx.kCatReport",
+  "⚙️ Umum": "jsx.kCatGeneral",
+  "Menyimpan...": "jsx.kSaving",
+  "PASSED": "jsx.kPassed",
+  "FAILED": "jsx.kFailed",
+  "RETEST/PEND": "jsx.kRetestPend",
+  "Transisi:": "jsx.kTransition"
+}

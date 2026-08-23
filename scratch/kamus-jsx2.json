@@ -1,0 +1,183 @@
+{
+  "Markdown fully supported. Auto-saves as you type. Press Ctrl+Enter to save & close, or Escape to cancel.": [
+    "k2",
+    "Markdown didukung penuh. Tersimpan otomatis saat mengetik. Tekan Ctrl+Enter untuk menyimpan & menutup, atau Escape untuk membatalkan.",
+    "Markdown fully supported. Auto-saves as you type. Press Ctrl+Enter to save & close, or Escape to cancel."
+  ],
+  "Maaf, widget atau komponen ini mengalami gangguan (Crash). Silakan muat ulang halaman.": [
+    "k3",
+    "Maaf, widget atau komponen ini mengalami gangguan. Silakan muat ulang halaman.",
+    "Sorry, this widget or component crashed. Please reload the page."
+  ],
+  "Rekan Kerja (DM)": ["k4", "Rekan Kerja (DM)", "Colleagues (DM)"],
+  "Single Input (Manual)": ["k9", "Input Tunggal (Manual)", "Single input (manual)"],
+  "Bulk Upload (Excel)": ["k10", "Unggah Massal (Excel)", "Bulk upload (Excel)"],
+  "Unggah berkas Excel (.xlsx / .csv)": [
+    "k11",
+    "Unggah berkas Excel (.xlsx / .csv)",
+    "Upload an Excel file (.xlsx / .csv)"
+  ],
+  "TARGET EPIC / TASK UTAMA (PARENT * MANDATORY)": [
+    "k12",
+    "TARGET EPIC / TUGAS UTAMA (INDUK * WAJIB)",
+    "TARGET EPIC / PARENT TASK (REQUIRED)"
+  ],
+  "Project Key (Short)": ["k13", "Kunci Proyek (Singkat)", "Project key (short)"],
+  "Labels (comma separated)": ["k14", "Label (dipisah koma)", "Labels (comma separated)"],
+  "Antrean Server (Rate Limit)": [
+    "k15",
+    "Antrean Server (Batas Laju)",
+    "Server queue (rate limit)"
+  ],
+  "Active Actors (24h)": ["k16", "Aktor Aktif (24 jam)", "Active actors (24h)"],
+  "Subject (Actor)": ["k17", "Subjek (Aktor)", "Subject (actor)"],
+  "Username": ["k18", "Nama Pengguna", "Username"],
+  "Belum punya akun?": ["k20", "Belum punya akun?", "Don't have an account?"],
+  "(Huruf saja, maks 10)": ["k21", "(Huruf saja, maks 10)", "(Letters only, max 10)"],
+  "Huruf Besar (A-Z)": ["k22", "Huruf Besar (A-Z)", "Uppercase (A-Z)"],
+  "Angka (0-9)": ["k23", "Angka (0-9)", "Digits (0-9)"],
+  "Simbol (@$!%*?&)": ["k24", "Simbol (@$!%*?&)", "Symbols (@$!%*?&)"],
+  "Sudah punya akun?": ["k25", "Sudah punya akun?", "Already have an account?"],
+  "Aplikasi terhubung aktif ke backend MySQL. Anda dapat menguji (Test) maupun menyimpan dan mengaktifkan (Save & Apply Live) konfigurasi database baru secara live tanpa restart manual.": [
+    "k27",
+    "Aplikasi terhubung aktif ke backend MySQL. Anda dapat menguji maupun menyimpan dan menerapkan konfigurasi basis data baru secara langsung tanpa restart manual.",
+    "The app is connected to the MySQL backend. You can test, or save and apply a new database configuration live without a manual restart."
+  ],
+  "Database Host (DB_HOST)": ["k28", "Host Basis Data (DB_HOST)", "Database host (DB_HOST)"],
+  "Database Port (DB_PORT)": ["k29", "Port Basis Data (DB_PORT)", "Database port (DB_PORT)"],
+  "Database Name (DB_NAME)": ["k30", "Nama Basis Data (DB_NAME)", "Database name (DB_NAME)"],
+  "Error ini terjadi karena salah ketik (typo) nama database. Konfigurasi default MySQL di Google Cloud / Aiven biasanya menggunakan nama database": [
+    "k31",
+    "Galat ini terjadi karena salah ketik nama basis data. Konfigurasi bawaan MySQL di Google Cloud atau Aiven biasanya memakai nama basis data",
+    "This error happens when the database name is mistyped. Default MySQL setups on Google Cloud or Aiven usually use the database name"
+  ],
+  "Username (DB_USER)": ["k32", "Nama Pengguna (DB_USER)", "Username (DB_USER)"],
+  "Password (DB_PASSWORD)": ["k33", "Kata Sandi (DB_PASSWORD)", "Password (DB_PASSWORD)"],
+  "⏰ Urgen (24j)": ["k34", "⏰ Urgen (24 jam)", "⏰ Urgent (24h)"],
+  "Tanda Waktu (WIB)": ["k35", "Tanda Waktu (WIB)", "Timestamp (WIB)"],
+  "Tampilkan Raw Technical Trace (JSON)": [
+    "k36",
+    "Tampilkan Jejak Teknis Mentah (JSON)",
+    "Show raw technical trace (JSON)"
+  ],
+  "(Primary Engine Active)": ["k38", "(Mesin Utama Aktif)", "(Primary engine active)"],
+  "Result (0 rows)": ["k39", "Hasil (0 baris)", "Result (0 rows)"],
+  "atau": ["k40", "atau", "or"],
+  ". Bentuk geometri, koordinat posisi, teks konten, serta panah logic (connectors) akan dipetakan secara cerdas ke bentuk alur whiteboard.": [
+    "k41",
+    ". Bentuk geometri, koordinat, teks, dan panah penghubung akan dipetakan otomatis ke bentuk alur papan tulis.",
+    ". Geometry, coordinates, text, and connectors are mapped automatically to whiteboard flow shapes."
+  ],
+  "yang diunduh dari aplikasi ini untuk memulihkan keseluruhan kondisi kanvas (bentuk, relasi, tema, dan status).": [
+    "k42",
+    "yang diunduh dari aplikasi ini untuk memulihkan seluruh kondisi kanvas: bentuk, relasi, tema, dan status.",
+    "downloaded from this app, to restore the whole canvas state: shapes, relations, theme, and status."
+  ],
+  "Bentuk & Ornamen (Nodes)": ["k43", "Bentuk & Ornamen (Node)", "Shapes & ornaments (nodes)"],
+  "Anak Panah Penghubung (Edges)": [
+    "k44",
+    "Anak Panah Penghubung (Edge)",
+    "Connecting arrows (edges)"
+  ],
+  "Batal Aksi (Undo)": ["k49", "Batalkan Aksi (Undo)", "Undo action"],
+  "Ulangi Aksi (Redo)": ["k51", "Ulangi Aksi (Redo)", "Redo action"],
+  "Geser Alur (Nudge)": ["k54", "Geser Alur (Nudge)", "Nudge flow"],
+  "Tombol Panah Arrow (↑↓←→)": ["k55", "Tombol Panah (↑↓←→)", "Arrow keys (↑↓←→)"],
+  "Lebar (W)": ["k57", "Lebar (W)", "Width (W)"],
+  "Tinggi (H)": ["k58", "Tinggi (H)", "Height (H)"],
+  "Mendukung PDF, Word, Excel (Max. 5MB)": [
+    "k59",
+    "Mendukung PDF, Word, Excel (maks. 5 MB)",
+    "Supports PDF, Word, Excel (max 5 MB)"
+  ],
+  "Category (Custom)": ["k60", "Kategori (Kustom)", "Category (custom)"],
+  "Environment (Custom)": ["k61", "Lingkungan (Kustom)", "Environment (custom)"],
+  "Release (Custom)": ["k62", "Rilis (Kustom)", "Release (custom)"],
+  "Resolution (Custom)": ["k63", "Resolusi (Kustom)", "Resolution (custom)"],
+  "Cancel": ["k64", "Batal", "Cancel"],
+  "Analisis transkrip suara hasil Speech-to-Text rapat menjadi ringkasan & poin diskusi otomatis": [
+    "k69",
+    "Analisis transkrip suara rapat menjadi ringkasan dan poin diskusi otomatis",
+    "Turn a meeting speech-to-text transcript into an automatic summary and discussion points"
+  ],
+  "Saran & Ide": ["k70", "Saran & Ide", "Suggestions & ideas"],
+  "Hasil Speech-to-Text Mentah (Raw Transcript)": [
+    "k73",
+    "Hasil Speech-to-Text Mentah",
+    "Raw speech-to-text result"
+  ],
+  "Transkrip mentah tidak tersedia (Analisis multimodal diekstrak langsung dari audio).": [
+    "k75",
+    "Transkrip mentah tidak tersedia; analisis multimodal diekstrak langsung dari audio.",
+    "No raw transcript available; the multimodal analysis was extracted straight from the audio."
+  ],
+  "1. Record Langsung (Mikrofon)": [
+    "k76",
+    "1. Rekam Langsung (Mikrofon)",
+    "1. Record live (microphone)"
+  ],
+  "Merekam suara rapat melalui mikrofon perangkat Anda (catatan: hanya suara dari perangkat ini).": [
+    "k77",
+    "Merekam suara rapat lewat mikrofon perangkat Anda; hanya suara dari perangkat ini yang terekam.",
+    "Records the meeting through your device microphone; only audio from this device is captured."
+  ],
+  "Keputusan & Hasil Akhir yang Disepakati (Final Decisions)": [
+    "k78",
+    "Keputusan & Hasil Akhir yang Disepakati",
+    "Agreed decisions & final outcomes"
+  ],
+  "Butir Tindak Lanjut & Rencana Aksi (Action Items)": [
+    "k79",
+    "Butir Tindak Lanjut & Rencana Aksi",
+    "Follow-up items & action plan"
+  ],
+  "Rencana Lanjut & Roadmap Eksekusi (Next Plan)": [
+    "k80",
+    "Rencana Lanjut & Peta Jalan Eksekusi",
+    "Next plan & execution roadmap"
+  ],
+  "Penanggung Jawab (PIC):": ["k81", "Penanggung Jawab (PIC):", "Person in charge (PIC):"],
+  "Rekomendasi Arsitektur & Target Proses (Target To-Be Architecture)": [
+    "k82",
+    "Rekomendasi Arsitektur & Target Proses",
+    "Architecture recommendation & target process"
+  ],
+  "Kondisi Saat Ini (As-Is)": ["k83", "Kondisi Saat Ini (As-Is)", "Current state (as-is)"],
+  "Target Masa Depan (To-Be)": ["k84", "Target Masa Depan (To-Be)", "Future target (to-be)"],
+  "Langkah-Langkah Transisi Migrasi (Transition Roadmap)": [
+    "k85",
+    "Langkah Transisi Migrasi",
+    "Migration transition steps"
+  ],
+  "Seluruh Peserta Rapat (Terdeteksi)": [
+    "k86",
+    "Seluruh Peserta Rapat (Terdeteksi)",
+    "All detected meeting participants"
+  ],
+  "Catatan Evaluasi & Koreksi Anda:": [
+    "k87",
+    "Catatan Evaluasi & Koreksi Anda:",
+    "Your evaluation and correction notes:"
+  ],
+  "(Existing)": ["k89", "(Yang Ada)", "(Existing)"],
+  "Langkah-Langkah Pengujian (Steps)": ["k90", "Langkah Pengujian", "Test steps"],
+  "Hasil yang Diharapkan (Expected Result)": ["k91", "Hasil yang Diharapkan", "Expected result"],
+  "Assign PIC Modul (Tim Proyek)": [
+    "k92",
+    "Tetapkan PIC Modul (Tim Proyek)",
+    "Assign module PIC (project team)"
+  ],
+  "Terkonfigurasi (Resend)": ["k96", "Terkonfigurasi (Resend)", "Configured (Resend)"],
+  "Mode Simulasi (Dev)": ["k97", "Mode Simulasi (Dev)", "Simulation mode (dev)"],
+  "Subjek Email Default (Task Assignment)": [
+    "k98",
+    "Subjek Email Bawaan (Penugasan Tugas)",
+    "Default email subject (task assignment)"
+  ],
+  "Konfigurasi Sistem & Integrasi": [
+    "k99",
+    "Konfigurasi Sistem & Integrasi",
+    "System & integration configuration"
+  ],
+  "Reset Cache & Reload": ["k102", "Bersihkan Cache & Muat Ulang", "Clear cache & reload"]
+}

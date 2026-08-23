@@ -261,7 +261,18 @@ export async function apiRequest(
 
     if (responseData && typeof responseData === "object" && !Array.isArray(responseData)) {
       errorData = responseData;
-      message = responseData.message || responseData.error || message;
+      // Item #150 — SATU titik terjemahan untuk seluruh pesan galat server.
+      //
+      // Server tidak tahu bahasa antarmuka, jadi ia mengirim KODE stabil
+      // (mis. "auth.wrongPassword") beserta parameternya. Di sinilah kode itu
+      // diterjemahkan. `message` bawaan server tetap dipakai bila kodenya
+      // belum dikenal kamus, sehingga tidak ada pesan yang hilang selama
+      // migrasi rute demi rute.
+      const kode = responseData.code;
+      const adaDiKamus = typeof kode === "string" && i18n.exists(`serverErr.${kode}`);
+      message = adaDiKamus
+        ? i18n.t(`serverErr.${kode}`, responseData.params || {})
+        : responseData.message || responseData.error || message;
     } else if (typeof responseData === "string" && responseData.trim().length > 0) {
       const text = responseData.trim();
       if (

@@ -148,7 +148,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
                   "flex items-center gap-1 py-1 px-2.5 rounded-full text-xs sm:text-[11px] font-medium"
                 )}
               >
-                Status: {listFilterStatus}
+                {t("jsx.j81")} {listFilterStatus}
                 <button
                   type="button"
                   onClick={() => setListFilterStatus("All")}
@@ -165,7 +165,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
                   "flex items-center gap-1 py-1 px-2.5 rounded-full text-xs sm:text-[11px] font-medium"
                 )}
               >
-                Priority: {listFilterPriority}
+                {t("jsx.j82")} {listFilterPriority}
                 <button
                   type="button"
                   onClick={() => setListFilterPriority("All")}
@@ -177,7 +177,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterAssignee !== "All" && (
               <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/30 flex items-center gap-1 shadow-soft">
-                Assignee:{" "}
+                {t("jsx.j83")}{" "}
                 {projectMembers.find((m) => m.uid === listFilterAssignee)?.displayName ||
                   t("newTask.unassigned")}
                 <button
@@ -191,7 +191,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterSprint !== "All" && (
               <span className="text-xs sm:text-[11px] font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-subtle flex items-center gap-1 shadow-soft">
-                Sprint:{" "}
+                {t("jsx.j84")}{" "}
                 {listFilterSprint === "Backlog"
                   ? "Backlog"
                   : sprints?.find((s) => s.id === listFilterSprint)?.name || listFilterSprint}
@@ -206,7 +206,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterCategory !== "All" && (
               <span className="text-[10px] leading-none font-medium text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1 shadow-soft">
-                Category: {listFilterCategory}
+                {t("jsx.j85")} {listFilterCategory}
                 <button
                   type="button"
                   onClick={() => setListFilterCategory("All")}
@@ -218,7 +218,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterLabel !== "All" && (
               <span className="text-xs sm:text-[11px] font-medium text-sky-600 bg-sky-500/10 px-2.5 py-1 rounded-full border border-sky-500/30 flex items-center gap-1 shadow-soft">
-                Label: {listFilterLabel}
+                {t("jsx.j86")} {listFilterLabel}
                 <button
                   type="button"
                   onClick={() => setListFilterLabel("All")}
@@ -230,7 +230,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterEnvironment !== "All" && (
               <span className="text-xs sm:text-[11px] font-medium text-orange-600 bg-orange-500/10 px-2.5 py-1 rounded-full border border-orange-500/30 flex items-center gap-1 shadow-soft">
-                Environment: {listFilterEnvironment}
+                {t("jsx.j87")} {listFilterEnvironment}
                 <button
                   type="button"
                   onClick={() => setListFilterEnvironment("All")}
@@ -242,7 +242,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterProjectRisk !== "All" && (
               <span className="text-[10px] leading-none font-medium text-rose-600 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/30 flex items-center gap-1 shadow-soft">
-                Risk: {listFilterProjectRisk}
+                {t("jsx.j88")} {listFilterProjectRisk}
                 <button
                   type="button"
                   onClick={() => setListFilterProjectRisk("All")}
@@ -254,7 +254,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterRelease !== "All" && (
               <span className="text-xs sm:text-[11px] font-medium text-teal-600 bg-teal-500/10 px-2.5 py-1 rounded-full border border-teal-500/30 flex items-center gap-1 shadow-soft">
-                Release: {listFilterRelease}
+                {t("jsx.j89")} {listFilterRelease}
                 <button
                   type="button"
                   onClick={() => setListFilterRelease("All")}
@@ -266,7 +266,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterResolution !== "All" && (
               <span className="text-[10px] leading-none font-medium text-violet-600 bg-violet-500/10 px-2.5 py-1 rounded-full border border-violet-500/30 flex items-center gap-1 shadow-soft">
-                Resolution: {listFilterResolution}
+                {t("jsx.j90")} {listFilterResolution}
                 <button
                   type="button"
                   onClick={() => setListFilterResolution("All")}

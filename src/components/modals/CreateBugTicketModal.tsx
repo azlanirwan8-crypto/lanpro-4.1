@@ -90,7 +90,8 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
                   {t("bugTicket.title")}
                 </h3>
                 <p className="text-xs sm:text-[11px] text-content-muted font-medium">
-                  Dibuat dari Test Case #{testCase.rowNum}
+                  {t("jsx.j13")}
+                  {testCase.rowNum}
                 </p>
               </div>
             </div>
@@ -120,7 +121,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
             {/* Parent Task Searchable Combobox */}
             <div className="space-y-1.5 relative">
               <label className="text-xs sm:text-[10px] font-medium text-danger-text uppercase tracking-wider block">
-                TARGET EPIC / TASK UTAMA (PARENT * MANDATORY)
+                {t("jsx.k12")}
               </label>
 
               <div

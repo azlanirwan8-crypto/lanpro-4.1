@@ -226,13 +226,8 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
         <div className="w-16 h-16 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 mb-4 shadow-soft">
           <FolderKanban className="w-8 h-8" />
         </div>
-        <h3 className="text-xl font-medium text-content-strong mb-2">
-          Pilih atau Buat Proyek Baru
-        </h3>
-        <p className="text-content-muted text-sm max-w-sm">
-          Silakan pilih proyek dari dropdown di bagian atas atau buat proyek baru untuk mulai
-          mengelola tugas.
-        </p>
+        <h3 className="text-xl font-medium text-content-strong mb-2">{t("jsx.j166")}</h3>
+        <p className="text-content-muted text-sm max-w-sm">{t("jsx.j167")}</p>
       </div>
     );
   }

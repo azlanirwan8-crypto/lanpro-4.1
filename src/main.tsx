@@ -1,3 +1,4 @@
+import i18n from "./i18n";
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
@@ -80,7 +81,7 @@ class ErrorBoundary extends Component<Props, State> {
               cursor: "pointer",
             }}
           >
-            Reset Cache & Reload
+            {i18n.t("jsx.k102")}
           </button>
         </div>
       );

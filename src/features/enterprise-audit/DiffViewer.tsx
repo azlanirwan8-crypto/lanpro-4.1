@@ -73,7 +73,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
               <div className="col-span-4 px-2 border-l border-border-faint min-h-[1.5rem] flex items-center">
                 {oldVal === undefined || oldVal === null ? (
                   <span className="text-xs sm:text-[10px] font-medium text-content-subtle italic flex items-center gap-1">
-                    <Minus className="w-2 h-2" /> Data Baru
+                    <Minus className="w-2 h-2" /> {t("jsx.j38")}
                   </span>
                 ) : (
                   <span className="text-xs text-rose-500 line-through decoration-rose-300 break-words w-full">

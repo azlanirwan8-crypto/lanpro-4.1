@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import React from "react";
 import { Trash2 } from "lucide-react";
 import { motion } from "motion/react";
@@ -38,18 +39,19 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
   wrapSubmit,
   isSubmitting,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4 pt-4 border-t border-border-faint">
       <div className="flex items-center justify-between">
         <h4 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-subtle">
-          Related Issues
+          {t("jsx.j92")}
         </h4>
         {isEditable && (
           <button
             onClick={() => setIsAddingTaskLinkLocal(!isAddingTaskLinkLocal)}
             className="text-xs sm:text-[10px] font-medium text-indigo-600 hover:underline"
           >
-            + Link
+            {t("jsx.j93")}
           </button>
         )}
       </div>
@@ -122,12 +124,8 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
             buttonClassName="text-[13px] font-medium bg-surface border border-border-subtle rounded-xl px-4 py-2 shadow-soft"
           />
           <div className="flex gap-2 justify-end">
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => setIsAddingTaskLinkLocal(false)}
-            >
-              Cancel
+            <Button size="sm" variant="secondary" onClick={() => setIsAddingTaskLinkLocal(false)}>
+              {t("jsx.k64")}
             </Button>
             <Button
               size="sm"
@@ -137,7 +135,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
               })}
               disabled={isSubmitting["addLinkedTask"] || !taskLinkTargetId}
             >
-              Add Link
+              {t("jsx.j95")}
             </Button>
           </div>
         </motion.div>

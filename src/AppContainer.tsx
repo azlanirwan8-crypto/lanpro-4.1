@@ -2548,7 +2548,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               </div>
               <div className="min-w-0">
                 <p className="text-xs sm:text-[10px] font-medium text-emerald-400 uppercase tracking-widest flex items-center gap-1">
-                  <span>🔔</span> QA Notification
+                  <span>🔔</span> {t("jsx.j1")}
                 </p>
                 <p className="text-xs font-medium text-content-inverse-strong mt-0.5 leading-snug">
                   Bug <span className="font-mono font-medium text-emerald-300">#{bugKey}</span>{" "}

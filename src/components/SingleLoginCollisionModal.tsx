@@ -45,7 +45,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
             {t("collision.stillActive")}
           </h2>
           <p className="text-sm text-content-muted text-center mt-2 max-w-[280px]">
-            Sistem mendeteksi bahwa akun ini sedang digunakan di perangkat atau browser lain.
+            {t("jsx.j18")}
           </p>
         </div>
 

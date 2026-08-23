@@ -219,9 +219,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
             <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
               {t("audit.systemAudit")}
             </span>
-            <span className="text-xs text-content-subtle font-medium">
-              • Pusat Kendali Perusahaan
-            </span>
+            <span className="text-xs text-content-subtle font-medium">{t("jsx.j39")}</span>
           </div>
           <h1 className="text-base font-medium text-content-strong tracking-tight">
             {t("audit.title")}
@@ -425,17 +423,17 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                         <div className="flex items-center gap-2">
                           {log.oldValues && Object.keys(log.oldValues).length > 0 && (
                             <span className="px-1.5 py-0.2 bg-rose-500/10 border border-rose-500/30 rounded text-[10px] leading-none sm:text-[9px] font-medium text-rose-600 uppercase">
-                              Sebelum: {Object.keys(log.oldValues).length} keys
+                              {t("jsx.j40")} {Object.keys(log.oldValues).length} keys
                             </span>
                           )}
                           {log.newValues && Object.keys(log.newValues).length > 0 && (
                             <span className="px-1.5 py-0.2 bg-emerald-500/10 border border-emerald-500/30 rounded text-[10px] leading-none sm:text-[9px] font-medium text-emerald-600 uppercase">
-                              Sesudah: {Object.keys(log.newValues).length} keys
+                              {t("jsx.j41")} {Object.keys(log.newValues).length} keys
                             </span>
                           )}
                         </div>
                         <span className="text-xs sm:text-[11px] font-medium text-indigo-600 group-hover:text-indigo-700 flex items-center gap-1 group-hover:gap-1.5 transition-all">
-                          Lihat detail perubahan <ArrowRight className="w-3 h-3" />
+                          {t("jsx.j42")} <ArrowRight className="w-3 h-3" />
                         </span>
                       </div>
                     </div>
@@ -517,7 +515,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 </div>
                 <div className="p-6">
                   <p className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-2">
-                    Tanda Waktu (WIB)
+                    {t("jsx.k35")}
                   </p>
                   <div className="flex items-center gap-3 text-content-strong font-medium">
                     <Calendar className="w-5 h-5 text-indigo-500" />
@@ -543,7 +541,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 {/* Raw JSON fallback (Optional for high technical audit) */}
                 <details className="mt-12 group">
                   <summary className="text-xs sm:text-[10px] font-medium text-content-subtle cursor-pointer uppercase hover:text-content-secondary transition-colors">
-                    Tampilkan Raw Technical Trace (JSON)
+                    {t("jsx.k36")}
                   </summary>
                   <div className="mt-4 p-4 rounded-xl bg-surface-inverse-strong text-indigo-400 font-mono text-xs sm:text-[10px] overflow-x-auto border border-border-inverse">
                     <pre>{JSON.stringify(selectedLog, null, 2)}</pre>
@@ -553,7 +551,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
               {/* Footer */}
               <div className="p-8 bg-surface-sunken border-t border-border-faint flex justify-between items-center">
                 <p className="text-xs sm:text-[10px] font-medium text-content-subtle italic">
-                  ID_JEJAK: {selectedLog.id}
+                  {t("jsx.j43")} {selectedLog.id}
                 </p>
                 <button
                   onClick={() => setSelectedLog(null)}

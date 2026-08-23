@@ -102,11 +102,7 @@ export const ConnectPanel = () => {
             <h3 className="text-xs font-medium text-content-strong uppercase tracking-wide">
               {t("connect.mysqlHelp")}
             </h3>
-            <p className="text-content-secondary mt-1 text-xs leading-relaxed">
-              Aplikasi terhubung aktif ke backend MySQL. Anda dapat menguji (Test) maupun menyimpan
-              dan mengaktifkan (Save & Apply Live) konfigurasi database baru secara live tanpa
-              restart manual.
-            </p>
+            <p className="text-content-secondary mt-1 text-xs leading-relaxed">{t("jsx.k27")}</p>
           </div>
         </div>
 
@@ -122,9 +118,7 @@ export const ConnectPanel = () => {
           <form onSubmit={handleTestConnection} className="p-4 md:p-5 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-content-body">
-                  Database Host (DB_HOST)
-                </label>
+                <label className="text-xs font-medium text-content-body">{t("jsx.k28")}</label>
                 <input
                   name="host"
                   value={config.host}
@@ -133,9 +127,7 @@ export const ConnectPanel = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-content-body">
-                  Database Port (DB_PORT)
-                </label>
+                <label className="text-xs font-medium text-content-body">{t("jsx.k29")}</label>
                 <input
                   name="port"
                   value={config.port}
@@ -146,9 +138,7 @@ export const ConnectPanel = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-content-body">
-                Database Name (DB_NAME)
-              </label>
+              <label className="text-xs font-medium text-content-body">{t("jsx.k30")}</label>
               <input
                 name="database"
                 value={config.database}
@@ -158,12 +148,9 @@ export const ConnectPanel = () => {
               <div className="bg-amber-500/10 rounded-md p-3 border border-amber-500/30 mt-2 flex gap-2.5 text-amber-800 text-xs">
                 <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <p className="font-medium text-amber-900">
-                    ⚠️ Solusi Penting: Mengatasi "Unknown database" / ER_BAD_DB_ERROR
-                  </p>
+                  <p className="font-medium text-amber-900">{t("jsx.j29")}</p>
                   <p className="leading-relaxed">
-                    Error ini terjadi karena salah ketik (typo) nama database. Konfigurasi default
-                    MySQL di Google Cloud / Aiven biasanya menggunakan nama database{" "}
+                    {t("jsx.k31")}{" "}
                     <strong className="font-medium underline text-amber-900 bg-amber-500/15 px-1 py-[3px] rounded">
                       defaultdb
                     </strong>
@@ -184,7 +171,7 @@ export const ConnectPanel = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-content-body">Username (DB_USER)</label>
+                <label className="text-xs font-medium text-content-body">{t("jsx.k32")}</label>
                 <input
                   name="user"
                   value={config.user}
@@ -193,9 +180,7 @@ export const ConnectPanel = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-content-body">
-                  Password (DB_PASSWORD)
-                </label>
+                <label className="text-xs font-medium text-content-body">{t("jsx.k33")}</label>
                 <input
                   type="password"
                   name="password"

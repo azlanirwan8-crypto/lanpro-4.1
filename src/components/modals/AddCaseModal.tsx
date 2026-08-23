@@ -98,7 +98,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   : "text-content-muted hover:text-content-body"
               }`}
             >
-              Single Input (Manual)
+              {t("jsx.k9")}
             </button>
             <button
               type="button"
@@ -109,14 +109,14 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   : "text-content-muted hover:text-content-body"
               }`}
             >
-              Bulk Upload (Excel)
+              {t("jsx.k10")}
             </button>
           </div>
 
           {/* Target Suite Banner */}
           <div className="bg-primary-surface/5 border border-primary/10 px-4 py-2.5 rounded-md flex items-center justify-between text-xs">
             <span className="font-medium text-primary">
-              Modul Target:{" "}
+              {t("jsx.j11")}{" "}
               <strong>{activeSuite ? activeSuite.name : t("ui2.noModuleSelected")}</strong>
             </span>
             <span className="px-2.5 py-0.5 bg-primary-surface text-content-inverse font-medium rounded-full text-xs sm:text-[10px]">
@@ -226,7 +226,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   type="submit"
                   className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
                 >
-                  <Plus className="w-4 h-4" /> Simpan Test Case
+                  <Plus className="w-4 h-4" /> {t("jsx.j12")}
                 </button>
               </div>
             </form>
@@ -254,9 +254,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
               <div className="border-2 border-dashed border-border-subtle hover:border-primary rounded-md p-8 text-center space-y-3 transition-colors bg-surface-sunken/50">
                 <Upload className="w-10 h-10 text-primary mx-auto" />
                 <div>
-                  <p className="text-xs font-medium text-content-body">
-                    Unggah berkas Excel (.xlsx / .csv)
-                  </p>
+                  <p className="text-xs font-medium text-content-body">{t("jsx.k11")}</p>
                   <p className="text-xs sm:text-[10px] text-content-subtle mt-1">
                     {t("testCase.columnFormat")}
                   </p>

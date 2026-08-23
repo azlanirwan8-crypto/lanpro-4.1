@@ -121,7 +121,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             >
               <span className="text-xl">🟡</span>
               <div className="text-xs sm:text-[10px] font-medium uppercase tracking-wider">
-                Miro Board
+                {t("jsx.j54")}
               </div>
               <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium">
                 {t("importDiagram.miroFile")}
@@ -156,25 +156,23 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
           <div className="bg-surface-sunken p-3 rounded-xl border border-border-subtle text-xs sm:text-[11px] leading-relaxed">
             {importType === "drawio" && (
               <p>
-                💡 <strong>{t("importDiagram.drawioHint")}</strong>: Anda dapat mengekspor diagram
-                dari Draw.io sebagai berkas <strong>{t("importDiagram.xmlHint")}</strong>. Sistem
-                kami secara otomatis mengonversi bentuk dasar, warna, label, serta garis penghubung
-                agar kompatibel di whiteboard.
+                💡 <strong>{t("importDiagram.drawioHint")}</strong>
+                {t("jsx.j55")} <strong>{t("importDiagram.xmlHint")}</strong>
+                {t("jsx.j56")}
               </p>
             )}
             {importType === "miro" && (
               <p>
-                💡 <strong>{t("importDiagram.miroHint")}</strong>: Ekspor papan Miro Anda dalam
-                format <strong>JSON</strong> atau <strong>{t("importDiagram.csvMetadata")}</strong>.
-                Bentuk geometri, koordinat posisi, teks konten, serta panah logic (connectors) akan
-                dipetakan secara cerdas ke bentuk alur whiteboard.
+                💡 <strong>{t("importDiagram.miroHint")}</strong>
+                {t("jsx.j57")} <strong>JSON</strong> {t("jsx.k40")}{" "}
+                <strong>{t("importDiagram.csvMetadata")}</strong>
+                {t("jsx.k41")}
               </p>
             )}
             {importType === "native" && (
               <p>
-                💡 <strong>{t("importDiagram.backupHint")}</strong>: Unggah file backup ruang kerja
-                berformat <strong>JSON</strong> yang diunduh dari aplikasi ini untuk memulihkan
-                keseluruhan kondisi kanvas (bentuk, relasi, tema, dan status).
+                💡 <strong>{t("importDiagram.backupHint")}</strong>
+                {t("jsx.j59")} <strong>JSON</strong> {t("jsx.k42")}
               </p>
             )}
           </div>
@@ -254,7 +252,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
           {parsedImportData && (
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 space-y-2 text-[10px] leading-none animate-fade-in text-emerald-900 leading-relaxed font-sans font-medium">
               <span className="font-medium uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-emerald-800 flex items-center gap-1.5 shadow-soft bg-surface p-1 px-2.5 w-fit rounded-full border border-emerald-500/30">
-                🔍 Ulasan Kesiapan Diagram
+                {t("jsx.j60")}
               </span>
 
               <div className="grid grid-cols-2 gap-3 pt-1">
@@ -265,7 +263,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                       {parsedImportData.nodes.length}
                     </div>
                     <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wider">
-                      Bentuk & Ornamen (Nodes)
+                      {t("jsx.k43")}
                     </div>
                   </div>
                 </div>
@@ -277,15 +275,14 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                       {parsedImportData.edges.length}
                     </div>
                     <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wider">
-                      Anak Panah Penghubung (Edges)
+                      {t("jsx.k44")}
                     </div>
                   </div>
                 </div>
               </div>
 
               <p className="text-xs sm:text-[10px] text-emerald-700 italic pt-1 font-medium leading-relaxed">
-                Kesiapan 105%: Semua komponen berhasil dipetakan ke logic element whiteboard.
-                Silakan klik salah satu tombol di bawah untuk mengaplikasikan.
+                {t("jsx.j61")}
               </p>
             </div>
           )}

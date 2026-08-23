@@ -112,6 +112,10 @@ router.post("/api/auth/login", validasiBody(loginSchema), async (req, res) => {
     if (authResult.success === false) {
       return res.status(authResult.status).json({
         status: "error",
+        // Item #150 — kode dan parameternya ikut dikirim supaya klien bisa
+        // menerjemahkan; `message` tetap ada sebagai cadangan.
+        code: authResult.code,
+        params: authResult.params,
         message: authResult.message,
         remainingMs: authResult.remainingMs,
       });
@@ -210,6 +214,10 @@ router.post("/api/auth/force-logout", validasiBody(forceLogoutSchema), async (re
     if (authResult.success === false) {
       return res.status(authResult.status).json({
         status: "error",
+        // Item #150 — kode dan parameternya ikut dikirim supaya klien bisa
+        // menerjemahkan; `message` tetap ada sebagai cadangan.
+        code: authResult.code,
+        params: authResult.params,
         message: authResult.message,
         remainingMs: authResult.remainingMs,
       });

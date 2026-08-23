@@ -352,7 +352,7 @@ export const BackupPanel = (_props: {
               ) : (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-content-subtle italic text-xs">
-                    Belum ada riwayat export backup. Klik tombol{" "}
+                    {t("jsx.j27")}{" "}
                     <strong className="font-medium text-content-secondary">
                       "Export Project Backup"
                     </strong>{" "}

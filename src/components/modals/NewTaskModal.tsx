@@ -327,7 +327,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           </div>
           <div>
             <label className="block text-sm font-medium text-content-body mb-1">
-              Labels (comma separated)
+              {t("jsx.k14")}
             </label>
             <Input
               value={newTaskLabels}

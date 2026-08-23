@@ -172,9 +172,9 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* USERNAME INPUT */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            Username <span className="text-rose-500">*</span>{" "}
+            {t("jsx.k18")} <span className="text-rose-500">*</span>{" "}
             <span className="text-xs sm:text-[11px] text-content-subtle font-normal">
-              (Huruf saja, maks 10)
+              {t("jsx.k21")}
             </span>
           </label>
           <input
@@ -264,7 +264,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
                       : "text-content-subtle"
                   )}
                 >
-                  <span>{passStrength.criteria.upper ? "[✓]" : "[ ]"}</span> Huruf Besar (A-Z)
+                  <span>{passStrength.criteria.upper ? "[✓]" : "[ ]"}</span> {t("jsx.k22")}
                 </div>
                 <div
                   className={cn(
@@ -274,7 +274,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
                       : "text-content-subtle"
                   )}
                 >
-                  <span>{passStrength.criteria.digit ? "[✓]" : "[ ]"}</span> Angka (0-9)
+                  <span>{passStrength.criteria.digit ? "[✓]" : "[ ]"}</span> {t("jsx.k23")}
                 </div>
                 <div
                   className={cn(
@@ -284,7 +284,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
                       : "text-content-subtle"
                   )}
                 >
-                  <span>{passStrength.criteria.special ? "[✓]" : "[ ]"}</span> Simbol (@$!%*?&)
+                  <span>{passStrength.criteria.special ? "[✓]" : "[ ]"}</span> {t("jsx.k24")}
                 </div>
               </div>
             </div>
@@ -322,7 +322,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
       <SsoButtons mode="daftar" />
 
       <p className="text-center text-xs font-medium text-content-muted pt-5 mt-4 border-t border-border-faint">
-        Sudah punya akun?{" "}
+        {t("jsx.k25")}{" "}
         <button
           type="button"
           onClick={onBackToLogin}

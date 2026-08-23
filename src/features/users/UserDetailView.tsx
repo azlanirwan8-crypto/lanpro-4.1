@@ -841,7 +841,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         onClick={generateRandomPassword}
                         className="text-xs sm:text-[11px] text-indigo-600 hover:underline flex items-center gap-1 font-medium cursor-pointer"
                       >
-                        <Key className="w-3 h-3" /> Buat Password Acak
+                        <Key className="w-3 h-3" /> {t("jsx.j163")}
                       </button>
                     </div>
                     <input

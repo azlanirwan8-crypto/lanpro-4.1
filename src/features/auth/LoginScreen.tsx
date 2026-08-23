@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import i18n from "../../i18n";
 import React, { useState, useEffect } from "react";
 import { ArrowRight, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,7 +15,7 @@ export const LoginScreen = ({
   onLogin,
   onRegisterClick,
   loading,
-  loadingText = i18n.t("ui2.authenticating"),
+  loadingText,
 }: LoginScreenProps) => {
   const { t } = useTranslation();
   const [username, setUsername] = useState(() => {
@@ -116,7 +115,7 @@ export const LoginScreen = ({
       <AnimatePresence mode="wait">
         {loading ? (
           <div key="login-skeleton" className="w-full">
-            <LoginSkeletonState loadingText={loadingText} />
+            <LoginSkeletonState loadingText={loadingText || t("ui2.authenticating")} />
           </div>
         ) : (
           <motion.div
@@ -139,7 +138,7 @@ export const LoginScreen = ({
               {/* USERNAME FIELD */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-content-body tracking-wide block">
-                  Username <span className="text-rose-500">*</span>
+                  {t("jsx.k18")} <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -164,7 +163,7 @@ export const LoginScreen = ({
               {/* PASSWORD FIELD */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-content-body tracking-wide block">
-                  Password <span className="text-rose-500">*</span>
+                  {t("jsx.kPassword")} <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -233,7 +232,7 @@ export const LoginScreen = ({
             <SsoButtons mode="login" />
 
             <p className="text-center text-xs font-medium text-content-muted pt-5 mt-4 border-t border-border-faint">
-              Belum punya akun?{" "}
+              {t("jsx.k20")}{" "}
               <button
                 type="button"
                 onClick={onRegisterClick}

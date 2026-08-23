@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
@@ -202,6 +203,7 @@ export const StyledDropdown = ({
   members?: UserProfile[];
   customButton?: (selected: any) => React.ReactNode;
 }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
@@ -419,7 +421,7 @@ export const StyledDropdown = ({
                 })}
                 {safeOptions.length === 0 && (
                   <div className="p-4 text-center text-xs text-content-subtle italic font-medium">
-                    {i18n.t("ui.noOptions")}
+                    {t("ui.noOptions")}
                   </div>
                 )}
               </div>

@@ -772,14 +772,14 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
             onClick={() => setShowFeedbackModal(true)}
             className="px-3.5 py-1.5 bg-surface/10 hover:bg-surface/20 border border-white/20 text-content-inverse text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
           >
-            <Brain className="w-3.5 h-3.5" /> Beri Masukan Kualitas Notulen
+            <Brain className="w-3.5 h-3.5" /> {t("jsx.j106")}
           </button>
           {aiData && (
             <button
               onClick={() => setActiveTab("transcript")}
               className="px-3.5 py-1.5 bg-surface/10 hover:bg-surface/20 border border-white/20 text-content-inverse text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
             >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-200" /> Analisis Transkrip Baru
+              <Sparkles className="w-3.5 h-3.5 text-indigo-200" /> {t("jsx.j107")}
             </button>
           )}
         </div>
@@ -796,7 +796,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 : "text-content-secondary hover:text-content hover:bg-surface-muted"
             }`}
           >
-            <FileText className="w-3.5 h-3.5 text-primary" /> Ringkasan
+            <FileText className="w-3.5 h-3.5 text-primary" /> {t("jsx.j108")}
           </button>
           <button
             onClick={() => setActiveTab("chronology")}
@@ -806,7 +806,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 : "text-content-secondary hover:text-content hover:bg-surface-muted"
             }`}
           >
-            <Brain className="w-3.5 h-3.5 text-primary" /> Kronologi Rapat
+            <Brain className="w-3.5 h-3.5 text-primary" /> {t("jsx.j109")}
           </button>
           <button
             onClick={() => setActiveTab("conclusions")}
@@ -816,7 +816,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 : "text-content-secondary hover:text-content hover:bg-surface-muted"
             }`}
           >
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Kesimpulan
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t("jsx.j110")}
           </button>
           <button
             onClick={() => setActiveTab("suggestions")}
@@ -826,7 +826,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 : "text-content-secondary hover:text-content hover:bg-surface-muted"
             }`}
           >
-            <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> Saran & Ide
+            <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> {t("jsx.k70")}
           </button>
           <button
             onClick={() => setActiveTab("actionItems")}
@@ -836,7 +836,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 : "text-content-secondary hover:text-content hover:bg-surface-muted"
             }`}
           >
-            <ListChecks className="w-3.5 h-3.5 text-primary" /> Tindak Lanjut
+            <ListChecks className="w-3.5 h-3.5 text-primary" /> {t("jsx.j111")}
             {activeMeetingData?.tab_tindak_lanjut?.length > 0 && (
               <span className="ml-1 px-1.5 py-0.5 bg-primary-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] rounded-full font-medium min-w-[16px] text-center inline-block">
                 {activeMeetingData.tab_tindak_lanjut.length}
@@ -851,7 +851,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 : "text-content-secondary hover:text-content hover:bg-surface-muted"
             }`}
           >
-            <ArrowRight className="w-3.5 h-3.5 text-pink-500" /> Next Plan
+            <ArrowRight className="w-3.5 h-3.5 text-pink-500" /> {t("jsx.j112")}
           </button>
           <button
             onClick={() => setActiveTab("toBeScenario")}
@@ -861,7 +861,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 : "text-content-secondary hover:text-content hover:bg-surface-muted"
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-600" /> Target To-Be
+            <Sparkles className="w-3.5 h-3.5 text-cyan-600" /> {t("jsx.j113")}
           </button>
           <button
             onClick={() => setActiveTab("metadata")}
@@ -871,7 +871,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 : "text-content-secondary hover:text-content hover:bg-surface-muted"
             }`}
           >
-            <Clock className="w-3.5 h-3.5 text-teal-600" /> Metadata
+            <Clock className="w-3.5 h-3.5 text-teal-600" /> {t("jsx.j114")}
           </button>
           <button
             onClick={() => setActiveTab("transcript")}
@@ -881,7 +881,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 : "text-content-secondary hover:text-content hover:bg-surface-muted"
             }`}
           >
-            <FileText className="w-3.5 h-3.5 text-content-muted" /> Lihat Transkrip
+            <FileText className="w-3.5 h-3.5 text-content-muted" /> {t("jsx.j115")}
           </button>
         </div>
       )}
@@ -893,8 +893,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
             <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mb-4" />
             <h5 className="text-sm font-medium text-content-strong">{t("aiMeeting.composing")}</h5>
             <p className="text-xs text-content-subtle mt-1.5 max-w-sm leading-relaxed">
-              Sekretaris AI sedang menganalisis alur argumen, mendeteksi topik bahasan, mengekstrak
-              poin kesimpulan, saran, serta butir tindak lanjut rapat Anda. Harap tunggu sebentar.
+              {t("jsx.j116")}
             </p>
           </div>
         ) : (
@@ -984,7 +983,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       <div className="flex items-center gap-2">
                         <h4 className="text-xs font-medium text-content-strong uppercase tracking-widest flex items-center gap-2">
                           <FileText className="w-4 h-4 text-indigo-600" />
-                          Hasil Speech-to-Text Mentah (Raw Transcript)
+                          {t("jsx.k73")}
                         </h4>
                         <span className="px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 text-[10px] leading-none font-medium rounded-lg">
                           {transcript ? `${transcript.split(/\s+/).length} Kata` : "0 Kata"}
@@ -1010,11 +1009,9 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-xs text-amber-800 leading-relaxed flex items-start gap-2.5">
                           <Sparkles className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5 animate-pulse" />
                           <div>
-                            Mode Edit Aktif: Anda dapat menambah, mengoreksi, atau menempelkan
-                            transkrip percakapan rapat yang lebih lengkap di bawah ini. Setelah
-                            selesai, klik tombol{" "}
-                            <span className="underline">"Simpan & Mulai Analisis Ulang"</span> untuk
-                            memproses kembali Notulen Rapat PMO Anda secara instan.
+                            {t("jsx.j119")}{" "}
+                            <span className="underline">"Simpan & Mulai Analisis Ulang"</span>{" "}
+                            {t("jsx.j120")}
                           </div>
                         </div>
 
@@ -1141,7 +1138,8 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             ))
                           ) : (
                             <div className="text-center py-8 text-content-subtle italic">
-                              Tidak ada baris transkrip yang cocok dengan pencarian "{searchTerm}".
+                              {t("jsx.j121")}
+                              {searchTerm}".
                             </div>
                           )}
                         </div>
@@ -1160,7 +1158,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
                     <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
                       <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                      1. Record Langsung (Mikrofon)
+                      {t("jsx.k76")}
                     </div>
                     <p className="text-xs sm:text-[11px] text-content-subtle">
                       Merekam suara rapat melalui mikrofon perangkat Anda (catatan: hanya suara yang
@@ -1185,7 +1183,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft flex flex-col justify-between">
                     <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
                       <FileText className="w-4 h-4 text-indigo-600" />
-                      2. Upload Rekaman Atau Transkrip
+                      {t("jsx.j122")}
                     </div>
 
                     {/* Media Platform Selector */}
@@ -1359,7 +1357,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       onClick={handleAnalyze}
                       className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-xl text-xs font-medium shadow-soft-lg flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
                     >
-                      <Sparkles className="w-4 h-4 text-indigo-200" /> MULAI ANALISIS AI
+                      <Sparkles className="w-4 h-4 text-indigo-200" /> {t("jsx.j123")}
                     </button>
                   </div>
                 </div>
@@ -1395,7 +1393,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                   {item.timestamp}
                                 </span>
                                 <h4 className="text-sm font-medium text-content-strong tracking-tight leading-snug">
-                                  Visual: {item.aktivitas_visual}
+                                  {t("jsx.j124")} {item.aktivitas_visual}
                                 </h4>
                               </div>
                             </div>
@@ -1422,7 +1420,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  Keputusan & Hasil Akhir yang Disepakati (Final Decisions)
+                  {t("jsx.k78")}
                 </div>
 
                 {activeMeetingData.tab_kesimpulan.length === 0 ? (
@@ -1468,7 +1466,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       >
                         <div className="flex items-center gap-2">
                           <span className="px-2 py-[3px] bg-amber-500/10 text-[10px] leading-none sm:text-[9px] font-medium uppercase rounded border border-amber-500/30">
-                            Diusulkan Oleh: {item.diusulkan_oleh}
+                            {t("jsx.j125")} {item.diusulkan_oleh}
                           </span>
                         </div>
                         <p className="text-xs text-content-body leading-relaxed pl-1">
@@ -1487,7 +1485,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-2">
                   <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
                     <ListChecks className="w-4 h-4 text-indigo-600" />
-                    Butir Tindak Lanjut & Rencana Aksi (Action Items)
+                    {t("jsx.k79")}
                   </div>
 
                   {activeMeetingData.tab_tindak_lanjut.length > 0 && (
@@ -1496,8 +1494,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       disabled={importingIds.length > 0}
                       className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-xl text-xs font-medium flex items-center gap-1.5 shadow-soft transition-colors cursor-pointer disabled:opacity-55"
                     >
-                      <Database className="w-3.5 h-3.5 text-indigo-200" /> Impor Semua ke Poin
-                      Diskusi
+                      <Database className="w-3.5 h-3.5 text-indigo-200" /> {t("jsx.j126")}
                     </button>
                   )}
                 </div>
@@ -1567,11 +1564,11 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             >
                               {isImporting ? (
                                 <>
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Mengimpor...
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("jsx.j127")}
                                 </>
                               ) : (
                                 <>
-                                  Impor <ArrowRight className="w-3.5 h-3.5" />
+                                  {t("jsx.j128")} <ArrowRight className="w-3.5 h-3.5" />
                                 </>
                               )}
                             </button>
@@ -1589,7 +1586,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
               <div className="space-y-6">
                 <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2">
                   <ArrowRight className="w-4 h-4 text-pink-600" />
-                  Rencana Lanjut & Roadmap Eksekusi (Next Plan)
+                  {t("jsx.k80")}
                 </div>
 
                 {activeMeetingData.tab_next_plan.length === 0 ? (
@@ -1609,7 +1606,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </span>
                             {item.due_date && (
                               <span className="px-2 py-[3px] bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 text-[10px] leading-none font-medium rounded-full">
-                                Target: {item.due_date}
+                                {t("jsx.j129")} {item.due_date}
                               </span>
                             )}
                           </div>
@@ -1619,8 +1616,8 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </p>
                             {item.pic && (
                               <div className="text-xs sm:text-[11px] text-content-muted font-medium flex items-center gap-1">
-                                <UserCheck className="w-3.5 h-3.5 text-pink-500" /> Penanggung Jawab
-                                (PIC): <span className="text-pink-600 font-medium">{item.pic}</span>
+                                <UserCheck className="w-3.5 h-3.5 text-pink-500" /> {t("jsx.k81")}{" "}
+                                <span className="text-pink-600 font-medium">{item.pic}</span>
                               </div>
                             )}
                           </div>
@@ -1637,7 +1634,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
               <div className="space-y-6">
                 <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2">
                   <Sparkles className="w-4 h-4 text-cyan-600 animate-pulse" />
-                  Rekomendasi Arsitektur & Target Proses (Target To-Be Architecture)
+                  {t("jsx.k82")}
                 </div>
 
                 <div className="space-y-6">
@@ -1646,7 +1643,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     <div className="bg-surface-sunken border border-border-subtle p-5 rounded-xl shadow-soft space-y-3">
                       <div className="flex items-center gap-2 text-content-body font-medium text-xs sm:text-[10px] uppercase tracking-widest">
                         <span className="w-2 h-2 rounded-full bg-slate-400" />
-                        Kondisi Saat Ini (As-Is)
+                        {t("jsx.k83")}
                       </div>
                       <p className="text-xs text-content-secondary leading-relaxed whitespace-pre-wrap">
                         {activeMeetingData.tab_target_to_be.proses_bisnis_as_is ||
@@ -1658,7 +1655,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     <div className="bg-indigo-500/10 border border-indigo-500/30 p-5 rounded-xl shadow-soft space-y-3">
                       <div className="flex items-center gap-2 text-indigo-700 font-medium text-xs sm:text-[10px] uppercase tracking-widest">
                         <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                        Target Masa Depan (To-Be)
+                        {t("jsx.k84")}
                       </div>
                       <p className="text-xs text-indigo-950 font-medium leading-relaxed whitespace-pre-wrap">
                         {activeMeetingData.tab_target_to_be.proses_bisnis_to_be ||
@@ -1670,7 +1667,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   {/* Transition Steps Card */}
                   <div className="bg-surface border border-border-subtle p-5 rounded-xl shadow-soft space-y-4">
                     <div className="flex items-center gap-2 text-content-body font-medium text-xs sm:text-[10px] uppercase tracking-widest">
-                      Langkah-Langkah Transisi Migrasi (Transition Roadmap)
+                      {t("jsx.k85")}
                     </div>
 
                     {!activeMeetingData.tab_target_to_be.langkah_transisi ||
@@ -1713,26 +1710,26 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     </h5>
                     <div className="space-y-2">
                       <div className="text-xs text-content-secondary">
-                        Host Rapat:{" "}
+                        {t("jsx.j130")}{" "}
                         <span className="text-content-strong font-medium">
                           {activeMeetingData.tab_metadata.host_rapat || "TBD"}
                         </span>
                       </div>
                       <div className="text-xs text-content-secondary">
-                        Tanggal Rapat:{" "}
+                        {t("jsx.j131")}{" "}
                         <span className="text-content-strong font-medium">
                           {activeMeetingData.tab_metadata.tanggal_rapat || "TBD"}
                         </span>
                       </div>
                       <div className="text-xs text-content-secondary">
-                        Platform:{" "}
+                        {t("jsx.j132")}{" "}
                         <span className="font-medium px-1.5 py-0.5 bg-surface-muted rounded border border-border-subtle">
                           {activeMeetingData.tab_metadata.platform_digunakan || "Zoom"}
                         </span>
                       </div>
                       {activeMeetingData.tab_metadata.durasi_detik > 0 && (
                         <div className="text-xs text-content-secondary">
-                          Durasi:{" "}
+                          {t("jsx.j133")}{" "}
                           <span className="font-medium">
                             {t("rakit.minutesCount", {
                               count: Math.floor(activeMeetingData.tab_metadata.durasi_detik / 60),
@@ -1746,7 +1743,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   {/* Active Speakers / Participants */}
                   <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft space-y-3">
                     <h5 className="text-xs sm:text-[10px] font-medium text-indigo-600 uppercase tracking-widest">
-                      Seluruh Peserta Rapat (Terdeteksi)
+                      {t("jsx.k86")}
                     </h5>
 
                     {!activeMeetingData.tab_metadata.peserta_rapat ||
@@ -1778,8 +1775,8 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
       <div className="bg-surface-sunken border-t p-4 px-6 flex items-center gap-2 text-xs sm:text-[11px] text-content-subtle">
         <Info className="w-4 h-4 text-content-subtle shrink-0" />
         <span>
-          Data di atas dianalisis secara aman menggunakan <strong>Gemini AI</strong>. Anda dapat
-          mengimpor Butir Tindak Lanjut di atas untuk menjadikannya Poin Diskusi resmi team.
+          {t("jsx.j134")} <strong>Gemini AI</strong>
+          {t("jsx.j136")}
         </span>
       </div>
 
@@ -1830,8 +1827,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
               <div className="space-y-2 text-left">
                 <label className="text-xs font-medium text-content-strong flex items-center gap-1.5">
-                  <FileText className="w-3.5 h-3.5 text-indigo-500" /> Catatan Evaluasi & Koreksi
-                  Anda:
+                  <FileText className="w-3.5 h-3.5 text-indigo-500" /> {t("jsx.k87")}
                 </label>
                 <textarea
                   value={feedbackText}
@@ -1859,11 +1855,11 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
               >
                 {submittingFeedback ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Menyimpan...
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("jsx.kSaving")}
                   </>
                 ) : (
                   <>
-                    <Brain className="w-3.5 h-3.5" /> Simpan Evaluasi
+                    <Brain className="w-3.5 h-3.5" /> {t("jsx.j138")}
                   </>
                 )}
               </button>

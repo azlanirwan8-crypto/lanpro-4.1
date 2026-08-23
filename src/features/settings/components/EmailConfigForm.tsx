@@ -133,12 +133,12 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
           ) : emailStatus?.aktif ? (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
               <CheckCircle2 size={12} />
-              Terkonfigurasi (Resend)
+              {t("jsx.k96")}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/15 text-amber-700 border border-amber-500/30">
               <AlertTriangle size={12} />
-              Mode Simulasi (Dev)
+              {t("jsx.k97")}
             </span>
           )}
         </div>
@@ -172,9 +172,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
       {/* Template Notifikasi Assignment */}
       <div className="space-y-3 pt-1">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-content-body">
-            Subjek Email Default (Task Assignment)
-          </label>
+          <label className="text-xs font-medium text-content-body">{t("jsx.k98")}</label>
           <input
             value={formData.subjectTemplate || ""}
             onChange={(e) => setFormData({ ...formData, subjectTemplate: e.target.value })}
@@ -234,9 +232,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
                 {t("emailCfg.testSend")}
               </h3>
             </div>
-            <p className="text-xs text-content-muted">
-              Kirim email simulasi uji coba untuk memverifikasi koneksi integrasi layanan email.
-            </p>
+            <p className="text-xs text-content-muted">{t("jsx.j150")}</p>
             <div className="space-y-1">
               <label className="text-xs text-content-body font-medium">
                 {t("emailCfg.recipient")}

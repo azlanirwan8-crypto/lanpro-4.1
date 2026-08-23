@@ -1293,7 +1293,8 @@ export const MasterDataPanel = ({
                 ))
               ) : (
                 <div className="col-span-full py-6 text-center text-xs text-content-subtle font-medium">
-                  Tidak ada ikon yang cocok dengan kata kunci "{iconSearch}"
+                  {t("jsx.j105")}
+                  {iconSearch}"
                 </div>
               )}
             </div>
@@ -1475,7 +1476,8 @@ export const MasterDataPanel = ({
                   ))
                 ) : (
                   <div className="col-span-full py-6 text-center text-xs text-content-subtle font-medium">
-                    Tidak ada ikon yang cocok dengan kata kunci "{editIconSearch}"
+                    {t("jsx.j105")}
+                    {editIconSearch}"
                   </div>
                 )}
               </div>

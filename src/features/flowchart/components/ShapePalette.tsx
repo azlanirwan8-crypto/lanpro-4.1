@@ -57,7 +57,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
       >
         <Layers className="w-4 h-4" />
         <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-medium uppercase tracking-tight text-indigo-600 mt-0.5 flex items-center">
-          Shapes <ChevronDown className="w-2 h-2 ml-0.5" />
+          {t("jsx.j62")} <ChevronDown className="w-2 h-2 ml-0.5" />
         </span>
       </button>
 

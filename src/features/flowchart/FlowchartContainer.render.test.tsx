@@ -154,8 +154,12 @@ describe("FlowchartView", () => {
 
     // Editor terbuka pada mode dokumen. Kanvasnya — bagian terbesar dari JSX
     // yang dibelah pada fase ini — baru ter-render setelah beralih ke
-    // "Flow Diagram", jadi peralihan itu ikut dijalankan di sini.
-    fireEvent.click(screen.getByText(/Flow Diagram/i));
+    // "Diagram Alur" (dulu "Flow Diagram", diterjemahkan di #149), jadi
+    // peralihan itu ikut dijalankan di sini.
+    // Pemilihnya harus PERSIS: setelah "Flow Diagram" diterjemahkan menjadi
+    // "Diagram Alur" (#149), teks itu juga cocok dengan judul halaman
+    // "Editor Diagram Alur".
+    fireEvent.click(screen.getByText("Diagram Alur", { selector: "button" }));
 
     await waitFor(() => expect(screen.getByTitle(/Snap to Grid|Snapping/i)).toBeInTheDocument());
 

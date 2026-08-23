@@ -2517,9 +2517,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 <h2 className="text-base font-medium text-content-strong mb-1">
                   {t("flowchart.canvasDocManagement")}
                 </h2>
-                <p className="text-xs text-content-muted font-medium">
-                  Pilih dokumen di sidebar atau buat baru untuk melihat preview dan merancang alur.
-                </p>
+                <p className="text-xs text-content-muted font-medium">{t("jsx.j64")}</p>
                 <button
                   onClick={openCreateModal}
                   className="mt-4 flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-content-inverse font-medium p-2.5 px-5 rounded-xl text-xs shadow-md transition-all active:scale-95"
@@ -2566,7 +2564,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             : "text-content-muted hover:text-content-strong"
                         )}
                       >
-                        <Workflow className="w-3.5 h-3.5" /> Flow Diagram
+                        <Workflow className="w-3.5 h-3.5" /> {t("jsx.j65")}
                       </button>
                     </div>
 
@@ -2598,22 +2596,22 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     {/* Category Badge */}
                     {currentFlowMetadata?.category === "PRD" && (
                       <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-surface-muted text-content-body border border-border-subtle/80 rounded-full">
-                        📄 PRD
+                        {t("jsx.kCatPrd")}
                       </span>
                     )}
                     {currentFlowMetadata?.category === "Panduan" && (
                       <span className="px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-blue-500/10 text-blue-700 border border-blue-500/30 rounded-full">
-                        📖 Panduan
+                        {t("jsx.kCatGuide")}
                       </span>
                     )}
                     {currentFlowMetadata?.category === "Laporan" && (
                       <span className="px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 rounded-full">
-                        📊 Laporan
+                        {t("jsx.kCatReport")}
                       </span>
                     )}
                     {!currentFlowMetadata?.category && (
                       <span className="px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-violet-500/10 text-violet-700 border border-violet-500/30 rounded-full">
-                        ⚙️ Umum
+                        {t("jsx.kCatGeneral")}
                       </span>
                     )}
 
@@ -2640,7 +2638,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           className="text-[10px] leading-none font-medium bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-[3px] rounded-full truncate max-w-[180px]"
                           title={linkedEpic.title}
                         >
-                          🎯 Epic: {linkedEpic.title}
+                          {t("jsx.j70")} {linkedEpic.title}
                         </span>
                       </>
                     )}
@@ -3277,7 +3275,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             <div className="space-y-2 text-xs sm:text-[11px] leading-relaxed">
                               <div className="flex justify-between items-center">
                                 <span className="text-content-subtle font-medium font-sans">
-                                  Batal Aksi (Undo)
+                                  {t("jsx.k49")}
                                 </span>
                                 <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Ctrl + Z
@@ -3285,7 +3283,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-content-subtle font-medium font-sans">
-                                  Ulangi Aksi (Redo)
+                                  {t("jsx.k51")}
                                 </span>
                                 <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Ctrl + Y / Ctrl+Shift+Z
@@ -3301,10 +3299,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-content-subtle font-medium font-sans">
-                                  Geser Alur (Nudge)
+                                  {t("jsx.k54")}
                                 </span>
                                 <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
-                                  Tombol Panah Arrow (↑↓←→)
+                                  {t("jsx.k55")}
                                 </kbd>
                               </div>
                               <div className="flex justify-between items-center">
@@ -3488,7 +3486,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               <div className="grid grid-cols-2 gap-2">
                                 <div>
                                   <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
-                                    Lebar (W)
+                                    {t("jsx.k57")}
                                   </span>
                                   <input
                                     type="number"
@@ -3505,7 +3503,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 </div>
                                 <div>
                                   <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
-                                    Tinggi (H)
+                                    {t("jsx.k58")}
                                   </span>
                                   <input
                                     type="number"
@@ -3532,8 +3530,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span>{t("flowchart.linkTaskBacklog")}</span>
                               </label>
                               <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted mb-2 font-medium">
-                                Hubungkan bentuk dengan sprint backlog agar status tersinkronisasi
-                                otomatis.
+                                {t("jsx.j75")}
                               </p>
 
                               <select
@@ -3587,7 +3584,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               onClick={handleDeleteSelected}
                               className="w-full p-2 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/30 text-rose-700 font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
                             >
-                              <Trash2 className="w-3.5 h-3.5" /> Putuskan Alur
+                              <Trash2 className="w-3.5 h-3.5" /> {t("jsx.j76")}
                             </button>
                           </div>
                         ) : (
@@ -3599,8 +3596,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               {t("flowchart.noComponentSelected")}
                             </div>
                             <p className="text-xs sm:text-[10px] text-content-muted max-w-[190px] mx-auto leading-relaxed">
-                              Klik satu komponen bentuk, catatan tempel, atau anak panah alir di
-                              canvas untuk mengubah properti ornamen.
+                              {t("jsx.j77")}
                             </p>
                           </div>
                         )}
@@ -3856,7 +3852,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     {t("flowchart.pickOrDrag")}
                   </p>
                   <p className="text-xs sm:text-[10px] text-content-subtle font-medium">
-                    Mendukung PDF, Word, Excel (Max. 5MB)
+                    {t("jsx.k59")}
                   </p>
 
                   {uploadDocFile && (

@@ -264,7 +264,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                           />
                           <div className="absolute right-0 bottom-full mb-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                             <div className="px-3 py-1 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider text-primary border-b border-border-faint mb-1">
-                              Assign PIC Modul (Tim Proyek)
+                              {t("jsx.k92")}
                             </div>
                             <button
                               onClick={(e) => {

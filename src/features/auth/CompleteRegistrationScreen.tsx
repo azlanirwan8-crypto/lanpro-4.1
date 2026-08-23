@@ -140,7 +140,7 @@ export const CompleteRegistrationScreen = ({
       <form onSubmit={kirim} className="mt-6 space-y-4">
         <div>
           <label className="mb-1.5 block text-sm font-medium text-content-body">
-            Username <span className="text-danger-text">*</span>{" "}
+            {t("jsx.k18")} <span className="text-danger-text">*</span>{" "}
             <span className="font-normal text-content-muted">{t("completeReg.usernameHint")}</span>
           </label>
           <input
