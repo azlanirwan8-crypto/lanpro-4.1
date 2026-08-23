@@ -1,6 +1,4 @@
 import type { ReactNode } from "react";
-import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
 import { ShieldCheck } from "lucide-react";
 import { LanguageSwitcher } from "../../../i18n/LanguageSwitcher";
 import { VelzonFloatingParticles } from "../../../components/ui/CoreUI";
@@ -128,14 +126,18 @@ const CorakBatikKawung = () => (
 );
 
 const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant">) => {
-  const { t } = useTranslation();
-
   return (
     <div className="relative min-h-screen flex flex-col font-sans bg-surface-sunken overflow-x-hidden">
       <CorakBatikKawung />
 
-      {/* BANNER — brand terpusat di atas gelombang. */}
-      <div className="relative z-10 select-none overflow-hidden bg-primary-surface pt-16 pb-44 sm:pt-20 sm:pb-52">
+      {/*
+        BANNER. Sejak logo dan tagline dihapus isinya tinggal bidang warna,
+        jadi ia TIDAK LAGI IKUT ALUR: posisinya absolut di puncak halaman
+        dengan tinggi tetap. Kalau ia tetap di alur, tingginya akan ikut
+        menentukan posisi kartu — dan kartu tidak akan pernah bisa benar-benar
+        terpusat karena selalu terdorong turun sebesar banner.
+      */}
+      <div className="absolute inset-x-0 top-0 z-10 h-[300px] sm:h-[360px] select-none overflow-hidden bg-primary-surface">
         <VelzonFloatingParticles />
 
         {/*
@@ -151,20 +153,6 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
         </div>
 
         <PemilihBahasaAuth className="absolute top-4 right-4 z-30" />
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="relative z-10 text-center px-6"
-        >
-          <h1 className="text-5xl sm:text-6xl font-medium text-content-inverse leading-[0.9] tracking-tighter drop-shadow-md">
-            LAN <span className="text-amber-400">PRO</span>
-          </h1>
-          <p className="text-xs font-medium text-content-inverse-muted mt-3 tracking-widest uppercase">
-            {t("ui.platformTagline")}
-          </p>
-        </motion.div>
 
         {/*
           Gelombang. Warnanya WAJIB sama persis dengan latar halaman, sebab yang
@@ -208,13 +196,17 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
       </div>
 
       {/*
-        Kartu ditarik naik sampai MELEWATI puncak gelombang, bukan berhenti di
-        garisnya. Kalau tariknya hanya sedalam gelombang, kartu tampak duduk di
-        atas lekukan dan efek mengambangnya hilang — sisi kiri-kanan gelombang
-        harus tetap terlihat di kedua sisi kartu. Padding bawah banner disetel
-        seiring nilai ini supaya jarak tagline ke kartu tidak ikut menyempit.
+        Kartu dipusatkan TEGAK LURUS di ruang yang tersisa, bukan digantung
+        pada tinggi banner lewat tarikan margin negatif seperti sebelumnya.
+        `flex-1` mengambil seluruh sisa tinggi di atas footer dan `items-center`
+        memusatkan di dalamnya, sehingga titik pusatnya tidak ikut bergeser tiap
+        kali tinggi banner atau isi kartu berubah.
+
+        `py-16` bukan hiasan: tanpa itu, pada layar pendek kartu akan menempel
+        di tepi dan sebagian terpotong, sebab pemusatan tidak menyisakan ruang
+        napas dengan sendirinya.
       */}
-      <div className="relative z-30 -mt-32 sm:-mt-40 px-4 sm:px-6 flex justify-center">
+      <div className="relative z-30 flex flex-1 items-center justify-center px-4 py-16 sm:px-6">
         {children}
       </div>
 
