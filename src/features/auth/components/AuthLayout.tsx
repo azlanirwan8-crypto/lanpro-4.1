@@ -117,14 +117,19 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
           dipakai langsung, bukan kelas Tailwind, supaya nilainya ikut berganti
           di mode gelap tanpa override tema tambahan.
 
-          BENTUKNYA: RATA DI TEPI, MELENGKUNG DI TENGAH. Versi pertama memakai
-          satu kurva dengan titik kendali jauh di luar (`C 400 120, 1040 120`),
-          dan hasilnya terbalik dari yang dimaksud: paling curam justru di tepi
-          kiri-kanan (turun 36px hanya dalam 240px pertama) lalu mendatar di
-          tengah. Terbaca sebagai patahan, bukan gelombang. Sekarang dipakai DUA
-          kurva simetris yang garis singgungnya mendatar di ketiga titik ujung
-          (0, 720, 1440), sehingga peralihannya mulus dan tepinya menyatu rata
-          dengan sisi banner.
+          BENTUKNYA GARIS LURUS, BUKAN KURVA — dan itu inti kerapiannya. Dua
+          percobaan sebelumnya sama-sama memakai bezier: yang pertama titik
+          kendalinya jauh di luar sehingga paling curam justru di tepi lalu
+          mendatar di tengah, yang kedua sudah rata di tepi dan melengkung
+          landai di tengah. Keduanya ditolak pemilik proyek dengan alasan yang
+          sama, dan alasannya benar: acuannya TIDAK melengkung sama sekali.
+          Tepinya dua garis lurus yang bertemu di satu titik rendah, dan justru
+          ketiadaan lengkungan itulah yang membuatnya terbaca bersih.
+
+          Titik temunya di x=548 dari 1440 (≈38% lebar), sedikit di kiri tengah
+          mengikuti acuan — bukan di tengah persis. Simetri sempurna terbaca
+          kaku; pergeseran kecil ini yang membuatnya terlihat disengaja.
+
         */}
         <svg
           className="absolute bottom-0 left-0 w-full h-[70px] sm:h-[100px] pointer-events-none z-20"
@@ -133,10 +138,7 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path
-            d="M0 0 C 300 0, 420 95, 720 95 C 1020 95, 1140 0, 1440 0 L1440 120 L0 120 Z"
-            fill="var(--color-surface-sunken)"
-          />
+          <path d="M0 0 L548 95 L1440 0 L1440 120 L0 120 Z" fill="var(--color-surface-sunken)" />
         </svg>
       </div>
 
