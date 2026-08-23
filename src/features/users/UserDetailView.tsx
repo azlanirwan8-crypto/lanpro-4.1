@@ -11,6 +11,7 @@ import {
   UserCog,
   Users,
   Eye,
+  EyeOff,
   CheckCircle,
   Layout,
   Mail,
@@ -27,7 +28,6 @@ import {
   Save,
   RefreshCw,
   Server,
-  RotateCcw,
 } from "lucide-react";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { cn } from "../../lib/utils";
@@ -174,6 +174,9 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   const [editEmail, setEditEmail] = useState<string>(user.email || "");
   const [editPhone, setEditPhone] = useState<string>(user.phone || "");
   const [editPassword, setEditPassword] = useState<string>("");
+  // Item #155 — sandi baru dibulatkan secara bawaan; hanya terbuka bila admin
+  // menekan tombol matanya sendiri. Lihat catatan di dekat inputnya.
+  const [showEditPassword, setShowEditPassword] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   // Clean up object URL on unmount or previewUrl change to avoid memory leak
@@ -229,6 +232,9 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
       setEditEmail(user.email || "");
       setEditPhone(user.phone || "");
       setEditPassword("");
+      // Item #155 — tombol mata ikut tertutup tiap form disetel ulang, supaya
+      // sandi pengguna BERIKUTNYA tidak terbuka gara-gara pilihan sebelumnya.
+      setShowEditPassword(false);
       setEditPermissions(getUserPermissions(user.role || "user", user.permissions));
     }
   }, [user]);
@@ -269,36 +275,14 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     return found?.name || found?.label || posId || "Anggota Tim";
   };
 
-  const handleTogglePermission = (
-    module: keyof UserPermissions,
-    action: "read" | "create" | "update" | "delete"
-  ) => {
-    setEditPermissions((prev) => {
-      const currentModule = prev[module] || {
-        read: false,
-        create: false,
-        update: false,
-        delete: false,
-      };
-      return {
-        ...prev,
-        [module]: {
-          ...currentModule,
-          [action]: !currentModule[action],
-        },
-      };
-    });
-  };
-
-  const handleResetToRoleDefaults = () => {
-    const defaultPerms =
-      ROLE_DEFAULT_PERMISSIONS[editRole] ||
-      ROLE_DEFAULT_PERMISSIONS.member ||
-      ROLE_DEFAULT_PERMISSIONS.viewer ||
-      (ROLE_DEFAULT_PERMISSIONS.owner as UserPermissions);
-    setEditPermissions(defaultPerms);
-    toast.success(t("toast.permissionMatrixReset", { peran: editRole }));
-  };
+  // Item #156 · §19.8 Tahap 6 — `handleTogglePermission` dan
+  // `handleResetToRoleDefaults` DIHAPUS bersama panelnya. Keduanya hanya
+  // menyunting `editPermissions`, dan matriksnya kini baca-saja.
+  //
+  // `editPermissions` sendiri SENGAJA dipertahankan: nilainya masih dibaca
+  // untuk menggambar matriks, masih ikut berubah saat peran diganti (baris
+  // di dropdown peran), dan masih dikirim saat simpan — sehingga penimpaan
+  // `list` yang sudah ada di database tidak terhapus diam-diam.
 
   // Handler Input File (Local Preview Only - Deferred Upload)
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -844,13 +828,40 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <Key className="w-3 h-3" /> {t("jsx.j163")}
                       </button>
                     </div>
-                    <input
-                      type="text"
-                      value={editPassword}
-                      onChange={(e) => setEditPassword(e.target.value)}
-                      placeholder={t("userDetail.passwordPlaceholder")}
-                      className="w-full px-3 py-1.5 border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface text-content-strong "
-                    />
+                    {/*
+                      Item #155 — dulu `type="text"` polos: sandi baru terbaca
+                      telanjang di layar, termasuk hasil "Buat Kata Sandi Acak",
+                      dan ikut terekam saat layar dibagikan. Kini dibulatkan dan
+                      dibuka lewat tombol mata.
+
+                      Padding kanan `pr-9` DIPERLUKAN, bukan hiasan: tanpa itu
+                      teks sandi yang panjang menyelinap ke bawah ikonnya.
+                    */}
+                    <div className="relative">
+                      <input
+                        type={showEditPassword ? "text" : "password"}
+                        value={editPassword}
+                        onChange={(e) => setEditPassword(e.target.value)}
+                        placeholder={t("userDetail.passwordPlaceholder")}
+                        className="w-full pl-3 pr-9 py-1.5 border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface text-content-strong "
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowEditPassword((v) => !v)}
+                        title={showEditPassword ? t("ui2.hidePassword") : t("ui2.showPassword")}
+                        aria-label={
+                          showEditPassword ? t("ui2.hidePassword") : t("ui2.showPassword")
+                        }
+                        aria-pressed={showEditPassword}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-body cursor-pointer"
+                      >
+                        {showEditPassword ? (
+                          <EyeOff className="w-3.5 h-3.5" />
+                        ) : (
+                          <Eye className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -867,14 +878,37 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         {t("userDetail.permissionHint")}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleResetToRoleDefaults}
-                      className="px-2.5 py-1 text-xs sm:text-[11px] bg-surface-muted hover:bg-surface-strong text-content-body rounded-md font-medium transition flex items-center gap-1 shrink-0"
-                      title={t("userDetail.resetRoleDefaultHint")}
-                    >
-                      <RotateCcw className="w-3 h-3" /> {t("userDetail.resetRoleDefault")}
-                    </button>
+                    {/*
+                      Item #156 · §19.8 Tahap 6 — tombol "Setel Ulang ke Peran
+                      Bawaan" DIHAPUS, bukan sekadar dinonaktifkan: panelnya
+                      tidak lagi menyunting apa pun, jadi tombol yang menulis
+                      ulang matriks tidak punya arti di sini.
+                    */}
+                  </div>
+
+                  {/*
+                    Item #156 · §19.8 Tahap 6 — panel ini dulu terbaca seperti
+                    saklar izin sungguhan: 24 modul x 4 aksi, semuanya bisa
+                    diklik dan tersimpan ke `Users.permissions`.
+
+                    Yang sebenarnya ditegakkan backend HANYA `list.update` dan
+                    `list.delete`, lewat `checkUserPermissionBackend` di
+                    `server/services/task.service.ts` — dua sel dari 96.
+                    `jagaProyek.ts` tidak pernah membaca kolom itu sama sekali.
+
+                    94 sel sisanya cuma menyembunyikan tombol di layar sementara
+                    API-nya tetap menerima. Saklar yang tidak menyalakan apa pun
+                    LEBIH berbahaya daripada tidak ada saklar, sebab admin
+                    mengira aksesnya sudah dicabut. Karena itu panelnya jadi
+                    jendela baca-saja ke izin efektif; sumber kebenarannya peran.
+
+                    Nilai di database TIDAK disentuh: `editPermissions` tetap
+                    dikirim apa adanya saat simpan, jadi penimpaan `list` yang
+                    sudah terlanjur ada tetap hidup dan tetap ditegakkan.
+                  */}
+                  <div className="flex items-start gap-2 text-content-body bg-surface-sunken border border-border-subtle p-2.5 rounded-md text-xs sm:text-[11px]">
+                    <Lock className="w-3.5 h-3.5 shrink-0 mt-0.5 text-content-muted" />
+                    <span>{t("userDetail.permissionReadOnlyNote")}</span>
                   </div>
 
                   {editRole === "admin" && (
@@ -934,21 +968,40 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                                   return (
                                     <td key={action} className="py-1.5 px-1 text-center">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleTogglePermission(module, action)}
+                                      {/*
+                                        Item #156 — dulu <button onClick>. Kini
+                                        <span role="img">: tidak fokusable,
+                                        tidak diklik, dan judulnya tidak lagi
+                                        menjanjikan "Click to revoke".
+
+                                        Judul lama juga prosa Inggris keras
+                                        ("Granted (…). Click to revoke.") — persis
+                                        kebocoran bahasa yang dikejar #147–#151.
+                                        Sekarang seluruhnya lewat kunci i18n.
+                                      */}
+                                      <span
+                                        role="img"
+                                        aria-label={`${moduleInfo.label} ${action}: ${
+                                          isChecked ? t("ui2.granted") : t("ui2.revoked")
+                                        } (${
+                                          isOverride
+                                            ? t("ui2.explicitOverride")
+                                            : t("ui2.roleDefault")
+                                        })`}
                                         className={cn(
-                                          "w-5 h-5 rounded-md flex items-center justify-center mx-auto transition-all cursor-pointer border relative",
+                                          "w-5 h-5 rounded-md flex items-center justify-center mx-auto border relative",
                                           isChecked
                                             ? "bg-indigo-600 text-content-inverse border-indigo-500 shadow-xs"
-                                            : "bg-surface-sunken text-content-subtle border-border-subtle hover:bg-surface-muted ",
+                                            : "bg-surface-sunken text-content-subtle border-border-subtle",
                                           isOverride && "ring-2 ring-amber-400 ring-offset-1 "
                                         )}
-                                        title={
-                                          isChecked
-                                            ? `Granted (${isOverride ? t("ui2.explicitOverride") : t("ui2.roleDefault")}). Click to revoke.`
-                                            : `Revoked (${isOverride ? t("ui2.explicitOverride") : t("ui2.roleDefault")}). Click to grant.`
-                                        }
+                                        title={`${
+                                          isChecked ? t("ui2.granted") : t("ui2.revoked")
+                                        } · ${
+                                          isOverride
+                                            ? t("ui2.explicitOverride")
+                                            : t("ui2.roleDefault")
+                                        }`}
                                       >
                                         <Check
                                           className={cn(
@@ -959,7 +1012,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                         {isOverride && (
                                           <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full ring-1 ring-white " />
                                         )}
-                                      </button>
+                                      </span>
                                     </td>
                                   );
                                 })}
