@@ -1051,7 +1051,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       {t("wiki.previous")}
                     </button>
                     <span className="text-xs font-medium px-2 text-content-secondary">
-                      Page {currentPage} of {totalPages}
+                      {t("rakit.pageOf", { kini: currentPage, total: totalPages })}
                     </span>
                     <button
                       onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}

@@ -62,7 +62,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
               <h3 className="font-medium text-content text-[16px]">{t("notifications.title")}</h3>
               <div className="flex items-center gap-2.5">
                 <span className="bg-violet-500/15 text-violet-700 text-xs font-medium px-2.5 py-1 rounded-md">
-                  {notifications.filter((n) => !n.read).length} New
+                  {t("rakit.newCount", { count: notifications.filter((n) => !n.read).length })}
                 </span>
                 <button
                   className="p-1 text-content-muted hover:text-content-secondary hover:bg-surface-muted rounded-full transition-all"

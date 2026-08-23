@@ -289,7 +289,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
                       : listFilterDateType === "createdAt"
                         ? "Created"
                         : "Any"}
-                ): {listFilterStartDate || "∞"} to {listFilterEndDate || "∞"}
+                ): {listFilterStartDate || "∞"} {t("rakit.dateTo")} {listFilterEndDate || "∞"}
                 <button
                   type="button"
                   onClick={() => {

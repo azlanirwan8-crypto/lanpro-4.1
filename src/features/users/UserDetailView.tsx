@@ -1004,7 +1004,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       {t("userDetail.totalRelatedProjects")}
                     </span>
                     <span className="text-base font-medium text-content-strong leading-none">
-                      {userProjectsList.length} Proyek
+                      {t("rakit.projectsCount", { count: userProjectsList.length })}
                     </span>
                   </div>
                 </div>
@@ -1018,7 +1018,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       {t("userDetail.assignedTasks")}
                     </span>
                     <span className="text-base font-medium text-content-strong leading-none">
-                      {userTasks.length} Tugas
+                      {t("rakit.tasksCount", { count: userTasks.length })}
                     </span>
                   </div>
                 </div>

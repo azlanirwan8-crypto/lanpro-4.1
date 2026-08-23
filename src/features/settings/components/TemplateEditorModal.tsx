@@ -124,7 +124,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
       <div className="bg-surface rounded-lg shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh] border border-border-subtle animate-in fade-in zoom-in-95 duration-200">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border-subtle bg-surface-sunken/50 shrink-0">
           <h3 className="font-medium text-content-strong text-sm">
-            Broadcast Message Template - {mode === "email" ? "Email" : "WhatsApp"}
+            {t("rakit.broadcastTemplateFor", { kanal: mode === "email" ? "Email" : "WhatsApp" })}
           </h3>
           <button
             onClick={onClose}

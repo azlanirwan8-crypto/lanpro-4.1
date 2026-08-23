@@ -1692,7 +1692,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                                 getStatusColors(task.status, isEpic).tooltipBadge
                               )}
                             >
-                              {differenceInDays(end, start) + 1} hari
+                              {t("rakit.daysCount", { count: differenceInDays(end, start) + 1 })}
                             </span>
                             <div className="absolute top-full left-1/2 -translate-x-1/2 border-x-4 border-t-4 border-x-transparent border-t-slate-900" />
                           </div>

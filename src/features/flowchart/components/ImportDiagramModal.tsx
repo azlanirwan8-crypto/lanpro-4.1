@@ -240,7 +240,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
 
             {!parsedImportData && (
               <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
-                Mendukung ekstensi{" "}
+                {t("rakit.supportsExt")}{" "}
                 {importType === "drawio"
                   ? ".xml, .drawio"
                   : importType === "miro"

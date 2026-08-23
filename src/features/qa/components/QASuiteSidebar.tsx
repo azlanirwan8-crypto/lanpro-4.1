@@ -82,7 +82,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
             </div>
           </div>
           <span className="px-2 py-[3px] bg-primary-surface/10 text-primary text-[10px] leading-none sm:text-[9px] font-medium rounded-md">
-            {suitesForFilter.length} Modul
+            {t("rakit.modulesCount", { count: suitesForFilter.length })}
           </span>
         </div>
 

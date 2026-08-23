@@ -264,29 +264,48 @@ export const MasterDataPanel = ({
   // Kini daftarnya diturunkan dari data. `LABEL_TIPE` hanya memperindah nama
   // yang sudah dikenal; tipe di luar daftar itu tetap tampil, dengan namanya
   // dirapikan otomatis — jadi menambah tipe baru cukup lewat database.
-  const LABEL_TIPE: Record<string, string> = {
-    priority: "Priority",
-    status: "Status",
-    category: "Category",
-    project_role: "Project Role",
-    project_status: "Project Status",
-    methodology: "Methodology",
-    issue_type: "Issue Type",
-    environment: "Environment",
-    department: "Department",
-    jabatan: "Position",
-    release: "Release",
-    fitur: "Feature",
-    system: "System",
-    surrounding: "Surrounding",
-    jenis_dokumen: "Jenis Dokumen",
-    modul_aplikasi: "Modul / Aplikasi",
-    sprint_status: "Sprint Status",
-    qa_phase: "QA Phase",
-    qa_status: "QA Status",
-    project_risk: "Project Risk",
-    resolution: "Resolution",
-  };
+  /**
+   * Item #147 — nama tipe kini dari kamus, bukan ditulis di sini.
+   *
+   * Versi lama campur bahasa dalam satu daftar: "Priority", "Status", tetapi
+   * "Jenis Dokumen" dan "Modul / Aplikasi". Judul panel dan tombolnya memakai
+   * nama itu apa adanya, sehingga di mode Inggris pun muncul "Add Jenis
+   * Dokumen" — persis yang dilaporkan pemilik proyek.
+   *
+   * Tipe di luar daftar tetap tampil dengan nama yang dirapikan otomatis (#84),
+   * jadi menambah tipe baru lewat basis data tidak menuntut berkas ini disunting.
+   */
+  const LABEL_TIPE: Record<string, string> = React.useMemo(
+    () =>
+      Object.fromEntries(
+        (
+          [
+            "priority",
+            "status",
+            "category",
+            "project_role",
+            "project_status",
+            "methodology",
+            "issue_type",
+            "environment",
+            "department",
+            "jabatan",
+            "release",
+            "fitur",
+            "system",
+            "surrounding",
+            "jenis_dokumen",
+            "modul_aplikasi",
+            "sprint_status",
+            "qa_phase",
+            "qa_status",
+            "project_risk",
+            "resolution",
+          ] as const
+        ).map((k) => [k, t(`masterTypes.${k}`)])
+      ),
+    [t]
+  );
 
   const URUTAN_TIPE = Object.keys(LABEL_TIPE);
 
@@ -314,7 +333,11 @@ export const MasterDataPanel = ({
       type,
       label: LABEL_TIPE[type] || rapikanNamaTipe(type),
     }));
-  }, [localMasterData]);
+    // Item #147 — LABEL_TIPE WAJIB ada di sini. Tanpa itu nama tipe dibekukan
+    // pada bahasa saat render pertama, dan tombolnya jadi setengah berganti:
+    // "Add Prioritas". Kelas cacat yang sama pernah ditemukan di #135
+    // (DashboardView, TeamManagementPanel).
+  }, [localMasterData, LABEL_TIPE]);
 
   const handleCreateMasterData = async () => {
     if (!newMasterLabel) {
@@ -584,8 +607,10 @@ export const MasterDataPanel = ({
                 }}
                 className="h-8 px-3.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-md text-xs font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
               >
-                <Plus className="w-3.5 h-3.5" /> Add{" "}
-                {masterDataTypes.find((t) => t.type === selectedType)?.label}
+                <Plus className="w-3.5 h-3.5" />{" "}
+                {t("master.addType", {
+                  type: masterDataTypes.find((mt) => mt.type === selectedType)?.label,
+                })}
               </button>
             )}
           </div>
@@ -940,7 +965,8 @@ export const MasterDataPanel = ({
 
                                           {usageCount > 0 && (
                                             <span className="text-[10px] leading-none font-medium px-2 py-0.2 rounded-md bg-indigo-500/10 text-indigo-700 border border-indigo-500/30 flex items-center gap-1">
-                                              <Tag className="w-3 h-3" /> {usageCount} Task aktif
+                                              <Tag className="w-3 h-3" />{" "}
+                                              {t("rakit.activeTasks", { count: usageCount })}
                                             </span>
                                           )}
                                         </div>

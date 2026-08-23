@@ -78,7 +78,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                     : "bg-surface-muted text-content-body border border-border-subtle/60"
                 }`}
               >
-                {selectedTestCase.priority || "Medium"} Priority
+                {t("rakit.priorityOf", { nama: selectedTestCase.priority || "Medium" })}
               </span>
             </div>
 

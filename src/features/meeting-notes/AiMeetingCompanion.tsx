@@ -922,7 +922,9 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                         {t("aiMeeting.discussionSegments")}
                       </span>
                       <p className="text-base font-medium text-indigo-950 mt-1">
-                        {(activeMeetingData.tab_kronologi_rapat || []).length} Topik
+                        {t("rakit.topicsCount", {
+                          count: (activeMeetingData.tab_kronologi_rapat || []).length,
+                        })}
                       </p>
                     </div>
 
@@ -931,7 +933,9 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                         {t("aiMeeting.actionItems")}
                       </span>
                       <p className="text-base font-medium text-emerald-700 mt-1">
-                        {(activeMeetingData.tab_tindak_lanjut || []).length} Butir
+                        {t("rakit.itemsFound", {
+                          count: (activeMeetingData.tab_tindak_lanjut || []).length,
+                        })}
                       </p>
                     </div>
                   </div>
@@ -1118,7 +1122,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                             {searchTerm.trim() && (
                               <div className="text-[10px] leading-none font-medium uppercase tracking-wider px-2.5 py-1 bg-amber-500/10 border border-amber-500/30 text-amber-800 rounded-lg animate-pulse">
-                                Ditemukan {getMatchCount()} kecocokan
+                                {t("rakit.matchesFound", { count: getMatchCount() })}
                               </div>
                             )}
                           </div>
@@ -1384,7 +1388,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <div>
                               <span className="text-xs sm:text-[10px] text-indigo-600 font-medium uppercase tracking-widest block mb-1">
-                                Topik {index + 1}
+                                {t("rakit.topicNo", { no: index + 1 })}
                               </span>
                               <div className="flex items-center gap-1.5">
                                 <span className="px-2 py-[3px] bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 font-mono text-[10px] leading-none font-medium rounded">
@@ -1520,7 +1524,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           <div className="flex-1 space-y-3 min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="px-2 py-[3px] bg-rose-500/10 text-rose-600 text-[10px] leading-none sm:text-[9px] font-medium uppercase rounded border border-rose-500/30">
-                                Concern Rapat {index + 1}
+                                {t("rakit.meetingConcernNo", { no: index + 1 })}
                               </span>
                             </div>
 
@@ -1601,7 +1605,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft hover:shadow-md transition-all">
                           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                             <span className="px-2 py-0.5 bg-pink-500/10 border border-pink-500/30 text-pink-700 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase rounded">
-                              Rencana Aksi {index + 1}
+                              {t("rakit.actionPlanNo", { no: index + 1 })}
                             </span>
                             {item.due_date && (
                               <span className="px-2 py-[3px] bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 text-[10px] leading-none font-medium rounded-full">
@@ -1730,7 +1734,9 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         <div className="text-xs text-content-secondary">
                           Durasi:{" "}
                           <span className="font-medium">
-                            {Math.floor(activeMeetingData.tab_metadata.durasi_detik / 60)} menit
+                            {t("rakit.minutesCount", {
+                              count: Math.floor(activeMeetingData.tab_metadata.durasi_detik / 60),
+                            })}
                           </span>
                         </div>
                       )}

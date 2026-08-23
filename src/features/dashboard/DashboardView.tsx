@@ -879,7 +879,7 @@ export function DashboardView(props: DashboardViewProps) {
                     {t("dashboard.weeklyVelocity")}
                   </span>
                   <p className="text-sm font-medium text-primary mt-0.5">
-                    {weeklyVelocity ? weeklyVelocity : "0.0"} poin/sprint
+                    {t("rakit.pointsPerSprint", { nilai: weeklyVelocity ? weeklyVelocity : "0.0" })}
                   </p>
                 </div>
                 <div>
@@ -887,7 +887,7 @@ export function DashboardView(props: DashboardViewProps) {
                     {t("dashboard.daysLeft")}
                   </span>
                   <p className="text-sm font-medium text-content-strong mt-0.5">
-                    {sprintDaysLeft} days
+                    {t("rakit.daysLeft", { count: sprintDaysLeft })}
                   </p>
                 </div>
               </div>
@@ -972,7 +972,9 @@ export function DashboardView(props: DashboardViewProps) {
                       atas daftar yang berjumlah 12. Itu bukan ambigu, itu
                       salah. */}
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle">
-                    {taskTypeBreakdown.reduce((a, t) => a + t.value, 0)} Total
+                    {t("rakit.totalCount", {
+                      count: taskTypeBreakdown.reduce((a: number, x) => a + x.value, 0),
+                    })}
                   </span>
                 </div>
 
@@ -1014,7 +1016,9 @@ export function DashboardView(props: DashboardViewProps) {
                   </h3>
                   {/* #112 — idem, dijumlahkan dari isinya sendiri. */}
                   <span className="text-xs sm:text-[11px] font-medium text-content-subtle">
-                    {statusBreakdown.reduce((a, t) => a + t.value, 0)} Total
+                    {t("rakit.totalCount", {
+                      count: statusBreakdown.reduce((a: number, x) => a + x.value, 0),
+                    })}
                   </span>
                 </div>
 
@@ -1397,7 +1401,7 @@ export function DashboardView(props: DashboardViewProps) {
                             className="w-2 h-2 rounded-full"
                             style={{ backgroundColor: color }}
                           />
-                          {p.name} Priority
+                          {t("rakit.priorityOf", { nama: p.name })}
                         </span>
                         <span className="text-content-strong font-medium">
                           {p.value} ({pct}%)

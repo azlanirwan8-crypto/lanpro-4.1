@@ -646,7 +646,7 @@ export const TeamManagementPanel = ({
                     {t("teamPanel.assignedTasks")}
                   </span>
                   <span className="font-medium text-content-body">
-                    {getUserTasks(selectedProfileUser).length} Tasks
+                    {t("rakit.tasksCount", { count: getUserTasks(selectedProfileUser).length })}
                   </span>
                 </div>
               </div>

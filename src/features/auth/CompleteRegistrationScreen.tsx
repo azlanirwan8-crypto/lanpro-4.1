@@ -116,7 +116,7 @@ export const CompleteRegistrationScreen = ({
           {t("completeReg.backToLogin")}
         </button>
         <p className="mt-3 text-xs text-content-muted">
-          Otomatis kembali ke halaman masuk dalam {hitungMundur} detik…
+          {t("rakit.backToLoginIn", { detik: hitungMundur })}
         </p>
       </motion.div>
     );

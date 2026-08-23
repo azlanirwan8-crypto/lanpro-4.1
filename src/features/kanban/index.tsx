@@ -178,7 +178,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
     }
 
     return memberLanes;
-  }, [allMemberSwimlanes, showEmptySwimlanes, boardStatuses, groupedTasks]);
+  }, [allMemberSwimlanes, showEmptySwimlanes, boardStatuses, groupedTasks, t]);
 
   const renderBoard = () => {
     return (

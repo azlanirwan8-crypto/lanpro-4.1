@@ -338,7 +338,9 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             <span className="p-1.5 bg-surface/10 rounded-md">
               <CheckSquare className="w-4 h-4 text-emerald-400" />
             </span>
-            <span className="text-xs font-medium">{selectedCaseIds.length} Task Terpilih</span>
+            <span className="text-xs font-medium">
+              {t("rakit.tasksSelected", { count: selectedCaseIds.length })}
+            </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -361,7 +363,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                   />
                   <div className="absolute right-0 top-full mt-1.5 w-60 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                     <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-medium uppercase tracking-wider text-primary border-b border-border-faint mb-1">
-                      Tetapkan PIC ke {selectedCaseIds.length} Task
+                      {t("rakit.assignPicToTasks", { count: selectedCaseIds.length })}
                     </div>
                     <button
                       onClick={() => {
@@ -428,7 +430,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                         }}
                         className="w-full text-left px-3.5 py-1.5 text-xs font-medium hover:bg-indigo-500/10 hover:text-primary transition-colors"
                       >
-                        Set to {st}
+                        {t("rakit.setTo", { nilai: st })}
                       </button>
                     ))}
                   </div>

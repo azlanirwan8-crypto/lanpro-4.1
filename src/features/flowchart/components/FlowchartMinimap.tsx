@@ -260,7 +260,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
                 <Move className="w-2.5 h-2.5 text-indigo-500" />
                 <span>{t("flowNode.dragToPan")}</span>
               </span>
-              <span>{nodes.length} Items</span>
+              <span>{t("rakit.itemsCount", { count: nodes.length })}</span>
             </div>
           </motion.div>
         )}

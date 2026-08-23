@@ -170,13 +170,13 @@ export const ConnectPanel = () => {
                     .
                   </p>
                   <p className="text-content-secondary">
-                    Pastikan Anda{" "}
+                    {t("rakit.ensureYou")}{" "}
                     <span className="text-red-600 font-medium line-through">
-                      tidak mengetik "defaultdbj" atau "defaultd"
+                      {t("rakit.doNotType")}
                     </span>{" "}
-                    di atas. Ubahlah kembali menjadi{" "}
-                    <strong className="font-medium text-emerald-700">defaultdb</strong> lalu klik{" "}
-                    <strong>{t("connect.saveApply")}</strong>.
+                    {t("rakit.changeItBackTo")}{" "}
+                    <strong className="font-medium text-emerald-700">defaultdb</strong>{" "}
+                    {t("rakit.thenClick")} <strong>{t("connect.saveApply")}</strong>.
                   </p>
                 </div>
               </div>

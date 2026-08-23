@@ -2702,7 +2702,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                       </span>
                                       {doc.fileSize && (
                                         <span className="text-xs sm:text-[10px] text-content-subtle mt-1">
-                                          {(doc.fileSize / 1024 / 1024).toFixed(2)} MB
+                                          {t("rakit.sizeMb", {
+                                            ukuran: (doc.fileSize / 1024 / 1024).toFixed(2),
+                                          })}
                                         </span>
                                       )}
                                     </div>
@@ -3056,7 +3058,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               <div className="w-px h-3.5" />
               <span className="font-medium">X: <span className="text-content-inverse-strong">{hoverCoords.x}</span> Y: <span className="text-content-inverse-strong">{hoverCoords.y}</span></span>
               <div className="w-px h-3.5" />
-              <span className="text-violet-300 font-medium">{nodes.length} Objek</span>
+              <span className="text-violet-300 font-medium">{t("rakit.objectsCount", { count: nodes.length })}</span>
             </div> */}
 
                         {/* FLOATING ACTION FLAPS OVERLAYS FOR ZERO-CLICK SIDEBAR EXPANSION */}
@@ -3864,7 +3866,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           {uploadDocFile.name}
                         </span>
                         <span className="text-xs sm:text-[10px] text-content-muted font-medium">
-                          {(uploadDocFile.size / 1024 / 1024).toFixed(2)} MB
+                          {t("rakit.sizeMb", {
+                            ukuran: (uploadDocFile.size / 1024 / 1024).toFixed(2),
+                          })}
                         </span>
                       </div>
                       <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0" />

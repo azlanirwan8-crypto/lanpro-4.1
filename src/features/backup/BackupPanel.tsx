@@ -267,7 +267,7 @@ export const BackupPanel = (_props: {
             </h3>
           </div>
           <span className="text-xs sm:text-[11px] text-content-muted font-medium">
-            Total: {exportHistory.length} file
+            {t("rakit.totalFiles", { count: exportHistory.length })}
           </span>
         </div>
 

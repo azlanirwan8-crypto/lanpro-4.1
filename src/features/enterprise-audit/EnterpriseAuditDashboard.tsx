@@ -401,7 +401,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
 
                       <div className="flex items-center gap-2 text-xs text-content-secondary font-medium flex-wrap">
                         <span>
-                          Melakukan aksis{" "}
+                          {t("rakit.auditDidAction")}{" "}
                           <span
                             className={cn(
                               "font-medium uppercase px-1.5 py-0.2 rounded text-xs sm:text-[10px]",
@@ -414,7 +414,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                           >
                             {log.actionType}
                           </span>{" "}
-                          pada entitas {log.entityName} dengan referensi ID:
+                          {t("rakit.onEntity", { nama: log.entityName })}
                         </span>
                         <span className="font-mono text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-1.5 py-0.2 rounded border border-indigo-500/30">
                           {log.entityId}

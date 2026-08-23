@@ -101,7 +101,9 @@ export const SsoButtons = ({ mode }: SsoButtonsProps) => {
           >
             {p === "google" ? <LogoGoogle /> : <LogoMicrosoft />}
             <span>
-              {kataKerja} dengan {NAMA[p]}
+              {mode === "login"
+                ? t("rakit.ssoSignIn", { penyedia: NAMA[p] })
+                : t("rakit.ssoSignUp", { penyedia: NAMA[p] })}
             </span>
           </a>
         ))}

@@ -656,7 +656,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer"
                       >
-                        <Video className="w-3.5 h-3.5" /> Join Meeting{" "}
+                        <Video className="w-3.5 h-3.5" /> {t("rakit.joinMeeting")}{" "}
                         <ExternalLink className="w-3 h-3 opacity-80" />
                       </a>
                     )}

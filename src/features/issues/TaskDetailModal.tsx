@@ -251,7 +251,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   <div className="ml-auto flex items-center gap-2">
                     <div className="flex items-center gap-1.5 text-xs sm:text-[11px] font-medium text-content-muted bg-surface-sunken/80 px-2.5 py-1 rounded-md border border-border-subtle/60">
                       <Clock className="w-3.5 h-3.5 text-content-subtle" />
-                      Updated{" "}
+                      {t("rakit.updatedPrefix")}{" "}
                       {task.updatedAt
                         ? formatDistanceToNow(ensureDate(task.updatedAt), { addSuffix: true })
                         : "Never"}
