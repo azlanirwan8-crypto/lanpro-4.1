@@ -78,13 +78,64 @@ const AuthLayoutSplit = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
   </div>
 );
 
+/**
+ * Corak batik kawung sebagai tekstur latar, bukan hiasan.
+ *
+ * KENAPA MOTIF, BUKAN IKON. Pilihan lainnya adalah menabur ikon perkakas
+ * manajemen proyek. Ditolak: ikon aplikasi yang bertebaran terbaca seperti
+ * wallpaper clip art, bersaing dengan ikon di dalam kartu, dan cepat basi
+ * begitu perkakasnya berganti. Motif geometris terbaca sebagai TEKSTUR — mata
+ * berhenti menghitungnya setelah sedetik.
+ *
+ * Kawung dibentuk dari lingkaran beririsan pada kisi, sehingga ubinnya
+ * menyambung tanpa jahitan asal jari-jarinya tepat setengah diagonal ubin.
+ *
+ * Warnanya `var(--color-content-subtle)` — bukan kelas Tailwind — supaya ikut
+ * berganti sendiri di mode gelap: garis gelap tipis di atas latar terang,
+ * garis terang tipis di atas latar gelap, tanpa satu pun override tema.
+ *
+ * Ada dua peredam supaya ini tetap tekstur dan tidak pernah jadi kebisingan:
+ * opasitas 6%, dan mask yang MELUNTURKANNYA KE ATAS. Corak paling terbaca di
+ * bagian bawah halaman yang memang kosong, dan sudah habis sebelum mencapai
+ * kartu — bidang di belakang formulir tetap bersih.
+ */
+const CorakBatikKawung = () => (
+  <div
+    aria-hidden="true"
+    className="pointer-events-none absolute inset-0 z-0 opacity-[0.06] [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_45%,black_100%)]"
+  >
+    <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="batik-kawung" width="72" height="72" patternUnits="userSpaceOnUse">
+          <g fill="none" stroke="var(--color-content-subtle)" strokeWidth="1.25">
+            <circle cx="0" cy="0" r="25.5" />
+            <circle cx="72" cy="0" r="25.5" />
+            <circle cx="0" cy="72" r="25.5" />
+            <circle cx="72" cy="72" r="25.5" />
+            <circle cx="36" cy="36" r="25.5" />
+          </g>
+          <g fill="var(--color-content-subtle)">
+            <circle cx="36" cy="0" r="1.75" />
+            <circle cx="0" cy="36" r="1.75" />
+            <circle cx="72" cy="36" r="1.75" />
+            <circle cx="36" cy="72" r="1.75" />
+          </g>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#batik-kawung)" />
+    </svg>
+  </div>
+);
+
 const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant">) => {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-surface-sunken overflow-x-hidden">
+    <div className="relative min-h-screen flex flex-col font-sans bg-surface-sunken overflow-x-hidden">
+      <CorakBatikKawung />
+
       {/* BANNER — brand terpusat di atas gelombang. */}
-      <div className="relative select-none overflow-hidden bg-primary-surface pt-16 pb-44 sm:pt-20 sm:pb-52">
+      <div className="relative z-10 select-none overflow-hidden bg-primary-surface pt-16 pb-44 sm:pt-20 sm:pb-52">
         <VelzonFloatingParticles />
 
         {/*
@@ -167,7 +218,7 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
         {children}
       </div>
 
-      <footer className="mt-auto pt-10 pb-6 text-center text-xs font-medium text-content-muted">
+      <footer className="relative z-10 mt-auto pt-10 pb-6 text-center text-xs font-medium text-content-muted">
         &copy; {new Date().getFullYear()} LANPRO
       </footer>
 
