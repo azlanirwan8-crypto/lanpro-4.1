@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { StyledDropdown } from "../../components/ui/CommonComponents";
 import React from "react";
 import { katalogPeranSistem } from "../../lib/roleCatalog";
 import {
@@ -1161,20 +1162,25 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 {t("users.department")}
               </label>
               <div className="relative group/select">
-                <select
+                <StyledDropdown
                   value={addPeopleDepartment}
-                  onChange={(e) => setAddPeopleDepartment(e.target.value)}
-                  className="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium appearance-none cursor-pointer focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 focus:bg-surface outline-none transition-all"
-                >
-                  <option value="">{t("users.selectDept")}</option>
-                  {masterData
-                    .filter((d) => d.type === "department")
-                    .map((dep) => (
-                      <option key={dep.id} value={dep.id}>
-                        {dep.label}
-                      </option>
-                    ))}
-                </select>
+                  onChange={(val: string) => setAddPeopleDepartment(val)}
+                  options={[
+                    { id: "", label: t("users.selectDept"), icon: "Building2", color: "#6366F1" },
+                    ...masterData
+                      .filter((d) => d.type === "department")
+                      .map((dep) => ({
+                        id: dep.id,
+                        label: dep.label,
+                        icon: dep.icon,
+                        color: dep.color,
+                      })),
+                  ]}
+                  type="department"
+                  masterData={masterData}
+                  className="w-full"
+                  buttonClassName="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium"
+                />
                 <ChevronDown className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-content-subtle" />
               </div>
             </div>
@@ -1183,20 +1189,25 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 {t("users.position")}
               </label>
               <div className="relative group/select">
-                <select
+                <StyledDropdown
                   value={addPeopleJabatan}
-                  onChange={(e) => setAddPeopleJabatan(e.target.value)}
-                  className="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium appearance-none cursor-pointer focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 focus:bg-surface outline-none transition-all"
-                >
-                  <option value="">{t("users.selectPosition")}</option>
-                  {masterData
-                    .filter((d) => d.type === "jabatan")
-                    .map((j) => (
-                      <option key={j.id} value={j.id}>
-                        {j.label}
-                      </option>
-                    ))}
-                </select>
+                  onChange={(val: string) => setAddPeopleJabatan(val)}
+                  options={[
+                    {
+                      id: "",
+                      label: t("users.selectPosition"),
+                      icon: "BadgeCheck",
+                      color: "#6366F1",
+                    },
+                    ...masterData
+                      .filter((d) => d.type === "jabatan")
+                      .map((j) => ({ id: j.id, label: j.label, icon: j.icon, color: j.color })),
+                  ]}
+                  type="jabatan"
+                  masterData={masterData}
+                  className="w-full"
+                  buttonClassName="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium"
+                />
                 <ChevronDown className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-content-subtle" />
               </div>
             </div>

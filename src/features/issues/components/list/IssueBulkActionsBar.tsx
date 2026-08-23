@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { StyledDropdown } from "../../../../components/ui/CommonComponents";
 import React from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Trash, X } from "lucide-react";
@@ -135,9 +136,9 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
               <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-wider">
                 {t("bulkActions.status")}
               </span>
-              <select
-                onChange={(e) => {
-                  const val = e.target.value;
+              <StyledDropdown
+                value=""
+                onChange={(val: string) => {
                   if (val) {
                     const ids = Array.from(selectedTaskIds);
                     ids.forEach((id) => updateTaskField(id, "status", val));
@@ -145,20 +146,21 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                     setSelectedTaskIds(new Set());
                   }
                 }}
-                defaultValue=""
-                className="bg-surface-inverse border border-border-inverse text-content-inverse rounded-xl px-2.5 py-1.5 text-xs outline-none focus:border-indigo-500 cursor-pointer font-medium"
-              >
-                <option value="" disabled>
-                  {t("bulkActions.pickStatus")}
-                </option>
-                {mArr
-                  .filter((m) => m.type === "status")
-                  .map((m) => (
-                    <option key={m.id} value={m.label}>
-                      {m.label}
-                    </option>
-                  ))}
-              </select>
+                options={[
+                  {
+                    id: "",
+                    label: t("bulkActions.pickStatus"),
+                    icon: "Layers",
+                    color: "#6366F1",
+                  },
+                  ...mArr
+                    .filter((m) => m.type === "status")
+                    .map((m) => ({ id: m.label, label: m.label, icon: m.icon, color: m.color })),
+                ]}
+                type="status"
+                masterData={mArr}
+                buttonClassName="bg-surface-inverse border border-border-inverse text-content-inverse rounded-xl px-2.5 py-1.5 text-xs font-medium"
+              />
             </div>
 
             {/* Change Assignee Dropdown */}

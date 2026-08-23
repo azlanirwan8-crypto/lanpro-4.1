@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { StyledDropdown } from "../../components/ui/CommonComponents";
 import { safeLocalStorage } from "../../lib/safeStorage";
 import React, { useState, useEffect } from "react";
 import { UserProfile, Project, Task, AppRole, UserPermissions } from "../../types";
@@ -750,44 +751,64 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           <label className="text-xs font-medium text-content-body ">
                             {t("userDetail.department")}
                           </label>
-                          <select
+                          <StyledDropdown
                             value={editDepartment}
-                            onChange={(e) => setEditDepartment(e.target.value)}
-                            className="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-indigo-500 transition-all cursor-pointer"
-                          >
-                            <option value="">{t("userDetail.selectDepartment")}</option>
-                            {(departments.length > 0
-                              ? departments
-                              : masterData.filter((d) => d.type === "department")
-                            ).map((opt) => (
-                              <option key={opt.id || opt.code} value={opt.id || opt.code}>
-                                {opt.name || opt.label}
-                              </option>
-                            ))}
-                          </select>
+                            onChange={(val: string) => setEditDepartment(val)}
+                            options={[
+                              {
+                                id: "",
+                                label: t("userDetail.selectDepartment"),
+                                icon: "Building2",
+                                color: "#6366F1",
+                              },
+                              ...(departments.length > 0
+                                ? departments
+                                : masterData.filter((d) => d.type === "department")
+                              ).map((opt: any) => ({
+                                id: opt.id || opt.code,
+                                label: opt.name || opt.label,
+                                icon: opt.icon,
+                                color: opt.color,
+                              })),
+                            ]}
+                            type="department"
+                            masterData={masterData}
+                            className="w-full"
+                            buttonClassName="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong"
+                          />
                         </div>
 
                         <div className="space-y-1">
                           <label className="text-xs font-medium text-content-body ">
                             {t("userDetail.position")}
                           </label>
-                          <select
+                          <StyledDropdown
                             value={editPosition}
-                            onChange={(e) => setEditPosition(e.target.value)}
-                            className="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-indigo-500 transition-all cursor-pointer"
-                          >
-                            <option value="">{t("userDetail.selectPosition")}</option>
-                            {(positions.length > 0
-                              ? positions
-                              : masterData.filter(
-                                  (d) => d.type === "jabatan" || d.type === "position"
-                                )
-                            ).map((opt) => (
-                              <option key={opt.id || opt.code} value={opt.id || opt.code}>
-                                {opt.name || opt.label}
-                              </option>
-                            ))}
-                          </select>
+                            onChange={(val: string) => setEditPosition(val)}
+                            options={[
+                              {
+                                id: "",
+                                label: t("userDetail.selectPosition"),
+                                icon: "BadgeCheck",
+                                color: "#6366F1",
+                              },
+                              ...(positions.length > 0
+                                ? positions
+                                : masterData.filter(
+                                    (d) => d.type === "jabatan" || d.type === "position"
+                                  )
+                              ).map((opt: any) => ({
+                                id: opt.id || opt.code,
+                                label: opt.name || opt.label,
+                                icon: opt.icon,
+                                color: opt.color,
+                              })),
+                            ]}
+                            type="jabatan"
+                            masterData={masterData}
+                            className="w-full"
+                            buttonClassName="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong"
+                          />
                         </div>
                       </div>
                     </>
