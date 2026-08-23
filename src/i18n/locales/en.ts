@@ -626,6 +626,7 @@ export const en = {
     projectRisk: "Project Risk (Custom)",
   },
   userDetail: {
+    emptyProjectRoleCatalog: "(project role catalog is empty — fill it in Master Data)",
     adminAccessPrefix: "The",
     adminAccessSuffix:
       "role has full access by default, but the per-module overrides below are applied explicitly.",
@@ -1560,6 +1561,7 @@ export const en = {
     confirmRestore: "Confirm Database Restore",
   },
   bulkActions: {
+    changeRole: "Change Role",
     unassignedClear: "Unassigned (Clear)",
     perPage: "Per Page:",
     all: "All",

@@ -41,7 +41,17 @@ const selectBersumberMaster = () => {
       const j = s.indexOf("</select>", i);
       if (j === -1) break;
       const blok = s.slice(i, j);
-      if (/(masterData|mArr)[\s\S]{0,80}\.filter\([\s\S]{0,80}type ===/.test(blok)) {
+      // Dua bentuk sumber MasterData:
+      //   langsung  — masterData.filter((m) => m.type === "...")
+      //   lewat helper — katalogPeranSistem/Proyek, yang juga membawa ikon
+      //
+      // Bentuk kedua sempat LUPUT dari versi pertama penjaga ini, sehingga
+      // lima <select> peran lolos dan sempat saya laporkan sebagai "nol".
+      const dariMasterLangsung = /(masterData|mArr)[\s\S]{0,80}\.filter\([\s\S]{0,80}type ===/.test(
+        blok
+      );
+      const dariKatalogPeran = /(peranSistem|peranProyek)/.test(blok);
+      if (dariMasterLangsung || dariKatalogPeran) {
         const baris = s.slice(0, i).split("\n").length;
         temuan.push(path.relative(AKAR, p).split(path.sep).join("/") + ":" + baris);
       }

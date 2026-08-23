@@ -551,20 +551,22 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   className="w-full pl-9 pr-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded focus:bg-surface focus:ring-1 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none text-xs h-8.5 font-medium text-content-strong placeholder:text-content-subtle"
                 />
               </div>
-              <select
+              <StyledDropdown
                 value={filterRole}
-                onChange={(e) => setFilterRole(e.target.value)}
-                className="px-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded focus:bg-surface focus:ring-1 focus:ring-indigo-500/10 outline-none text-content-body font-medium text-xs cursor-pointer h-8.5"
-              >
-                {/* #82 — dari Master Data. Sebelumnya lima opsi ditulis di sini
-                    dan tidak pernah ikut berubah saat katalog diperbarui. */}
-                <option value="all">{t("users.allRoles")}</option>
-                {peranSistem.map((p) => (
-                  <option key={p.code} value={p.code}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
+                onChange={(val: string) => setFilterRole(val)}
+                options={[
+                  { id: "all", label: t("users.allRoles"), icon: "Users", color: "#6366F1" },
+                  ...peranSistem.map((p) => ({
+                    id: p.code,
+                    label: p.label,
+                    icon: p.icon || undefined,
+                    color: p.color || undefined,
+                  })),
+                ]}
+                type="project_role"
+                masterData={masterData}
+                buttonClassName="px-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded text-content-body font-medium text-xs h-8.5"
+              />
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
@@ -663,24 +665,30 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   </button>
 
                   <div className="relative inline-block text-left">
-                    <select
+                    <StyledDropdown
+                      value=""
                       disabled={isBulkActionPending}
-                      onChange={(e) => {
-                        if (e.target.value) {
-                          handleBulkAction(e.target.value as AppRole);
-                          e.target.value = "";
-                        }
+                      onChange={(val: string) => {
+                        if (val) handleBulkAction(val as AppRole);
                       }}
-                      className="px-3.5 py-1.5 bg-surface border border-border-subtle text-xs font-medium rounded-lg shadow-2xs focus:ring-2 focus:ring-indigo-500/20 outline-none cursor-pointer"
-                    >
-                      {/* #82 — dari Master Data. */}
-                      <option value="">{t("users.bulkChangeRole")}</option>
-                      {peranSistem.map((p) => (
-                        <option key={p.code} value={p.code}>
-                          {p.label}
-                        </option>
-                      ))}
-                    </select>
+                      options={[
+                        {
+                          id: "",
+                          label: t("bulkActions.changeRole"),
+                          icon: "Users",
+                          color: "#6366F1",
+                        },
+                        ...peranSistem.map((p) => ({
+                          id: p.code,
+                          label: p.label,
+                          icon: p.icon || undefined,
+                          color: p.color || undefined,
+                        })),
+                      ]}
+                      type="project_role"
+                      masterData={masterData}
+                      buttonClassName="px-3.5 py-1.5 bg-surface border border-border-subtle text-xs font-medium rounded-lg shadow-2xs"
+                    />
                   </div>
 
                   <button
@@ -1216,24 +1224,20 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 {t("users.systemRole")}
               </label>
               <div className="relative group/select">
-                <select
+                <StyledDropdown
                   value={addPeopleRole}
-                  onChange={(e) => setAddPeopleRole(sebagaiPeranSistem(e.target.value))}
-                  className="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium appearance-none cursor-pointer focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 focus:bg-surface outline-none transition-all"
-                >
-                  {/* #82 — dari Master Data. Versi lama menulis lima opsi lalu
-                      menambahkan Master Data di bawahnya dengan daftar
-                      pengecualian yang harus dijaga manual; setiap peran baru
-                      menuntut daftar itu ikut disunting. */}
-                  {peranSistem.length === 0 && (
-                    <option value="">{t("users.emptyRoleCatalog")}</option>
-                  )}
-                  {peranSistem.map((p) => (
-                    <option key={p.code} value={p.code}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val: string) => setAddPeopleRole(sebagaiPeranSistem(val))}
+                  options={peranSistem.map((p) => ({
+                    id: p.code,
+                    label: p.label,
+                    icon: p.icon || undefined,
+                    color: p.color || undefined,
+                  }))}
+                  type="project_role"
+                  masterData={masterData}
+                  className="w-full"
+                  buttonClassName="w-full px-4 py-2 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium"
+                />
                 <ChevronDown className="w-4 h-4 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-content-subtle" />
               </div>
             </div>

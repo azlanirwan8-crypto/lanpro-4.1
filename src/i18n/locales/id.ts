@@ -623,6 +623,7 @@ export const id = {
     projectRisk: "Risiko Proyek (Kustom)",
   },
   userDetail: {
+    emptyProjectRoleCatalog: "(katalog peran proyek kosong — isi di Master Data)",
     adminAccessPrefix: "Role",
     adminAccessSuffix:
       "memiliki akses penuh secara default, namun override per-modul di bawah akan diberlakukan secara eksplisit.",
@@ -1564,6 +1565,7 @@ export const id = {
     confirmRestore: "Konfirmasi Pemulihan Basis Data",
   },
   bulkActions: {
+    changeRole: "Ubah Peran",
     unassignedClear: "Tanpa Penerima (Kosongkan)",
     perPage: "Per Halaman:",
     all: "Semua",

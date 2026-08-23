@@ -681,10 +681,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <label className="text-xs font-medium text-content-body ">
                           {t("userDetail.systemRole")}
                         </label>
-                        <select
+                        <StyledDropdown
                           value={editRole}
-                          onChange={(e) => {
-                            const newRole = e.target.value as AppRole;
+                          onChange={(val: string) => {
+                            const newRole = val as AppRole;
                             setEditRole(newRole);
                             setEditPermissions(
                               ROLE_DEFAULT_PERMISSIONS[newRole] ||
@@ -693,25 +693,21 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 (ROLE_DEFAULT_PERMISSIONS.owner as UserPermissions)
                             );
                           }}
-                          className="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-indigo-500 transition-all cursor-pointer"
-                        >
-                          {/* #82 — TIDAK ADA opsi yang ditulis di sini. Daftarnya
- berasal dari Master Data, dan nilai yang disimpan
- adalah `code`, bukan label. Versi lama menulis lima
- opsi langsung lalu MENAMBAHKAN Master Data di
- bawahnya, sehingga Department Head muncul dua kali
- dengan nilai berbeda: `head` dan "Department Head". */}
-                          {peranSistem.length === 0 && (
-                            <option value="">
-                              (katalog peran sistem kosong — isi di Master Data)
-                            </option>
-                          )}
-                          {peranSistem.map((p) => (
-                            <option key={p.code} value={p.code}>
-                              {p.label}
-                            </option>
-                          ))}
-                        </select>
+                          options={
+                            peranSistem.length === 0
+                              ? [{ id: "", label: t("users.emptyRoleCatalog") }]
+                              : peranSistem.map((p) => ({
+                                  id: p.code,
+                                  label: p.label,
+                                  icon: p.icon || undefined,
+                                  color: p.color || undefined,
+                                }))
+                          }
+                          type="project_role"
+                          masterData={masterData}
+                          className="w-full"
+                          buttonClassName="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong"
+                        />
                       </div>
 
                       {/* Role Description Card */}
@@ -1066,26 +1062,24 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     </div>
 
                     <div className="sm:col-span-4">
-                      <select
+                      <StyledDropdown
                         value={selectedAssignProjectRole}
-                        onChange={(e) => setSelectedAssignProjectRole(e.target.value)}
-                        className="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-indigo-500"
-                      >
-                        {/* #82 — dari Master Data, bukan ditulis di sini. Versi
- lama menawarkan `lead` dan `member` yang tidak ada di
- katalog mana pun, sementara System Analyst, Business
- Analyst, Developer, dan QA tidak bisa dipilih. */}
-                        {peranProyek.length === 0 && (
-                          <option value="">
-                            (katalog peran proyek kosong — isi di Master Data)
-                          </option>
-                        )}
-                        {peranProyek.map((p) => (
-                          <option key={p.code} value={p.code}>
-                            {p.label}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(val: string) => setSelectedAssignProjectRole(val)}
+                        options={
+                          peranProyek.length === 0
+                            ? [{ id: "", label: t("userDetail.emptyProjectRoleCatalog") }]
+                            : peranProyek.map((p) => ({
+                                id: p.code,
+                                label: p.label,
+                                icon: p.icon || undefined,
+                                color: p.color || undefined,
+                              }))
+                        }
+                        type="project_role"
+                        masterData={masterData}
+                        className="w-full"
+                        buttonClassName="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong"
+                      />
                     </div>
 
                     <div className="sm:col-span-3">
