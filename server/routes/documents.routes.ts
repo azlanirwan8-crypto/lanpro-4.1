@@ -17,7 +17,13 @@ router.get("/api/projects/:projectId/documents", jagaProyek("wiki", "R"), async 
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error(error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
   }
 });
 
@@ -34,12 +40,19 @@ router.get(
         const { getDbMode } = await import("../../src/lib/db");
         res.status(404).json({
           status: "error",
+          code: "srv.document_not_found_id",
           message: "Document not found. id: " + id + ", mode: " + getDbMode(),
         });
       }
     } catch (error: any) {
       console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   }
 );
@@ -96,7 +109,13 @@ router.post(
       });
     } catch (error: any) {
       console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   }
 );
@@ -109,7 +128,9 @@ router.put(
       const { id } = req.params;
       const item = await documentRepository.findById(id);
       if (!item) {
-        return res.status(404).json({ status: "error", message: "Document not found" });
+        return res
+          .status(404)
+          .json({ status: "error", code: "srv.document_not_found", message: "Document not found" });
       }
 
       const currentUserId = req.user?.id || req.user?.uid || req.headers["x-user-id"];
@@ -140,10 +161,16 @@ router.put(
         category,
       });
 
-      res.json({ status: "success", message: "Document updated" });
+      res.json({ status: "success", code: "srv.document_updated", message: "Document updated" });
     } catch (error: any) {
       console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   }
 );
@@ -156,7 +183,9 @@ router.delete(
       const { id } = req.params;
       const item = await documentRepository.findById(id);
       if (!item) {
-        return res.status(404).json({ status: "error", message: "Document not found" });
+        return res
+          .status(404)
+          .json({ status: "error", code: "srv.document_not_found", message: "Document not found" });
       }
 
       const currentUserId = req.user?.id || req.user?.uid || req.headers["x-user-id"];
@@ -173,10 +202,16 @@ router.delete(
       }
 
       await documentRepository.delete(id);
-      res.json({ status: "success", message: "Document deleted" });
+      res.json({ status: "success", code: "srv.document_deleted", message: "Document deleted" });
     } catch (error: any) {
       console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   }
 );

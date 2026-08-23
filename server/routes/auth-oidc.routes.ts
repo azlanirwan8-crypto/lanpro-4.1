@@ -106,7 +106,13 @@ router.get("/api/auth/oidc/:provider/start", async (req: any, res) => {
   try {
     const provider = req.params.provider as ProviderOidc;
     if (provider !== "google" && provider !== "microsoft") {
-      return res.status(400).json({ status: "error", message: "Provider tidak dikenal." });
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          code: "srv.provider_tidak_dikenal",
+          message: "Provider tidak dikenal.",
+        });
     }
     const mode = req.query.mode === "daftar" ? "daftar" : "login";
 
@@ -193,6 +199,7 @@ router.post("/api/auth/oidc/lengkapi-pendaftaran", async (req: any, res) => {
     if (!titipan) {
       return res.status(400).json({
         status: "error",
+        code: "srv.sesi_pendaftaran_sudah_kedaluwarsa",
         message: "Sesi pendaftaran sudah kedaluwarsa. Ulangi dari awal.",
       });
     }
@@ -211,11 +218,18 @@ router.post("/api/auth/oidc/lengkapi-pendaftaran", async (req: any, res) => {
     // persetujuan admin, sama seperti pendaftaran manual.
     return res.status(201).json({
       status: "success",
+      code: "srv.pendaftaran_berhasil_akun_anda",
       message: "Pendaftaran berhasil. Akun Anda menunggu persetujuan admin.",
     });
   } catch (err: any) {
     console.error("[OIDC] Lengkapi pendaftaran gagal:", err.message);
-    return res.status(400).json({ status: "error", message: "Sesi pendaftaran tidak sah." });
+    return res
+      .status(400)
+      .json({
+        status: "error",
+        code: "srv.sesi_pendaftaran_tidak_sah",
+        message: "Sesi pendaftaran tidak sah.",
+      });
   }
 });
 

@@ -52,7 +52,7 @@ router.post("/api/users/heartbeat", async (req, res) => {
     await userRepository.updateLastSeen(userId, new Date().toISOString());
     res.json({ status: "success" });
   } catch (e) {
-    res.json({ status: "error", message: "Silent error" });
+    res.json({ status: "error", code: "srv.silent_error", message: "Silent error" });
   }
 });
 
@@ -181,7 +181,11 @@ router.get("/api/users", async (req, res) => {
     console.error("LOG ANOMALI CRITICAL: GET /api/users error:", error);
     res
       .status(500)
-      .json({ status: "error", message: "Terjadi kesalahan internal server: " + error.message });
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server_3",
+        message: "Terjadi kesalahan internal server: " + error.message,
+      });
   }
 });
 
@@ -192,13 +196,19 @@ router.get("/api/users/:id", async (req, res) => {
     if (user) {
       res.json({ status: "success", data: user });
     } else {
-      res.status(404).json({ status: "error", message: "User not found" });
+      res
+        .status(404)
+        .json({ status: "error", code: "srv.user_not_found", message: "User not found" });
     }
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/users/:id error:", error);
     res
       .status(500)
-      .json({ status: "error", message: "Terjadi kesalahan internal server: " + error.message });
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server_3",
+        message: "Terjadi kesalahan internal server: " + error.message,
+      });
   }
 });
 
@@ -217,6 +227,7 @@ router.post(
       if (!isAdmin && String(id) !== String(currentUserId)) {
         return res.status(403).json({
           status: "error",
+          code: "srv.akses_ditolak_anda_hanya_5",
           message: "Akses ditolak: Anda hanya dapat memperbarui foto profil Anda sendiri.",
         });
       }
@@ -225,6 +236,7 @@ router.post(
       if (!file) {
         return res.status(400).json({
           status: "error",
+          code: "srv.file_gambar_avatar_wajib",
           message: "File gambar avatar wajib disertakan.",
         });
       }
@@ -236,6 +248,7 @@ router.post(
         if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
         return res.status(400).json({
           status: "error",
+          code: "srv.foto_profil_harus_berupa",
           message: "Foto profil harus berupa gambar (PNG, JPG, WEBP, atau GIF).",
         });
       }
@@ -260,6 +273,7 @@ router.post(
 
       return res.json({
         status: "success",
+        code: "srv.foto_profil_berhasil_diperbarui",
         message: "Foto profil berhasil diperbarui",
         avatar_url: avatarUrl,
         data: {
@@ -273,53 +287,33 @@ router.post(
       console.error("LOG ANOMALI CRITICAL: POST /api/users/:id/avatar error:", error);
       return res.status(500).json({
         status: "error",
+        code: "srv.gagal_memperbarui_foto_profil",
         message: "Gagal memperbarui foto profil: " + error.message,
       });
     }
   }
 );
 
-router.put("/api/users/:id", authenticateJWT, validasiBody(updateUserSchema), async (req: AuthenticatedRequest, res) => {
-  try {
-    const { id } = req.params;
-    const currentUserId = req.user?.id || req.user?.uid;
-    const currentUserRole = String(req.user?.role || req.user?.system_role || "").toLowerCase();
-    const isAdmin = currentUserRole === "admin";
+router.put(
+  "/api/users/:id",
+  authenticateJWT,
+  validasiBody(updateUserSchema),
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const currentUserId = req.user?.id || req.user?.uid;
+      const currentUserRole = String(req.user?.role || req.user?.system_role || "").toLowerCase();
+      const isAdmin = currentUserRole === "admin";
 
-    if (!isAdmin && String(id) !== String(currentUserId)) {
-      return res.status(403).json({
-        status: "error",
-        message: "Akses ditolak: Anda hanya dapat memperbarui profil Anda sendiri.",
-      });
-    }
+      if (!isAdmin && String(id) !== String(currentUserId)) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak_anda_hanya_6",
+          message: "Akses ditolak: Anda hanya dapat memperbarui profil Anda sendiri.",
+        });
+      }
 
-    let {
-      role,
-      status,
-      department,
-      position,
-      permissions,
-      displayName,
-      username,
-      email,
-      phone,
-      passwordHash,
-      password,
-      photoURL,
-      avatar_url,
-    } = req.body;
-
-    const effectiveAvatar = sanitizeAvatarValue(avatar_url || photoURL) ?? undefined;
-    const rawPassword = passwordHash || password;
-    const computedPasswordHash = rawPassword
-      ? rawPassword.startsWith("pbkdf2$")
-        ? rawPassword
-        : hashPassword(rawPassword)
-      : undefined;
-
-    await userRepository.updateUser(
-      id,
-      {
+      const {
         role,
         status,
         department,
@@ -329,103 +323,167 @@ router.put("/api/users/:id", authenticateJWT, validasiBody(updateUserSchema), as
         username,
         email,
         phone,
-        effectiveAvatar,
-        passwordHash: computedPasswordHash,
-      },
-      isAdmin
-    );
+        passwordHash,
+        password,
+        photoURL,
+        avatar_url,
+      } = req.body;
 
-    res.json({ status: "success", message: "User updated" });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: PUT /api/users error:", error);
-    res
-      .status(500)
-      .json({ status: "error", message: "Terjadi kesalahan internal server: " + error.message });
-  }
-});
+      const effectiveAvatar = sanitizeAvatarValue(avatar_url || photoURL) ?? undefined;
+      const rawPassword = passwordHash || password;
+      const computedPasswordHash = rawPassword
+        ? rawPassword.startsWith("pbkdf2$")
+          ? rawPassword
+          : hashPassword(rawPassword)
+        : undefined;
 
-router.delete("/api/users/:id", authenticateJWT, verifyGlobalAdmin, async (req: AuthenticatedRequest, res) => {
-  try {
-    const { id } = req.params;
-    await userRepository.delete(id);
-    res.json({ status: "success", message: "User deleted" });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: DELETE /api/users error:", error);
-    res
-      .status(500)
-      .json({ status: "error", message: "Terjadi kesalahan internal server: " + error.message });
-  }
-});
+      await userRepository.updateUser(
+        id,
+        {
+          role,
+          status,
+          department,
+          position,
+          permissions,
+          displayName,
+          username,
+          email,
+          phone,
+          effectiveAvatar,
+          passwordHash: computedPasswordHash,
+        },
+        isAdmin
+      );
 
-router.put("/api/profile/update", authenticateJWT, validasiBody(updateProfileSchema), async (req: AuthenticatedRequest, res: any) => {
-  try {
-    const userId = req.user?.id || req.user?.uid;
-    if (!userId) {
-      return res.status(401).json({ status: "error", message: "Sesi tidak valid." });
-    }
-    const id = userId;
-    const {
-      displayName,
-      username,
-      email,
-      phone,
-      currentPassword,
-      newPassword,
-      photoURL,
-      avatar_url,
-    } = req.body;
-
-    const effectiveAvatar = sanitizeAvatarValue(avatar_url || photoURL) ?? undefined;
-    const user = await userRepository.findByIdOrUid(id);
-    if (!user) {
-      return res.status(404).json({ status: "error", message: "User not found" });
-    }
-
-    let newPasswordHash: string | undefined;
-    if (currentPassword && newPassword) {
-      const isValid = await verifyPassword(currentPassword, user.passwordHash || "");
-      if (!isValid) {
-        return res
-          .status(400)
-          .json({ status: "error", message: "Password lama yang Anda masukkan salah!" });
-      }
-      newPasswordHash = hashPassword(newPassword);
-    }
-
-    const finalAvatar =
-      effectiveAvatar !== undefined ? effectiveAvatar : user.avatar_url || user.photoURL || user.avatarUrl || null;
-
-    await userRepository.updateProfile(id, {
-      displayName,
-      username,
-      email,
-      phone,
-      avatar: finalAvatar,
-      newPasswordHash,
-    });
-
-    const io = req.app.get("io") || (req as any).io;
-    if (io) {
-      io.emit("data_changed", { path: `/api/users/${id}`, method: "PUT" });
-      io.emit("data_changed", { path: `/api/users`, method: "GET" });
-
-      const avatarLama = user.avatar_url || user.photoURL || user.avatarUrl || null;
-      if (finalAvatar && finalAvatar !== avatarLama) {
-        io.emit("user_avatar_updated", {
-          userId: id,
-          avatar_url: finalAvatar,
-          user: { ...user, avatar_url: finalAvatar, photoURL: finalAvatar, avatarUrl: finalAvatar },
+      res.json({ status: "success", code: "srv.user_updated", message: "User updated" });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: PUT /api/users error:", error);
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server_3",
+          message: "Terjadi kesalahan internal server: " + error.message,
         });
-      }
     }
-
-    res.json({ status: "success", message: "Profile updated" });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: PUT /api/profile/update error:", error);
-    res
-      .status(500)
-      .json({ status: "error", message: "Terjadi kesalahan internal server: " + error.message });
   }
-});
+);
+
+router.delete(
+  "/api/users/:id",
+  authenticateJWT,
+  verifyGlobalAdmin,
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      await userRepository.delete(id);
+      res.json({ status: "success", code: "srv.user_deleted", message: "User deleted" });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: DELETE /api/users error:", error);
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server_3",
+          message: "Terjadi kesalahan internal server: " + error.message,
+        });
+    }
+  }
+);
+
+router.put(
+  "/api/profile/update",
+  authenticateJWT,
+  validasiBody(updateProfileSchema),
+  async (req: AuthenticatedRequest, res: any) => {
+    try {
+      const userId = req.user?.id || req.user?.uid;
+      if (!userId) {
+        return res
+          .status(401)
+          .json({ status: "error", code: "srv.sesi_tidak_valid", message: "Sesi tidak valid." });
+      }
+      const id = userId;
+      const {
+        displayName,
+        username,
+        email,
+        phone,
+        currentPassword,
+        newPassword,
+        photoURL,
+        avatar_url,
+      } = req.body;
+
+      const effectiveAvatar = sanitizeAvatarValue(avatar_url || photoURL) ?? undefined;
+      const user = await userRepository.findByIdOrUid(id);
+      if (!user) {
+        return res
+          .status(404)
+          .json({ status: "error", code: "srv.user_not_found", message: "User not found" });
+      }
+
+      let newPasswordHash: string | undefined;
+      if (currentPassword && newPassword) {
+        const isValid = await verifyPassword(currentPassword, user.passwordHash || "");
+        if (!isValid) {
+          return res
+            .status(400)
+            .json({
+              status: "error",
+              code: "srv.password_lama_yang_anda",
+              message: "Password lama yang Anda masukkan salah!",
+            });
+        }
+        newPasswordHash = hashPassword(newPassword);
+      }
+
+      const finalAvatar =
+        effectiveAvatar !== undefined
+          ? effectiveAvatar
+          : user.avatar_url || user.photoURL || user.avatarUrl || null;
+
+      await userRepository.updateProfile(id, {
+        displayName,
+        username,
+        email,
+        phone,
+        avatar: finalAvatar,
+        newPasswordHash,
+      });
+
+      const io = req.app.get("io") || (req as any).io;
+      if (io) {
+        io.emit("data_changed", { path: `/api/users/${id}`, method: "PUT" });
+        io.emit("data_changed", { path: `/api/users`, method: "GET" });
+
+        const avatarLama = user.avatar_url || user.photoURL || user.avatarUrl || null;
+        if (finalAvatar && finalAvatar !== avatarLama) {
+          io.emit("user_avatar_updated", {
+            userId: id,
+            avatar_url: finalAvatar,
+            user: {
+              ...user,
+              avatar_url: finalAvatar,
+              photoURL: finalAvatar,
+              avatarUrl: finalAvatar,
+            },
+          });
+        }
+      }
+
+      res.json({ status: "success", code: "srv.profile_updated", message: "Profile updated" });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: PUT /api/profile/update error:", error);
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server_3",
+          message: "Terjadi kesalahan internal server: " + error.message,
+        });
+    }
+  }
+);
 
 export default router;

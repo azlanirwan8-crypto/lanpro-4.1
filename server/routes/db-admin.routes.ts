@@ -22,10 +22,20 @@ const router = Router();
 router.get("/api/test-db", verifyGlobalAdmin, async (req, res) => {
   try {
     await dbAdminRepository.testConnection();
-    res.json({ status: "success", message: "Koneksi ke database MySQL berhasil!" });
+    res.json({
+      status: "success",
+      code: "srv.koneksi_ke_database_mysql",
+      message: "Koneksi ke database MySQL berhasil!",
+    });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Database connection error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
   }
 });
 
@@ -37,22 +47,38 @@ router.get("/api/test-db", verifyGlobalAdmin, async (req, res) => {
 router.post("/api/db-query", verifyGlobalAdmin, async (req, res) => {
   try {
     const { query: sqlString } = req.body;
-    if (!sqlString || typeof sqlString !== "string") return res.status(400).json({ error: "Query is required" });
+    if (!sqlString || typeof sqlString !== "string")
+      return res.status(400).json({ error: "Query is required" });
 
     const trimmed = sqlString.trim().replace(/;+\s*$/, "");
     const isSingleStatement = !trimmed.includes(";");
     const isReadOnly = /^(SELECT|SHOW|DESCRIBE)\s/i.test(trimmed);
-    const hasForbiddenKeyword = /\b(INSERT|UPDATE|DELETE|DROP|TRUNCATE|ALTER|CREATE|GRANT|REVOKE|EXEC|CALL|MERGE)\b/i.test(trimmed);
+    const hasForbiddenKeyword =
+      /\b(INSERT|UPDATE|DELETE|DROP|TRUNCATE|ALTER|CREATE|GRANT|REVOKE|EXEC|CALL|MERGE)\b/i.test(
+        trimmed
+      );
 
     if (!isSingleStatement || !isReadOnly || hasForbiddenKeyword) {
-      return res.status(400).json({ status: "error", message: "DB Explorer hanya mengizinkan satu statement SELECT/SHOW/DESCRIBE read-only." });
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          code: "srv.db_explorer_hanya_mengizinkan",
+          message: "DB Explorer hanya mengizinkan satu statement SELECT/SHOW/DESCRIBE read-only.",
+        });
     }
 
     const rows = await dbAdminRepository.runReadOnlyQuery(trimmed);
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Database query error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
   }
 });
 
@@ -122,6 +148,7 @@ router.post("/api/system/db-status", verifyGlobalAdmin, async (req, res) => {
     res.json({
       status: "success",
       mode: "pg",
+      code: "srv.aplikasi_terkunci_pada_neon",
       message: "Aplikasi terkunci pada Neon PostgreSQL Server.",
     });
   } catch (e: any) {
@@ -144,7 +171,11 @@ router.post("/api/system/db-config", verifyGlobalAdmin, async (req, res) => {
     });
     await testPool.query("SELECT 1");
     await testPool.end();
-    res.json({ status: "success", message: "Koneksi PostgreSQL Berhasil!" });
+    res.json({
+      status: "success",
+      code: "srv.koneksi_postgresql_berhasil",
+      message: "Koneksi PostgreSQL Berhasil!",
+    });
   } catch (e: any) {
     console.error(e);
     res.status(500).json({ status: "error", message: e.message });
@@ -161,7 +192,11 @@ router.post("/api/system/db-config/save", verifyGlobalAdmin, async (req, res) =>
     const { connectionString } = req.body;
     const { updatePoolConfig } = await import("../../src/lib/db");
     updatePoolConfig({ connectionString, force: true });
-    res.json({ status: "success", message: "Konfigurasi PostgreSQL berhasil diperbarui!" });
+    res.json({
+      status: "success",
+      code: "srv.konfigurasi_postgresql_berhasil_diperbarui",
+      message: "Konfigurasi PostgreSQL berhasil diperbarui!",
+    });
   } catch (e: any) {
     console.error(e);
     res.status(500).json({ status: "error", message: e.message });

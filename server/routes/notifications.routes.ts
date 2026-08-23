@@ -17,7 +17,11 @@ router.get("/api/users/:userId/notifications", async (req, res) => {
     if (!activeUser) {
       return res
         .status(401)
-        .json({ status: "error", message: "Akses tidak sah: Sesi tidak valid atau belum login." });
+        .json({
+          status: "error",
+          code: "srv.akses_tidak_sah_sesi",
+          message: "Akses tidak sah: Sesi tidak valid atau belum login.",
+        });
     }
 
     const activeUserId = activeUser.id || activeUser.uid;
@@ -133,7 +137,13 @@ router.get("/api/users/:userId/notifications", async (req, res) => {
     res.json({ status: "success", data: filteredNotifications.slice(0, 50) });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/users/:userId/notifications error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
   }
 });
 
@@ -162,7 +172,13 @@ router.post("/api/users/:userId/notifications", async (req: any, res) => {
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: POST /api/users/:userId/notifications error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
   }
 });
 
@@ -174,26 +190,47 @@ router.put("/api/users/:userId/notifications/:id", async (req: any, res) => {
     if (!matchesCaller(req.user, userId)) {
       return res.status(403).json({
         status: "error",
+        code: "srv.akses_ditolak_anda_hanya_4",
         message: "Akses ditolak: Anda hanya dapat mengubah notifikasi milik Anda sendiri.",
       });
     }
 
     const recipientId = await notificationRepository.findRecipientIdById(id);
     if (!recipientId) {
-      return res.status(404).json({ status: "error", message: "Notifikasi tidak ditemukan." });
+      return res
+        .status(404)
+        .json({
+          status: "error",
+          code: "srv.notifikasi_tidak_ditemukan",
+          message: "Notifikasi tidak ditemukan.",
+        });
     }
     if (!matchesCaller(req.user, recipientId)) {
       return res
         .status(403)
-        .json({ status: "error", message: "Akses ditolak: notifikasi ini bukan milik Anda." });
+        .json({
+          status: "error",
+          code: "srv.akses_ditolak_notifikasi_ini",
+          message: "Akses ditolak: notifikasi ini bukan milik Anda.",
+        });
     }
 
     await notificationRepository.setRead(id, read ? true : false);
 
-    res.json({ status: "success", message: "Notification updated" });
+    res.json({
+      status: "success",
+      code: "srv.notification_updated",
+      message: "Notification updated",
+    });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: PUT /api/users/:userId/notifications/:id error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
   }
 });
 

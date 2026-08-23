@@ -19,7 +19,13 @@ router.get("/api/projects/:projectId/milestones", jagaProyek("timeline", "R"), a
     res.json({ status: "success", data: milestones });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET milestones error:", error);
-    res.status(500).json({ status: "error", message: "Gagal mengambil Milestone." });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.gagal_mengambil_milestone",
+        message: "Gagal mengambil Milestone.",
+      });
   }
 });
 
@@ -51,7 +57,13 @@ router.post(
       res.json({ status: "success", data: { id: milestoneId, name, milestoneId } });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: POST milestones error:", error);
-      res.status(500).json({ status: "error", message: "Gagal membuat Milestone." });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.gagal_membuat_milestone",
+          message: "Gagal membuat Milestone.",
+        });
     }
   }
 );
@@ -74,9 +86,15 @@ router.put(
       });
 
       await createAuditLog(userId as string, projectId, "UPDATE", "Milestones", id, null, req.body);
-      res.json({ status: "success", message: "Milestone updated" });
+      res.json({ status: "success", code: "srv.milestone_updated", message: "Milestone updated" });
     } catch (error: any) {
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   }
 );
@@ -92,9 +110,15 @@ router.delete(
       await createAuditLog(userId as string, projectId, "DELETE", "Milestones", id, null, null);
       await milestoneRepository.delete(id);
 
-      res.json({ status: "success", message: "Milestone deleted" });
+      res.json({ status: "success", code: "srv.milestone_deleted", message: "Milestone deleted" });
     } catch (error: any) {
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   }
 );

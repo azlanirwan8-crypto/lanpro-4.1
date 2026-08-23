@@ -28,6 +28,7 @@ export async function buatProyekDemoBni(req: any, res: any) {
     if (req.user?.role !== "admin") {
       return res.status(403).json({
         status: "error",
+        code: "srv.akses_ditolak_hanya_administrator",
         message:
           "Akses ditolak: Hanya administrator yang diizinkan untuk men-generate proyek demo.",
       });

@@ -2087,7 +2087,7 @@ function AppContainer() {
       const errMessage = e?.message || "";
       const errCode = e?.data?.code || "";
       if (
-        errCode === "EPIC_TIMELINE_EXCEEDED" ||
+        errCode.startsWith("EPIC_TIMELINE_EXCEEDED") ||
         errMessage.includes("Epic") ||
         errMessage.includes("melebihi")
       ) {
@@ -2799,7 +2799,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       const errMessage = e?.message || "";
       const errCode = e?.data?.code || "";
       if (
-        errCode === "EPIC_TIMELINE_EXCEEDED" ||
+        errCode.startsWith("EPIC_TIMELINE_EXCEEDED") ||
         errMessage.includes("Epic") ||
         errMessage.includes("melebihi")
       ) {

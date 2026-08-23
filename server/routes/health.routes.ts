@@ -27,6 +27,7 @@ const penjagaMetrik = (req: any, res: any, next: any) => {
   if (!diharapkan) {
     return res.status(503).json({
       status: "error",
+      code: "srv.endpoint_metrik_dinonaktifkan_metriktoken",
       message: "Endpoint metrik dinonaktifkan: METRIK_TOKEN belum diisi di environment.",
     });
   }
@@ -42,7 +43,13 @@ const penjagaMetrik = (req: any, res: any, next: any) => {
     timingSafeEqual(Buffer.from(diberikan), Buffer.from(diharapkan));
 
   if (!cocok) {
-    return res.status(401).json({ status: "error", message: "Token metrik tidak valid." });
+    return res
+      .status(401)
+      .json({
+        status: "error",
+        code: "srv.token_metrik_tidak_valid",
+        message: "Token metrik tidak valid.",
+      });
   }
 
   next();

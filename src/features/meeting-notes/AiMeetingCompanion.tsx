@@ -762,8 +762,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               </span>
             </div>
             <p className="text-xs sm:text-[11px] text-content-inverse-muted/80 mt-0.5">
-              Analisis transkrip suara hasil Speech-to-Text rapat menjadi ringkasan & action items
-              terstruktur.
+              {t("jsx.m1")}
             </p>
           </div>
         </div>
@@ -1009,8 +1008,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-xs text-amber-800 leading-relaxed flex items-start gap-2.5">
                           <Sparkles className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5 animate-pulse" />
                           <div>
-                            {t("jsx.j119")}{" "}
-                            <span className="underline">"Simpan & Mulai Analisis Ulang"</span>{" "}
+                            {t("jsx.j119")} <span className="underline">{t("jsx.m4")}</span>{" "}
                             {t("jsx.j120")}
                           </div>
                         </div>
@@ -1145,10 +1143,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         </div>
                       </div>
                     ) : (
-                      <p className="text-xs text-content-subtle italic">
-                        Transkrip mentah tidak tersedia (Analisis multimodal diekstrak langsung dari
-                        rekaman video/audio).
-                      </p>
+                      <p className="text-xs text-content-subtle italic">{t("jsx.m2")}</p>
                     )}
                   </div>
                 )}
@@ -1160,10 +1155,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                       {t("jsx.k76")}
                     </div>
-                    <p className="text-xs sm:text-[11px] text-content-subtle">
-                      Merekam suara rapat melalui mikrofon perangkat Anda (catatan: hanya suara yang
-                      ditangkap mikrofon).
-                    </p>
+                    <p className="text-xs sm:text-[11px] text-content-subtle">{t("jsx.m3")}</p>
 
                     <div className="flex flex-col items-center justify-center gap-3 w-full py-4">
                       <button

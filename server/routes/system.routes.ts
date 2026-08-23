@@ -19,7 +19,13 @@ router.get("/api/db-schema", verifyGlobalAdmin, async (req, res) => {
     res.json({ status: "success", tables: schema, stats });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Database query error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
   }
 });
 
@@ -35,10 +41,20 @@ router.post("/api/migrate-db", verifyGlobalAdmin, async (req, res) => {
 
     await systemRepository.executeRawMigration(cleanSql);
 
-    res.json({ status: "success", message: "Migrasi database berhasil dijalankan! Tabel sudah terbuat." });
+    res.json({
+      status: "success",
+      code: "srv.migrasi_database_berhasil_dijalankan",
+      message: "Migrasi database berhasil dijalankan! Tabel sudah terbuat.",
+    });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Migration error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
   }
 });
 
@@ -59,6 +75,7 @@ router.get("/api/settings/email", verifyGlobalAdmin, async (req, res) => {
     console.error("[SETTINGS] Gagal mengambil status konfigurasi email:", error);
     res.status(500).json({
       status: "error",
+      code: "srv.gagal_mengambil_status_integrasi",
       message: "Gagal mengambil status integrasi email",
     });
   }
@@ -74,6 +91,7 @@ router.post("/api/settings/email/test", verifyGlobalAdmin, async (req, res) => {
     if (!targetEmail || !validasiFormatEmail(targetEmail)) {
       return res.status(400).json({
         status: "error",
+        code: "srv.alamat_email_tujuan_tidak",
         message: "Alamat email tujuan tidak valid atau kosong",
       });
     }
@@ -112,6 +130,7 @@ router.post("/api/settings/email/test", verifyGlobalAdmin, async (req, res) => {
     console.error("[SETTINGS] Gagal mengirim email uji coba:", error);
     res.status(500).json({
       status: "error",
+      code: "srv.terjadi_kesalahan_internal_saat",
       message: "Terjadi kesalahan internal saat mengirim email uji coba",
     });
   }

@@ -38,7 +38,11 @@ export const verifyGlobalAdmin = (req: any, res: Response, next: NextFunction) =
   } else {
     res
       .status(403)
-      .json({ status: "error", message: "Akses ditolak: Hanya Global Admin yang memiliki izin." });
+      .json({
+        status: "error",
+        code: "srv.akses_ditolak_hanya_global",
+        message: "Akses ditolak: Hanya Global Admin yang memiliki izin.",
+      });
   }
 };
 
@@ -48,6 +52,7 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
   if (!authHeader) {
     return res.status(401).json({
       status: "error",
+      code: "srv.akses_ditolak_token_autentikasi",
       message: "Akses ditolak: Token autentikasi tidak ditemukan.",
     });
   }
@@ -59,6 +64,7 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
     if (!token) {
       return res.status(401).json({
         status: "error",
+        code: "srv.format_token_tidak_valid",
         message: "Format token tidak valid.",
       });
     }
@@ -67,6 +73,7 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
       if (err) {
         return res.status(401).json({
           status: "error",
+          code: "srv.sesi_anda_telah_berakhir",
           message: "Sesi Anda telah berakhir atau token tidak valid. Silakan login kembali.",
         });
       }
@@ -75,10 +82,10 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
       const userId = user.id || user.uid;
 
       if (userId) {
-        db.query(
-          'SELECT "currentSessionToken", role, status FROM Users WHERE id = ? OR uid = ?',
-          [userId.toString(), userId.toString()]
-        )
+        db.query('SELECT "currentSessionToken", role, status FROM Users WHERE id = ? OR uid = ?', [
+          userId.toString(),
+          userId.toString(),
+        ])
           .then(([rows]: any) => {
             if (rows && rows.length > 0) {
               const dbUser = rows[0];
@@ -86,6 +93,7 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
               if (currentToken && currentToken !== token) {
                 return res.status(401).json({
                   status: "error",
+                  code: "srv.sesi_anda_telah_diakhiri",
                   message:
                     "Sesi Anda telah diakhiri karena akun Anda telah masuk di perangkat/browser lain.",
                 });
@@ -96,6 +104,7 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
               if (statusLower && statusLower !== "active" && statusLower !== "approved") {
                 return res.status(403).json({
                   status: "error",
+                  code: "srv.akses_ditolak_akun_anda",
                   message: "Akses ditolak: Akun Anda dinonaktifkan atau belum aktif.",
                 });
               }
@@ -111,6 +120,7 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
 
             return res.status(401).json({
               status: "error",
+              code: "srv.akses_ditolak_pengguna_tidak",
               message: "Akses ditolak: Pengguna tidak ditemukan.",
             });
           })
@@ -124,6 +134,7 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
             if (activeSession && activeSession.token !== token) {
               return res.status(401).json({
                 status: "error",
+                code: "srv.sesi_anda_telah_diakhiri",
                 message:
                   "Sesi Anda telah diakhiri karena akun Anda telah masuk di perangkat/browser lain.",
               });
@@ -139,6 +150,7 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
   } else {
     res.status(401).json({
       status: "error",
+      code: "srv.akses_ditolak_format_authorization",
       message: "Akses ditolak: Format Authorization bukan Bearer.",
     });
   }

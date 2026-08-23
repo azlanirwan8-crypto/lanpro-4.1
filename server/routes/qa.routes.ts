@@ -43,7 +43,13 @@ export function setupQARoutes(
         res.json({ status: "success", data: rows });
       } catch (error: any) {
         console.error("GET /api/projects/:projectId/qa-test-suites error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+        res
+          .status(500)
+          .json({
+            status: "error",
+            code: "srv.terjadi_kesalahan_internal_server",
+            message: "Terjadi kesalahan internal server",
+          });
       }
     }
   );
@@ -55,6 +61,7 @@ export function setupQARoutes(
       if (!project_id || !evaluation_notes || !evaluation_notes.trim()) {
         return res.status(400).json({
           status: "error",
+          code: "srv.parameter_projectid_dan_evaluationnotes",
           message: "Parameter project_id dan evaluation_notes wajib diisi.",
         });
       }
@@ -63,12 +70,14 @@ export function setupQARoutes(
       console.log(`[QA AI FEEDBACK] Saved learning log ${id} for project ${project_id}`);
       return res.json({
         status: "success",
+        code: "srv.feedback_berhasil_disimpan_ke",
         message: "Feedback berhasil disimpan ke dalam log pembelajaran AI.",
       });
     } catch (error: any) {
       console.error("[QA AI FEEDBACK ERROR]", error);
       return res.status(500).json({
         status: "error",
+        code: "srv.gagal_menyimpan_feedback",
         message: "Gagal menyimpan feedback: " + error.message,
       });
     }
@@ -83,6 +92,7 @@ export function setupQARoutes(
       if (!projectId || !phase || !file) {
         return res.status(400).json({
           status: "error",
+          code: "srv.missing_required_fields_projectid",
           message: "Missing required fields (projectId, phase, file)",
         });
       }
@@ -112,6 +122,7 @@ export function setupQARoutes(
       if (!headers || headers.length < 4) {
         return res.status(400).json({
           status: "error",
+          code: "srv.format_kolom_tidak_sesuai",
           message:
             "Format kolom tidak sesuai standar (Nama Judul, Deskripsi, Hasil Diharapkan, Level)",
         });
@@ -129,6 +140,7 @@ export function setupQARoutes(
       if (!headerValid) {
         return res.status(400).json({
           status: "error",
+          code: "srv.format_kolom_tidak_sesuai",
           message:
             "Format kolom tidak sesuai standar (Nama Judul, Deskripsi, Hasil Diharapkan, Level)",
         });
@@ -172,6 +184,7 @@ export function setupQARoutes(
 
       res.status(201).json({
         status: "success",
+        code: "srv.bulk_upload_berhasil",
         message: "Bulk upload berhasil",
         data: {
           suiteId: newSuiteId,
@@ -180,7 +193,13 @@ export function setupQARoutes(
       });
     } catch (error: any) {
       console.error("POST /api/v1/qa/test-case/bulk-upload error:", error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   });
 
@@ -202,12 +221,19 @@ export function setupQARoutes(
 
       res.json({
         status: "success",
+        code: "srv.test_suite_created",
         message: "Test Suite created",
         data: suite,
       });
     } catch (error: any) {
       console.error("POST /api/projects/:projectId/qa-test-suites error:", error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   });
 
@@ -221,10 +247,20 @@ export function setupQARoutes(
         const { projectId, id } = req.params;
         const suite = req.body;
         await qaRepository.updateSuite(id, projectId, suite);
-        res.json({ status: "success", message: "Test Suite updated" });
+        res.json({
+          status: "success",
+          code: "srv.test_suite_updated",
+          message: "Test Suite updated",
+        });
       } catch (error: any) {
         console.error("PUT /api/projects/:projectId/qa-test-suites/:id error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+        res
+          .status(500)
+          .json({
+            status: "error",
+            code: "srv.terjadi_kesalahan_internal_server",
+            message: "Terjadi kesalahan internal server",
+          });
       }
     }
   );
@@ -239,11 +275,18 @@ export function setupQARoutes(
         await qaRepository.deleteSuiteWithCases(id, projectId);
         res.json({
           status: "success",
+          code: "srv.test_suite_and_its",
           message: "Test Suite and its Test Cases deleted",
         });
       } catch (error: any) {
         console.error("DELETE /api/projects/:projectId/qa-test-suites/:id error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+        res
+          .status(500)
+          .json({
+            status: "error",
+            code: "srv.terjadi_kesalahan_internal_server",
+            message: "Terjadi kesalahan internal server",
+          });
       }
     }
   );
@@ -256,7 +299,13 @@ export function setupQARoutes(
       res.json({ status: "success", data: cases });
     } catch (error: any) {
       console.error("GET /api/projects/:projectId/qa-test-cases error:", error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   });
 
@@ -298,10 +347,20 @@ export function setupQARoutes(
           assignedTo: tc.assignedTo || null,
         });
 
-        res.json({ status: "success", message: "Test Case created" });
+        res.json({
+          status: "success",
+          code: "srv.test_case_created",
+          message: "Test Case created",
+        });
       } catch (error: any) {
         console.error("POST /api/projects/:projectId/qa-test-cases error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+        res
+          .status(500)
+          .json({
+            status: "error",
+            code: "srv.terjadi_kesalahan_internal_server",
+            message: "Terjadi kesalahan internal server",
+          });
       }
     }
   );
@@ -316,10 +375,20 @@ export function setupQARoutes(
         const { projectId, id } = req.params;
         const tc = req.body;
         await qaRepository.updateTestCase(id, projectId, tc);
-        res.json({ status: "success", message: "Test Case updated" });
+        res.json({
+          status: "success",
+          code: "srv.test_case_updated",
+          message: "Test Case updated",
+        });
       } catch (error: any) {
         console.error("PUT /api/projects/:projectId/qa-test-cases/:id error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+        res
+          .status(500)
+          .json({
+            status: "error",
+            code: "srv.terjadi_kesalahan_internal_server",
+            message: "Terjadi kesalahan internal server",
+          });
       }
     }
   );
@@ -338,7 +407,13 @@ export function setupQARoutes(
 
         const tc = await qaRepository.findTestCaseById(id, projectId);
         if (!tc) {
-          return res.status(404).json({ status: "error", message: "Test case tidak ditemukan." });
+          return res
+            .status(404)
+            .json({
+              status: "error",
+              code: "srv.test_case_tidak_ditemukan",
+              message: "Test case tidak ditemukan.",
+            });
         }
 
         let finalEvidenceUrl =
@@ -433,6 +508,7 @@ export function setupQARoutes(
 
         res.json({
           status: "success",
+          code: "srv.test_case_saved_successfully",
           message: "Test case saved successfully",
           data: {
             id,
@@ -448,7 +524,13 @@ export function setupQARoutes(
         });
       } catch (error: any) {
         console.error("POST /api/projects/:projectId/qa-test-cases/:id/save error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+        res
+          .status(500)
+          .json({
+            status: "error",
+            code: "srv.terjadi_kesalahan_internal_server",
+            message: "Terjadi kesalahan internal server",
+          });
       }
     }
   );
@@ -464,7 +546,13 @@ export function setupQARoutes(
         res.json({ status: "success", data: logs || [] });
       } catch (error: any) {
         console.error("GET execution-history error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+        res
+          .status(500)
+          .json({
+            status: "error",
+            code: "srv.terjadi_kesalahan_internal_server",
+            message: "Terjadi kesalahan internal server",
+          });
       }
     }
   );
@@ -478,7 +566,9 @@ export function setupQARoutes(
         const { projectId, id } = req.params;
         const { status, notes } = req.body;
         if (!status) {
-          return res.status(400).json({ status: "error", message: "Status required" });
+          return res
+            .status(400)
+            .json({ status: "error", code: "srv.status_required", message: "Status required" });
         }
 
         const userIdStr = req.user?.uid || req.user?.id || req.headers["x-user-id"] || "guest";
@@ -493,13 +583,20 @@ export function setupQARoutes(
 
         res.json({
           status: "success",
+          code: "srv.status_updated_successfully",
           message: "Status updated successfully",
           statusValue: result.statusValue,
           bugKey: result.bugKey,
         });
       } catch (error: any) {
         console.error("PATCH /api/projects/:projectId/qa-test-cases/:id/status error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+        res
+          .status(500)
+          .json({
+            status: "error",
+            code: "srv.terjadi_kesalahan_internal_server",
+            message: "Terjadi kesalahan internal server",
+          });
       }
     }
   );
@@ -512,10 +609,20 @@ export function setupQARoutes(
       try {
         const { projectId, id } = req.params;
         await qaRepository.deleteTestCase(id, projectId);
-        res.json({ status: "success", message: "Test Case deleted" });
+        res.json({
+          status: "success",
+          code: "srv.test_case_deleted",
+          message: "Test Case deleted",
+        });
       } catch (error: any) {
         console.error("DELETE /api/projects/:projectId/qa-test-cases/:id error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+        res
+          .status(500)
+          .json({
+            status: "error",
+            code: "srv.terjadi_kesalahan_internal_server",
+            message: "Terjadi kesalahan internal server",
+          });
       }
     }
   );
@@ -529,7 +636,13 @@ export function setupQARoutes(
         const { projectId } = req.params;
         const testCases = req.body;
         if (!Array.isArray(testCases)) {
-          return res.status(400).json({ status: "error", message: "Body must be an array" });
+          return res
+            .status(400)
+            .json({
+              status: "error",
+              code: "srv.body_must_be_an",
+              message: "Body must be an array",
+            });
         }
 
         await qaRepository.syncTestCases(projectId, testCases);
@@ -540,7 +653,13 @@ export function setupQARoutes(
         });
       } catch (error: any) {
         console.error("POST /api/projects/:projectId/qa-test-cases/sync error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+        res
+          .status(500)
+          .json({
+            status: "error",
+            code: "srv.terjadi_kesalahan_internal_server",
+            message: "Terjadi kesalahan internal server",
+          });
       }
     }
   );
@@ -555,6 +674,7 @@ export function setupQARoutes(
         if (!judul) {
           return res.status(400).json({
             status: "error",
+            code: "srv.judul_skenario_uji_diperlukan",
             message: "Judul skenario uji diperlukan.",
           });
         }
@@ -563,6 +683,7 @@ export function setupQARoutes(
         if (!apiKey) {
           return res.status(400).json({
             status: "error",
+            code: "srv.kunci_api_gemini_tidak_2",
             message: "Kunci API Gemini tidak dikonfigurasi pada server.",
           });
         }
@@ -626,6 +747,7 @@ Berikan langkah-langkah pengujian (langkah-langkah nyata yang harus dilakukan te
       if (!apiKey) {
         return res.status(400).json({
           status: "error",
+          code: "srv.kunci_api_gemini_tidak_2",
           message: "Kunci API Gemini tidak dikonfigurasi pada server.",
         });
       }

@@ -21,7 +21,13 @@ router.get(
       res.json({ status: "success", data: rows });
     } catch (error: any) {
       console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   }
 );
@@ -69,7 +75,13 @@ router.post(
       res.json({ status: "success", data: { id: newId, meetingId: id } });
     } catch (error: any) {
       console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   }
 );
@@ -108,10 +120,16 @@ router.put(
         tanggalUpdateStatus,
       });
 
-      res.json({ status: "success", message: "Point updated" });
+      res.json({ status: "success", code: "srv.point_updated", message: "Point updated" });
     } catch (error: any) {
       console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   }
 );
@@ -123,10 +141,16 @@ router.delete(
     try {
       const { pointId } = req.params;
       await discussionPointsRepository.deletePoint(pointId);
-      res.json({ status: "success", message: "Point deleted" });
+      res.json({ status: "success", code: "srv.point_deleted", message: "Point deleted" });
     } catch (error: any) {
       console.error(error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   }
 );
@@ -141,7 +165,11 @@ const getCommentsHandler = async (req: any, res: any) => {
     console.error(error);
     res
       .status(500)
-      .json({ status: "error", message: "Failed to fetch comments: " + error.message });
+      .json({
+        status: "error",
+        code: "srv.failed_to_fetch_comments",
+        message: "Failed to fetch comments: " + error.message,
+      });
   }
 };
 
@@ -151,7 +179,13 @@ const postCommentHandler = async (req: any, res: any) => {
     const { userId, userName, commentText } = req.body;
 
     if (!commentText || !commentText.trim()) {
-      return res.status(400).json({ status: "error", message: "Teks komentar wajib diisi." });
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          code: "srv.teks_komentar_wajib_diisi",
+          message: "Teks komentar wajib diisi.",
+        });
     }
 
     const commentId = crypto.randomUUID();
@@ -174,7 +208,13 @@ const postCommentHandler = async (req: any, res: any) => {
     });
   } catch (error: any) {
     console.error(error);
-    res.status(500).json({ status: "error", message: "Failed to add comment: " + error.message });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.failed_to_add_comment",
+        message: "Failed to add comment: " + error.message,
+      });
   }
 };
 

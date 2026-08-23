@@ -37,6 +37,7 @@ router.post(
       if (!file) {
         return res.status(400).json({
           status: "error",
+          code: "srv.gagal_mengunggah_dokumen_file",
           message: "Gagal Mengunggah Dokumen: File tidak ditemukan dalam request.",
         });
       }
@@ -76,6 +77,7 @@ router.post(
 
       return res.json({
         status: "success",
+        code: "srv.dokumen_berhasil_diunggah_dan",
         message: "Dokumen berhasil diunggah dan diamankan.",
         data: {
           filename: safeFilename,
@@ -89,6 +91,7 @@ router.post(
       console.error("POST /api/v1/upload-document error:", err);
       return res.status(500).json({
         status: "error",
+        code: "srv.gagal_mengunggah_dokumen_terjadi",
         message: "Gagal Mengunggah Dokumen: Terjadi kesalahan server",
       });
     }
@@ -104,7 +107,13 @@ router.get("/api/v1/files/secure-stream", async (req: any, res: any) => {
     const uid = req.query.uid as string;
 
     if (!file) {
-      return res.status(400).json({ status: "error", message: "Parameter 'file' wajib diisi." });
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          code: "srv.parameter_file_wajib_diisi",
+          message: "Parameter 'file' wajib diisi.",
+        });
     }
 
     const safeFilename = path.basename(file);
@@ -114,7 +123,13 @@ router.get("/api/v1/files/secure-stream", async (req: any, res: any) => {
     // lebih dulu dan dikirim sebagai respons.
     const isiBerkas = await bacaBerkas(safeFilename);
     if (!isiBerkas) {
-      return res.status(404).json({ status: "error", message: "Dokumen tidak ditemukan." });
+      return res
+        .status(404)
+        .json({
+          status: "error",
+          code: "srv.dokumen_tidak_ditemukan",
+          message: "Dokumen tidak ditemukan.",
+        });
     }
 
     let isAuthorized = false;
@@ -139,6 +154,7 @@ router.get("/api/v1/files/secure-stream", async (req: any, res: any) => {
     if (!isAuthorized) {
       return res.status(403).json({
         status: "error",
+        code: "srv.akses_ditolak_presigned_url",
         message: "Akses Ditolak: Presigned URL telah kadaluarsa atau token tidak valid.",
       });
     }
@@ -155,7 +171,11 @@ router.get("/api/v1/files/secure-stream", async (req: any, res: any) => {
   } catch (err: any) {
     return res
       .status(500)
-      .json({ status: "error", message: "Terjadi kesalahan saat mengunduh dokumen." });
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_saat_mengunduh",
+        message: "Terjadi kesalahan saat mengunduh dokumen.",
+      });
   }
 });
 

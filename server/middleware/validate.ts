@@ -69,6 +69,7 @@ export function validasiRequest(targets: ValidationTargets) {
     } catch (err: any) {
       return res.status(400).json({
         status: "error",
+        code: "srv.format_permintaan_tidak_dapat",
         message: "Format permintaan tidak dapat diproses",
         error: err?.message || "Invalid payload",
       });

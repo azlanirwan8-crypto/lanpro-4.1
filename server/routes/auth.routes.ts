@@ -81,15 +81,31 @@ router.post("/api/auth/refresh", authenticateJWT, async (req: any, res) => {
     const userId = req.user.id || req.user.uid;
     const user = await authRepository.findUserByIdOrUid(userId);
     if (!user) {
-      return res.status(404).json({ status: "error", message: "Pengguna tidak ditemukan." });
+      return res
+        .status(404)
+        .json({
+          status: "error",
+          code: "srv.pengguna_tidak_ditemukan",
+          message: "Pengguna tidak ditemukan.",
+        });
     }
     if (user.status === "rejected") {
-      return res.status(403).json({ status: "error", message: "Akun Anda ditolak oleh admin." });
+      return res
+        .status(403)
+        .json({
+          status: "error",
+          code: "srv.akun_anda_ditolak_oleh",
+          message: "Akun Anda ditolak oleh admin.",
+        });
     }
     if (user.status === "pending") {
       return res
         .status(403)
-        .json({ status: "error", message: "Akun Anda masih dalam status peninjauan." });
+        .json({
+          status: "error",
+          code: "srv.akun_anda_masih_dalam",
+          message: "Akun Anda masih dalam status peninjauan.",
+        });
     }
 
     const newToken = generateToken(user);
@@ -100,7 +116,13 @@ router.post("/api/auth/refresh", authenticateJWT, async (req: any, res) => {
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Refresh token error:", error);
-    return res.status(500).json({ status: "error", message: "Gagal memperpanjang sesi." });
+    return res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.gagal_memperpanjang_sesi",
+        message: "Gagal memperpanjang sesi.",
+      });
   }
 });
 
@@ -142,6 +164,7 @@ router.post("/api/auth/login", validasiBody(loginSchema), async (req, res) => {
       if (lastActiveTime && Date.now() - lastActiveTime < ONE_DAY) {
         return res.status(409).json({
           status: "conflict",
+          code: "srv.akun_anda_masih_aktif",
           message: "Akun Anda Masih Aktif di perangkat lain.",
           activeSession: {
             ip: "Device Lain",
@@ -173,7 +196,13 @@ router.post("/api/auth/login", validasiBody(loginSchema), async (req, res) => {
       String(Date.now())
     );
     if (!updated) {
-      return res.status(404).json({ status: "error", message: "User tidak ditemukan." });
+      return res
+        .status(404)
+        .json({
+          status: "error",
+          code: "srv.user_tidak_ditemukan",
+          message: "User tidak ditemukan.",
+        });
     }
 
     activeUserSessions.set(userId.toString(), {
@@ -202,7 +231,13 @@ router.post("/api/auth/login", validasiBody(loginSchema), async (req, res) => {
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Login error:", error);
-    return res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server." });
+    return res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server_2",
+        message: "Terjadi kesalahan internal server.",
+      });
   }
 });
 
@@ -248,7 +283,13 @@ router.post("/api/auth/force-logout", validasiBody(forceLogoutSchema), async (re
       String(Date.now())
     );
     if (!updated) {
-      return res.status(404).json({ status: "error", message: "User tidak ditemukan." });
+      return res
+        .status(404)
+        .json({
+          status: "error",
+          code: "srv.user_tidak_ditemukan",
+          message: "User tidak ditemukan.",
+        });
     }
 
     activeUserSessions.set(userId.toString(), {
@@ -357,14 +398,22 @@ router.post("/api/auth/register", async (req, res) => {
     if (usernameInUse) {
       return res
         .status(400)
-        .json({ status: "error", message: "Username sudah digunakan oleh akun lain." });
+        .json({
+          status: "error",
+          code: "srv.username_sudah_digunakan_oleh",
+          message: "Username sudah digunakan oleh akun lain.",
+        });
     }
 
     const emailInUse = await authRepository.checkUserExistsByEmail(email);
     if (emailInUse) {
       return res
         .status(400)
-        .json({ status: "error", message: "Email sudah digunakan oleh akun lain." });
+        .json({
+          status: "error",
+          code: "srv.email_sudah_digunakan_oleh",
+          message: "Email sudah digunakan oleh akun lain.",
+        });
     }
 
     const uid = (
@@ -418,12 +467,19 @@ router.post("/api/auth/register", async (req, res) => {
 
     return res.status(201).json({
       status: "success",
+      code: "srv.akun_anda_sudah_berhasil",
       message:
         "Akun Anda sudah berhasil dibuat. Silahkan hubungi Admin untuk diaktifkan sebelum Anda dapat melakukan login.",
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Register error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
   }
 });
 
@@ -433,6 +489,7 @@ router.post("/api/auth/forgot-password", async (req, res) => {
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return res.status(400).json({
         status: "error",
+        code: "srv.alamat_email_tidak_valid",
         message: "Alamat email tidak valid.",
       });
     }
@@ -445,6 +502,7 @@ router.post("/api/auth/forgot-password", async (req, res) => {
      */
     const balasanNetral = {
       status: "success",
+      code: "srv.bila_alamat_email_itu",
       message:
         "Bila alamat email itu terdaftar, tautan pengaturan ulang kata sandi sudah dikirim ke sana. Tautannya berlaku 15 menit.",
     };
@@ -491,6 +549,7 @@ router.post("/api/auth/forgot-password", async (req, res) => {
     console.error("LOG ANOMALI: forgot-password error:", error);
     return res.status(500).json({
       status: "error",
+      code: "srv.terjadi_kesalahan_internal_server_2",
       message: "Terjadi kesalahan internal server.",
     });
   }
@@ -504,6 +563,7 @@ router.post("/api/auth/reset-password", async (req, res) => {
     if (!token || typeof token !== "string") {
       return res.status(400).json({
         status: "error",
+        code: "srv.token_pengaturan_ulang_kata",
         message: "Token pengaturan ulang kata sandi tidak valid atau hilang.",
       });
     }
@@ -532,6 +592,7 @@ router.post("/api/auth/reset-password", async (req, res) => {
     } catch (err: any) {
       return res.status(400).json({
         status: "error",
+        code: "srv.token_pengaturan_ulang_kata_2",
         message:
           "Token pengaturan ulang kata sandi sudah kedaluwarsa atau tidak valid. Silakan ajukan permohonan baru.",
       });
@@ -540,6 +601,7 @@ router.post("/api/auth/reset-password", async (req, res) => {
     if (decoded.type !== "password_reset" || !decoded.id) {
       return res.status(400).json({
         status: "error",
+        code: "srv.jenis_token_tidak_valid",
         message: "Jenis token tidak valid untuk pengaturan ulang kata sandi.",
       });
     }
@@ -553,11 +615,18 @@ router.post("/api/auth/reset-password", async (req, res) => {
 
     return res.json({
       status: "success",
+      code: "srv.kata_sandi_anda_berhasil",
       message: "Kata sandi Anda berhasil diperbarui. Silakan masuk menggunakan kata sandi baru.",
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Reset password error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
   }
 });
 

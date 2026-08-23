@@ -64,7 +64,9 @@ export const verifyProjectAccess = (allowedRoles: string[]) => {
         if (allowedRoles.includes("*")) {
           return next();
         }
-        return res.status(403).json({ status: "error", message: "Akses ditolak" });
+        return res
+          .status(403)
+          .json({ status: "error", code: "srv.akses_ditolak", message: "Akses ditolak" });
       }
 
       connection = await db.getConnection();
@@ -118,10 +120,18 @@ export const verifyProjectAccess = (allowedRoles: string[]) => {
         }
       }
 
-      return res.status(403).json({ status: "error", message: "Akses ditolak" });
+      return res
+        .status(403)
+        .json({ status: "error", code: "srv.akses_ditolak", message: "Akses ditolak" });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: RBAC Middleware error:", error);
-      res.status(500).json({ status: "error", message: "Gagal memverifikasi hak akses." });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.gagal_memverifikasi_hak_akses",
+          message: "Gagal memverifikasi hak akses.",
+        });
     } finally {
       if (connection) connection.release();
     }

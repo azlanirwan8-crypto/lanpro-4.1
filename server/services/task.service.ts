@@ -6,7 +6,7 @@
  * menerima argumen biasa dan mengembalikan nilai — sehingga tempatnya di
  * lapisan services. Dipindah apa adanya, tanpa perubahan logika.
  */
-import crypto from 'crypto';
+import crypto from "crypto";
 
 // True if `val` (a client-supplied id, e.g. senderId/receiverId/userId in a chat or
 // notification request) actually identifies the authenticated caller — checked
@@ -32,14 +32,34 @@ export async function recordExecutionRunLog(
   await connection.query(
     `INSERT INTO QATestCaseExecutionLogs (id, projectId, caseId, executionStatus, linkedIssueKey, executedByUserId, executedByName, evaluationNotes, evidences)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [logId, projectId, caseId, executionStatus, linkedIssueKey, executedByUserId, executedByName, evaluationNotes, JSON.stringify(evidences || [])]
+    [
+      logId,
+      projectId,
+      caseId,
+      executionStatus,
+      linkedIssueKey,
+      executedByUserId,
+      executedByName,
+      evaluationNotes,
+      JSON.stringify(evidences || []),
+    ]
   );
 }
 
-export async function validateTimelineBoundaries(connection: any, projectId: string, sprintId: string | null, parentId: string | null, startDate: string | null, endDate: string | null) {
+export async function validateTimelineBoundaries(
+  connection: any,
+  projectId: string,
+  sprintId: string | null,
+  parentId: string | null,
+  startDate: string | null,
+  endDate: string | null
+) {
   // 1. Validate against Sprint (Planning) if sprintId is present
   if (sprintId && (startDate || endDate)) {
-    const [sprintRows]: any = await connection.query("SELECT startDate, endDate, name FROM Sprints WHERE id = ? AND projectId = ?", [sprintId, projectId]);
+    const [sprintRows]: any = await connection.query(
+      "SELECT startDate, endDate, name FROM Sprints WHERE id = ? AND projectId = ?",
+      [sprintId, projectId]
+    );
     if (sprintRows.length > 0) {
       const sprint = sprintRows[0];
       if (sprint.startDate || sprint.endDate) {
@@ -51,25 +71,25 @@ export async function validateTimelineBoundaries(connection: any, projectId: str
         if (sprintStart && itemStart && itemStart < sprintStart) {
           return {
             code: "PLANNING_BOUNDARY_EXCEEDED",
-            message: `Gagal Menyimpan: Tanggal mulai melampaui rentang jadwal Planning induk (${sprint.name}).`
+            message: `Gagal Menyimpan: Tanggal mulai melampaui rentang jadwal Planning induk (${sprint.name}).`,
           };
         }
         if (sprintEnd && itemStart && itemStart > sprintEnd) {
           return {
             code: "PLANNING_BOUNDARY_EXCEEDED",
-            message: `Gagal Menyimpan: Tanggal mulai melampaui rentang jadwal Planning induk (${sprint.name}).`
+            message: `Gagal Menyimpan: Tanggal mulai melampaui rentang jadwal Planning induk (${sprint.name}).`,
           };
         }
         if (sprintStart && itemEnd && itemEnd < sprintStart) {
           return {
             code: "PLANNING_BOUNDARY_EXCEEDED",
-            message: `Gagal Menyimpan: Tanggal selesai melampaui rentang jadwal Planning induk (${sprint.name}).`
+            message: `Gagal Menyimpan: Tanggal selesai melampaui rentang jadwal Planning induk (${sprint.name}).`,
           };
         }
         if (sprintEnd && itemEnd && itemEnd > sprintEnd) {
           return {
             code: "PLANNING_BOUNDARY_EXCEEDED",
-            message: `Gagal Menyimpan: Tanggal selesai melampaui rentang jadwal Planning induk (${sprint.name}).`
+            message: `Gagal Menyimpan: Tanggal selesai melampaui rentang jadwal Planning induk (${sprint.name}).`,
           };
         }
       }
@@ -78,7 +98,10 @@ export async function validateTimelineBoundaries(connection: any, projectId: str
 
   // 2. Validate against Parent Epic if parentId is present
   if (parentId && (startDate || endDate)) {
-    const [parentRows]: any = await connection.query("SELECT startDate, endDate, title FROM Tasks WHERE id = ? AND projectId = ?", [parentId, projectId]);
+    const [parentRows]: any = await connection.query(
+      "SELECT startDate, endDate, title FROM Tasks WHERE id = ? AND projectId = ?",
+      [parentId, projectId]
+    );
     if (parentRows.length > 0) {
       const parentEpic = parentRows[0];
       if (parentEpic.startDate || parentEpic.endDate) {
@@ -90,25 +113,29 @@ export async function validateTimelineBoundaries(connection: any, projectId: str
         if (epicStart && itemStart && itemStart < epicStart) {
           return {
             code: "EPIC_TIMELINE_EXCEEDED",
-            message: "Peringatan: Tanggal mulai task tidak boleh lebih awal dari rentang tanggal Epic induk."
+            message:
+              "Peringatan: Tanggal mulai task tidak boleh lebih awal dari rentang tanggal Epic induk.",
           };
         }
         if (epicEnd && itemStart && itemStart > epicEnd) {
           return {
-            code: "EPIC_TIMELINE_EXCEEDED",
-            message: "Peringatan: Tanggal mulai task tidak boleh melebihi rentang tanggal Epic induk."
+            code: "EPIC_TIMELINE_EXCEEDED_2",
+            message:
+              "Peringatan: Tanggal mulai task tidak boleh melebihi rentang tanggal Epic induk.",
           };
         }
         if (epicStart && itemEnd && itemEnd < epicStart) {
           return {
-            code: "EPIC_TIMELINE_EXCEEDED",
-            message: "Peringatan: Tanggal selesai task tidak boleh lebih awal dari rentang tanggal Epic induk."
+            code: "EPIC_TIMELINE_EXCEEDED_3",
+            message:
+              "Peringatan: Tanggal selesai task tidak boleh lebih awal dari rentang tanggal Epic induk.",
           };
         }
         if (epicEnd && itemEnd && itemEnd > epicEnd) {
           return {
-            code: "EPIC_TIMELINE_EXCEEDED",
-            message: "Peringatan: Tanggal selesai task tidak boleh melebihi rentang tanggal Epic induk."
+            code: "EPIC_TIMELINE_EXCEEDED_4",
+            message:
+              "Peringatan: Tanggal selesai task tidak boleh melebihi rentang tanggal Epic induk.",
           };
         }
       }
@@ -126,8 +153,12 @@ const DEFAULT_PERMISSIONS = {
   viewer: { list: { create: false, read: true, update: false, delete: false } },
 };
 
-export function checkUserPermissionBackend(role: string, customPermissions: any, action: 'update' | 'delete'): boolean {
-  const userRole = (role || 'viewer').toLowerCase();
+export function checkUserPermissionBackend(
+  role: string,
+  customPermissions: any,
+  action: "update" | "delete"
+): boolean {
+  const userRole = (role || "viewer").toLowerCase();
   const roleDefaults = (DEFAULT_PERMISSIONS as any)[userRole] || DEFAULT_PERMISSIONS.viewer;
   const defaultVal = roleDefaults.list[action];
 

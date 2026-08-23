@@ -24,7 +24,13 @@ export function setupSprintsRoutes(
       res.json({ status: "success", data: rows });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/sprints error:", error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   });
 
@@ -41,6 +47,7 @@ export function setupSprintsRoutes(
         if (category === "Waterfall") {
           return res.status(400).json({
             status: "error",
+            code: "srv.metodologi_waterfall_tidak_mendukung",
             message:
               "Metodologi Waterfall tidak mendukung pembuatan Sprint. Gunakan Milestone atau GANTT Chart.",
           });
@@ -74,7 +81,13 @@ export function setupSprintsRoutes(
         });
       } catch (error: any) {
         console.error("LOG ANOMALI CRITICAL: POST /api/projects/:projectId/sprints error:", error);
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+        res
+          .status(500)
+          .json({
+            status: "error",
+            code: "srv.terjadi_kesalahan_internal_server",
+            message: "Terjadi kesalahan internal server",
+          });
       }
     }
   );
@@ -85,7 +98,13 @@ export function setupSprintsRoutes(
       const { id } = req.params;
       const existing = await sprintRepository.findById(id);
       if (!existing) {
-        return res.status(404).json({ status: "error", message: "Sprint tidak ditemukan" });
+        return res
+          .status(404)
+          .json({
+            status: "error",
+            code: "srv.sprint_tidak_ditemukan",
+            message: "Sprint tidak ditemukan",
+          });
       }
 
       const finalName = req.body.hasOwnProperty("name") ? req.body.name : existing.name;
@@ -104,10 +123,16 @@ export function setupSprintsRoutes(
         status: finalStatus,
       });
 
-      res.json({ status: "success", message: "Sprint updated" });
+      res.json({ status: "success", code: "srv.sprint_updated", message: "Sprint updated" });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: PUT /api/projects/:projectId/sprints/:id error:", error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+      res
+        .status(500)
+        .json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
     }
   });
 
@@ -119,13 +144,19 @@ export function setupSprintsRoutes(
       try {
         const { id, projectId } = req.params;
         await sprintRepository.delete(id, projectId);
-        res.json({ status: "success", message: "Sprint deleted" });
+        res.json({ status: "success", code: "srv.sprint_deleted", message: "Sprint deleted" });
       } catch (error: any) {
         console.error(
           "LOG ANOMALI CRITICAL: DELETE /api/projects/:projectId/sprints/:id error:",
           error
         );
-        res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+        res
+          .status(500)
+          .json({
+            status: "error",
+            code: "srv.terjadi_kesalahan_internal_server",
+            message: "Terjadi kesalahan internal server",
+          });
       }
     }
   );

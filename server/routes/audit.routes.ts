@@ -16,7 +16,13 @@ router.get("/api/audit-logs", authenticateJWT, async (req, res) => {
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("[AUDIT] Error:", error);
-    res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
+    res
+      .status(500)
+      .json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
   }
 });
 
