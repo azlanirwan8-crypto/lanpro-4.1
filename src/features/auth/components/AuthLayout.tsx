@@ -131,6 +131,18 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
       <CorakBatikKawung />
 
       {/*
+        Pemilih bahasa duduk di LUAR banner, bukan di dalamnya, dan itu bukan
+        selera. Banner ada di z-10 sementara kolom pemusat kartu ada di z-30
+        dan membentang menutupi seluruh viewport — termasuk pojok kanan atas.
+        Selama pemilih bahasa berada di dalam banner, z-index setinggi apa pun
+        yang diberikan padanya terkurung di konteks tumpukan banner, sehingga
+        kolom kartu selalu menang dan menelan kliknya. Persis itu yang terjadi
+        dan dilaporkan pemilik proyek. Sebagai saudara kandung di z-40 ia
+        berada di atas segalanya dan bisa diklik lagi.
+      */}
+      <PemilihBahasaAuth className="absolute top-4 right-4 z-40" />
+
+      {/*
         BANNER. Sejak logo dan tagline dihapus isinya tinggal bidang warna,
         jadi ia TIDAK LAGI IKUT ALUR: posisinya absolut di puncak halaman
         dengan tinggi tetap. Kalau ia tetap di alur, tingginya akan ikut
@@ -151,8 +163,6 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
           <div className="absolute top-[-60%] left-[20%] w-[60%] h-[200%] bg-indigo-400/10 rounded-full blur-[150px]" />
           <div className="absolute bottom-[-80%] right-[10%] w-[50%] h-[200%] bg-cyan-300/10 rounded-full blur-[150px]" />
         </div>
-
-        <PemilihBahasaAuth className="absolute top-4 right-4 z-30" />
 
         {/*
           Gelombang. Warnanya WAJIB sama persis dengan latar halaman, sebab yang
