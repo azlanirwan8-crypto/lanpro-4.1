@@ -126,9 +126,13 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
           Tepinya dua garis lurus yang bertemu di satu titik rendah, dan justru
           ketiadaan lengkungan itulah yang membuatnya terbaca bersih.
 
-          Titik temunya di x=548 dari 1440 (≈38% lebar), sedikit di kiri tengah
-          mengikuti acuan — bukan di tengah persis. Simetri sempurna terbaca
-          kaku; pergeseran kecil ini yang membuatnya terlihat disengaja.
+          Titik temunya TEPAT DI TENGAH (x=720 dari 1440), dan itu revisi dari
+          percobaan sebelumnya yang menaruhnya di 38% lebar meniru acuan.
+          Kedua ujungnya sama-sama y=0 di kedua versi, jadi tingginya memang
+          sudah sama — yang membuatnya terbaca berat sebelah adalah KEMIRINGAN:
+          titik temu di 38% memaksa sisi kiri menempuh turunan 95 unit hanya
+          dalam 548 unit sementara sisi kanan punya 892 unit untuk naik yang
+          sama. Di tengah, kedua sisi jadi cermin persis.
 
         */}
         <svg
@@ -138,7 +142,7 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path d="M0 0 L548 95 L1440 0 L1440 120 L0 120 Z" fill="var(--color-surface-sunken)" />
+          <path d="M0 0 L720 95 L1440 0 L1440 120 L0 120 Z" fill="var(--color-surface-sunken)" />
         </svg>
       </div>
 
