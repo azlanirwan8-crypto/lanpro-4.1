@@ -84,14 +84,19 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
   return (
     <div className="min-h-screen flex flex-col font-sans bg-surface-sunken overflow-x-hidden">
       {/* BANNER — brand terpusat di atas gelombang. */}
-      <div className="relative select-none overflow-hidden bg-gradient-to-b from-primary-surface-active via-primary-surface-hover to-primary-surface pt-16 pb-44 sm:pt-20 sm:pb-52">
+      <div className="relative select-none overflow-hidden bg-primary-surface pt-16 pb-44 sm:pt-20 sm:pb-52">
         <VelzonFloatingParticles />
 
-        {/* Mesh gradient ambien — sama dengan panel hero varian split. */}
+        {/*
+          Wash ambien. SENGAJA sangat lemah dan TANPA animasi. Versi sebelumnya
+          memakai tiga blob /20-/30 dengan `animate-pulse`, dan hasilnya banner
+          terbaca berat sebelah serta gelisah — acuannya justru hampir satu
+          warna rata. Yang tersisa di sini cuma pelembut supaya bidangnya tidak
+          terasa datar seperti cat tembok, bukan elemen yang terlihat.
+        */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-40%] right-[-10%] w-[60%] h-[160%] bg-indigo-500/30 rounded-full blur-[140px] animate-pulse" />
-          <div className="absolute bottom-[-60%] left-[-10%] w-[60%] h-[160%] bg-cyan-400/20 rounded-full blur-[140px]" />
-          <div className="absolute top-[-20%] left-[25%] w-[45%] h-[140%] bg-blue-600/20 rounded-full blur-[130px]" />
+          <div className="absolute top-[-60%] left-[20%] w-[60%] h-[200%] bg-indigo-400/10 rounded-full blur-[150px]" />
+          <div className="absolute bottom-[-80%] right-[10%] w-[50%] h-[200%] bg-cyan-300/10 rounded-full blur-[150px]" />
         </div>
 
         <PemilihBahasaAuth className="absolute top-4 right-4 z-30" />
@@ -117,22 +122,24 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
           dipakai langsung, bukan kelas Tailwind, supaya nilainya ikut berganti
           di mode gelap tanpa override tema tambahan.
 
-          BENTUKNYA GARIS LURUS, BUKAN KURVA — dan itu inti kerapiannya. Dua
-          percobaan sebelumnya sama-sama memakai bezier: yang pertama titik
-          kendalinya jauh di luar sehingga paling curam justru di tepi lalu
-          mendatar di tengah, yang kedua sudah rata di tepi dan melengkung
-          landai di tengah. Keduanya ditolak pemilik proyek dengan alasan yang
-          sama, dan alasannya benar: acuannya TIDAK melengkung sama sekali.
-          Tepinya dua garis lurus yang bertemu di satu titik rendah, dan justru
-          ketiadaan lengkungan itulah yang membuatnya terbaca bersih.
+          BENTUKNYA BUSUR SERAGAM. Ini revisi ketiga, dan tiga percobaan
+          sebelumnya masing-masing salah dengan cara berbeda: (1) bezier dengan
+          titik kendali jauh di luar — paling curam di tepi lalu mendatar di
+          tengah, terbaca sebagai patahan; (2) dua bezier bersinggungan mendatar
+          — masih terbaca melengkung-lengkung; (3) dua garis lurus bertemu di
+          satu titik — sudutnya patah tajam di tengah, dan justru inilah yang
+          paling keras.
 
-          Titik temunya TEPAT DI TENGAH (x=720 dari 1440), dan itu revisi dari
-          percobaan sebelumnya yang menaruhnya di 38% lebar meniru acuan.
-          Kedua ujungnya sama-sama y=0 di kedua versi, jadi tingginya memang
-          sudah sama — yang membuatnya terbaca berat sebelah adalah KEMIRINGAN:
-          titik temu di 38% memaksa sisi kiri menempuh turunan 95 unit hanya
-          dalam 548 unit sementara sisi kanan punya 892 unit untuk naik yang
-          sama. Di tengah, kedua sisi jadi cermin persis.
+          Yang dipakai acuan bukan garis lurus dan bukan gelombang, melainkan
+          satu busur lingkaran yang melandai MERATA. Titik kendali diletakkan
+          tepat di sepertiga (480 dan 960) dengan y=146,7 — kombinasi yang
+          menghampiri busur lingkaran sejati: kemiringan di ujung keluar 0,306
+          sementara busur lingkaran dengan tali 1440 dan panjang panah 110
+          memberi 0,311. Selisihnya 1,6%, tidak terlihat mata.
+
+          Jangan menggeser titik kendali dari sepertiga. Menariknya keluar
+          membuat tepi curam dan tengah datar (kesalahan 1); menariknya masuk
+          membuat tengah runcing mendekati kesalahan 3.
 
         */}
         <svg
@@ -142,7 +149,10 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path d="M0 0 L720 95 L1440 0 L1440 120 L0 120 Z" fill="var(--color-surface-sunken)" />
+          <path
+            d="M0 0 C 480 146.7, 960 146.7, 1440 0 L1440 120 L0 120 Z"
+            fill="var(--color-surface-sunken)"
+          />
         </svg>
       </div>
 
