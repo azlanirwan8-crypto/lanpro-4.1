@@ -1,19 +1,28 @@
 import { z } from "zod";
 
+/**
+ * Pesan di bawah ini adalah KUNCI i18n, bukan teks jadi (#171).
+ *
+ * Skema ini konstanta tingkat modul, jadi `t()` tidak bisa dipanggil di sini —
+ * hasilnya akan membeku pada bahasa yang aktif saat modul pertama dimuat, dan
+ * mengganti bahasa tidak akan mengubahnya lagi. Kuncinya diterjemahkan di
+ * tempat galat dipetakan, di `RegisterScreen`. Pola yang sama dipakai
+ * `evaluatePasswordStrength` di bawah, dan dijaga uji kunci dinamis.
+ */
 export const registrationSchema = z.object({
-  name: z.string().min(3, "Nama minimal 3 karakter").max(25, "Nama maksimal 25 karakter"),
-  email: z.string().email("Format email tidak valid (contoh: user@gmail.com)"),
+  name: z.string().min(3, "regValidation.nameMin").max(25, "regValidation.nameMax"),
+  email: z.string().email("regValidation.emailInvalid"),
   username: z
     .string()
-    .regex(/^[a-zA-Z]+$/, "Username hanya boleh berupa huruf")
-    .max(10, "Username maksimal 10 karakter"),
+    .regex(/^[a-zA-Z]+$/, "regValidation.usernameLettersOnly")
+    .max(10, "regValidation.usernameMax"),
   password: z
     .string()
-    .min(8, "Password minimal 8 karakter")
-    .regex(/[A-Z]/, "Password harus mengandung minimal 1 huruf besar (A-Z)")
-    .regex(/[a-z]/, "Password harus mengandung minimal 1 huruf kecil (a-z)")
-    .regex(/[0-9]/, "Password harus mengandung minimal 1 angka (0-9)")
-    .regex(/[@$!%*?&]/, "Password harus mengandung minimal 1 simbol khusus (@$!%*?&)"),
+    .min(8, "regValidation.passwordMin")
+    .regex(/[A-Z]/, "regValidation.passwordUpper")
+    .regex(/[a-z]/, "regValidation.passwordLower")
+    .regex(/[0-9]/, "regValidation.passwordDigit")
+    .regex(/[@$!%*?&]/, "regValidation.passwordSymbol"),
 });
 
 export type RegistrationFormData = z.infer<typeof registrationSchema>;

@@ -2507,6 +2507,18 @@ export const id = {
     usernameRequired: "Username wajib diisi",
     cancel: "Batal",
   },
+  regValidation: {
+    nameMin: "Nama minimal 3 karakter",
+    nameMax: "Nama maksimal 25 karakter",
+    emailInvalid: "Format email tidak valid (contoh: user@gmail.com)",
+    usernameLettersOnly: "Username hanya boleh berupa huruf",
+    usernameMax: "Username maksimal 10 karakter",
+    passwordMin: "Password minimal 8 karakter",
+    passwordUpper: "Password harus mengandung minimal 1 huruf besar (A-Z)",
+    passwordLower: "Password harus mengandung minimal 1 huruf kecil (a-z)",
+    passwordDigit: "Password harus mengandung minimal 1 angka (0-9)",
+    passwordSymbol: "Password harus mengandung minimal 1 simbol khusus (@$!%*?&)",
+  },
   teamLead2: {
     sprintProgress: "Progres Sprint",
     openPlanning: "Buka Panel Perencanaan Sprint Lengkap",

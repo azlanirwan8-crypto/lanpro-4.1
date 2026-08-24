@@ -43,9 +43,9 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
     const filteredVal = rawVal.replace(/[^a-zA-Z]/g, "").slice(0, 10);
 
     if (rawVal !== filteredVal) {
-      setFieldErrors((prev) => ({ ...prev, username: "Username hanya boleh berupa huruf" }));
+      setFieldErrors((prev) => ({ ...prev, username: t("regValidation.usernameLettersOnly") }));
     } else if (filteredVal.length > 10) {
-      setFieldErrors((prev) => ({ ...prev, username: "Username maksimal 10 karakter" }));
+      setFieldErrors((prev) => ({ ...prev, username: t("regValidation.usernameMax") }));
     } else {
       setFieldErrors((prev) => ({ ...prev, username: undefined }));
     }
@@ -72,7 +72,9 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
       const formattedErrors: Record<string, string> = {};
       result.error.issues.forEach((err) => {
         if (err.path[0]) {
-          formattedErrors[err.path[0] as string] = err.message;
+          // `err.message` berisi KUNCI i18n, bukan teks (#171). Diterjemahkan
+          // di sini, bukan di skema, supaya ganti bahasa ikut terasa.
+          formattedErrors[err.path[0] as string] = t(err.message);
         }
       });
       setFieldErrors(formattedErrors);

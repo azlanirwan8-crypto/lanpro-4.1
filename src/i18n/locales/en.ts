@@ -2497,6 +2497,18 @@ export const en = {
     usernameRequired: "Username is required",
     cancel: "Cancel",
   },
+  regValidation: {
+    nameMin: "Name must be at least 3 characters",
+    nameMax: "Name must be at most 25 characters",
+    emailInvalid: "Invalid email format (example: user@gmail.com)",
+    usernameLettersOnly: "Username may contain letters only",
+    usernameMax: "Username may be at most 10 characters",
+    passwordMin: "Password must be at least 8 characters",
+    passwordUpper: "Password must contain at least 1 uppercase letter (A-Z)",
+    passwordLower: "Password must contain at least 1 lowercase letter (a-z)",
+    passwordDigit: "Password must contain at least 1 number (0-9)",
+    passwordSymbol: "Password must contain at least 1 special symbol (@$!%*?&)",
+  },
   teamLead2: {
     sprintProgress: "Sprint Progress",
     openPlanning: "Open the full sprint planning panel",
