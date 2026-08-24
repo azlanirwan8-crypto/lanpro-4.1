@@ -75,7 +75,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
           {/* Langkah — status jujur, bukan ajakan yang tidak bisa dijalankan */}
           <div className="mt-7 space-y-2.5">
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-surface border border-border-subtle">
+            <div className="flex items-start gap-3 px-4 py-5 rounded-xl bg-surface border border-border-subtle">
               <BadgeCheck className="w-5 h-5 shrink-0 text-success mt-0.5" />
               <div className="min-w-0">
                 <div className="text-sm font-medium text-content-strong">
@@ -87,7 +87,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-surface border border-border-subtle">
+            <div className="flex items-start gap-3 px-4 py-5 rounded-xl bg-surface border border-border-subtle">
               <UserCog className="w-5 h-5 shrink-0 text-primary mt-0.5" />
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-medium text-content-strong">
@@ -99,14 +99,14 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 <button
                   type="button"
                   onClick={onOpenProfile}
-                  className="mt-3 px-4 py-2 min-h-9 rounded-lg bg-primary hover:bg-primary-hover text-content-inverse text-xs font-medium transition-colors"
+                  className="mt-3 px-6 py-2 min-h-9 rounded-lg bg-primary hover:bg-primary-hover text-content-inverse text-xs font-semibold transition-colors"
                 >
                   {t("welcome.openProfile")}
                 </button>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-surface border border-border-subtle">
+            <div className="flex items-start gap-3 px-4 py-5 rounded-xl bg-surface border border-border-subtle">
               <CircleDashed className="w-5 h-5 shrink-0 text-content-subtle mt-0.5" />
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-medium text-content-strong">
@@ -119,7 +119,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                   <button
                     type="button"
                     onClick={onCreateProject}
-                    className="mt-3 px-4 py-2 min-h-9 rounded-lg bg-primary hover:bg-primary-hover text-content-inverse text-xs font-medium transition-colors flex items-center gap-2"
+                    className="mt-3 px-6 py-2 min-h-9 rounded-lg bg-primary hover:bg-primary-hover text-content-inverse text-xs font-semibold transition-colors flex items-center gap-2"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>{t("appShell.createNewProject")}</span>
@@ -134,7 +134,16 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
             <div className="text-xs font-semibold uppercase tracking-wider text-content-subtle mb-3">
               {t("welcome.lockedTitle")}
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            {/*
+              `opacity-50` dipasang di GRID, bukan di tiap kartu: satu lapis
+              transparansi menurunkan ikon, teks, dan garis bersama-sama,
+              sedangkan enam lapis terpisah akan saling menumpuk di titik
+              temu grid dan membuat sebagian kartu tampak lebih pudar dari
+              yang lain. Keterangan di bawahnya SENGAJA di luar pembungkus
+              ini — kalimat itu yang menjelaskan kenapa modulnya redup, jadi
+              ia harus tetap terbaca penuh.
+            */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 opacity-50">
               {modulTerkunci.map((m) => (
                 <div
                   key={m.judul}

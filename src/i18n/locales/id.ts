@@ -2468,7 +2468,8 @@ export const id = {
     noProjectYet:
       "Anda belum tergabung di proyek mana pun. Administrator perlu menambahkan Anda ke sebuah proyek sebelum modul kerja terbuka.",
     stepAccountTitle: "Akun Anda aktif",
-    stepAccountDesc: "Masuk berhasil. Tidak ada yang rusak pada aplikasi ini.",
+    stepAccountDesc:
+      "Akun Anda sudah siap. Menunggu administrator untuk mengundang Anda ke proyek.",
     stepProfileTitle: "Lengkapi profil Anda",
     stepProfileDesc:
       "Ini satu-satunya hal yang bisa Anda kerjakan sekarang, sekaligus memudahkan orang yang akan menugaskan Anda mengenali Anda.",
@@ -2479,8 +2480,7 @@ export const id = {
     stepAccessDescAdmin:
       "Anda boleh membuat proyek sendiri, atau menunggu ditambahkan ke proyek yang sudah ada.",
     lockedTitle: "Terbuka setelah Anda tergabung di proyek",
-    lockedHint:
-      "Modul ini terkunci, bukan rusak. Semuanya terbuka begitu Anda menjadi anggota proyek.",
+    lockedHint: "Modul ini akan otomatis terbuka setelah Anda menjadi anggota sebuah proyek.",
   },
   appShell: {
     forbiddenUsers:

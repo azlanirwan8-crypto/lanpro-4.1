@@ -2458,7 +2458,8 @@ export const en = {
     noProjectYet:
       "You are not part of any project yet. An administrator needs to add you to a project before the work modules open up.",
     stepAccountTitle: "Your account is active",
-    stepAccountDesc: "Sign-in succeeded. Nothing is wrong with the application.",
+    stepAccountDesc:
+      "Your account is ready. Waiting for an administrator to invite you to a project.",
     stepProfileTitle: "Complete your profile",
     stepProfileDesc:
       "This is the one thing you can do right now, and it helps whoever assigns you to a project recognise you.",
@@ -2469,8 +2470,7 @@ export const en = {
     stepAccessDescAdmin:
       "You may create a project yourself, or wait to be added to an existing one.",
     lockedTitle: "Available once you join a project",
-    lockedHint:
-      "These modules are locked, not broken. They open as soon as you are a project member.",
+    lockedHint: "These modules unlock automatically once you become a member of a project.",
   },
   appShell: {
     forbiddenUsers:
