@@ -156,16 +156,27 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
             <span className="text-content-muted block text-[11px]">
               {t("emailCfg.defaultSender")}
             </span>
+            {/*
+              #157 — Cadangan `LanPro <lanpro@rajonet.com>` DIHAPUS. Panel ini
+              melaporkan keadaan server; menampilkan alamat yang dikeraskan di
+              frontend berarti berbohong ke admin persis saat `EMAIL_FROM`
+              belum disetel — satu-satunya saat panel ini benar-benar dibaca.
+            */}
             <span className="font-medium text-content-strong">
-              {emailStatus?.from || "LanPro <lanpro@rajonet.com>"}
+              {emailStatus?.from || t("emailCfg.senderNotSet")}
             </span>
           </div>
         </div>
 
         <p className="text-[11px] text-content-muted leading-relaxed">
-          {emailStatus?.aktif
-            ? "Layanan email transaksional aktif dan terhubung ke Resend REST API dengan domain terverifikasi."
-            : "Layanan email berjalan dalam mode mock/simulasi untuk pengembangan lokal. Email akan tercatat di log konsol server."}
+          {/*
+            #157 — Kalimat lama mengklaim "dengan domain terverifikasi".
+            `aktif` hanya berarti RESEND_API_KEY terisi; ia tidak tahu apa pun
+            soal status DNS domain (justru itu yang gagal di #127). Klaim itu
+            dicabut, dan kedua kalimat dipindah ke kamus — sebelumnya prosa
+            Inggris/Indonesia keras yang tidak ikut tombol bahasa (#135).
+          */}
+          {emailStatus?.aktif ? t("emailCfg.statusActive") : t("emailCfg.statusMock")}
         </p>
       </div>
 

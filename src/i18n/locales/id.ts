@@ -2210,6 +2210,11 @@ export const id = {
     checking: "Memeriksa...",
     providerBackend: "Penyedia Backend",
     defaultSender: "Alamat Pengirim Default",
+    senderNotSet: "Belum disetel (EMAIL_FROM kosong)",
+    statusActive:
+      "Layanan email transaksional aktif dan terhubung ke Resend REST API. Pastikan domain pengirim sudah terverifikasi di dasbor Resend.",
+    statusMock:
+      "Layanan email berjalan dalam mode mock/simulasi untuk pengembangan lokal. Email akan tercatat di log konsol server.",
     subjectPlaceholder: "[LanPro] Penugasan: {{task_key}}",
     advancedEditor: "Editor Template Lanjutan",
     saveConfig: "Simpan Konfigurasi",

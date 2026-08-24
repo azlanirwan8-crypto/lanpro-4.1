@@ -2202,6 +2202,11 @@ export const en = {
     checking: "Checking...",
     providerBackend: "Provider Backend",
     defaultSender: "Default Sender Address",
+    senderNotSet: "Not set (EMAIL_FROM is empty)",
+    statusActive:
+      "Transactional email service is active and connected to the Resend REST API. Make sure the sender domain is verified in the Resend dashboard.",
+    statusMock:
+      "Email service is running in mock/simulation mode for local development. Emails are written to the server console log.",
     subjectPlaceholder: "[LanPro] Task Assignment: {{task_key}}",
     advancedEditor: "Advanced Template Editor",
     saveConfig: "Save Config",
