@@ -181,6 +181,76 @@ describe("putuskanKebijakan — identitas yang sudah tertaut", () => {
 });
 
 /**
+ * #177 — TAUTAN BASI SETELAH EMAIL DIPINDAH KE AKUN LAIN.
+ *
+ * `sub` sengaja dipercaya di atas email supaya pengguna yang mengganti
+ * emailnya SENDIRI tetap bisa SSO (lihat test di atas, "sub tidak berubah
+ * walau email berganti"). Tapi itu berbeda dari kasus ini: email tersebut
+ * sekarang dipakai user AKTIF LAIN di tabel Users — tandanya admin sudah
+ * memindahkan email itu ke akun lain sejak tautan ini dibuat. Sebelum
+ * perbaikan ini, kode tetap login sebagai pemilik tautan LAMA tanpa peduli
+ * siapa pemilik email SEKARANG. Dilaporkan pemilik proyek.
+ */
+describe("putuskanKebijakan — #177 email tertaut sudah dipindah ke user lain", () => {
+  it("mode LOGIN: MENOLAK, bukan login sebagai pemilik tautan lama", async () => {
+    pasangDb({
+      identitas: { userId: "u9" },
+      userById: { id: "u9", status: "active" },
+      userByEmail: { id: "u10", status: "active" }, // email kini milik user LAIN
+    });
+    const hasil: any = await putuskanKebijakan(IDENTITAS, "login");
+    expect(hasil).toEqual({ aksi: "tolak", alasan: "tautan_kedaluwarsa" });
+  });
+
+  it("mode LOGIN: TIDAK diam-diam login sebagai pemilik email baru (u10) juga", async () => {
+    pasangDb({
+      identitas: { userId: "u9" },
+      userById: { id: "u9", status: "active" },
+      userByEmail: { id: "u10", status: "active" },
+    });
+    const hasil: any = await putuskanKebijakan(IDENTITAS, "login");
+    expect(hasil.aksi).not.toBe("masuk");
+  });
+
+  it("mode DAFTAR: MENOLAK juga — tidak diam-diam menaut ke akun lain", async () => {
+    pasangDb({
+      identitas: { userId: "u9" },
+      userById: { id: "u9", status: "active" },
+      userByEmail: { id: "u10", status: "active" },
+    });
+    const hasil: any = await putuskanKebijakan(IDENTITAS, "daftar");
+    expect(hasil).toEqual({ aksi: "tolak", alasan: "tautan_kedaluwarsa" });
+  });
+
+  it("memutus tautan basi supaya tidak terkunci permanen", async () => {
+    pasangDb({
+      identitas: { userId: "u9" },
+      userById: { id: "u9", status: "active" },
+      userByEmail: { id: "u10", status: "active" },
+    });
+    await putuskanKebijakan(IDENTITAS, "login");
+
+    const adaDelete = kueriPalsu.mock.calls.some(
+      (c) => String(c[0]).includes("DELETE") && String(c[0]).includes("UserIdentities")
+    );
+    expect(adaDelete).toBe(true);
+  });
+
+  it("email dipindah ke user yang statusnya BELUM aktif (pending) — tautan lama tetap dipercaya", async () => {
+    // Pemilik email baru belum aktif, jadi bukan konflik nyata: perilaku lama
+    // (percaya sub) tetap berlaku, sama seperti kasus ganti email sendiri.
+    pasangDb({
+      identitas: { userId: "u9" },
+      userById: { id: "u9", status: "active" },
+      userByEmail: { id: "u10", status: "pending" },
+    });
+    const hasil: any = await putuskanKebijakan(IDENTITAS, "login");
+    expect(hasil.aksi).toBe("masuk");
+    expect(hasil.user.id).toBe("u9");
+  });
+});
+
+/**
  * IDENTITAS YATIM — baris tautan ada, tetapi user yang ditunjuknya tidak.
  *
  * Terjadi saat akun dihapus admin sementara identitasnya tertinggal. Versi
