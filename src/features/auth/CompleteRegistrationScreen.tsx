@@ -24,6 +24,10 @@ import type { CompleteRegistrationScreenProps } from "./types";
  * Akun baru dibuat SETELAH tombol ini ditekan, bukan sebelumnya. Bila pengguna
  * menutup layar sekarang, tidak ada baris setengah jadi yang tertinggal.
  */
+const ID_KOLOM = "sso-username";
+const ID_GALAT = "sso-username-galat";
+const ID_PETUNJUK = "sso-username-petunjuk";
+
 export const CompleteRegistrationScreen = ({
   email,
   onSelesai,
@@ -39,6 +43,13 @@ export const CompleteRegistrationScreen = ({
   const [galat, setGalat] = useState<string | null>(null);
   const [mengirim, setMengirim] = useState(false);
   const [berhasil, setBerhasil] = useState<string | null>(null);
+
+  // `aria-describedby` hanya menyebut id yang BENAR-BENAR ter-render. Menunjuk
+  // ke elemen yang tidak ada dibaca pembaca layar sebagai tidak ada keterangan
+  // sama sekali, jadi lebih buruk daripada tidak memasangnya (#167).
+  const keteranganKolom = [galat ? ID_GALAT : null, adaUsulan ? ID_PETUNJUK : null]
+    .filter(Boolean)
+    .join(" ");
 
   // Penyaringan sama persis dengan form pendaftaran manual — aturan lama tidak
   // boleh berbeda hanya karena jalur masuknya berbeda.
@@ -139,12 +150,15 @@ export const CompleteRegistrationScreen = ({
           ditampilkan di sini. */}
       <form onSubmit={kirim} className="mt-6 space-y-4">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-content-body">
+          <label htmlFor={ID_KOLOM} className="mb-1.5 block text-sm font-medium text-content-body">
             {t("jsx.k18")} <span className="text-danger-text">*</span>{" "}
             <span className="font-normal text-content-muted">{t("completeReg.usernameHint")}</span>
           </label>
           <input
+            id={ID_KOLOM}
             type="text"
+            aria-invalid={galat ? "true" : "false"}
+            aria-describedby={keteranganKolom || undefined}
             value={username}
             onChange={(e) => ubahUsername(e.target.value)}
             placeholder={t("completeReg.usernamePlaceholder")}
@@ -156,12 +170,18 @@ export const CompleteRegistrationScreen = ({
           {/* Keterangan hanya muncul bila memang ada usulan. Menampilkan
               "kami sarankan" pada kolom kosong justru membingungkan. */}
           {adaUsulan && (
-            <p className="mt-1 text-xs text-content-muted">{t("completeReg.suggestHint")}</p>
+            <p id={ID_PETUNJUK} className="mt-1 text-xs text-content-muted">
+              {t("completeReg.suggestHint")}
+            </p>
           )}
         </div>
 
         {galat && (
-          <div className="flex items-start gap-2 text-sm text-danger-text">
+          <div
+            id={ID_GALAT}
+            role="alert"
+            className="flex items-start gap-2 text-sm text-danger-text"
+          >
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{galat}</span>
           </div>
