@@ -14,8 +14,12 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
+import fs from "fs";
+
 import i18n from "../../i18n";
 import { CompleteRegistrationScreen } from "./CompleteRegistrationScreen";
+
+const fsBerkas = (jalur: string) => fs.readFileSync(jalur, "utf8");
 
 const props = {
   email: "azlan@example.com",
@@ -77,5 +81,44 @@ describe("#164 pesan galat Lengkapi Pendaftaran ikut bahasa aktif", () => {
         screen.getByText("Username hanya boleh berupa huruf, maksimal 10 karakter")
       ).toBeInTheDocument();
     });
+  });
+});
+
+/**
+ * #170 (sebagian) — satu layar, satu namespace.
+ *
+ * Layar ini dulu memanggil empat namespace sekaligus (`completeReg.*`,
+ * `rakit.*`, `ui2.*`) dan label utamanya `t("jsx.k18")` — kunci yang tidak
+ * menyebutkan apa pun tentang isinya. Kunci lama TIDAK dihapus dari kamus
+ * sebab layar lain masih memakainya; yang diperbaiki hanya layar ini.
+ */
+describe("#170 layar SSO memakai satu namespace yang bermakna", () => {
+  it("tidak ada lagi kunci jsx/ui2/rakit di berkas layar ini", () => {
+    const berkas = fsBerkas(__dirname + "/CompleteRegistrationScreen.tsx");
+
+    expect(berkas).not.toMatch(/t\("jsx\./);
+    expect(berkas).not.toMatch(/t\("ui2\./);
+    expect(berkas).not.toMatch(/t\("rakit\./);
+  });
+
+  it("setiap kunci completeReg yang dipakai ada di kedua kamus", () => {
+    const berkas = fsBerkas(__dirname + "/CompleteRegistrationScreen.tsx");
+    const dipakai = [...berkas.matchAll(/t\("(completeReg\.[a-zA-Z0-9_]+)"/g)].map((m) => m[1]);
+
+    expect(dipakai.length).toBeGreaterThan(0);
+
+    const kurang: string[] = [];
+    for (const kunci of dipakai) {
+      const [blok, nama] = kunci.split(".");
+      for (const bahasa of ["id", "en"] as const) {
+        const bundel = i18n.getResourceBundle(bahasa, "translation") as Record<
+          string,
+          Record<string, string>
+        >;
+        const nilai = bundel[blok]?.[nama];
+        if (typeof nilai !== "string" || nilai.trim() === "") kurang.push(`${bahasa}:${kunci}`);
+      }
+    }
+    expect(kurang).toEqual([]);
   });
 });

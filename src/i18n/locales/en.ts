@@ -2495,6 +2495,10 @@ export const en = {
     suggestHint: "We suggested one from your email. Change it if you prefer another name.",
     usernameInvalid: "Username may contain letters only, max 10 characters",
     usernameRequired: "Username is required",
+    usernameLabel: "Username",
+    submitting: "Processing…",
+    submit: "Finish Registration",
+    backToLoginIn: "Returning to the sign-in page in {{detik}} seconds…",
     cancel: "Cancel",
   },
   regValidation: {

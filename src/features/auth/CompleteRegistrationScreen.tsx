@@ -172,7 +172,7 @@ export const CompleteRegistrationScreen = ({
         </button>
         {!dijeda && (
           <p className="mt-3 text-xs text-content-muted">
-            {t("rakit.backToLoginIn", { detik: hitungMundur })}
+            {t("completeReg.backToLoginIn", { detik: hitungMundur })}
           </p>
         )}
       </motion.div>
@@ -197,7 +197,7 @@ export const CompleteRegistrationScreen = ({
       <form onSubmit={kirim} className="mt-6 space-y-4">
         <div>
           <label htmlFor={ID_KOLOM} className="mb-1.5 block text-sm font-medium text-content-body">
-            {t("jsx.k18")} <span className="text-danger-text">*</span>{" "}
+            {t("completeReg.usernameLabel")} <span className="text-danger-text">*</span>{" "}
             <span className="font-normal text-content-muted">{t("completeReg.usernameHint")}</span>
           </label>
           <input
@@ -241,7 +241,7 @@ export const CompleteRegistrationScreen = ({
                      transition-colors duration-150 hover:bg-primary-surface-hover
                      disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {mengirim ? t("ui2.processing") : t("ui2.finishRegistration")}
+          {mengirim ? t("completeReg.submitting") : t("completeReg.submit")}
           {!mengirim && <ArrowRight className="h-4 w-4" />}
         </button>
 

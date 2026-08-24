@@ -2505,6 +2505,10 @@ export const id = {
     suggestHint: "Kami sarankan dari email Anda. Silakan ubah bila ingin nama lain.",
     usernameInvalid: "Username hanya boleh berupa huruf, maksimal 10 karakter",
     usernameRequired: "Username wajib diisi",
+    usernameLabel: "Nama Pengguna",
+    submitting: "Memproses…",
+    submit: "Selesaikan Pendaftaran",
+    backToLoginIn: "Otomatis kembali ke halaman masuk dalam {{detik}} detik…",
     cancel: "Batal",
   },
   regValidation: {
