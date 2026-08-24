@@ -13,7 +13,6 @@ import {
   ListChecks,
   Clock,
   UserCheck,
-  Cpu,
   Lightbulb,
   CheckCircle2,
   Loader2,
@@ -778,26 +777,8 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
   return (
     <div className="w-full flex flex-col bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">
-      {/* Companion Header Banner */}
-      <div className="p-4 sm:p-5 bg-gradient-to-r from-primary-active via-primary to-primary-hover text-content-inverse flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="p-2.5 bg-surface/10 border border-white/15 rounded-lg text-indigo-200 shadow-2xs">
-            <Cpu className="w-5 h-5 animate-pulse" />
-          </span>
-          <div>
-            <div className="flex items-center gap-2">
-              <h4 className="text-sm font-medium tracking-tight text-content-inverse">
-                {t("aiMeeting.title")}
-              </h4>
-              <span className="px-2 py-0.5 bg-indigo-500/80 text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-medium rounded-md uppercase tracking-wider">
-                PRO
-              </span>
-            </div>
-            <p className="text-xs sm:text-[11px] text-content-inverse-muted/80 mt-0.5">
-              {t("jsx.m1")}
-            </p>
-          </div>
-        </div>
+      {/* Companion Header Banner — judul/subjudul dekoratif dihapus atas permintaan pemilik proyek (#182), tombol fungsional dipertahankan */}
+      <div className="p-3 sm:p-4 bg-gradient-to-r from-primary-active via-primary to-primary-hover text-content-inverse flex flex-col md:flex-row justify-end items-start md:items-center gap-4 shrink-0">
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setShowFeedbackModal(true)}
@@ -1807,15 +1788,6 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
             )}
           </>
         )}
-      </div>
-
-      {/* Info footer */}
-      <div className="bg-surface-sunken border-t p-4 px-6 flex items-center gap-2 text-xs sm:text-[11px] text-content-subtle">
-        <Info className="w-4 h-4 text-content-subtle shrink-0" />
-        <span>
-          {t("jsx.j134")} <strong>Gemini AI</strong>
-          {t("jsx.j136")}
-        </span>
       </div>
 
       {/* Continuous Learning Loop Feedback Modal */}
