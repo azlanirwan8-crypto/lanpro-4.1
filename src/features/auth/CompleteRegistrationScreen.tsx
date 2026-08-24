@@ -7,6 +7,16 @@ import { usulkanUsername } from "./lib/ssoUsername";
 import type { CompleteRegistrationScreenProps } from "./types";
 
 /**
+ * KENAPA LAYAR INI DUDUK DI ATAS KARTU (#165). Banner biru di `AuthLayout`
+ * berposisi ABSOLUT, jadi ia keluar dari alur dan pemusatan tegak lurus di
+ * sana mengabaikan tingginya. Layar login dan daftar tidak terganggu sebab
+ * keduanya sudah punya kartu legap; layar ini dulu tidak punya, sehingga
+ * judul dan subjudulnya ter-render langsung di atas banner. Terukur dari
+ * token `index.css`: teks sekunder di atas banner hanya 3,71:1 di mode gelap
+ * dan 1,01:1 di mode terang — yang kedua praktis tidak terbaca. Di atas
+ * `bg-surface` keduanya menjadi 8,46:1 dan 7,58:1.
+ */
+/**
  * Langkah terakhir pendaftaran lewat Google/Microsoft.
  *
  * KENAPA LAYAR INI ADA. Google dan Microsoft hanya memberi email dan nama —
@@ -132,7 +142,7 @@ export const CompleteRegistrationScreen = ({
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md text-center"
+        className="w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-border-faint/90 p-8 sm:p-10 mx-auto text-center"
       >
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-success/10">
           <CheckCircle2 className="h-7 w-7 text-success-text" />
@@ -162,7 +172,7 @@ export const CompleteRegistrationScreen = ({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-md"
+      className="w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-border-faint/90 p-8 sm:p-10 mx-auto"
     >
       <h2 className="text-2xl font-semibold text-content-strong">{t("completeReg.completeReg")}</h2>
       <p className="mt-1.5 text-sm text-content-secondary">{t("completeReg.oneMoreStep")}</p>
