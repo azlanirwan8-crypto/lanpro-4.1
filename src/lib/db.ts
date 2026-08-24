@@ -278,7 +278,41 @@ if (!connectionString) {
 // teardown yang tidak perlu ketika konfigurasinya sebenarnya tidak berubah.
 let activeConnectionString = connectionString;
 
-let pgPool: Pool = createPgPool();
+// Batas aman pool koneksi serverless. #163: nilai default 100 membuat tiap
+// instance meminta hingga seratus koneksi sekaligus dan pooler Neon
+// mengantre tanpa galat sampai timeout Vercel. #175: nilai diagnostik `1`
+// yang dipakai untuk membuktikan hipotesis itu menetap jadi permanen di
+// Vercel — pool bergantian dipakai sendirian oleh job latar dan permintaan
+// login, sehingga siapa pun yang datang kedua gagal. Kedua insiden berakar
+// pada hal yang sama: nilai ini hidup HANYA di env var Vercel, gampang lupa
+// diubah balik, dan tidak ada apa pun di kode yang mencegah nilai ekstrem.
+// Klem ini memastikan nilai seaneh apa pun di dashboard tidak bisa lagi
+// mengulang salah satu dari dua insiden itu.
+const DB_CONNECTION_LIMIT_MIN = 5;
+const DB_CONNECTION_LIMIT_MAX = 20;
+const DB_CONNECTION_LIMIT_DEFAULT = 5;
+
+export function resolveConnectionLimit(): number {
+  const raw = process.env.DB_CONNECTION_LIMIT;
+  const parsed = raw ? parseInt(raw, 10) : NaN;
+
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    if (raw) {
+      console.warn(
+        `⚠️ [DB] DB_CONNECTION_LIMIT="${raw}" tidak valid, memakai default ${DB_CONNECTION_LIMIT_DEFAULT}.`
+      );
+    }
+    return DB_CONNECTION_LIMIT_DEFAULT;
+  }
+
+  const clamped = Math.min(Math.max(parsed, DB_CONNECTION_LIMIT_MIN), DB_CONNECTION_LIMIT_MAX);
+  if (clamped !== parsed) {
+    console.warn(
+      `⚠️ [DB] DB_CONNECTION_LIMIT=${parsed} di luar rentang aman [${DB_CONNECTION_LIMIT_MIN}, ${DB_CONNECTION_LIMIT_MAX}], dipakaikan ${clamped}.`
+    );
+  }
+  return clamped;
+}
 
 function createPgPool(connStr?: string): Pool {
   const cs = connStr || connectionString || "";
@@ -286,7 +320,7 @@ function createPgPool(connStr?: string): Pool {
   const pool = new Pool({
     connectionString: cs,
     ssl: sslConfig,
-    max: parseInt(process.env.DB_CONNECTION_LIMIT || "100", 10),
+    max: resolveConnectionLimit(),
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
   });
@@ -298,6 +332,8 @@ function createPgPool(connStr?: string): Pool {
 
   return pool;
 }
+
+let pgPool: Pool = createPgPool();
 
 // Verify connection on startup
 if (connectionString) {

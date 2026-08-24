@@ -11,7 +11,7 @@ jest.mock("pg", () => ({
   })),
 }));
 
-import { convertToPostgres } from "./db";
+import { convertToPostgres, resolveConnectionLimit } from "./db";
 
 describe("convertToPostgres", () => {
   it("converts ? placeholders to $1, $2, ... in order", () => {
@@ -92,5 +92,63 @@ describe("convertToPostgres", () => {
     const { text } = convertToPostgres("SHOW TABLES");
     expect(text).toContain("pg_class");
     expect(text).not.toContain("Tables_in_defaultdb");
+  });
+});
+
+// Regression: ISSUE-163/175 — DB_CONNECTION_LIMIT tanpa klem
+// Found by /qa on 2026-08-24
+// Report: AUDIT.md #175, #163
+//
+// #163: nilai default 100 membuat pool serverless kelebihan beban, pooler
+// Neon mengantre tanpa galat sampai timeout Vercel.
+// #175: nilai diagnostik 1 (dipakai untuk membuktikan hipotesis #163) menetap
+// permanen di Vercel — pool hanya punya satu koneksi, job latar dan login
+// saling berebut, siapa pun yang datang kedua gagal setelah 5 detik.
+// Klem di resolveConnectionLimit() memastikan kedua ekstrem ini tidak bisa
+// lagi meloloskan nilai berbahaya ke Pool({ max }), apa pun yang disetel di
+// dashboard Vercel.
+describe("resolveConnectionLimit", () => {
+  const ORIGINAL_ENV = process.env.DB_CONNECTION_LIMIT;
+
+  afterEach(() => {
+    if (ORIGINAL_ENV === undefined) {
+      delete process.env.DB_CONNECTION_LIMIT;
+    } else {
+      process.env.DB_CONNECTION_LIMIT = ORIGINAL_ENV;
+    }
+  });
+
+  it("menaikkan nilai diagnostik 1 (#175) ke batas minimum aman", () => {
+    process.env.DB_CONNECTION_LIMIT = "1";
+    expect(resolveConnectionLimit()).toBeGreaterThanOrEqual(5);
+  });
+
+  it("menurunkan nilai default lama 100 (#163) ke batas maksimum aman", () => {
+    process.env.DB_CONNECTION_LIMIT = "100";
+    expect(resolveConnectionLimit()).toBeLessThanOrEqual(20);
+  });
+
+  it("memakai nilai apa adanya saat sudah di dalam rentang aman", () => {
+    process.env.DB_CONNECTION_LIMIT = "5";
+    expect(resolveConnectionLimit()).toBe(5);
+  });
+
+  it("jatuh ke default aman saat env var kosong", () => {
+    delete process.env.DB_CONNECTION_LIMIT;
+    expect(resolveConnectionLimit()).toBeGreaterThanOrEqual(5);
+    expect(resolveConnectionLimit()).toBeLessThanOrEqual(20);
+  });
+
+  it("jatuh ke default aman saat env var bukan angka", () => {
+    process.env.DB_CONNECTION_LIMIT = "banyak";
+    expect(resolveConnectionLimit()).toBeGreaterThanOrEqual(5);
+    expect(resolveConnectionLimit()).toBeLessThanOrEqual(20);
+  });
+
+  it("jatuh ke default aman saat env var nol atau negatif", () => {
+    process.env.DB_CONNECTION_LIMIT = "0";
+    expect(resolveConnectionLimit()).toBeGreaterThanOrEqual(5);
+    process.env.DB_CONNECTION_LIMIT = "-1";
+    expect(resolveConnectionLimit()).toBeGreaterThanOrEqual(5);
   });
 });
