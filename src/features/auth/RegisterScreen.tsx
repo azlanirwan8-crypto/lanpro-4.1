@@ -39,17 +39,21 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawVal = e.target.value;
-    // Allow only alphabetic letters
-    const filteredVal = rawVal.replace(/[^a-zA-Z]/g, "").slice(0, 10);
 
-    if (rawVal !== filteredVal) {
-      setFieldErrors((prev) => ({ ...prev, username: "Username hanya boleh berupa huruf" }));
-    } else if (filteredVal.length > 10) {
-      setFieldErrors((prev) => ({ ...prev, username: "Username maksimal 10 karakter" }));
-    } else {
-      setFieldErrors((prev) => ({ ...prev, username: undefined }));
-    }
-    setUsername(filteredVal);
+    // Nilainya disimpan APA ADANYA (#168). Versi sebelumnya membuang karakter
+    // terlarang pada setiap ketikan, sehingga angka lenyap sebelum sempat
+    // terlihat dan papan ketik terasa rusak. Panjangnya tetap dibatasi lewat
+    // `maxLength` di kolomnya — itu batas peramban yang menolak ketikan
+    // berikutnya, bukan penghapusan diam-diam atas apa yang sudah diketik.
+    // Pengiriman tetap dijaga `registrationSchema`, jadi nilai tak sah tidak
+    // pernah lolos ke `onRegister`.
+    setUsername(rawVal);
+
+    const hanyaHuruf = /^[a-zA-Z]*$/.test(rawVal);
+    setFieldErrors((prev) => ({
+      ...prev,
+      username: hanyaHuruf ? undefined : t("regValidation.usernameLettersOnly"),
+    }));
   };
 
   const handleEmailChange = (val: string) => {
@@ -72,7 +76,9 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
       const formattedErrors: Record<string, string> = {};
       result.error.issues.forEach((err) => {
         if (err.path[0]) {
-          formattedErrors[err.path[0] as string] = err.message;
+          // `err.message` berisi KUNCI i18n, bukan teks (#171). Diterjemahkan
+          // di sini, bukan di skema, supaya ganti bahasa ikut terasa.
+          formattedErrors[err.path[0] as string] = t(err.message);
         }
       });
       setFieldErrors(formattedErrors);

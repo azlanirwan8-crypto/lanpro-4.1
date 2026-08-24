@@ -173,19 +173,27 @@ router.get("/api/presence/sync", authenticateJWT, async (req: any, res) => {
 });
 
 // Users API
-router.get("/api/users", async (req, res) => {
+router.get("/api/users", async (req: any, res) => {
   try {
-    const rows = await userRepository.findAll();
+    // Item #162 — `email`, `phone`, dan `permissions` hanya untuk Global
+    // Admin. Pemeriksaannya SAMA PERSIS dengan `verifyGlobalAdmin`
+    // (`req.user.role === "admin"`, diisi `authenticateJWT` dari JWT yang
+    // ditandatangani, jadi tidak bisa dipalsukan klien) supaya tidak lahir
+    // kosakata otorisasi kedua di repo ini. Middleware-nya sendiri tidak
+    // bisa dipakai di sini: ia MENOLAK non-admin dengan 403, sedangkan rute
+    // ini memang harus tetap melayani mereka — cuma dengan isi lebih sedikit.
+    const rows =
+      req.user?.role === "admin"
+        ? await userRepository.findAll()
+        : await userRepository.findAllRingkas();
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/users error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server_3",
-        message: "Terjadi kesalahan internal server: " + error.message,
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server_3",
+      message: "Terjadi kesalahan internal server: " + error.message,
+    });
   }
 });
 
@@ -202,13 +210,11 @@ router.get("/api/users/:id", async (req, res) => {
     }
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/users/:id error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server_3",
-        message: "Terjadi kesalahan internal server: " + error.message,
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server_3",
+      message: "Terjadi kesalahan internal server: " + error.message,
+    });
   }
 });
 
@@ -358,13 +364,11 @@ router.put(
       res.json({ status: "success", code: "srv.user_updated", message: "User updated" });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: PUT /api/users error:", error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server_3",
-          message: "Terjadi kesalahan internal server: " + error.message,
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server_3",
+        message: "Terjadi kesalahan internal server: " + error.message,
+      });
     }
   }
 );
@@ -380,13 +384,11 @@ router.delete(
       res.json({ status: "success", code: "srv.user_deleted", message: "User deleted" });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: DELETE /api/users error:", error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server_3",
-          message: "Terjadi kesalahan internal server: " + error.message,
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server_3",
+        message: "Terjadi kesalahan internal server: " + error.message,
+      });
     }
   }
 );
@@ -427,13 +429,11 @@ router.put(
       if (currentPassword && newPassword) {
         const isValid = await verifyPassword(currentPassword, user.passwordHash || "");
         if (!isValid) {
-          return res
-            .status(400)
-            .json({
-              status: "error",
-              code: "srv.password_lama_yang_anda",
-              message: "Password lama yang Anda masukkan salah!",
-            });
+          return res.status(400).json({
+            status: "error",
+            code: "srv.password_lama_yang_anda",
+            message: "Password lama yang Anda masukkan salah!",
+          });
         }
         newPasswordHash = hashPassword(newPassword);
       }
@@ -475,13 +475,11 @@ router.put(
       res.json({ status: "success", code: "srv.profile_updated", message: "Profile updated" });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: PUT /api/profile/update error:", error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server_3",
-          message: "Terjadi kesalahan internal server: " + error.message,
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server_3",
+        message: "Terjadi kesalahan internal server: " + error.message,
+      });
     }
   }
 );

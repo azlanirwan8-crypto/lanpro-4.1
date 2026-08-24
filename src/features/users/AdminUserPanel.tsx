@@ -261,10 +261,13 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
     setSortField,
     sortOrder,
     setSortOrder,
+    // Item #160 — `setFilterRole`/`setFilterStatus` tidak lagi diambil: nol
+    // pemakai sesudah dua dropdown-nya dihapus. Nilainya sendiri TETAP diambil
+    // karena masih jadi kebergantungan efek pembersih pilihan di bawah; hook
+    // `useAdminUsers` sengaja tidak disentuh supaya saringannya bisa dipasang
+    // kembali tanpa membongkar apa pun.
     filterRole,
-    setFilterRole,
     filterStatus,
-    setFilterStatus,
     handleDeleteUser,
     filteredUsers,
     totalPages,
@@ -510,7 +513,14 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
         <div className="flex flex-col space-y-6 min-h-full">
           {/* Header & Controls */}
           <div className="bg-surface rounded-lg shadow-soft border border-border-subtle/80 p-4 shrink-0">
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-4">
+            {/*
+              Item #160 — dua saringan (Semua Peran, Semua Status) DIHAPUS atas
+              permintaan pemilik proyek, dan pencarian naik sebaris dengan
+              Ekspor + Tambah. Barisnya jadi satu, jadi `mb-4` pemisah antar
+              baris ikut hilang — kalau ditinggal, ia menyisakan celah kosong
+              di bawah kartu.
+            */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 bg-info/10 text-info-text rounded-lg flex items-center justify-center border border-info/20 shrink-0">
                   <Users className="w-4.5 h-4.5" />
@@ -524,7 +534,24 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto">
+                {/*
+                  Pencarian dipindah ke sini dari baris kedua. `sm:w-64` dipakai
+                  alih-alih `flex-1`: di baris ini tetangganya dua tombol
+                  berlebar tetap, jadi `flex-1` akan meregang sampai menyentuh
+                  judul di layar lebar. Di bawah `sm` ia kembali selebar penuh
+                  supaya tidak terhimpit.
+                */}
+                <div className="relative w-full sm:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle" />
+                  <input
+                    type="text"
+                    placeholder={t("users.searchPlaceholder")}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-9 pr-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded focus:bg-surface focus:ring-1 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none text-xs h-8.5 font-medium text-content-strong placeholder:text-content-subtle"
+                  />
+                </div>
                 <button
                   onClick={handleExportCSV}
                   className="bg-surface-sunken hover:bg-surface-muted text-content-body border border-border-subtle hover:border-border-subtle font-medium py-1.5 px-3 rounded text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98] shadow-2xs h-8.5"
@@ -538,45 +565,6 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   <UserPlus className="w-3.5 h-3.5" /> {t("users.addUser")}
                 </Button>
               </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle" />
-                <input
-                  type="text"
-                  placeholder={t("users.searchPlaceholder")}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded focus:bg-surface focus:ring-1 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none text-xs h-8.5 font-medium text-content-strong placeholder:text-content-subtle"
-                />
-              </div>
-              <StyledDropdown
-                value={filterRole}
-                onChange={(val: string) => setFilterRole(val)}
-                options={[
-                  { id: "all", label: t("users.allRoles"), icon: "Users", color: "#6366F1" },
-                  ...peranSistem.map((p) => ({
-                    id: p.code,
-                    label: p.label,
-                    icon: p.icon || undefined,
-                    color: p.color || undefined,
-                  })),
-                ]}
-                type="project_role"
-                masterData={masterData}
-                buttonClassName="px-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded text-content-body font-medium text-xs h-8.5"
-              />
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded focus:bg-surface focus:ring-1 focus:ring-indigo-500/10 outline-none text-content-body font-medium text-xs cursor-pointer h-8.5"
-              >
-                <option value="all">{t("users.allStatus")}</option>
-                <option value="approved">{t("users.approved")}</option>
-                <option value="pending">{t("users.pending")}</option>
-                <option value="rejected">{t("users.rejected")}</option>
-              </select>
             </div>
           </div>
 

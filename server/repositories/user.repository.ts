@@ -42,6 +42,35 @@ export class UserRepository {
     }
   }
 
+  /**
+   * Daftar pengguna TANPA field sensitif — item #162.
+   *
+   * `findAll()` memulangkan `email`, `phone`, dan `permissions`, dan
+   * `GET /api/users` memulangkannya kepada SIAPA PUN yang membawa JWT sah.
+   * Endpoint itu tidak bisa sekadar dikunci admin: ia mengisi `allUsers`
+   * yang dipakai lima fitur non-admin — penyebutan di obrolan, status
+   * daring, avatar header, pemilih penerima tugas, dan peserta rapat.
+   *
+   * Tidak satu pun dari kelimanya membaca ketiga field itu. Jadi yang
+   * dipersempit adalah ISI-nya, bukan siapa yang boleh memanggil.
+   *
+   * Kolomnya sengaja ditulis ulang penuh, bukan hasil `findAll()` yang
+   * disaring di JavaScript: menyaring setelah kueri berarti datanya SUDAH
+   * meninggalkan database, dan satu `console.log` atau satu jalur galat
+   * cukup untuk membocorkannya kembali.
+   */
+  async findAllRingkas(): Promise<UserEntity[]> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        "SELECT id, uid, username, nama_lengkap, displayName, role, status, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, createdAt, lastSeen FROM Users"
+      );
+      return rows || [];
+    } finally {
+      connection.release();
+    }
+  }
+
   async findByIdOrUid(idOrUid: string): Promise<UserEntity | null> {
     const connection = await db.getConnection();
     try {
@@ -101,7 +130,9 @@ export class UserRepository {
         "SELECT avatar_url, photoURL, avatarUrl FROM Users WHERE id = ? OR uid = ?",
         [userId, userId]
       );
-      return barisLama?.[0]?.avatar_url || barisLama?.[0]?.photoURL || barisLama?.[0]?.avatarUrl || null;
+      return (
+        barisLama?.[0]?.avatar_url || barisLama?.[0]?.photoURL || barisLama?.[0]?.avatarUrl || null
+      );
     } finally {
       connection.release();
     }
@@ -156,7 +187,11 @@ export class UserRepository {
         sqlUpdates.push("phone = ?");
         values.push(updates.phone && updates.phone.trim() !== "" ? updates.phone.trim() : null);
       }
-      if (updates.passwordHash !== undefined && updates.passwordHash !== null && updates.passwordHash !== "") {
+      if (
+        updates.passwordHash !== undefined &&
+        updates.passwordHash !== null &&
+        updates.passwordHash !== ""
+      ) {
         sqlUpdates.push("passwordHash = ?");
         values.push(updates.passwordHash);
       }
@@ -217,7 +252,14 @@ export class UserRepository {
     }
   }
 
-  async getUserProjectRoles(dbUserId: string, firebaseUid: string): Promise<{ projectRoles: Record<string, string>; adminProjectIds: string[]; qaProjectIds: string[] }> {
+  async getUserProjectRoles(
+    dbUserId: string,
+    firebaseUid: string
+  ): Promise<{
+    projectRoles: Record<string, string>;
+    adminProjectIds: string[];
+    qaProjectIds: string[];
+  }> {
     const connection = await db.getConnection();
     try {
       const [pmRows]: any = await connection.query(

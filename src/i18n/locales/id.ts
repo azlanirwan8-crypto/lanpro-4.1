@@ -1044,6 +1044,7 @@ export const id = {
     tasksDeleteFailed: "Gagal menghapus beberapa tugas: ",
   },
   sidebar: {
+    noProjectYet: "Belum ada proyek",
     yourProfile: "Profil Anda",
     logout: "Keluar",
     profileMenuHint: "Klik untuk opsi profil & keluar",
@@ -2209,6 +2210,11 @@ export const id = {
     checking: "Memeriksa...",
     providerBackend: "Penyedia Backend",
     defaultSender: "Alamat Pengirim Default",
+    senderNotSet: "Belum disetel (EMAIL_FROM kosong)",
+    statusActive:
+      "Layanan email transaksional aktif dan terhubung ke Resend REST API. Pastikan domain pengirim sudah terverifikasi di dasbor Resend.",
+    statusMock:
+      "Layanan email berjalan dalam mode mock/simulasi untuk pengembangan lokal. Email akan tercatat di log konsol server.",
     subjectPlaceholder: "[LanPro] Penugasan: {{task_key}}",
     advancedEditor: "Editor Template Lanjutan",
     saveConfig: "Simpan Konfigurasi",
@@ -2456,7 +2462,33 @@ export const id = {
     saveApply: "Simpan & Terapkan Langsung",
     testConnection: "Uji Koneksi",
   },
+  welcome: {
+    greeting: "Selamat datang di LanPro",
+    greetingNamed: "Selamat datang, {{nama}}",
+    noProjectYet:
+      "Anda belum tergabung di proyek mana pun. Administrator perlu menambahkan Anda ke sebuah proyek sebelum modul kerja terbuka.",
+    stepAccountTitle: "Akun Anda aktif",
+    stepAccountDesc: "Masuk berhasil. Tidak ada yang rusak pada aplikasi ini.",
+    stepProfileTitle: "Lengkapi profil Anda",
+    stepProfileDesc:
+      "Ini satu-satunya hal yang bisa Anda kerjakan sekarang, sekaligus memudahkan orang yang akan menugaskan Anda mengenali Anda.",
+    openProfile: "Buka Profil",
+    stepAccessTitle: "Menunggu akses proyek",
+    stepAccessDesc:
+      "Mintalah administrator menambahkan Anda ke sebuah proyek. Halaman ini memperbarui dirinya sendiri begitu itu terjadi.",
+    stepAccessDescAdmin:
+      "Anda boleh membuat proyek sendiri, atau menunggu ditambahkan ke proyek yang sudah ada.",
+    lockedTitle: "Terbuka setelah Anda tergabung di proyek",
+    lockedHint:
+      "Modul ini terkunci, bukan rusak. Semuanya terbuka begitu Anda menjadi anggota proyek.",
+  },
   appShell: {
+    forbiddenUsers:
+      "Anda tidak memiliki izin untuk melihat Manajemen Pengguna. Hubungi administrator bila memerlukan akses.",
+    pickProjectHintAdmin:
+      "Silakan pilih salah satu proyek dari sidebar di sebelah kiri, atau buat proyek baru untuk mulai mengelola tugas & sprint tim Anda.",
+    pickProjectHint:
+      "Silakan pilih salah satu proyek dari sidebar di sebelah kiri. Pembuatan proyek baru hanya dapat dilakukan oleh administrator.",
     loading: "Memuat...",
     forbidden: "403 Terlarang",
     forbiddenIntegration:
@@ -2476,7 +2508,25 @@ export const id = {
     oneMoreStep: "Satu langkah lagi. Pilih username untuk akun LanPro Anda.",
     usernamePlaceholder: "johndoe",
     suggestHint: "Kami sarankan dari email Anda. Silakan ubah bila ingin nama lain.",
+    usernameInvalid: "Username hanya boleh berupa huruf, maksimal 10 karakter",
+    usernameRequired: "Username wajib diisi",
+    usernameLabel: "Nama Pengguna",
+    submitting: "Memproses…",
+    submit: "Selesaikan Pendaftaran",
+    backToLoginIn: "Otomatis kembali ke halaman masuk dalam {{detik}} detik…",
     cancel: "Batal",
+  },
+  regValidation: {
+    nameMin: "Nama minimal 3 karakter",
+    nameMax: "Nama maksimal 25 karakter",
+    emailInvalid: "Format email tidak valid (contoh: user@gmail.com)",
+    usernameLettersOnly: "Username hanya boleh berupa huruf",
+    usernameMax: "Username maksimal 10 karakter",
+    passwordMin: "Password minimal 8 karakter",
+    passwordUpper: "Password harus mengandung minimal 1 huruf besar (A-Z)",
+    passwordLower: "Password harus mengandung minimal 1 huruf kecil (a-z)",
+    passwordDigit: "Password harus mengandung minimal 1 angka (0-9)",
+    passwordSymbol: "Password harus mengandung minimal 1 simbol khusus (@$!%*?&)",
   },
   teamLead2: {
     sprintProgress: "Progres Sprint",

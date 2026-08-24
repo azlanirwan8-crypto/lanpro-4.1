@@ -37,9 +37,17 @@ describe("email.service - F6.2 Fondasi Layanan Email", () => {
   });
 
   describe("ambilEmailPengirim & statusEmailService", () => {
-    it("mengembalikan default EMAIL_FROM bila env kosong", () => {
+    // #157 — Dulu test ini menegaskan adanya alamat cadangan yang dikeraskan.
+    // Cadangan itulah yang membuat domain mati tetap terlihat sehat, jadi yang
+    // dijaga sekarang justru kebalikannya: kosong harus tetap kosong.
+    it("mengembalikan string kosong bila EMAIL_FROM tidak disetel", () => {
       delete process.env.EMAIL_FROM;
-      expect(ambilEmailPengirim()).toBe("LanPro <lanpro@rajonet.com>");
+      expect(ambilEmailPengirim()).toBe("");
+    });
+
+    it("tidak memuat domain apa pun yang dikeraskan di dalam kode", () => {
+      delete process.env.EMAIL_FROM;
+      expect(ambilEmailPengirim()).not.toMatch(/@/);
     });
 
     it("mengembalikan EMAIL_FROM dari environment bila ada", () => {
@@ -168,6 +176,23 @@ describe("email.service - F6.2 Fondasi Layanan Email", () => {
       );
     });
 
+    // #157 — Sebelum ini, EMAIL_FROM kosong tidak pernah sampai ke sini: nilai
+    // cadangan menutupinya, lalu Resend menolak dengan galat domain yang tidak
+    // menyebut sebab sebenarnya. Sekarang berhenti sebelum jaringan tersentuh.
+    it("menolak sebelum memanggil Resend bila EMAIL_FROM kosong", async () => {
+      delete process.env.EMAIL_FROM;
+
+      const res = await kirimEmail({
+        to: "recipient@contoh.com",
+        subject: "Aktivasi Akun",
+        html: "<h1>Halo</h1>",
+      });
+
+      expect(res.success).toBe(false);
+      expect(res.error).toContain("EMAIL_FROM belum dikonfigurasi");
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
     it("menangani response error dari Resend API (misal 403 / unverified domain)", async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
@@ -243,4 +268,3 @@ describe("email.service - F6.2 Fondasi Layanan Email", () => {
     });
   });
 });
-

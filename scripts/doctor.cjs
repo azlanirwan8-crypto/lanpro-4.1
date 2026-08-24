@@ -304,11 +304,18 @@ section('6. Penyimpanan berkas unggahan');
   // keadaannya hidup di layanan pihak ketiga. Tidak ada gerbang yang menangkapnya,
   // jadi kegagalannya hanya muncul sebagai satu baris di log server saat email
   // benar-benar dikirim — yaitu tepat saat pengguna sedang menunggunya.
+  // #157 — Cadangan `LanPro <lanpro@rajonet.com>` DIHAPUS dari sini. Selama ia
+  // ada, `EMAIL_FROM` yang kosong diperiksa seolah-olah domainnya sudah diisi,
+  // sehingga doctor bisa melaporkan sesuatu yang tidak dipakai kode mana pun.
   const kunciResend = (process.env.RESEND_API_KEY || '').trim();
-  const pengirim = (process.env.EMAIL_FROM || '').trim() || 'LanPro <lanpro@rajonet.com>';
+  const pengirim = (process.env.EMAIL_FROM || '').trim();
   const domainPengirim = (pengirim.match(/@([^>\s]+)/) || [])[1] || '';
 
-  if (!kunciResend) {
+  if (!pengirim) {
+    warn('EMAIL_FROM kosong — tidak ada alamat pengirim',
+      'Pengiriman ditolak sebelum menyentuh Resend. Isi dengan bentuk ' +
+      '"Nama <alamat@domain>" memakai domain yang sudah terverifikasi');
+  } else if (!kunciResend) {
     warn('RESEND_API_KEY belum diisi — status domain tidak bisa diperiksa',
       'Di PRODUKSI ini berarti tidak ada email yang terkirim sama sekali: ' +
       'verifikasi akun, tautan lupa kata sandi, dan digest harian semuanya diam');
@@ -347,6 +354,40 @@ section('6. Penyimpanan berkas unggahan');
       warn('Gagal menghubungi Resend untuk memeriksa domain',
         `Pemeriksaan DILEWATI, jangan diartikan domainnya sehat: ${e && e.message ? e.message : e}`);
     }
+  }
+
+  // ── 6c. Alamat aplikasi untuk tautan di dalam email ─────────────────
+  section('6c. APP_URL (tautan di dalam email)');
+
+  // #157 — `urlFrontend()` MENGUTAMAKAN APP_URL di atas header permintaan bila
+  // nilainya berawalan http(s). Artinya APP_URL yang tertinggal di localhost
+  // tidak diabaikan di produksi, melainkan MENANG: tautan atur-ulang kata sandi
+  // yang dikirim ke pengguna menunjuk ke mesin mereka sendiri, dan tidak ada
+  // galat di mana pun karena emailnya terkirim dengan sukses.
+  const appUrl = (process.env.APP_URL || '').trim();
+  const diProduksi = (process.env.NODE_ENV || '').toLowerCase() === 'production';
+
+  if (!appUrl) {
+    warn('APP_URL kosong — tautan email mengikuti header permintaan',
+      'Biasanya benar di belakang reverse proxy, tetapi menjadi salah bila ' +
+      'Host dapat dipalsukan. Isi eksplisit untuk produksi');
+  } else if (!/^https?:\/\//i.test(appUrl)) {
+    warn(`APP_URL tidak berawalan http:// atau https:// (${appUrl})`,
+      'Nilai tanpa skema DIABAIKAN diam-diam oleh urlFrontend()');
+  } else if (/localhost|127\.0\.0\.1/i.test(appUrl)) {
+    (diProduksi ? fail : ok)(
+      diProduksi
+        ? `APP_URL masih menunjuk localhost di PRODUKSI: ${appUrl}`
+        : `APP_URL localhost (wajar di pengembangan)`,
+      diProduksi
+        ? 'Tautan atur-ulang kata sandi akan menunjuk mesin pengguna sendiri ' +
+          'dan mustahil diselesaikan. Ganti ke domain aplikasi sungguhan'
+        : appUrl);
+  } else if (diProduksi && appUrl.startsWith('http://')) {
+    warn(`APP_URL memakai http:// polos di produksi: ${appUrl}`,
+      'Tautan bertoken atur-ulang kata sandi akan melintas tanpa enkripsi');
+  } else {
+    ok('APP_URL siap dipakai untuk tautan email', appUrl);
   }
 
   section('7. Uji koneksi database');

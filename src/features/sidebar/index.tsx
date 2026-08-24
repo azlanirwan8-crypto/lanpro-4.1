@@ -185,6 +185,13 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
           </motion.div>
         ))}
 
+        {/* Daftar proyek kosong — item #160. Tanpa baris ini blok "PROYEK
+            AKTIF" hanya berupa judul melayang, sehingga pengguna baru membaca
+            layar ini sebagai aplikasi yang gagal memuat. */}
+        {projects.length === 0 && !isSidebarCollapsed && (
+          <div className="px-3 py-2 text-xs text-sidebar-text">{t("sidebar.noProjectYet")}</div>
+        )}
+
         {/* Sidebar Categories & Navigation Items */}
         {sidebarSections.map((section) => {
           const permittedItems = section.items.filter((item) => {
@@ -221,7 +228,25 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
             return hasAnyPermission && hasRead;
           });
 
-          if (permittedItems.length === 0) return null;
+          /* Menu yang butuh proyek DIBUANG, bukan dikunci — revisi #160
+             setelah design review. Alasan awal ("terkunci lebih informatif")
+             kalah oleh duplikasi: enam dari delapan menu itu sudah muncul lagi
+             sebagai kartu bergembok di layar sambutan, lengkap dengan
+             penjelasannya. Versi sidebar cuma daftar tanpa penjelasan, jadi
+             versi itulah yang dibuang. Delapan gembok berbaris juga merebut
+             titik pandang pertama dari sapaan, dan pada opasitas 50% teksnya
+             cuma berkontras 3,17:1 — di bawah ambang WCAG AA.
+
+             `tetapTampil` mengecualikan `dashboard`: ia beranda, dan tanpa
+             proyek ia mendarat di layar sambutan alih-alih layar kosong. */
+          const itemTampil =
+            projects.length === 0
+              ? permittedItems.filter((item) => !item.butuhProyek || item.tetapTampil)
+              : permittedItems;
+
+          /* Judul seksi ikut hilang begitu isinya habis. Tanpa ini "KOLABORASI"
+             dan "MANAJEMEN PROYEK" tertinggal sebagai judul melayang. */
+          if (itemTampil.length === 0) return null;
 
           return (
             <React.Fragment key={section.id}>
@@ -232,7 +257,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                   </div>
                 </div>
               )}
-              {permittedItems.map((item) => {
+              {itemTampil.map((item) => {
                 const isActive = currentView === item.id;
                 const hasChildren = Boolean(item.children && item.children.length > 0);
                 const isExpanded = Boolean(expandedItems[item.id]);

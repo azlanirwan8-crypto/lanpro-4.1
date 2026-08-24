@@ -7,6 +7,16 @@ import { usulkanUsername } from "./lib/ssoUsername";
 import type { CompleteRegistrationScreenProps } from "./types";
 
 /**
+ * KENAPA LAYAR INI DUDUK DI ATAS KARTU (#165). Banner biru di `AuthLayout`
+ * berposisi ABSOLUT, jadi ia keluar dari alur dan pemusatan tegak lurus di
+ * sana mengabaikan tingginya. Layar login dan daftar tidak terganggu sebab
+ * keduanya sudah punya kartu legap; layar ini dulu tidak punya, sehingga
+ * judul dan subjudulnya ter-render langsung di atas banner. Terukur dari
+ * token `index.css`: teks sekunder di atas banner hanya 3,71:1 di mode gelap
+ * dan 1,01:1 di mode terang — yang kedua praktis tidak terbaca. Di atas
+ * `bg-surface` keduanya menjadi 8,46:1 dan 7,58:1.
+ */
+/**
  * Langkah terakhir pendaftaran lewat Google/Microsoft.
  *
  * KENAPA LAYAR INI ADA. Google dan Microsoft hanya memberi email dan nama —
@@ -24,6 +34,13 @@ import type { CompleteRegistrationScreenProps } from "./types";
  * Akun baru dibuat SETELAH tombol ini ditekan, bukan sebelumnya. Bila pengguna
  * menutup layar sekarang, tidak ada baris setengah jadi yang tertinggal.
  */
+/** Aturan lama yang tidak berubah: hanya huruf, maksimal 10 karakter. */
+const SAH = /^[a-zA-Z]{1,10}$/;
+
+const ID_KOLOM = "sso-username";
+const ID_GALAT = "sso-username-galat";
+const ID_PETUNJUK = "sso-username-petunjuk";
+
 export const CompleteRegistrationScreen = ({
   email,
   onSelesai,
@@ -40,22 +57,37 @@ export const CompleteRegistrationScreen = ({
   const [mengirim, setMengirim] = useState(false);
   const [berhasil, setBerhasil] = useState<string | null>(null);
 
+  // `aria-describedby` hanya menyebut id yang BENAR-BENAR ter-render. Menunjuk
+  // ke elemen yang tidak ada dibaca pembaca layar sebagai tidak ada keterangan
+  // sama sekali, jadi lebih buruk daripada tidak memasangnya (#167).
+  const keteranganKolom = [galat ? ID_GALAT : null, adaUsulan ? ID_PETUNJUK : null]
+    .filter(Boolean)
+    .join(" ");
+
   // Penyaringan sama persis dengan form pendaftaran manual — aturan lama tidak
   // boleh berbeda hanya karena jalur masuknya berbeda.
   const ubahUsername = (nilai: string) => {
-    const disaring = nilai.replace(/[^a-zA-Z]/g, "").slice(0, 10);
-    if (nilai !== disaring) {
-      setGalat("Username hanya boleh berupa huruf, maksimal 10 karakter");
-    } else {
-      setGalat(null);
-    }
-    setUsername(disaring);
+    // Nilainya disimpan APA ADANYA (#168). Versi sebelumnya membuang karakter
+    // terlarang pada setiap ketikan, sehingga angka lenyap sebelum sempat
+    // terlihat dan papan ketik terasa rusak. Efek sampingnya terbukti saat
+    // #167: karena kolom sudah berisi hasil saringan, memperbaikinya dengan
+    // mengetik ulang nilai yang sama tidak memicu peristiwa apa pun dan galat
+    // lama bertahan di layar. Kini kolom menampilkan yang diketik, galat
+    // menjelaskan yang salah, dan pengiriman yang menahan nilai tak sah.
+    setUsername(nilai);
+    setGalat(SAH.test(nilai) || nilai === "" ? null : t("completeReg.usernameInvalid"));
   };
 
   const kirim = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username) {
-      setGalat("Username wajib diisi");
+      setGalat(t("completeReg.usernameRequired"));
+      return;
+    }
+    // Penjaga terakhir. Sejak #168 kolom tidak lagi menyaring saat mengetik,
+    // jadi nilai tak sah bisa sampai ke sini — dan tidak boleh lewat.
+    if (!SAH.test(username)) {
+      setGalat(t("completeReg.usernameInvalid"));
       return;
     }
     setMengirim(true);
@@ -72,14 +104,37 @@ export const CompleteRegistrationScreen = ({
   };
 
   // -- Auto-redirect ke halaman login setelah 5 detik --
+  //
+  // Hitung mundur ini BERHENTI pada interaksi pertama, untuk seterusnya (#166).
+  // Pesan di layar sukses berbunyi "akun Anda menunggu persetujuan admin" —
+  // pengguna baru saja mendaftar dan perlu tahu bahwa ia BELUM bisa masuk,
+  // jadi melemparnya keluar saat ia masih membaca adalah kerugian bersih.
+  // Tombolnya tetap ada, jadi yang memang ingin kembali tidak dihalangi.
   const [hitungMundur, setHitungMundur] = useState(5);
+  const [dijeda, setDijeda] = useState(false);
 
   const kembali = useCallback(() => {
     onSelesai();
   }, [onSelesai]);
 
   useEffect(() => {
-    if (!berhasil) return;
+    if (!berhasil || dijeda) return;
+
+    const hentikan = () => setDijeda(true);
+    const peristiwa = ["mousemove", "mousedown", "keydown", "wheel", "touchstart"] as const;
+    for (const nama of peristiwa) {
+      window.addEventListener(nama, hentikan, { passive: true });
+    }
+
+    return () => {
+      for (const nama of peristiwa) {
+        window.removeEventListener(nama, hentikan);
+      }
+    };
+  }, [berhasil, dijeda]);
+
+  useEffect(() => {
+    if (!berhasil || dijeda) return;
 
     if (hitungMundur <= 0) {
       kembali();
@@ -91,14 +146,14 @@ export const CompleteRegistrationScreen = ({
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [berhasil, hitungMundur, kembali]);
+  }, [berhasil, dijeda, hitungMundur, kembali]);
 
   if (berhasil) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md text-center"
+        className="w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-border-faint/90 p-8 sm:p-10 mx-auto text-center"
       >
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-success/10">
           <CheckCircle2 className="h-7 w-7 text-success-text" />
@@ -115,9 +170,11 @@ export const CompleteRegistrationScreen = ({
         >
           {t("completeReg.backToLogin")}
         </button>
-        <p className="mt-3 text-xs text-content-muted">
-          {t("rakit.backToLoginIn", { detik: hitungMundur })}
-        </p>
+        {!dijeda && (
+          <p className="mt-3 text-xs text-content-muted">
+            {t("completeReg.backToLoginIn", { detik: hitungMundur })}
+          </p>
+        )}
       </motion.div>
     );
   }
@@ -126,7 +183,7 @@ export const CompleteRegistrationScreen = ({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-md"
+      className="w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-border-faint/90 p-8 sm:p-10 mx-auto"
     >
       <h2 className="text-2xl font-semibold text-content-strong">{t("completeReg.completeReg")}</h2>
       <p className="mt-1.5 text-sm text-content-secondary">{t("completeReg.oneMoreStep")}</p>
@@ -139,12 +196,15 @@ export const CompleteRegistrationScreen = ({
           ditampilkan di sini. */}
       <form onSubmit={kirim} className="mt-6 space-y-4">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-content-body">
-            {t("jsx.k18")} <span className="text-danger-text">*</span>{" "}
+          <label htmlFor={ID_KOLOM} className="mb-1.5 block text-sm font-medium text-content-body">
+            {t("completeReg.usernameLabel")} <span className="text-danger-text">*</span>{" "}
             <span className="font-normal text-content-muted">{t("completeReg.usernameHint")}</span>
           </label>
           <input
+            id={ID_KOLOM}
             type="text"
+            aria-invalid={galat ? "true" : "false"}
+            aria-describedby={keteranganKolom || undefined}
             value={username}
             onChange={(e) => ubahUsername(e.target.value)}
             placeholder={t("completeReg.usernamePlaceholder")}
@@ -156,12 +216,18 @@ export const CompleteRegistrationScreen = ({
           {/* Keterangan hanya muncul bila memang ada usulan. Menampilkan
               "kami sarankan" pada kolom kosong justru membingungkan. */}
           {adaUsulan && (
-            <p className="mt-1 text-xs text-content-muted">{t("completeReg.suggestHint")}</p>
+            <p id={ID_PETUNJUK} className="mt-1 text-xs text-content-muted">
+              {t("completeReg.suggestHint")}
+            </p>
           )}
         </div>
 
         {galat && (
-          <div className="flex items-start gap-2 text-sm text-danger-text">
+          <div
+            id={ID_GALAT}
+            role="alert"
+            className="flex items-start gap-2 text-sm text-danger-text"
+          >
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{galat}</span>
           </div>
@@ -175,7 +241,7 @@ export const CompleteRegistrationScreen = ({
                      transition-colors duration-150 hover:bg-primary-surface-hover
                      disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {mengirim ? t("ui2.processing") : t("ui2.finishRegistration")}
+          {mengirim ? t("completeReg.submitting") : t("completeReg.submit")}
           {!mengirim && <ArrowRight className="h-4 w-4" />}
         </button>
 

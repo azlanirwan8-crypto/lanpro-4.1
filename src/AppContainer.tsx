@@ -42,6 +42,7 @@ import { UserDetailView } from "./features/users/UserDetailView";
 import { Sidebar } from "./features/sidebar";
 import { AdminUserPanel } from "./features/users";
 import { MasterDataPanel } from "./features/master/MasterDataPanel";
+import { WelcomeScreen } from "./components/WelcomeScreen";
 import { LiveChatWidget } from "./components/LiveChatWidget";
 import { PresenceProvider } from "./contexts/PresenceContext";
 import { HeaderAvatarGroup } from "./components/HeaderAvatarGroup";
@@ -121,6 +122,7 @@ import {
   Lock as LockIcon,
   Link2 as Link2Icon,
   Settings,
+  ShieldAlert,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
 import { useAuthNotification } from "./components/AuthToastContainer";
@@ -674,6 +676,25 @@ function AppContainer() {
   };
 
   const handleSetIsTaskDetailModalOpen = setIsTaskDetailModalOpen;
+
+  /**
+   * Membuka detail pengguna sambil MENGINGAT asalnya — item #161.
+   *
+   * `onBack` di `UserDetailView` dulu dikeraskan ke `"users"`, jadi tombol
+   * Kembali selalu bermuara di panel admin Manajemen Pengguna, dari mana pun
+   * layar itu dibuka. Untuk pengguna biasa yang membuka profilnya sendiri
+   * lewat footer sidebar atau layar sambutan, satu klik Kembali melemparkannya
+   * ke daftar SELURUH pengguna — layar yang menunya sendiri disembunyikan
+   * untuknya. Dipakai pola yang sudah ada untuk `issueDetail`, bukan state
+   * baru.
+   */
+  const bukaDetailPengguna = (target: any) => {
+    if (currentView !== "userDetail") {
+      setPreviousView(currentView);
+    }
+    setSelectedUserForDetail(target);
+    setCurrentView("userDetail" as any);
+  };
 
   const {
     socketConnected,
@@ -3428,10 +3449,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           currentUser={currentUser}
           user={user}
           setIsProfileModalOpen={setIsProfileModalOpen}
-          onOpenProfile={() => {
-            setSelectedUserForDetail(currentUserProfile || currentUser || user);
-            setCurrentView("userDetail" as any);
-          }}
+          onOpenProfile={() => bukaDetailPengguna(currentUserProfile || currentUser || user)}
           handleLogout={handleLogoutRequest}
         />
 
@@ -3568,7 +3586,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           {currentView === "userDetail" ? (
             <UserDetailView
               user={selectedUserForDetail}
-              onBack={() => setCurrentView("users")}
+              onBack={() => setCurrentView(previousView as any)}
               projects={projects}
               tasks={tasks}
               departments={masterData.filter((m) => m.type === "department")}
@@ -3580,19 +3598,38 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               }}
             />
           ) : currentView === "users" ? (
-            <AdminUserPanel
-              projects={projects}
-              tasks={tasks}
-              masterData={masterData}
-              userRole={effectiveRole}
-              currentUserId={currentUser?.uid || user?.uid}
-              onAddUser={() => {}}
-              onRefreshProjects={fetchProjects}
-              onSelectUserForDetail={(u) => {
-                setSelectedUserForDetail(u);
-                setCurrentView("userDetail" as any);
-              }}
-            />
+            /* Penjaga izin — item #161. `AdminUserPanel` tidak memeriksa izin
+               sama sekali di dalamnya, dan cabang ini berada DI ATAS penjaga
+               `selectedProject`, jadi apa pun yang berhasil menyetel
+               `currentView` ke "users" langsung mendapat daftar SELURUH
+               pengguna. Menyembunyikan menunya di sidebar bukan penjaga:
+               menu hanya salah satu jalan masuk. */
+            !hasPermission(
+              effectiveRole,
+              "userManagement",
+              "read",
+              false,
+              currentUserProfile?.permissions
+            ) ? (
+              <div className="flex flex-col items-center justify-center w-full flex-1 p-8 text-center bg-surface-sunken">
+                <ShieldAlert className="w-16 h-16 text-danger mb-4" />
+                <h2 className="text-2xl font-medium text-content-strong mb-2">
+                  {t("appShell.forbidden")}
+                </h2>
+                <p className="text-content-muted max-w-md">{t("appShell.forbiddenUsers")}</p>
+              </div>
+            ) : (
+              <AdminUserPanel
+                projects={projects}
+                tasks={tasks}
+                masterData={masterData}
+                userRole={effectiveRole}
+                currentUserId={currentUser?.uid || user?.uid}
+                onAddUser={() => {}}
+                onRefreshProjects={fetchProjects}
+                onSelectUserForDetail={(u) => bukaDetailPengguna(u)}
+              />
+            )
           ) : currentView === "master" ? (
             <MasterDataPanel
               projects={projects}
@@ -3740,6 +3777,38 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                 </motion.div>
               </AnimatePresence>
             </React.Fragment>
+          ) : projects.length === 0 ? (
+            /* Belum tergabung di proyek MANA PUN — item #160. Kartu di bawah
+               menyuruh memilih proyek dari sidebar, dan pada kondisi ini
+               sidebar-nya justru kosong, jadi perintahnya mustahil dijalankan. */
+            <WelcomeScreen
+              /* Urutan field SENGAJA disamakan dengan footer sidebar
+                 (`user?.displayName || currentUser?.displayName ||
+                 currentUser?.username`). Sebelumnya sapaan memulai dari
+                 `name`, yang kosong pada akun ini, sehingga sapaan jatuh ke
+                 "azlanirwan" sementara footer di layar yang SAMA menampilkan
+                 "alan Ir" — dua identitas untuk satu orang dalam satu
+                 tatapan. */
+              namaPengguna={
+                user?.displayName ||
+                currentUserProfile?.displayName ||
+                currentUser?.displayName ||
+                currentUserProfile?.name ||
+                currentUser?.name ||
+                currentUserProfile?.username ||
+                currentUser?.username ||
+                ""
+              }
+              onOpenProfile={() => bukaDetailPengguna(currentUserProfile || currentUser || user)}
+              bolehBuatProyek={hasPermission(
+                effectiveRole,
+                "configuration",
+                "create",
+                false,
+                currentUserProfile?.permissions
+              )}
+              onCreateProject={() => setIsNewProjectModalOpen(true)}
+            />
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8 text-center">
               <div className="w-16 h-16 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 mb-4 shadow-soft">
@@ -3756,8 +3825,8 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   false,
                   currentUserProfile?.permissions
                 )
-                  ? "Silakan pilih salah satu proyek dari sidebar di sebelah kiri, atau buat proyek baru untuk mulai mengelola tugas & sprint tim Anda."
-                  : "Silakan pilih salah satu proyek dari sidebar di sebelah kiri. Pembuatan proyek baru hanya dapat dilakukan oleh administrator."}
+                  ? t("appShell.pickProjectHintAdmin")
+                  : t("appShell.pickProjectHint")}
               </p>
               {/* Penjaga izin memakai pemeriksaan yang SAMA dengan tombol di
                   sidebar. Sebelumnya tombol ini tidak dijaga sama sekali,

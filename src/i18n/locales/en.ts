@@ -1041,6 +1041,7 @@ export const en = {
     tasksDeleteFailed: "Failed to delete some tasks: ",
   },
   sidebar: {
+    noProjectYet: "No project yet",
     yourProfile: "Your Profile",
     logout: "Log Out",
     profileMenuHint: "Click for profile options & logout",
@@ -2201,6 +2202,11 @@ export const en = {
     checking: "Checking...",
     providerBackend: "Provider Backend",
     defaultSender: "Default Sender Address",
+    senderNotSet: "Not set (EMAIL_FROM is empty)",
+    statusActive:
+      "Transactional email service is active and connected to the Resend REST API. Make sure the sender domain is verified in the Resend dashboard.",
+    statusMock:
+      "Email service is running in mock/simulation mode for local development. Emails are written to the server console log.",
     subjectPlaceholder: "[LanPro] Task Assignment: {{task_key}}",
     advancedEditor: "Advanced Template Editor",
     saveConfig: "Save Config",
@@ -2446,7 +2452,33 @@ export const en = {
     saveApply: "Save & Apply Live",
     testConnection: "Test Connection",
   },
+  welcome: {
+    greeting: "Welcome to LanPro",
+    greetingNamed: "Welcome, {{nama}}",
+    noProjectYet:
+      "You are not part of any project yet. An administrator needs to add you to a project before the work modules open up.",
+    stepAccountTitle: "Your account is active",
+    stepAccountDesc: "Sign-in succeeded. Nothing is wrong with the application.",
+    stepProfileTitle: "Complete your profile",
+    stepProfileDesc:
+      "This is the one thing you can do right now, and it helps whoever assigns you to a project recognise you.",
+    openProfile: "Open Profile",
+    stepAccessTitle: "Waiting for project access",
+    stepAccessDesc:
+      "Ask your administrator to add you to a project. This page updates by itself once that happens.",
+    stepAccessDescAdmin:
+      "You may create a project yourself, or wait to be added to an existing one.",
+    lockedTitle: "Available once you join a project",
+    lockedHint:
+      "These modules are locked, not broken. They open as soon as you are a project member.",
+  },
   appShell: {
+    forbiddenUsers:
+      "You do not have permission to view User Management. Contact your administrator if you need access.",
+    pickProjectHintAdmin:
+      "Pick one of the projects in the sidebar on the left, or create a new one to start managing your team's tasks and sprints.",
+    pickProjectHint:
+      "Pick one of the projects in the sidebar on the left. Only an administrator can create a new project.",
     loading: "Loading...",
     forbidden: "403 Forbidden",
     forbiddenIntegration:
@@ -2466,7 +2498,25 @@ export const en = {
     oneMoreStep: "One more step. Choose a username for your LanPro account.",
     usernamePlaceholder: "johndoe",
     suggestHint: "We suggested one from your email. Change it if you prefer another name.",
+    usernameInvalid: "Username may contain letters only, max 10 characters",
+    usernameRequired: "Username is required",
+    usernameLabel: "Username",
+    submitting: "Processing…",
+    submit: "Finish Registration",
+    backToLoginIn: "Returning to the sign-in page in {{detik}} seconds…",
     cancel: "Cancel",
+  },
+  regValidation: {
+    nameMin: "Name must be at least 3 characters",
+    nameMax: "Name must be at most 25 characters",
+    emailInvalid: "Invalid email format (example: user@gmail.com)",
+    usernameLettersOnly: "Username may contain letters only",
+    usernameMax: "Username may be at most 10 characters",
+    passwordMin: "Password must be at least 8 characters",
+    passwordUpper: "Password must contain at least 1 uppercase letter (A-Z)",
+    passwordLower: "Password must contain at least 1 lowercase letter (a-z)",
+    passwordDigit: "Password must contain at least 1 number (0-9)",
+    passwordSymbol: "Password must contain at least 1 special symbol (@$!%*?&)",
   },
   teamLead2: {
     sprintProgress: "Sprint Progress",

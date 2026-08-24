@@ -61,6 +61,10 @@ describe("taskDigest.service - F6.4 Rekapitulasi Tugas Pending (Item #28)", () =
 
     it("mengirimkan email task digest via Resend API bila API key terisi", async () => {
       process.env.RESEND_API_KEY = "re_test_task_digest_key";
+      // #157 — Baris ini WAJIB ada sekarang. Sebelumnya test lulus tanpa pernah
+      // menyetel EMAIL_FROM karena kode memakai alamat cadangan; itu berarti
+      // seluruh jalur digest tidak pernah diuji dengan konfigurasi sungguhan.
+      process.env.EMAIL_FROM = "LanPro <lanpro@contoh.test>";
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,

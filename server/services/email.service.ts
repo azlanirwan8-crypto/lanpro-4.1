@@ -35,8 +35,20 @@ export function ambilApiKey(): string {
   return (process.env.RESEND_API_KEY || "").trim();
 }
 
+/**
+ * #157 — TIDAK ADA alamat cadangan yang dikeraskan di sini.
+ *
+ * Versi lama memulangkan `LanPro <lanpro@rajonet.com>` bila `EMAIL_FROM` kosong.
+ * Cadangan semacam itu terlihat membantu, padahal justru menjamin kegagalan
+ * SENYAP: begitu domain berganti (atau, seperti #127, tidak pernah lolos
+ * verifikasi DNS), setiap pengiriman ditolak Resend sementara log server
+ * tetap melaporkan alamat pengirim yang tampak masuk akal. Lupa mengisi
+ * `EMAIL_FROM` harus terlihat, bukan tertutup nilai bawaan.
+ *
+ * Mengganti domain sekarang benar-benar cuma satu variabel: `EMAIL_FROM`.
+ */
 export function ambilEmailPengirim(): string {
-  return (process.env.EMAIL_FROM || "").trim() || "LanPro <lanpro@rajonet.com>";
+  return (process.env.EMAIL_FROM || "").trim();
 }
 
 export function emailTerkonfigurasi(): boolean {
@@ -88,12 +100,27 @@ export async function kirimEmail(input: KirimEmailInput): Promise<KirimEmailResu
     }
 
     console.info(
-      `[EMAIL MOCK] Mengirim email ke: ${penerima.join(", ")} | Subjek: "${subject}" | Pengirim: ${pengirim}`
+      `[EMAIL MOCK] Mengirim email ke: ${penerima.join(", ")} | Subjek: "${subject}" | Pengirim: ${
+        pengirim || "(EMAIL_FROM belum disetel)"
+      }`
     );
     return {
       success: true,
       messageId: `mock-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     };
+  }
+
+  /**
+   * #157 — Dijaga di sini, SESUDAH mode mock, supaya pengembangan lokal tanpa
+   * `EMAIL_FROM` tetap bisa jalan lewat log konsol. Yang tidak boleh terjadi
+   * adalah menembak Resend dengan alamat pengirim kosong: jawabannya akan
+   * berupa galat provider yang tidak menyebut sebab sebenarnya.
+   */
+  if (!pengirim) {
+    const err =
+      "EMAIL_FROM belum dikonfigurasi — alamat pengirim harus memakai domain yang terverifikasi di Resend";
+    console.error(`[EMAIL] Gagal kirim: ${err}`);
+    return { success: false, error: err };
   }
 
   try {

@@ -1,207 +1,122 @@
 [
-  {
-    "berkas": "src/AppContainer.tsx",
-    "baris": 2553,
-    "teks": "Bug"
-  },
-  {
-    "berkas": "src/components/LiveChatWidget.tsx",
-    "baris": 1140,
-    "teks": "UI Mockup Redesign"
-  },
-  {
-    "berkas": "src/components/LiveChatWidget.tsx",
-    "baris": 1143,
-    "teks": "PNG Mockup Asset"
-  },
-  {
-    "berkas": "src/components/LiveChatWidget.tsx",
-    "baris": 1165,
-    "teks": "Database Blueprint"
-  },
-  {
-    "berkas": "src/components/LiveChatWidget.tsx",
-    "baris": 1168,
-    "teks": "PDF Schema Spec"
-  },
-  {
-    "berkas": "src/features/auth/LoginScreen.tsx",
-    "baris": 166,
-    "teks": "Password"
-  },
-  {
-    "berkas": "src/features/backup/BackupPanel.tsx",
-    "baris": 356,
-    "teks": "\"Export Project Backup\""
-  },
-  {
-    "berkas": "src/features/explorer/DbExplorerPanel.tsx",
-    "baris": 183,
-    "teks": "PostgreSQL (Neon Cloud)"
-  },
-  {
-    "berkas": "src/features/flowchart/FlowchartContainer.tsx",
-    "baris": 2600,
-    "teks": "📄 PRD"
-  },
-  {
-    "berkas": "src/features/flowchart/FlowchartContainer.tsx",
-    "baris": 2605,
-    "teks": "📖 Panduan"
-  },
-  {
-    "berkas": "src/features/flowchart/FlowchartContainer.tsx",
-    "baris": 2610,
-    "teks": "📊 Laporan"
-  },
-  {
-    "berkas": "src/features/flowchart/FlowchartContainer.tsx",
-    "baris": 2615,
-    "teks": "⚙️ Umum"
-  },
-  {
-    "berkas": "src/features/flowchart/FlowchartContainer.tsx",
-    "baris": 3282,
-    "teks": "Ctrl + Z"
-  },
-  {
-    "berkas": "src/features/flowchart/FlowchartContainer.tsx",
-    "baris": 3290,
-    "teks": "Ctrl + Y / Ctrl+Shift+Z"
-  },
-  {
-    "berkas": "src/features/flowchart/FlowchartContainer.tsx",
-    "baris": 3298,
-    "teks": "Ctrl + D"
-  },
-  {
-    "berkas": "src/features/flowchart/FlowchartContainer.tsx",
-    "baris": 3330,
-    "teks": "Delete / Backspace"
-  },
-  {
-    "berkas": "src/features/kanban/index.tsx",
-    "baris": 97,
-    "teks": "acc + (groupedTasks[`$"
-  },
-  {
-    "berkas": "src/features/kanban/index.tsx",
-    "baris": 156,
-    "teks": "acc + (groupedTasks[`$"
-  },
-  {
-    "berkas": "src/features/kanban/index.tsx",
-    "baris": 164,
-    "teks": "acc + (groupedTasks[`unassigned:$"
-  },
-  {
-    "berkas": "src/features/kanban/index.tsx",
-    "baris": 282,
-    "teks": "acc + (groupedTasks[`$"
-  },
-  {
-    "berkas": "src/features/kanban/index.tsx",
-    "baris": 371,
-    "teks": "acc + (groupedTasks[`$"
-  },
-  {
-    "berkas": "src/features/master/MasterDataPanel.tsx",
-    "baris": 1148,
-    "teks": "Epic"
-  },
-  {
-    "berkas": "src/features/master/MasterDataPanel.tsx",
-    "baris": 1149,
-    "teks": "Standard"
-  },
-  {
-    "berkas": "src/features/master/MasterDataPanel.tsx",
-    "baris": 1150,
-    "teks": "Subtask"
-  },
-  {
-    "berkas": "src/features/meeting-notes/AiMeetingCompanion.tsx",
-    "baris": 764,
-    "teks": "Analisis transkrip suara hasil Speech-to-Text rapat menjadi ringkasan & action items terstruktur."
-  },
-  {
-    "berkas": "src/features/meeting-notes/AiMeetingCompanion.tsx",
-    "baris": 969,
-    "teks": "`- **Concern**: $"
-  },
-  {
-    "berkas": "src/features/meeting-notes/AiMeetingCompanion.tsx",
-    "baris": 969,
-    "teks": "*Solusi:* $"
-  },
-  {
-    "berkas": "src/features/meeting-notes/AiMeetingCompanion.tsx",
-    "baris": 1013,
-    "teks": "\"Simpan & Mulai Analisis Ulang\""
-  },
-  {
-    "berkas": "src/features/meeting-notes/AiMeetingCompanion.tsx",
-    "baris": 1146,
-    "teks": "Transkrip mentah tidak tersedia (Analisis multimodal diekstrak langsung dari rekaman video/audio)."
-  },
-  {
-    "berkas": "src/features/meeting-notes/AiMeetingCompanion.tsx",
-    "baris": 1161,
-    "teks": "Merekam suara rapat melalui mikrofon perangkat Anda (catatan: hanya suara yang ditangkap mikrofon)."
-  },
-  {
-    "berkas": "src/features/meeting-notes/AiMeetingCompanion.tsx",
-    "baris": 1854,
-    "teks": "Menyimpan..."
-  },
-  {
-    "berkas": "src/features/qa/components/QATestCaseTable.tsx",
-    "baris": 257,
-    "teks": "PASSED"
-  },
-  {
-    "berkas": "src/features/qa/components/QATestCaseTable.tsx",
-    "baris": 265,
-    "teks": "FAILED"
-  },
-  {
-    "berkas": "src/features/qa/components/QATestCaseTable.tsx",
-    "baris": 281,
-    "teks": "RETEST/PEND"
-  },
-  {
-    "berkas": "src/features/users/AdminUserPanel.tsx",
-    "baris": 629,
-    "teks": "Administrator"
-  },
-  {
-    "berkas": "src/features/users/UserDetailView.tsx",
-    "baris": 434,
-    "teks": "[ ...prev,"
-  },
-  {
-    "berkas": "src/features/users/UserDetailView.tsx",
-    "baris": 884,
-    "teks": "Administrator"
-  },
-  {
-    "berkas": "src/main.tsx",
-    "baris": 50,
-    "teks": "🚨 React Render Crash detected"
-  },
-  {
-    "berkas": "src/routes/AppRoutes.tsx",
-    "baris": 137,
-    "teks": "void | Promise"
-  },
-  {
-    "berkas": "src/utils/notificationFormatter.tsx",
-    "baris": 366,
-    "teks": "Transisi:"
-  },
-  {
-    "berkas": "src/utils/notificationFormatter.tsx",
-    "baris": 381,
-    "teks": "Transisi:"
-  }
+ {
+  "berkas": "src/AppContainer.tsx",
+  "baris": 2557,
+  "teks": "Bug"
+ },
+ {
+  "berkas": "src/components/LiveChatWidget.tsx",
+  "baris": 1140,
+  "teks": "UI Mockup Redesign"
+ },
+ {
+  "berkas": "src/components/LiveChatWidget.tsx",
+  "baris": 1143,
+  "teks": "PNG Mockup Asset"
+ },
+ {
+  "berkas": "src/components/LiveChatWidget.tsx",
+  "baris": 1165,
+  "teks": "Database Blueprint"
+ },
+ {
+  "berkas": "src/components/LiveChatWidget.tsx",
+  "baris": 1168,
+  "teks": "PDF Schema Spec"
+ },
+ {
+  "berkas": "src/features/explorer/DbExplorerPanel.tsx",
+  "baris": 181,
+  "teks": "PostgreSQL (Neon Cloud)"
+ },
+ {
+  "berkas": "src/features/flowchart/FlowchartContainer.tsx",
+  "baris": 3280,
+  "teks": "Ctrl + Z"
+ },
+ {
+  "berkas": "src/features/flowchart/FlowchartContainer.tsx",
+  "baris": 3288,
+  "teks": "Ctrl + Y / Ctrl+Shift+Z"
+ },
+ {
+  "berkas": "src/features/flowchart/FlowchartContainer.tsx",
+  "baris": 3296,
+  "teks": "Ctrl + D"
+ },
+ {
+  "berkas": "src/features/flowchart/FlowchartContainer.tsx",
+  "baris": 3328,
+  "teks": "Delete / Backspace"
+ },
+ {
+  "berkas": "src/features/kanban/index.tsx",
+  "baris": 97,
+  "teks": "acc + (groupedTasks[`$"
+ },
+ {
+  "berkas": "src/features/kanban/index.tsx",
+  "baris": 156,
+  "teks": "acc + (groupedTasks[`$"
+ },
+ {
+  "berkas": "src/features/kanban/index.tsx",
+  "baris": 164,
+  "teks": "acc + (groupedTasks[`unassigned:$"
+ },
+ {
+  "berkas": "src/features/kanban/index.tsx",
+  "baris": 282,
+  "teks": "acc + (groupedTasks[`$"
+ },
+ {
+  "berkas": "src/features/kanban/index.tsx",
+  "baris": 371,
+  "teks": "acc + (groupedTasks[`$"
+ },
+ {
+  "berkas": "src/features/master/MasterDataPanel.tsx",
+  "baris": 1150,
+  "teks": "Epic"
+ },
+ {
+  "berkas": "src/features/master/MasterDataPanel.tsx",
+  "baris": 1151,
+  "teks": "Standard"
+ },
+ {
+  "berkas": "src/features/master/MasterDataPanel.tsx",
+  "baris": 1152,
+  "teks": "Subtask"
+ },
+ {
+  "berkas": "src/features/meeting-notes/AiMeetingCompanion.tsx",
+  "baris": 968,
+  "teks": "`- **Concern**: $"
+ },
+ {
+  "berkas": "src/features/meeting-notes/AiMeetingCompanion.tsx",
+  "baris": 968,
+  "teks": "*Solusi:* $"
+ },
+ {
+  "berkas": "src/features/users/UserDetailView.tsx",
+  "baris": 434,
+  "teks": "[ ...prev,"
+ },
+ {
+  "berkas": "src/features/users/UserDetailView.tsx",
+  "baris": 884,
+  "teks": "Administrator"
+ },
+ {
+  "berkas": "src/main.tsx",
+  "baris": 50,
+  "teks": "🚨 React Render Crash detected"
+ },
+ {
+  "berkas": "src/routes/AppRoutes.tsx",
+  "baris": 137,
+  "teks": "void | Promise"
+ }
 ]
