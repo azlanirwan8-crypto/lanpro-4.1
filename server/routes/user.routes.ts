@@ -343,6 +343,23 @@ router.put(
           : hashPassword(rawPassword)
         : undefined;
 
+      // #178 — username & email unik di database, tapi tanpa pemeriksaan ini
+      // klien hanya melihat galat Postgres mentah, bukan pesan yang jelas.
+      if (username !== undefined && (await userRepository.isUsernameTaken(username, id))) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.username_sudah_digunakan_oleh",
+          message: "Username sudah digunakan oleh akun lain.",
+        });
+      }
+      if (email && (await userRepository.isEmailTaken(email, id))) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.email_sudah_digunakan_oleh",
+          message: "Email sudah digunakan oleh akun lain.",
+        });
+      }
+
       await userRepository.updateUser(
         id,
         {
@@ -442,6 +459,23 @@ router.put(
         effectiveAvatar !== undefined
           ? effectiveAvatar
           : user.avatar_url || user.photoURL || user.avatarUrl || null;
+
+      // #178 — sama seperti PUT /api/users/:id: cegah bentrok eksplisit
+      // sebelum UPDATE, supaya pesannya jelas alih-alih galat Postgres mentah.
+      if (username !== undefined && (await userRepository.isUsernameTaken(username, id))) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.username_sudah_digunakan_oleh",
+          message: "Username sudah digunakan oleh akun lain.",
+        });
+      }
+      if (email && (await userRepository.isEmailTaken(email, id))) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.email_sudah_digunakan_oleh",
+          message: "Email sudah digunakan oleh akun lain.",
+        });
+      }
 
       await userRepository.updateProfile(id, {
         displayName,
