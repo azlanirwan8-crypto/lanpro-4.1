@@ -22,6 +22,7 @@ import {
   Users,
   Info,
   FileText,
+  FileUp,
   UploadCloud,
   X,
   XCircle,
@@ -173,6 +174,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
   const [importingIds, setImportingIds] = useState<number[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const manuscriptInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadState, setUploadState] = useState<
     | "IDLE"
@@ -428,6 +430,38 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     const file = event.target.files?.[0];
     if (!file) return;
     await processUploadedFile(file);
+  };
+
+  const handleManuscriptUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith(".txt")) {
+      toast.error(t("aiMeeting.manuscriptOnlyTxt"));
+      return;
+    }
+
+    const validation = validateFileClient(file, 5 * 1024 * 1024);
+    if (!validation.valid) {
+      toast.error(validation.error || t("aiMeeting.manuscriptOnlyTxt"));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = typeof reader.result === "string" ? reader.result : "";
+      if (!text.trim()) {
+        toast.error(t("aiMeeting.manuscriptEmpty"));
+        return;
+      }
+      setTranscript(text);
+      toast.success(t("aiMeeting.manuscriptLoaded"));
+    };
+    reader.onerror = () => {
+      toast.error(t("aiMeeting.manuscriptReadFailed"));
+    };
+    reader.readAsText(file);
   };
 
   const handleCancelProcessing = async () => {
@@ -1148,7 +1182,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Section 1: Record Langsung */}
                   <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
                     <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
@@ -1322,36 +1356,74 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       </div>
                     )}
                   </div>
+
+                  {/* Section 3: Upload Manuskrip (.txt) — #182 */}
+                  <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft flex flex-col justify-between">
+                    <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
+                      <FileUp className="w-4 h-4 text-indigo-600" />
+                      {t("aiMeeting.manuscriptUploadLabel")}
+                    </div>
+                    <p className="text-xs sm:text-[11px] text-content-subtle">
+                      {t("aiMeeting.manuscriptUploadDesc")}
+                    </p>
+
+                    <div
+                      onClick={() => manuscriptInputRef.current?.click()}
+                      className="border-2 border-dashed border-border-subtle rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-indigo-400 hover:bg-indigo-500/10 transition-all text-content-muted hover:text-indigo-600 h-full min-h-[160px]"
+                    >
+                      <input
+                        type="file"
+                        ref={manuscriptInputRef}
+                        onChange={handleManuscriptUpload}
+                        accept=".txt,text/plain"
+                        className="hidden"
+                      />
+                      <FileUp className="w-8 h-8" />
+                      <p className="text-xs text-center">{t("aiMeeting.manuscriptDropText")}</p>
+                      <p className="text-xs sm:text-[10px] text-content-subtle text-center">
+                        {t("aiMeeting.manuscriptDropHint")}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Section 3: Paste Transcript */}
-                <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
-                  <div className="text-center text-xs text-content-subtle uppercase tracking-wider py-2">
-                    {t("aiMeeting.orPasteLink")}
+                {/* Section 4: Link rapat & transkrip manual — dipisah, tidak lagi digabung dalam satu label (#182) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
+                    <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
+                      <Sparkles className="w-4 h-4 text-indigo-600" />
+                      {t("aiMeeting.meetingLinkLabel")}
+                    </div>
+                    <input
+                      type="text"
+                      value={meetingLink}
+                      onChange={(e) => setMeetingLink(e.target.value)}
+                      placeholder={t("aiMeeting.pasteLinkPlaceholder")}
+                      className="w-full p-3 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle"
+                    />
                   </div>
 
-                  <input
-                    type="text"
-                    value={meetingLink}
-                    onChange={(e) => setMeetingLink(e.target.value)}
-                    placeholder={t("aiMeeting.pasteLinkPlaceholder")}
-                    className="w-full p-3 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle"
-                  />
-
-                  <textarea
-                    value={transcript}
-                    onChange={(e) => setTranscript(e.target.value)}
-                    placeholder={t("aiMeeting.pasteTranscriptPlaceholder")}
-                    className="w-full min-h-[160px] p-4 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle font-mono leading-relaxed shadow-inner"
-                  />
-                  <div className="flex justify-end">
-                    <button
-                      onClick={handleAnalyze}
-                      className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-xl text-xs font-medium shadow-soft-lg flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
-                    >
-                      <Sparkles className="w-4 h-4 text-indigo-200" /> {t("jsx.j123")}
-                    </button>
+                  <div className="space-y-2 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
+                    <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
+                      <FileText className="w-4 h-4 text-indigo-600" />
+                      {t("aiMeeting.manualTranscriptLabel")}
+                    </div>
+                    <textarea
+                      value={transcript}
+                      onChange={(e) => setTranscript(e.target.value)}
+                      placeholder={t("aiMeeting.pasteTranscriptPlaceholder")}
+                      className="w-full min-h-[92px] p-4 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle font-mono leading-relaxed shadow-inner"
+                    />
                   </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleAnalyze}
+                    className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-xl text-xs font-medium shadow-soft-lg flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
+                  >
+                    <Sparkles className="w-4 h-4 text-indigo-200" /> {t("jsx.j123")}
+                  </button>
                 </div>
               </div>
             )}
