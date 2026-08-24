@@ -1,0 +1,7 @@
+{
+ "Analisis transkrip suara hasil Speech-to-Text rapat menjadi ringkasan & action items terstruktur.": "jsx.m1",
+ "Transkrip mentah tidak tersedia (Analisis multimodal diekstrak langsung dari rekaman video/audio).": "jsx.m2",
+ "Merekam suara rapat melalui mikrofon perangkat Anda (catatan: hanya suara yang ditangkap mikrofon).": "jsx.m3",
+ "\"Simpan & Mulai Analisis Ulang\"": "jsx.m4",
+ "\"Export Project Backup\"": "jsx.m5"
+}
