@@ -2468,6 +2468,8 @@ export const en = {
       "These modules are locked, not broken. They open as soon as you are a project member.",
   },
   appShell: {
+    forbiddenUsers:
+      "You do not have permission to view User Management. Contact your administrator if you need access.",
     pickProjectHintAdmin:
       "Pick one of the projects in the sidebar on the left, or create a new one to start managing your team's tasks and sprints.",
     pickProjectHint:

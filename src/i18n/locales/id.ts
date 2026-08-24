@@ -2478,6 +2478,8 @@ export const id = {
       "Modul ini terkunci, bukan rusak. Semuanya terbuka begitu Anda menjadi anggota proyek.",
   },
   appShell: {
+    forbiddenUsers:
+      "Anda tidak memiliki izin untuk melihat Manajemen Pengguna. Hubungi administrator bila memerlukan akses.",
     pickProjectHintAdmin:
       "Silakan pilih salah satu proyek dari sidebar di sebelah kiri, atau buat proyek baru untuk mulai mengelola tugas & sprint tim Anda.",
     pickProjectHint:
