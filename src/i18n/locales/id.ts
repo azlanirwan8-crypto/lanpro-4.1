@@ -1045,7 +1045,6 @@ export const id = {
   },
   sidebar: {
     noProjectYet: "Belum ada proyek",
-    lockedNeedsProject: "Terbuka setelah Anda tergabung di proyek",
     yourProfile: "Profil Anda",
     logout: "Keluar",
     profileMenuHint: "Klik untuk opsi profil & keluar",

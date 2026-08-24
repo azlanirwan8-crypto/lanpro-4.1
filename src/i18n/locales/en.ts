@@ -1042,7 +1042,6 @@ export const en = {
   },
   sidebar: {
     noProjectYet: "No project yet",
-    lockedNeedsProject: "Available once you join a project",
     yourProfile: "Your Profile",
     logout: "Log Out",
     profileMenuHint: "Click for profile options & logout",

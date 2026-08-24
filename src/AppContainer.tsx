@@ -3746,10 +3746,20 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                menyuruh memilih proyek dari sidebar, dan pada kondisi ini
                sidebar-nya justru kosong, jadi perintahnya mustahil dijalankan. */
             <WelcomeScreen
+              /* Urutan field SENGAJA disamakan dengan footer sidebar
+                 (`user?.displayName || currentUser?.displayName ||
+                 currentUser?.username`). Sebelumnya sapaan memulai dari
+                 `name`, yang kosong pada akun ini, sehingga sapaan jatuh ke
+                 "azlanirwan" sementara footer di layar yang SAMA menampilkan
+                 "alan Ir" — dua identitas untuk satu orang dalam satu
+                 tatapan. */
               namaPengguna={
+                user?.displayName ||
+                currentUserProfile?.displayName ||
+                currentUser?.displayName ||
                 currentUserProfile?.name ||
-                currentUserProfile?.username ||
                 currentUser?.name ||
+                currentUserProfile?.username ||
                 currentUser?.username ||
                 ""
               }

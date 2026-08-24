@@ -76,6 +76,40 @@ describe("#160 layar sambutan tanpa proyek", () => {
   });
 });
 
+describe("#160 revisi design review — menu disembunyikan, bukan dikunci", () => {
+  /**
+   * Kegagalan yang dikunci: menu butuh-proyek muncul kembali di sidebar untuk
+   * pengguna tanpa proyek. Bentuk lamanya (opasitas 50% + gembok) mengulang
+   * grid modul di layar ini, merebut titik pandang pertama dari sapaan, dan
+   * berkontras 3,17:1 — di bawah ambang WCAG AA 4,5:1.
+   *
+   * `dashboard` sengaja DIKECUALIKAN: ia beranda dan mendarat di layar
+   * sambutan, bukan layar kosong, jadi navigasi tidak pernah benar-benar
+   * kosong.
+   */
+  const isi = fs.readFileSync(
+    path.resolve(__dirname, "..", "features", "sidebar", "index.tsx"),
+    "utf8"
+  );
+
+  it("sidebar tidak lagi merender jalur item terkunci", () => {
+    expect(isi).not.toContain("cursor-not-allowed");
+    expect(isi).not.toContain("const terkunci");
+  });
+
+  it("menu butuh-proyek disaring saat daftar proyek kosong", () => {
+    expect(isi).toContain("!item.butuhProyek || item.tetapTampil");
+  });
+
+  it("hanya dashboard yang dikecualikan dari penyaringan", () => {
+    const dikecualikan = sidebarSections
+      .flatMap((s) => s.items)
+      .filter((i) => i.tetapTampil)
+      .map((i) => i.id);
+    expect(dikecualikan).toEqual(["dashboard"]);
+  });
+});
+
 describe("#160 penandaan butuhProyek selaras dengan penjaga AppContainer", () => {
   /**
    * `users` dan `master` punya cabang SENDIRI di atas penjaga

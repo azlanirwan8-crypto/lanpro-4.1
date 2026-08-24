@@ -38,6 +38,16 @@ export interface SidebarItemConfig {
    * penjaga itu, karena itu keduanya tetap hidup.
    */
   butuhProyek?: boolean;
+  /**
+   * Tetap ditampilkan walau `projects.length === 0` — revisi #160.
+   *
+   * Hanya untuk `dashboard`. Ia memang berada di balik penjaga
+   * `selectedProject`, tetapi tanpa proyek ia mendarat di layar sambutan, jadi
+   * tombolnya TIDAK buntu. Disisakan supaya navigasi tidak pernah benar-benar
+   * kosong: pengguna yang kehilangan seluruh menu kehilangan juga jawaban atas
+   * "aplikasi ini apa dan saya sedang di mana".
+   */
+  tetapTampil?: boolean;
   badge?: string;
   badgeColor?: "orange" | "emerald" | "blue" | "purple";
   children?: SidebarSubItemConfig[];
@@ -59,6 +69,7 @@ export const sidebarSections: SidebarSectionConfig[] = [
         label: "sidebar.dashboard",
         icon: <LayoutDashboard className="w-4 h-4" />,
         butuhProyek: true,
+        tetapTampil: true,
         module: "dashboard",
       },
     ],
