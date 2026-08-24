@@ -34,6 +34,9 @@ import type { CompleteRegistrationScreenProps } from "./types";
  * Akun baru dibuat SETELAH tombol ini ditekan, bukan sebelumnya. Bila pengguna
  * menutup layar sekarang, tidak ada baris setengah jadi yang tertinggal.
  */
+/** Aturan lama yang tidak berubah: hanya huruf, maksimal 10 karakter. */
+const SAH = /^[a-zA-Z]{1,10}$/;
+
 const ID_KOLOM = "sso-username";
 const ID_GALAT = "sso-username-galat";
 const ID_PETUNJUK = "sso-username-petunjuk";
@@ -64,19 +67,27 @@ export const CompleteRegistrationScreen = ({
   // Penyaringan sama persis dengan form pendaftaran manual — aturan lama tidak
   // boleh berbeda hanya karena jalur masuknya berbeda.
   const ubahUsername = (nilai: string) => {
-    const disaring = nilai.replace(/[^a-zA-Z]/g, "").slice(0, 10);
-    if (nilai !== disaring) {
-      setGalat(t("completeReg.usernameInvalid"));
-    } else {
-      setGalat(null);
-    }
-    setUsername(disaring);
+    // Nilainya disimpan APA ADANYA (#168). Versi sebelumnya membuang karakter
+    // terlarang pada setiap ketikan, sehingga angka lenyap sebelum sempat
+    // terlihat dan papan ketik terasa rusak. Efek sampingnya terbukti saat
+    // #167: karena kolom sudah berisi hasil saringan, memperbaikinya dengan
+    // mengetik ulang nilai yang sama tidak memicu peristiwa apa pun dan galat
+    // lama bertahan di layar. Kini kolom menampilkan yang diketik, galat
+    // menjelaskan yang salah, dan pengiriman yang menahan nilai tak sah.
+    setUsername(nilai);
+    setGalat(SAH.test(nilai) || nilai === "" ? null : t("completeReg.usernameInvalid"));
   };
 
   const kirim = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username) {
       setGalat(t("completeReg.usernameRequired"));
+      return;
+    }
+    // Penjaga terakhir. Sejak #168 kolom tidak lagi menyaring saat mengetik,
+    // jadi nilai tak sah bisa sampai ke sini — dan tidak boleh lewat.
+    if (!SAH.test(username)) {
+      setGalat(t("completeReg.usernameInvalid"));
       return;
     }
     setMengirim(true);

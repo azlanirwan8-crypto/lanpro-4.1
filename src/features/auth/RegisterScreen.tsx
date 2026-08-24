@@ -39,17 +39,21 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
 
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawVal = e.target.value;
-    // Allow only alphabetic letters
-    const filteredVal = rawVal.replace(/[^a-zA-Z]/g, "").slice(0, 10);
 
-    if (rawVal !== filteredVal) {
-      setFieldErrors((prev) => ({ ...prev, username: t("regValidation.usernameLettersOnly") }));
-    } else if (filteredVal.length > 10) {
-      setFieldErrors((prev) => ({ ...prev, username: t("regValidation.usernameMax") }));
-    } else {
-      setFieldErrors((prev) => ({ ...prev, username: undefined }));
-    }
-    setUsername(filteredVal);
+    // Nilainya disimpan APA ADANYA (#168). Versi sebelumnya membuang karakter
+    // terlarang pada setiap ketikan, sehingga angka lenyap sebelum sempat
+    // terlihat dan papan ketik terasa rusak. Panjangnya tetap dibatasi lewat
+    // `maxLength` di kolomnya — itu batas peramban yang menolak ketikan
+    // berikutnya, bukan penghapusan diam-diam atas apa yang sudah diketik.
+    // Pengiriman tetap dijaga `registrationSchema`, jadi nilai tak sah tidak
+    // pernah lolos ke `onRegister`.
+    setUsername(rawVal);
+
+    const hanyaHuruf = /^[a-zA-Z]*$/.test(rawVal);
+    setFieldErrors((prev) => ({
+      ...prev,
+      username: hanyaHuruf ? undefined : t("regValidation.usernameLettersOnly"),
+    }));
   };
 
   const handleEmailChange = (val: string) => {
