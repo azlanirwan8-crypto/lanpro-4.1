@@ -2503,6 +2503,8 @@ export const id = {
     oneMoreStep: "Satu langkah lagi. Pilih username untuk akun LanPro Anda.",
     usernamePlaceholder: "johndoe",
     suggestHint: "Kami sarankan dari email Anda. Silakan ubah bila ingin nama lain.",
+    usernameInvalid: "Username hanya boleh berupa huruf, maksimal 10 karakter",
+    usernameRequired: "Username wajib diisi",
     cancel: "Batal",
   },
   teamLead2: {

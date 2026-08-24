@@ -45,7 +45,7 @@ export const CompleteRegistrationScreen = ({
   const ubahUsername = (nilai: string) => {
     const disaring = nilai.replace(/[^a-zA-Z]/g, "").slice(0, 10);
     if (nilai !== disaring) {
-      setGalat("Username hanya boleh berupa huruf, maksimal 10 karakter");
+      setGalat(t("completeReg.usernameInvalid"));
     } else {
       setGalat(null);
     }
@@ -55,7 +55,7 @@ export const CompleteRegistrationScreen = ({
   const kirim = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username) {
-      setGalat("Username wajib diisi");
+      setGalat(t("completeReg.usernameRequired"));
       return;
     }
     setMengirim(true);

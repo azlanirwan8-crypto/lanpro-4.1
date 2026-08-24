@@ -2493,6 +2493,8 @@ export const en = {
     oneMoreStep: "One more step. Choose a username for your LanPro account.",
     usernamePlaceholder: "johndoe",
     suggestHint: "We suggested one from your email. Change it if you prefer another name.",
+    usernameInvalid: "Username may contain letters only, max 10 characters",
+    usernameRequired: "Username is required",
     cancel: "Cancel",
   },
   teamLead2: {
