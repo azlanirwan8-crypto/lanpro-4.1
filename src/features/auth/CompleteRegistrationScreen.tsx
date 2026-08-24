@@ -83,14 +83,37 @@ export const CompleteRegistrationScreen = ({
   };
 
   // -- Auto-redirect ke halaman login setelah 5 detik --
+  //
+  // Hitung mundur ini BERHENTI pada interaksi pertama, untuk seterusnya (#166).
+  // Pesan di layar sukses berbunyi "akun Anda menunggu persetujuan admin" —
+  // pengguna baru saja mendaftar dan perlu tahu bahwa ia BELUM bisa masuk,
+  // jadi melemparnya keluar saat ia masih membaca adalah kerugian bersih.
+  // Tombolnya tetap ada, jadi yang memang ingin kembali tidak dihalangi.
   const [hitungMundur, setHitungMundur] = useState(5);
+  const [dijeda, setDijeda] = useState(false);
 
   const kembali = useCallback(() => {
     onSelesai();
   }, [onSelesai]);
 
   useEffect(() => {
-    if (!berhasil) return;
+    if (!berhasil || dijeda) return;
+
+    const hentikan = () => setDijeda(true);
+    const peristiwa = ["mousemove", "mousedown", "keydown", "wheel", "touchstart"] as const;
+    for (const nama of peristiwa) {
+      window.addEventListener(nama, hentikan, { passive: true });
+    }
+
+    return () => {
+      for (const nama of peristiwa) {
+        window.removeEventListener(nama, hentikan);
+      }
+    };
+  }, [berhasil, dijeda]);
+
+  useEffect(() => {
+    if (!berhasil || dijeda) return;
 
     if (hitungMundur <= 0) {
       kembali();
@@ -102,7 +125,7 @@ export const CompleteRegistrationScreen = ({
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [berhasil, hitungMundur, kembali]);
+  }, [berhasil, dijeda, hitungMundur, kembali]);
 
   if (berhasil) {
     return (
@@ -126,9 +149,11 @@ export const CompleteRegistrationScreen = ({
         >
           {t("completeReg.backToLogin")}
         </button>
-        <p className="mt-3 text-xs text-content-muted">
-          {t("rakit.backToLoginIn", { detik: hitungMundur })}
-        </p>
+        {!dijeda && (
+          <p className="mt-3 text-xs text-content-muted">
+            {t("rakit.backToLoginIn", { detik: hitungMundur })}
+          </p>
+        )}
       </motion.div>
     );
   }
