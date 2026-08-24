@@ -2136,7 +2136,7 @@ export const en = {
     strengthMedium: "Medium",
     strengthWeak: "Weak",
     createAccount: "Create New Account",
-    subtitle: "Join LanPro to manage projects and workflows",
+    subtitle: "Join to manage your projects and workflows",
     namePlaceholder: "John Doe",
     emailPlaceholder: "name@company.com",
     usernamePlaceholder: "johndoe",
@@ -2331,7 +2331,7 @@ export const en = {
   },
   login: {
     signIn: "Sign In",
-    subtitle: "Sign in to continue to LanPro Workspace",
+    subtitle: "Sign in to continue to your Workspace",
     usernamePlaceholder: "Enter your username",
     passwordPlaceholder: "Enter your password",
     rememberMe: "Remember Me",
