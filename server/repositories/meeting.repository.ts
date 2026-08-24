@@ -57,7 +57,12 @@ export class MeetingRepository {
     }
   }
 
-  async updateRecordingInfo(meetingId: string, recordingUrl: string, fileSize: number, status = "UPLOAD_SUCCESS"): Promise<void> {
+  async updateRecordingInfo(
+    meetingId: string,
+    recordingUrl: string,
+    fileSize: number,
+    status = "UPLOAD_SUCCESS"
+  ): Promise<void> {
     const connection = await db.getConnection();
     try {
       await connection.query(
@@ -72,7 +77,22 @@ export class MeetingRepository {
   async setUploadStatus(meetingId: string, status: string): Promise<void> {
     const connection = await db.getConnection();
     try {
-      await connection.query("UPDATE Meetings SET upload_status = ? WHERE id = ?", [status, meetingId]);
+      await connection.query("UPDATE Meetings SET upload_status = ? WHERE id = ?", [
+        status,
+        meetingId,
+      ]);
+    } finally {
+      connection.release();
+    }
+  }
+
+  async clearRecordingFile(meetingId: string): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query(
+        "UPDATE Meetings SET recording_url = NULL, file_size = NULL WHERE id = ?",
+        [meetingId]
+      );
     } finally {
       connection.release();
     }
@@ -151,7 +171,11 @@ export class MeetingRepository {
     }
   }
 
-  async updateTranscriptAndAiSummary(id: string, transcript: string, jsonStr: string): Promise<void> {
+  async updateTranscriptAndAiSummary(
+    id: string,
+    transcript: string,
+    jsonStr: string
+  ): Promise<void> {
     const connection = await db.getConnection();
     try {
       await connection.query("UPDATE Meetings SET transcript = ?, aiSummary = ? WHERE id = ?", [
@@ -250,7 +274,9 @@ export class MeetingRepository {
     }
   }
 
-  async getFileDownload(id: string): Promise<{ fileData: string; fileName: string; fileType: string } | null> {
+  async getFileDownload(
+    id: string
+  ): Promise<{ fileData: string; fileName: string; fileType: string } | null> {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(

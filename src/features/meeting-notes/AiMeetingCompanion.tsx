@@ -192,7 +192,6 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   const [uploadPercentage, setUploadPercentage] = useState(0);
   const [uploadedBytes, setUploadedBytes] = useState(0);
   const [totalBytes, setTotalBytes] = useState(0);
-  const [selectedPlatform, setSelectedPlatform] = useState<"Zoom" | "Teams" | "GMeet">("Zoom");
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -366,7 +365,6 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
         formData.append("recording", chunkFile);
         formData.append("meeting_id", meeting.id || "");
         formData.append("file_name", file.name);
-        formData.append("platform", selectedPlatform);
         formData.append("chunkIndex", chunkIndex.toString());
         formData.append("totalChunks", totalChunks.toString());
         formData.append("fileSize", file.size.toString());
@@ -1212,30 +1210,6 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       {t("jsx.j122")}
                     </div>
 
-                    {/* Media Platform Selector */}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
-                        {t("aiMeeting.recordingPlatform")}
-                      </label>
-                      <div className="grid grid-cols-3 gap-1.5 p-1 bg-surface-muted rounded-xl">
-                        {(["Zoom", "Teams", "GMeet"] as const).map((p) => (
-                          <button
-                            key={p}
-                            type="button"
-                            disabled={uploadState !== "IDLE"}
-                            onClick={() => setSelectedPlatform(p)}
-                            className={`py-1.5 text-xs sm:text-[11px]  rounded-lg transition-all cursor-pointer ${
-                              selectedPlatform === p
-                                ? "bg-surface text-indigo-700 shadow-soft border border-border-subtle/50"
-                                : "text-content-muted hover:text-content-strong disabled:opacity-50"
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
                     {uploadState !== "IDLE" ? (
                       (() => {
                         let title = "Mengolah Rapat...";
@@ -1349,7 +1323,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           className="hidden"
                         />
                         <UploadCloud className="w-8 h-8" />
-                        <p className="text-xs text-center">Unggah Rekaman ({selectedPlatform})</p>
+                        <p className="text-xs text-center">Unggah Rekaman Rapat</p>
                         <p className="text-xs sm:text-[10px] text-content-subtle text-center">
                           Video / Audio (MP4, AVI, MKV, MOV, MP3, WAV, etc.)
                         </p>
