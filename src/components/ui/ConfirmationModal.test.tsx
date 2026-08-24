@@ -10,7 +10,7 @@ describe("ConfirmationModal", () => {
         onClose={jest.fn()}
         onConfirm={jest.fn()}
         title="Logout Akun"
-        message="Apakah Anda yakin ingin keluar dari LanPro? Sesi Anda akan diakhiri."
+        message="Apakah Anda yakin ingin keluar? Sesi Anda akan diakhiri."
         variant="warning"
       />
     );
@@ -19,7 +19,7 @@ describe("ConfirmationModal", () => {
     expect(logoutIcon).toBeInTheDocument();
     expect(screen.getByText("Logout Akun")).toBeInTheDocument();
     expect(
-      screen.getByText("Apakah Anda yakin ingin keluar dari LanPro? Sesi Anda akan diakhiri.")
+      screen.getByText("Apakah Anda yakin ingin keluar? Sesi Anda akan diakhiri.")
     ).toBeInTheDocument();
   });
 

@@ -2144,7 +2144,7 @@ export const id = {
     strengthMedium: "Sedang",
     strengthWeak: "Lemah",
     createAccount: "Buat Akun Baru",
-    subtitle: "Bergabung dengan LanPro untuk mengelola proyek dan alur kerja",
+    subtitle: "Bergabung untuk mengelola proyek dan alur kerja Anda",
     namePlaceholder: "John Doe",
     emailPlaceholder: "nama@perusahaan.com",
     usernamePlaceholder: "johndoe",
@@ -2340,7 +2340,7 @@ export const id = {
   },
   login: {
     signIn: "Masuk",
-    subtitle: "Masuk untuk melanjutkan ke LanPro Workspace",
+    subtitle: "Masuk untuk melanjutkan ke Workspace Anda",
     usernamePlaceholder: "Masukkan username Anda",
     passwordPlaceholder: "Masukkan kata sandi",
     rememberMe: "Ingat Saya",

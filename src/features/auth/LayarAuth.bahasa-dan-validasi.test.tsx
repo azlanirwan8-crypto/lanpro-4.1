@@ -34,7 +34,7 @@ describe("#101 layar autentikasi berbahasa Indonesia", () => {
     render(<LoginScreen {...propsLogin} />);
 
     expect(screen.getByRole("heading", { name: "Masuk" })).toBeInTheDocument();
-    expect(screen.getByText("Masuk untuk melanjutkan ke LanPro Workspace")).toBeInTheDocument();
+    expect(screen.getByText("Masuk untuk melanjutkan ke Workspace Anda")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Masukkan username Anda")).toBeInTheDocument();
     expect(screen.getByText("Ingat Saya")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Lupa Kata Sandi?" })).toBeInTheDocument();
