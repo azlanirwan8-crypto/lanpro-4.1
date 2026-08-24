@@ -114,7 +114,7 @@ describe("AppContainer — jalur sudah login", () => {
     );
 
     expect(
-      screen.queryByText(/Masuk untuk melanjutkan ke LanPro Workspace/i)
+      screen.queryByText(/Masuk untuk melanjutkan ke Workspace Anda/i)
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/React Render Crash/i)).not.toBeInTheDocument();
   });

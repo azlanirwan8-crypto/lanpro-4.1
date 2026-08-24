@@ -98,7 +98,7 @@ describe("pemulihan sesi dari sessionStorage — jalur 'jangan ingat saya'", () 
       timeout: 12000,
     });
     expect(
-      screen.queryByText(/Masuk untuk melanjutkan ke LanPro Workspace/i)
+      screen.queryByText(/Masuk untuk melanjutkan ke Workspace Anda/i)
     ).not.toBeInTheDocument();
   }, 20000);
 
@@ -113,7 +113,7 @@ describe("pemulihan sesi dari sessionStorage — jalur 'jangan ingat saya'", () 
       timeout: 12000,
     });
     expect(
-      screen.queryByText(/Masuk untuk melanjutkan ke LanPro Workspace/i)
+      screen.queryByText(/Masuk untuk melanjutkan ke Workspace Anda/i)
     ).not.toBeInTheDocument();
   }, 20000);
 });
@@ -169,9 +169,7 @@ describe("isi storage yang RUSAK tidak boleh mengunci pengguna", () => {
 
     await waitFor(
       () =>
-        expect(
-          screen.getByText(/Masuk untuk melanjutkan ke LanPro Workspace/i)
-        ).toBeInTheDocument(),
+        expect(screen.getByText(/Masuk untuk melanjutkan ke Workspace Anda/i)).toBeInTheDocument(),
       { timeout: 5000 }
     );
 

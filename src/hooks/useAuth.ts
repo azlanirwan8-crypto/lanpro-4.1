@@ -196,7 +196,7 @@ export function useAuth(
     setConfirmAction?.({
       isOpen: true,
       title: "Logout Akun",
-      message: "Apakah Anda yakin ingin keluar dari LanPro? Sesi Anda akan diakhiri.",
+      message: "Apakah Anda yakin ingin keluar? Sesi Anda akan diakhiri.",
       variant: "warning",
       confirmText: "Ya, Keluar",
       cancelText: "Batal",

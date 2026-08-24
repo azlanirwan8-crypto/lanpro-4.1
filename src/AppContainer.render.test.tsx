@@ -74,7 +74,7 @@ describe("AppContainer", () => {
     // "body tidak kosong" akan tetap hijau meski yang ter-render hanyalah
     // error boundary — persis kegagalan yang test ini seharusnya tangkap.
     expect(screen.getByText(/Platform Manajemen Proyek/i)).toBeInTheDocument();
-    expect(screen.getByText(/Masuk untuk melanjutkan ke LanPro Workspace/i)).toBeInTheDocument();
+    expect(screen.getByText(/Masuk untuk melanjutkan ke Workspace Anda/i)).toBeInTheDocument();
   });
 
   it("tidak menampilkan error boundary", () => {
