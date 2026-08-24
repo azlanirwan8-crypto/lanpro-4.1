@@ -1,6 +1,15 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
-import { ChevronRight, ChevronLeft, ChevronDown, Kanban, Plus, LogOut, User } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronLeft,
+  ChevronDown,
+  Kanban,
+  Plus,
+  LogOut,
+  User,
+  Lock,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../lib/utils";
 import { SidebarProps } from "./types";
@@ -185,6 +194,15 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
           </motion.div>
         ))}
 
+        {/* Daftar proyek kosong — item #160. Tanpa baris ini blok "PROYEK
+            AKTIF" hanya berupa judul melayang, sehingga pengguna baru membaca
+            layar ini sebagai aplikasi yang gagal memuat. */}
+        {projects.length === 0 && !isSidebarCollapsed && (
+          <div className="px-3 py-2 text-xs text-sidebar-title italic">
+            {t("sidebar.noProjectYet")}
+          </div>
+        )}
+
         {/* Sidebar Categories & Navigation Items */}
         {sidebarSections.map((section) => {
           const permittedItems = section.items.filter((item) => {
@@ -233,6 +251,11 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 </div>
               )}
               {permittedItems.map((item) => {
+                /* Terkunci, bukan tersembunyi — item #160. Disembunyikan total
+                   membuat pengguna baru tidak pernah tahu aplikasi ini bisa
+                   apa; dibiarkan aktif membuatnya menekan tombol yang pasti
+                   memulangkan layar kosong. */
+                const terkunci = Boolean(item.butuhProyek) && projects.length === 0;
                 const isActive = currentView === item.id;
                 const hasChildren = Boolean(item.children && item.children.length > 0);
                 const isExpanded = Boolean(expandedItems[item.id]);
@@ -240,18 +263,29 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 return (
                   <div key={item.id} className="my-0.5">
                     <motion.button
-                      whileHover={{ x: 2 }}
-                      whileTap={{ scale: 0.98 }}
+                      whileHover={terkunci ? undefined : { x: 2 }}
+                      whileTap={terkunci ? undefined : { scale: 0.98 }}
                       onClick={() => {
+                        if (terkunci) return;
                         setCurrentView(item.id as any);
                       }}
+                      disabled={terkunci}
+                      aria-disabled={terkunci}
                       className={cn(
                         "w-full flex items-center gap-3 px-3 py-2.5 min-h-11 rounded-md transition-all text-xs relative overflow-hidden group",
-                        isActive
-                          ? "bg-sidebar-item-active text-sidebar-text-active font-medium shadow-xs"
-                          : "text-sidebar-text hover:bg-sidebar-item-hover hover:text-sidebar-text-active"
+                        terkunci
+                          ? "text-sidebar-text opacity-50 cursor-not-allowed"
+                          : isActive
+                            ? "bg-sidebar-item-active text-sidebar-text-active font-medium shadow-xs"
+                            : "text-sidebar-text hover:bg-sidebar-item-hover hover:text-sidebar-text-active"
                       )}
-                      title={isSidebarCollapsed ? t(item.label) : undefined}
+                      title={
+                        terkunci
+                          ? t("sidebar.lockedNeedsProject")
+                          : isSidebarCollapsed
+                            ? t(item.label)
+                            : undefined
+                      }
                     >
                       <div className="shrink-0 text-sidebar-text group-hover:text-sidebar-text-active transition-colors">
                         {item.icon}
@@ -261,7 +295,8 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                           <span className="flex-1 text-left font-medium truncate">
                             {t(item.label)}
                           </span>
-                          {item.badge && renderBadge(item.badge, item.badgeColor)}
+                          {terkunci && <Lock className="w-3.5 h-3.5 shrink-0 text-sidebar-title" />}
+                          {!terkunci && item.badge && renderBadge(item.badge, item.badgeColor)}
                           {hasChildren && (
                             <div
                               onClick={(e) => toggleExpand(item.id, e)}

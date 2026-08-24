@@ -1044,6 +1044,8 @@ export const id = {
     tasksDeleteFailed: "Gagal menghapus beberapa tugas: ",
   },
   sidebar: {
+    noProjectYet: "Belum ada proyek",
+    lockedNeedsProject: "Terbuka setelah Anda tergabung di proyek",
     yourProfile: "Profil Anda",
     logout: "Keluar",
     profileMenuHint: "Klik untuk opsi profil & keluar",
@@ -2456,7 +2458,31 @@ export const id = {
     saveApply: "Simpan & Terapkan Langsung",
     testConnection: "Uji Koneksi",
   },
+  welcome: {
+    greeting: "Selamat datang di LanPro",
+    greetingNamed: "Selamat datang, {{nama}}",
+    noProjectYet:
+      "Anda belum tergabung di proyek mana pun. Administrator perlu menambahkan Anda ke sebuah proyek sebelum modul kerja terbuka.",
+    stepAccountTitle: "Akun Anda aktif",
+    stepAccountDesc: "Masuk berhasil. Tidak ada yang rusak pada aplikasi ini.",
+    stepProfileTitle: "Lengkapi profil Anda",
+    stepProfileDesc:
+      "Ini satu-satunya hal yang bisa Anda kerjakan sekarang, sekaligus memudahkan orang yang akan menugaskan Anda mengenali Anda.",
+    openProfile: "Buka Profil",
+    stepAccessTitle: "Menunggu akses proyek",
+    stepAccessDesc:
+      "Mintalah administrator menambahkan Anda ke sebuah proyek. Halaman ini memperbarui dirinya sendiri begitu itu terjadi.",
+    stepAccessDescAdmin:
+      "Anda boleh membuat proyek sendiri, atau menunggu ditambahkan ke proyek yang sudah ada.",
+    lockedTitle: "Terbuka setelah Anda tergabung di proyek",
+    lockedHint:
+      "Modul ini terkunci, bukan rusak. Semuanya terbuka begitu Anda menjadi anggota proyek.",
+  },
   appShell: {
+    pickProjectHintAdmin:
+      "Silakan pilih salah satu proyek dari sidebar di sebelah kiri, atau buat proyek baru untuk mulai mengelola tugas & sprint tim Anda.",
+    pickProjectHint:
+      "Silakan pilih salah satu proyek dari sidebar di sebelah kiri. Pembuatan proyek baru hanya dapat dilakukan oleh administrator.",
     loading: "Memuat...",
     forbidden: "403 Terlarang",
     forbiddenIntegration:

@@ -1041,6 +1041,8 @@ export const en = {
     tasksDeleteFailed: "Failed to delete some tasks: ",
   },
   sidebar: {
+    noProjectYet: "No project yet",
+    lockedNeedsProject: "Available once you join a project",
     yourProfile: "Your Profile",
     logout: "Log Out",
     profileMenuHint: "Click for profile options & logout",
@@ -2446,7 +2448,31 @@ export const en = {
     saveApply: "Save & Apply Live",
     testConnection: "Test Connection",
   },
+  welcome: {
+    greeting: "Welcome to LanPro",
+    greetingNamed: "Welcome, {{nama}}",
+    noProjectYet:
+      "You are not part of any project yet. An administrator needs to add you to a project before the work modules open up.",
+    stepAccountTitle: "Your account is active",
+    stepAccountDesc: "Sign-in succeeded. Nothing is wrong with the application.",
+    stepProfileTitle: "Complete your profile",
+    stepProfileDesc:
+      "This is the one thing you can do right now, and it helps whoever assigns you to a project recognise you.",
+    openProfile: "Open Profile",
+    stepAccessTitle: "Waiting for project access",
+    stepAccessDesc:
+      "Ask your administrator to add you to a project. This page updates by itself once that happens.",
+    stepAccessDescAdmin:
+      "You may create a project yourself, or wait to be added to an existing one.",
+    lockedTitle: "Available once you join a project",
+    lockedHint:
+      "These modules are locked, not broken. They open as soon as you are a project member.",
+  },
   appShell: {
+    pickProjectHintAdmin:
+      "Pick one of the projects in the sidebar on the left, or create a new one to start managing your team's tasks and sprints.",
+    pickProjectHint:
+      "Pick one of the projects in the sidebar on the left. Only an administrator can create a new project.",
     loading: "Loading...",
     forbidden: "403 Forbidden",
     forbiddenIntegration:
