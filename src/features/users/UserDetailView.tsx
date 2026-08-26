@@ -1206,6 +1206,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
         setEditPassword("");
         setEditConfirmPassword("");
         if (onUserUpdated) onUserUpdated();
+        // Item #195/#196 — simpan berhasil dulu tidak pernah membawa kembali
+        // ke mode LIHAT; pengguna tetap terjebak di form edit dan harus klik
+        // "Back"/"Cancel" sendiri walau perubahannya sudah tersimpan.
+        exitEditMode();
       } else {
         toast.error(res.message || "Gagal memperbarui data user.");
       }
