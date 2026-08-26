@@ -2583,7 +2583,7 @@ export const en = {
     regSuccess: "Registration Successful",
     backToLogin: "Back to Sign In Page",
     completeReg: "Complete Registration",
-    oneMoreStep: "One more step. Choose a username for your LanPro account.",
+    oneMoreStep: "One more step. Choose a username for your account.",
     usernamePlaceholder: "johndoe",
     suggestHint: "We suggested one from your email. Change it if you prefer another name.",
     usernameInvalid: "Username may contain letters only, max 10 characters",
