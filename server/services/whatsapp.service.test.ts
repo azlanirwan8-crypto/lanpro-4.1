@@ -129,6 +129,41 @@ describe("whatsapp.service", () => {
       );
       expect(pesan).toContain("Selamat pagi Budi, ini pengingat tugasmu:");
     });
+
+    it("mengganti {{project_name}} di template kustom dengan nama project sungguhan", async () => {
+      const wa = await import("./whatsapp.service");
+      const pesan = wa.formatMessage(
+        "Budi",
+        [{ title: "Tugas A", status: "To Do", dueDate: null, projectName: "Proyek X" }],
+        "Halo {{user_name}}, ada update dari {{project_name}}."
+      );
+      expect(pesan).toContain("Halo Budi, ada update dari Proyek X.");
+    });
+
+    it("mengabaikan template LAMA yang tersimpan sebelum #193/#194 (bukan dianggap kustomisasi admin)", async () => {
+      const wa = await import("./whatsapp.service");
+      const templateLama =
+        "*[LanPro] Task Assignment*\n\nHi {{user_name}},\n\nYou have been assigned to task *{{task_key}}*: {{task_title}}.\n_Status_: {{status}}\n_Project_: {{project_name}}\n\nPlease check the dashboard for details.";
+      const pesan = wa.formatMessage(
+        "Budi",
+        [{ title: "Tugas A", status: "To Do", dueDate: null, projectName: "Proyek X" }],
+        templateLama
+      );
+      expect(pesan).toContain("Halo Budi,");
+      expect(pesan).not.toContain("{{task_key}}");
+      expect(pesan).not.toContain("{{task_title}}");
+      expect(pesan).not.toContain("You have been assigned");
+    });
+
+    it("tidak pernah membiarkan placeholder {{...}} apa pun tersisa di template kustom", async () => {
+      const wa = await import("./whatsapp.service");
+      const pesan = wa.formatMessage(
+        "Budi",
+        [{ title: "Tugas A", status: "To Do", dueDate: null, projectName: "Proyek X" }],
+        "Halo {{user_name}}, task {{task_key}} status {{status}} milikmu."
+      );
+      expect(pesan).not.toMatch(/\{\{[a-zA-Z0-9_]+\}\}/);
+    });
   });
 
   describe("formatTanggal", () => {

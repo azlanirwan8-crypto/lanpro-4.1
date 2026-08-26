@@ -167,25 +167,59 @@ function formatTenggat(dueDate: any): string {
 }
 
 /**
+ * Template default LAMA yang pernah tersimpan di `BroadcastConfig` sebelum
+ * item #193/#194 ada — ditulis untuk SATU tugas (`{{task_key}}`,
+ * `{{task_title}}`, `{{status}}`), tidak cocok untuk digest berisi BANYAK
+ * tugas. Admin yang membuka panel sebelum perbaikan ini punya baris
+ * tersimpan berisi teks ini secara harfiah; tanpa deteksi di sini, teks
+ * lama itu akan terus dipakai wholesale sebagai sapaan dan membocorkan
+ * placeholder-nya ke WhatsApp SUNGGUHAN — persis yang dilaporkan pemilik
+ * proyek. Cocok → diperlakukan seolah admin belum kustomisasi apa pun.
+ */
+const TEMPLATE_LAMA_DIKENALI = [
+  "you have been assigned to task",
+  "please check the dashboard for details",
+];
+
+function isTemplateLegacy(template: string): boolean {
+  const lower = template.toLowerCase();
+  return TEMPLATE_LAMA_DIKENALI.some((penanda) => lower.includes(penanda));
+}
+
+/**
  * Menyusun isi pesan (Item #193/#194, format "Daily Stand-up" diminta
  * pemilik proyek 26 Agu 2026). Sapaan pembuka bisa dikustomisasi admin
- * lewat panel Settings → WhatsApp gateway → "Edit Broadcast Template"
- * (variabel `{{user_name}}` diganti); daftar tugas SELALU disusun
- * terprogram — dikelompokkan per STATUS (Sedang Berjalan / Menunggu
+ * lewat panel Settings → WhatsApp gateway → "Edit Broadcast Template" —
+ * mendukung `{{user_name}}` dan `{{project_name}}`; daftar tugas SELALU
+ * disusun terprogram — dikelompokkan per STATUS (Sedang Berjalan / Menunggu
  * Eksekusi), sebab itu yang paling relevan dibaca cepat tiap pagi, bukan
  * per project. Nama project ikut disebut per baris tugas hanya bila
  * pengguna punya tugas dari LEBIH dari satu project sekaligus — kalau
  * cuma satu, cukup disebut sekali di header supaya pesan tidak berulang.
+ *
+ * Jaring pengaman: placeholder APA PUN yang tersisa tak-terganti setelah
+ * substitusi (mis. `{{task_key}}` dari template lama yang belum dibersihkan
+ * admin) dibuang, bukan dikirim mentah — pesan WhatsApp sungguhan tidak
+ * boleh pernah menampilkan `{{...}}` literal.
  */
 export function formatMessage(name: string, tasks: any[], messageTemplate?: string | null) {
-  const greeting =
-    messageTemplate && messageTemplate.trim()
-      ? messageTemplate.replace(/\{\{user_name\}\}/g, name)
-      : `Halo ${name},`;
-
   const projectNames = Array.from(new Set(tasks.map((t) => t.projectName || "Tanpa Project")));
   const headerProject = projectNames.length === 1 ? ` - ${projectNames[0]}` : "";
+  const projectNameUntukTemplate = projectNames.length === 1 ? projectNames[0] : "beberapa project";
   const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+
+  const templateBersih =
+    messageTemplate && messageTemplate.trim() && !isTemplateLegacy(messageTemplate)
+      ? messageTemplate
+      : null;
+
+  const greeting = templateBersih
+    ? templateBersih
+        .replace(/\{\{user_name\}\}/g, name)
+        .replace(/\{\{project_name\}\}/g, projectNameUntukTemplate)
+        .replace(/\{\{[a-zA-Z0-9_]+\}\}/g, "")
+        .trim()
+    : `Halo ${name},`;
 
   const bulletLine = (t: any) => {
     const proyek = projectNames.length > 1 ? ` (${t.projectName || "Tanpa Project"})` : "";
