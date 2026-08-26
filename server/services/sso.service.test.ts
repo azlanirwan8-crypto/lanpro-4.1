@@ -173,6 +173,49 @@ describe("putuskanKebijakan — identitas yang sudah tertaut", () => {
     expect(hasil.user.id).toBe("u9");
   });
 
+  it("ganti email mandiri: pengguna ganti email di Users, lalu login SSO akun provider baru (sub baru) -> menautkan otomatis sub baru dan masuk tanpa menimpa nama pengguna", async () => {
+    // Skenario Opsi 1: User mengganti email profil di tabel Users menjadi email baru.
+    // Saat login dengan akun Google baru (sub baru & email baru), (provider, sub) belum ada di DB.
+    // putuskanKebijakan mencocokkan Users.email -> menautkan identitas -> masuk.
+    // Nama lokal di DB ("Budi Asli LanPro") TIDAK ditimpa oleh nama Google ("Budi Google Baru").
+    pasangDb({
+      identitas: null, // sub baru belum terdaftar
+      userByEmail: {
+        id: "u9",
+        status: "active",
+        email: "baru@perusahaan.com",
+        name: "Budi Asli LanPro",
+        displayName: "Budi Asli LanPro",
+      },
+    });
+    const hasil: any = await putuskanKebijakan(
+      {
+        ...IDENTITAS,
+        sub: "sub-google-baru-456",
+        email: "baru@perusahaan.com",
+        nama: "Budi Google Baru",
+      },
+      "login"
+    );
+    expect(hasil.aksi).toBe("masuk");
+    expect(hasil.user.id).toBe("u9");
+    expect(hasil.user.name).toBe("Budi Asli LanPro");
+    expect(hasil.user.displayName).toBe("Budi Asli LanPro");
+
+    const insertTautanBaru = kueriPalsu.mock.calls.some(
+      (c) =>
+        String(c[0]).includes('INSERT INTO "UserIdentities"') &&
+        String(c[1]).includes("sub-google-baru-456")
+    );
+    expect(insertTautanBaru).toBe(true);
+
+    // Pastikan tidak ada kueri UPDATE ke tabel Users yang menimpa nama
+    const adaUpdateNama = kueriPalsu.mock.calls.some(
+      (c) => String(c[0]).includes("UPDATE Users") || String(c[0]).includes('UPDATE "Users"')
+    );
+    expect(adaUpdateNama).toBe(false);
+  });
+
   it("MENOLAK bila akun pemilik tautan sudah tidak aktif", async () => {
     pasangDb({ identitas: { userId: "u9" }, userById: { id: "u9", status: "pending" } });
     const hasil = await putuskanKebijakan(IDENTITAS, "login");

@@ -65,9 +65,19 @@ const renderDetail = (peranPengguna: string, peranPeninjau: string) =>
     />
   );
 
+// Item #187 — layar ini kini dua mode: LIHAT (baca-saja, bawaan) dan EDIT
+// (bertab: Personal Detail / Change Password / Project / Settings), dibuka
+// lewat tombol "Edit Profil". Field sandi & matriks izin yang dulu selalu
+// terlihat kini ada di mode edit, di balik tab masing-masing.
+const bukaTab = (namaTab: RegExp) => {
+  fireEvent.click(screen.getByRole("button", { name: /edit profil|edit profile/i }));
+  fireEvent.click(screen.getByRole("button", { name: namaTab }));
+};
+
 describe("Item #155 — input Perbarui Kata Sandi", () => {
   it("dibulatkan secara bawaan, bukan teks telanjang", () => {
     const { container } = renderDetail("user", "admin");
+    bukaTab(/ubah kata sandi|change password/i);
 
     // Diambil lewat selektor atribut, BUKAN lewat getByRole("textbox"):
     // input bertipe password sengaja tidak punya role textbox, jadi query
@@ -80,35 +90,45 @@ describe("Item #155 — input Perbarui Kata Sandi", () => {
 
   it("tombol mata membuka lalu menutup kembali", () => {
     const { container } = renderDetail("user", "admin");
+    bukaTab(/ubah kata sandi|change password/i);
+
+    const newPasswordInput = container.querySelector<HTMLInputElement>(
+      'input[placeholder="Kosongkan jika tidak diubah..."], input[placeholder="Leave blank to keep current..."]'
+    );
+    expect(newPasswordInput).not.toBeNull();
+    expect(newPasswordInput!.type).toBe("password");
 
     const tombol = screen.getByRole("button", { name: /tampilkan kata sandi|show password/i });
 
     fireEvent.click(tombol);
-    expect(container.querySelector('input[type="text"][placeholder]')).not.toBeNull();
-    expect(container.querySelector('input[type="password"]')).toBeNull();
+    expect(newPasswordInput!.type).toBe("text");
 
     // Menutup kembali diuji terpisah: pernah ada bentuk toggle yang hanya
     // bekerja satu arah karena state-nya disetel `true`, bukan dibalik.
     fireEvent.click(screen.getByRole("button", { name: /sembunyikan kata sandi|hide password/i }));
-    expect(container.querySelector('input[type="password"]')).not.toBeNull();
+    expect(newPasswordInput!.type).toBe("password");
   });
 });
 
 describe("Item #156 — panel Izin Sistem Aktif & Penimpaan", () => {
   it("selnya tidak bisa diklik", () => {
     renderDetail("user", "admin");
+    bukaTab(/pengaturan|settings/i);
 
     const judul = screen.getByText(/Izin Sistem Aktif & Penimpaan|Active System Permissions/i);
     const panel = judul.closest("div")!.parentElement!.parentElement!;
-    const tabel = within(panel).getByRole("table");
+    const tabels = within(panel).getAllByRole("table");
 
-    // Nol tombol di dalam tabel matriks. Ini yang membedakan panel baca-saja
+    // Nol tombol di dalam seluruh tabel matriks grup. Ini yang membedakan panel baca-saja
     // dari panel yang sekadar terlihat pucat.
-    expect(within(tabel).queryAllByRole("button")).toHaveLength(0);
+    tabels.forEach((tabel) => {
+      expect(within(tabel).queryAllByRole("button")).toHaveLength(0);
+    });
   });
 
   it("tidak lagi menawarkan Setel Ulang ke Peran Bawaan", () => {
     renderDetail("user", "admin");
+    bukaTab(/pengaturan|settings/i);
 
     expect(
       screen.queryByRole("button", { name: /setel ulang ke peran bawaan|reset role default/i })
@@ -117,6 +137,7 @@ describe("Item #156 — panel Izin Sistem Aktif & Penimpaan", () => {
 
   it("menyebut peran sebagai sumber kebenaran, bukan centangnya", () => {
     renderDetail("user", "admin");
+    bukaTab(/pengaturan|settings/i);
 
     expect(screen.getByText(/panel ini baca-saja|this panel is read-only/i)).toBeInTheDocument();
   });

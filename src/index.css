@@ -151,12 +151,12 @@
   --color-content-subtle: #64748b; /* = slate-500 */
 
   /* Sidebar Semantik Velzon (Mode Terang: Dark Navy) */
-  --color-sidebar-surface: #111c43;
-  --color-sidebar-border: #1e2a56;
+  --color-sidebar-surface: #2a3042;
+  --color-sidebar-border: #3a4059;
   --color-sidebar-title: #878a99;
-  --color-sidebar-text: #abb9e8;
+  --color-sidebar-text: #9099b8;
   --color-sidebar-text-active: #ffffff;
-  --color-sidebar-item-active: rgba(255, 255, 255, 0.12);
+  --color-sidebar-item-active: rgba(255, 255, 255, 0.08);
   --color-sidebar-item-hover: rgba(255, 255, 255, 0.06);
 }
 
@@ -225,12 +225,12 @@ html.dark {
   --color-content-subtle: #7c8ba1;
 
   /* Sidebar Semantik Velzon (Mode Gelap: Clean Dark Charcoal) */
-  --color-sidebar-surface: #121a2a;
-  --color-sidebar-border: #1e293b;
+  --color-sidebar-surface: #252b3b;
+  --color-sidebar-border: #333a4d;
   --color-sidebar-title: #64748b;
-  --color-sidebar-text: #94a3b8;
+  --color-sidebar-text: #8b96ab;
   --color-sidebar-text-active: #ffffff;
-  --color-sidebar-item-active: rgba(255, 255, 255, 0.1);
+  --color-sidebar-item-active: rgba(255, 255, 255, 0.07);
   --color-sidebar-item-hover: rgba(255, 255, 255, 0.05);
 }
 

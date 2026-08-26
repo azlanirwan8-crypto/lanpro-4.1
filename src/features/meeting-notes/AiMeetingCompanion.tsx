@@ -776,130 +776,121 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">
-      {/* Companion Header Banner — judul/subjudul dekoratif dihapus atas permintaan pemilik proyek (#182), tombol fungsional dipertahankan */}
-      <div className="p-3 sm:p-4 bg-gradient-to-r from-primary-active via-primary to-primary-hover text-content-inverse flex flex-col md:flex-row justify-end items-start md:items-center gap-4 shrink-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => setShowFeedbackModal(true)}
-            className="px-3.5 py-1.5 bg-surface/10 hover:bg-surface/20 border border-white/20 text-content-inverse text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
-          >
-            <Brain className="w-3.5 h-3.5" /> {t("jsx.j106")}
-          </button>
-          {aiData && (
-            <button
-              onClick={() => setActiveTab("transcript")}
-              className="px-3.5 py-1.5 bg-surface/10 hover:bg-surface/20 border border-white/20 text-content-inverse text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-200" /> {t("jsx.j107")}
-            </button>
-          )}
-        </div>
-      </div>
-
+    <div className="w-full flex flex-col text-left">
+      {/* Continuous Learning Loop Feedback Modal Trigger — tombol feedback dipasang subtil jika ada data, atau diakses lewat modal */}
       {/* Tabs navigation */}
       {aiData && (
-        <div className="border-b border-border-subtle/80 bg-surface-sunken/70 p-1 flex flex-wrap gap-1">
+        <div className="border-b border-border-subtle/80 bg-surface-sunken/70 p-1 flex flex-wrap items-center justify-between gap-1 rounded-t-lg">
+          <div className="flex flex-wrap gap-1">
+            <button
+              onClick={() => setActiveTab("summary")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "summary"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5 text-primary" /> {t("jsx.j108")}
+            </button>
+            <button
+              onClick={() => setActiveTab("chronology")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "chronology"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <Brain className="w-3.5 h-3.5 text-primary" /> {t("jsx.j109")}
+            </button>
+            <button
+              onClick={() => setActiveTab("conclusions")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "conclusions"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t("jsx.j110")}
+            </button>
+            <button
+              onClick={() => setActiveTab("suggestions")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "suggestions"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> {t("jsx.k70")}
+            </button>
+            <button
+              onClick={() => setActiveTab("actionItems")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer relative ${
+                activeTab === "actionItems"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <ListChecks className="w-3.5 h-3.5 text-primary" /> {t("jsx.j111")}
+              {activeMeetingData?.tab_tindak_lanjut?.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 bg-primary-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] rounded-full font-medium min-w-[16px] text-center inline-block">
+                  {activeMeetingData.tab_tindak_lanjut.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("nextPlan")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "nextPlan"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <ArrowRight className="w-3.5 h-3.5 text-pink-500" /> {t("jsx.j112")}
+            </button>
+            <button
+              onClick={() => setActiveTab("toBeScenario")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "toBeScenario"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-600" /> {t("jsx.j113")}
+            </button>
+            <button
+              onClick={() => setActiveTab("metadata")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "metadata"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5 text-teal-600" /> {t("jsx.j114")}
+            </button>
+            <button
+              onClick={() => setActiveTab("transcript")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "transcript"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5 text-content-muted" /> {t("jsx.j115")}
+            </button>
+          </div>
+
           <button
-            onClick={() => setActiveTab("summary")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "summary"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
+            onClick={() => setShowFeedbackModal(true)}
+            className="px-3 py-1.5 bg-surface hover:bg-surface-muted border border-border-subtle text-content-body text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs shrink-0"
+            title={t("jsx.j106")}
           >
-            <FileText className="w-3.5 h-3.5 text-primary" /> {t("jsx.j108")}
-          </button>
-          <button
-            onClick={() => setActiveTab("chronology")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "chronology"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <Brain className="w-3.5 h-3.5 text-primary" /> {t("jsx.j109")}
-          </button>
-          <button
-            onClick={() => setActiveTab("conclusions")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "conclusions"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t("jsx.j110")}
-          </button>
-          <button
-            onClick={() => setActiveTab("suggestions")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "suggestions"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> {t("jsx.k70")}
-          </button>
-          <button
-            onClick={() => setActiveTab("actionItems")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer relative ${
-              activeTab === "actionItems"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <ListChecks className="w-3.5 h-3.5 text-primary" /> {t("jsx.j111")}
-            {activeMeetingData?.tab_tindak_lanjut?.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 bg-primary-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] rounded-full font-medium min-w-[16px] text-center inline-block">
-                {activeMeetingData.tab_tindak_lanjut.length}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("nextPlan")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "nextPlan"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <ArrowRight className="w-3.5 h-3.5 text-pink-500" /> {t("jsx.j112")}
-          </button>
-          <button
-            onClick={() => setActiveTab("toBeScenario")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "toBeScenario"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-600" /> {t("jsx.j113")}
-          </button>
-          <button
-            onClick={() => setActiveTab("metadata")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "metadata"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5 text-teal-600" /> {t("jsx.j114")}
-          </button>
-          <button
-            onClick={() => setActiveTab("transcript")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "transcript"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5 text-content-muted" /> {t("jsx.j115")}
+            <Brain className="w-3.5 h-3.5 text-primary" /> {t("jsx.j106")}
           </button>
         </div>
       )}
 
       {/* Main workspace container */}
-      <div className="p-6 min-h-[300px] bg-surface-sunken/20 text-left">
+      <div className="p-4 sm:p-6 min-h-[300px] text-left">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mb-4" />
