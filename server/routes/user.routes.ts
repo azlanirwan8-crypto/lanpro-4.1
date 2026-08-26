@@ -8,7 +8,11 @@ import jwt from "jsonwebtoken";
 import { getJwtSecret } from "../middleware/auth";
 import { validateFileBuffer } from "../../src/lib/fileSecurity";
 import { simpanBerkas, hapusBerkas } from "../services/storage.service";
-import { sanitizeAvatarValue, AVATAR_ALLOWED_EXT } from "../helpers/avatarValue";
+import {
+  sanitizeAvatarValue,
+  extractStoredFilename,
+  AVATAR_ALLOWED_EXT,
+} from "../helpers/avatarValue";
 import { validasiBody } from "../middleware/validate";
 import { updateUserSchema, updateProfileSchema } from "../schemas/user.schema";
 import { AuthenticatedRequest } from "../types/express";
@@ -16,10 +20,15 @@ import { userRepository } from "../repositories/user.repository";
 import { createAuditLog } from "../services/audit.service";
 export { sanitizeAvatarValue };
 
+// Item #210 — dulu memakai `sanitizeAvatarValue` (yang sengaja menolak URL
+// absolut untuk validasi INPUT PENGGUNA), jadi begitu STORAGE_DRIVER=s3
+// aktif dan `simpanBerkas()` mengembalikan URL absolut, fungsi ini berhenti
+// menghapus apa pun — berkas lama menumpuk selamanya di bucket. Lihat
+// `extractStoredFilename()` di avatarValue.ts untuk penjelasan lengkap.
 function hapusAvatarLama(urlLama: unknown, urlBaru: string): void {
-  const lama = sanitizeAvatarValue(urlLama);
-  if (!lama || lama === urlBaru) return;
-  const namaBerkas = path.basename(lama);
+  if (urlLama === urlBaru) return;
+  const namaBerkas = extractStoredFilename(urlLama);
+  if (!namaBerkas) return;
   void hapusBerkas(namaBerkas);
 }
 
@@ -262,6 +271,12 @@ router.post(
 
       const safeFilename = `avatar-${id}-${Date.now()}.${ext}`;
       const avatarUrl = await simpanBerkas(safeFilename, fileBuffer, file.mimetype);
+      // Item #211 — dicatat sementara untuk diagnosis: pemilik proyek
+      // melaporkan berkas TERLIHAT ADA di bucket R2 tapi TIDAK tampil di
+      // halaman. Log ini menampilkan URL persis yang dikembalikan
+      // simpanBerkas(), supaya bisa dibandingkan dengan URL publik bucket
+      // sungguhan tanpa pemilik proyek perlu buka DevTools browser.
+      console.log(`[UPLOAD] Avatar disimpan untuk user ${id}: ${avatarUrl}`);
 
       try {
         if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
@@ -356,6 +371,8 @@ router.post(
       // avatar tapi kategori file terpisah.
       const safeFilename = `cover-${id}-${Date.now()}.${ext}`;
       const coverUrl = await simpanBerkas(safeFilename, fileBuffer, file.mimetype);
+      // Item #211 — lihat catatan sama di endpoint /avatar di atas.
+      console.log(`[UPLOAD] Cover disimpan untuk user ${id}: ${coverUrl}`);
 
       try {
         if (fs.existsSync(file.path)) fs.unlinkSync(file.path);

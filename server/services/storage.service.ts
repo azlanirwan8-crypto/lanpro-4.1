@@ -46,6 +46,17 @@ if (DRIVER === "s3" && (!S3_BUCKET || !process.env.STORAGE_ACCESS_KEY_ID)) {
   );
 }
 
+// Item #211 — dicatat sementara untuk diagnosis "berkas ada di bucket tapi
+// tidak tampil di halaman": menampilkan persis apa yang terbaca dari
+// environment (TANPA kredensial) supaya salah ketik/salah format bisa
+// ketahuan tanpa pemilik proyek perlu membuka dashboard Vercel/DevTools.
+if (DRIVER === "s3") {
+  console.log(
+    `[STORAGE] Driver=s3 aktif — bucket="${S3_BUCKET}" region="${S3_REGION}" ` +
+      `endpoint="${S3_ENDPOINT}" publicUrl="${S3_PUBLIC_URL || "(KOSONG — URL berkas akan salah!)"}"`
+  );
+}
+
 /** Klien S3 dibuat malas: proyek yang memakai driver lokal tidak perlu memuatnya. */
 let klienS3: any = null;
 async function ambilKlien() {

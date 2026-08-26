@@ -13,7 +13,7 @@
 // #56 — DULU diimpor dari './user.routes', yang ikut menarik adaptor DB dan
 // membuka koneksi Postgres sungguhan; koneksi itu masih menyambung saat Jest
 // dibongkar dan mencetak crash `pg` di akhir SETIAP `npm test`.
-import { sanitizeAvatarValue } from "../helpers/avatarValue";
+import { sanitizeAvatarValue, extractStoredFilename } from "../helpers/avatarValue";
 
 describe("sanitizeAvatarValue", () => {
   it("menolak URL dokumen ber-presigned-token — kasus nyata dari produksi", () => {
@@ -71,5 +71,56 @@ describe("sanitizeAvatarValue", () => {
     expect(sanitizeAvatarValue("   ")).toBeNull();
     expect(sanitizeAvatarValue(123)).toBeNull();
     expect(sanitizeAvatarValue({})).toBeNull();
+  });
+});
+
+/**
+ * Item #210 — `sanitizeAvatarValue` sengaja menolak URL absolut (untuk
+ * memvalidasi INPUT PENGGUNA). `extractStoredFilename` sengaja TERPISAH:
+ * dipakai membersihkan berkas LAMA yang kita hasilkan sendiri lewat
+ * `simpanBerkas()`, yang begitu `STORAGE_DRIVER=s3` aktif mengembalikan URL
+ * ABSOLUT — kalau dites lewat `sanitizeAvatarValue`, pembersihan berkas
+ * lama berhenti bekerja sepenuhnya (berkas menumpuk selamanya di bucket).
+ */
+describe("extractStoredFilename", () => {
+  const publicUrlLama = process.env.STORAGE_PUBLIC_URL;
+  afterEach(() => {
+    process.env.STORAGE_PUBLIC_URL = publicUrlLama;
+  });
+
+  it("menerima jalur lokal /uploads/... (driver local)", () => {
+    expect(extractStoredFilename("/uploads/avatar-1-1786634777587.png")).toBe(
+      "avatar-1-1786634777587.png"
+    );
+    expect(extractStoredFilename("/uploads/cover-1-1786634777587.png")).toBe(
+      "cover-1-1786634777587.png"
+    );
+  });
+
+  it("menerima URL absolut HANYA bila prefiksnya persis STORAGE_PUBLIC_URL yang dikonfigurasi (driver s3)", () => {
+    process.env.STORAGE_PUBLIC_URL = "https://pub-abc123.r2.dev";
+    expect(extractStoredFilename("https://pub-abc123.r2.dev/avatar-1-1786634777587.png")).toBe(
+      "avatar-1-1786634777587.png"
+    );
+    expect(extractStoredFilename("https://pub-abc123.r2.dev/cover-1-1786634777587.png")).toBe(
+      "cover-1-1786634777587.png"
+    );
+  });
+
+  it("menolak URL absolut dari domain LAIN, walau bentuk nama berkasnya sah", () => {
+    process.env.STORAGE_PUBLIC_URL = "https://pub-abc123.r2.dev";
+    expect(extractStoredFilename("https://jahat.example/avatar-1-1786634777587.png")).toBeNull();
+  });
+
+  it("menolak query string, fragment, dan upaya keluar direktori", () => {
+    process.env.STORAGE_PUBLIC_URL = "https://pub-abc123.r2.dev";
+    expect(extractStoredFilename("https://pub-abc123.r2.dev/avatar-1-1.png?token=abc")).toBeNull();
+    expect(extractStoredFilename("/uploads/../../.env")).toBeNull();
+  });
+
+  it("menolak nilai kosong dan tipe bukan string", () => {
+    expect(extractStoredFilename(null)).toBeNull();
+    expect(extractStoredFilename(undefined)).toBeNull();
+    expect(extractStoredFilename("")).toBeNull();
   });
 });
