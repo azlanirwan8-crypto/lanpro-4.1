@@ -830,6 +830,15 @@ router.post(
       const user = await userRepository.findByIdOrUid(userId);
       const dbUserId = user?.id;
       const dbUserUid = user?.uid;
+      // Item #204 — sama seperti #202 (delete satuan): bulk-delete di sini
+      // TIDAK PUNYA jalur Admin/Manager/Head sama sekali, jadi task yang
+      // bukan dilaporkan Admin sendiri diam-diam TERSARING KELUAR dari
+      // `deletableTaskIds` tanpa pesan galat apa pun — kelihatan seperti
+      // "berhasil sebagian" padahal aslinya Admin diblokir seperti user
+      // biasa.
+      const isLeadOrAdmin = ["admin", "manager", "head"].includes(
+        String(user?.role || "").toLowerCase()
+      );
 
       const taskRows = await taskRepository.findTasksByIds(taskIds, projectId);
 
@@ -842,7 +851,7 @@ router.post(
           (dbUserId && t.reporterId === dbUserId) ||
           (dbUserUid && t.reporterId === dbUserUid);
 
-        if (isReporter) {
+        if (isReporter || isLeadOrAdmin) {
           deletableTaskIds.push(t.id);
         }
       }
