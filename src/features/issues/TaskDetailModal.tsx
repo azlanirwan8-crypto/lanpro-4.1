@@ -108,9 +108,40 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     );
   };
 
+  // Item #200 — sebelumnya `isEditable`/`canDelete` di sini juga cuma
+  // `isUserReporter(task)` mentah, tanpa lewat `hasPermission`, jadi
+  // Admin/Manager/Head yang bukan reporter satu task tertentu terkunci
+  // mengedit apa pun di sidebar ini — termasuk field Reporter. Pola
+  // disamakan dengan `canDeleteIssue`/`canEditIssue` di `IssueListView.tsx`.
   const isDirectOwner = task ? isUserReporter(task) : false;
-  const isEditable = isDirectOwner;
-  const canDelete = isDirectOwner;
+  const canEditTask = (issue: Task): boolean => {
+    if (!issue) return false;
+    const isReporter = isUserReporter(issue);
+    const hasRole = hasPermission(
+      userRole,
+      "list",
+      "update",
+      isReporter,
+      currentUserProfile?.permissions
+    );
+    const isLeadOrAdmin = ["admin", "manager", "head"].includes(userRole || "");
+    return hasRole || isReporter || isLeadOrAdmin;
+  };
+  const canDeleteTask = (issue: Task): boolean => {
+    if (!issue) return false;
+    const isReporter = isUserReporter(issue);
+    const hasRole = hasPermission(
+      userRole,
+      "list",
+      "delete",
+      isReporter,
+      currentUserProfile?.permissions
+    );
+    const isLeadOrAdmin = ["admin", "manager", "head"].includes(userRole || "");
+    return hasRole || isReporter || isLeadOrAdmin;
+  };
+  const isEditable = task ? canEditTask(task) : false;
+  const canDelete = task ? canDeleteTask(task) : false;
   const blockMember = !isEditable;
   const isProjectMember = false;
   const isReporter = isDirectOwner;

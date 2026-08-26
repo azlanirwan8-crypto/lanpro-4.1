@@ -135,6 +135,27 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
     return hasRole || isReporter || isLeadOrAdmin;
   };
 
+  // Item #200 — sebelumnya kemampuan EDIT baris (status/assignee/reporter,
+  // dst.) hanya dihitung dari `isUserReporter(issue)` mentah — tidak lewat
+  // `hasPermission`, jadi Admin/Manager/Head yang BUKAN reporter satu issue
+  // tertentu tetap terkunci mengedit issue itu, termasuk field Reporter.
+  // Polanya disamakan persis dengan `canDeleteIssue` di atas, yang sudah
+  // benar memberi akses penuh ke role admin (`hasPermission` mengembalikan
+  // `true` untuk admin tanpa syarat lain).
+  const canEditIssue = (issue: Task): boolean => {
+    if (!issue) return false;
+    const isReporter = isUserReporter(issue);
+    const hasRole = hasPermission(
+      userRole,
+      "list",
+      "update",
+      isReporter,
+      currentUserProfile?.permissions
+    );
+    const isLeadOrAdmin = ["admin", "manager", "head"].includes(userRole || "");
+    return hasRole || isReporter || isLeadOrAdmin;
+  };
+
   const rawTasks = Array.isArray(tasks) ? tasks : [];
   const mArr = Array.isArray(masterData) ? masterData : [];
 
@@ -437,6 +458,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                       sprints={sprints}
                                       isUserReporter={isUserReporter}
                                       canDeleteIssue={canDeleteIssue}
+                                      canEditIssue={canEditIssue}
                                       deleteTask={deleteTask}
                                       setSelectedTaskForDetail={setSelectedTaskForDetail}
                                       setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}

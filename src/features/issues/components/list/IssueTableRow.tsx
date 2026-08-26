@@ -55,6 +55,7 @@ interface IssueTableRowProps {
   sprints: Sprint[];
   isUserReporter: (issue: Task) => boolean;
   canDeleteIssue: (issue: Task) => boolean;
+  canEditIssue: (issue: Task) => boolean;
   deleteTask?: (id: string) => void;
   setSelectedTaskForDetail: (task: Task) => void;
   setIsTaskDetailModalOpen: (open: boolean) => void;
@@ -111,6 +112,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
     sprints = [],
     isUserReporter,
     canDeleteIssue,
+    canEditIssue,
     deleteTask,
     setSelectedTaskForDetail,
     setIsTaskDetailModalOpen,
@@ -221,9 +223,14 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
     new Map(rawSubtasks.filter((s) => s && s.id).map((s) => [s.id, s])).values()
   );
   const hasSubtasks = subtasks.length > 0;
-  const isDirectOwner = isUserReporter(task);
-  const isEditable = isDirectOwner;
-  const canDelete = isDirectOwner;
+  // Item #200 — sebelumnya `isEditable`/`canDelete` dihitung dari
+  // `isDirectOwner` mentah, mengabaikan `canEditIssue`/`canDeleteIssue`
+  // (prop yang sudah lewat `hasPermission` dan memberi akses penuh ke
+  // Admin/Manager/Head) yang bahkan sudah diteruskan tapi tidak dipakai.
+  // Akibatnya Admin terkunci mengedit/menghapus issue yang bukan mereka
+  // laporkan — termasuk field Reporter.
+  const isEditable = canEditIssue(task);
+  const canDelete = canDeleteIssue(task);
   const blockMember = !isEditable;
 
   return (
