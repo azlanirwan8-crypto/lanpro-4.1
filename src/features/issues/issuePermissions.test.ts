@@ -122,6 +122,23 @@ describe("issuePermissions", () => {
       expect(canDeleteIssue(issue, c)).toBe(false);
     });
 
+    it("#202 — user tak terkait TIDAK bisa delete walau hasPermission (custom permission) selalu true", () => {
+      // Mengunci bug nyata: akun "user" dengan custom permission list.delete
+      // tersimpan di profilnya (dari pengujian sebelumnya) sempat membuat
+      // ikon Hapus tampil di Daftar Isu, padahal ia bukan reporter/admin.
+      const issue = buatIssue();
+      const c = ctx("orang-lain", "user");
+      c.hasPermission = hasPermissionSelaluTrue;
+      expect(canDeleteIssue(issue, c)).toBe(false);
+    });
+
+    it("#202 — assignee (BUKAN reporter) TIDAK bisa delete walau hasPermission selalu true", () => {
+      const issue = buatIssue();
+      const c = ctx("user-assignee", "user");
+      c.hasPermission = hasPermissionSelaluTrue;
+      expect(canDeleteIssue(issue, c)).toBe(false);
+    });
+
     it("user tak terkait TIDAK bisa delete bila hasPermission menolak", () => {
       const issue = buatIssue();
       const c = ctx("orang-lain", "user");

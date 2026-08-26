@@ -14,10 +14,12 @@ import { Task, UserProfile, PeranEfektif } from "../../types";
  * task — lihat `src/lib/permissions.ts:365-372` — melanggar aturan di atas).
  * Fungsi murni di sini bisa diuji langsung tanpa me-mount komponen React.
  *
- * `canDeleteIssue` di sini SENGAJA tetap memakai `hasPermission()` (bukan
- * cuma role-list) supaya custom permission per-user (mis. admin memberi
- * akses delete eksplisit ke satu pengguna) tetap dihormati — pengecualian
- * "list"+update yang bermasalah TIDAK berlaku untuk actionKey "delete".
+ * `canDeleteIssue` SEMPAT memakai `hasPermission()` supaya custom permission
+ * per-user dihormati — TERNYATA itu sendiri celah lain (item #202): custom
+ * permission bisa membuat tombol Hapus tampil untuk "user" biasa yang bukan
+ * reporter/admin, melanggar aturan di atas yang TEGAS tanpa pengecualian.
+ * Sekarang `canDeleteIssue` sama sekali tidak memakai `hasPermission` —
+ * murni Admin/Manager/Head atau Reporter, sama seperti `canManageIssue`.
  */
 
 export interface IssuePermissionContext {
@@ -96,18 +98,22 @@ export function canEditIssue(issue: Task | null | undefined, ctx: IssuePermissio
   return canManageIssue(issue, ctx) || isUserAssignee(issue, ctx);
 }
 
+/**
+ * Item #202 — SEBELUMNYA fungsi ini juga memakai `hasPermission(...)`, yang
+ * menghormati custom permission per-user (mis. admin memberi akses "list"
+ * eksplisit ke satu akun). Itu membuka celah: seorang "user" biasa yang
+ * kebetulan punya custom permission `list.delete = true` tersimpan di
+ * profilnya (dari pengujian sebelumnya) melihat ikon Hapus tampil — padahal
+ * aturan yang disepakati pemilik proyek TEGAS: **hapus issue hanya boleh
+ * Admin/Manager/Head atau Reporter, TANPA pengecualian lewat custom
+ * permission apa pun.** Jadi TIDAK lagi memakai `hasPermission` sama sekali
+ * di sini — persis logika `canManageIssue`, sengaja tidak digabung jadi
+ * satu nama supaya niatnya (izin utk aksi DELETE) tetap jelas dibaca.
+ */
 export function canDeleteIssue(
   issue: Task | null | undefined,
   ctx: IssuePermissionContext
 ): boolean {
   if (!issue) return false;
-  const isReporter = isUserReporter(issue, ctx);
-  const hasRole = ctx.hasPermission(
-    ctx.userRole,
-    "list",
-    "delete",
-    isReporter,
-    ctx.currentUserProfile?.permissions
-  );
-  return hasRole || isReporter || isLeadOrAdmin(ctx);
+  return isLeadOrAdmin(ctx) || isUserReporter(issue, ctx);
 }

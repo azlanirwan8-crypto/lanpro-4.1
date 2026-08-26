@@ -111,13 +111,11 @@ router.get(
       res.json({ status: "success", data: tasks });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/tasks error:", error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -132,13 +130,11 @@ router.get(
       res.json({ status: "success", data: tasks });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/team-tasks error:", error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -240,13 +236,11 @@ router.post(
         });
       }
       console.error("LOG ANOMALI CRITICAL: POST /api/projects/:projectId/tasks error:", error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -274,13 +268,11 @@ router.put(
       });
     } catch (error: any) {
       console.error("Reorder tasks error:", error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -325,13 +317,11 @@ router.put(
 
       const oldTask = await taskRepository.findTaskWithProjectCategory(id, projectId);
       if (!oldTask) {
-        return res
-          .status(404)
-          .json({
-            status: "error",
-            code: "srv.tugas_tidak_ditemukan",
-            message: "Tugas tidak ditemukan.",
-          });
+        return res.status(404).json({
+          status: "error",
+          code: "srv.tugas_tidak_ditemukan",
+          message: "Tugas tidak ditemukan.",
+        });
       }
 
       let effectiveStatus = status;
@@ -380,13 +370,11 @@ router.put(
 
       const hasRolePermission = checkUserPermissionBackend(userRole, userPerms, "update");
       if (!hasRolePermission) {
-        return res
-          .status(403)
-          .json({
-            status: "error",
-            code: "srv.role_anda_tidak_memiliki",
-            message: "Role Anda tidak memiliki akses untuk tindakan ini",
-          });
+        return res.status(403).json({
+          status: "error",
+          code: "srv.role_anda_tidak_memiliki",
+          message: "Role Anda tidak memiliki akses untuk tindakan ini",
+        });
       }
 
       if (sprintId !== undefined) {
@@ -452,13 +440,11 @@ router.put(
           { version: oldTask.version },
           { version: version, status: "409 CONFLICT" }
         );
-        return res
-          .status(409)
-          .json({
-            status: "error",
-            code: "srv.konflik_versi_tugas_silakan",
-            message: "Konflik versi tugas. Silakan refresh.",
-          });
+        return res.status(409).json({
+          status: "error",
+          code: "srv.konflik_versi_tugas_silakan",
+          message: "Konflik versi tugas. Silakan refresh.",
+        });
       }
 
       if (isWaterfall && status === "Done" && oldTask.status !== "Done") {
@@ -729,13 +715,11 @@ router.put(
       res.json({ status: "success", data: { id, ...changedFields } });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: PUT /api/projects/:projectId/tasks/:id error:", error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -771,22 +755,33 @@ router.delete(
         (dbUserUid && task.reporterId === dbUserUid) ||
         (dbUsername && task.reporterId === dbUsername);
 
+      // Item #202 — sebelumnya baris ini TIDAK PUNYA jalur untuk
+      // Admin/Manager/Head sama sekali, jadi bahkan Admin diblokir menghapus
+      // task yang bukan mereka laporkan — bertentangan dengan #200/#201
+      // (frontend `src/features/issues/issuePermissions.ts`, sudah benar).
+      // `checkUserPermissionBackend` di atas MASIH bisa lolos lewat custom
+      // permission per-user, tapi gerbang di bawah ini TETAP mewajibkan
+      // Reporter ATAU Admin/Manager/Head — custom permission TIDAK cukup
+      // sendirian, menyamakan aturan dengan frontend.
+      const isLeadOrAdmin = ["admin", "manager", "head"].includes(
+        String(userRole || "").toLowerCase()
+      );
+
       const hasRolePermission = checkUserPermissionBackend(userRole, userPerms, "delete");
-      if (!hasRolePermission) {
-        return res
-          .status(403)
-          .json({
-            status: "error",
-            code: "srv.role_anda_tidak_memiliki",
-            message: "Role Anda tidak memiliki akses untuk tindakan ini",
-          });
+      if (!hasRolePermission && !isLeadOrAdmin) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.role_anda_tidak_memiliki",
+          message: "Role Anda tidak memiliki akses untuk tindakan ini",
+        });
       }
 
-      if (!isReporter) {
+      if (!isReporter && !isLeadOrAdmin) {
         return res.status(403).json({
           status: "error",
           code: "srv.hanya_reporter_pembuat_task_2",
-          message: "Hanya Reporter pembuat task ini yang diizinkan melakukan perubahan/penghapusan",
+          message:
+            "Hanya Reporter pembuat task ini atau Admin/Manager yang diizinkan melakukan perubahan/penghapusan",
         });
       }
 
@@ -799,13 +794,11 @@ router.delete(
         "LOG ANOMALI CRITICAL: DELETE /api/projects/:projectId/tasks/:id error:",
         error
       );
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -827,13 +820,11 @@ router.post(
         (req as any).user?.id || (req as any).user?.uid || req.headers["x-user-id"] || "guest";
 
       if (!Array.isArray(taskIds) || taskIds.length === 0) {
-        return res
-          .status(400)
-          .json({
-            status: "error",
-            code: "srv.taskids_must_be_a",
-            message: "taskIds must be a non-empty array",
-          });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.taskids_must_be_a",
+          message: "taskIds must be a non-empty array",
+        });
       }
 
       const user = await userRepository.findByIdOrUid(userId);
@@ -880,13 +871,11 @@ router.post(
         "LOG ANOMALI CRITICAL: POST /api/projects/:projectId/tasks/bulk-delete error:",
         error
       );
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -905,13 +894,11 @@ router.get(
         "LOG ANOMALI CRITICAL: GET /api/projects/:projectId/tasks/:taskId/comments error:",
         error
       );
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -952,13 +939,11 @@ router.post(
         "LOG ANOMALI CRITICAL: POST /api/projects/:projectId/tasks/:taskId/comments error:",
         error
       );
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -971,13 +956,11 @@ router.get("/api/projects/:projectId/activity", jagaProyek("list", "R"), async (
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/activity error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -1010,13 +993,11 @@ router.post("/api/projects/:projectId/activity", jagaProyek("list", "U"), async 
     res.json({ status: "success", data: { id: newId } });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: POST /api/projects/:projectId/activity error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -1058,13 +1039,11 @@ router.post(
         "LOG ANOMALI CRITICAL: POST /api/projects/:projectId/tasks/:taskId/links error:",
         error
       );
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -1082,13 +1061,11 @@ router.delete(
         "LOG ANOMALI CRITICAL: DELETE /api/projects/:projectId/tasks/:taskId/links/:linkId error:",
         error
       );
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
