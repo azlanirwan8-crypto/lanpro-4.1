@@ -2595,7 +2595,7 @@ export const id = {
     regSuccess: "Pendaftaran Berhasil",
     backToLogin: "Kembali ke Halaman Masuk",
     completeReg: "Lengkapi Pendaftaran",
-    oneMoreStep: "Satu langkah lagi. Pilih username untuk akun LanPro Anda.",
+    oneMoreStep: "Satu langkah lagi. Pilih username untuk akun Anda.",
     usernamePlaceholder: "johndoe",
     suggestHint: "Kami sarankan dari email Anda. Silakan ubah bila ingin nama lain.",
     usernameInvalid: "Username hanya boleh berupa huruf, maksimal 10 karakter",
