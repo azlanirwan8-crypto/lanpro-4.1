@@ -3585,6 +3585,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                 currentUserProfile={currentUserProfile}
                 user={user}
                 userRole={effectiveRole}
+                masterData={masterData}
                 onOpenProfile={() => bukaDetailPengguna(currentUserProfile || currentUser || user)}
                 onOpenMessages={() => {
                   // Trigger socket or scroll to live chat if needed

@@ -11,6 +11,8 @@ export interface UserProfileDropdownProps {
   currentUserProfile: UserProfile | null;
   user: any;
   userRole?: PeranEfektif | null;
+  /** Item #199 — Master Data "jabatan"/"position", untuk menerjemahkan kode posisi ke nama manusiawi. */
+  masterData?: any[];
   onOpenProfile: () => void;
   onOpenMessages?: () => void;
   onOpenHelp?: () => void;
@@ -22,6 +24,7 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   currentUserProfile,
   user,
   userRole,
+  masterData = [],
   onOpenProfile,
   onOpenMessages,
   onOpenHelp,
@@ -34,8 +37,30 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
   const activeUser = currentUserProfile || currentUser || user;
   const displayName = activeUser?.displayName || activeUser?.name || activeUser?.username || "User";
   const username = activeUser?.username || "";
+
+  /**
+   * Item #199 — `activeUser.position` menyimpan KODE Master Data (mis.
+   * "Jab-4"), bukan nama yang siap ditampilkan. `UserDetailView.tsx`
+   * (`getPosName`) sudah menerjemahkannya lewat lookup ke Master Data; komponen
+   * ini sebelumnya menampilkan kode itu mentah-mentah, jadi header aplikasi
+   * menampilkan "Jab-4" alih-alih nama jabatan sungguhan.
+   */
+  const posName = (posId?: string) => {
+    if (!posId) return undefined;
+    const allPos = masterData.filter((d) => d.type === "jabatan" || d.type === "position");
+    const found = allPos.find((p: any) => (p.id || p.code) === posId || p.label === posId);
+    // Sama seperti `getPosName` di UserDetailView.tsx: jatuh ke kode aslinya
+    // (BUKAN disembunyikan) bila tidak cocok di Master Data — supaya tidak
+    // ada informasi yang hilang, hanya tidak diterjemahkan.
+    return found?.name || found?.label || posId;
+  };
+
   const roleDisplay =
-    activeUser?.position || activeUser?.jobTitle || userRole || activeUser?.role || "Member";
+    posName(activeUser?.position) ||
+    activeUser?.jobTitle ||
+    userRole ||
+    activeUser?.role ||
+    "Member";
 
   // First name for friendly greeting
   const firstName = displayName.split(" ")[0] || "User";
