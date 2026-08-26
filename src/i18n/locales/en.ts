@@ -828,6 +828,7 @@ export const en = {
     fileMax5MB: "Maximum file size is 5 MB",
     profileUpdated: "Profile updated successfully.",
     avatarFormatUnsupported: "Unsupported file format (use JPG, PNG, or WEBP)",
+    avatarPreviewReady: 'Preview ready — click "Save Changes" to actually upload this photo.',
     fileMax2MB: "Maximum file size is 2 MB",
     fullNameRequired: "Full name is required.",
     assignProjectFailed: "Failed to assign the user to the project: ",

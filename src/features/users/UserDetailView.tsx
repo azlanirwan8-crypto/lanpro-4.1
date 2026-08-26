@@ -1098,6 +1098,15 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     const objectUrl = URL.createObjectURL(file);
     setSelectedAvatar(file);
     setPreviewUrl(objectUrl);
+
+    // Item #209 — sebelumnya baris ini diam total: tidak ada toast, tidak ada
+    // indikator apa pun bahwa foto BELUM benar-benar terkirim (unggahnya
+    // ditunda sampai tombol "Simpan" utama diklik, berbeda dari Cover yang
+    // sejak #208 langsung terkirim). Dari sudut pandang pengguna itu terlihat
+    // identik dengan "gagal upload" — tidak ada bedanya. Bukan diubah jadi
+    // unggah instan (akan mengacaukan alur Batal/Simpan gabungan formulir
+    // ini), cukup diberi tahu supaya langkah berikutnya jelas.
+    toast.info(t("toast.avatarPreviewReady"));
   };
 
   // Item #208 — Handler Input Cover File: diunggah SEGERA ke server saat

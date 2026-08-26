@@ -831,6 +831,8 @@ export const id = {
     fileMax5MB: "Ukuran file maksimal 5MB",
     profileUpdated: "Profil berhasil diperbarui.",
     avatarFormatUnsupported: "Format file tidak didukung (gunakan JPG, PNG, atau WEBP)",
+    avatarPreviewReady:
+      'Pratinjau siap — klik "Simpan Perubahan" untuk benar-benar mengunggah foto ini.',
     fileMax2MB: "Ukuran file maksimal 2MB",
     fullNameRequired: "Nama Lengkap wajib diisi.",
     assignProjectFailed: "Gagal menugaskan pengguna ke project: ",
