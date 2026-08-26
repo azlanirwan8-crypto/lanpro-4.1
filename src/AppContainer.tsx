@@ -3195,7 +3195,16 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
       currentUser?.username || user?.username || currentUserProfile?.username;
     const isReporter =
       taskToDelete.reporterId === effectiveUserId || taskToDelete.reporterId === effectiveUsername;
-    if (!isReporter) {
+    // Item #206 — jalur KETIGA dari bug #202/#204: fungsi ini (dipanggil
+    // langsung saat ikon Hapus diklik, di TENGAH antara tombol dan API) juga
+    // punya pengecekan reporter-only-nya sendiri, TANPA jalur admin/manager/
+    // head — jadi walau tombolnya sudah benar tampil untuk Admin (#202) dan
+    // backend sudah benar mengizinkan (#204), klik-nya tetap gagal di sini,
+    // di tengah jalan, sebelum sempat memanggil API sama sekali.
+    const isLeadOrAdmin = ["admin", "manager", "head"].includes(
+      String(effectiveRole || "").toLowerCase()
+    );
+    if (!isReporter && !isLeadOrAdmin) {
       toast.error(t("toast.onlyReporterDeleteTask"));
       return;
     }
