@@ -62,13 +62,13 @@ describe("whatsapp.service", () => {
       expect(jadwalTerdaftar).toHaveLength(0);
     });
 
-    it("mendaftarkan penjadwal 07:00 bila token dikonfigurasi", async () => {
+    it("mendaftarkan penjadwal (dicek tiap menit terhadap BroadcastConfig) bila token dikonfigurasi", async () => {
       process.env.WHATSAPP_API_TOKEN = "token-uji";
       const wa = await import("./whatsapp.service");
       wa.initWhatsAppScheduler();
 
       expect(jadwalTerdaftar).toHaveLength(1);
-      expect(jadwalTerdaftar[0]).toBe("0 7 * * *");
+      expect(jadwalTerdaftar[0]).toBe("* * * * *");
       delete process.env.WHATSAPP_API_TOKEN;
     });
   });

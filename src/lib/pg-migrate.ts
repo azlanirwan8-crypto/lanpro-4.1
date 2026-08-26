@@ -680,6 +680,25 @@ export async function runMigrations(pool: Pool): Promise<void> {
       );
     `);
 
+    // ── BroadcastConfig (item #193) ──────────────────────────────────────────
+    //
+    // Jadwal broadcast (hari/jam) dan daftar penerima sebelumnya hardcode di
+    // kode server (cron.schedule("0 7 * * *") + SELECT semua user), tidak ada
+    // tempat penyimpanan sama sekali sehingga panel "WhatsApp gateway" di UI
+    // tidak punya apa pun untuk dibaca/diubah. Satu baris per channel
+    // ("whatsapp"), dibuat otomatis dengan nilai default saat pertama diakses.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "BroadcastConfig" (
+        id                 SERIAL PRIMARY KEY,
+        channel            VARCHAR(20) NOT NULL UNIQUE,
+        "scheduleDays"     VARCHAR(20) NOT NULL DEFAULT '1,2,3,4,5,6,7',
+        "scheduleTime"     VARCHAR(5) NOT NULL DEFAULT '07:00',
+        "recipientIds"     TEXT NOT NULL DEFAULT '',
+        "messageTemplate"  TEXT,
+        "updatedAt"        TIMESTAMP DEFAULT NOW()
+      );
+    `);
+
     // ── PENYETARAAN SCHEMA (item #79) ─────────────────────────────────────────
     //
     // Diukur 16 Agu 2026: 13 tabel dan 54 kolom ADA di database production tetapi

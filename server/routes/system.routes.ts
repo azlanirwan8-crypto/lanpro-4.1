@@ -9,8 +9,12 @@ import {
   ambilApiKey,
 } from "../services/email.service";
 import { systemRepository } from "../repositories/system.repository";
+import { getBroadcastConfig, saveBroadcastConfig } from "../services/broadcastConfig.service";
 
 const router = Router();
+
+const VALID_DAYS = ["1", "2", "3", "4", "5", "6", "7"];
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 // Database Schema Stats
 router.get("/api/db-schema", verifyGlobalAdmin, async (req, res) => {
@@ -19,13 +23,11 @@ router.get("/api/db-schema", verifyGlobalAdmin, async (req, res) => {
     res.json({ status: "success", tables: schema, stats });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Database query error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -48,13 +50,11 @@ router.post("/api/migrate-db", verifyGlobalAdmin, async (req, res) => {
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Migration error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -132,6 +132,72 @@ router.post("/api/settings/email/test", verifyGlobalAdmin, async (req, res) => {
       status: "error",
       code: "srv.terjadi_kesalahan_internal_saat",
       message: "Terjadi kesalahan internal saat mengirim email uji coba",
+    });
+  }
+});
+
+/**
+ * Item #193: Konfigurasi jadwal (hari/jam), penerima, dan template broadcast
+ * WhatsApp (Khusus Global Admin).
+ */
+router.get("/api/settings/whatsapp/broadcast-config", verifyGlobalAdmin, async (req, res) => {
+  try {
+    const config = await getBroadcastConfig("whatsapp");
+    res.json({ status: "success", data: config });
+  } catch (error: any) {
+    console.error("[SETTINGS] Gagal mengambil konfigurasi broadcast WhatsApp:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_mengambil_konfigurasi_broadcast",
+      message: "Gagal mengambil konfigurasi broadcast",
+    });
+  }
+});
+
+router.post("/api/settings/whatsapp/broadcast-config", verifyGlobalAdmin, async (req, res) => {
+  try {
+    const { scheduleDays, scheduleTime, recipientIds, messageTemplate } = req.body || {};
+
+    if (!Array.isArray(scheduleDays) || scheduleDays.length === 0) {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.pilih_minimal_satu_hari",
+        message: "Pilih minimal satu hari untuk jadwal broadcast",
+      });
+    }
+    const cleanDays = scheduleDays.map(String).filter((d) => VALID_DAYS.includes(d));
+    if (cleanDays.length === 0) {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.hari_tidak_valid",
+        message: "Hari yang dipilih tidak valid",
+      });
+    }
+
+    if (typeof scheduleTime !== "string" || !TIME_RE.test(scheduleTime)) {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.jam_tidak_valid",
+        message: "Format jam tidak valid, gunakan HH:MM",
+      });
+    }
+
+    const cleanRecipients = Array.isArray(recipientIds) ? recipientIds.map(String) : [];
+
+    const config = await saveBroadcastConfig("whatsapp", {
+      scheduleDays: cleanDays,
+      scheduleTime,
+      recipientIds: cleanRecipients,
+      messageTemplate: typeof messageTemplate === "string" ? messageTemplate : "",
+    });
+
+    res.json({ status: "success", data: config });
+  } catch (error: any) {
+    console.error("[SETTINGS] Gagal menyimpan konfigurasi broadcast WhatsApp:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_menyimpan_konfigurasi_broadcast",
+      message: "Gagal menyimpan konfigurasi broadcast",
     });
   }
 });

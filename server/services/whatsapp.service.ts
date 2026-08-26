@@ -1,5 +1,6 @@
 import cron from "node-cron";
 import dbPool from "../../src/lib/db";
+import { getBroadcastConfig } from "./broadcastConfig.service";
 
 const WA_API_URL = "https://api.fonnte.com/send";
 
@@ -19,12 +20,50 @@ function ambilToken(): string {
 
 export const terkonfigurasi = (): boolean => ambilToken() !== "";
 
+/** Hari ISO (1=Senin..7=Minggu) & jam "HH:MM" saat ini di zona Asia/Jakarta. */
+function jadwalSekarangWIB(): { day: string; time: string } {
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Jakarta",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+
+  const byType: Record<string, string> = {};
+  for (const p of parts) byType[p.type] = p.value;
+
+  const weekdayIso: Record<string, string> = {
+    Mon: "1",
+    Tue: "2",
+    Wed: "3",
+    Thu: "4",
+    Fri: "5",
+    Sat: "6",
+    Sun: "7",
+  };
+
+  return {
+    day: weekdayIso[byType.weekday] || "1",
+    time: `${byType.hour}:${byType.minute}`,
+  };
+}
+
+let lastTriggeredKey = "";
+
 /**
- * Menyalakan penjadwal digest harian pukul 07:00.
+ * Menyalakan penjadwal digest broadcast WhatsApp (Item #193).
  *
  * Fungsi ini sebelumnya di-import di `server.ts` tetapi TIDAK PERNAH DIPANGGIL,
  * sehingga digest harian belum pernah menyala sekali pun sejak ditulis. Hanya
  * pemicu manual yang berfungsi.
+ *
+ * Jadwal (hari + jam) dan daftar penerima TIDAK LAGI hardcode — keduanya
+ * dibaca dari `BroadcastConfig` (diatur lewat panel Settings → WhatsApp
+ * gateway) setiap menit. Cron sendiri berjalan tiap menit hanya untuk
+ * MENGECEK apakah waktu saat ini cocok dengan konfigurasi; ini memungkinkan
+ * jadwal diubah dari UI tanpa perlu restart server.
  *
  * Bila token belum dikonfigurasi, penjadwal sengaja TIDAK didaftarkan sama
  * sekali. Mendaftarkannya hanya akan menghasilkan kegagalan setiap pagi tanpa
@@ -39,21 +78,39 @@ export const initWhatsAppScheduler = () => {
     return;
   }
 
-  cron.schedule("0 7 * * *", async () => {
+  cron.schedule("* * * * *", async () => {
     try {
-      await sendDailyTaskDigest();
+      const { day, time } = jadwalSekarangWIB();
+      const config = await getBroadcastConfig("whatsapp");
+
+      if (!config.scheduleDays.includes(day) || config.scheduleTime !== time) return;
+
+      // Cron bisa terpicu lebih dari sekali pada menit yang sama di beberapa
+      // runtime; kunci hari+jam mencegah broadcast terkirim dobel.
+      const key = `${day}-${time}`;
+      if (lastTriggeredKey === key) return;
+      lastTriggeredKey = key;
+
+      console.log(`[WHATSAPP] Menjalankan broadcast terjadwal (hari ${day}, ${time} WIB)...`);
+      await sendDailyTaskDigest(undefined, config.recipientIds, config.messageTemplate);
     } catch (err: any) {
-      // Kegagalan satu hari tidak boleh mematikan penjadwal untuk hari-hari
+      // Kegagalan satu jadwal tidak boleh mematikan penjadwal untuk jadwal
       // berikutnya. Tanpa penangkap ini, satu galat menghentikan seluruh
       // pengiriman berikutnya secara senyap.
-      console.error("[WHATSAPP] Digest harian gagal:", err?.message);
+      console.error("[WHATSAPP] Broadcast terjadwal gagal:", err?.message);
     }
   });
 
-  console.log("[WHATSAPP] Penjadwal digest harian aktif (07:00).");
+  console.log(
+    "[WHATSAPP] Penjadwal broadcast dinamis aktif (dicek tiap menit dari BroadcastConfig)."
+  );
 };
 
-export async function sendDailyTaskDigest(targetUserId?: number) {
+export async function sendDailyTaskDigest(
+  targetUserId?: number,
+  recipientIds?: string[],
+  messageTemplate?: string | null
+) {
   const connection = await dbPool.getConnection();
   try {
     let query = "SELECT id, displayName, phone FROM Users WHERE phone IS NOT NULL";
@@ -61,6 +118,9 @@ export async function sendDailyTaskDigest(targetUserId?: number) {
     if (targetUserId) {
       query += " AND id = ?";
       params.push(targetUserId);
+    } else if (recipientIds && recipientIds.length > 0) {
+      query += ` AND id IN (${recipientIds.map(() => "?").join(",")})`;
+      params.push(...recipientIds);
     }
     const [users]: any = await connection.query(query, params);
 
@@ -69,14 +129,14 @@ export async function sendDailyTaskDigest(targetUserId?: number) {
         `
         SELECT t.title, t.dueDate, t.status
         FROM Tasks t
-        WHERE t.assigneeId = ? 
+        WHERE t.assigneeId = ?
         AND t.status IN ('To Do', 'In Progress', 'Testing')
       `,
         [user.id]
       );
 
       if (tasks.length > 0) {
-        const message = formatMessage(user.displayName, tasks);
+        const message = formatMessage(user.displayName, tasks, messageTemplate);
         await sendToWhatsApp(user.phone, message);
       }
     }
@@ -88,8 +148,20 @@ export async function sendDailyTaskDigest(targetUserId?: number) {
   }
 }
 
-function formatMessage(name: string, tasks: any[]) {
-  let msg = `*Selamat Pagi, ${name}!* ☕\n\nBerikut ringkasan tugas Anda hari ini:\n\n`;
+/**
+ * Menyusun isi pesan. Bila admin sudah menyimpan template kustom (panel
+ * Settings → WhatsApp gateway → "Edit Broadcast Template"), sapaan pembuka
+ * diambil dari sana (variabel `{{user_name}}` diganti); daftar tugas tetap
+ * disusun terprogram sebab template ditulis untuk SATU tugas sementara
+ * digest ini berisi BANYAK tugas per pengguna.
+ */
+function formatMessage(name: string, tasks: any[], messageTemplate?: string | null) {
+  const greeting =
+    messageTemplate && messageTemplate.trim()
+      ? messageTemplate.replace(/\{\{user_name\}\}/g, name)
+      : `*Selamat Pagi, ${name}!* ☕\n\nBerikut ringkasan tugas Anda hari ini:`;
+
+  let msg = `${greeting}\n\n`;
   tasks.forEach((t) => {
     msg += `• *${t.title}*\n  Status: ${t.status} | Due: ${t.dueDate}\n\n`;
   });
