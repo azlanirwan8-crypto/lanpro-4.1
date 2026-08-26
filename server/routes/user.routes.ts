@@ -13,6 +13,7 @@ import { validasiBody } from "../middleware/validate";
 import { updateUserSchema, updateProfileSchema } from "../schemas/user.schema";
 import { AuthenticatedRequest } from "../types/express";
 import { userRepository } from "../repositories/user.repository";
+import { createAuditLog } from "../services/audit.service";
 export { sanitizeAvatarValue };
 
 function hapusAvatarLama(urlLama: unknown, urlBaru: string): void {
@@ -360,6 +361,14 @@ router.put(
         });
       }
 
+      // Item #195 — snapshot SEBELUM update: aksi manajemen-user sebelumnya
+      // tidak pernah tercatat di mana pun (hanya ActivityLogs Task yang
+      // ditulis), jadi panel "Recent Activity" di Detail User selalu kosong
+      // untuk perubahan seperti ini. Dicatat ke AuditLogs (tabel global,
+      // sudah dipakai fitur "Audit Perusahaan") supaya konsisten dengan
+      // aksi lain di aplikasi, bukan tabel baru.
+      const oldUser = await userRepository.findByIdOrUid(id);
+
       await userRepository.updateUser(
         id,
         {
@@ -377,6 +386,16 @@ router.put(
         },
         isAdmin
       );
+
+      createAuditLog({
+        userId: currentUserId,
+        projectId: null,
+        actionType: "UPDATE",
+        entityName: "User",
+        entityId: id,
+        oldValues: oldUser,
+        newValues: { role, status, department, position, displayName, username, email, phone },
+      });
 
       res.json({ status: "success", code: "srv.user_updated", message: "User updated" });
     } catch (error: any) {
@@ -397,7 +416,21 @@ router.delete(
   async (req: AuthenticatedRequest, res) => {
     try {
       const { id } = req.params;
+      const currentUserId = req.user?.id || req.user?.uid;
+      const oldUser = await userRepository.findByIdOrUid(id);
+
       await userRepository.delete(id);
+
+      createAuditLog({
+        userId: currentUserId,
+        projectId: null,
+        actionType: "DELETE",
+        entityName: "User",
+        entityId: id,
+        oldValues: oldUser,
+        newValues: null,
+      });
+
       res.json({ status: "success", code: "srv.user_deleted", message: "User deleted" });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: DELETE /api/users error:", error);
@@ -484,6 +517,18 @@ router.put(
         phone,
         avatar: finalAvatar,
         newPasswordHash,
+      });
+
+      // Item #195 — self-service profile update juga tidak pernah tercatat
+      // sebelumnya, sama seperti PUT /api/users/:id.
+      createAuditLog({
+        userId: id,
+        projectId: null,
+        actionType: "UPDATE",
+        entityName: "User",
+        entityId: id,
+        oldValues: user,
+        newValues: { displayName, username, email, phone, avatar: finalAvatar },
       });
 
       const io = req.app.get("io") || (req as any).io;

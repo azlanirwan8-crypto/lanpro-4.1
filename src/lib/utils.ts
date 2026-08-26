@@ -86,6 +86,9 @@ export const humanizeActivityAction = (action?: string, details?: any): string =
     return i18n.t("aktivitas.actProjectCreated");
   if (act.includes("file_uploaded") || act.includes("upload_file") || act.includes("file uploaded"))
     return i18n.t("aktivitas.actFileUploaded");
+  if (act.includes("user_profile_updated") || act.includes("profile_updated"))
+    return i18n.t("aktivitas.actUserProfileUpdated");
+  if (act.includes("user_deleted")) return i18n.t("aktivitas.actUserDeleted");
 
   return act.replace(/_/g, " ");
 };

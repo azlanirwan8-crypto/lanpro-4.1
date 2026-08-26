@@ -780,15 +780,72 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     return availableUsers.filter((u) => ids.has(u.id) || ids.has(u.uid));
   }, [userProjectsList, availableUsers, userId, user.uid]);
 
+  // Item #195 — panel "Recent Activity" sebelumnya HANYA membaca
+  // `ActivityLogs` (task di project yang sedang aktif) — aksi manajemen-user
+  // (admin mengedit department/role/dll, atau pengguna mengedit profil
+  // sendiri) tidak pernah dicatat ke mana pun, jadi pengguna yang baru
+  // diperbarui datanya tetap melihat "belum ada aktivitas". Ditambal dengan
+  // membaca `AuditLogs` (tabel global yang sudah dipakai fitur "Audit
+  // Perusahaan") untuk entitas User ini, digabung ke feed yang sama.
+  const [userAuditLogs, setUserAuditLogs] = useState<any[]>([]);
+  useEffect(() => {
+    if (!userId) return;
+    let isMounted = true;
+    apiRequest(`/api/audit-logs?entityName=User&entityId=${userId}&limit=20`)
+      .then((res: any) => {
+        if (isMounted && res?.status === "success" && Array.isArray(res.data)) {
+          setUserAuditLogs(res.data);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      isMounted = false;
+    };
+  }, [userId]);
+
+  const userAuditActivityLogs = React.useMemo(() => {
+    return userAuditLogs.map((row: any) => {
+      const isSelf = row.userId === userId || row.userId === user.uid;
+      const aktor = isSelf
+        ? t("userDetail.actorSelf")
+        : row.userName || t("userDetail.actorSomeone");
+      const changedFields =
+        row.newValues && row.oldValues && typeof row.newValues === "object"
+          ? Object.keys(row.newValues).filter(
+              (k) =>
+                row.newValues[k] !== undefined &&
+                JSON.stringify(row.oldValues[k]) !== JSON.stringify(row.newValues[k])
+            )
+          : [];
+      const details =
+        row.actionType === "DELETE"
+          ? t("userDetail.auditDeleted", { aktor })
+          : changedFields.length > 0
+            ? t("userDetail.auditUpdated", { aktor, fields: changedFields.join(", ") })
+            : t("userDetail.auditUpdatedNoFields", { aktor });
+
+      return {
+        id: `audit-${row.id}`,
+        createdAt: row.createdAt,
+        userId,
+        action: row.actionType === "DELETE" ? "user_deleted" : "user_profile_updated",
+        details,
+      };
+    });
+  }, [userAuditLogs, userId, user.uid, t]);
+
   // Item #187 — koreksi pemilik proyek: "Recent Activity" (pengganti
   // banner statis Velzon) dan filter Today/Weekly/Monthly diisi dari
   // `ActivityLog` sungguhan (src/types/task.ts), bukan data karangan.
   const [activityFilter, setActivityFilter] = useState<"today" | "week" | "month">("today");
   const userActivityLogsAll = React.useMemo(() => {
-    return (activityLogs || [])
-      .filter((log) => log.userId === userId || log.userId === user.uid)
-      .sort((a, b) => ensureDate(b.createdAt).getTime() - ensureDate(a.createdAt).getTime());
-  }, [activityLogs, userId, user.uid]);
+    const taskLogs = (activityLogs || []).filter(
+      (log) => log.userId === userId || log.userId === user.uid
+    );
+    return [...taskLogs, ...userAuditActivityLogs].sort(
+      (a, b) => ensureDate(b.createdAt).getTime() - ensureDate(a.createdAt).getTime()
+    );
+  }, [activityLogs, userAuditActivityLogs, userId, user.uid]);
   const userActivityLogsFiltered = React.useMemo(() => {
     return userActivityLogsAll.filter((log) => {
       const d = ensureDate(log.createdAt);
