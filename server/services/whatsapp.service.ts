@@ -158,62 +158,58 @@ export function formatTanggal(dueDate: any): string {
   return d.toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-/**
- * Titik status jadi penanda cepat-dipindai — pola yang sama dipakai bot
- * digest Slack/Asana/Jira: warna di depan baris jauh lebih cepat dibaca
- * di layar HP daripada teks status saja.
- */
-const STATUS_EMOJI: Record<string, string> = {
-  "to do": "⚪",
-  "in progress": "🟡",
-  "in review": "🟣",
-  testing: "🔵",
-  blocked: "🔴",
-  done: "🟢",
-};
-
-function statusEmoji(status: string): string {
-  return STATUS_EMOJI[String(status || "").toLowerCase()] || "⚪";
+/** "Tenggat: DD/MM/YYYY", atau "(Tenggat: Belum diatur)" — TIDAK PERNAH "null" literal. */
+function formatTenggat(dueDate: any): string {
+  if (!dueDate) return "(Tenggat: Belum diatur)";
+  const d = new Date(dueDate);
+  if (isNaN(d.getTime())) return "(Tenggat: Belum diatur)";
+  return `Tenggat: ${formatTanggal(dueDate)}`;
 }
 
 /**
- * Menyusun isi pesan (Item #193/#194). Sapaan pembuka bisa dikustomisasi
- * admin lewat panel Settings → WhatsApp gateway → "Edit Broadcast Template"
+ * Menyusun isi pesan (Item #193/#194, format "Daily Stand-up" diminta
+ * pemilik proyek 26 Agu 2026). Sapaan pembuka bisa dikustomisasi admin
+ * lewat panel Settings → WhatsApp gateway → "Edit Broadcast Template"
  * (variabel `{{user_name}}` diganti); daftar tugas SELALU disusun
- * terprogram — dikelompokkan per project, bernomor, dengan tanggal yang
- * sudah diformat — sebab satu digest berisi BANYAK tugas dari BANYAK
- * project per pengguna, sesuatu yang tidak bisa diwakili satu string
- * template statis.
- *
- * Desain dibenchmark ke pola notifikasi digest Slack/Asana/Jira (dot status
- * berwarna, tautan CTA jelas ke aplikasi) dan disamakan dengan digest email
- * yang sudah ada (`email.service.ts` — tombol "Buka Dashboard LanPro" ke
- * `APP_URL`), supaya kedua kanal punya identitas visual yang konsisten.
+ * terprogram — dikelompokkan per STATUS (Sedang Berjalan / Menunggu
+ * Eksekusi), sebab itu yang paling relevan dibaca cepat tiap pagi, bukan
+ * per project. Nama project ikut disebut per baris tugas hanya bila
+ * pengguna punya tugas dari LEBIH dari satu project sekaligus — kalau
+ * cuma satu, cukup disebut sekali di header supaya pesan tidak berulang.
  */
 export function formatMessage(name: string, tasks: any[], messageTemplate?: string | null) {
   const greeting =
     messageTemplate && messageTemplate.trim()
       ? messageTemplate.replace(/\{\{user_name\}\}/g, name)
-      : `Hi ${name}`;
+      : `Halo ${name},`;
 
-  const groups = new Map<string, any[]>();
-  for (const t of tasks) {
-    const proyek = t.projectName || "Tanpa Project";
-    if (!groups.has(proyek)) groups.set(proyek, []);
-    groups.get(proyek)!.push(t);
-  }
-
+  const projectNames = Array.from(new Set(tasks.map((t) => t.projectName || "Tanpa Project")));
+  const headerProject = projectNames.length === 1 ? ` - ${projectNames[0]}` : "";
   const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
 
-  let msg = `*LanPro — Ringkasan Tugas*\n\n${greeting}\n`;
-  for (const [projectName, projectTasks] of groups) {
-    msg += `\n📁 Project *${projectName}*\n`;
-    projectTasks.forEach((t, i) => {
-      msg += `${i + 1}. *${t.title}*\n   ${statusEmoji(t.status)} ${t.status} · 📅 ${formatTanggal(t.dueDate)}\n`;
-    });
+  const bulletLine = (t: any) => {
+    const proyek = projectNames.length > 1 ? ` (${t.projectName || "Tanpa Project"})` : "";
+    return `• ${t.title}${proyek} — ${formatTenggat(t.dueDate)}`;
+  };
+
+  const sedangBerjalan = tasks.filter(
+    (t) => String(t.status || "").toLowerCase() === "in progress"
+  );
+  const menungguEksekusi = tasks.filter(
+    (t) => String(t.status || "").toLowerCase() !== "in progress"
+  );
+
+  let msg = `*[LanPro] 📊 Ringkasan Tugas${headerProject}*\n\n`;
+  msg += `${greeting}\nBerikut adalah ringkasan tugas Anda:\n`;
+
+  if (sedangBerjalan.length > 0) {
+    msg += `\n🚀 *SEDANG BERJALAN (In Progress)*\n${sedangBerjalan.map(bulletLine).join("\n")}\n`;
+  }
+  if (menungguEksekusi.length > 0) {
+    msg += `\n📋 *MENUNGGU EKSEKUSI (Pending/To Do)*\n${menungguEksekusi.map(bulletLine).join("\n")}\n`;
   }
 
-  msg += `\n🔗 Buka dashboard Anda: ${appUrl}\n\nTerima kasih 🙏`;
+  msg += `\nMohon perbarui status tugas Anda jika ada progres terbaru.\nCek detail selengkapnya di: ${appUrl}`;
   return msg;
 }
 

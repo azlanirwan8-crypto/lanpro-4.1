@@ -18,7 +18,7 @@ export interface BroadcastConfigData {
   messageTemplate: string | null;
 }
 
-const DEFAULT_TEMPLATE = "Hi {{user_name}}";
+const DEFAULT_TEMPLATE = "Halo {{user_name}},";
 
 function toRow(data: any): BroadcastConfigData {
   return {

@@ -27,7 +27,7 @@ export const SettingsPage: React.FC = () => {
     token: "",
     deviceId: "",
     senderNumber: "",
-    messageTemplate: "Hi {{user_name}}",
+    messageTemplate: "Halo {{user_name}},",
     scheduleDays: ["1", "2", "3", "4", "5", "6", "7"],
     scheduleTime: "07:00",
     recipientIds: [] as string[],
