@@ -27,8 +27,7 @@ export const SettingsPage: React.FC = () => {
     token: "",
     deviceId: "",
     senderNumber: "",
-    messageTemplate:
-      "*[LanPro] Task Assignment*\n\nHi {{user_name}},\n\nYou have been assigned to task *{{task_key}}*: {{task_title}}.\n_Status_: {{status}}\n_Project_: {{project_name}}\n\nPlease check the dashboard for details.",
+    messageTemplate: "Hi {{user_name}}",
     scheduleDays: ["1", "2", "3", "4", "5", "6", "7"],
     scheduleTime: "07:00",
     recipientIds: [] as string[],

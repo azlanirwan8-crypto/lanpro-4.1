@@ -127,10 +127,12 @@ export async function sendDailyTaskDigest(
     for (const user of users) {
       const [tasks]: any = await connection.query(
         `
-        SELECT t.title, t.dueDate, t.status
+        SELECT t.title, t.dueDate, t.status, p.name as "projectName"
         FROM Tasks t
+        LEFT JOIN Projects p ON t."projectId" = p.id
         WHERE t.assigneeId = ?
         AND t.status IN ('To Do', 'In Progress', 'Testing')
+        ORDER BY p.name, t.dueDate
       `,
         [user.id]
       );
@@ -148,23 +150,45 @@ export async function sendDailyTaskDigest(
   }
 }
 
+/** Formats a due date as "DD/MM/YYYY", or "-" when missing/invalid. */
+export function formatTanggal(dueDate: any): string {
+  if (!dueDate) return "-";
+  const d = new Date(dueDate);
+  if (isNaN(d.getTime())) return "-";
+  return d.toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
 /**
- * Menyusun isi pesan. Bila admin sudah menyimpan template kustom (panel
- * Settings → WhatsApp gateway → "Edit Broadcast Template"), sapaan pembuka
- * diambil dari sana (variabel `{{user_name}}` diganti); daftar tugas tetap
- * disusun terprogram sebab template ditulis untuk SATU tugas sementara
- * digest ini berisi BANYAK tugas per pengguna.
+ * Menyusun isi pesan (Item #194). Sapaan pembuka bisa dikustomisasi admin
+ * lewat panel Settings → WhatsApp gateway → "Edit Broadcast Template"
+ * (variabel `{{user_name}}` diganti); daftar tugas SELALU disusun
+ * terprogram — dikelompokkan per project, bernomor, dengan tanggal yang
+ * sudah diformat — sebab satu digest berisi BANYAK tugas dari BANYAK
+ * project per pengguna, sesuatu yang tidak bisa diwakili satu string
+ * template statis.
  */
-function formatMessage(name: string, tasks: any[], messageTemplate?: string | null) {
+export function formatMessage(name: string, tasks: any[], messageTemplate?: string | null) {
   const greeting =
     messageTemplate && messageTemplate.trim()
       ? messageTemplate.replace(/\{\{user_name\}\}/g, name)
-      : `*Selamat Pagi, ${name}!* ☕\n\nBerikut ringkasan tugas Anda hari ini:`;
+      : `Hi ${name}`;
 
-  let msg = `${greeting}\n\n`;
-  tasks.forEach((t) => {
-    msg += `• *${t.title}*\n  Status: ${t.status} | Due: ${t.dueDate}\n\n`;
-  });
+  const groups = new Map<string, any[]>();
+  for (const t of tasks) {
+    const proyek = t.projectName || "Tanpa Project";
+    if (!groups.has(proyek)) groups.set(proyek, []);
+    groups.get(proyek)!.push(t);
+  }
+
+  let msg = `${greeting}\n`;
+  for (const [projectName, projectTasks] of groups) {
+    msg += `\nAnda ada di Project *${projectName}*\nAnda memiliki beberapa task dengan status:\n\n`;
+    projectTasks.forEach((t, i) => {
+      msg += `${i + 1}. ${t.title} - ${t.status} - ${formatTanggal(t.dueDate)}\n`;
+    });
+  }
+
+  msg += `\nSilahkan akses portal Anda untuk cek ini.\n\nTerima kasih`;
   return msg;
 }
 

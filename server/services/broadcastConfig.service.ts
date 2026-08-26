@@ -18,8 +18,7 @@ export interface BroadcastConfigData {
   messageTemplate: string | null;
 }
 
-const DEFAULT_TEMPLATE =
-  "*[LanPro] Task Assignment*\n\nHi {{user_name}},\n\nYou have been assigned to task *{{task_key}}*: {{task_title}}.\n_Status_: {{status}}\n_Project_: {{project_name}}\n\nPlease check the dashboard for details.";
+const DEFAULT_TEMPLATE = "Hi {{user_name}}";
 
 function toRow(data: any): BroadcastConfigData {
   return {

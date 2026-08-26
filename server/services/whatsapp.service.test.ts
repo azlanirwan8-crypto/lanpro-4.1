@@ -72,4 +72,72 @@ describe("whatsapp.service", () => {
       delete process.env.WHATSAPP_API_TOKEN;
     });
   });
+
+  /**
+   * #194 — pesan digest sebelumnya membocorkan `{{task_key}}`/`{{task_title}}`
+   * mentah (template ditulis untuk satu tugas, dipakai untuk banyak tugas),
+   * menampilkan "Due: null" literal, dan tidak mengelompokkan per project.
+   * Dikonfirmasi dari isi pesan broadcast SUNGGUHAN yang dikirim ke WhatsApp
+   * pemilik proyek.
+   */
+  describe("formatMessage", () => {
+    it("tidak membocorkan placeholder {{task_key}}/{{task_title}} mentah", async () => {
+      const wa = await import("./whatsapp.service");
+      const pesan = wa.formatMessage("Budi", [
+        { title: "Tugas A", status: "To Do", dueDate: null, projectName: "Proyek X" },
+      ]);
+      expect(pesan).not.toContain("{{task_key}}");
+      expect(pesan).not.toContain("{{task_title}}");
+    });
+
+    it("menomori tugas per project, bukan menampilkan 'Due: null' literal", async () => {
+      const wa = await import("./whatsapp.service");
+      const pesan = wa.formatMessage("Budi", [
+        { title: "Tugas A", status: "To Do", dueDate: null, projectName: "Proyek X" },
+        { title: "Tugas B", status: "In Progress", dueDate: "2026-08-30", projectName: "Proyek X" },
+      ]);
+
+      expect(pesan).toContain("Hi Budi");
+      expect(pesan).toContain("Anda ada di Project *Proyek X*");
+      expect(pesan).toContain("1. Tugas A - To Do - -");
+      expect(pesan).toContain("2. Tugas B - In Progress - 30/08/2026");
+      expect(pesan).not.toContain("Due: null");
+      expect(pesan).toContain("Silahkan akses portal Anda untuk cek ini.");
+    });
+
+    it("mengelompokkan tugas dari project berbeda ke bagian terpisah", async () => {
+      const wa = await import("./whatsapp.service");
+      const pesan = wa.formatMessage("Budi", [
+        { title: "Tugas A", status: "To Do", dueDate: null, projectName: "Proyek X" },
+        { title: "Tugas B", status: "To Do", dueDate: null, projectName: "Proyek Y" },
+      ]);
+
+      expect(pesan).toContain("Anda ada di Project *Proyek X*");
+      expect(pesan).toContain("Anda ada di Project *Proyek Y*");
+    });
+
+    it("memakai template kustom untuk sapaan, mengganti {{user_name}}", async () => {
+      const wa = await import("./whatsapp.service");
+      const pesan = wa.formatMessage(
+        "Budi",
+        [{ title: "Tugas A", status: "To Do", dueDate: null, projectName: "Proyek X" }],
+        "Selamat pagi {{user_name}}, ini pengingat tugasmu:"
+      );
+      expect(pesan).toContain("Selamat pagi Budi, ini pengingat tugasmu:");
+    });
+  });
+
+  describe("formatTanggal", () => {
+    it("mengembalikan '-' untuk tanggal kosong/tidak valid", async () => {
+      const wa = await import("./whatsapp.service");
+      expect(wa.formatTanggal(null)).toBe("-");
+      expect(wa.formatTanggal(undefined)).toBe("-");
+      expect(wa.formatTanggal("bukan-tanggal")).toBe("-");
+    });
+
+    it("memformat tanggal valid sebagai DD/MM/YYYY", async () => {
+      const wa = await import("./whatsapp.service");
+      expect(wa.formatTanggal("2026-01-05")).toBe("05/01/2026");
+    });
+  });
 });
