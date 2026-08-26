@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { cn, ensureDate } from "../../../../lib/utils";
-import { UserAvatar } from "../../../../components/ui/UserAvatar";
 import { StyledDropdown, UncontrolledInput } from "../../../../components/ui/CommonComponents";
 import { RenderIcon } from "../../../../components/RenderIcon";
 import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
@@ -406,33 +405,29 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                 break;
 
               case "reporter": {
-                const reporterObj =
-                  (task as any).reporter ||
-                  projectMembers.find(
-                    (m) => m.uid === task.reporterId || (m as any).id === task.reporterId
-                  );
-                const reporterName =
-                  reporterObj?.name ||
-                  reporterObj?.displayName ||
-                  reporterObj?.email ||
-                  (task.reporterId ? t("common.unknown") : t("newTask.unassigned"));
+                // Item #205 — sebelumnya kolom ini cuma teks statis (avatar +
+                // nama), TIDAK bisa diklik sama sekali — beda dengan Assignee
+                // yang sudah dropdown. Disamakan: dropdown yang sama, digerbangi
+                // `canManage` (Admin/Manager/Head atau Reporter task ini),
+                // sama seperti dropdown Reporter di sidebar detail issue.
+                const reporterOptions = [
+                  { id: "", label: t("ui2.linkNone") },
+                  ...projectMembers.map((m) => ({
+                    id: m?.uid || "",
+                    label: m?.displayName || m?.email || "Unknown",
+                  })),
+                ];
                 content = (
-                  <div className="flex items-center gap-2">
-                    <UserAvatar
-                      uid={task.reporterId || ""}
-                      user={reporterObj}
-                      members={projectMembers}
-                      className="w-5 h-5 border border-surface shadow-soft ring-1 ring-border-faint"
-                    />
-                    <span
-                      className={cn(
-                        "text-xs sm:text-[11px] font-medium truncate max-w-[120px]",
-                        reporterObj ? "text-content-body" : "text-content-subtle"
-                      )}
-                    >
-                      {reporterName}
-                    </span>
-                  </div>
+                  <StyledDropdown
+                    value={task.reporterId || ""}
+                    onChange={(val) => updateTaskField(task.id, "reporterId", val)}
+                    options={reporterOptions}
+                    members={projectMembers}
+                    type="member"
+                    masterData={mArr}
+                    disabled={!canManage}
+                    className={cn("max-w-[150px]", !canManage && "pointer-events-none opacity-85")}
+                  />
                 );
                 break;
               }
