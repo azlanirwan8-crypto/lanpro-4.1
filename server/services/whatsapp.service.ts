@@ -159,13 +159,36 @@ export function formatTanggal(dueDate: any): string {
 }
 
 /**
- * Menyusun isi pesan (Item #194). Sapaan pembuka bisa dikustomisasi admin
- * lewat panel Settings → WhatsApp gateway → "Edit Broadcast Template"
+ * Titik status jadi penanda cepat-dipindai — pola yang sama dipakai bot
+ * digest Slack/Asana/Jira: warna di depan baris jauh lebih cepat dibaca
+ * di layar HP daripada teks status saja.
+ */
+const STATUS_EMOJI: Record<string, string> = {
+  "to do": "⚪",
+  "in progress": "🟡",
+  "in review": "🟣",
+  testing: "🔵",
+  blocked: "🔴",
+  done: "🟢",
+};
+
+function statusEmoji(status: string): string {
+  return STATUS_EMOJI[String(status || "").toLowerCase()] || "⚪";
+}
+
+/**
+ * Menyusun isi pesan (Item #193/#194). Sapaan pembuka bisa dikustomisasi
+ * admin lewat panel Settings → WhatsApp gateway → "Edit Broadcast Template"
  * (variabel `{{user_name}}` diganti); daftar tugas SELALU disusun
  * terprogram — dikelompokkan per project, bernomor, dengan tanggal yang
  * sudah diformat — sebab satu digest berisi BANYAK tugas dari BANYAK
  * project per pengguna, sesuatu yang tidak bisa diwakili satu string
  * template statis.
+ *
+ * Desain dibenchmark ke pola notifikasi digest Slack/Asana/Jira (dot status
+ * berwarna, tautan CTA jelas ke aplikasi) dan disamakan dengan digest email
+ * yang sudah ada (`email.service.ts` — tombol "Buka Dashboard LanPro" ke
+ * `APP_URL`), supaya kedua kanal punya identitas visual yang konsisten.
  */
 export function formatMessage(name: string, tasks: any[], messageTemplate?: string | null) {
   const greeting =
@@ -180,15 +203,17 @@ export function formatMessage(name: string, tasks: any[], messageTemplate?: stri
     groups.get(proyek)!.push(t);
   }
 
-  let msg = `${greeting}\n`;
+  const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+
+  let msg = `*LanPro — Ringkasan Tugas*\n\n${greeting}\n`;
   for (const [projectName, projectTasks] of groups) {
-    msg += `\nAnda ada di Project *${projectName}*\nAnda memiliki beberapa task dengan status:\n\n`;
+    msg += `\n📁 Project *${projectName}*\n`;
     projectTasks.forEach((t, i) => {
-      msg += `${i + 1}. ${t.title} - ${t.status} - ${formatTanggal(t.dueDate)}\n`;
+      msg += `${i + 1}. *${t.title}*\n   ${statusEmoji(t.status)} ${t.status} · 📅 ${formatTanggal(t.dueDate)}\n`;
     });
   }
 
-  msg += `\nSilahkan akses portal Anda untuk cek ini.\n\nTerima kasih`;
+  msg += `\n🔗 Buka dashboard Anda: ${appUrl}\n\nTerima kasih 🙏`;
   return msg;
 }
 

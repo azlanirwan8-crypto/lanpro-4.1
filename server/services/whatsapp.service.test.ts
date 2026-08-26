@@ -90,7 +90,7 @@ describe("whatsapp.service", () => {
       expect(pesan).not.toContain("{{task_title}}");
     });
 
-    it("menomori tugas per project, bukan menampilkan 'Due: null' literal", async () => {
+    it("menomori tugas per project dengan status emoji, bukan menampilkan 'Due: null' literal", async () => {
       const wa = await import("./whatsapp.service");
       const pesan = wa.formatMessage("Budi", [
         { title: "Tugas A", status: "To Do", dueDate: null, projectName: "Proyek X" },
@@ -98,11 +98,13 @@ describe("whatsapp.service", () => {
       ]);
 
       expect(pesan).toContain("Hi Budi");
-      expect(pesan).toContain("Anda ada di Project *Proyek X*");
-      expect(pesan).toContain("1. Tugas A - To Do - -");
-      expect(pesan).toContain("2. Tugas B - In Progress - 30/08/2026");
+      expect(pesan).toContain("Project *Proyek X*");
+      expect(pesan).toContain("1. *Tugas A*");
+      expect(pesan).toContain("⚪ To Do · 📅 -");
+      expect(pesan).toContain("2. *Tugas B*");
+      expect(pesan).toContain("🟡 In Progress · 📅 30/08/2026");
       expect(pesan).not.toContain("Due: null");
-      expect(pesan).toContain("Silahkan akses portal Anda untuk cek ini.");
+      expect(pesan).toContain("Buka dashboard Anda:");
     });
 
     it("mengelompokkan tugas dari project berbeda ke bagian terpisah", async () => {
@@ -112,8 +114,8 @@ describe("whatsapp.service", () => {
         { title: "Tugas B", status: "To Do", dueDate: null, projectName: "Proyek Y" },
       ]);
 
-      expect(pesan).toContain("Anda ada di Project *Proyek X*");
-      expect(pesan).toContain("Anda ada di Project *Proyek Y*");
+      expect(pesan).toContain("Project *Proyek X*");
+      expect(pesan).toContain("Project *Proyek Y*");
     });
 
     it("memakai template kustom untuk sapaan, mengganti {{user_name}}", async () => {
