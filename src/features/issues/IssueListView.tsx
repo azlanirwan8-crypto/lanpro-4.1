@@ -16,6 +16,13 @@ import { IssueAdvancedFiltersPanel } from "./components/list/IssueAdvancedFilter
 import { IssueTableRow } from "./components/list/IssueTableRow";
 import { IssueQuickCreateBar } from "./components/list/IssueQuickCreateBar";
 import { IssueBulkActionsBar } from "./components/list/IssueBulkActionsBar";
+import {
+  isUserReporter as isUserReporterFn,
+  canDeleteIssue as canDeleteIssueFn,
+  canManageIssue as canManageIssueFn,
+  canEditIssue as canEditIssueFn,
+  IssuePermissionContext,
+} from "./issuePermissions";
 
 export const IssueListView: React.FC<IssueListViewProps> = (props) => {
   const { t } = useTranslation();
@@ -105,56 +112,18 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
 
   const [inlineAddSprintId, setInlineAddSprintId] = useState("");
 
-  const isUserReporter = (issue: Task): boolean => {
-    if (!issue) return false;
-    const currentUserId =
-      currentUserProfile?.uid || currentUserProfile?.id || user?.uid || user?.id;
-    const currentUsername = currentUserProfile?.username || user?.username;
-    const currentEmail = currentUserProfile?.email || user?.email;
-    const rId = issue.reporterId;
-    return (
-      !!currentUserId &&
-      (rId === currentUserId ||
-        rId === currentUsername ||
-        rId === currentEmail ||
-        rId === currentUserProfile?.id)
-    );
-  };
-
-  const canDeleteIssue = (issue: Task): boolean => {
-    if (!issue) return false;
-    const isReporter = isUserReporter(issue);
-    const hasRole = hasPermission(
-      userRole,
-      "list",
-      "delete",
-      isReporter,
-      currentUserProfile?.permissions
-    );
-    const isLeadOrAdmin = ["admin", "manager", "head"].includes(userRole || "");
-    return hasRole || isReporter || isLeadOrAdmin;
-  };
-
-  // Item #200 — sebelumnya kemampuan EDIT baris (status/assignee/reporter,
-  // dst.) hanya dihitung dari `isUserReporter(issue)` mentah — tidak lewat
-  // `hasPermission`, jadi Admin/Manager/Head yang BUKAN reporter satu issue
-  // tertentu tetap terkunci mengedit issue itu, termasuk field Reporter.
-  // Polanya disamakan persis dengan `canDeleteIssue` di atas, yang sudah
-  // benar memberi akses penuh ke role admin (`hasPermission` mengembalikan
-  // `true` untuk admin tanpa syarat lain).
-  const canEditIssue = (issue: Task): boolean => {
-    if (!issue) return false;
-    const isReporter = isUserReporter(issue);
-    const hasRole = hasPermission(
-      userRole,
-      "list",
-      "update",
-      isReporter,
-      currentUserProfile?.permissions
-    );
-    const isLeadOrAdmin = ["admin", "manager", "head"].includes(userRole || "");
-    return hasRole || isReporter || isLeadOrAdmin;
-  };
+  // Item #200/#201 — aturan izin (Delete/Assignee/Reporter hanya
+  // Admin/Manager/Head atau Reporter; Assignee cuma boleh edit field lain
+  // di task yang diberikan ke mereka) dipindah ke modul murni
+  // `issuePermissions.ts` yang terkunci test (`issuePermissions.test.ts`) —
+  // JANGAN tulis ulang logikanya di sini. Riwayat lengkap kenapa (termasuk
+  // bug #200 yang sempat salah memakai `hasPermission("list","update")` yang
+  // ternyata selalu `true` untuk role "user") ada di komentar modul itu.
+  const permCtx: IssuePermissionContext = { userRole, currentUserProfile, user, hasPermission };
+  const isUserReporter = (issue: Task) => isUserReporterFn(issue, permCtx);
+  const canDeleteIssue = (issue: Task) => canDeleteIssueFn(issue, permCtx);
+  const canManageIssue = (issue: Task) => canManageIssueFn(issue, permCtx);
+  const canEditIssue = (issue: Task) => canEditIssueFn(issue, permCtx);
 
   const rawTasks = Array.isArray(tasks) ? tasks : [];
   const mArr = Array.isArray(masterData) ? masterData : [];
@@ -459,6 +428,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                       isUserReporter={isUserReporter}
                                       canDeleteIssue={canDeleteIssue}
                                       canEditIssue={canEditIssue}
+                                      canManageIssue={canManageIssue}
                                       deleteTask={deleteTask}
                                       setSelectedTaskForDetail={setSelectedTaskForDetail}
                                       setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}

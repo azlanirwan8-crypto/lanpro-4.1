@@ -28,6 +28,13 @@ import { TaskLinksSection } from "./components/modal/TaskLinksSection";
 import { TaskSubtasksSection } from "./components/modal/TaskSubtasksSection";
 import { TaskCommentsSection } from "./components/modal/TaskCommentsSection";
 import { TaskDetailSidebar } from "./components/modal/TaskDetailSidebar";
+import {
+  isUserReporter as isUserReporterFn,
+  canDeleteIssue as canDeleteIssueFn,
+  canManageIssue as canManageIssueFn,
+  canEditIssue as canEditIssueFn,
+  IssuePermissionContext,
+} from "./issuePermissions";
 
 export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   isUpdatingTask,
@@ -92,56 +99,15 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
     }
   };
 
-  const isUserReporter = (issue: Task): boolean => {
-    if (!issue) return false;
-    const currentUserId =
-      currentUserProfile?.uid || currentUserProfile?.id || user?.uid || user?.id;
-    const currentUsername = currentUserProfile?.username || user?.username;
-    const currentEmail = currentUserProfile?.email || user?.email;
-    const rId = issue.reporterId;
-    return (
-      !!currentUserId &&
-      (rId === currentUserId ||
-        rId === currentUsername ||
-        rId === currentEmail ||
-        rId === currentUserProfile?.id)
-    );
-  };
-
-  // Item #200 — sebelumnya `isEditable`/`canDelete` di sini juga cuma
-  // `isUserReporter(task)` mentah, tanpa lewat `hasPermission`, jadi
-  // Admin/Manager/Head yang bukan reporter satu task tertentu terkunci
-  // mengedit apa pun di sidebar ini — termasuk field Reporter. Pola
-  // disamakan dengan `canDeleteIssue`/`canEditIssue` di `IssueListView.tsx`.
+  // Item #200/#201 — aturan izin dipindah ke modul murni terkunci test
+  // `issuePermissions.ts` (sama dengan `IssueListView.tsx`) — JANGAN tulis
+  // ulang logikanya di sini. Riwayat lengkap ada di komentar modul itu.
+  const permCtx: IssuePermissionContext = { userRole, currentUserProfile, user, hasPermission };
+  const isUserReporter = (issue: Task) => isUserReporterFn(issue, permCtx);
   const isDirectOwner = task ? isUserReporter(task) : false;
-  const canEditTask = (issue: Task): boolean => {
-    if (!issue) return false;
-    const isReporter = isUserReporter(issue);
-    const hasRole = hasPermission(
-      userRole,
-      "list",
-      "update",
-      isReporter,
-      currentUserProfile?.permissions
-    );
-    const isLeadOrAdmin = ["admin", "manager", "head"].includes(userRole || "");
-    return hasRole || isReporter || isLeadOrAdmin;
-  };
-  const canDeleteTask = (issue: Task): boolean => {
-    if (!issue) return false;
-    const isReporter = isUserReporter(issue);
-    const hasRole = hasPermission(
-      userRole,
-      "list",
-      "delete",
-      isReporter,
-      currentUserProfile?.permissions
-    );
-    const isLeadOrAdmin = ["admin", "manager", "head"].includes(userRole || "");
-    return hasRole || isReporter || isLeadOrAdmin;
-  };
-  const isEditable = task ? canEditTask(task) : false;
-  const canDelete = task ? canDeleteTask(task) : false;
+  const isEditable = task ? canEditIssueFn(task, permCtx) : false;
+  const canManage = task ? canManageIssueFn(task, permCtx) : false;
+  const canDelete = task ? canDeleteIssueFn(task, permCtx) : false;
   const blockMember = !isEditable;
   const isProjectMember = false;
   const isReporter = isDirectOwner;
@@ -501,6 +467,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               blockMember={blockMember}
               isProjectMember={isProjectMember}
               isReporter={isReporter}
+              canManage={canManage}
               canDelete={canDelete}
               isUpdatingTask={isUpdatingTask}
               updateTaskField={updateTaskField}

@@ -56,6 +56,7 @@ interface IssueTableRowProps {
   isUserReporter: (issue: Task) => boolean;
   canDeleteIssue: (issue: Task) => boolean;
   canEditIssue: (issue: Task) => boolean;
+  canManageIssue: (issue: Task) => boolean;
   deleteTask?: (id: string) => void;
   setSelectedTaskForDetail: (task: Task) => void;
   setIsTaskDetailModalOpen: (open: boolean) => void;
@@ -113,6 +114,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
     isUserReporter,
     canDeleteIssue,
     canEditIssue,
+    canManageIssue,
     deleteTask,
     setSelectedTaskForDetail,
     setIsTaskDetailModalOpen,
@@ -231,7 +233,11 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
   // laporkan — termasuk field Reporter.
   const isEditable = canEditIssue(task);
   const canDelete = canDeleteIssue(task);
-  const blockMember = !isEditable;
+  // Item #201 — Assignee (dan Reporter, di sidebar detail) cuma boleh diubah
+  // Admin/Manager/Head atau Reporter task ini — bukan sekadar "isEditable"
+  // umum, supaya assignee yang cuma diberi tugas TIDAK bisa melimpahkannya
+  // ke orang lain.
+  const canManage = canManageIssue(task);
 
   return (
     <React.Fragment key={task.id ? `tr-${task.id}-${depth}` : `tr-rnd-${Math.random()}`}>
@@ -393,8 +399,8 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     members={projectMembers}
                     type="member"
                     masterData={mArr}
-                    disabled={!isEditable || blockMember}
-                    className={cn("max-w-[150px]", blockMember && "pointer-events-none opacity-85")}
+                    disabled={!canManage}
+                    className={cn("max-w-[150px]", !canManage && "pointer-events-none opacity-85")}
                   />
                 );
                 break;
