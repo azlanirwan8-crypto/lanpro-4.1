@@ -301,6 +301,99 @@ router.post(
   }
 );
 
+// Item #208 — UPLOAD COVER ENDPOINT: POST /api/users/:id/cover
+//
+// Sebelumnya cover foto profil disimpan HANYA di localStorage browser
+// (`UserDetailView.tsx`) sebagai data URI base64 — tidak pernah tersimpan
+// di database, tidak terlihat pengguna lain, dan hilang begitu pindah
+// browser/hapus cache. Endpoint ini meniru persis pola `POST
+// /api/users/:id/avatar` di atas: divalidasi sama, disimpan lewat
+// `simpanBerkas()` (driver storage yang sama, ikut memakai S3 begitu
+// dikonfigurasi — lihat storage.service.ts / item #30), dan URL-nya
+// disimpan ke kolom "coverUrl" di tabel Users.
+router.post(
+  "/api/users/:id/cover",
+  authenticateJWT,
+  upload.single("file"),
+  async (req: any, res: any) => {
+    try {
+      const { id } = req.params;
+      const currentUserId = req.user?.id || req.user?.uid;
+      const currentUserRole = String(req.user?.role || req.user?.system_role || "").toLowerCase();
+      const isAdmin = currentUserRole === "admin";
+
+      if (!isAdmin && String(id) !== String(currentUserId)) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak_anda_hanya_5",
+          message: "Akses ditolak: Anda hanya dapat memperbarui cover Anda sendiri.",
+        });
+      }
+
+      const file = req.file || (req.files && req.files[0]);
+      if (!file) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.file_gambar_cover_wajib",
+          message: "File gambar cover wajib disertakan.",
+        });
+      }
+
+      const fileBuffer = fs.readFileSync(file.path);
+      const validation = validateFileBuffer(fileBuffer, file.originalname);
+      const ext = path.extname(file.originalname).toLowerCase().replace(".", "");
+      if (!validation.valid || !AVATAR_ALLOWED_EXT.has(ext)) {
+        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+        return res.status(400).json({
+          status: "error",
+          code: "srv.foto_cover_harus_berupa",
+          message: "Foto cover harus berupa gambar (PNG, JPG, WEBP, atau GIF).",
+        });
+      }
+
+      // Nama diawali "cover-" (bukan "avatar-") supaya diberi akses publik
+      // lewat penjaga khusus di server.ts (item #208), pola sama seperti
+      // avatar tapi kategori file terpisah.
+      const safeFilename = `cover-${id}-${Date.now()}.${ext}`;
+      const coverUrl = await simpanBerkas(safeFilename, fileBuffer, file.mimetype);
+
+      try {
+        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+      } catch {}
+
+      const coverLama = await userRepository.getCover(id);
+      const updatedUser = await userRepository.updateCover(id, coverUrl);
+      hapusAvatarLama(coverLama, coverUrl);
+
+      const io = req.app.get("io") || (req as any).io;
+      if (io) {
+        io.emit("data_changed", { path: `/api/users/${id}`, method: "PUT" });
+        io.emit("data_changed", { path: `/api/users`, method: "GET" });
+        io.emit("user_cover_updated", { userId: id, cover_url: coverUrl, user: updatedUser });
+      }
+
+      return res.json({
+        status: "success",
+        code: "srv.cover_berhasil_diperbarui",
+        message: "Cover berhasil diperbarui",
+        cover_url: coverUrl,
+        data: {
+          id: id,
+          cover_url: coverUrl,
+          user: updatedUser || { id, coverUrl },
+        },
+      });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: POST /api/users/:id/cover error:", error);
+      return res.status(500).json({
+        status: "error",
+        code: "srv.gagal_memperbarui_cover",
+        message: "Gagal memperbarui cover: " + error.message,
+      });
+    }
+  }
+);
+
 router.put(
   "/api/users/:id",
   authenticateJWT,

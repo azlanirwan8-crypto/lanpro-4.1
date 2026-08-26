@@ -1457,6 +1457,7 @@ export const en = {
     cancel: "Cancel",
     changePasswordAction: "Change Password",
     changeCover: "Change Cover",
+    uploading: "Uploading...",
     coverUpdated: "Cover photo updated successfully.",
     oldPassword: "Old Password",
     oldPasswordPlaceholder: "Enter current password",

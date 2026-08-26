@@ -17,6 +17,7 @@ export interface UserEntity {
   photoURL?: string | null;
   avatarUrl?: string | null;
   avatar?: string | null;
+  coverUrl?: string | null;
   passwordHash?: string;
   createdAt?: string;
   lastSeen?: string | null;
@@ -27,7 +28,7 @@ export class UserRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        "SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, createdAt, lastSeen FROM Users"
+        'SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, "coverUrl", createdAt, lastSeen FROM Users'
       );
       return (rows || []).map((u: any) => {
         try {
@@ -63,7 +64,7 @@ export class UserRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        "SELECT id, uid, username, nama_lengkap, displayName, role, status, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, createdAt, lastSeen FROM Users"
+        'SELECT id, uid, username, nama_lengkap, displayName, role, status, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, "coverUrl", createdAt, lastSeen FROM Users'
       );
       return rows || [];
     } finally {
@@ -75,7 +76,7 @@ export class UserRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        "SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, department, position, passwordHash, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, createdAt, lastSeen FROM Users WHERE id = ? OR uid = ?",
+        'SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, department, position, passwordHash, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, "coverUrl", createdAt, lastSeen FROM Users WHERE id = ? OR uid = ?',
         [idOrUid, idOrUid]
       );
       if (rows && rows.length > 0) {
@@ -133,6 +134,43 @@ export class UserRepository {
       return (
         barisLama?.[0]?.avatar_url || barisLama?.[0]?.photoURL || barisLama?.[0]?.avatarUrl || null
       );
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * Item #208 — sebelumnya cover disimpan hanya di `localStorage` browser
+   * (`UserDetailView.tsx`), tidak pernah dikirim ke server sama sekali —
+   * hilang begitu pindah browser/hapus cache, dan tidak terlihat pengguna
+   * lain. Ditambahkan supaya persis pola avatar: tersimpan di database.
+   */
+  async updateCover(userId: string, coverUrl: string): Promise<Partial<UserEntity> | null> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query('UPDATE Users SET "coverUrl" = ? WHERE id = ? OR uid = ?', [
+        coverUrl,
+        userId,
+        userId,
+      ]);
+      const [rows]: any = await connection.query(
+        'SELECT id, uid, "coverUrl" FROM Users WHERE id = ? OR uid = ?',
+        [userId, userId]
+      );
+      return rows && rows[0] ? rows[0] : null;
+    } finally {
+      connection.release();
+    }
+  }
+
+  async getCover(userId: string): Promise<string | null> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        'SELECT "coverUrl" FROM Users WHERE id = ? OR uid = ?',
+        [userId, userId]
+      );
+      return rows?.[0]?.coverUrl || null;
     } finally {
       connection.release();
     }

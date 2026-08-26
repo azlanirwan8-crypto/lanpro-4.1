@@ -1460,6 +1460,7 @@ export const id = {
     cancel: "Batal",
     changePasswordAction: "Ubah Kata Sandi",
     changeCover: "Ubah Sampul",
+    uploading: "Mengunggah...",
     coverUpdated: "Foto sampul berhasil diperbarui.",
     oldPassword: "Kata Sandi Lama",
     oldPasswordPlaceholder: "Masukkan kata sandi lama",

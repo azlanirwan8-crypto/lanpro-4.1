@@ -11,7 +11,7 @@
  * memaksa penulisan ulang penanganan error di tujuh titik panggilan sekaligus.
  */
 
-import { apiRequest } from '../../../lib/api';
+import { apiRequest } from "../../../lib/api";
 
 /** Bentuk respons standar backend. */
 export interface UserApiResponse {
@@ -24,6 +24,8 @@ export interface UserApiResponse {
    * `status`.
    */
   avatar_url?: string;
+  /** Item #208 — dikembalikan endpoint unggah cover. */
+  cover_url?: string;
 }
 
 /**
@@ -33,7 +35,7 @@ export interface UserApiResponse {
  * "guest" sebagai penanda aktor tak dikenal, jadi fallback-nya dipertahankan.
  */
 function actorHeader(actorId?: string | null) {
-  return { 'x-user-id': actorId || 'guest' };
+  return { "x-user-id": actorId || "guest" };
 }
 
 // ── Keanggotaan proyek ────────────────────────────────────────────
@@ -47,10 +49,10 @@ function actorHeader(actorId?: string | null) {
 export async function assignUserToProject(
   projectId: string,
   actorId: string | null | undefined,
-  payload: any,
+  payload: any
 ): Promise<UserApiResponse> {
   return apiRequest(`/api/projects/${projectId}/members`, {
-    method: 'PUT',
+    method: "PUT",
     headers: actorHeader(actorId),
     body: payload,
   });
@@ -60,10 +62,10 @@ export async function assignUserToProject(
 export async function removeUserFromProject(
   projectId: string,
   actorId: string | null | undefined,
-  userId: string,
+  userId: string
 ): Promise<UserApiResponse> {
   return apiRequest(`/api/projects/${projectId}/members/${userId}`, {
-    method: 'DELETE',
+    method: "DELETE",
     headers: actorHeader(actorId),
   });
 }
@@ -77,8 +79,8 @@ export async function removeUserFromProject(
  * sehingga aturan validasi dan pembatas lajunya konsisten.
  */
 export async function registerUser(payload: any): Promise<UserApiResponse> {
-  return apiRequest('/api/auth/register', {
-    method: 'POST',
+  return apiRequest("/api/auth/register", {
+    method: "POST",
     body: payload,
   });
 }
@@ -91,10 +93,10 @@ export async function registerUser(payload: any): Promise<UserApiResponse> {
  */
 export async function updateUser(
   userId: string,
-  patch: Record<string, any>,
+  patch: Record<string, any>
 ): Promise<UserApiResponse> {
   return apiRequest(`/api/users/${userId}`, {
-    method: 'PUT',
+    method: "PUT",
     body: patch,
   });
 }
@@ -102,13 +104,13 @@ export async function updateUser(
 /** Menghapus pengguna secara permanen. */
 export async function deleteUser(userId: string): Promise<UserApiResponse> {
   return apiRequest(`/api/users/${userId}`, {
-    method: 'DELETE',
+    method: "DELETE",
   });
 }
 
 /** Mengambil seluruh pengguna. */
 export async function fetchUsers(): Promise<UserApiResponse> {
-  return apiRequest('/api/users');
+  return apiRequest("/api/users");
 }
 
 /**
@@ -117,12 +119,21 @@ export async function fetchUsers(): Promise<UserApiResponse> {
  * Memakai FormData, sehingga Content-Type sengaja TIDAK diset — browser perlu
  * menentukannya sendiri agar boundary multipart-nya benar.
  */
-export async function uploadAvatar(
-  userId: string,
-  formData: FormData,
-): Promise<UserApiResponse> {
+export async function uploadAvatar(userId: string, formData: FormData): Promise<UserApiResponse> {
   return apiRequest(`/api/users/${userId}/avatar`, {
-    method: 'POST',
+    method: "POST",
+    body: formData,
+  });
+}
+
+/**
+ * Item #208 — mengunggah cover foto profil ke server (tersimpan di database,
+ * kolom "coverUrl"). Sebelumnya cover hanya disimpan di localStorage browser,
+ * tidak pernah dikirim ke server sama sekali.
+ */
+export async function uploadCover(userId: string, formData: FormData): Promise<UserApiResponse> {
+  return apiRequest(`/api/users/${userId}/cover`, {
+    method: "POST",
     body: formData,
   });
 }
@@ -134,8 +145,8 @@ export async function uploadAvatar(
  * pengguna sembarang, sehingga tidak memerlukan hak admin.
  */
 export async function updateProfile(payload: unknown): Promise<UserApiResponse> {
-  return apiRequest('/api/profile/update', {
-    method: 'PUT',
+  return apiRequest("/api/profile/update", {
+    method: "PUT",
     body: payload,
   });
 }

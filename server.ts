@@ -398,6 +398,13 @@ async function startServer() {
       isAuthorized = true;
     }
 
+    // Item #208 — cover foto profil, sama seperti avatar: ditampilkan di
+    // banner profil yang bisa dilihat siapa pun yang boleh membuka halaman
+    // itu, bukan dokumen privat.
+    if (!isAuthorized && safeName.startsWith('cover-')) {
+      isAuthorized = true;
+    }
+
     if (!isAuthorized) {
       return res.status(403).json({
         status: "error",

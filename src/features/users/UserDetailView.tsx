@@ -66,6 +66,7 @@ import { toast } from "sonner";
 import {
   updateUser,
   uploadAvatar,
+  uploadCover,
   fetchUsers,
   assignUserToProject,
   removeUserFromProject,
@@ -229,9 +230,14 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedCover, setSelectedCover] = useState<File | null>(null);
   const [previewCoverUrl, setPreviewCoverUrl] = useState<string | null>(null);
+  // Item #208 — cover kini tersimpan di server (kolom "coverUrl", sama
+  // seperti avatar), bukan hanya localStorage. `user.coverUrl` diprioritaskan;
+  // localStorage cuma cadangan untuk cover yang sempat disimpan sebelum
+  // perbaikan ini (belum pernah diunggah ulang).
   const [coverURL, setCoverURL] = useState<string>(() => {
-    return safeLocalStorage.getItem(`user_cover_${user?.id || user?.uid}`) || "";
+    return user?.coverUrl || safeLocalStorage.getItem(`user_cover_${user?.id || user?.uid}`) || "";
   });
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [photoURL, setPhotoURL] = useState(
     user?.avatar_url || user?.photoURL || user?.avatarUrl || ""
@@ -1094,8 +1100,11 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     setPreviewUrl(objectUrl);
   };
 
-  // Handler Input Cover File
-  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Item #208 — Handler Input Cover File: diunggah SEGERA ke server saat
+  // dipilih (bukan menunggu tombol Simpan, dan bukan lagi disimpan ke
+  // localStorage) — pola paling sederhana yang tetap benar-benar tersimpan
+  // di database, sesuai diminta pemilik proyek.
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -1118,17 +1127,32 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     const objectUrl = URL.createObjectURL(file);
     setSelectedCover(file);
     setPreviewCoverUrl(objectUrl);
-    // Simpan data uri preview ke storage
-    const reader = new FileReader();
-    reader.onload = (re) => {
-      const dataUri = re.target?.result as string;
-      if (dataUri) {
-        setCoverURL(dataUri);
-        safeLocalStorage.setItem(`user_cover_${user?.id || user?.uid}`, dataUri);
+    setIsUploadingCover(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const uploadData = await uploadCover(userId, formData);
+
+      if (uploadData && (uploadData.status === "success" || uploadData.cover_url)) {
+        const finalCoverUrl: string =
+          uploadData.cover_url || uploadData.data?.cover_url || uploadData.data?.user?.coverUrl;
+        if (finalCoverUrl) {
+          setCoverURL(finalCoverUrl);
+          // Bersihkan sisa localStorage lama — sumber kebenaran sekarang server.
+          safeLocalStorage.removeItem(`user_cover_${user?.id || user?.uid}`);
+        }
         toast.success(t("userDetail.coverUpdated"));
+      } else {
+        toast.error(uploadData?.message || "Gagal mengunggah cover.");
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err: any) {
+      console.error("Gagal mengunggah cover:", err);
+      toast.error(err?.message || "Gagal mengunggah cover.");
+    } finally {
+      setIsUploadingCover(false);
+      setSelectedCover(null);
+    }
   };
 
   // Handler Submit Utama (Simpan Perubahan User)
@@ -1396,10 +1420,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
       <div className="flex flex-col space-y-5 min-h-full animate-in fade-in duration-700">
         {/* Main Content Area */}
         <div className="w-full space-y-5 flex-1">
-          {/* Cover-nya dekoratif (gradien), BUKAN foto per-pengguna — LanPro
-              tidak punya kolom cover photo, dan mengarang foto acak akan
-              melanggar aturan anti-halusinasi repo ini. Tombol aksi (Back,
-              Edit Profile / Save) ada di pojok cover, persis posisi Velzon. */}
+          {/* Item #208 — cover kini tersimpan di server (kolom "coverUrl"),
+              sebelumnya cuma gradien dekoratif + localStorage lokal. Tombol
+              aksi (Back, Edit Profile / Save) ada di pojok cover, persis
+              posisi Velzon. */}
           <div className="bg-surface rounded-lg shadow-xs border border-border-subtle overflow-hidden">
             <div
               className="h-32 sm:h-44 w-full bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 relative bg-cover bg-center transition-all"
@@ -1416,14 +1440,22 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
               <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
                 {/* Tombol Change Cover ala Velzon - Kontras Solid */}
-                <label className="flex items-center gap-1.5 px-3 py-1.5 bg-surface/90 hover:bg-surface text-content-strong border border-border-subtle rounded-md text-xs font-semibold shadow-sm backdrop-blur-md transition cursor-pointer">
+                <label
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 bg-surface/90 hover:bg-surface text-content-strong border border-border-subtle rounded-md text-xs font-semibold shadow-sm backdrop-blur-md transition cursor-pointer",
+                    isUploadingCover && "opacity-60 pointer-events-none"
+                  )}
+                >
                   <Camera className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>{t("userDetail.changeCover")}</span>
+                  <span>
+                    {isUploadingCover ? t("userDetail.uploading") : t("userDetail.changeCover")}
+                  </span>
                   <input
                     type="file"
                     className="hidden"
                     accept="image/*"
                     onChange={handleCoverChange}
+                    disabled={isUploadingCover}
                   />
                 </label>
 

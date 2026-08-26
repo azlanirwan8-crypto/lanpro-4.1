@@ -68,6 +68,8 @@ export interface UserProfile {
   avatar_url?: string;
   avatarUrl?: string;
   avatar?: string;
+  /** Item #208 — foto sampul profil, tersimpan di server (bukan lagi localStorage). */
+  coverUrl?: string;
   phone?: string;
   position?: string;
   department?: string;
