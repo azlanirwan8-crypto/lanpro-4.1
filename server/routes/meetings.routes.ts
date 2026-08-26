@@ -36,26 +36,22 @@ router.post(
       const file = req.file;
 
       if (!file) {
-        return res
-          .status(400)
-          .json({
-            status: "error",
-            code: "srv.file_tidak_ditemukan",
-            message: "File tidak ditemukan.",
-          });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.file_tidak_ditemukan",
+          message: "File tidak ditemukan.",
+        });
       }
 
       const { meeting_id, file_name, platform, chunkIndex, totalChunks, fileSize } = req.body;
       const targetMeetingId = meetingId || meeting_id;
 
       if (!targetMeetingId) {
-        return res
-          .status(400)
-          .json({
-            status: "error",
-            code: "srv.meetingid_tidak_ditemukan_dalam",
-            message: "meeting_id tidak ditemukan dalam request.",
-          });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.meetingid_tidak_ditemukan_dalam",
+          message: "meeting_id tidak ditemukan dalam request.",
+        });
       }
 
       const isChunked = chunkIndex !== undefined && totalChunks !== undefined;
@@ -66,22 +62,18 @@ router.post(
         const originalSize = parseInt(fileSize as string) || file.size;
 
         if (isNaN(cIndex) || cIndex < 0 || cIndex >= tChunks) {
-          return res
-            .status(400)
-            .json({
-              status: "error",
-              code: "srv.invalid_chunk_index_or",
-              message: "Invalid chunk index or total chunks.",
-            });
+          return res.status(400).json({
+            status: "error",
+            code: "srv.invalid_chunk_index_or",
+            message: "Invalid chunk index or total chunks.",
+          });
         }
         if (isNaN(tChunks) || tChunks <= 0) {
-          return res
-            .status(400)
-            .json({
-              status: "error",
-              code: "srv.invalid_total_chunks_value",
-              message: "Invalid total chunks value.",
-            });
+          return res.status(400).json({
+            status: "error",
+            code: "srv.invalid_total_chunks_value",
+            message: "Invalid total chunks value.",
+          });
         }
 
         const chunksDir = path.join(GLOBAL_UPLOADS_DIR, "chunks", targetMeetingId);
@@ -104,13 +96,11 @@ router.post(
         if (allChunksArrived) {
           const mergeLockPath = path.join(chunksDir, ".merging");
           if (fs.existsSync(mergeLockPath)) {
-            return res
-              .status(409)
-              .json({
-                status: "error",
-                code: "srv.merge_already_in_progress",
-                message: "Merge already in progress for this upload.",
-              });
+            return res.status(409).json({
+              status: "error",
+              code: "srv.merge_already_in_progress",
+              message: "Merge already in progress for this upload.",
+            });
           }
 
           fs.writeFileSync(mergeLockPath, Date.now().toString());
@@ -282,24 +272,20 @@ router.get("/api/v1/meetings/:id", jagaProyek("meetingNotes", "R", "meeting"), a
     const { id } = req.params;
     const meeting = await meetingRepository.findById(id);
     if (!meeting) {
-      return res
-        .status(404)
-        .json({
-          status: "error",
-          code: "srv.meeting_tidak_ditemukan",
-          message: "Meeting tidak ditemukan.",
-        });
+      return res.status(404).json({
+        status: "error",
+        code: "srv.meeting_tidak_ditemukan",
+        message: "Meeting tidak ditemukan.",
+      });
     }
     return res.json({ status: "success", data: meeting });
   } catch (error: any) {
     console.error(error);
-    return res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.gagal_mendapatkan_status_meeting",
-        message: "Gagal mendapatkan status meeting: " + error.message,
-      });
+    return res.status(500).json({
+      status: "error",
+      code: "srv.gagal_mendapatkan_status_meeting",
+      message: "Gagal mendapatkan status meeting: " + error.message,
+    });
   }
 });
 
@@ -313,13 +299,11 @@ router.get(
       const meeting = await meetingRepository.findStatusById(meetingId);
 
       if (!meeting) {
-        return res
-          .status(404)
-          .json({
-            status: "error",
-            code: "srv.meeting_tidak_ditemukan",
-            message: "Meeting tidak ditemukan.",
-          });
+        return res.status(404).json({
+          status: "error",
+          code: "srv.meeting_tidak_ditemukan",
+          message: "Meeting tidak ditemukan.",
+        });
       }
 
       let statusValue = meeting.upload_status || "IDLE";
@@ -374,13 +358,11 @@ router.get(
       });
     } catch (error: any) {
       console.error("GET /api/v1/meetings/:meetingId/status error:", error);
-      return res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.gagal_mendapatkan_status",
-          message: "Gagal mendapatkan status: " + error.message,
-        });
+      return res.status(500).json({
+        status: "error",
+        code: "srv.gagal_mendapatkan_status",
+        message: "Gagal mendapatkan status: " + error.message,
+      });
     }
   }
 );
@@ -409,13 +391,11 @@ router.post(
       });
     } catch (error: any) {
       console.error("POST /api/v1/meetings/:meetingId/cancel error:", error);
-      return res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.gagal_membatalkan_pemrosesan",
-          message: "Gagal membatalkan pemrosesan: " + error.message,
-        });
+      return res.status(500).json({
+        status: "error",
+        code: "srv.gagal_membatalkan_pemrosesan",
+        message: "Gagal membatalkan pemrosesan: " + error.message,
+      });
     }
   }
 );
@@ -430,24 +410,20 @@ router.post(
       const meeting = await meetingRepository.findById(meetingId);
 
       if (!meeting) {
-        return res
-          .status(404)
-          .json({
-            status: "error",
-            code: "srv.meeting_tidak_ditemukan",
-            message: "Meeting tidak ditemukan.",
-          });
+        return res.status(404).json({
+          status: "error",
+          code: "srv.meeting_tidak_ditemukan",
+          message: "Meeting tidak ditemukan.",
+        });
       }
 
       const recordingUrl = meeting.recording_url;
       if (!recordingUrl) {
-        return res
-          .status(400)
-          .json({
-            status: "error",
-            code: "srv.file_rekaman_belum_diunggah",
-            message: "File rekaman belum diunggah.",
-          });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.file_rekaman_belum_diunggah",
+          message: "File rekaman belum diunggah.",
+        });
       }
 
       runAIPipeline(meetingId).catch((err) =>
@@ -477,35 +453,29 @@ router.post(["/analyze-video", "/api/v1/meetings/:meetingId/analyze-video"], asy
   try {
     const meetingId = req.params.meetingId || req.body.meetingId || req.query.meetingId;
     if (!meetingId) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          code: "srv.id_meeting_meetingid_diperlukan",
-          message: "ID Meeting (meetingId) diperlukan.",
-        });
+      return res.status(400).json({
+        status: "error",
+        code: "srv.id_meeting_meetingid_diperlukan",
+        message: "ID Meeting (meetingId) diperlukan.",
+      });
     }
 
     const meeting = await meetingRepository.findById(meetingId);
     if (!meeting) {
-      return res
-        .status(404)
-        .json({
-          status: "error",
-          code: "srv.meeting_tidak_ditemukan",
-          message: "Meeting tidak ditemukan.",
-        });
+      return res.status(404).json({
+        status: "error",
+        code: "srv.meeting_tidak_ditemukan",
+        message: "Meeting tidak ditemukan.",
+      });
     }
 
     const recordingUrl = meeting.recording_url;
     if (!recordingUrl) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          code: "srv.file_rekaman_belum_diunggah",
-          message: "File rekaman belum diunggah.",
-        });
+      return res.status(400).json({
+        status: "error",
+        code: "srv.file_rekaman_belum_diunggah",
+        message: "File rekaman belum diunggah.",
+      });
     }
 
     await meetingRepository.setUploadStatus(meetingId, "ANALYZING_LLM");
@@ -543,13 +513,11 @@ router.post(["/analyze-video", "/api/v1/meetings/:meetingId/analyze-video"], asy
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          code: "srv.kunci_api_gemini_tidak",
-          message: "Kunci API Gemini tidak dikonfigurasi.",
-        });
+      return res.status(400).json({
+        status: "error",
+        code: "srv.kunci_api_gemini_tidak",
+        message: "Kunci API Gemini tidak dikonfigurasi.",
+      });
     }
 
     const ai = new GoogleGenAI({
@@ -707,6 +675,16 @@ ${learningSection}`;
 
     await meetingRepository.saveMultimodalDetails(detailId, meetingId, parsedData, finalJsonStr);
 
+    // #182: notulen sudah tersimpan di finalJsonStr — berkas video/audio mentah
+    // tidak lagi dibutuhkan. Dihapus dari disk supaya tidak menumpuk permanen
+    // (disk lokal di serverless bersifat sementara, lihat npm run doctor §6).
+    try {
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      await meetingRepository.clearRecordingFile(meetingId);
+    } catch (cleanupErr) {
+      console.warn("[MULTIMODAL AI] Gagal menghapus berkas rekaman pasca-analisis:", cleanupErr);
+    }
+
     io.emit("meeting_ai_status", {
       meetingId,
       status: "COMPLETED",
@@ -755,24 +733,20 @@ router.post(
       const { transcript, meetingLink } = req.body;
 
       if (!transcript || !transcript.trim()) {
-        return res
-          .status(400)
-          .json({
-            status: "error",
-            code: "srv.transkrip_tidak_boleh_kosong",
-            message: "Transkrip tidak boleh kosong.",
-          });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.transkrip_tidak_boleh_kosong",
+          message: "Transkrip tidak boleh kosong.",
+        });
       }
 
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
-        return res
-          .status(400)
-          .json({
-            status: "error",
-            code: "srv.kunci_api_gemini_tidak_2",
-            message: "Kunci API Gemini tidak dikonfigurasi pada server.",
-          });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.kunci_api_gemini_tidak_2",
+          message: "Kunci API Gemini tidak dikonfigurasi pada server.",
+        });
       }
 
       const ai = new GoogleGenAI({
@@ -1030,13 +1004,11 @@ router.get(
       res.json({ status: "success", data: rows });
     } catch (error: any) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -1078,13 +1050,11 @@ router.post(
       });
     } catch (error: any) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -1140,13 +1110,11 @@ router.put(
       res.json({ status: "success", code: "srv.meeting_updated", message: "Meeting updated" });
     } catch (error: any) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -1161,22 +1129,18 @@ router.get(
       if (file) {
         res.json({ status: "success", data: file });
       } else {
-        res
-          .status(404)
-          .json({
-            status: "error",
-            code: "srv.meeting_atau_berkas_tidak",
-            message: "Meeting atau berkas tidak ditemukan",
-          });
+        res.status(404).json({
+          status: "error",
+          code: "srv.meeting_atau_berkas_tidak",
+          message: "Meeting atau berkas tidak ditemukan",
+        });
       }
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -1211,13 +1175,11 @@ router.delete(
       res.json({ status: "success", code: "srv.meeting_deleted", message: "Meeting deleted" });
     } catch (error: any) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );

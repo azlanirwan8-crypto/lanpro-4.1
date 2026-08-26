@@ -17,6 +17,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { generateContentWithFallback } from "./ai.service";
 import { getSocketServer } from "../config/socket";
 import { GLOBAL_UPLOADS_DIR } from "../config/uploads";
+import { meetingRepository } from "../repositories/meeting.repository";
 
 /**
  * Instance Socket.IO untuk memancarkan progres.
@@ -468,6 +469,18 @@ ${learningSection}`;
       "UPDATE Meetings SET aiSummary = ?, analysis_result = ?, upload_status = 'COMPLETED' WHERE id = ?",
       [finalJson, finalJson, meetingId]
     );
+
+    // #182: notulen sudah tersimpan di aiSummary/analysis_result — rekaman
+    // mentah (dan audio hasil ekstraksi FFmpeg bila video) tidak lagi
+    // dibutuhkan. Dihapus dari disk supaya tidak menumpuk permanen (disk
+    // lokal di serverless bersifat sementara, lihat npm run doctor §6).
+    try {
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      if (audioPath !== filePath && fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
+      await meetingRepository.clearRecordingFile(meetingId);
+    } catch (cleanupErr) {
+      console.warn(`[AI PIPELINE] Gagal menghapus berkas rekaman pasca-analisis:`, cleanupErr);
+    }
 
     console.log(`[AI PIPELINE] Successfully completed meeting ${meetingId}. Emitting COMPLETED.`);
 

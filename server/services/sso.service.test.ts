@@ -173,10 +173,123 @@ describe("putuskanKebijakan — identitas yang sudah tertaut", () => {
     expect(hasil.user.id).toBe("u9");
   });
 
+  it("ganti email mandiri: pengguna ganti email di Users, lalu login SSO akun provider baru (sub baru) -> menautkan otomatis sub baru dan masuk tanpa menimpa nama pengguna", async () => {
+    // Skenario Opsi 1: User mengganti email profil di tabel Users menjadi email baru.
+    // Saat login dengan akun Google baru (sub baru & email baru), (provider, sub) belum ada di DB.
+    // putuskanKebijakan mencocokkan Users.email -> menautkan identitas -> masuk.
+    // Nama lokal di DB ("Budi Asli LanPro") TIDAK ditimpa oleh nama Google ("Budi Google Baru").
+    pasangDb({
+      identitas: null, // sub baru belum terdaftar
+      userByEmail: {
+        id: "u9",
+        status: "active",
+        email: "baru@perusahaan.com",
+        name: "Budi Asli LanPro",
+        displayName: "Budi Asli LanPro",
+      },
+    });
+    const hasil: any = await putuskanKebijakan(
+      {
+        ...IDENTITAS,
+        sub: "sub-google-baru-456",
+        email: "baru@perusahaan.com",
+        nama: "Budi Google Baru",
+      },
+      "login"
+    );
+    expect(hasil.aksi).toBe("masuk");
+    expect(hasil.user.id).toBe("u9");
+    expect(hasil.user.name).toBe("Budi Asli LanPro");
+    expect(hasil.user.displayName).toBe("Budi Asli LanPro");
+
+    const insertTautanBaru = kueriPalsu.mock.calls.some(
+      (c) =>
+        String(c[0]).includes('INSERT INTO "UserIdentities"') &&
+        String(c[1]).includes("sub-google-baru-456")
+    );
+    expect(insertTautanBaru).toBe(true);
+
+    // Pastikan tidak ada kueri UPDATE ke tabel Users yang menimpa nama
+    const adaUpdateNama = kueriPalsu.mock.calls.some(
+      (c) => String(c[0]).includes("UPDATE Users") || String(c[0]).includes('UPDATE "Users"')
+    );
+    expect(adaUpdateNama).toBe(false);
+  });
+
   it("MENOLAK bila akun pemilik tautan sudah tidak aktif", async () => {
     pasangDb({ identitas: { userId: "u9" }, userById: { id: "u9", status: "pending" } });
     const hasil = await putuskanKebijakan(IDENTITAS, "login");
     expect(hasil).toEqual({ aksi: "tolak", alasan: "akun_belum_aktif" });
+  });
+});
+
+/**
+ * #177 — TAUTAN BASI SETELAH EMAIL DIPINDAH KE AKUN LAIN.
+ *
+ * `sub` sengaja dipercaya di atas email supaya pengguna yang mengganti
+ * emailnya SENDIRI tetap bisa SSO (lihat test di atas, "sub tidak berubah
+ * walau email berganti"). Tapi itu berbeda dari kasus ini: email tersebut
+ * sekarang dipakai user AKTIF LAIN di tabel Users — tandanya admin sudah
+ * memindahkan email itu ke akun lain sejak tautan ini dibuat. Sebelum
+ * perbaikan ini, kode tetap login sebagai pemilik tautan LAMA tanpa peduli
+ * siapa pemilik email SEKARANG. Dilaporkan pemilik proyek.
+ */
+describe("putuskanKebijakan — #177 email tertaut sudah dipindah ke user lain", () => {
+  it("mode LOGIN: MENOLAK, bukan login sebagai pemilik tautan lama", async () => {
+    pasangDb({
+      identitas: { userId: "u9" },
+      userById: { id: "u9", status: "active" },
+      userByEmail: { id: "u10", status: "active" }, // email kini milik user LAIN
+    });
+    const hasil: any = await putuskanKebijakan(IDENTITAS, "login");
+    expect(hasil).toEqual({ aksi: "tolak", alasan: "tautan_kedaluwarsa" });
+  });
+
+  it("mode LOGIN: TIDAK diam-diam login sebagai pemilik email baru (u10) juga", async () => {
+    pasangDb({
+      identitas: { userId: "u9" },
+      userById: { id: "u9", status: "active" },
+      userByEmail: { id: "u10", status: "active" },
+    });
+    const hasil: any = await putuskanKebijakan(IDENTITAS, "login");
+    expect(hasil.aksi).not.toBe("masuk");
+  });
+
+  it("mode DAFTAR: MENOLAK juga — tidak diam-diam menaut ke akun lain", async () => {
+    pasangDb({
+      identitas: { userId: "u9" },
+      userById: { id: "u9", status: "active" },
+      userByEmail: { id: "u10", status: "active" },
+    });
+    const hasil: any = await putuskanKebijakan(IDENTITAS, "daftar");
+    expect(hasil).toEqual({ aksi: "tolak", alasan: "tautan_kedaluwarsa" });
+  });
+
+  it("memutus tautan basi supaya tidak terkunci permanen", async () => {
+    pasangDb({
+      identitas: { userId: "u9" },
+      userById: { id: "u9", status: "active" },
+      userByEmail: { id: "u10", status: "active" },
+    });
+    await putuskanKebijakan(IDENTITAS, "login");
+
+    const adaDelete = kueriPalsu.mock.calls.some(
+      (c) => String(c[0]).includes("DELETE") && String(c[0]).includes("UserIdentities")
+    );
+    expect(adaDelete).toBe(true);
+  });
+
+  it("email dipindah ke user yang statusnya BELUM aktif (pending) — tautan lama tetap dipercaya", async () => {
+    // Pemilik email baru belum aktif, jadi bukan konflik nyata: perilaku lama
+    // (percaya sub) tetap berlaku, sama seperti kasus ganti email sendiri.
+    pasangDb({
+      identitas: { userId: "u9" },
+      userById: { id: "u9", status: "active" },
+      userByEmail: { id: "u10", status: "pending" },
+    });
+    const hasil: any = await putuskanKebijakan(IDENTITAS, "login");
+    expect(hasil.aksi).toBe("masuk");
+    expect(hasil.user.id).toBe("u9");
   });
 });
 

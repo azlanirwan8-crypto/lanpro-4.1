@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { fetchTeamTasks as fetchTeamTasksApi } from "./services/team.service";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { StyledDropdown as CommonStyledDropdown } from "../../components/ui/CommonComponents";
+import { safeLocalStorage } from "../../lib/safeStorage";
 
 export const TeamManagementPanel = ({
   projectMembers: propMembers,
@@ -393,7 +394,7 @@ export const TeamManagementPanel = ({
       </div>
 
       {/* Scrollable Container for Card Grid or List */}
-      <div className="flex-1 overflow-y-auto pb-6 space-y-5 pr-1 mt-3">
+      <div className="flex-1 overflow-y-auto pb-24 md:pb-32 space-y-5 pr-1 mt-3 custom-scrollbar">
         {/* Grid View Mode - Match Velzon Team Cards */}
         {viewMode === "grid" && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -415,15 +416,21 @@ export const TeamManagementPanel = ({
               });
               const isOwner =
                 selectedProject?.ownerId === person.uid || selectedProject?.ownerId === person.id;
+              const personUid = person.uid || person.id || "";
+              const personCover = safeLocalStorage.getItem(`user_cover_${personUid}`);
 
               return (
                 <div
                   key={person.uid || i}
                   className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col hover:border-indigo-500/30 transition-all duration-200 group"
                 >
-                  {/* Banner Header */}
-                  <div className="h-16 bg-gradient-to-r from-slate-700 via-indigo-950 to-slate-900 relative p-2.5 flex items-start justify-end">
-                    <Star className="w-4 h-4 text-white/40 hover:text-amber-300 cursor-pointer transition-colors" />
+                  {/* Banner Header dengan Cover Kustom / Gradien Identitas LanPro */}
+                  <div
+                    className="h-16 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 relative p-2.5 flex items-start justify-end bg-cover bg-center transition-all"
+                    style={personCover ? { backgroundImage: `url(${personCover})` } : undefined}
+                  >
+                    {personCover && <div className="absolute inset-0 bg-overlay/20" />}
+                    <Star className="w-4 h-4 text-white/50 hover:text-amber-300 cursor-pointer transition-colors relative z-10" />
                   </div>
 
                   {/* Avatar Centered Overlap */}
@@ -595,104 +602,115 @@ export const TeamManagementPanel = ({
       </div>
 
       {/* View Profile Modal (View-Only) */}
-      {selectedProfileUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/40 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-surface rounded-xl border border-border-subtle shadow-xl max-w-md w-full overflow-hidden text-left">
-            {/* Modal Cover */}
-            <div className="h-24 bg-gradient-to-r from-slate-800 via-indigo-900 to-slate-900 p-4 flex justify-end">
-              <button
-                onClick={() => setSelectedProfileUser(null)}
-                className="w-7 h-7 rounded-full bg-surface/20 hover:bg-surface/40 text-content-inverse flex items-center justify-center transition-colors cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Profile Detail Content */}
-            <div className="p-6 pt-0 relative">
-              <div className="-mt-12 mb-4 flex items-end justify-between">
-                <UserAvatar
-                  user={selectedProfileUser}
-                  className="w-20 h-20 border-4 border-surface shadow-md text-xl"
-                />
-                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-700 text-xs font-medium rounded-full border border-emerald-500/30">
-                  {t("teamPanel.joinedProject")}
-                </span>
-              </div>
-
-              <h2 className="text-base font-medium text-content-strong">
-                {selectedProfileUser.displayName || "Anggota Tim"}
-              </h2>
-              <p className="text-xs text-content-muted font-medium">
-                {selectedProfileUser.email || "@" + selectedProfileUser.uid}
-              </p>
-
-              <div className="mt-4 p-3 bg-surface-sunken rounded-lg border border-border-subtle/80 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-content-subtle font-medium">
-                    {t("teamPanel.projectRole")}
-                  </span>
-                  <span className="font-medium text-content-body capitalize">
-                    {/* #82 — label dari katalog. */}
-                    {labelPeran(
-                      peranProyek,
-                      selectedProject?.memberRoles?.[selectedProfileUser.uid] ||
-                        selectedProfileUser.role
-                    ) || "—"}
-                  </span>
+      {selectedProfileUser &&
+        (() => {
+          const selectedUid = selectedProfileUser.uid || selectedProfileUser.id || "";
+          const modalCover = safeLocalStorage.getItem(`user_cover_${selectedUid}`);
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/40 backdrop-blur-xs animate-in fade-in">
+              <div className="bg-surface rounded-xl border border-border-subtle shadow-xl max-w-md w-full overflow-hidden text-left">
+                {/* Modal Cover */}
+                <div
+                  className="h-24 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 p-4 flex justify-end relative bg-cover bg-center"
+                  style={modalCover ? { backgroundImage: `url(${modalCover})` } : undefined}
+                >
+                  {modalCover && <div className="absolute inset-0 bg-overlay/20" />}
+                  <button
+                    onClick={() => setSelectedProfileUser(null)}
+                    className="w-7 h-7 rounded-full bg-surface/40 hover:bg-surface/60 text-content-strong flex items-center justify-center transition-colors cursor-pointer relative z-10"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-content-subtle font-medium">
-                    {t("teamPanel.assignedTasks")}
-                  </span>
-                  <span className="font-medium text-content-body">
-                    {t("rakit.tasksCount", { count: getUserTasks(selectedProfileUser).length })}
-                  </span>
-                </div>
-              </div>
 
-              {/* Task list preview */}
-              <div className="mt-4">
-                <h4 className="text-xs font-medium text-content-body uppercase tracking-wider mb-2">
-                  {t("teamPanel.assignedTasksTitle")}
-                </h4>
-                <div className="max-h-40 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
-                  {getUserTasks(selectedProfileUser).map((t) => (
-                    <div
-                      key={t.id}
-                      className="p-2 bg-surface rounded border border-border-subtle/80 text-xs flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <span className="font-mono text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-1 rounded">
-                          {t.key}
-                        </span>
-                        <span className="truncate text-content-body font-medium">{t.title}</span>
-                      </div>
-                      <span className="text-xs sm:text-[10px] font-medium px-1.5 py-0.5 bg-surface-muted text-content-secondary rounded shrink-0">
-                        {t.status}
+                {/* Profile Detail Content */}
+                <div className="p-6 pt-0 relative">
+                  <div className="-mt-12 mb-4 flex items-end justify-between">
+                    <UserAvatar
+                      user={selectedProfileUser}
+                      className="w-20 h-20 border-4 border-surface shadow-md text-xl"
+                    />
+                    <span className="px-3 py-1 bg-emerald-500/10 text-emerald-700 text-xs font-medium rounded-full border border-emerald-500/30">
+                      {t("teamPanel.joinedProject")}
+                    </span>
+                  </div>
+
+                  <h2 className="text-base font-medium text-content-strong">
+                    {selectedProfileUser.displayName || "Anggota Tim"}
+                  </h2>
+                  <p className="text-xs text-content-muted font-medium">
+                    {selectedProfileUser.email || "@" + selectedProfileUser.uid}
+                  </p>
+
+                  <div className="mt-4 p-3 bg-surface-sunken rounded-lg border border-border-subtle/80 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-content-subtle font-medium">
+                        {t("teamPanel.projectRole")}
+                      </span>
+                      <span className="font-medium text-content-body capitalize">
+                        {/* #82 — label dari katalog. */}
+                        {labelPeran(
+                          peranProyek,
+                          selectedProject?.memberRoles?.[selectedProfileUser.uid] ||
+                            selectedProfileUser.role
+                        ) || "—"}
                       </span>
                     </div>
-                  ))}
-                  {getUserTasks(selectedProfileUser).length === 0 && (
-                    <p className="text-xs text-content-subtle italic">
-                      {t("teamPanel.noAssignedTask")}
-                    </p>
-                  )}
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-content-subtle font-medium">
+                        {t("teamPanel.assignedTasks")}
+                      </span>
+                      <span className="font-medium text-content-body">
+                        {t("rakit.tasksCount", { count: getUserTasks(selectedProfileUser).length })}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Task list preview */}
+                  <div className="mt-4">
+                    <h4 className="text-xs font-medium text-content-body uppercase tracking-wider mb-2">
+                      {t("teamPanel.assignedTasksTitle")}
+                    </h4>
+                    <div className="max-h-40 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">
+                      {getUserTasks(selectedProfileUser).map((t) => (
+                        <div
+                          key={t.id}
+                          className="p-2 bg-surface rounded border border-border-subtle/80 text-xs flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-2 truncate">
+                            <span className="font-mono text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-1 rounded">
+                              {t.key}
+                            </span>
+                            <span className="truncate text-content-body font-medium">
+                              {t.title}
+                            </span>
+                          </div>
+                          <span className="text-xs sm:text-[10px] font-medium px-1.5 py-0.5 bg-surface-muted text-content-secondary rounded shrink-0">
+                            {t.status}
+                          </span>
+                        </div>
+                      ))}
+                      {getUserTasks(selectedProfileUser).length === 0 && (
+                        <p className="text-xs text-content-subtle italic">
+                          {t("teamPanel.noAssignedTask")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex justify-end">
+                    <button
+                      onClick={() => setSelectedProfileUser(null)}
+                      className="px-4 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle cursor-pointer"
+                    >
+                      {t("teamPanel.close")}
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={() => setSelectedProfileUser(null)}
-                  className="px-4 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle cursor-pointer"
-                >
-                  {t("teamPanel.close")}
-                </button>
-              </div>
             </div>
-          </div>
-        </div>
-      )}
+          );
+        })()}
     </div>
   );
 };

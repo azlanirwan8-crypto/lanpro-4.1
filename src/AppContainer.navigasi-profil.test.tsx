@@ -42,7 +42,7 @@ describe("#161 tombol Kembali di detail pengguna", () => {
     const langsung = isi.match(/setCurrentView\("userDetail"/g) || [];
     expect(langsung).toHaveLength(1);
     expect(isi).toContain("const bukaDetailPengguna");
-    // Ketiga pemanggil: panel admin, footer sidebar, layar sambutan.
+    // Ketiga pemanggil: panel admin, dropdown profil header, layar sambutan.
     expect((isi.match(/bukaDetailPengguna\(/g) || []).length).toBe(3);
   });
 });

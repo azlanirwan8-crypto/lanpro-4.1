@@ -46,6 +46,7 @@ import { WelcomeScreen } from "./components/WelcomeScreen";
 import { LiveChatWidget } from "./components/LiveChatWidget";
 import { PresenceProvider } from "./contexts/PresenceContext";
 import { HeaderAvatarGroup } from "./components/HeaderAvatarGroup";
+import { UserProfileDropdown } from "./components/UserProfileDropdown";
 import { SingleLoginCollisionModal } from "./components/SingleLoginCollisionModal";
 import { apiRequest, getAuthToken, isNetworkOrAuthError } from "./lib/api";
 import {
@@ -3448,9 +3449,6 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
           hasPermission={hasPermission}
           currentUser={currentUser}
           user={user}
-          setIsProfileModalOpen={setIsProfileModalOpen}
-          onOpenProfile={() => bukaDetailPengguna(currentUserProfile || currentUser || user)}
-          handleLogout={handleLogoutRequest}
         />
 
         {/* Live Chat Widget */}
@@ -3580,6 +3578,22 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   tasks={tasks}
                 />
               </div>
+
+              {/* Velzon Top-Right User Profile Dropdown */}
+              <UserProfileDropdown
+                currentUser={currentUser}
+                currentUserProfile={currentUserProfile}
+                user={user}
+                userRole={effectiveRole}
+                onOpenProfile={() => bukaDetailPengguna(currentUserProfile || currentUser || user)}
+                onOpenMessages={() => {
+                  // Trigger socket or scroll to live chat if needed
+                }}
+                onOpenHelp={() => {
+                  window.open("https://github.com", "_blank");
+                }}
+                handleLogout={handleLogoutRequest}
+              />
             </div>
           </header>
 
@@ -3593,6 +3607,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               positions={masterData.filter((m) => m.type === "position" || m.type === "jabatan")}
               masterData={masterData}
               currentUser={currentUser || currentUserProfile}
+              activityLogs={activityLogs || []}
               onUserUpdated={() => {
                 fetchProjects();
               }}
@@ -3741,6 +3756,16 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                     </div>
                   )}
                   <AppRoutes
+                    currentView={currentView}
+                    setCurrentView={setCurrentView}
+                    selectedProject={selectedProject}
+                    tasks={tasks}
+                    sprints={sprints}
+                    masterData={masterData}
+                    projectMembers={projectMembers}
+                    allUsers={allUsers}
+                    activityLogs={activityLogs}
+                    setTasks={setTasks}
                     effectiveRole={userRoleForProject}
                     currentUser={currentUser}
                     currentUserProfile={currentUserProfile}

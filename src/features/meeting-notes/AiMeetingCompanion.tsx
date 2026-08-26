@@ -13,7 +13,6 @@ import {
   ListChecks,
   Clock,
   UserCheck,
-  Cpu,
   Lightbulb,
   CheckCircle2,
   Loader2,
@@ -22,6 +21,7 @@ import {
   Users,
   Info,
   FileText,
+  FileUp,
   UploadCloud,
   X,
   XCircle,
@@ -173,6 +173,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
   const [importingIds, setImportingIds] = useState<number[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const manuscriptInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadState, setUploadState] = useState<
     | "IDLE"
@@ -190,7 +191,6 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   const [uploadPercentage, setUploadPercentage] = useState(0);
   const [uploadedBytes, setUploadedBytes] = useState(0);
   const [totalBytes, setTotalBytes] = useState(0);
-  const [selectedPlatform, setSelectedPlatform] = useState<"Zoom" | "Teams" | "GMeet">("Zoom");
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -364,7 +364,6 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
         formData.append("recording", chunkFile);
         formData.append("meeting_id", meeting.id || "");
         formData.append("file_name", file.name);
-        formData.append("platform", selectedPlatform);
         formData.append("chunkIndex", chunkIndex.toString());
         formData.append("totalChunks", totalChunks.toString());
         formData.append("fileSize", file.size.toString());
@@ -428,6 +427,38 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     const file = event.target.files?.[0];
     if (!file) return;
     await processUploadedFile(file);
+  };
+
+  const handleManuscriptUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith(".txt")) {
+      toast.error(t("aiMeeting.manuscriptOnlyTxt"));
+      return;
+    }
+
+    const validation = validateFileClient(file, 5 * 1024 * 1024);
+    if (!validation.valid) {
+      toast.error(validation.error || t("aiMeeting.manuscriptOnlyTxt"));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = typeof reader.result === "string" ? reader.result : "";
+      if (!text.trim()) {
+        toast.error(t("aiMeeting.manuscriptEmpty"));
+        return;
+      }
+      setTranscript(text);
+      toast.success(t("aiMeeting.manuscriptLoaded"));
+    };
+    reader.onerror = () => {
+      toast.error(t("aiMeeting.manuscriptReadFailed"));
+    };
+    reader.readAsText(file);
   };
 
   const handleCancelProcessing = async () => {
@@ -745,148 +776,121 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">
-      {/* Companion Header Banner */}
-      <div className="p-4 sm:p-5 bg-gradient-to-r from-primary-active via-primary to-primary-hover text-content-inverse flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
-        <div className="flex items-center gap-3">
-          <span className="p-2.5 bg-surface/10 border border-white/15 rounded-lg text-indigo-200 shadow-2xs">
-            <Cpu className="w-5 h-5 animate-pulse" />
-          </span>
-          <div>
-            <div className="flex items-center gap-2">
-              <h4 className="text-sm font-medium tracking-tight text-content-inverse">
-                {t("aiMeeting.title")}
-              </h4>
-              <span className="px-2 py-0.5 bg-indigo-500/80 text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-medium rounded-md uppercase tracking-wider">
-                PRO
-              </span>
-            </div>
-            <p className="text-xs sm:text-[11px] text-content-inverse-muted/80 mt-0.5">
-              {t("jsx.m1")}
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => setShowFeedbackModal(true)}
-            className="px-3.5 py-1.5 bg-surface/10 hover:bg-surface/20 border border-white/20 text-content-inverse text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
-          >
-            <Brain className="w-3.5 h-3.5" /> {t("jsx.j106")}
-          </button>
-          {aiData && (
-            <button
-              onClick={() => setActiveTab("transcript")}
-              className="px-3.5 py-1.5 bg-surface/10 hover:bg-surface/20 border border-white/20 text-content-inverse text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-indigo-200" /> {t("jsx.j107")}
-            </button>
-          )}
-        </div>
-      </div>
-
+    <div className="w-full flex flex-col text-left">
+      {/* Continuous Learning Loop Feedback Modal Trigger — tombol feedback dipasang subtil jika ada data, atau diakses lewat modal */}
       {/* Tabs navigation */}
       {aiData && (
-        <div className="border-b border-border-subtle/80 bg-surface-sunken/70 p-1 flex flex-wrap gap-1">
+        <div className="border-b border-border-subtle/80 bg-surface-sunken/70 p-1 flex flex-wrap items-center justify-between gap-1 rounded-t-lg">
+          <div className="flex flex-wrap gap-1">
+            <button
+              onClick={() => setActiveTab("summary")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "summary"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5 text-primary" /> {t("jsx.j108")}
+            </button>
+            <button
+              onClick={() => setActiveTab("chronology")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "chronology"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <Brain className="w-3.5 h-3.5 text-primary" /> {t("jsx.j109")}
+            </button>
+            <button
+              onClick={() => setActiveTab("conclusions")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "conclusions"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t("jsx.j110")}
+            </button>
+            <button
+              onClick={() => setActiveTab("suggestions")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "suggestions"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> {t("jsx.k70")}
+            </button>
+            <button
+              onClick={() => setActiveTab("actionItems")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer relative ${
+                activeTab === "actionItems"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <ListChecks className="w-3.5 h-3.5 text-primary" /> {t("jsx.j111")}
+              {activeMeetingData?.tab_tindak_lanjut?.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 bg-primary-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] rounded-full font-medium min-w-[16px] text-center inline-block">
+                  {activeMeetingData.tab_tindak_lanjut.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("nextPlan")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "nextPlan"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <ArrowRight className="w-3.5 h-3.5 text-pink-500" /> {t("jsx.j112")}
+            </button>
+            <button
+              onClick={() => setActiveTab("toBeScenario")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "toBeScenario"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-600" /> {t("jsx.j113")}
+            </button>
+            <button
+              onClick={() => setActiveTab("metadata")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "metadata"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5 text-teal-600" /> {t("jsx.j114")}
+            </button>
+            <button
+              onClick={() => setActiveTab("transcript")}
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === "transcript"
+                  ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
+                  : "text-content-secondary hover:text-content hover:bg-surface-muted"
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5 text-content-muted" /> {t("jsx.j115")}
+            </button>
+          </div>
+
           <button
-            onClick={() => setActiveTab("summary")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "summary"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
+            onClick={() => setShowFeedbackModal(true)}
+            className="px-3 py-1.5 bg-surface hover:bg-surface-muted border border-border-subtle text-content-body text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs shrink-0"
+            title={t("jsx.j106")}
           >
-            <FileText className="w-3.5 h-3.5 text-primary" /> {t("jsx.j108")}
-          </button>
-          <button
-            onClick={() => setActiveTab("chronology")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "chronology"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <Brain className="w-3.5 h-3.5 text-primary" /> {t("jsx.j109")}
-          </button>
-          <button
-            onClick={() => setActiveTab("conclusions")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "conclusions"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t("jsx.j110")}
-          </button>
-          <button
-            onClick={() => setActiveTab("suggestions")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "suggestions"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> {t("jsx.k70")}
-          </button>
-          <button
-            onClick={() => setActiveTab("actionItems")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer relative ${
-              activeTab === "actionItems"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <ListChecks className="w-3.5 h-3.5 text-primary" /> {t("jsx.j111")}
-            {activeMeetingData?.tab_tindak_lanjut?.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 bg-primary-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] rounded-full font-medium min-w-[16px] text-center inline-block">
-                {activeMeetingData.tab_tindak_lanjut.length}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("nextPlan")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "nextPlan"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <ArrowRight className="w-3.5 h-3.5 text-pink-500" /> {t("jsx.j112")}
-          </button>
-          <button
-            onClick={() => setActiveTab("toBeScenario")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "toBeScenario"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-600" /> {t("jsx.j113")}
-          </button>
-          <button
-            onClick={() => setActiveTab("metadata")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "metadata"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5 text-teal-600" /> {t("jsx.j114")}
-          </button>
-          <button
-            onClick={() => setActiveTab("transcript")}
-            className={`px-3.5 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === "transcript"
-                ? "bg-surface text-primary shadow-2xs border border-border-subtle/80"
-                : "text-content-secondary hover:text-content hover:bg-surface-muted"
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5 text-content-muted" /> {t("jsx.j115")}
+            <Brain className="w-3.5 h-3.5 text-primary" /> {t("jsx.j106")}
           </button>
         </div>
       )}
 
       {/* Main workspace container */}
-      <div className="p-6 min-h-[300px] bg-surface-sunken/20 text-left">
+      <div className="p-4 sm:p-6 min-h-[300px] text-left">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mb-4" />
@@ -1148,7 +1152,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Section 1: Record Langsung */}
                   <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
                     <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
@@ -1176,30 +1180,6 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
                       <FileText className="w-4 h-4 text-indigo-600" />
                       {t("jsx.j122")}
-                    </div>
-
-                    {/* Media Platform Selector */}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
-                        {t("aiMeeting.recordingPlatform")}
-                      </label>
-                      <div className="grid grid-cols-3 gap-1.5 p-1 bg-surface-muted rounded-xl">
-                        {(["Zoom", "Teams", "GMeet"] as const).map((p) => (
-                          <button
-                            key={p}
-                            type="button"
-                            disabled={uploadState !== "IDLE"}
-                            onClick={() => setSelectedPlatform(p)}
-                            className={`py-1.5 text-xs sm:text-[11px]  rounded-lg transition-all cursor-pointer ${
-                              selectedPlatform === p
-                                ? "bg-surface text-indigo-700 shadow-soft border border-border-subtle/50"
-                                : "text-content-muted hover:text-content-strong disabled:opacity-50"
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        ))}
-                      </div>
                     </div>
 
                     {uploadState !== "IDLE" ? (
@@ -1315,43 +1295,81 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           className="hidden"
                         />
                         <UploadCloud className="w-8 h-8" />
-                        <p className="text-xs text-center">Unggah Rekaman ({selectedPlatform})</p>
+                        <p className="text-xs text-center">Unggah Rekaman Rapat</p>
                         <p className="text-xs sm:text-[10px] text-content-subtle text-center">
                           Video / Audio (MP4, AVI, MKV, MOV, MP3, WAV, etc.)
                         </p>
                       </div>
                     )}
                   </div>
+
+                  {/* Section 3: Upload Manuskrip (.txt) — #182 */}
+                  <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft flex flex-col justify-between">
+                    <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
+                      <FileUp className="w-4 h-4 text-indigo-600" />
+                      {t("aiMeeting.manuscriptUploadLabel")}
+                    </div>
+                    <p className="text-xs sm:text-[11px] text-content-subtle">
+                      {t("aiMeeting.manuscriptUploadDesc")}
+                    </p>
+
+                    <div
+                      onClick={() => manuscriptInputRef.current?.click()}
+                      className="border-2 border-dashed border-border-subtle rounded-xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-indigo-400 hover:bg-indigo-500/10 transition-all text-content-muted hover:text-indigo-600 h-full min-h-[160px]"
+                    >
+                      <input
+                        type="file"
+                        ref={manuscriptInputRef}
+                        onChange={handleManuscriptUpload}
+                        accept=".txt,text/plain"
+                        className="hidden"
+                      />
+                      <FileUp className="w-8 h-8" />
+                      <p className="text-xs text-center">{t("aiMeeting.manuscriptDropText")}</p>
+                      <p className="text-xs sm:text-[10px] text-content-subtle text-center">
+                        {t("aiMeeting.manuscriptDropHint")}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Section 3: Paste Transcript */}
-                <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
-                  <div className="text-center text-xs text-content-subtle uppercase tracking-wider py-2">
-                    {t("aiMeeting.orPasteLink")}
+                {/* Section 4: Link rapat & transkrip manual — dipisah, tidak lagi digabung dalam satu label (#182) */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
+                    <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
+                      <Sparkles className="w-4 h-4 text-indigo-600" />
+                      {t("aiMeeting.meetingLinkLabel")}
+                    </div>
+                    <input
+                      type="text"
+                      value={meetingLink}
+                      onChange={(e) => setMeetingLink(e.target.value)}
+                      placeholder={t("aiMeeting.pasteLinkPlaceholder")}
+                      className="w-full p-3 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle"
+                    />
                   </div>
 
-                  <input
-                    type="text"
-                    value={meetingLink}
-                    onChange={(e) => setMeetingLink(e.target.value)}
-                    placeholder={t("aiMeeting.pasteLinkPlaceholder")}
-                    className="w-full p-3 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle"
-                  />
-
-                  <textarea
-                    value={transcript}
-                    onChange={(e) => setTranscript(e.target.value)}
-                    placeholder={t("aiMeeting.pasteTranscriptPlaceholder")}
-                    className="w-full min-h-[160px] p-4 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle font-mono leading-relaxed shadow-inner"
-                  />
-                  <div className="flex justify-end">
-                    <button
-                      onClick={handleAnalyze}
-                      className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-xl text-xs font-medium shadow-soft-lg flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
-                    >
-                      <Sparkles className="w-4 h-4 text-indigo-200" /> {t("jsx.j123")}
-                    </button>
+                  <div className="space-y-2 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
+                    <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
+                      <FileText className="w-4 h-4 text-indigo-600" />
+                      {t("aiMeeting.manualTranscriptLabel")}
+                    </div>
+                    <textarea
+                      value={transcript}
+                      onChange={(e) => setTranscript(e.target.value)}
+                      placeholder={t("aiMeeting.pasteTranscriptPlaceholder")}
+                      className="w-full min-h-[92px] p-4 border border-border-subtle rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/15 focus:border-indigo-500 bg-surface placeholder:text-content-subtle font-mono leading-relaxed shadow-inner"
+                    />
                   </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleAnalyze}
+                    className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-xl text-xs font-medium shadow-soft-lg flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
+                  >
+                    <Sparkles className="w-4 h-4 text-indigo-200" /> {t("jsx.j123")}
+                  </button>
                 </div>
               </div>
             )}
@@ -1761,15 +1779,6 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
             )}
           </>
         )}
-      </div>
-
-      {/* Info footer */}
-      <div className="bg-surface-sunken border-t p-4 px-6 flex items-center gap-2 text-xs sm:text-[11px] text-content-subtle">
-        <Info className="w-4 h-4 text-content-subtle shrink-0" />
-        <span>
-          {t("jsx.j134")} <strong>Gemini AI</strong>
-          {t("jsx.j136")}
-        </span>
       </div>
 
       {/* Continuous Learning Loop Feedback Modal */}

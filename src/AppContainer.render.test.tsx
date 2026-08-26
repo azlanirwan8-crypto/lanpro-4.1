@@ -73,7 +73,7 @@ describe("AppContainer", () => {
     // Assertion pada isi nyata, bukan sekadar "ada sesuatu". Pemeriksaan
     // "body tidak kosong" akan tetap hijau meski yang ter-render hanyalah
     // error boundary — persis kegagalan yang test ini seharusnya tangkap.
-    expect(screen.getByText(/Platform Manajemen Proyek/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Masuk/i })).toBeInTheDocument();
     expect(screen.getByText(/Masuk untuk melanjutkan ke Workspace Anda/i)).toBeInTheDocument();
   });
 

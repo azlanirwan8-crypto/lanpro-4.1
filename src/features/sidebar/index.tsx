@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
-import { ChevronRight, ChevronLeft, ChevronDown, Kanban, Plus, LogOut, User } from "lucide-react";
+import { ChevronRight, ChevronLeft, ChevronDown, Kanban, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../lib/utils";
 import { SidebarProps } from "./types";
@@ -8,7 +8,6 @@ import { useSidebar } from "./hooks";
 import { styles } from "./styles";
 import { sidebarSections } from "./config";
 import { getUserPermissions, normalizeModuleKey } from "../../lib/permissions";
-import { UserAvatar } from "../../components/ui/UserAvatar";
 
 export const Sidebar: React.FC<SidebarProps> = (props) => {
   const { t } = useTranslation();
@@ -26,14 +25,10 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
     currentUserProfile,
     currentUser,
     user,
-    setIsProfileModalOpen,
-    onOpenProfile,
-    handleLogout,
   } = props;
 
   const { canCreateProject } = useSidebar(props);
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const toggleExpand = (itemId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -115,13 +110,13 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
         </div>
       </div>
 
-      <nav className={styles.nav}>
-        {/* Active Projects Section */}
+      {/* Active Projects Section — FIXED / NON-SCROLLABLE WITH MENU */}
+      <div className="shrink-0 px-3 pt-2 pb-2.5 border-b border-sidebar-border/60">
         {!isSidebarCollapsed && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className={styles.sectionLabelWrapper}
+            className="flex items-center justify-between mb-1.5 px-3 group"
           >
             <div className={styles.sectionLabel}>{t("sidebar.activeProjects")}</div>
             {canCreateProject && (
@@ -141,57 +136,60 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
           </motion.div>
         )}
 
-        {/* Project List Buttons */}
-        {projects.map((p, idx) => (
-          <motion.div
-            key={p.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, delay: idx * 0.02 }}
-            className="group relative my-0.5"
-          >
-            <motion.button
-              whileHover={{ x: 2 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setSelectedProject(p)}
-              className={cn(
-                styles.projectButton,
-                isSidebarCollapsed
-                  ? "justify-center px-0 py-2 min-h-11"
-                  : "gap-2.5 px-3 py-2 min-h-11",
-                selectedProject?.id === p.id
-                  ? styles.projectButtonSelected
-                  : styles.projectButtonDefault
-              )}
-              title={isSidebarCollapsed ? p.name : undefined}
+        {/* Project List Buttons (Max-height dengan scroll internal jika banyak proyek) */}
+        <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5">
+          {projects.map((p, idx) => (
+            <motion.div
+              key={p.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: idx * 0.02 }}
+              className="group relative my-0.5"
             >
-              <div
+              <motion.button
+                whileHover={{ x: 2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setSelectedProject(p)}
                 className={cn(
-                  styles.indicator,
+                  styles.projectButton,
+                  isSidebarCollapsed
+                    ? "justify-center px-0 py-2 min-h-11"
+                    : "gap-2.5 px-3 py-2 min-h-11",
                   selectedProject?.id === p.id
-                    ? "bg-sidebar-text-active scale-125 shadow-xs"
-                    : "bg-sidebar-title/40"
+                    ? styles.projectButtonSelected
+                    : styles.projectButtonDefault
                 )}
-              />
-              {!isSidebarCollapsed && (
-                <>
-                  <span className="truncate flex-1 text-left text-xs font-medium">{p.name}</span>
-                  <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded bg-sidebar-item-hover text-sidebar-text-active">
-                    {p.key}
-                  </span>
-                </>
-              )}
-            </motion.button>
-          </motion.div>
-        ))}
+                title={isSidebarCollapsed ? p.name : undefined}
+              >
+                <div
+                  className={cn(
+                    styles.indicator,
+                    selectedProject?.id === p.id
+                      ? "bg-sidebar-text-active scale-125 shadow-xs"
+                      : "bg-sidebar-title/40"
+                  )}
+                />
+                {!isSidebarCollapsed && (
+                  <>
+                    <span className="truncate flex-1 text-left text-xs font-medium">{p.name}</span>
+                    <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium px-1.5 py-0.5 rounded bg-sidebar-item-hover text-sidebar-text-active">
+                      {p.key}
+                    </span>
+                  </>
+                )}
+              </motion.button>
+            </motion.div>
+          ))}
 
-        {/* Daftar proyek kosong — item #160. Tanpa baris ini blok "PROYEK
-            AKTIF" hanya berupa judul melayang, sehingga pengguna baru membaca
-            layar ini sebagai aplikasi yang gagal memuat. */}
-        {projects.length === 0 && !isSidebarCollapsed && (
-          <div className="px-3 py-2 text-xs text-sidebar-text">{t("sidebar.noProjectYet")}</div>
-        )}
+          {/* Daftar proyek kosong — item #160. */}
+          {projects.length === 0 && !isSidebarCollapsed && (
+            <div className="px-3 py-2 text-xs text-sidebar-text">{t("sidebar.noProjectYet")}</div>
+          )}
+        </div>
+      </div>
 
+      {/* Navigation Menu — SCROLLABLE */}
+      <nav className={styles.nav}>
         {/* Sidebar Categories & Navigation Items */}
         {sidebarSections.map((section) => {
           const permittedItems = section.items.filter((item) => {
@@ -338,79 +336,6 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
           );
         })}
       </nav>
-
-      {/* Velzon Bottom User Profile Footer */}
-      <div className="p-3 border-t border-sidebar-border bg-sidebar-surface mt-auto relative">
-        {isUserMenuOpen && (
-          <div className="absolute bottom-full left-3 right-3 mb-2 bg-sidebar-surface border border-sidebar-border rounded-xl shadow-2xl py-1.5 z-50 text-sidebar-text-active animate-in fade-in zoom-in-95 duration-150">
-            <button
-              onClick={() => {
-                setIsUserMenuOpen(false);
-                if (onOpenProfile) onOpenProfile();
-              }}
-              className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-sidebar-item-hover flex items-center gap-2.5 transition-colors text-sidebar-text hover:text-sidebar-text-active cursor-pointer"
-            >
-              <User className="w-4 h-4 text-sidebar-title" />
-              <span>{t("sidebar.yourProfile")}</span>
-            </button>
-            <div className="h-px bg-sidebar-border my-1" />
-            <button
-              onClick={() => {
-                setIsUserMenuOpen(false);
-                handleLogout();
-              }}
-              className="w-full text-left px-4 py-3 min-h-11 text-xs font-medium hover:bg-danger-surface/20 flex items-center gap-2.5 transition-colors text-danger-hover hover:text-danger cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>{t("sidebar.logout")}</span>
-            </button>
-          </div>
-        )}
-
-        <motion.div
-          whileHover={{ scale: 1.01 }}
-          onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-          className={cn(
-            "flex items-center p-2 rounded-lg hover:bg-sidebar-item-hover transition-all cursor-pointer group",
-            isSidebarCollapsed ? "justify-center" : "gap-3"
-          )}
-          title={t("sidebar.profileMenuHint")}
-        >
-          <UserAvatar
-            user={user || currentUserProfile || currentUser}
-            className="w-8 h-8 shrink-0 border border-sidebar-border"
-          />
-          {!isSidebarCollapsed && (
-            <>
-              <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-sidebar-text-active truncate">
-                  {user?.displayName || currentUser?.displayName || currentUser?.username || "User"}
-                </div>
-                <div className="text-xs sm:text-[10px] text-sidebar-text truncate font-mono">
-                  {currentUser?.username || "admin"}
-                </div>
-              </div>
-              <ChevronDown
-                className={cn(
-                  "w-4 h-4 text-sidebar-text transition-transform duration-200",
-                  isUserMenuOpen && "rotate-180"
-                )}
-              />
-            </>
-          )}
-        </motion.div>
-        {isSidebarCollapsed && (
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className="w-full mt-2 flex justify-center p-2 text-sidebar-text hover:text-sidebar-text-active transition-colors"
-            title={t("sidebar.profileOptions")}
-          >
-            <User className="w-4 h-4" />
-          </motion.button>
-        )}
-      </div>
     </motion.aside>
   );
 };

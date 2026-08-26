@@ -166,4 +166,20 @@ Pemilik proyek memakai alur **review-first**: analisa dan laporkan lebih dulu
 dengan format A–F, lalu **tunggu persetujuan** sebelum mengubah kode. Laporan
 harus jujur, termasuk saat hasilnya buruk atau saat Anda keliru.
 
+**Berlaku untuk semua perkakas AI yang mengerjakan repo ini — termasuk
+Antigravity.** Sebelum mengubah _flow_ atau kode apa pun, urutannya wajib:
+
+1. **Analisa isu dulu.** Pahami akar masalahnya, jangan menebak dari gejala.
+2. **Berikan saran, masukan, dan dampaknya.** Termasuk risiko ke bagian lain
+   sistem, bukan cuma bagian yang diminta.
+3. **Berikan langkah-langkah penyelesaian yang disarankan.**
+4. **Berikan opsi penyelesaian** bila ada lebih dari satu cara yang masuk akal,
+   lengkap dengan trade-off masing-masing.
+5. **Tanyakan keputusan mana yang diambil pemilik proyek**, sambil memberi
+   rekomendasi Anda sendiri — lalu **tunggu jawaban** sebelum mengeksekusi.
+
+Langkah 1–5 ini tidak menggantikan §0 (nomor item `AUDIT.md`) — keduanya
+wajib berjalan bersamaan: nomor item menentukan APA yang boleh dikerjakan,
+lima langkah ini menentukan BAGAIMANA cara mengerjakannya.
+
 Pekerjaan yang melanggar berkas ini ditolak.

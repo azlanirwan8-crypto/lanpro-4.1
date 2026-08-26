@@ -22,7 +22,4 @@ export interface SidebarProps {
   ) => boolean;
   currentUser: any;
   user: any;
-  setIsProfileModalOpen: (open: boolean) => void;
-  onOpenProfile?: () => void;
-  handleLogout: () => void;
 }

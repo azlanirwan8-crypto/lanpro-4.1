@@ -547,7 +547,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
       {/* AREA KONTEN UTAMA (AI ASSISTANT VS DISCUSSION TABLE) */}
       {showAiAssistant ? (
-        <div className="p-4 sm:p-5 w-full animate-in fade-in duration-200">
+        <div className="pt-4 pb-2 w-full animate-in fade-in duration-200">
           <AiMeetingCompanion
             projectId={projectId}
             meeting={{ id: meetingId, title: "Meeting Discussion" } as any}

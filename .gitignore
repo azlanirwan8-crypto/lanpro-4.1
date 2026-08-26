@@ -11,6 +11,10 @@ tmp/
 uploads/
 *.docx
 
+# Folder kerja sementara sesi AI (skrip sekali-pakai, dump, screenshot debug) —
+# lihat #180 di AUDIT.md: 138 berkas macam ini pernah ter-commit tanpa sengaja.
+scratch/
+
 # Berkas izin Claude Code, khusus mesin lokal
 .claude/settings.local.json
 

@@ -33,7 +33,8 @@ export type AlasanTolak =
   | "belum_terdaftar"
   | "akun_belum_aktif"
   | "identitas_milik_akun_lain"
-  | "email_sudah_terdaftar";
+  | "email_sudah_terdaftar"
+  | "tautan_kedaluwarsa";
 
 export type HasilKebijakan =
   | { aksi: "masuk"; user: any }
@@ -108,6 +109,33 @@ export async function putuskanKebijakan(
     const user = await cariUserById(identitasTersimpan.userId);
 
     if (user) {
+      // #177 — tautan sub->user TIDAK berarti email itu masih milik user ini.
+      // `sub` sengaja dipercaya di atas email (lihat komentar di bawah), supaya
+      // pengguna yang mengganti emailnya SENDIRI tetap bisa SSO tanpa menaut
+      // ulang — itu tetap harus jalan. Tapi bila email yang dilaporkan provider
+      // SEKARANG sudah dipakai user AKTIF LAIN di tabel Users, tandanya beda:
+      // email itu sudah dipindah (mis. lewat panel admin) ke akun lain sejak
+      // tautan ini dibuat. Mempercayai tautan lama di sini berarti siapa pun
+      // yang memegang akun Google/Microsoft itu otomatis masuk ke identitas
+      // LAMA meski emailnya kini sah milik orang lain. TIDAK diarahkan otomatis
+      // ke pemilik baru pula — arah itu sama bahayanya, sebab tautan provider
+      // untuk akun baru itu belum pernah diverifikasi. Tautan basi diputus
+      // (pola sama seperti identitas yatim di bawah) supaya proses berikutnya
+      // bisa menaut ulang dengan bersih lewat jalur yang sah, bukan terkunci
+      // permanen ke akun lama.
+      const pemilikEmailSekarang = await cariUserByEmail(identitas.email);
+      if (
+        pemilikEmailSekarang &&
+        String(pemilikEmailSekarang.id) !== String(user.id) &&
+        akunAktif(pemilikEmailSekarang)
+      ) {
+        console.warn(
+          `[SSO] Tautan identitas basi diputus: ${identitas.provider}/${identitas.sub} menunjuk user ${user.id}, tetapi email ${identitas.email} kini milik user ${pemilikEmailSekarang.id}.`
+        );
+        await hapusIdentitas(identitas.provider, identitas.sub);
+        return { aksi: "tolak", alasan: "tautan_kedaluwarsa" };
+      }
+
       if (!akunAktif(user)) return { aksi: "tolak", alasan: "akun_belum_aktif" };
       return { aksi: "masuk", user };
     }
@@ -241,7 +269,10 @@ export async function buatAkunDariSso(
       nama: identitas.nama,
       username,
     }).catch((emailErr) => {
-      console.error("[EMAIL] Gagal mengirim email selamat datang pendaftaran SSO:", emailErr?.message || emailErr);
+      console.error(
+        "[EMAIL] Gagal mengirim email selamat datang pendaftaran SSO:",
+        emailErr?.message || emailErr
+      );
     });
   } catch (err: any) {
     if (connection) {
@@ -314,8 +345,11 @@ export const PESAN_TOLAK: Record<string, string> = {
     "Domain email Anda tidak diizinkan untuk masuk ke LanPro. Pastikan domain email Anda terdaftar pada SSO_ALLOWED_DOMAINS.",
   identitas_milik_akun_lain: "Akun Google/Microsoft ini sudah tertaut ke pengguna lain.",
   email_sudah_terdaftar: "Email ini sudah terdaftar. Silakan gunakan tombol masuk.",
+  tautan_kedaluwarsa:
+    "Tautan akun Google/Microsoft ini sudah tidak berlaku karena alamat emailnya kini terdaftar pada akun LanPro lain. Silakan masuk memakai kata sandi, atau hubungi admin untuk menautkan ulang.",
   username_tidak_sah: "Username hanya boleh berupa huruf, maksimal 10 karakter, dan belum dipakai.",
-  gagal_mulai: "Gagal memulai otorisasi SSO. Pastikan kredensial OIDC dan JWT_SECRET telah dikonfigurasi di server.",
+  gagal_mulai:
+    "Gagal memulai otorisasi SSO. Pastikan kredensial OIDC dan JWT_SECRET telah dikonfigurasi di server.",
   dibatalkan: "Proses otorisasi Google/Microsoft dibatalkan.",
   state_hilang: "Sesi otorisasi kedaluwarsa atau state tidak ditemukan. Silakan coba lagi.",
   state_tidak_cocok: "Validasi keamanan state tidak cocok. Silakan coba lagi.",

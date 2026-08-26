@@ -138,6 +138,34 @@ export class UserRepository {
     }
   }
 
+  /** #178 — dipakai sebelum UPDATE supaya klien dapat pesan jelas, bukan galat Postgres mentah. */
+  async isUsernameTaken(username: string, excludeId: string): Promise<boolean> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        "SELECT id FROM Users WHERE username = ? AND id != ?",
+        [username, excludeId]
+      );
+      return !!(rows && rows.length > 0);
+    } finally {
+      connection.release();
+    }
+  }
+
+  /** #178 — case-insensitive, sejalan dengan `findUserByEmail` di auth.repository.ts. */
+  async isEmailTaken(email: string, excludeId: string): Promise<boolean> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        "SELECT id FROM Users WHERE LOWER(email) = LOWER(?) AND id != ?",
+        [email.trim(), excludeId]
+      );
+      return !!(rows && rows.length > 0);
+    } finally {
+      connection.release();
+    }
+  }
+
   async updateUser(id: string, updates: Record<string, any>, isAdmin: boolean): Promise<void> {
     const connection = await db.getConnection();
     try {
