@@ -65,7 +65,11 @@ export const SsoButtons = ({ mode }: SsoButtonsProps) => {
     let dibatalkan = false;
     ambilProviderSso().then((hasil) => {
       if (!dibatalkan) {
-        setProviders(hasil);
+        // Item #197 — SSO Microsoft dilaporkan backend sebagai terkonfigurasi
+        // tapi alurnya belum berfungsi ("belum bisa sign dengan microsoft"),
+        // jadi tombolnya disembunyikan sengaja di sini sampai OIDC-nya siap.
+        // Konfigurasi backend TIDAK disentuh — hanya tampilan tombolnya.
+        setProviders(hasil.filter((p) => p !== "microsoft"));
         setMemuat(false);
       }
     });
