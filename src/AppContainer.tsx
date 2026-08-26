@@ -293,6 +293,23 @@ function AppContainer() {
     bersihkanSso();
   }, [hasilSso]);
 
+  // Item #207 — sebelumnya `email`/`nama` (PII) tertinggal di address bar
+  // SELAMA layar "Lengkapi Pendaftaran" terbuka — baru dibersihkan lewat
+  // `bersihkanSso` saat pengguna menyelesaikan/membatalkan form (`onSelesai`/
+  // `onBatal` di bawah). Prinsip yang sudah ditegakkan untuk `sso_token`
+  // ("token tidak boleh tertinggal di address bar", `ssoCallback.ts`) berlaku
+  // sama untuk email: ikut tersalin ke riwayat peramban dan tertangkap kalau
+  // pengguna screenshot/share link SEBELUM sempat menutup form. Dibersihkan
+  // dari URL SEGERA di sini, TANPA mereset `hasilSso` — form tetap perlu
+  // `hasilSso.email` untuk pra-isi field, jadi hanya address bar-nya yang
+  // dirapikan, bukan state React-nya.
+  useEffect(() => {
+    if (hasilSso.jenis !== "lengkapi") return;
+    if (typeof window === "undefined") return;
+    const sisa = bersihkanQuerySso(window.location.search);
+    window.history.replaceState({}, "", window.location.pathname + sisa);
+  }, [hasilSso]);
+
   // Modal & Detail Panel Management
   const {
     isNewProjectModalOpen,
