@@ -22,6 +22,7 @@
 import crypto from "crypto";
 import db from "../../src/lib/db";
 import { activeUserSessions } from "../middleware/auth";
+import { authRepository } from "../repositories/auth.repository";
 import type { IdentitasOidc } from "./oidc.service";
 import { kirimEmailSelamatDatang } from "./email.service";
 import { domainDiizinkan } from "./oidc.service";
@@ -311,7 +312,16 @@ export async function buatAkunDariSso(
 export async function daftarkanSesi(
   userId: string,
   token: string,
-  info: { ip?: string; browser?: string; device?: string } = {}
+  info: {
+    ip?: string;
+    browser?: string;
+    device?: string;
+    userAgent?: string;
+    os?: string;
+    city?: string;
+    country?: string;
+    location?: string;
+  } = {}
 ): Promise<void> {
   await db.query("UPDATE Users SET currentSessionToken = ?, lastSeen = ? WHERE id = ?", [
     token,
@@ -326,6 +336,27 @@ export async function daftarkanSesi(
     device: info.device || "SSO",
     lastActiveAt: Date.now(),
     browserSessionId: "",
+  });
+
+  const sessionId = crypto.randomUUID();
+  setImmediate(async () => {
+    try {
+      await authRepository.recordSessionLogin({
+        id: sessionId,
+        userId: String(userId),
+        ipAddress: info.ip || null,
+        userAgent: info.userAgent || null,
+        browser: info.browser || "SSO",
+        os: info.os || null,
+        device: info.device || "SSO",
+        city: info.city || null,
+        country: info.country || null,
+        location: info.location || null,
+        token: token || null,
+      });
+    } catch (err) {
+      console.error("[SSO] Gagal mencatat UserSession login:", err);
+    }
   });
 }
 

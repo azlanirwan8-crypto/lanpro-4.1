@@ -40,7 +40,7 @@ import { useAppNavigation } from "./hooks/useAppNavigation";
 import { TaskDetailModal } from "./features/issues";
 import { UserDetailView } from "./features/users/UserDetailView";
 import { Sidebar } from "./features/sidebar";
-import { AdminUserPanel } from "./features/users";
+import { AdminUserPanel, UserSessionsPanel } from "./features/users";
 import { MasterDataPanel } from "./features/master/MasterDataPanel";
 import { WelcomeScreen } from "./components/WelcomeScreen";
 import { LiveChatWidget } from "./components/LiveChatWidget";
@@ -1096,6 +1096,7 @@ function AppContainer() {
       fetchComments,
       fetchNotifications,
       selectedProject,
+      currentUser,
     };
   });
 
@@ -1328,6 +1329,28 @@ function AppContainer() {
             photoURL: event.avatar_url || event.photoURL,
             avatar_url: event.avatar_url || event.photoURL,
             avatarUrl: event.avatar_url || event.photoURL,
+          };
+          setCurrentUser(updated);
+          setCurrentUserProfile(updated);
+          safeLocalStorage.setItem("sessionUser", JSON.stringify(updated));
+        }
+      }
+    });
+
+    socket.on("user_cover_updated", (event: any) => {
+      const refs = realTimeRefs.current;
+      if (refs && typeof refs.fetchAllUsers === "function") {
+        refs.fetchAllUsers();
+      }
+      if (event && event.userId) {
+        if (
+          refs &&
+          refs.currentUser &&
+          (refs.currentUser.id === event.userId || refs.currentUser.uid === event.userId)
+        ) {
+          const updated = {
+            ...refs.currentUser,
+            coverUrl: event.cover_url,
           };
           setCurrentUser(updated);
           setCurrentUserProfile(updated);
@@ -3670,6 +3693,27 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                 onAddUser={() => {}}
                 onRefreshProjects={fetchProjects}
                 onSelectUserForDetail={(u) => bukaDetailPengguna(u)}
+              />
+            )
+          ) : currentView === "userSessions" ? (
+            !hasPermission(
+              effectiveRole,
+              "userManagement",
+              "read",
+              false,
+              currentUserProfile?.permissions
+            ) ? (
+              <div className="flex flex-col items-center justify-center w-full flex-1 p-8 text-center bg-surface-sunken">
+                <ShieldAlert className="w-16 h-16 text-danger mb-4" />
+                <h2 className="text-2xl font-medium text-content-strong mb-2">
+                  {t("appShell.forbidden")}
+                </h2>
+                <p className="text-content-muted max-w-md">{t("appShell.forbiddenUsers")}</p>
+              </div>
+            ) : (
+              <UserSessionsPanel
+                userRole={effectiveRole}
+                currentUserId={currentUser?.uid || user?.uid}
               />
             )
           ) : currentView === "master" ? (

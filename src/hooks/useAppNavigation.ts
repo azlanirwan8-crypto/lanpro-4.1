@@ -13,6 +13,7 @@ const VALID_VIEWS = new Set<string>([
   "sprints",
   "planning",
   "users",
+  "userSessions",
   "meetingNotes",
   "backup",
   "issueList",

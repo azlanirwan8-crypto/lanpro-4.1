@@ -55,7 +55,7 @@ import {
 import { formatDistanceToNow, isToday, isThisWeek, isThisMonth } from "date-fns";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { cn, ensureDate, humanizeActivityAction } from "../../lib/utils";
-import { apiRequest } from "../../lib/api";
+import { apiRequest, apiClient } from "../../lib/api";
 import {
   katalogPeranSistem,
   katalogPeranProyek,
@@ -456,7 +456,43 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
       fetchGpsLocation();
     };
 
-    fetchRealGeoLocation();
+    const fetchUserDbSessions = async () => {
+      const targetId = user?.id || user?.uid;
+      if (!targetId) return;
+      try {
+        const res = await apiClient.get(`/api/admin/sessions?userId=${targetId}&limit=10`);
+        if (
+          res.data?.status === "success" &&
+          Array.isArray(res.data.data) &&
+          res.data.data.length > 0 &&
+          isMounted
+        ) {
+          const formatted: SessionItem[] = res.data.data.map((item: any) => {
+            const isMobile =
+              (item.device || item.os || "").toLowerCase().includes("android") ||
+              (item.device || item.os || "").toLowerCase().includes("iphone");
+            const isTablet = (item.device || item.os || "").toLowerCase().includes("ipad");
+            return {
+              id: item.id,
+              device: `${item.browser || "Browser"} on ${item.os || "Device"}`,
+              deviceType: isMobile ? "smartphone" : isTablet ? "tablet" : "laptop",
+              location: item.location || item.city || "Unknown Location",
+              ip: item.ipAddress || "127.0.0.1",
+              time:
+                item.status === "ACTIVE" ? "Active Now" : new Date(item.loginAt).toLocaleString(),
+              isCurrent: item.status === "ACTIVE",
+            };
+          });
+          setUserSessions(formatted);
+          return;
+        }
+      } catch {
+        // Fallback ke deteksi lokal jika gagal atau bukan admin
+      }
+      fetchRealGeoLocation();
+    };
+
+    fetchUserDbSessions();
     return () => {
       isMounted = false;
     };
@@ -1151,6 +1187,16 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
           // Bersihkan sisa localStorage lama — sumber kebenaran sekarang server.
           safeLocalStorage.removeItem(`user_cover_${user?.id || user?.uid}`);
         }
+        // Lepas pratinjau blob sementara sekarang setelah URL permanen dari
+        // server tersedia di coverURL. Dibiarkan tidak null di sini akan
+        // membuat render terus memprioritaskan blob (lihat prioritas
+        // `previewCoverUrl || coverURL`), dan blob itu ikut ter-revoke oleh
+        // efek cleanup begitu ada perubahan preview avatar/cover lain —
+        // membuat cover yang SUDAH tersimpan di server tampak hilang.
+        if (previewCoverUrl && previewCoverUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(previewCoverUrl);
+        }
+        setPreviewCoverUrl(null);
         toast.success(t("userDetail.coverUpdated"));
       } else {
         toast.error(uploadData?.message || "Gagal mengunggah cover.");

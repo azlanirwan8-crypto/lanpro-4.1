@@ -101,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 className="flex flex-col"
               >
                 <span className={styles.logoText}>LANPRO</span>
-                <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-sidebar-title tracking-widest uppercase -mt-1">
+                <span className="text-[10px] font-semibold text-sidebar-title tracking-wider uppercase whitespace-nowrap block mt-0.5">
                   {t("jsx.j154")}
                 </span>
               </motion.div>

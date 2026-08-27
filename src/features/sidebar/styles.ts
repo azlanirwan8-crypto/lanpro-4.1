@@ -15,7 +15,7 @@ export const styles = {
   logoWrapper: "p-5 flex items-center shrink-0 border-b border-sidebar-border",
   logoIcon:
     "w-8 h-8 bg-gradient-to-tr from-indigo-500 via-blue-500 to-cyan-400 rounded-md flex items-center justify-center shrink-0 shadow-md",
-  logoText: "font-medium text-2xl tracking-widest text-sidebar-text-active uppercase font-sans",
+  logoText: "font-bold text-lg tracking-wider text-sidebar-text-active uppercase font-sans",
   nav: "flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar py-3",
   sectionLabelWrapper: "flex items-center justify-between mb-1.5 px-3 mt-5 group",
   sectionLabel: "text-[11px] font-semibold text-sidebar-title uppercase tracking-wider",

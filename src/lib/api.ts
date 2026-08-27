@@ -313,3 +313,20 @@ export async function apiRequest(
 
   return responseData;
 }
+
+export const apiClient = {
+  get: (url: string) => apiRequest(url, { method: "GET" }).then((data) => ({ data })),
+  post: (url: string, body?: any) =>
+    apiRequest(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : undefined,
+    }).then((data) => ({ data })),
+  put: (url: string, body?: any) =>
+    apiRequest(url, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : undefined,
+    }).then((data) => ({ data })),
+  delete: (url: string) => apiRequest(url, { method: "DELETE" }).then((data) => ({ data })),
+};

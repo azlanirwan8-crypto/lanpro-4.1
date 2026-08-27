@@ -15,6 +15,7 @@ import {
   Beaker,
   Settings2,
   Sparkles,
+  ShieldCheck,
 } from "lucide-react";
 
 export interface SidebarSubItemConfig {
@@ -165,6 +166,12 @@ export const sidebarSections: SidebarSectionConfig[] = [
         id: "users",
         label: "sidebar.userManagement",
         icon: <UserCog className="w-4 h-4" />,
+        module: "userManagement",
+      },
+      {
+        id: "userSessions",
+        label: "sidebar.userSessions",
+        icon: <ShieldCheck className="w-4 h-4" />,
         module: "userManagement",
       },
       {

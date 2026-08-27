@@ -905,6 +905,9 @@ async function startServer() {
   const { default: userRoutes } = await import('./server/routes/user.routes.ts');
   app.use(userRoutes);
 
+  const { default: sessionRoutes } = await import('./server/routes/session.routes.ts');
+  app.use(sessionRoutes);
+
   app.post("/api/whatsapp/simulate", authenticateJWT, async (req: any, res) => {
     try {
       const { userId } = req.body;
@@ -1125,6 +1128,15 @@ app.use(errorHandler);
     // belum dikonfigurasi, fungsinya melewat dengan pesan yang jelas.
     initWhatsAppScheduler();
     initTaskDigestEmailScheduler();
+
+    // PostgreSQL Neon Keep-Alive Warmup Engine (Mencegah Compute Node Cold-Start Sleep)
+    setInterval(async () => {
+      try {
+        await query("SELECT 1");
+      } catch (err: any) {
+        // Keep-alive heartbeat silently maintained
+      }
+    }, 4 * 60 * 1000);
   });
 }
 

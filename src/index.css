@@ -412,12 +412,81 @@ select option {
   animation: shake 0.3s ease-in-out;
 }
 
-/* ─── Kehalusan bergaya Velzon ───────────────────────────────────────────────
- * Velzon terasa halus bukan karena Bootstrap, melainkan karena empat kebiasaan
- * yang konsisten: transisi pendek di SETIAP perubahan state, bayangan berlapis
- * yang lembut, radius seragam, dan animasi masuk yang singkat. Keempatnya
- * direplikasi di sini dengan Tailwind murni.
+/* ─── Jira & Velzon Compact Design System Baseline (Global LanPro) ────────────
+ * Menetapkan standar typography, hirarki judul, dan densitas tabel yang compact,
+ * clean, sleek, dan profesional ala Jira & Velzon Admin di SELURUH modul LanPro.
  * ─────────────────────────────────────────────────────────────────────────── */
+html {
+  font-size: 81.25%; /* 1rem = 13px Baseline (Jira Standard) */
+}
+
+@layer base {
+  /* Standarisasi Universal Font Family Inter (Velzon Admin Standard) */
+  *,
+  ::before,
+  ::after,
+  html,
+  body,
+  button,
+  input,
+  select,
+  textarea,
+  optgroup {
+    font-family:
+      "Inter",
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      Roboto,
+      sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Hirarki Judul Halaman Standar Jira */
+  h1,
+  .h1 {
+    font-size: 1.125rem; /* 18px */
+    font-weight: 700;
+    line-height: 1.35;
+  }
+  h2,
+  .h2 {
+    font-size: 1rem; /* 16px */
+    font-weight: 600;
+    line-height: 1.35;
+  }
+  h3,
+  .h3 {
+    font-size: 0.875rem; /* 14px */
+    font-weight: 600;
+  }
+
+  /* Densitas Sel Tabel Standar Jira */
+  th {
+    padding: 0.5rem 0.75rem; /* py-2 px-3 */
+    font-size: 0.625rem; /* 10px */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  td {
+    padding: 0.5rem 0.75rem; /* py-2 px-3 */
+    font-size: 0.75rem; /* 12px */
+  }
+
+  /* Standarisasi Form Input & Dropdown Velzon Admin (Height 36px) */
+  input[type="text"],
+  input[type="email"],
+  input[type="search"],
+  input[type="password"],
+  select {
+    height: 2.25rem; /* h-9 (36px) */
+    font-size: 0.75rem; /* text-xs (12px) */
+  }
+}
 
 /* 1. Transisi bawaan untuk elemen interaktif.
  *    Durasi 150ms dengan easing standar — cukup terasa, tidak memperlambat.

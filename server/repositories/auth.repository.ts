@@ -179,6 +179,99 @@ export class AuthRepository {
       connection.release();
     }
   }
+
+  async recordSessionLogin(sessionData: {
+    id: string;
+    userId: string;
+    ipAddress?: string | null;
+    userAgent?: string | null;
+    browser?: string | null;
+    os?: string | null;
+    device?: string | null;
+    city?: string | null;
+    country?: string | null;
+    location?: string | null;
+    token?: string | null;
+  }): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      const safeId = String(sessionData.id).slice(0, 250);
+      const safeUserId = String(sessionData.userId).slice(0, 250);
+      const safeIpAddress = sessionData.ipAddress
+        ? String(sessionData.ipAddress).slice(0, 250)
+        : null;
+      const safeUserAgent = sessionData.userAgent ? String(sessionData.userAgent) : null;
+      const safeBrowser = sessionData.browser ? String(sessionData.browser) : null;
+      const safeOs = sessionData.os ? String(sessionData.os) : null;
+      const safeDevice = sessionData.device ? String(sessionData.device) : null;
+      const safeCity = sessionData.city ? String(sessionData.city).slice(0, 250) : null;
+      const safeCountry = sessionData.country ? String(sessionData.country).slice(0, 250) : null;
+      const safeLocation = sessionData.location ? String(sessionData.location) : null;
+      const safeToken = sessionData.token ? String(sessionData.token) : null;
+
+      // Tandai sesi aktif sebelumnya sebagai FORCE_LOGOUT jika ada
+      await connection.query(
+        `UPDATE "UserSessions" 
+         SET status = 'FORCE_LOGOUT', "logoutAt" = NOW(), "updatedAt" = NOW() 
+         WHERE "userId" = ? AND status = 'ACTIVE'`,
+        [safeUserId]
+      );
+
+      await connection.query(
+        `INSERT INTO "UserSessions" 
+         (id, "userId", "ipAddress", "userAgent", browser, os, device, city, country, location, "loginAt", "lastActiveAt", status, token, "createdAt", "updatedAt")
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), 'ACTIVE', ?, NOW(), NOW())`,
+        [
+          safeId,
+          safeUserId,
+          safeIpAddress,
+          safeUserAgent,
+          safeBrowser,
+          safeOs,
+          safeDevice,
+          safeCity,
+          safeCountry,
+          safeLocation,
+          safeToken,
+        ]
+      );
+    } catch (e) {
+      console.error("Gagal mencatat UserSession login:", e);
+    } finally {
+      connection.release();
+    }
+  }
+
+  async recordSessionLogout(userId: string, token?: string | null): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      let updated = false;
+      if (token) {
+        const [res]: any = await connection.query(
+          `UPDATE "UserSessions" 
+           SET status = 'LOGGED_OUT', "logoutAt" = NOW(), "updatedAt" = NOW() 
+           WHERE "userId" = ? AND token = ?`,
+          [userId, token]
+        );
+        if (res?.affectedRows > 0 || res?.rowCount > 0) {
+          updated = true;
+        }
+      }
+
+      if (!updated) {
+        await connection.query(
+          `UPDATE "UserSessions" 
+           SET status = 'LOGGED_OUT', "logoutAt" = NOW(), "updatedAt" = NOW() 
+           WHERE "userId" = ? AND status = 'ACTIVE'`,
+          [userId]
+        );
+      }
+    } catch (e) {
+      console.error("Gagal mencatat UserSession logout:", e);
+    } finally {
+      connection.release();
+    }
+  }
 }
 
 export const authRepository = new AuthRepository();

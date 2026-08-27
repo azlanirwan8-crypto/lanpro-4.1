@@ -216,7 +216,7 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
         di tepi dan sebagian terpotong, sebab pemusatan tidak menyisakan ruang
         napas dengan sendirinya.
       */}
-      <div className="relative z-30 flex flex-1 items-center justify-center px-4 py-16 sm:px-6">
+      <div className="relative z-30 flex flex-1 items-center justify-center px-4 py-4 sm:py-6 overflow-y-auto max-h-screen my-auto">
         {children}
       </div>
 

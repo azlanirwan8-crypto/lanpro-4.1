@@ -1157,13 +1157,18 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
     <div className="flex-1 flex flex-col min-h-0 bg-surface-muted p-4 md:p-5 gap-4 text-left">
       {/* Timeline Controls Header */}
       <div className="bg-surface px-5 py-3.5 rounded-md border border-border-subtle/80 shadow-2xs flex items-center justify-between shrink-0">
-        <div>
-          <h2 className="text-base font-semibold text-content-strong tracking-tight">
-            {t("roadmap.title")}
-          </h2>
-          <p className="text-xs font-medium text-content-muted mt-0.5">{t("roadmap.subtitle")}</p>
-        </div>
         <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 flex items-center justify-center shrink-0 shadow-xs">
+            <Zap className="w-5 h-5 text-indigo-600" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-content-strong tracking-tight">
+              {t("roadmap.title")}
+            </h2>
+            <p className="text-xs font-medium text-content-muted mt-0.5">{t("roadmap.subtitle")}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
           {/* Quick Action Navigation Buttons */}
           <div className="flex items-center gap-1.5 bg-surface-sunken/80 p-1 rounded-md border border-border-subtle/80">
             <button
@@ -1215,7 +1220,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 }}
                 className={`px-3 py-1 text-xs uppercase tracking-wider rounded-md transition-all cursor-pointer ${
                   timelineZoom === z
-                    ? "bg-primary-surface/10 text-primary font-semibold shadow-2xs border border-primary/20"
+                    ? "bg-indigo-600 text-content-inverse font-semibold shadow-2xs"
                     : "text-content-muted hover:text-content-strong hover:bg-surface-sunken font-medium"
                 }`}
               >
@@ -1237,10 +1242,10 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             <button
               onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
               onBlur={() => setTimeout(() => setIsExportMenuOpen(false), 200)}
-              className="h-8 px-3.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+              className="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-lg text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>{t("roadmap.exportAs")}</span> <ChevronDown className="w-3 h-3" />
+              <span>{t("roadmap.exportAs")}</span> <ChevronDown className="w-3.5 h-3.5" />
             </button>
             {isExportMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-surface rounded-md shadow-md border border-border-subtle/80 py-1.5 z-50">
@@ -1281,7 +1286,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               onScroll={handleTimelineVerticalScroll}
             >
               <AnimatePresence initial={false}>
-                {renderedRows.map(({ task, isChild, depth, isLastChild }) => {
+                {renderedRows.map(({ task, isChild, depth, isLastChild }, rowIdx) => {
                   const hasChildren = tasks.some((t) => t.parentId === task.id);
                   const expanded = expandedEpics[task.id] !== false;
                   const isEpic = (task.type || "").toLowerCase() === "epic";
@@ -1294,12 +1299,11 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
                       className={cn(
-                        "h-14 flex items-center gap-2 border-b border-border-faint bg-surface transition-colors relative z-10 overflow-hidden",
-                        isChild
-                          ? "bg-surface-sunken/40 hover:bg-surface-sunken/80 pr-3"
-                          : isEpic
-                            ? "bg-purple-500/10 hover:bg-purple-500/10 px-3"
-                            : "hover:bg-surface-sunken px-3"
+                        "h-14 flex items-center gap-2 border-b border-border-faint transition-colors relative z-10 overflow-hidden",
+                        rowIdx % 2 === 1
+                          ? "bg-surface-sunken/40 hover:bg-surface-sunken/80"
+                          : "bg-surface hover:bg-surface-sunken/40",
+                        isChild ? "pr-3" : "px-3"
                       )}
                       style={{
                         ...(isChild ? { paddingLeft: `${14 + depth * 20}px` } : {}),
@@ -1377,23 +1381,23 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         >
                           {task.title}
                         </span>
-                        <div className="flex items-center gap-1.5 mt-0.5">
+                        <div className="flex items-center gap-1 mt-0.5">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedTaskForDetail(task);
                               setIsTaskDetailModalOpen(true);
                             }}
-                            className="text-[10px] leading-none sm:text-[9px] font-semibold text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/30 rounded-md px-1 py-0.2 tracking-tight text-left uppercase transition-colors"
+                            className="text-[9px] leading-none font-semibold text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/30 rounded px-1 py-0.5 tracking-tight text-left uppercase transition-colors shrink-0"
                           >
                             {task.key}
                           </button>
-                          <span className="text-xs sm:text-[10px] sm:text-[7px] text-content-subtle">
+                          <span className="text-[9px] text-content-subtle font-bold px-0.5 shrink-0">
                             •
                           </span>
                           <span
                             className={cn(
-                              "text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider",
+                              "text-[10px] font-semibold uppercase tracking-tight shrink-0",
                               task.status === "Done"
                                 ? "text-emerald-600"
                                 : task.status === "In Progress"
@@ -1726,7 +1730,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
                           {/* Drag and Move Row Area */}
                           <div
-                            className="flex-1 h-full px-4 flex items-center min-w-0 cursor-grab active:cursor-grabbing overflow-hidden"
+                            className="flex-1 h-full px-3 flex items-center justify-between min-w-0 cursor-grab active:cursor-grabbing overflow-hidden"
                             onMouseDown={(e) => {
                               // Only trigger move if clicked outside the resize handles
                               const rect = e.currentTarget.getBoundingClientRect();
@@ -1745,12 +1749,15 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           >
                             <span
                               className={cn(
-                                "text-xs sm:text-[10.5px] font-medium truncate tracking-tight select-none pr-1",
+                                "text-xs sm:text-[10.5px] font-semibold truncate tracking-tight select-none pr-1",
                                 getStatusColors(task.status, isEpic).text
                               )}
                             >
                               {task.title}
                             </span>
+                            <div className="w-5 h-5 rounded-full bg-indigo-600/90 text-content-inverse font-bold text-[9px] flex items-center justify-center shrink-0 ml-1.5 shadow-xs uppercase">
+                              {task.assigneeId ? task.assigneeId.slice(0, 2) : "AL"}
+                            </div>
                           </div>
 
                           {/* Visually Rich Right Resize Handle */}

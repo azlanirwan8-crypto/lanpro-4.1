@@ -12,7 +12,7 @@ export async function runMigrations(pool: Pool): Promise<void> {
   console.log("🚀 [PG-MIGRATE] Memulai migrasi schema ke Neon PostgreSQL...");
 
   try {
-    await client.query("BEGIN");
+    // Non-transactional DDL execution to prevent table locking on startup
 
     // ── Users ───────────────────────────────────────────────────────────────
     await client.query(`
@@ -672,6 +672,61 @@ export async function runMigrations(pool: Pool): Promise<void> {
       END $$;
     `);
 
+    // ── UserSessions (Item #212 — Monitoring Sesi & Aktivitas Pengguna) ──────
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "UserSessions" (
+        id            VARCHAR(255) PRIMARY KEY,
+        "userId"      VARCHAR(255) NOT NULL,
+        "ipAddress"   VARCHAR(255),
+        "userAgent"   TEXT,
+        browser       TEXT,
+        os            TEXT,
+        device        TEXT,
+        city          VARCHAR(255),
+        country       VARCHAR(255),
+        location      TEXT,
+        "loginAt"     TIMESTAMP DEFAULT NOW(),
+        "logoutAt"    TIMESTAMP,
+        "lastActiveAt" TIMESTAMP DEFAULT NOW(),
+        status        VARCHAR(50) DEFAULT 'ACTIVE',
+        token         TEXT,
+        "createdAt"   TIMESTAMP DEFAULT NOW(),
+        "updatedAt"   TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS "UserSessions_userId_idx" ON "UserSessions" ("userId");
+      CREATE INDEX IF NOT EXISTS "UserSessions_loginAt_idx" ON "UserSessions" ("loginAt" DESC);
+    `);
+
+    await client.query(`
+      ALTER TABLE "UserSessions" ALTER COLUMN id TYPE VARCHAR(255);
+      ALTER TABLE "UserSessions" ALTER COLUMN "userId" TYPE VARCHAR(255);
+      ALTER TABLE "UserSessions" ALTER COLUMN "ipAddress" TYPE VARCHAR(255);
+      ALTER TABLE "UserSessions" ALTER COLUMN browser TYPE TEXT;
+      ALTER TABLE "UserSessions" ALTER COLUMN os TYPE TEXT;
+      ALTER TABLE "UserSessions" ALTER COLUMN device TYPE TEXT;
+      ALTER TABLE "UserSessions" ALTER COLUMN city TYPE VARCHAR(255);
+      ALTER TABLE "UserSessions" ALTER COLUMN country TYPE VARCHAR(255);
+      ALTER TABLE "UserSessions" ALTER COLUMN location TYPE TEXT;
+    `);
+
+    await client.query(`
+      DELETE FROM "UserSessions" us
+      WHERE NOT EXISTS (SELECT 1 FROM "Users" u WHERE u.id = us."userId");
+    `);
+
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'UserSessions_userId_fkey'
+        ) THEN
+          ALTER TABLE "UserSessions"
+            ADD CONSTRAINT "UserSessions_userId_fkey"
+            FOREIGN KEY ("userId") REFERENCES "Users" (id) ON DELETE CASCADE;
+        END IF;
+      END $$;
+    `);
+
     // ── TokenBlacklist ────────────────────────────────────────────────────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS "TokenBlacklist" (
@@ -835,6 +890,10 @@ export async function runMigrations(pool: Pool): Promise<void> {
       `CREATE INDEX IF NOT EXISTS idx_messages_receiver ON "Messages" ("receiverId")`,
       `CREATE INDEX IF NOT EXISTS idx_token_blacklist ON "TokenBlacklist" (token)`,
       `CREATE INDEX IF NOT EXISTS idx_token_expiry ON "TokenBlacklist" ("expiresAt")`,
+      `CREATE INDEX IF NOT EXISTS idx_usersessions_userid ON "UserSessions" ("userId")`,
+      `CREATE INDEX IF NOT EXISTS idx_usersessions_loginat ON "UserSessions" ("loginAt" DESC)`,
+      `CREATE INDEX IF NOT EXISTS idx_auditlogs_userid_createdat ON "AuditLogs" ("userId", "createdAt" DESC)`,
+      `CREATE INDEX IF NOT EXISTS idx_activitylogs_userid_createdat ON "ActivityLogs" ("userId", "createdAt" DESC)`,
     ];
     for (const idx of indexes) {
       try {
@@ -842,10 +901,8 @@ export async function runMigrations(pool: Pool): Promise<void> {
       } catch {}
     }
 
-    await client.query("COMMIT");
     console.log("✅ [PG-MIGRATE] Semua tabel berhasil dibuat/diverifikasi di Neon PostgreSQL!");
   } catch (err: any) {
-    await client.query("ROLLBACK");
     console.error("❌ [PG-MIGRATE] Migrasi gagal:", err.message);
     throw err;
   } finally {

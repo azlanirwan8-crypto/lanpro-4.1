@@ -12,6 +12,7 @@
  * serverless yang menjalankan banyak instance.
  */
 import express from "express";
+import { UAParser } from "ua-parser-js";
 import { generateToken } from "../middleware/auth";
 import {
   providerTersedia,
@@ -106,13 +107,11 @@ router.get("/api/auth/oidc/:provider/start", async (req: any, res) => {
   try {
     const provider = req.params.provider as ProviderOidc;
     if (provider !== "google" && provider !== "microsoft") {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          code: "srv.provider_tidak_dikenal",
-          message: "Provider tidak dikenal.",
-        });
+      return res.status(400).json({
+        status: "error",
+        code: "srv.provider_tidak_dikenal",
+        message: "Provider tidak dikenal.",
+      });
     }
     const mode = req.query.mode === "daftar" ? "daftar" : "login";
 
@@ -180,9 +179,25 @@ router.get("/api/auth/oidc/callback", async (req: any, res) => {
     // membalas 401 untuk setiap permintaan berikutnya — dan gagalnya senyap,
     // karena callback ini sendiri sukses. Lihat daftarkanSesi().
     const userId = keputusan.user.id || keputusan.user.uid;
+
+    const parser = new UAParser(req.headers["user-agent"] as string);
+    const browserInfo = parser.getBrowser();
+    const osInfo = parser.getOS();
+    const deviceInfo = parser.getDevice();
+
+    const browser = `${browserInfo.name || "Chrome"} ${browserInfo.version || ""}`.trim();
+    const os = `${osInfo.name || "Windows"} ${osInfo.version || ""}`.trim();
+    let device = os;
+    if (deviceInfo.vendor || deviceInfo.model) {
+      device += ` (${deviceInfo.vendor || ""} ${deviceInfo.model || ""})`.trim();
+    }
+
     await daftarkanSesi(String(userId), token, {
-      ip: String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "SSO"),
-      browser: String(req.headers["user-agent"] || "SSO").slice(0, 120),
+      ip: String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "127.0.0.1"),
+      browser,
+      os,
+      device,
+      userAgent: String(req.headers["user-agent"] || ""),
     });
 
     return res.redirect(`${urlFrontend(req)}/?sso_token=${encodeURIComponent(token)}`);
@@ -223,13 +238,11 @@ router.post("/api/auth/oidc/lengkapi-pendaftaran", async (req: any, res) => {
     });
   } catch (err: any) {
     console.error("[OIDC] Lengkapi pendaftaran gagal:", err.message);
-    return res
-      .status(400)
-      .json({
-        status: "error",
-        code: "srv.sesi_pendaftaran_tidak_sah",
-        message: "Sesi pendaftaran tidak sah.",
-      });
+    return res.status(400).json({
+      status: "error",
+      code: "srv.sesi_pendaftaran_tidak_sah",
+      message: "Sesi pendaftaran tidak sah.",
+    });
   }
 });
 

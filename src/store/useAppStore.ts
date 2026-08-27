@@ -34,6 +34,7 @@ export type AppView =
   | "activity"
   | "sprints"
   | "users"
+  | "userSessions"
   | "meetingNotes"
   | "backup"
   | "planning"

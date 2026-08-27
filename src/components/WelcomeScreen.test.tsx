@@ -116,7 +116,7 @@ describe("#160 penandaan butuhProyek selaras dengan penjaga AppContainer", () =>
    * `selectedProject ?`, jadi keduanya tetap tampil tanpa proyek. Selebihnya
    * jatuh ke penjaga itu dan pasti memulangkan layar kosong.
    */
-  const BEBAS = new Set(["users", "master"]);
+  const BEBAS = new Set(["users", "userSessions", "master"]);
 
   it("hanya menu yang benar-benar bisa tampil tanpa proyek yang dibiarkan bebas", () => {
     for (const seksi of sidebarSections) {

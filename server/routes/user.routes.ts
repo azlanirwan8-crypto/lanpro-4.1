@@ -340,7 +340,7 @@ router.post(
       if (!isAdmin && String(id) !== String(currentUserId)) {
         return res.status(403).json({
           status: "error",
-          code: "srv.akses_ditolak_anda_hanya_5",
+          code: "srv.akses_ditolak_anda_hanya_cover_sendiri",
           message: "Akses ditolak: Anda hanya dapat memperbarui cover Anda sendiri.",
         });
       }

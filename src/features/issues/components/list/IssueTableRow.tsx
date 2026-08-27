@@ -335,7 +335,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
 
                     {task.type !== "epic" && (
                       <span
-                        className="text-xs sm:text-[11px] font-mono font-medium text-content-subtle bg-surface-sunken px-1.5 py-0.5 rounded border border-border-subtle select-all shrink-0 uppercase tracking-tighter"
+                        className="text-[10px] font-bold text-indigo-600 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded select-all shrink-0 uppercase tracking-tighter ml-1"
                         title={task.key}
                       >
                         {task.key}

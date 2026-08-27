@@ -113,19 +113,19 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.25 }}
-      className="w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-border-faint/90 p-8 sm:p-10 relative z-10 font-sans mx-auto"
+      className="w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-border-faint/90 p-5 sm:p-6 relative z-10 font-sans mx-auto my-auto"
     >
       {/* Velzon Header */}
-      <div className="text-center space-y-1.5 mb-6">
-        <h2 className="text-2xl font-bold text-content-strong tracking-tight">
+      <div className="text-center space-y-1 mb-4">
+        <h2 className="text-xl font-bold text-content-strong tracking-tight">
           {t("register.createAccount")}
         </h2>
         <p className="text-xs font-medium text-content-muted">{t("register.subtitle")}</p>
       </div>
 
-      <form className="space-y-4" onSubmit={handleRegisterSubmit}>
+      <form className="space-y-3" onSubmit={handleRegisterSubmit}>
         {/* FULL NAME INPUT */}
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
             {t("ui2.fullName")} <span className="text-rose-500">*</span>
           </label>
@@ -136,7 +136,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder={t("register.namePlaceholder")}
             className={cn(
-              "w-full px-4 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-sm font-medium text-content placeholder:text-content-subtle",
+              "w-full px-3.5 py-2 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-xs font-medium text-content placeholder:text-content-subtle",
               fieldErrors.name
                 ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -151,7 +151,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         </div>
 
         {/* EMAIL ADDRESS INPUT */}
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
             {t("ui2.emailAddress")} <span className="text-rose-500">*</span>
           </label>
@@ -161,7 +161,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             onChange={(e) => handleEmailChange(e.target.value)}
             placeholder={t("register.emailPlaceholder")}
             className={cn(
-              "w-full px-4 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-sm font-medium text-content placeholder:text-content-subtle",
+              "w-full px-3.5 py-2 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-xs font-medium text-content placeholder:text-content-subtle",
               fieldErrors.email
                 ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -176,7 +176,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         </div>
 
         {/* USERNAME INPUT */}
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
             {t("jsx.k18")} <span className="text-rose-500">*</span>{" "}
             <span className="text-xs sm:text-[11px] text-content-subtle font-normal">
@@ -190,7 +190,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             onChange={handleUsernameChange}
             placeholder={t("register.usernamePlaceholder")}
             className={cn(
-              "w-full px-4 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-sm font-medium text-content placeholder:text-content-subtle",
+              "w-full px-3.5 py-2 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-xs font-medium text-content placeholder:text-content-subtle",
               fieldErrors.username
                 ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -205,7 +205,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         </div>
 
         {/* PASSWORD INPUT & STRENGTH METER */}
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
             {t("ui2.password")} <span className="text-rose-500">*</span>
           </label>
@@ -216,7 +216,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               onChange={(e) => handlePasswordChange(e.target.value)}
               placeholder={t("register.passwordPlaceholder")}
               className={cn(
-                "w-full pl-4 pr-11 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-sm font-medium text-content placeholder:text-content-subtle",
+                "w-full pl-3.5 pr-10 py-2 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-xs font-medium text-content placeholder:text-content-subtle",
                 fieldErrors.password
                   ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
                   : "border-border-subtle focus:ring-primary/20 focus:border-primary"

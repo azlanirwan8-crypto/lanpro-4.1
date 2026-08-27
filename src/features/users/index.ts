@@ -5,4 +5,5 @@
  * ditulis di index.tsx, sehingga `import { AdminUserPanel } from './features/users'`
  * menarik ribuan baris lewat berkas yang namanya tidak menyebut apa pun.
  */
-export { AdminUserPanel } from './AdminUserPanel';
+export { AdminUserPanel } from "./AdminUserPanel";
+export { UserSessionsPanel } from "./UserSessionsPanel";
