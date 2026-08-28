@@ -1759,7 +1759,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 {tm.displayName || tm.username || tm.email}
                               </div>
                               <div className="text-xs sm:text-[10px] text-indigo-500 truncate">
-                                {tm.position || tm.role || ""}
+                                {getPosName(tm.position) || tm.role || ""}
                               </div>
                             </div>
                           </div>
