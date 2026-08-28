@@ -422,15 +422,77 @@ async function startServer() {
   });
 
 
-  // Attach io to req for routes to use
+  /**
+   * Penjaga otentikasi global — item #234.
+   *
+   * KENAPA DIUBAH. Versi sebelumnya menentukan rute publik lewat pencocokan
+   * AWALAN: `['/api/auth', '/api/health-check'].some(r => req.url.startsWith(r))`.
+   * Bentuk itu punya dua konsekuensi yang tidak terlihat oleh orang yang
+   * menulis rute baru, dan tidak ada gerbang yang memperingatkannya:
+   *
+   *   (a) apa pun DI BAWAH `/api/auth` otomatis publik. Menambah endpoint auth
+   *       baru yang seharusnya menuntut sesi akan diam-diam terbuka.
+   *   (b) apa pun DI LUAR `/api/` tidak pernah sampai ke sini sama sekali.
+   *       Persis celah yang dilewati #233: rute `/analyze-video` didaftarkan
+   *       sebagai alias telanjang dan melewati penjaga ini sepenuhnya.
+   *
+   * Daftar di bawah karena itu EKSAK, bukan awalan. Rute publik harus
+   * disebutkan namanya satu per satu; apa pun yang tidak tersebut dijaga.
+   * Bedanya bukan gaya: dengan daftar eksak, menambah rute baru yang lupa
+   * didaftarkan berarti rute itu DIJAGA — gagal ke arah yang aman. Dengan
+   * pencocokan awalan, rute baru yang lupa dipikirkan menjadi PUBLIK.
+   *
+   * Pencocokan eksak juga menutup penyusunan jalur yang menyesatkan seperti
+   * `/api/auth/login/../../users`: string semacam itu tidak sama dengan
+   * anggota mana pun di daftar, jadi ia dijaga. Pencocokan awalan akan
+   * meloloskannya.
+   *
+   * KENAPA `/api/` MASIH JADI SYARAT MASUK. Segala yang bukan `/api/` di sini
+   * adalah halaman SPA dan aset statis — memaksanya lewat `authenticateJWT`
+   * membuat aplikasinya tidak pernah bisa dimuat. Konsekuensi (b) karena itu
+   * TIDAK bisa ditutup di runtime tanpa merusak penyajian aset; ia ditutup di
+   * gerbang uji `server/routes/rute-di-luar-api.test.ts`, yang membaca
+   * pendaftaran rutenya dan melarang rute API lahir di luar `/api/`.
+   *
+   * ISI DAFTAR INI DIUKUR, BUKAN DITEBAK. Kedua belas rute `/api/auth` yang
+   * dulu publik karena awalan diperiksa satu per satu: `verify` dan `refresh`
+   * ternyata memasang `authenticateJWT` sendiri di dalam rutenya sehingga
+   * SENGAJA tidak didaftarkan di sini (dijaga penjaga global, lalu dijaga
+   * ulang oleh dirinya sendiri — berlapis, dan tidak merugikan); `force-logout`
+   * menuntut username+password lewat `handleUserAuthentication` dan dibatasi
+   * `loginLimiter`, jadi ia pintu login kedua yang memang publik (#52).
+   */
+  const RUTE_PUBLIK = new Set([
+    "/api/health-check",
+    "/api/auth/login",
+    "/api/auth/register",
+    "/api/auth/logout",
+    "/api/auth/force-logout",
+    "/api/auth/forgot-password",
+    "/api/auth/reset-password",
+    "/api/auth/oidc/providers",
+    "/api/auth/oidc/callback",
+    "/api/auth/oidc/lengkapi-pendaftaran",
+  ]);
+
+  /**
+   * Satu-satunya rute publik yang jalurnya berparameter, jadi tidak bisa
+   * ditulis eksak: `/api/auth/oidc/:provider/start`. Polanya sengaja dikunci
+   * pada SATU segmen (`[^/]+`) supaya tidak ikut memayungi jalur yang lebih
+   * dalam.
+   */
+  const POLA_PUBLIK = [/^\/api\/auth\/oidc\/[^/]+\/start$/];
+
   app.use((req, res, next) => {
-    if (req.method !== 'OPTIONS' && req.url.startsWith('/api/')) {
-        const publicRoutes = ['/api/auth', '/api/health-check'];
-        if (!publicRoutes.some(route => req.url.startsWith(route))) {
-           return authenticateJWT(req, res, next);
-        }
-    }
-    next(); 
+    if (req.method === "OPTIONS" || !req.url.startsWith("/api/")) return next();
+
+    // Query string dibuang sebelum dicocokkan: rute publik nyata dipanggil
+    // dengan query (`/api/auth/oidc/google/start?mode=login`), dan
+    // membandingkan URL mentah akan menjaganya lalu memutus login SSO.
+    const jalur = req.url.split("?")[0].replace(/\/+$/, "") || "/";
+
+    if (RUTE_PUBLIK.has(jalur) || POLA_PUBLIK.some((p) => p.test(jalur))) return next();
+    return authenticateJWT(req, res, next);
   });
 
   app.use((req: any, res, next) => {
