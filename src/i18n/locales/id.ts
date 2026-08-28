@@ -2613,7 +2613,7 @@ export const id = {
     createNewProject: "Buat Proyek Baru",
   },
   completeReg: {
-    usernameHint: "(Huruf saja, maks 10)",
+    usernameHint: "(Huruf saja, maks 25)",
     regSuccess: "Pendaftaran Berhasil",
     backToLogin: "Kembali ke Halaman Masuk",
     completeReg: "Lengkapi Pendaftaran",

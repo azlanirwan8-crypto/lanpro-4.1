@@ -190,7 +190,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                   setIsAddCaseOpen(true);
                   setActiveAddTab("single");
                 }}
-                className="px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+                className="btn-animation waves-effect waves-light btn-primary h-8 px-3 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t("qa.addTask")}</span>

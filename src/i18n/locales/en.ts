@@ -2600,7 +2600,7 @@ export const en = {
     createNewProject: "Create New Project",
   },
   completeReg: {
-    usernameHint: "(Letters only, max 10)",
+    usernameHint: "(Letters only, max 25)",
     regSuccess: "Registration Successful",
     backToLogin: "Back to Sign In Page",
     completeReg: "Complete Registration",

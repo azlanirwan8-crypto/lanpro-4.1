@@ -13,19 +13,19 @@ describe("usulkanUsername", () => {
   });
 
   it("membuang titik dan angka — aturan huruf-saja tidak dilonggarkan", () => {
-    expect(usulkanUsername("budi.santoso@perusahaan.com")).toBe("budisantos");
+    expect(usulkanUsername("budi.santoso@perusahaan.com")).toBe("budisantoso");
     expect(usulkanUsername("azlanirwan9@gmail.com")).toBe("azlanirwan");
-    expect(usulkanUsername("budi_santoso-01@x.com")).toBe("budisantos");
+    expect(usulkanUsername("budi_santoso-01@x.com")).toBe("budisantoso");
   });
 
-  it("memotong pada 10 karakter", () => {
-    const hasil = usulkanUsername("abcdefghijklmnop@x.com");
-    expect(hasil).toBe("abcdefghij");
-    expect(hasil.length).toBe(10);
+  it("memotong pada 25 karakter", () => {
+    const hasil = usulkanUsername("abcdefghijklmnopqrstuvwxyz123@x.com");
+    expect(hasil).toBe("abcdefghijklmnopqrstuvwxy");
+    expect(hasil.length).toBe(25);
   });
 
   it("menormalkan ke huruf kecil", () => {
-    expect(usulkanUsername("Budi.Santoso@Perusahaan.COM")).toBe("budisantos");
+    expect(usulkanUsername("Budi.Santoso@Perusahaan.COM")).toBe("budisantoso");
   });
 
   it("mengembalikan kosong bila hasilnya kurang dari 3 huruf", () => {
@@ -41,18 +41,18 @@ describe("usulkanUsername", () => {
     expect(usulkanUsername("@perusahaan.com")).toBe("");
   });
 
-  it("hasilnya SELALU lolos aturan username lama", () => {
+  it("hasilnya SELALU lolos aturan username (max 25)", () => {
     const contoh = [
       "budi.santoso@perusahaan.com",
       "azlanirwan9@gmail.com",
-      "ABCDEFGHIJKLMNOP@x.co.id",
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ@x.co.id",
       "n.a.m.a.p.a.n.j.a.n.g@x.com",
     ];
     for (const email of contoh) {
       const hasil = usulkanUsername(email);
       if (hasil === "") continue;
       expect(hasil).toMatch(/^[a-z]+$/);
-      expect(hasil.length).toBeLessThanOrEqual(10);
+      expect(hasil.length).toBeLessThanOrEqual(25);
     }
   });
 });

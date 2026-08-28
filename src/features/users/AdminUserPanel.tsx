@@ -554,16 +554,16 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 </div>
                 <button
                   onClick={handleExportCSV}
-                  className="bg-surface-sunken hover:bg-surface-muted text-content-body border border-border-subtle hover:border-border-subtle font-medium py-1.5 px-3 rounded text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98] shadow-2xs h-8.5"
+                  className="btn-animation waves-effect waves-light bg-surface border border-border-subtle text-content-strong hover:bg-surface-sunken h-9 px-3.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   <Download className="w-3.5 h-3.5 text-content-muted" /> {t("users.exportCsv")}
                 </button>
-                <Button
+                <button
                   onClick={() => setIsInviteModalOpen(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium py-1.5 px-3 rounded text-xs flex items-center gap-1.5 cursor-pointer transition-all active:scale-[0.98] shadow-soft h-8.5"
+                  className="btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
                 >
                   <UserPlus className="w-3.5 h-3.5" /> {t("users.addUser")}
-                </Button>
+                </button>
               </div>
             </div>
           </div>

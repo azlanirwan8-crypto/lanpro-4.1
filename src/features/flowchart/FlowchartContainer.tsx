@@ -2520,7 +2520,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 <p className="text-xs text-content-muted font-medium">{t("jsx.j64")}</p>
                 <button
                   onClick={openCreateModal}
-                  className="mt-4 flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-content-inverse font-medium p-2.5 px-5 rounded-xl text-xs shadow-md transition-all active:scale-95"
+                  className="mt-4 btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-xs"
                 >
                   <Plus className="w-4 h-4" /> {t("flowchart.uploadNewDocument")}
                 </button>
@@ -3892,17 +3892,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           </div>
         </div>
       )}
-
-      <ConfirmationModal
-        isOpen={confirmModal.isOpen}
-        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
-        title={confirmModal.title}
-        message={confirmModal.message}
-        onConfirm={confirmModal.onConfirm}
-        confirmText={t("ui2.yesDelete")}
-        cancelText={t("ui2.cancel")}
-        variant="danger"
-      />
     </div>
   );
 };

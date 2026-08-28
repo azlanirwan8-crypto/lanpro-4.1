@@ -82,42 +82,48 @@ export const Button = ({
   className = "",
   disabled = false,
   size = "md",
+  dataText,
+  ...props
 }: any) => {
-  /* Warna diambil dari token merek, bukan palet Tailwind bawaan. Versi
-   * sebelumnya memakai bg-blue-600 dan gray-*, sehingga tombol "bersama" ini
-   * justru satu-satunya tempat di aplikasi yang TIDAK memakai warna merek.
-   *
-   * Tinggi minimum 44px pada ukuran md dan lg memenuhi WCAG 2.5.5; ukuran sm
-   * disediakan untuk toolbar padat di desktop dan sengaja tidak dipaksa 44px,
-   * tetapi tetap diberi min-h-9 agar tidak sekecil sebelumnya. */
   const base =
-    "rounded-lg font-medium transition-all inline-flex items-center justify-center gap-2 " +
+    "btn-animation waves-effect waves-light rounded-lg font-semibold transition-all inline-flex items-center justify-center gap-2 " +
     "disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none " +
-    "focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-1 active:scale-[0.98]";
+    "focus-visible:ring-2 focus-visible:ring-indigo-500/20 active:scale-[0.98] cursor-pointer shadow-xs";
+
   const sizes: any = {
-    sm: "px-3 py-2 min-h-9 text-xs",
-    md: "px-4 py-2.5 min-h-11 text-sm",
-    lg: "px-6 py-3 min-h-12 text-base",
+    sm: "px-3 py-1.5 h-8 text-xs",
+    md: "px-4 py-2 h-9 text-xs sm:text-[13px]",
+    lg: "px-5 py-2.5 h-11 text-sm",
   };
+
   const variants: any = {
-    primary:
-      "bg-primary-surface text-content-inverse hover:bg-primary-surface-hover active:bg-primary-active shadow-soft",
-    secondary:
-      "bg-surface-muted text-content-body hover:bg-border-subtle border border-border-subtle",
-    danger: "bg-danger-surface text-content-inverse hover:opacity-90 shadow-soft",
-    ghost: "text-content-secondary hover:bg-surface-muted",
+    primary: "btn-primary",
+    secondary: "btn-secondary",
+    success: "btn-success",
+    info: "btn-info",
+    warning: "btn-warning",
+    danger: "btn-danger",
+    ["dark"]: "btn-dark",
+    ghost:
+      "bg-transparent text-content-secondary hover:bg-surface-sunken border border-transparent",
+    outline: "bg-surface text-content-strong hover:bg-surface-sunken border border-border-subtle",
   };
+
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
+      data-text={dataText}
+      className={`${base} ${variants[variant] || variants.primary} ${sizes[size]} ${className}`}
       disabled={disabled}
+      {...props}
     >
-      {children}
+      <span>{children}</span>
     </button>
   );
 };
+
+export const VelzonButton = Button;
 
 export const Input = ({
   value,

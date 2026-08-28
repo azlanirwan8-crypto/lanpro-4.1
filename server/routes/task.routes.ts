@@ -365,6 +365,15 @@ router.put(
           (dbUsername && parentReporterId === dbUsername)
         : false;
 
+      const isAssignee = oldTask.assigneeId
+        ? oldTask.assigneeId === userId ||
+          oldTask.assigneeId === (req as any).user?.uid ||
+          oldTask.assigneeId === (req as any).user?.username ||
+          (dbUserId && oldTask.assigneeId === dbUserId) ||
+          (dbUserUid && oldTask.assigneeId === dbUserUid) ||
+          (dbUsername && oldTask.assigneeId === dbUsername)
+        : false;
+
       const isWorkspaceAdmin = (userRole || "").toLowerCase() === "admin";
       const isAdmin = isWorkspaceAdmin;
 
@@ -387,13 +396,13 @@ router.put(
           });
         }
       } else {
-        const isAuthorizedGeneral = isDirectReporter || isAdmin;
+        const isAuthorizedGeneral = isDirectReporter || isParentReporter || isAssignee || isAdmin;
         if (!isAuthorizedGeneral) {
           return res.status(403).json({
             status: "error",
             code: "srv.hanya_reporter_pembuat_task",
             message:
-              "Hanya Reporter pembuat task ini atau Admin/Manager yang diizinkan melakukan perubahan/penghapusan",
+              "Hanya Reporter pembuat task ini, Assignee, atau Admin/Manager yang diizinkan melakukan perubahan",
           });
         }
       }

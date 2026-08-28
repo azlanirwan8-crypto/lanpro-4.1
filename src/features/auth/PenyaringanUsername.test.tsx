@@ -54,13 +54,13 @@ describe("#168 kolom username tidak menghapus ketikan diam-diam", () => {
     await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
   });
 
-  it("nilai lebih dari 10 huruf tetap terlihat dan ditandai salah", async () => {
+  it("nilai lebih dari 25 huruf tetap terlihat dan ditandai salah", async () => {
     render(<CompleteRegistrationScreen {...props} />);
 
     const kolom = screen.getByLabelText(/Nama Pengguna/) as HTMLInputElement;
-    fireEvent.change(kolom, { target: { value: "azlanirwanpanjang" } });
+    fireEvent.change(kolom, { target: { value: "azlanirwanpanjangsekaliterlalu" } });
 
-    expect(kolom.value).toBe("azlanirwanpanjang");
+    expect(kolom.value).toBe("azlanirwanpanjangsekaliterlalu");
     expect(kolom).toHaveAttribute("aria-invalid", "true");
   });
 

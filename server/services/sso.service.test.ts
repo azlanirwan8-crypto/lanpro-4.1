@@ -347,16 +347,16 @@ describe("putuskanKebijakan — identitas yatim", () => {
   });
 });
 
-describe("usernameSah — aturan lama TIDAK berubah", () => {
-  it("menerima huruf saja maksimal 10 karakter", () => {
+describe("usernameSah — aturan dilonggarkan ke max 25 (#214)", () => {
+  it("menerima huruf saja maksimal 25 karakter", () => {
     expect(usernameSah("budi")).toBe(true);
-    expect(usernameSah("abcdefghij")).toBe(true);
+    expect(usernameSah("abcdefghijklmnopqrstuvwxy")).toBe(true);
   });
 
-  it("menolak angka, simbol, dan lebih dari 10 karakter", () => {
+  it("menolak angka, simbol, dan lebih dari 25 karakter", () => {
     expect(usernameSah("budi123")).toBe(false);
     expect(usernameSah("budi_santoso")).toBe(false);
-    expect(usernameSah("abcdefghijk")).toBe(false);
+    expect(usernameSah("abcdefghijklmnopqrstuvwxyz")).toBe(false);
     expect(usernameSah("")).toBe(false);
     expect(usernameSah("budi@perusahaan.com")).toBe(false);
   });

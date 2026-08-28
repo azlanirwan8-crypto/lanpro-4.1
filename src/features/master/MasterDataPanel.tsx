@@ -605,7 +605,7 @@ export const MasterDataPanel = ({
                     setIsNewMasterModalOpen(true);
                   }
                 }}
-                className="h-8 px-3.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-md text-xs font-medium shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                className="btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />{" "}
                 {t("master.addType", {

@@ -105,7 +105,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
           {canCreate && (
             <button
               onClick={() => setIsAddSuiteOpen(true)}
-              className="px-2.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md shadow-2xs transition-all flex items-center gap-1 text-xs font-medium cursor-pointer shrink-0"
+              className="btn-animation waves-effect waves-light btn-primary h-8 px-3 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer shrink-0"
               title={t("qaSuite.addModule")}
             >
               <Plus className="w-3.5 h-3.5" />

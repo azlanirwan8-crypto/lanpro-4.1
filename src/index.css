@@ -561,3 +561,71 @@ html.dark .shadow-soft-lg {
     animation: none;
   }
 }
+
+/* ==========================================
+ * VELZON ANIMATION BUTTONS & RIPPLE WAVES EFFECT
+ * ========================================== */
+.btn-animation {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-width: 1px;
+  @apply rounded-lg;
+}
+
+.btn-animation::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 160%;
+  height: 160%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%) scale(0);
+  border-radius: 9999px;
+  opacity: 0;
+  transition:
+    transform 0.4s ease-out,
+    opacity 0.4s ease-out;
+  pointer-events: none;
+}
+
+.btn-animation:active::after {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  transition: 0s;
+}
+
+.btn-primary {
+  background-color: #354574;
+  color: #ffffff;
+  border-color: #354574;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-primary:hover {
+  background-color: rgba(53, 69, 116, 0.15);
+  color: #60a5fa;
+  border-color: #60a5fa;
+}
+.btn-primary:active {
+  background-color: #354574;
+  color: #ffffff;
+}
+.btn-secondary {
+  @apply bg-blue-600 text-white border-blue-600 hover:bg-blue-500/15 hover:text-blue-400 hover:border-blue-400 active:bg-blue-600 active:text-white transition-all duration-200;
+}
+.btn-success {
+  @apply bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-500/15 hover:text-emerald-400 hover:border-emerald-400 active:bg-emerald-600 active:text-white transition-all duration-200;
+}
+.btn-info {
+  @apply bg-sky-500 text-white border-sky-500 hover:bg-sky-500/15 hover:text-sky-400 hover:border-sky-400 active:bg-sky-500 active:text-white transition-all duration-200;
+}
+.btn-warning {
+  @apply bg-amber-500 text-white border-amber-500 hover:bg-amber-500/15 hover:text-amber-400 hover:border-amber-400 active:bg-amber-500 active:text-white transition-all duration-200;
+}
+.btn-danger {
+  @apply bg-rose-600 text-white border-rose-600 hover:bg-rose-500/15 hover:text-rose-400 hover:border-rose-400 active:bg-rose-600 active:text-white transition-all duration-200;
+}
+.btn-dark {
+  @apply bg-slate-800 text-white border-slate-800 hover:bg-slate-700/30 hover:text-slate-200 hover:border-slate-400 active:bg-slate-800 active:text-white transition-all duration-200;
+}

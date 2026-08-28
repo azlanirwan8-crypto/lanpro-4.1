@@ -430,7 +430,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 {canAdd && (
                   <button
                     onClick={startAddMeeting}
-                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer shrink-0"
+                    className="btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
                   >
                     <Plus className="w-4 h-4" /> {t("meetings.addMeeting")}
                   </button>

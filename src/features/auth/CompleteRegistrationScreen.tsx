@@ -34,8 +34,8 @@ import type { CompleteRegistrationScreenProps } from "./types";
  * Akun baru dibuat SETELAH tombol ini ditekan, bukan sebelumnya. Bila pengguna
  * menutup layar sekarang, tidak ada baris setengah jadi yang tertinggal.
  */
-/** Aturan lama yang tidak berubah: hanya huruf, maksimal 10 karakter. */
-const SAH = /^[a-zA-Z]{1,10}$/;
+/** Aturan baru: hanya huruf, maksimal 25 karakter (#214). */
+const SAH = /^[a-zA-Z]{1,25}$/;
 
 const ID_KOLOM = "sso-username";
 const ID_GALAT = "sso-username-galat";

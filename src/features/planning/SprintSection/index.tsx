@@ -172,7 +172,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                               e.stopPropagation();
                               handleStartSprint(sprint.id);
                             }}
-                            className="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
+                            className="btn-animation waves-effect waves-light btn-primary h-9 px-4 text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
                           >
                             <Zap className="w-3.5 h-3.5 fill-current" />{" "}
                             <span>{t("planning.start")}</span>
@@ -184,7 +184,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                               e.stopPropagation();
                               handleCompleteSprint(sprint.id);
                             }}
-                            className="h-9 px-4 bg-emerald-600 hover:bg-emerald-700 text-content-inverse text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
+                            className="btn-animation waves-effect waves-light btn-success h-9 px-4 text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
                           >
                             <CheckCircle2 className="w-3.5 h-3.5" />{" "}
                             <span>{t("planning.complete")}</span>
@@ -200,7 +200,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                 activeSprintMenuId === sprint.id ? null : sprint.id
                               );
                             }}
-                            className="p-2.5 text-content-subtle hover:text-content-strong hover:bg-surface border border-border-subtle rounded-xl transition-colors cursor-pointer"
+                            className="btn-animation waves-effect waves-light p-2.5 text-content-subtle hover:text-content-strong hover:bg-surface border border-border-subtle rounded-lg transition-colors cursor-pointer"
                             title={t("planning.sprintOptions", "Opsi Sprint")}
                           >
                             <MoreVertical className="w-4 h-4" />

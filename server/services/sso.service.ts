@@ -191,9 +191,9 @@ export async function putuskanKebijakan(
   return { aksi: "lengkapi_pendaftaran", identitas };
 }
 
-/** Username mengikuti aturan lama yang TIDAK berubah: huruf saja, maks 10. */
+/** Username mengikuti aturan baru (#214): huruf saja, maks 25. */
 export function usernameSah(username: string): boolean {
-  return /^[a-zA-Z]+$/.test(username) && username.length <= 10;
+  return /^[a-zA-Z]+$/.test(username) && username.length <= 25;
 }
 
 export async function usernameTersedia(username: string): Promise<boolean> {
