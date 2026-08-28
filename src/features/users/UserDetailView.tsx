@@ -3350,174 +3350,163 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   </div>
                 )}
 
-                {/* List Proyek Terkait */}
-                <div className="bg-surface p-4 rounded-lg shadow-xs border border-border-subtle space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Layout className="w-4 h-4 text-indigo-600 " />
-                      <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider">
-                        Proyek Terkait ({userProjectsList.length})
-                      </h3>
+                {/* List Proyek Terkait (Hanya tampil di Tab Project mode Edit) */}
+                {activeTab === "project" && (
+                  <div className="bg-surface p-4 rounded-lg shadow-xs border border-border-subtle space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Layout className="w-4 h-4 text-indigo-600 " />
+                        <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider">
+                          Proyek Terkait ({userProjectsList.length})
+                        </h3>
+                      </div>
                     </div>
-                  </div>
 
-                  {userProjectsList.length === 0 ? (
-                    <p className="text-xs text-content-subtle italic py-6 text-center">
-                      {t("userDetail.noActiveProject")}
-                    </p>
-                  ) : (
-                    <div className="space-y-2 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
-                      {userProjectsList.map((p) => {
-                        const uId = user.id || user.uid;
+                    {userProjectsList.length === 0 ? (
+                      <p className="text-xs text-content-subtle italic py-6 text-center">
+                        {t("userDetail.noActiveProject")}
+                      </p>
+                    ) : (
+                      <div className="space-y-2 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+                        {userProjectsList.map((p) => {
+                          const uId = user.id || user.uid;
 
-                        // #82 — label diambil dari katalog Master Data, bukan
-                        // menampilkan nilai mentah dari database.
-                        //
-                        // Versi lama menampilkan `manager` apa adanya, sehingga
-                        // layar ini menyebut "MANAGER" sementara Master Data
-                        // menyebut "Project Manager" — dua nama untuk hal yang
-                        // sama, dan pemilik proyek wajar mengiranya data berbeda.
-                        //
-                        // Cadangannya pun dulu ditulis di kode ("Owner"/"Member").
-                        // Kini pemilik proyek dikenali dari katalog lewat kode
-                        // `owner`, dan bila peran tidak ada di katalog, KODE
-                        // MENTAHNYA yang ditampilkan — supaya nilai lama yang
-                        // belum dimigrasikan TERLIHAT, bukan disamarkan.
-                        const kodePeranProyek =
-                          p.memberRoles?.[uId] || (p.ownerId === uId ? "owner" : "");
-                        const roleInProject = kodePeranProyek
-                          ? labelPeran(peranProyek, kodePeranProyek)
-                          : "—";
-                        const peranDikenal = Boolean(cariPeran(peranProyek, kodePeranProyek));
-                        const projectTasks = userTasks.filter((t) => t.projectId === p.id);
-                        const style = projectStatusStyle(p.status);
+                          const kodePeranProyek =
+                            p.memberRoles?.[uId] || (p.ownerId === uId ? "owner" : "");
+                          const roleInProject = kodePeranProyek
+                            ? labelPeran(peranProyek, kodePeranProyek)
+                            : "—";
+                          const peranDikenal = Boolean(cariPeran(peranProyek, kodePeranProyek));
+                          const projectTasks = userTasks.filter((t) => t.projectId === p.id);
+                          const style = projectStatusStyle(p.status);
 
-                        const members = projectMemberAvatars(p);
-                        const isExpanded = expandedProjectTasks[p.id] !== false;
+                          const members = projectMemberAvatars(p);
+                          const isExpanded = expandedProjectTasks[p.id] !== false;
 
-                        return (
-                          <div
-                            key={p.id}
-                            className={cn(
-                              "p-3 bg-surface-sunken border border-border-subtle rounded-md space-y-2.5 border-l-4",
-                              style.border
-                            )}
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="space-y-1.5 min-w-0 flex-1">
-                                <div>
-                                  <div className="font-medium text-xs text-content-strong">
-                                    {p.name}
-                                  </div>
-                                  <div className="text-xs sm:text-[10px] font-mono text-indigo-600 uppercase mt-0.5">
-                                    {p.key}
-                                  </div>
-                                </div>
-
-                                {/* Tim yang ada di dalam proyek ini */}
-                                {members.length > 0 && (
-                                  <div className="flex items-center gap-1.5 pt-0.5">
-                                    <div className="flex items-center -space-x-1.5">
-                                      {members.slice(0, 4).map((m) => (
-                                        <UserAvatar
-                                          key={m.id || m.uid}
-                                          user={m}
-                                          className="w-5 h-5 text-[10px] ring-2 ring-surface shadow-2xs"
-                                        />
-                                      ))}
-                                      {members.length > 4 && (
-                                        <span className="w-5 h-5 rounded-full bg-surface-muted text-content-subtle text-xs sm:text-[8px] font-semibold flex items-center justify-center ring-2 ring-surface">
-                                          +{members.length - 4}
-                                        </span>
-                                      )}
+                          return (
+                            <div
+                              key={p.id}
+                              className={cn(
+                                "p-3 bg-surface-sunken border border-border-subtle rounded-md space-y-2.5 border-l-4",
+                                style.border
+                              )}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="space-y-1.5 min-w-0 flex-1">
+                                  <div>
+                                    <div className="font-medium text-xs text-content-strong">
+                                      {p.name}
                                     </div>
-                                    <span className="text-xs sm:text-[10px] text-content-muted font-medium">
-                                      {t("rakit.membersCount", { count: members.length })}
-                                    </span>
+                                    <div className="text-xs sm:text-[10px] font-mono text-indigo-600 uppercase mt-0.5">
+                                      {p.key}
+                                    </div>
                                   </div>
-                                )}
-                              </div>
 
-                              <div className="flex items-center gap-1.5 shrink-0">
-                                <span
-                                  className={cn(
-                                    "text-xs sm:text-[10px] font-medium uppercase px-2 py-0.5 rounded-md border",
-                                    peranDikenal
-                                      ? "bg-indigo-500/15 text-indigo-700 border-indigo-500/30 "
-                                      : "bg-amber-500/15 text-amber-800 border-amber-500/30 "
-                                  )}
-                                  title={
-                                    peranDikenal
-                                      ? undefined
-                                      : "Peran ini tidak ada di katalog Master Data — perlu dimigrasikan"
-                                  }
-                                >
-                                  {roleInProject}
-                                </span>
-
-                                {/* Dropdown toggle (v) untuk lihat / sembunyikan detail tugas */}
-                                {projectTasks.length > 0 && (
-                                  <button
-                                    type="button"
-                                    onClick={() => toggleProjectTasks(p.id)}
-                                    className="p-1 rounded-md text-content-muted hover:text-content-strong hover:bg-surface transition-colors cursor-pointer"
-                                    title={isExpanded ? "Sembunyikan Tugas" : "Lihat Tugas"}
-                                  >
-                                    {isExpanded ? (
-                                      <ChevronDown className="w-4 h-4 text-indigo-600" />
-                                    ) : (
-                                      <ChevronRight className="w-4 h-4 text-content-subtle" />
-                                    )}
-                                  </button>
-                                )}
-
-                                {isAdmin && pageMode === "edit" && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveFromProject(p.id)}
-                                    className="p-1 text-content-subtle hover:text-rose-500 hover:bg-rose-500/10 rounded-md transition-colors"
-                                    title={t("userDetail.removeFromProject")}
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Tasks in project (Collapsable via Dropdown icon) */}
-                            {projectTasks.length > 0 && isExpanded && (
-                              <div className="pt-2 border-t border-border-subtle/60 space-y-1.5 animate-in fade-in duration-150">
-                                <div className="flex items-center justify-between text-xs sm:text-[10px] text-content-subtle font-semibold uppercase tracking-wider">
-                                  <span>Tugas Terdelegasi ({projectTasks.length}):</span>
-                                </div>
-                                <div className="space-y-1 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-                                  {projectTasks.map((t) => (
-                                    <div
-                                      key={t.id}
-                                      className="flex items-center justify-between text-xs bg-surface p-1.5 px-2.5 rounded-md border border-border-subtle/80 shadow-2xs hover:border-indigo-500/30 transition-colors"
-                                    >
-                                      <div className="min-w-0 flex-1 pr-2">
-                                        <div className="font-medium text-content-strong truncate">
-                                          {t.title}
-                                        </div>
-                                        <div className="text-xs sm:text-[10px] font-mono text-indigo-600 uppercase">
-                                          {t.key || "TASK"}
-                                        </div>
+                                  {/* Tim yang ada di dalam proyek ini */}
+                                  {members.length > 0 && (
+                                    <div className="flex items-center gap-1.5 pt-0.5">
+                                      <div className="flex items-center -space-x-1.5">
+                                        {members.slice(0, 4).map((m) => (
+                                          <UserAvatar
+                                            key={m.id || m.uid}
+                                            user={m}
+                                            className="w-5 h-5 text-[10px] ring-2 ring-surface shadow-2xs"
+                                          />
+                                        ))}
+                                        {members.length > 4 && (
+                                          <span className="w-5 h-5 rounded-full bg-surface-muted text-content-subtle text-xs sm:text-[8px] font-semibold flex items-center justify-center ring-2 ring-surface">
+                                            +{members.length - 4}
+                                          </span>
+                                        )}
                                       </div>
-                                      <span className="text-xs sm:text-[10px] font-medium px-2 py-0.5 rounded bg-surface-muted text-content-secondary uppercase shrink-0">
-                                        {t.status || "todo"}
+                                      <span className="text-xs sm:text-[10px] text-content-muted font-medium">
+                                        {t("rakit.membersCount", { count: members.length })}
                                       </span>
                                     </div>
-                                  ))}
+                                  )}
+                                </div>
+
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <span
+                                    className={cn(
+                                      "text-xs sm:text-[10px] font-medium uppercase px-2 py-0.5 rounded-md border",
+                                      peranDikenal
+                                        ? "bg-indigo-500/15 text-indigo-700 border-indigo-500/30 "
+                                        : "bg-amber-500/15 text-amber-800 border-amber-500/30 "
+                                    )}
+                                    title={
+                                      peranDikenal
+                                        ? undefined
+                                        : "Peran ini tidak ada di katalog Master Data — perlu dimigrasikan"
+                                    }
+                                  >
+                                    {roleInProject}
+                                  </span>
+
+                                  {/* Dropdown toggle (v) untuk lihat / sembunyikan detail tugas */}
+                                  {projectTasks.length > 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleProjectTasks(p.id)}
+                                      className="p-1 rounded-md text-content-muted hover:text-content-strong hover:bg-surface transition-colors cursor-pointer"
+                                      title={isExpanded ? "Sembunyikan Tugas" : "Lihat Tugas"}
+                                    >
+                                      {isExpanded ? (
+                                        <ChevronDown className="w-4 h-4 text-indigo-600" />
+                                      ) : (
+                                        <ChevronRight className="w-4 h-4 text-content-subtle" />
+                                      )}
+                                    </button>
+                                  )}
+
+                                  {isAdmin && pageMode === "edit" && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveFromProject(p.id)}
+                                      className="p-1 text-content-subtle hover:text-rose-500 hover:bg-rose-500/10 rounded-md transition-colors"
+                                      title={t("userDetail.removeFromProject")}
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  )}
                                 </div>
                               </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+
+                              {/* Tasks in project (Collapsable via Dropdown icon) */}
+                              {projectTasks.length > 0 && isExpanded && (
+                                <div className="pt-2 border-t border-border-subtle/60 space-y-1.5 animate-in fade-in duration-150">
+                                  <div className="flex items-center justify-between text-xs sm:text-[10px] text-content-subtle font-semibold uppercase tracking-wider">
+                                    <span>Tugas Terdelegasi ({projectTasks.length}):</span>
+                                  </div>
+                                  <div className="space-y-1 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                                    {projectTasks.map((t) => (
+                                      <div
+                                        key={t.id}
+                                        className="flex items-center justify-between text-xs bg-surface p-1.5 px-2.5 rounded-md border border-border-subtle/80 shadow-2xs hover:border-indigo-500/30 transition-colors"
+                                      >
+                                        <div className="min-w-0 flex-1 pr-2">
+                                          <div className="font-medium text-content-strong truncate">
+                                            {t.title}
+                                          </div>
+                                          <div className="text-xs sm:text-[10px] font-mono text-indigo-600 uppercase">
+                                            {t.key || "TASK"}
+                                          </div>
+                                        </div>
+                                        <span className="text-xs sm:text-[10px] font-medium px-2 py-0.5 rounded bg-surface-muted text-content-secondary uppercase shrink-0">
+                                          {t.status || "todo"}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
