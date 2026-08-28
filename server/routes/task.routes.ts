@@ -290,6 +290,7 @@ router.put(
         type,
         priority,
         assigneeId,
+        reporterId,
         sprintId,
         parentId,
         dueDate,
@@ -519,6 +520,7 @@ router.put(
       checkUpdate("type", type);
       checkUpdate("priority", priority);
       checkUpdate("assigneeId", assigneeId);
+      checkUpdate("reporterId", reporterId);
       checkUpdate("sprintId", sprintId);
       checkUpdate("parentId", parentId);
       checkUpdate("dueDate", dueDate);
