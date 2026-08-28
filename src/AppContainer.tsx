@@ -3398,7 +3398,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
   if (!isLoggedIn) {
     return (
       <AuthLayout
-        variant="cover"
+        variant="split"
         overlays={
           <>
             <Toaster position="top-right" richColors />

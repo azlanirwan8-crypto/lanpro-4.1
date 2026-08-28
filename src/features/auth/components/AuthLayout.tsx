@@ -3,6 +3,7 @@ import { ShieldCheck } from "lucide-react";
 import { LanguageSwitcher } from "../../../i18n/LanguageSwitcher";
 import { VelzonFloatingParticles } from "../../../components/ui/CoreUI";
 import { AuthHeroPanel } from "./AuthHeroPanel";
+import { CorakBatikKawung, CorakBatikKawungBanner, WatermarkSisiTerang } from "./AuthWatermarks";
 
 /**
  * #154 — Pembungkus tata letak layar auth.
@@ -53,12 +54,30 @@ const PemilihBahasaAuth = ({ className }: { className: string }) => (
 );
 
 const AuthLayoutSplit = ({ children, overlays }: Omit<AuthLayoutProps, "variant">) => (
-  <div className="min-h-screen flex flex-col md:flex-row font-sans bg-surface-sunken overflow-x-hidden">
+  /*
+    #231 — latar root memakai `bg-surface-muted`, SAMA dengan sisi form di
+    bawah, dan itu bukan kebetulan. `AuthHeroPanel` kini melengkungkan tepi
+    kanannya dengan `clip-path`, sehingga sudut kanan-atas dan kanan-bawah
+    panel kiri terpotong dan yang tampak di situ adalah latar root ini. Kalau
+    root tetap `bg-surface-sunken` (beda dari sisi form), potongan itu
+    terbaca sebagai bidang warna ketiga di sebelah sisi form — jahitan yang
+    justru ingin dihilangkan lengkungannya.
+  */
+  <div className="min-h-screen flex flex-col md:flex-row font-sans bg-surface-muted overflow-x-hidden">
     {/* Sisi visual (desktop) — tetap diam saat login/register bertukar. */}
     <AuthHeroPanel />
 
     {/* Sisi form. */}
     <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-12 bg-surface-muted relative overflow-y-auto min-h-screen">
+      {/*
+        #231 — "watermark" sisi terang, sesuai gambar acuan pemilik proyek:
+        BUKAN motif batik/kanban (itu ditolak), melainkan kartu placeholder
+        garis putus-putus + garis lengkung bertitik, sangat samar, murni
+        tekstur latar di belakang kartu form. Panel kiri gelap (`AuthHeroPanel`)
+        sengaja TIDAK punya watermark apa pun — tetap polos seperti acuan asli.
+      */}
+      <WatermarkSisiTerang />
+
       <PemilihBahasaAuth className="absolute top-4 right-4 z-20" />
 
       {children}
@@ -73,55 +92,6 @@ const AuthLayoutSplit = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
     </div>
 
     {overlays}
-  </div>
-);
-
-/**
- * Corak batik kawung sebagai tekstur latar, bukan hiasan.
- *
- * KENAPA MOTIF, BUKAN IKON. Pilihan lainnya adalah menabur ikon perkakas
- * manajemen proyek. Ditolak: ikon aplikasi yang bertebaran terbaca seperti
- * wallpaper clip art, bersaing dengan ikon di dalam kartu, dan cepat basi
- * begitu perkakasnya berganti. Motif geometris terbaca sebagai TEKSTUR — mata
- * berhenti menghitungnya setelah sedetik.
- *
- * Kawung dibentuk dari lingkaran beririsan pada kisi, sehingga ubinnya
- * menyambung tanpa jahitan asal jari-jarinya tepat setengah diagonal ubin.
- *
- * Warnanya `var(--color-content-subtle)` — bukan kelas Tailwind — supaya ikut
- * berganti sendiri di mode gelap: garis gelap tipis di atas latar terang,
- * garis terang tipis di atas latar gelap, tanpa satu pun override tema.
- *
- * Ada dua peredam supaya ini tetap tekstur dan tidak pernah jadi kebisingan:
- * opasitas 6%, dan mask yang MELUNTURKANNYA KE ATAS. Corak paling terbaca di
- * bagian bawah halaman yang memang kosong, dan sudah habis sebelum mencapai
- * kartu — bidang di belakang formulir tetap bersih.
- */
-const CorakBatikKawung = () => (
-  <div
-    aria-hidden="true"
-    className="pointer-events-none absolute inset-0 z-0 opacity-[0.06] [mask-image:linear-gradient(to_bottom,transparent_0%,transparent_45%,black_100%)]"
-  >
-    <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <pattern id="batik-kawung" width="72" height="72" patternUnits="userSpaceOnUse">
-          <g fill="none" stroke="var(--color-content-subtle)" strokeWidth="1.25">
-            <circle cx="0" cy="0" r="25.5" />
-            <circle cx="72" cy="0" r="25.5" />
-            <circle cx="0" cy="72" r="25.5" />
-            <circle cx="72" cy="72" r="25.5" />
-            <circle cx="36" cy="36" r="25.5" />
-          </g>
-          <g fill="var(--color-content-subtle)">
-            <circle cx="36" cy="0" r="1.75" />
-            <circle cx="0" cy="36" r="1.75" />
-            <circle cx="72" cy="36" r="1.75" />
-            <circle cx="36" cy="72" r="1.75" />
-          </g>
-        </pattern>
-      </defs>
-      <rect width="100%" height="100%" fill="url(#batik-kawung)" />
-    </svg>
   </div>
 );
 
@@ -152,6 +122,9 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
       <div className="absolute inset-x-0 top-0 z-10 h-[300px] sm:h-[360px] select-none overflow-hidden bg-primary-surface">
         <VelzonFloatingParticles />
 
+        {/* #229 — motif watermark putih transparan, khusus area banner. */}
+        <CorakBatikKawungBanner />
+
         {/*
           Wash ambien. SENGAJA sangat lemah dan TANPA animasi. Versi sebelumnya
           memakai tiga blob /20-/30 dengan `animate-pulse`, dan hasilnya banner
@@ -165,41 +138,30 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
         </div>
 
         {/*
-          Gelombang. Warnanya WAJIB sama persis dengan latar halaman, sebab yang
-          diisi adalah bagian di BAWAH batas — kalau meleset sedikit saja akan
-          terlihat sebagai garis pucat memanjang. `var(--color-surface-sunken)`
-          dipakai langsung, bukan kelas Tailwind, supaya nilainya ikut berganti
-          di mode gelap tanpa override tema tambahan.
+          Gelombang Dua Lapis (Double-Layer Wave).
+          Lapis 1: Pita gelombang aksen biru terang murni (translucent blue ribbon strip).
+          Lapis 2: Bidang utama latar bawah halaman (var(--color-surface-sunken)).
 
-          BENTUKNYA BUSUR SERAGAM. Ini revisi ketiga, dan tiga percobaan
-          sebelumnya masing-masing salah dengan cara berbeda: (1) bezier dengan
-          titik kendali jauh di luar — paling curam di tepi lalu mendatar di
-          tengah, terbaca sebagai patahan; (2) dua bezier bersinggungan mendatar
-          — masih terbaca melengkung-lengkung; (3) dua garis lurus bertemu di
-          satu titik — sudutnya patah tajam di tengah, dan justru inilah yang
-          paling keras.
-
-          Yang dipakai acuan bukan garis lurus dan bukan gelombang, melainkan
-          satu busur lingkaran yang melandai MERATA. Titik kendali diletakkan
-          tepat di sepertiga (480 dan 960) dengan y=146,7 — kombinasi yang
-          menghampiri busur lingkaran sejati: kemiringan di ujung keluar 0,306
-          sementara busur lingkaran dengan tali 1440 dan panjang panah 110
-          memberi 0,311. Selisihnya 1,6%, tidak terlihat mata.
-
-          Jangan menggeser titik kendali dari sepertiga. Menariknya keluar
-          membuat tepi curam dan tengah datar (kesalahan 1); menariknya masuk
-          membuat tengah runcing mendekati kesalahan 3.
-
+          #229 — tinggi & kurva diperbesar (dari 80/110px ke 140/190px) supaya
+          lengkungannya landai dan lebar seperti gambar referensi pemilik
+          proyek, bukan ombak kecil-kecil seperti sebelumnya.
         */}
         <svg
-          className="absolute bottom-0 left-0 w-full h-[70px] sm:h-[100px] pointer-events-none z-20"
-          viewBox="0 0 1440 120"
+          className="absolute bottom-0 left-0 w-full h-[140px] sm:h-[190px] pointer-events-none z-20"
+          viewBox="0 0 1440 200"
           preserveAspectRatio="none"
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
         >
+          {/* Lapis 1: Pita Aksen Biru Translusen */}
           <path
-            d="M0 0 C 480 146.7, 960 146.7, 1440 0 L1440 120 L0 120 Z"
+            d="M0 -20 C 480 200, 960 200, 1440 -20 L1440 200 L0 200 Z"
+            fill="var(--color-primary)"
+            opacity="0.3"
+          />
+          {/* Lapis 2: Bidang Utama Latar Bawah Halaman */}
+          <path
+            d="M0 15 C 480 220, 960 220, 1440 15 L1440 200 L0 200 Z"
             fill="var(--color-surface-sunken)"
           />
         </svg>
