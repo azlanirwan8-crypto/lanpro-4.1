@@ -587,7 +587,12 @@ router.put(
 
       let newPasswordHash: string | undefined;
       if (currentPassword && newPassword) {
-        const isValid = await verifyPassword(currentPassword, user.passwordHash || "");
+        // #241 — hash diminta TERPISAH, hanya di titik yang benar-benar
+        // memverifikasinya. Sebelumnya ia menumpang di objek `user` hasil
+        // `findByIdOrUid()`, dan objek itu juga dipakai `GET /api/users/:id`
+        // yang memulangkannya utuh ke klien.
+        const hashTersimpan = await userRepository.findPasswordHashById(id);
+        const isValid = await verifyPassword(currentPassword, hashTersimpan || "");
         if (!isValid) {
           return res.status(400).json({
             status: "error",

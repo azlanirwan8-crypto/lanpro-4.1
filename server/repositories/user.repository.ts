@@ -72,11 +72,37 @@ export class UserRepository {
     }
   }
 
+  /**
+   * Detail satu pengguna TANPA `passwordHash` — item #241.
+   *
+   * KENAPA HASH-NYA DIKELUARKAN. Kolom ini dulu ikut di-SELECT di sini, dan
+   * `GET /api/users/:id` (`user.routes.ts`) memulangkan objek hasilnya apa
+   * adanya lewat `res.json({ data: user })`. Akibatnya SETIAP pengguna yang
+   * membawa JWT sah — sekecil apa pun perannya — bisa mengambil hash bcrypt
+   * akun mana pun termasuk admin, lalu membobolnya offline tanpa batas
+   * percobaan dan tanpa jejak di server. Itu jalur naik hak akses yang utuh.
+   *
+   * Yang membuatnya bertahan lama: method ini melayani DUA keperluan yang
+   * berbeda. Satu-satunya yang benar-benar butuh hash adalah alur ganti sandi,
+   * dan kebutuhan internal itulah yang dulu menentukan daftar kolomnya —
+   * lalu jalur tampilan ikut kebagian. Sebelas pemanggil lainnya hanya
+   * memakai `id`/`uid`/`username`/`email`/`role`/`permissions`.
+   *
+   * Jadi yang dibalik adalah DEFAULT-nya, bukan satu baris yang bocor.
+   * Menambal `res.json` di rute itu saja akan menutup kebocoran hari ini
+   * sambil membiarkan pemanggil BERIKUTNYA mewarisi hash tanpa memintanya.
+   * Sekarang aman secara bawaan, dan yang butuh hash memintanya terpisah
+   * lewat `findPasswordHashById()`.
+   *
+   * Kolomnya ditulis ulang penuh dan bukan disaring di JavaScript, alasan
+   * yang sama seperti `findAllRingkas()` di atas: menyaring setelah kueri
+   * berarti datanya sudah meninggalkan database.
+   */
   async findByIdOrUid(idOrUid: string): Promise<UserEntity | null> {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        'SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, department, position, passwordHash, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, "coverUrl", createdAt, lastSeen FROM Users WHERE id = ? OR uid = ?',
+        'SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, "coverUrl", createdAt, lastSeen FROM Users WHERE id = ? OR uid = ?',
         [idOrUid, idOrUid]
       );
       if (rows && rows.length > 0) {
@@ -88,6 +114,33 @@ export class UserRepository {
         } catch (e) {}
         return u;
       }
+      return null;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * Hash sandi tersimpan, HANYA untuk verifikasi — item #241.
+   *
+   * Dipisah dari `findByIdOrUid()` supaya hash tidak lagi ikut menumpang di
+   * objek pengguna yang dipakai belasan tempat. Memulangkan `string | null`
+   * dan bukan objek pengguna adalah bagian dari poinnya: nilai telanjang
+   * tidak bisa tanpa sengaja ikut ter-`res.json()` bersama field lain, yang
+   * persis cara #241 lahir.
+   *
+   * Pemanggil sahnya satu: alur ganti sandi di `user.routes.ts`, yang
+   * mencocokkan sandi lama sebelum menyimpan yang baru. Bila suatu saat ada
+   * pemanggil kedua, itu keputusan sadar — bukan warisan diam-diam.
+   */
+  async findPasswordHashById(idOrUid: string): Promise<string | null> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        "SELECT passwordHash FROM Users WHERE id = ? OR uid = ?",
+        [idOrUid, idOrUid]
+      );
+      if (rows && rows.length > 0) return rows[0].passwordHash ?? null;
       return null;
     } finally {
       connection.release();
