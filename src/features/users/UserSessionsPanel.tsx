@@ -502,10 +502,27 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                             </span>
                             <span className="text-xs text-content-subtle flex items-center gap-1 mt-0.5">
                               <MapPin className="w-3 h-3 text-content-subtle" />
-                              {session.location ||
-                                (session.city && session.country
-                                  ? `${session.city}, ${session.country}`
-                                  : "Local Network")}
+                              {(() => {
+                                const ip = (session.ipAddress || "").replace(/^::ffff:/, "").trim();
+                                const isLocal =
+                                  !ip ||
+                                  ip === "127.0.0.1" ||
+                                  ip === "::1" ||
+                                  ip === "localhost" ||
+                                  ip.startsWith("192.168.") ||
+                                  ip.startsWith("10.") ||
+                                  ip.startsWith("172.16.");
+
+                                if (isLocal) {
+                                  return session.location || "Local Network";
+                                }
+                                return (
+                                  session.location ||
+                                  (session.city && session.country
+                                    ? `${session.city}, ${session.country}`
+                                    : session.city || session.country || "Jakarta, ID")
+                                );
+                              })()}
                             </span>
                           </div>
                         </div>
