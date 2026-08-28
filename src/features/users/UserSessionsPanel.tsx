@@ -134,6 +134,10 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
 
   useEffect(() => {
     fetchSessions();
+    const intervalId = setInterval(() => {
+      fetchSessions();
+    }, 10000);
+    return () => clearInterval(intervalId);
   }, [fetchSessions]);
 
   const handleTerminateSession = async (session: UserSessionItem) => {

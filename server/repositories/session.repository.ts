@@ -171,7 +171,16 @@ export class SessionRepository {
          RETURNING "userId", token`,
         [sessionId]
       );
-      return rows?.[0] || null;
+      const termData = rows?.[0] || null;
+      if (termData?.userId) {
+        await connection.query(
+          `UPDATE Users 
+           SET "currentSessionToken" = NULL 
+           WHERE (id = ? OR uid = ?)`,
+          [termData.userId.toString(), termData.userId.toString()]
+        );
+      }
+      return termData;
     } finally {
       connection.release();
     }

@@ -36,13 +36,11 @@ export const verifyGlobalAdmin = (req: any, res: Response, next: NextFunction) =
   if (req.user?.role === "admin") {
     next();
   } else {
-    res
-      .status(403)
-      .json({
-        status: "error",
-        code: "srv.akses_ditolak_hanya_global",
-        message: "Akses ditolak: Hanya Global Admin yang memiliki izin.",
-      });
+    res.status(403).json({
+      status: "error",
+      code: "srv.akses_ditolak_hanya_global",
+      message: "Akses ditolak: Hanya Global Admin yang memiliki izin.",
+    });
   }
 };
 
@@ -90,12 +88,12 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
             if (rows && rows.length > 0) {
               const dbUser = rows[0];
               const currentToken = dbUser.currentSessionToken;
-              if (currentToken && currentToken !== token) {
+              if (!currentToken || currentToken !== token) {
                 return res.status(401).json({
                   status: "error",
                   code: "srv.sesi_anda_telah_diakhiri",
                   message:
-                    "Sesi Anda telah diakhiri karena akun Anda telah masuk di perangkat/browser lain.",
+                    "Sesi Anda telah diakhiri oleh Administrator atau Anda telah masuk di perangkat/browser lain.",
                 });
               }
 
@@ -131,12 +129,12 @@ export const authenticateJWT = (req: any, res: Response, next: NextFunction) => 
             );
             // Fallback to in-memory activeUserSessions if DB fails
             const activeSession = activeUserSessions.get(userId.toString());
-            if (activeSession && activeSession.token !== token) {
+            if (!activeSession || activeSession.token !== token) {
               return res.status(401).json({
                 status: "error",
                 code: "srv.sesi_anda_telah_diakhiri",
                 message:
-                  "Sesi Anda telah diakhiri karena akun Anda telah masuk di perangkat/browser lain.",
+                  "Sesi Anda telah diakhiri oleh Administrator atau Anda telah masuk di perangkat/browser lain.",
               });
             }
             req.user = user;
