@@ -206,7 +206,13 @@ export const StyledDropdown = ({
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLDivElement>(null);
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 });
+  const [dropdownPos, setDropdownPos] = useState<{
+    top?: number;
+    bottom?: number;
+    left: number;
+    width: number;
+    placement: "bottom" | "top";
+  }>({ left: 0, width: 0, placement: "bottom" });
 
   // De-duplicate options to prevent duplicate key errors
   const safeOptions = Array.from(new Map((options || []).map((o) => [o.id, o])).values());
@@ -219,16 +225,21 @@ export const StyledDropdown = ({
       const dropdownHeight = Math.min(safeOptions.length * 36 + 20, 300);
       const spaceBelow = viewportHeight - rect.bottom;
 
-      let top = rect.bottom;
       if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
-        top = rect.top - dropdownHeight;
+        setDropdownPos({
+          bottom: viewportHeight - rect.top + 4,
+          left: rect.left,
+          width: Math.max(rect.width, 160),
+          placement: "top",
+        });
+      } else {
+        setDropdownPos({
+          top: rect.bottom + 4,
+          left: rect.left,
+          width: Math.max(rect.width, 160),
+          placement: "bottom",
+        });
       }
-
-      setDropdownPos({
-        top: top + window.scrollY,
-        left: rect.left + window.scrollX,
-        width: Math.max(rect.width, 160),
-      });
     }
   }, [isOpen, safeOptions.length]);
 
@@ -344,12 +355,13 @@ export const StyledDropdown = ({
             <div
               style={{
                 position: "fixed",
-                top: dropdownPos.top - window.scrollY,
+                top: dropdownPos.placement === "bottom" ? dropdownPos.top : undefined,
+                bottom: dropdownPos.placement === "top" ? dropdownPos.bottom : undefined,
                 left: dropdownPos.left,
                 width: dropdownPos.width,
                 zIndex: 10000,
               }}
-              className="mt-1 bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden ring-1 ring-black/5 flex flex-col max-h-[300px]"
+              className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden ring-1 ring-black/5 flex flex-col max-h-[300px]"
             >
               <div className="overflow-y-auto p-1.5 custom-scrollbar">
                 {safeOptions.map((opt, optIdx) => {
@@ -444,7 +456,12 @@ export const TableStatusBadge = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+  const [dropdownPos, setDropdownPos] = useState<{
+    top?: number;
+    bottom?: number;
+    left: number;
+    placement: "bottom" | "top";
+  }>({ left: 0, placement: "bottom" });
   const current = (statuses || []).find((s) => s.label === value);
 
   useEffect(() => {
@@ -454,15 +471,19 @@ export const TableStatusBadge = ({
       const dropdownHeight = (statuses || []).length * 36 + 20;
       const spaceBelow = viewportHeight - rect.bottom;
 
-      let top = rect.bottom;
       if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
-        top = rect.top - dropdownHeight;
+        setDropdownPos({
+          bottom: viewportHeight - rect.top + 4,
+          left: rect.left,
+          placement: "top",
+        });
+      } else {
+        setDropdownPos({
+          top: rect.bottom + 4,
+          left: rect.left,
+          placement: "bottom",
+        });
       }
-
-      setDropdownPos({
-        top: top + window.scrollY,
-        left: rect.left + window.scrollX,
-      });
     }
   }, [isOpen, statuses?.length]);
 
@@ -506,11 +527,12 @@ export const TableStatusBadge = ({
             <div
               style={{
                 position: "fixed",
-                top: dropdownPos.top - window.scrollY,
+                top: dropdownPos.placement === "bottom" ? dropdownPos.top : undefined,
+                bottom: dropdownPos.placement === "top" ? dropdownPos.bottom : undefined,
                 left: dropdownPos.left,
                 zIndex: 10000,
               }}
-              className="mt-1 bg-surface rounded-lg shadow-xl border border-border-subtle p-1 min-w-[140px]"
+              className="bg-surface rounded-lg shadow-xl border border-border-subtle p-1 min-w-[140px]"
             >
               {(statuses || []).map((s, index) => (
                 <button
