@@ -1213,6 +1213,7 @@ export const en = {
     userDetail: "User Detail",
     deleteUser: "Delete User",
     cannotDeleteSelf: "You cannot delete your own account",
+    fieldRequired: "Required",
     rowsPerPage: "Rows per page:",
     userRegistration: "User Registration",
     username: "Username",

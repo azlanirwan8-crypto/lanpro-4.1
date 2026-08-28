@@ -1218,6 +1218,7 @@ export const id = {
     userDetail: "Detail Pengguna",
     deleteUser: "Hapus Pengguna",
     cannotDeleteSelf: "Anda tidak bisa menghapus akun Anda sendiri",
+    fieldRequired: "Wajib diisi",
     rowsPerPage: "Baris per halaman:",
     userRegistration: "Registrasi Pengguna",
     username: "Username",

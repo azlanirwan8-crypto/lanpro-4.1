@@ -200,10 +200,40 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const [successEmail, setSuccessEmail] = React.useState("");
 
   const handleAddPeople = async () => {
-    if (!addPeopleUsername || !addPeopleFullName || !addPeopleEmail || !addPeoplePassword) {
+    /**
+     * #189 — penolakan yang TERLIHAT, bukan sekadar tidak terjadi apa-apa.
+     *
+     * Penjaga ini sudah ada sebelumnya beserta `toast.error`-nya, tetapi tidak
+     * pernah bisa berjalan: tombol "Add Person" memakai `disabled` yang
+     * mencakup keempat field kosong, sehingga `onClick` tidak pernah menyala
+     * dan toast-nya menjadi kode mati. Yang dilihat pengguna adalah tombol
+     * yang tidak bereaksi — dan tombol yang tidak bereaksi terbaca sebagai
+     * aplikasi rusak, bukan sebagai "ada yang belum Anda isi".
+     *
+     * Sekarang tombolnya menyala, penolakannya terjadi di sini, dan alasannya
+     * ditempelkan ke FIELD-nya masing-masing — pola yang sama dengan
+     * `LoginScreen.tsx`, yang juga memasangkan pesan per-field dengan satu
+     * toast ringkasan.
+     */
+    const galat: typeof addPeopleErrors = {};
+    if (!addPeopleFullName.trim()) galat.fullName = t("users.fieldRequired");
+    if (!addPeoplePassword.trim()) galat.password = t("users.fieldRequired");
+
+    // Username dan email memakai ULANG `usernameError`/`emailError` yang sudah
+    // punya tempat tampil di bawah field masing-masing. Menambah saluran pesan
+    // kedua untuk field yang sama akan memunculkan dua baris merah sekaligus.
+    const kurangUsername = !addPeopleUsername.trim();
+    const kurangEmail = !addPeopleEmail.trim();
+    if (kurangUsername) setUsernameError(t("users.fieldRequired"));
+    if (kurangEmail) setEmailError(t("users.fieldRequired"));
+
+    if (Object.keys(galat).length > 0 || kurangUsername || kurangEmail) {
+      setAddPeopleErrors(galat);
       toast.error(t("toast.allFieldsRequired"));
       return;
     }
+
+    setAddPeopleErrors({});
 
     try {
       const normalizedUsername = addPeopleUsername.trim().toLowerCase().replace(/\s+/g, "_");
@@ -291,6 +321,21 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   // Point 5: Real-time validation errors & Password Strength Indicator
   const [usernameError, setUsernameError] = React.useState("");
   const [emailError, setEmailError] = React.useState("");
+
+  /**
+   * #189 — pesan "wajib diisi" per field pada form Add Person.
+   *
+   * `usernameError`/`emailError` di atas hanya menangani format dan duplikat.
+   * Tidak ada satu pun yang memberi tahu bahwa sebuah field WAJIB diisi, dan
+   * itulah yang dilaporkan: membuka modal lalu langsung menekan "Add Person"
+   * tidak menghasilkan apa-apa. Diam, bukan menolak.
+   */
+  const [addPeopleErrors, setAddPeopleErrors] = React.useState<{
+    username?: string;
+    fullName?: string;
+    email?: string;
+    password?: string;
+  }>({});
   const [passwordStrength, setPasswordStrength] = React.useState<"weak" | "medium" | "strong" | "">(
     ""
   );
@@ -304,7 +349,9 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const handleUsernameChange = (val: string) => {
     setAddPeopleUsername(val);
     if (!val) {
-      setUsernameError("Username wajib diisi");
+      // #189 — lewat i18n. Sebelumnya string harfiah, sehingga pengguna
+      // berbahasa Inggris melihat pesan Indonesia di form ini saja.
+      setUsernameError(t("users.fieldRequired"));
       return;
     }
     const clean = val.trim().toLowerCase();
@@ -324,7 +371,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const handleEmailChange = (val: string) => {
     setAddPeopleEmail(val);
     if (!val) {
-      setEmailError("Email wajib diisi");
+      setEmailError(t("users.fieldRequired"));
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -1127,9 +1174,26 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               </label>
               <Input
                 value={addPeopleFullName}
-                onChange={(e: any) => setAddPeopleFullName(e.target.value)}
+                onChange={(e: any) => {
+                  setAddPeopleFullName(e.target.value);
+                  // #189 — pesan hilang begitu pengguna mulai memperbaikinya.
+                  // Membiarkannya menetap sampai submit berikutnya membuat
+                  // form terasa masih menolak padahal sudah benar.
+                  if (addPeopleErrors.fullName)
+                    setAddPeopleErrors((p) => ({ ...p, fullName: undefined }));
+                }}
                 placeholder={t("users.fullNamePlaceholder")}
+                className={
+                  addPeopleErrors.fullName
+                    ? "border-rose-500 focus:ring-rose-500/10 focus:border-rose-500"
+                    : ""
+                }
               />
+              {addPeopleErrors.fullName && (
+                <p className="text-xs sm:text-[10px] font-medium text-rose-500 mt-1">
+                  {addPeopleErrors.fullName}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
@@ -1166,9 +1230,23 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               <Input
                 type="password"
                 value={addPeoplePassword}
-                onChange={(e: any) => handlePasswordChange(e.target.value)}
+                onChange={(e: any) => {
+                  handlePasswordChange(e.target.value);
+                  if (addPeopleErrors.password)
+                    setAddPeopleErrors((p) => ({ ...p, password: undefined }));
+                }}
                 placeholder={t("users.passwordPlaceholder")}
+                className={
+                  addPeopleErrors.password
+                    ? "border-rose-500 focus:ring-rose-500/10 focus:border-rose-500"
+                    : ""
+                }
               />
+              {addPeopleErrors.password && (
+                <p className="text-xs sm:text-[10px] font-medium text-rose-500 mt-1">
+                  {addPeopleErrors.password}
+                </p>
+              )}
               {passwordStrength && (
                 <div className="mt-1.5 space-y-1">
                   <div className="flex gap-1 h-1.5 w-full bg-surface-muted rounded-full overflow-hidden">
@@ -1291,14 +1369,14 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             </Button>
             <Button
               onClick={handleAddPeople}
-              disabled={
-                !!usernameError ||
-                !!emailError ||
-                !addPeopleUsername ||
-                !addPeopleFullName ||
-                !addPeopleEmail ||
-                !addPeoplePassword
-              }
+              // #189 — keempat syarat "field kosong" DIHAPUS dari sini dengan
+              // sengaja. Selama mereka ada, tombolnya mati saat form kosong,
+              // `onClick` tidak pernah menyala, dan penolakan di
+              // `handleAddPeople` beserta pesannya tidak pernah sampai ke
+              // pengguna. `usernameError`/`emailError` tetap dipertahankan:
+              // keduanya SUDAH menampilkan alasannya di bawah field, jadi
+              // tombol matinya tidak membingungkan.
+              disabled={!!usernameError || !!emailError}
               className="flex-1 justify-center bg-violet-600 hover:bg-violet-700 disabled:opacity-50"
             >
               <UserPlus className="w-4 h-4" /> {t("users.addPerson")}

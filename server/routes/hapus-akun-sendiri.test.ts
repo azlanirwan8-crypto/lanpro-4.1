@@ -9,13 +9,23 @@
  * terjadi, bukan yang paling tidak mungkin. Bila ia satu-satunya admin,
  * seluruh administrasi sistem terkunci tanpa jalan pemulihan lewat UI.
  *
- * AKAR MASALAHNYA TIDAK SEPERTI YANG TERLIHAT, dan ini yang paling penting
- * dijaga. Tombolnya SUDAH punya penjaga: `disabled={user.role === "admin"}`.
- * Penjaga itu tidak bekerja karena perbandingannya peka huruf besar-kecil,
- * sedangkan `src/types/roles.ts` mencatat data lama menyimpan campuran
- * `Admin`/`admin`/`ADMIN` dan mewajibkan SETIAP pembanding peran lewat
- * `normalkanPeran()` lebih dulu. Pada baris yang perannya tersimpan `Admin`,
- * penjaganya menghasilkan `false` dan tombolnya aktif.
+ * GEJALA PERSISNYA TIDAK BERHASIL DIREPRODUKSI, dan itu harus disebut lebih
+ * dulu supaya tidak ada yang menyangka sebabnya sudah diketahui. Tombolnya
+ * SUDAH punya penjaga `disabled={user.role === "admin"}` sejak commit b119bad
+ * (15 Agu), sebelas hari SEBELUM laporan. Dugaan pertama adalah perbandingan
+ * itu gagal karena peka huruf besar-kecil — `src/types/roles.ts` mencatat data
+ * lama menyimpan campuran `Admin`/`admin`/`ADMIN`. Dugaan itu melemah sendiri:
+ * kartu ringkasan yang menampilkan `ADMINISTRATOR: 1` dihitung dengan
+ * perbandingan mentah yang SAMA, dan angka itu hanya bisa bernilai 1 bila
+ * perannya memang tersimpan persis `admin` — yang berarti penjaga lama
+ * semestinya berlaku. Menuntaskannya menuntut membaca nilai peran di basis
+ * data lewat sesi login, yang belum tersedia saat perbaikan ini dibuat.
+ *
+ * YANG PASTI DAN TIDAK TERBANTAH, dan itulah yang dikunci di sini: penjaga
+ * hapus-diri-sendiri memang TIDAK ADA sama sekali, baik di UI maupun di
+ * server. Perbandingan peran mentah tetap diperbaiki sebagai bahaya laten
+ * yang berdiri sendiri, sebab `types/roles.ts` mewajibkan SETIAP pembanding
+ * peran lewat `normalkanPeran()`, terlepas dari apakah ia penyebab #190.
  *
  *   Penjaga yang ADA tetapi tidak berlaku lebih berbahaya daripada penjaga
  *   yang tidak ada — sebab pembacanya menyimpulkan kasus itu sudah tertutup.
