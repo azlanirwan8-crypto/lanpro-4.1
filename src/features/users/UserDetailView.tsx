@@ -1486,12 +1486,17 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               sebelumnya cuma gradien dekoratif + localStorage lokal. Tombol
               aksi (Back, Edit Profile / Save) ada di pojok cover, persis
               posisi Velzon. */}
-          <div className="bg-surface rounded-lg shadow-xs border border-border-subtle overflow-hidden">
+          <div className="bg-surface rounded-2xl shadow-xs border border-border-subtle overflow-hidden">
+            {/* Purple Gradient Cover Banner */}
             <div
-              className="h-32 sm:h-44 w-full bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 relative bg-cover bg-center transition-all"
+              className="min-h-[150px] sm:min-h-[175px] w-full bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-600 relative p-4 sm:p-6 flex flex-col justify-between transition-all"
               style={
                 previewCoverUrl || coverURL
-                  ? { backgroundImage: `url(${previewCoverUrl || coverURL})` }
+                  ? {
+                      backgroundImage: `url(${previewCoverUrl || coverURL})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }
                   : undefined
               }
             >
@@ -1500,77 +1505,78 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 <div className="absolute inset-0 bg-surface-sunken/40" />
               )}
 
-              <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
-                {/* Tombol Change Cover ala Velzon - Kontras Solid */}
-                <label
-                  className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 bg-surface/90 hover:bg-surface text-content-strong border border-border-subtle rounded-md text-xs font-semibold shadow-sm backdrop-blur-md transition cursor-pointer",
-                    isUploadingCover && "opacity-60 pointer-events-none"
-                  )}
-                >
-                  <Camera className="w-3.5 h-3.5 text-indigo-600" />
-                  <span>
-                    {isUploadingCover ? t("userDetail.uploading") : t("userDetail.changeCover")}
-                  </span>
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleCoverChange}
-                    disabled={isUploadingCover}
-                  />
-                </label>
-
+              {/* Top Row: Back button on left, Action buttons on right */}
+              <div className="flex items-center justify-between z-10 relative">
                 <button
+                  type="button"
                   onClick={pageMode === "edit" ? exitEditMode : onBack}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-surface/90 hover:bg-surface text-content-strong border border-border-subtle rounded-md text-xs font-semibold shadow-sm backdrop-blur-md transition cursor-pointer"
-                  title={t("userDetail.back")}
+                  className="flex items-center gap-1.5 text-content-inverse/90 hover:text-content-inverse text-xs font-medium transition cursor-pointer"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5 text-content-muted" />
-                  <span>{t("userDetail.back")}</span>
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back</span>
                 </button>
 
-                {pageMode === "view" && (isAdmin || isSelf) && (
-                  <button
-                    onClick={enterEditMode}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse rounded-md text-xs font-medium shadow-soft transition cursor-pointer"
-                  >
-                    <UserCog className="w-3.5 h-3.5" />
-                    <span>{t("userDetail.editProfile")}</span>
-                  </button>
-                )}
-                {pageMode === "edit" && (
-                  <button
-                    onClick={handleSaveUser}
-                    disabled={isSaving}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse rounded-md text-xs font-medium shadow-soft transition disabled:opacity-50 cursor-pointer"
-                  >
-                    {isSaving ? (
-                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Save className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-2">
+                  <label
+                    className={cn(
+                      "flex items-center gap-1.5 px-3.5 py-1.5 bg-surface-sunken/40 hover:bg-surface-sunken/60 text-content-inverse border border-border-subtle/30 rounded-full text-xs font-medium backdrop-blur-md transition cursor-pointer shadow-xs",
+                      isUploadingCover && "opacity-60 pointer-events-none"
                     )}
-                    <span>{t("userDetail.saveUserChanges")}</span>
-                  </button>
-                )}
-              </div>
-            </div>
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>
+                      {isUploadingCover ? t("userDetail.uploading") : t("userDetail.changeCover")}
+                    </span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleCoverChange}
+                      disabled={isUploadingCover}
+                    />
+                  </label>
 
-            <div className="px-5 pb-5">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className="relative group cursor-pointer shrink-0 z-10 -mt-10 sm:-mt-12">
+                  {pageMode === "view" && (isAdmin || isSelf) && (
+                    <button
+                      onClick={enterEditMode}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-surface-sunken/40 hover:bg-surface-sunken/60 text-content-inverse rounded-full text-xs font-medium backdrop-blur-md transition cursor-pointer border border-border-subtle/30"
+                    >
+                      <UserCog className="w-3.5 h-3.5" />
+                      <span>{t("userDetail.editProfile")}</span>
+                    </button>
+                  )}
+                  {pageMode === "edit" && (
+                    <button
+                      onClick={handleSaveUser}
+                      disabled={isSaving}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse rounded-full text-xs font-medium shadow-soft transition disabled:opacity-50 cursor-pointer"
+                    >
+                      {isSaving ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Save className="w-3.5 h-3.5" />
+                      )}
+                      <span>{t("userDetail.saveUserChanges")}</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom Row inside Cover Banner: Avatar + Name & Subtitle */}
+              <div className="flex items-center gap-4 z-10 relative mt-4">
+                <div className="relative group shrink-0">
                   <UserAvatar
                     user={{ ...user, photoURL: previewUrl || photoURL } as any}
-                    className="w-20 h-20 sm:w-24 sm:h-24 text-2xl shadow-soft border-4 border-surface shrink-0"
+                    className="w-16 h-16 sm:w-20 sm:h-20 text-xl ring-4 ring-border-subtle/40 shadow-md shrink-0"
                   />
                   {previewUrl && (
-                    <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
+                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-[9px] font-semibold px-2 py-0.5 rounded-full shadow-xs whitespace-nowrap z-20">
                       {t("userDetail.preview")}
                     </span>
                   )}
                   {pageMode === "edit" && (
-                    <label className="absolute inset-0 bg-black/50 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity border-4 border-surface ">
-                      <Camera className="w-6 h-6" />
+                    <label className="absolute inset-0 bg-surface-sunken/60 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+                      <Camera className="w-5 h-5" />
                       <input
                         type="file"
                         accept="image/png,image/jpeg,image/jpg,image/webp"
@@ -1581,70 +1587,23 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   )}
                 </div>
 
-                <div className="flex-1 pt-2 sm:pt-3">
-                  <h2 className="text-xl font-semibold text-content-strong">
+                <div className="min-w-0">
+                  <h2 className="text-lg sm:text-xl font-bold text-content-inverse tracking-tight truncate">
                     {user.displayName || user.username}
                   </h2>
-                  <div className="flex flex-wrap items-center gap-2 mt-1">
-                    {editPosition && (
-                      <span className="text-xs font-medium text-content-body">
-                        {getPosName(editPosition)}
-                      </span>
-                    )}
+                  <div className="flex flex-wrap items-center gap-1.5 text-xs text-content-inverse/80 font-medium mt-0.5">
+                    {editPosition && <span>{getPosName(editPosition)}</span>}
                     {editPosition && editDepartment && (
-                      <span className="text-content-muted text-xs">•</span>
+                      <span className="text-content-inverse/60">•</span>
                     )}
-                    {editDepartment && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-surface-muted text-content-secondary border border-border-subtle">
-                        {getDeptName(editDepartment)}
-                      </span>
-                    )}
+                    {editDepartment && <span>{getDeptName(editDepartment)}</span>}
                   </div>
-                </div>
-
-                <div className="flex items-center gap-2 pb-1">
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium uppercase border shadow-xs",
-                      editRole === "admin"
-                        ? "bg-rose-500/10 text-rose-700 border-rose-500/30 "
-                        : editRole === "head"
-                          ? "bg-purple-500/10 text-purple-700 border-purple-500/30 "
-                          : editRole === "user"
-                            ? "bg-indigo-500/10 text-indigo-700 border-indigo-500/30 "
-                            : "bg-surface-muted text-content-body border-border-subtle "
-                    )}
-                  >
-                    {editRole === "admin" && <ShieldCheck className="w-3.5 h-3.5 shrink-0" />}
-                    {editRole === "head" && <Award className="w-3.5 h-3.5 shrink-0" />}
-                    {editRole === "user" && <Users className="w-3.5 h-3.5 shrink-0" />}
-                    {editRole === "viewer" && <Eye className="w-3.5 h-3.5 shrink-0" />}
-                    <span>{editRole}</span>
-                  </span>
-
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium uppercase border shadow-xs",
-                      editStatus === "approved"
-                        ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30 "
-                        : editStatus === "pending"
-                          ? "bg-amber-500/10 text-amber-700 border-amber-500/30 "
-                          : "bg-rose-500/10 text-rose-700 border-rose-500/30 "
-                    )}
-                  >
-                    {editStatus === "approved" ? (
-                      <CheckCircle className="w-3.5 h-3.5" />
-                    ) : (
-                      <Clock className="w-3.5 h-3.5" />
-                    )}
-                    <span>{editStatus}</span>
-                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Item #187 — Tab bar Velzon */}
-            <div className="flex overflow-x-auto border-t border-border-subtle px-2 sm:px-4 mt-4">
+            {/* Clean White Tab Bar Directly Attached Below Cover */}
+            <div className="bg-surface border-t border-border-subtle/60 px-4 sm:px-6 flex overflow-x-auto gap-6 sm:gap-8">
               {(
                 (pageMode === "view"
                   ? [
@@ -1680,14 +1639,19 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "flex items-center gap-1.5 px-3.5 py-3 text-xs font-medium whitespace-nowrap transition-all border-b-2 cursor-pointer",
+                    "flex items-center gap-2 py-3.5 text-xs font-semibold whitespace-nowrap transition-all border-b-2 cursor-pointer",
                     activeTab === tab.id
-                      ? "text-indigo-600 border-indigo-500 bg-indigo-500/10"
-                      : "text-content-muted border-transparent hover:text-content-body"
+                      ? "text-indigo-600 border-indigo-600 font-bold"
+                      : "text-content-muted border-transparent hover:text-content-strong"
                   )}
                 >
-                  <tab.icon className="w-3.5 h-3.5" />
-                  {tab.label}
+                  <tab.icon
+                    className={cn(
+                      "w-4 h-4",
+                      activeTab === tab.id ? "text-indigo-600" : "text-content-subtle"
+                    )}
+                  />
+                  <span>{tab.label}</span>
                 </button>
               ))}
             </div>
