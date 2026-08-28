@@ -114,6 +114,9 @@ export const id = {
     "srv.user_not_found": "Pengguna tidak ditemukan",
     "srv.user_updated": "Pengguna diperbarui",
     "srv.user_deleted": "Pengguna dihapus",
+    "srv.tidak_bisa_hapus_akun_sendiri": "Anda tidak bisa menghapus akun Anda sendiri.",
+    "srv.tidak_bisa_hapus_admin_terakhir":
+      "Tidak bisa menghapus administrator terakhir yang tersisa.",
     "srv.sesi_tidak_valid": "Sesi tidak valid.",
     "srv.password_lama_yang_anda": "Kata sandi lama yang Anda masukkan salah.",
     "srv.profile_updated": "Profil diperbarui",
@@ -1214,6 +1217,7 @@ export const id = {
     action: "Aksi",
     userDetail: "Detail Pengguna",
     deleteUser: "Hapus Pengguna",
+    cannotDeleteSelf: "Anda tidak bisa menghapus akun Anda sendiri",
     rowsPerPage: "Baris per halaman:",
     userRegistration: "Registrasi Pengguna",
     username: "Username",

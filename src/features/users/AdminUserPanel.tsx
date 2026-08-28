@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { AppRole } from "../../types";
-import { sebagaiPeranSistem } from "../../types/roles";
+import { normalkanPeran, sebagaiPeranSistem } from "../../types/roles";
 import { AdminUserPanelProps } from "./types";
 import { useAdminUsers } from "./hooks";
 import { Button, Modal, UserAvatar } from "./styles";
@@ -430,7 +430,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
     if (action === "delete") {
       const hasAdmins = filteredUsers.some(
-        (u) => selectedUserIds.includes(u.id) && u.role === "admin"
+        (u) => selectedUserIds.includes(u.id) && normalkanPeran(u.role) === "admin"
       );
       if (hasAdmins) {
         toast.error(t("toast.cannotBulkDeleteAdmin"));
@@ -499,7 +499,11 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const totalUsersCount = users.length;
   const approvedUsersCount = users.filter((u) => u.status === "approved").length;
   const pendingUsersCount = users.filter((u) => u.status === "pending").length;
-  const adminUsersCount = users.filter((u) => u.role === "admin").length;
+  // #190 — lewat `normalkanPeran()` seperti diwajibkan `types/roles.ts`.
+  // Hitungan inilah yang tampil sebagai kartu "ADMINISTRATOR: N"; dengan
+  // perbandingan mentah, akun yang perannya tersimpan `Admin` tidak terhitung
+  // dan kartunya menunjukkan angka yang lebih kecil dari kenyataan.
+  const adminUsersCount = users.filter((u) => normalkanPeran(u.role) === "admin").length;
 
   if (loading) {
     return (
@@ -682,7 +686,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   <button
                     onClick={async () => {
                       const hasAdmins = filteredUsers.some(
-                        (u) => selectedUserIds.includes(u.id) && u.role === "admin"
+                        (u) => selectedUserIds.includes(u.id) && normalkanPeran(u.role) === "admin"
                       );
                       if (hasAdmins) {
                         toast.error(t("toast.cannotBulkDeleteAdmin"));
@@ -899,9 +903,9 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           <span
                             className={cn(
                               "inline-flex font-medium text-xs sm:text-[11px] sm:text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-md border",
-                              user.role === "admin"
+                              normalkanPeran(user.role) === "admin"
                                 ? "bg-rose-500/10 text-rose-600 border-rose-500/30"
-                                : user.role === "head"
+                                : normalkanPeran(user.role) === "head"
                                   ? "bg-purple-500/10 text-purple-600 border-purple-500/30"
                                   : "bg-surface-sunken text-content-secondary border-border-subtle"
                             )}
@@ -949,14 +953,60 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             >
                               <UserCog className="w-3.5 h-3.5 shrink-0" />
                             </button>
-                            <button
-                              onClick={() => handleDeleteUser(user)}
-                              disabled={user.role === "admin"}
-                              className="p-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-1"
-                              title={t("users.deleteUser")}
-                            >
-                              <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                            </button>
+                            {(() => {
+                              /**
+                               * #190 — dua penjaga, dan yang pertama memperbaiki
+                               * penjaga yang SUDAH ADA tapi diam-diam tidak berlaku.
+                               *
+                               * Sebelumnya: `disabled={user.role === "admin"}`.
+                               * Perbandingan itu peka huruf besar-kecil, sedangkan
+                               * `types/roles.ts` mencatat data lama menyimpan campuran
+                               * `Admin`/`admin`/`ADMIN` dan mewajibkan SETIAP pembanding
+                               * peran lewat `normalkanPeran()` lebih dulu. Pada baris yang
+                               * perannya tersimpan `Admin`, penjaga lama menghasilkan
+                               * `false` — tombolnya aktif, dan dialog hapus muncul persis
+                               * seperti yang dilaporkan. Penjaganya terlihat ada di kode
+                               * tetapi tidak bekerja pada data yang justru paling perlu
+                               * dilindungi.
+                               *
+                               * Penjaga kedua baru: baris akun yang SEDANG LOGIN. Barisnya
+                               * berada di urutan teratas tabel, jadi salah klik pada baris
+                               * pertama adalah kesalahan yang paling mungkin terjadi. Jalur
+                               * hapus MASSAL sudah menolak keduanya sejak dulu
+                               * (`cannotBulkDeleteAdmin`, `cannotBulkDeleteSelf`); tombol
+                               * per baris ini satu-satunya yang tertinggal.
+                               *
+                               * `id` DAN `uid` sama-sama dibandingkan sebab keduanya dipakai
+                               * sebagai identitas di repo ini, dan membandingkan salah satu
+                               * saja membuat penjaganya meleset tanpa suara.
+                               */
+                              const adalahAdmin = normalkanPeran(user.role) === "admin";
+                              const adalahAkunSendiri =
+                                !!props.currentUserId &&
+                                [user.id, user.uid]
+                                  .filter(Boolean)
+                                  .map(String)
+                                  .includes(String(props.currentUserId));
+                              const terkunci = adalahAdmin || adalahAkunSendiri;
+                              return (
+                                <button
+                                  onClick={() => handleDeleteUser(user)}
+                                  disabled={terkunci}
+                                  className="p-1.5 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-1"
+                                  // Tombol mati tanpa penjelasan terbaca sebagai aplikasi
+                                  // rusak. Alasannya disebutkan di tempat kursor sudah berada.
+                                  title={
+                                    adalahAkunSendiri
+                                      ? t("users.cannotDeleteSelf")
+                                      : adalahAdmin
+                                        ? t("toast.cannotDeleteAdmin")
+                                        : t("users.deleteUser")
+                                  }
+                                >
+                                  <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                                </button>
+                              );
+                            })()}
                           </div>
                         </td>
                       </tr>

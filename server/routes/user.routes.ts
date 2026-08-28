@@ -529,6 +529,65 @@ router.delete(
       const currentUserId = req.user?.id || req.user?.uid;
       const oldUser = await userRepository.findByIdOrUid(id);
 
+      /**
+       * #190 — tiga penolakan sebelum menghapus.
+       *
+       * `verifyGlobalAdmin` di atas hanya menjawab "penghapusnya admin?",
+       * bukan "yang dihapus boleh dihapus?". Sampai sebelum ini, admin bisa
+       * menghapus AKUN DIRINYA SENDIRI. Dan karena barisnya sendiri berada di
+       * urutan teratas tabel User Management, salah klik pada baris pertama
+       * adalah kesalahan yang paling mungkin terjadi, bukan yang paling tidak
+       * mungkin. Bila ia satu-satunya admin — keadaan nyata saat #190
+       * dilaporkan, kartu ringkasan menunjukkan ADMINISTRATOR: 1 — seluruh
+       * administrasi sistem terkunci tanpa jalan pemulihan lewat UI.
+       */
+
+      // (1) Menghapus yang tidak ada sebelumnya "berhasil" diam-diam: tanpa
+      // baris ini `userRepository.delete()` tidak menghapus apa pun, audit log
+      // tetap tertulis, dan klien menerima "User deleted" yang keliru.
+      if (!oldUser) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.user_not_found",
+          message: "User not found",
+        });
+      }
+
+      // (2) Tidak boleh menghapus akun sendiri. Dibandingkan lewat `oldUser`
+      // dan bukan `id` mentah dari URL, sebab `findByIdOrUid` menerima id
+      // MAUPUN uid — membandingkan `id` langsung akan meleset ketika yang satu
+      // uid dan yang lain id, dan penjaganya diam-diam tidak berlaku.
+      const iniAkunSendiri = [oldUser.id, oldUser.uid]
+        .filter(Boolean)
+        .map(String)
+        .includes(String(currentUserId));
+      if (iniAkunSendiri) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.tidak_bisa_hapus_akun_sendiri",
+          message: "Anda tidak bisa menghapus akun Anda sendiri.",
+        });
+      }
+
+      // (3) Tidak boleh menghapus admin terakhir. Dengan (2) sudah berlaku,
+      // kasus ini secara logika sulit tercapai lewat rute ini — penghapusnya
+      // pasti admin, jadi kalau targetnya juga admin berarti ada minimal dua.
+      // Tetap dipasang: ia tidak bergantung pada penalaran itu tetap benar
+      // bila kelak muncul jalur hapus lain atau peran admin kedua.
+      if (String(oldUser.role || "").toLowerCase() === "admin") {
+        const semua = await userRepository.findAll();
+        const jumlahAdmin = semua.filter(
+          (u: any) => String(u.role || "").toLowerCase() === "admin"
+        ).length;
+        if (jumlahAdmin <= 1) {
+          return res.status(400).json({
+            status: "error",
+            code: "srv.tidak_bisa_hapus_admin_terakhir",
+            message: "Tidak bisa menghapus administrator terakhir yang tersisa.",
+          });
+        }
+      }
+
       await userRepository.delete(id);
 
       createAuditLog({
