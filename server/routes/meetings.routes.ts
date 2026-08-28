@@ -449,102 +449,142 @@ router.post(
 );
 
 // POST: Multimodal Video/Audio analysis using Gemini API with exact JSON Schema & saves to meeting_details
-router.post(["/analyze-video", "/api/v1/meetings/:meetingId/analyze-video"], async (req, res) => {
-  try {
-    const meetingId = req.params.meetingId || req.body.meetingId || req.query.meetingId;
-    if (!meetingId) {
-      return res.status(400).json({
-        status: "error",
-        code: "srv.id_meeting_meetingid_diperlukan",
-        message: "ID Meeting (meetingId) diperlukan.",
-      });
-    }
-
-    const meeting = await meetingRepository.findById(meetingId);
-    if (!meeting) {
-      return res.status(404).json({
-        status: "error",
-        code: "srv.meeting_tidak_ditemukan",
-        message: "Meeting tidak ditemukan.",
-      });
-    }
-
-    const recordingUrl = meeting.recording_url;
-    if (!recordingUrl) {
-      return res.status(400).json({
-        status: "error",
-        code: "srv.file_rekaman_belum_diunggah",
-        message: "File rekaman belum diunggah.",
-      });
-    }
-
-    await meetingRepository.setUploadStatus(meetingId, "ANALYZING_LLM");
-    io.emit("meeting_ai_status", {
-      meetingId,
-      status: "ANALYZING_LLM",
-      progress_percentage: 85,
-      code: "srv.menganalisis_video_audio_multimodal",
-      message: "Menganalisis video & audio multimodal menggunakan Gemini 2.5 Pro...",
-    });
-
-    const safeFileName = path.basename(recordingUrl);
-    const filePath = path.join(GLOBAL_UPLOADS_DIR, safeFileName);
-
-    if (!fs.existsSync(filePath)) {
-      return res
-        .status(404)
-        .json({ status: "error", message: `File rekaman tidak ditemukan di path: ${filePath}` });
-    }
-
-    const fileExt = path.extname(filePath).toLowerCase();
-    let mimeType = "video/mp4";
-    if (fileExt === ".webm") mimeType = "video/webm";
-    else if (fileExt === ".avi") mimeType = "video/x-msvideo";
-    else if (fileExt === ".mov") mimeType = "video/quicktime";
-    else if (fileExt === ".mkv") mimeType = "video/x-matroska";
-    else if (fileExt === ".mp3" || fileExt === ".wav" || fileExt === ".m4a") {
-      mimeType =
-        fileExt === ".mp3" ? "audio/mp3" : fileExt === ".wav" ? "audio/wav" : "audio/x-m4a";
-    }
-
-    console.log(`[MULTIMODAL AI] Reading file for multimodal analysis: ${filePath} (${mimeType})`);
-    const fileBuffer = fs.readFileSync(filePath);
-    const base64File = fileBuffer.toString("base64");
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return res.status(400).json({
-        status: "error",
-        code: "srv.kunci_api_gemini_tidak",
-        message: "Kunci API Gemini tidak dikonfigurasi.",
-      });
-    }
-
-    const ai = new GoogleGenAI({
-      apiKey: apiKey,
-      httpOptions: {
-        headers: {
-          "User-Agent": "aistudio-build",
-        },
-      },
-    });
-
-    let learningNotesStr = "";
+/**
+ * Analisis video multimodal sebuah rapat — perbaikan item #233.
+ *
+ * DUA HAL YANG DIPERBAIKI DI SINI, dan keduanya lahir dari satu baris.
+ *
+ * 1. ALIAS TELANJANG `/analyze-video` DIHAPUS. Rute ini dulu didaftarkan
+ *    sebagai ARRAY dua jalur: `["/analyze-video", "/api/v1/meetings/..."]`.
+ *    Penjaga global di `server.ts:426` hanya menyaring URL yang diawali
+ *    `/api/`, sehingga alias telanjang itu melewatinya sepenuhnya. Terbukti
+ *    lewat probe: `POST /api/v1/meetings/1/analyze-video` menjawab 401,
+ *    sedangkan `POST /analyze-video` menembus sampai ke validasi di dalam
+ *    handler dan menjawab 400 — tanpa token sama sekali. Siapa pun tanpa akun
+ *    bisa menebak `meetingId`, memicu analisis Gemini atas rekaman rapat mana
+ *    pun, dan membebani kuota API berbayar.
+ *
+ *    Tidak ada kode klien yang memanggil `/analyze-video`; antarmuka memakai
+ *    `/api/projects/:projectId/meetings/:meetingId/analyze-transcript`
+ *    (`src/features/meeting-notes/services/meeting.service.ts:43`). Jadi alias
+ *    itu murni permukaan serang tanpa pemakai.
+ *
+ * 2. `jagaProyek` DIPASANG, dan `meetingId` kini HANYA dari path.
+ *    Sebelumnya handler menerima `meetingId` dari body dan query juga. Itu
+ *    berbahaya begitu ada penjaga: `jagaProyek` memvalidasi lingkup dari
+ *    parameter path, sehingga handler yang membaca id dari body bisa
+ *    mengerjakan rapat LAIN daripada yang barusan divalidasi. Penjaga dan
+ *    handler harus membaca nilai yang sama persis.
+ *
+ * KENAPA GERBANG TIDAK PERNAH MENANGKAPNYA. `rute-tanpa-penjaga.test.ts`
+ * menuntut setiap rute berlingkup proyek punya penjaga, dan `/api/v1/meetings/`
+ * memang terdaftar di `POLA_ENTITAS`-nya. Tetapi penguraiannya menuntut jalur
+ * berupa string dalam kutip tepat sesudah `(`; bentuk ARRAY seperti di sini
+ * tidak cocok dengan polanya, sehingga rute ini tidak pernah masuk himpunan
+ * yang diperiksa. Gerbangnya hijau justru karena rutenya tak terlihat. Sesudah
+ * jalurnya jadi string tunggal, rute ini akhirnya ikut terperiksa.
+ */
+router.post(
+  "/api/v1/meetings/:meetingId/analyze-video",
+  jagaProyek("meetingNotes", "U", "meeting"),
+  async (req, res) => {
     try {
-      const logs = await meetingRepository.getAiLearningLogs(meeting.projectId, 10);
-      if (logs && logs.length > 0) {
-        learningNotesStr = logs
-          .map(
-            (log: any, idx: number) =>
-              `[Evaluation #${idx + 1} - ${log.timestamp}]: ${log.evaluation_notes}`
-          )
-          .join("\n");
+      const meetingId = req.params.meetingId;
+      if (!meetingId) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.id_meeting_meetingid_diperlukan",
+          message: "ID Meeting (meetingId) diperlukan.",
+        });
       }
-    } catch (logQueryErr) {
-      console.warn("[MULTIMODAL AI] Gagal mengambil log evaluasi pembelajaran:", logQueryErr);
-    }
 
-    const learningSection = `
+      const meeting = await meetingRepository.findById(meetingId);
+      if (!meeting) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.meeting_tidak_ditemukan",
+          message: "Meeting tidak ditemukan.",
+        });
+      }
+
+      const recordingUrl = meeting.recording_url;
+      if (!recordingUrl) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.file_rekaman_belum_diunggah",
+          message: "File rekaman belum diunggah.",
+        });
+      }
+
+      await meetingRepository.setUploadStatus(meetingId, "ANALYZING_LLM");
+      io.emit("meeting_ai_status", {
+        meetingId,
+        status: "ANALYZING_LLM",
+        progress_percentage: 85,
+        code: "srv.menganalisis_video_audio_multimodal",
+        message: "Menganalisis video & audio multimodal menggunakan Gemini 2.5 Pro...",
+      });
+
+      const safeFileName = path.basename(recordingUrl);
+      const filePath = path.join(GLOBAL_UPLOADS_DIR, safeFileName);
+
+      if (!fs.existsSync(filePath)) {
+        return res
+          .status(404)
+          .json({ status: "error", message: `File rekaman tidak ditemukan di path: ${filePath}` });
+      }
+
+      const fileExt = path.extname(filePath).toLowerCase();
+      let mimeType = "video/mp4";
+      if (fileExt === ".webm") mimeType = "video/webm";
+      else if (fileExt === ".avi") mimeType = "video/x-msvideo";
+      else if (fileExt === ".mov") mimeType = "video/quicktime";
+      else if (fileExt === ".mkv") mimeType = "video/x-matroska";
+      else if (fileExt === ".mp3" || fileExt === ".wav" || fileExt === ".m4a") {
+        mimeType =
+          fileExt === ".mp3" ? "audio/mp3" : fileExt === ".wav" ? "audio/wav" : "audio/x-m4a";
+      }
+
+      console.log(
+        `[MULTIMODAL AI] Reading file for multimodal analysis: ${filePath} (${mimeType})`
+      );
+      const fileBuffer = fs.readFileSync(filePath);
+      const base64File = fileBuffer.toString("base64");
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.kunci_api_gemini_tidak",
+          message: "Kunci API Gemini tidak dikonfigurasi.",
+        });
+      }
+
+      const ai = new GoogleGenAI({
+        apiKey: apiKey,
+        httpOptions: {
+          headers: {
+            "User-Agent": "aistudio-build",
+          },
+        },
+      });
+
+      let learningNotesStr = "";
+      try {
+        const logs = await meetingRepository.getAiLearningLogs(meeting.projectId, 10);
+        if (logs && logs.length > 0) {
+          learningNotesStr = logs
+            .map(
+              (log: any, idx: number) =>
+                `[Evaluation #${idx + 1} - ${log.timestamp}]: ${log.evaluation_notes}`
+            )
+            .join("\n");
+        }
+      } catch (logQueryErr) {
+        console.warn("[MULTIMODAL AI] Gagal mengambil log evaluasi pembelajaran:", logQueryErr);
+      }
+
+      const learningSection = `
 PANDUAN PENINGKATAN KEMAMPUAN ADAPTIF (SELF-IMPROVEMENT):
 - Di bawah ini adalah daftar kritik dan catatan evaluasi dari user mengenai hasil kerja Anda pada rapat-rapat sebelumnya:
   ${learningNotesStr || "Tidak ada catatan evaluasi sebelumnya. Harap berikan hasil analisis terbaik dan detail secara konsisten."}
@@ -553,176 +593,177 @@ PANDUAN PENINGKATAN KEMAMPUAN ADAPTIF (SELF-IMPROVEMENT):
 - Selalu adaptasikan gaya penulisan notulen Anda agar semakin mendekati ekspektasi spesifik yang diminta oleh user dalam log evaluasi tersebut. Jangan ulangi kesalahan klasifikasi atau reduksi informasi yang sama.
 `;
 
-    const multimodalPrompt = `Bertindaklah sebagai Senior Full-Stack Architect, Principal AI Engineer, dan Notulis Profesional. Analisis file video/audio rapat ini secara mendalam baik visual (apa yang tampil di slide, screen-share, peragaan) maupun audio (apa yang diucapkan para pembicara).
+      const multimodalPrompt = `Bertindaklah sebagai Senior Full-Stack Architect, Principal AI Engineer, dan Notulis Profesional. Analisis file video/audio rapat ini secara mendalam baik visual (apa yang tampil di slide, screen-share, peragaan) maupun audio (apa yang diucapkan para pembicara).
       
 Gunakan responseSchema yang diberikan untuk menghasilkan objek JSON utuh tanpa bungkus markdown. Pastikan semua komponen terisi lengkap berdasarkan informasi riil di dalam video. JANGAN gunakan data dummy atau placeholder kosong. List semua peserta rapat yang terdeteksi di dalam list peserta_rapat di tab_metadata.
 
 ${learningSection}`;
 
-    console.log(
-      `[MULTIMODAL AI] Calling Gemini with multimodal prompt on file size: ${fileBuffer.length} bytes`
-    );
+      console.log(
+        `[MULTIMODAL AI] Calling Gemini with multimodal prompt on file size: ${fileBuffer.length} bytes`
+      );
 
-    const responseGemini = await generateContentWithFallback(ai, {
-      model: "gemini-2.5-pro",
-      contents: [
-        {
-          inlineData: {
-            data: base64File,
-            mimeType: mimeType,
+      const responseGemini = await generateContentWithFallback(ai, {
+        model: "gemini-2.5-pro",
+        contents: [
+          {
+            inlineData: {
+              data: base64File,
+              mimeType: mimeType,
+            },
           },
+          {
+            text: multimodalPrompt,
+          },
+        ],
+        config: {
+          temperature: 0.2,
+          responseMimeType: "application/json",
+          responseSchema: MULTIMODAL_ANALYSIS_SCHEMA,
         },
-        {
-          text: multimodalPrompt,
-        },
-      ],
-      config: {
-        temperature: 0.2,
-        responseMimeType: "application/json",
-        responseSchema: MULTIMODAL_ANALYSIS_SCHEMA,
-      },
-    });
+      });
 
-    const analysisJsonText = responseGemini.text ? responseGemini.text.trim() : "{}";
-    let parsedData;
-    try {
-      parsedData = JSON.parse(analysisJsonText);
-    } catch (parseErr) {
-      console.error("Failed to parse multimodal analysis JSON:", parseErr);
-      parsedData = {};
-    }
+      const analysisJsonText = responseGemini.text ? responseGemini.text.trim() : "{}";
+      let parsedData;
+      try {
+        parsedData = JSON.parse(analysisJsonText);
+      } catch (parseErr) {
+        console.error("Failed to parse multimodal analysis JSON:", parseErr);
+        parsedData = {};
+      }
 
-    const ringkasan_eksekutif = parsedData.tab_ringkasan?.executive_summary_multimodal || "";
-    const kronologiList = parsedData.tab_kronologi_rapat || [];
-    const kesimpulanList = parsedData.tab_kesimpulan || [];
-    const saranList = parsedData.tab_saran_dan_ide || [];
-    const tindakLanjutList = parsedData.tab_tindak_lanjut || [];
-    const nextPlanList = parsedData.tab_next_plan || [];
-    const targetToBe = parsedData.tab_target_to_be || {};
-    const metadataVal = parsedData.tab_metadata || {};
+      const ringkasan_eksekutif = parsedData.tab_ringkasan?.executive_summary_multimodal || "";
+      const kronologiList = parsedData.tab_kronologi_rapat || [];
+      const kesimpulanList = parsedData.tab_kesimpulan || [];
+      const saranList = parsedData.tab_saran_dan_ide || [];
+      const tindakLanjutList = parsedData.tab_tindak_lanjut || [];
+      const nextPlanList = parsedData.tab_next_plan || [];
+      const targetToBe = parsedData.tab_target_to_be || {};
+      const metadataVal = parsedData.tab_metadata || {};
 
-    const mappedKronologi = kronologiList.map((item: any) => ({
-      topik_bahasan: `[${item.timestamp}] Visual: ${item.aktivitas_visual}`,
-      latar_belakang_argumen: item.isi_percakapan_inti || "Tidak ada detail argumen.",
-      keputusan_akhir: item.isi_percakapan_inti || "Tidak ada keputusan.",
-    }));
+      const mappedKronologi = kronologiList.map((item: any) => ({
+        topik_bahasan: `[${item.timestamp}] Visual: ${item.aktivitas_visual}`,
+        latar_belakang_argumen: item.isi_percakapan_inti || "Tidak ada detail argumen.",
+        keputusan_akhir: item.isi_percakapan_inti || "Tidak ada keputusan.",
+      }));
 
-    const mappedTindakLanjut = tindakLanjutList.map((item: any) => ({
-      pembicara: "Rapat",
-      kekhawatiran_spesifik: item.concern_masalah || "",
-      solusi_dan_arahan: item.solusi_disepakati || "",
-    }));
+      const mappedTindakLanjut = tindakLanjutList.map((item: any) => ({
+        pembicara: "Rapat",
+        kekhawatiran_spesifik: item.concern_masalah || "",
+        solusi_dan_arahan: item.solusi_disepakati || "",
+      }));
 
-    const mappedNextPlan = nextPlanList.map((item: any) => ({
-      action_item: item.action_item || "",
-      pic: item.pic || "TBD",
-      estimasi_waktu: item.due_date || "TBD",
-    }));
-
-    const mappedTargetToBe = {
-      proses_bisnis_as_is: targetToBe.proses_bisnis_as_is || "",
-      proses_bisnis_to_be: targetToBe.proses_bisnis_to_be || "",
-      langkah_transisi: targetToBe.langkah_transisi || [],
-    };
-
-    const mappedMetadata = {
-      topik_utama: parsedData.tab_ringkasan?.topik_utama || "Rapat Multimodal",
-      tanggal_waktu: metadataVal.tanggal_rapat || new Date().toISOString().split("T")[0],
-      peserta_aktif: metadataVal.peserta_rapat || [],
-    };
-
-    const compatibleSummary = {
-      ringkasan_eksekutif,
-      kronologi_dan_kesimpulan: mappedKronologi,
-      tindak_lanjut_dan_concern: mappedTindakLanjut,
-      next_plan_roadmap: mappedNextPlan,
-      target_to_be_architecture: mappedTargetToBe,
-      tab_ringkasan: parsedData.tab_ringkasan,
-      tab_kronologi_rapat: parsedData.tab_kronologi_rapat,
-      tab_kesimpulan: parsedData.tab_kesimpulan,
-      tab_saran_dan_ide: parsedData.tab_saran_dan_ide,
-      tab_tindak_lanjut: parsedData.tab_tindak_lanjut,
-      tab_next_plan: parsedData.tab_next_plan,
-      tab_target_to_be: parsedData.tab_target_to_be,
-      tab_metadata: parsedData.tab_metadata,
-      notulen_rapat: kronologiList.map((item: any) => ({
-        topik: `[${item.timestamp}] Visual: ${item.aktivitas_visual}`,
-        pembahasan: item.isi_percakapan_inti || "",
-      })),
-      kesimpulan: kesimpulanList,
-      saran: saranList.map((item: any) => `${item.diusulkan_oleh}: ${item.deskripsi_ide}`),
-      meeting_metadata: mappedMetadata,
-      poin_diskusi_tambahan: tindakLanjutList.map((item: any) => ({
-        concern: item.concern_masalah || "",
-        tindakanLanjut: item.solusi_disepakati || "",
-        PIC: "TBD",
-        targetDate: "TBD",
-      })),
-      next_plan: nextPlanList.map((item: any) => ({
-        tahapan: item.action_item || "",
-        deskripsi: `PIC: ${item.pic}. Target: ${item.due_date}`,
+      const mappedNextPlan = nextPlanList.map((item: any) => ({
+        action_item: item.action_item || "",
+        pic: item.pic || "TBD",
         estimasi_waktu: item.due_date || "TBD",
-      })),
-      to_be_scenario: {
-        kondisi_sekarang: targetToBe.proses_bisnis_as_is || "",
-        target_ke_depan: targetToBe.proses_bisnis_to_be || "",
+      }));
+
+      const mappedTargetToBe = {
+        proses_bisnis_as_is: targetToBe.proses_bisnis_as_is || "",
+        proses_bisnis_to_be: targetToBe.proses_bisnis_to_be || "",
         langkah_transisi: targetToBe.langkah_transisi || [],
-      },
-    };
+      };
 
-    const finalJsonStr = JSON.stringify(compatibleSummary);
-    const detailId = crypto.randomUUID();
+      const mappedMetadata = {
+        topik_utama: parsedData.tab_ringkasan?.topik_utama || "Rapat Multimodal",
+        tanggal_waktu: metadataVal.tanggal_rapat || new Date().toISOString().split("T")[0],
+        peserta_aktif: metadataVal.peserta_rapat || [],
+      };
 
-    await meetingRepository.saveMultimodalDetails(detailId, meetingId, parsedData, finalJsonStr);
+      const compatibleSummary = {
+        ringkasan_eksekutif,
+        kronologi_dan_kesimpulan: mappedKronologi,
+        tindak_lanjut_dan_concern: mappedTindakLanjut,
+        next_plan_roadmap: mappedNextPlan,
+        target_to_be_architecture: mappedTargetToBe,
+        tab_ringkasan: parsedData.tab_ringkasan,
+        tab_kronologi_rapat: parsedData.tab_kronologi_rapat,
+        tab_kesimpulan: parsedData.tab_kesimpulan,
+        tab_saran_dan_ide: parsedData.tab_saran_dan_ide,
+        tab_tindak_lanjut: parsedData.tab_tindak_lanjut,
+        tab_next_plan: parsedData.tab_next_plan,
+        tab_target_to_be: parsedData.tab_target_to_be,
+        tab_metadata: parsedData.tab_metadata,
+        notulen_rapat: kronologiList.map((item: any) => ({
+          topik: `[${item.timestamp}] Visual: ${item.aktivitas_visual}`,
+          pembahasan: item.isi_percakapan_inti || "",
+        })),
+        kesimpulan: kesimpulanList,
+        saran: saranList.map((item: any) => `${item.diusulkan_oleh}: ${item.deskripsi_ide}`),
+        meeting_metadata: mappedMetadata,
+        poin_diskusi_tambahan: tindakLanjutList.map((item: any) => ({
+          concern: item.concern_masalah || "",
+          tindakanLanjut: item.solusi_disepakati || "",
+          PIC: "TBD",
+          targetDate: "TBD",
+        })),
+        next_plan: nextPlanList.map((item: any) => ({
+          tahapan: item.action_item || "",
+          deskripsi: `PIC: ${item.pic}. Target: ${item.due_date}`,
+          estimasi_waktu: item.due_date || "TBD",
+        })),
+        to_be_scenario: {
+          kondisi_sekarang: targetToBe.proses_bisnis_as_is || "",
+          target_ke_depan: targetToBe.proses_bisnis_to_be || "",
+          langkah_transisi: targetToBe.langkah_transisi || [],
+        },
+      };
 
-    // #182: notulen sudah tersimpan di finalJsonStr — berkas video/audio mentah
-    // tidak lagi dibutuhkan. Dihapus dari disk supaya tidak menumpuk permanen
-    // (disk lokal di serverless bersifat sementara, lihat npm run doctor §6).
-    try {
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-      await meetingRepository.clearRecordingFile(meetingId);
-    } catch (cleanupErr) {
-      console.warn("[MULTIMODAL AI] Gagal menghapus berkas rekaman pasca-analisis:", cleanupErr);
-    }
+      const finalJsonStr = JSON.stringify(compatibleSummary);
+      const detailId = crypto.randomUUID();
 
-    io.emit("meeting_ai_status", {
-      meetingId,
-      status: "COMPLETED",
-      progress_percentage: 100,
-      code: "srv.pemrosesan_analisis_video_multimodal",
-      message: "Pemrosesan analisis video multimodal selesai!",
-    });
+      await meetingRepository.saveMultimodalDetails(detailId, meetingId, parsedData, finalJsonStr);
 
-    io.emit("meeting_ai_completed", {
-      meetingId,
-      status: "COMPLETED",
-      progress_percentage: 100,
-      aiSummary: compatibleSummary,
-      analysis_result: compatibleSummary,
-      transcript:
-        meeting.transcript ||
-        "Transkrip tidak tersedia. Analisis dilakukan langsung dari rekaman visual video.",
-    });
+      // #182: notulen sudah tersimpan di finalJsonStr — berkas video/audio mentah
+      // tidak lagi dibutuhkan. Dihapus dari disk supaya tidak menumpuk permanen
+      // (disk lokal di serverless bersifat sementara, lihat npm run doctor §6).
+      try {
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        await meetingRepository.clearRecordingFile(meetingId);
+      } catch (cleanupErr) {
+        console.warn("[MULTIMODAL AI] Gagal menghapus berkas rekaman pasca-analisis:", cleanupErr);
+      }
 
-    return res.json({
-      status: "success",
-      code: "srv.analisis_video_multimodal_berhasil",
-      message: "Analisis video multimodal berhasil dilakukan dan disimpan.",
-      data: {
-        detailId,
+      io.emit("meeting_ai_status", {
         meetingId,
-        analysis: parsedData,
-      },
-    });
-  } catch (error: any) {
-    console.error("[MULTIMODAL API ERROR] Error processing video analysis:", error);
-    return res.status(500).json({
-      status: "error",
-      code: "srv.gagal_memproses_analisis_video",
-      message: "Gagal memproses analisis video multimodal: " + error.message,
-    });
+        status: "COMPLETED",
+        progress_percentage: 100,
+        code: "srv.pemrosesan_analisis_video_multimodal",
+        message: "Pemrosesan analisis video multimodal selesai!",
+      });
+
+      io.emit("meeting_ai_completed", {
+        meetingId,
+        status: "COMPLETED",
+        progress_percentage: 100,
+        aiSummary: compatibleSummary,
+        analysis_result: compatibleSummary,
+        transcript:
+          meeting.transcript ||
+          "Transkrip tidak tersedia. Analisis dilakukan langsung dari rekaman visual video.",
+      });
+
+      return res.json({
+        status: "success",
+        code: "srv.analisis_video_multimodal_berhasil",
+        message: "Analisis video multimodal berhasil dilakukan dan disimpan.",
+        data: {
+          detailId,
+          meetingId,
+          analysis: parsedData,
+        },
+      });
+    } catch (error: any) {
+      console.error("[MULTIMODAL API ERROR] Error processing video analysis:", error);
+      return res.status(500).json({
+        status: "error",
+        code: "srv.gagal_memproses_analisis_video",
+        message: "Gagal memproses analisis video multimodal: " + error.message,
+      });
+    }
   }
-});
+);
 
 router.post(
   "/api/projects/:projectId/meetings/:id/analyze-transcript",
