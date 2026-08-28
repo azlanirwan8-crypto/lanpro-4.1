@@ -3227,10 +3227,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               </div>
             )}
 
-            {/* Tab: Project — delegasi, daftar proyek terkait + tugasnya.
-                  Form delegasi & tombol keluarkan HANYA di mode edit — mode
-                  lihat murni baca-saja, mengikuti tab "Projects" Velzon. */}
-            {activeTab === "project" && (
+            {/* Tab: Project (Mode Edit) — delegasi & manajemen proyek */}
+            {pageMode === "edit" && activeTab === "project" && (
               <div className="space-y-5">
                 {/* Form Delegasi Project Baru */}
                 {isAdmin && pageMode === "edit" && (
