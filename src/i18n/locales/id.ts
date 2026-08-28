@@ -1415,6 +1415,7 @@ export const id = {
     delegateNewProject: "Delegasikan ke Proyek Baru",
     delegateHint: "Tambahkan akses proyek dan peranan pengguna ini dalam tim.",
     delegate: "Delegasikan",
+    searchProjectPlaceholder: "Cari project...",
     noActiveProject: "Pengguna belum tergabung dalam proyek aktif.",
     noAssignedTask: "Tidak ada tugas aktif yang ditugaskan kepada pengguna ini.",
     accountStatus: "Status Akun",

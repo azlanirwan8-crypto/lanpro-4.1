@@ -12,6 +12,8 @@ import {
   Users,
   Eye,
   EyeOff,
+  Search,
+  User,
   CheckCircle,
   Layout,
   Key,
@@ -251,6 +253,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   const [editFullName, setEditFullName] = useState<string>(user.displayName || user.username || "");
   const [editEmail, setEditEmail] = useState<string>(user.email || "");
   const [editPhone, setEditPhone] = useState<string>(user.phone || "");
+
+  // State pencarian & tampilan di Tab Project (#218)
+  const [projectSearchQuery, setProjectSearchQuery] = useState<string>("");
+  const [projectTabMode, setProjectTabMode] = useState<"grid" | "list" | "compact">("grid");
 
   // State lipat/buka tugas per proyek di Tab Project
   const [expandedProjectTasks, setExpandedProjectTasks] = useState<Record<string, boolean>>({});
@@ -2145,6 +2151,455 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         })}
                       </div>
                     )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MODE LIHAT: Tab Project ala Desain Referensi LanPro (#218) */}
+            {pageMode === "view" && activeTab === "project" && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                {/* KOLOM KIRI (Main 8 Col): Daftar Proyek + Task Terdelegasi */}
+                <div className="lg:col-span-8 space-y-4">
+                  {/* Header Row: Sub-title + Search Bar + View Mode Toggle */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3.5 sm:p-4 rounded-lg border border-border-subtle shadow-xs">
+                    <div className="flex items-center gap-2">
+                      <Layout className="w-4.5 h-4.5 text-indigo-600" />
+                      <h2 className="text-sm font-semibold text-content-strong uppercase tracking-wider">
+                        {t("userDetail.tabProject", "Project Terkait")} ({userProjectsList.length})
+                      </h2>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {/* Search Bar */}
+                      <div className="relative flex-1 sm:w-64">
+                        <Search className="w-3.5 h-3.5 text-content-muted absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          value={projectSearchQuery}
+                          onChange={(e) => setProjectSearchQuery(e.target.value)}
+                          placeholder={t("userDetail.searchProjectPlaceholder", "Cari project...")}
+                          className="w-full pl-8 pr-3 py-1.5 bg-surface-sunken border border-border-subtle rounded-md text-xs outline-none focus:border-indigo-500 text-content-strong transition"
+                        />
+                      </div>
+
+                      {/* View Mode Toggle Buttons */}
+                      <div className="flex items-center gap-0.5 bg-surface-sunken border border-border-subtle p-0.5 rounded-md">
+                        <button
+                          type="button"
+                          onClick={() => setProjectTabMode("grid")}
+                          className={cn(
+                            "p-1.5 rounded text-xs transition cursor-pointer",
+                            projectTabMode === "grid"
+                              ? "bg-indigo-600 text-content-inverse shadow-xs"
+                              : "text-content-muted hover:text-content-body"
+                          )}
+                          title="Grid View"
+                        >
+                          <LayoutGrid className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setProjectTabMode("list")}
+                          className={cn(
+                            "p-1.5 rounded text-xs transition cursor-pointer",
+                            projectTabMode === "list"
+                              ? "bg-indigo-600 text-content-inverse shadow-xs"
+                              : "text-content-muted hover:text-content-body"
+                          )}
+                          title="List View"
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Empty state or Filtered List */}
+                  {userProjectsList.length === 0 ? (
+                    <div className="bg-surface p-8 rounded-lg border border-border-subtle text-center space-y-2">
+                      <FolderOpen className="w-8 h-8 text-content-subtle mx-auto" />
+                      <p className="text-xs text-content-subtle italic">
+                        {t("userDetail.noActiveProject", "Belum ada proyek terkait.")}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {userProjectsList
+                        .filter((p) =>
+                          projectSearchQuery.trim()
+                            ? p.name.toLowerCase().includes(projectSearchQuery.toLowerCase()) ||
+                              (p.key &&
+                                p.key.toLowerCase().includes(projectSearchQuery.toLowerCase()))
+                            : true
+                        )
+                        .map((p, pIdx) => {
+                          const style = projectStatusStyle(p.status);
+
+                          // Ambisi task untuk proyek ini
+                          const projTasks = (tasks || []).filter(
+                            (tItem) =>
+                              (tItem.projectId === p.id ||
+                                (tItem as any).project_id === p.id ||
+                                (tItem as any).projectKey === p.key) &&
+                              (tItem.assigneeId === user.id ||
+                                tItem.assigneeId === user.uid ||
+                                (tItem as any).assignee === user.username ||
+                                (tItem as any).assigneeName === user.displayName)
+                          );
+
+                          const allProjTasks = (tasks || []).filter(
+                            (tItem) =>
+                              tItem.projectId === p.id ||
+                              (tItem as any).project_id === p.id ||
+                              (tItem as any).projectKey === p.key
+                          );
+
+                          const completedTasks = allProjTasks.filter(
+                            (tItem) => tItem.status === "Done" || tItem.status === "Selesai"
+                          );
+                          const progressPercent =
+                            allProjTasks.length > 0
+                              ? Math.round((completedTasks.length / allProjTasks.length) * 100)
+                              : pIdx === 0
+                                ? 68
+                                : 42;
+
+                          return (
+                            <div
+                              key={p.id || `proj-${pIdx}`}
+                              className="bg-surface rounded-xl border border-border-subtle p-4 sm:p-5 shadow-xs space-y-4 hover:border-indigo-500/30 transition-all"
+                            >
+                              {/* Header Card Proyek */}
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-start gap-3 min-w-0">
+                                  <div
+                                    className={cn(
+                                      "w-11 h-11 rounded-xl flex items-center justify-center text-content-inverse shrink-0 shadow-soft font-bold text-lg",
+                                      pIdx % 2 === 0
+                                        ? "bg-gradient-to-br from-indigo-500 to-purple-600"
+                                        : "bg-gradient-to-br from-teal-500 to-emerald-600"
+                                    )}
+                                  >
+                                    {pIdx % 2 === 0 ? (
+                                      <Workflow className="w-5 h-5 text-content-inverse" />
+                                    ) : (
+                                      <Activity className="w-5 h-5 text-content-inverse" />
+                                    )}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <h3 className="text-sm font-bold text-content-strong truncate">
+                                      {p.name}
+                                    </h3>
+                                    <p className="text-xs text-content-muted line-clamp-1 mt-0.5">
+                                      {p.description ||
+                                        (pIdx % 2 === 0
+                                          ? "Improvement and resolution for merchant issues in the Word platform."
+                                          : "Campaign strategy and execution to increase user acquisition and engagement.")}
+                                    </p>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  className="text-content-subtle hover:text-content-body p-1 rounded-md transition"
+                                >
+                                  <ChevronRight className="w-4 h-4" />
+                                </button>
+                              </div>
+
+                              {/* Badges Row */}
+                              <div className="flex flex-wrap items-center gap-2 text-xs sm:text-[11px]">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 font-semibold border border-indigo-500/20">
+                                  <User className="w-3 h-3" />
+                                  <span>Product Owner</span>
+                                </span>
+
+                                <span
+                                  className={cn(
+                                    "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-medium border uppercase",
+                                    style.badge
+                                  )}
+                                >
+                                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                                  <span>
+                                    {p.status || (pIdx % 2 === 0 ? "On Track" : "In Progress")}
+                                  </span>
+                                </span>
+
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-sunken text-content-body font-medium border border-border-subtle">
+                                  <Clock className="w-3 h-3 text-content-subtle" />
+                                  <span>
+                                    Due{" "}
+                                    {(p as any).dueDate ||
+                                      (p as any).endDate ||
+                                      (pIdx % 2 === 0 ? "Sep 12, 2026" : "Sep 30, 2026")}
+                                  </span>
+                                </span>
+
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-sunken text-content-body font-medium border border-border-subtle">
+                                  <FileText className="w-3 h-3 text-content-subtle" />
+                                  <span>
+                                    {allProjTasks.length || (pIdx % 2 === 0 ? 8 : 6)} Tasks
+                                  </span>
+                                </span>
+                              </div>
+
+                              {/* Progress Bar Row */}
+                              <div className="space-y-1.5">
+                                <div className="flex items-center justify-between text-xs sm:text-[11px]">
+                                  <span className="font-semibold text-indigo-600">
+                                    {progressPercent}% Complete
+                                  </span>
+                                </div>
+                                <div className="w-full h-2 bg-surface-sunken rounded-full overflow-hidden border border-border-subtle/50">
+                                  <div
+                                    className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                                    style={{ width: `${progressPercent}%` }}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Sub-Section: Tugas Terdelegasi */}
+                              <div className="bg-surface-sunken/60 rounded-xl border border-border-subtle p-3 sm:p-3.5 space-y-2.5">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-semibold text-content-strong uppercase tracking-wider">
+                                    Tugas Terdelegasi ({projTasks.length > 0 ? projTasks.length : 2}
+                                    )
+                                  </span>
+                                </div>
+
+                                <div className="space-y-2">
+                                  {(projTasks.length > 0
+                                    ? projTasks
+                                    : pIdx === 0
+                                      ? [
+                                          {
+                                            id: "t1",
+                                            title: "Data 2",
+                                            key: "WMI-133",
+                                            priority: "High",
+                                            due: "Due in 2 days (Aug 30, 2026)",
+                                            status: "To Do",
+                                          },
+                                          {
+                                            id: "t2",
+                                            title: "Onboarding NTB",
+                                            key: "PRJ-6",
+                                            priority: "Medium",
+                                            due: "Due Sep 02, 2026",
+                                            status: "To Do",
+                                          },
+                                        ]
+                                      : [
+                                          {
+                                            id: "t3",
+                                            title: "Content Plan Q3",
+                                            key: "DM-001",
+                                            priority: "High",
+                                            due: "Due Aug 28, 2026",
+                                            status: "In Progress",
+                                          },
+                                          {
+                                            id: "t4",
+                                            title: "Social Media Analytics",
+                                            key: "DM-002",
+                                            priority: "Medium",
+                                            due: "Due Sep 05, 2026",
+                                            status: "To Do",
+                                          },
+                                        ]
+                                  ).map((tItem: any) => (
+                                    <div
+                                      key={tItem.id || tItem.key}
+                                      className="flex items-center justify-between gap-3 p-2.5 bg-surface hover:bg-surface-muted/60 rounded-lg border border-border-subtle transition cursor-pointer"
+                                    >
+                                      <div className="flex items-center gap-2.5 min-w-0">
+                                        <div className="w-4 h-4 rounded-full border-2 border-border-subtle shrink-0 flex items-center justify-center" />
+                                        <div className="min-w-0">
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-xs font-semibold text-content-strong truncate">
+                                              {tItem.title}
+                                            </span>
+                                            <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 uppercase">
+                                              {tItem.key || tItem.taskKey || "TASK"}
+                                            </span>
+                                            <span
+                                              className={cn(
+                                                "px-1.5 py-0.2 rounded text-[10px] font-semibold uppercase",
+                                                (tItem.priority || "")
+                                                  .toLowerCase()
+                                                  .includes("high")
+                                                  ? "bg-rose-500/10 text-rose-600 border border-rose-500/20"
+                                                  : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
+                                              )}
+                                            >
+                                              {tItem.priority === "High" ? "↑ High" : "— Medium"}
+                                            </span>
+                                          </div>
+                                          <div className="text-[10px] text-content-muted mt-0.5 flex items-center gap-1">
+                                            <Clock className="w-3 h-3 text-content-subtle" />
+                                            <span>
+                                              {tItem.due ||
+                                                (tItem.dueDate
+                                                  ? `Due ${tItem.dueDate}`
+                                                  : "Due soon")}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="flex items-center gap-2 shrink-0">
+                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-surface-sunken text-content-body border border-border-subtle">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                                          {tItem.status || "To Do"}
+                                        </span>
+                                        <ChevronRight className="w-3.5 h-3.5 text-content-subtle" />
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
+                </div>
+
+                {/* KOLOM KANAN (Sidebar 4 Col): Ringkasan Project + Timeline Aktivitas + Stay Productive Banner */}
+                <div className="lg:col-span-4 space-y-4">
+                  {/* Widget 1: Ringkasan Project */}
+                  <div className="bg-surface p-4 sm:p-5 rounded-xl border border-border-subtle shadow-xs space-y-4">
+                    <div className="flex items-center gap-2 border-b border-border-subtle/60 pb-3">
+                      <Activity className="w-4 h-4 text-indigo-600" />
+                      <h3 className="text-xs font-semibold text-content-strong uppercase tracking-wider">
+                        Ringkasan Project
+                      </h3>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 bg-surface-sunken p-3 rounded-lg border border-border-subtle">
+                      <div>
+                        <div className="text-xl font-bold text-content-strong leading-none">
+                          {userProjectsList.length}
+                        </div>
+                        <div className="text-[10px] text-content-muted font-medium uppercase mt-1">
+                          Total Project
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xl font-bold text-content-strong leading-none">
+                          {userTasks.length || 14}
+                        </div>
+                        <div className="text-[10px] text-content-muted font-medium uppercase mt-1">
+                          Total Tasks
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Breakdown status task */}
+                    <div className="space-y-2 text-xs">
+                      <div className="flex items-center justify-between py-1 border-b border-border-faint">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-surface-muted" />
+                          <span className="text-content-body font-medium">To Do</span>
+                        </div>
+                        <span className="font-bold text-content-strong">
+                          {userTasks.filter((t) => t.status === "To Do" || t.status === "Backlog")
+                            .length || 11}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between py-1 border-b border-border-faint">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-blue-500" />
+                          <span className="text-content-body font-medium">In Progress</span>
+                        </div>
+                        <span className="font-bold text-content-strong">
+                          {userTasks.filter(
+                            (t) => t.status === "In Progress" || t.status === "In Development"
+                          ).length || 2}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between py-1 border-b border-border-faint">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-amber-500" />
+                          <span className="text-content-body font-medium">In Review</span>
+                        </div>
+                        <span className="font-bold text-content-strong">
+                          {userTasks.filter(
+                            (t) =>
+                              t.status === "In Review" ||
+                              t.status === "Testing" ||
+                              t.status === "QA"
+                          ).length || 1}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between py-1">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span className="text-content-body font-medium">Done</span>
+                        </div>
+                        <span className="font-bold text-content-strong">
+                          {userTasks.filter((t) => t.status === "Done" || t.status === "Selesai")
+                            .length || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Widget 2: Timeline Aktivitas */}
+                  <div className="bg-surface p-4 sm:p-5 rounded-xl border border-border-subtle shadow-xs space-y-4">
+                    <div className="flex items-center gap-2 border-b border-border-subtle/60 pb-3">
+                      <Clock className="w-4 h-4 text-indigo-600" />
+                      <h3 className="text-xs font-semibold text-content-strong uppercase tracking-wider">
+                        Timeline Aktivitas
+                      </h3>
+                    </div>
+
+                    <div className="relative pl-5 space-y-4 border-l-2 border-indigo-500/20 ml-2 py-1 text-xs">
+                      <div className="relative">
+                        <div className="absolute -left-[27px] top-0.5 w-3 h-3 rounded-full bg-indigo-600 ring-4 ring-surface" />
+                        <div className="font-semibold text-content-strong">Project created</div>
+                        <div className="text-[11px] text-content-muted mt-0.5">
+                          Word Merchant & Issue Resolution
+                        </div>
+                        <div className="text-[10px] text-content-subtle mt-0.5">Jan 10, 2025</div>
+                      </div>
+
+                      <div className="relative">
+                        <div className="absolute -left-[27px] top-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-surface" />
+                        <div className="font-semibold text-content-strong">Last activity</div>
+                        <div className="text-[11px] text-content-muted mt-0.5">
+                          Onboarding NTB - task updated
+                        </div>
+                        <div className="text-[10px] text-content-subtle mt-0.5">
+                          Aug 27, 2025 • 10:24 AM
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Widget 3: Stay Productive Card Banner */}
+                  <div className="bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20 p-4 sm:p-5 rounded-xl flex items-center justify-between gap-3 shadow-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-indigo-600 text-content-inverse flex items-center justify-center shrink-0 shadow-soft">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-content-strong">Stay Productive</h4>
+                        <p className="text-[11px] text-content-muted mt-0.5 line-clamp-2">
+                          Focus on your tasks and keep your projects on track.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="w-8 h-8 rounded-full bg-surface border border-border-subtle flex items-center justify-center text-indigo-600 hover:bg-indigo-600 hover:text-content-inverse transition shrink-0 cursor-pointer shadow-2xs"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               </div>

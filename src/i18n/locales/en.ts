@@ -1412,6 +1412,7 @@ export const en = {
     delegateNewProject: "Delegate to a New Project",
     delegateHint: "Add project access and this user's role in the team.",
     delegate: "Delegate",
+    searchProjectPlaceholder: "Search project...",
     noActiveProject: "This user has not joined any active project.",
     noAssignedTask: "No active task assigned to this user.",
     accountStatus: "Account Status",
