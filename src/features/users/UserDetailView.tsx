@@ -1536,15 +1536,6 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     />
                   </label>
 
-                  {pageMode === "view" && (isAdmin || isSelf) && (
-                    <button
-                      onClick={enterEditMode}
-                      className="flex items-center gap-1.5 px-3.5 py-1.5 bg-surface-sunken/40 hover:bg-surface-sunken/60 text-content-inverse rounded-full text-xs font-medium backdrop-blur-md transition cursor-pointer border border-border-subtle/30"
-                    >
-                      <UserCog className="w-3.5 h-3.5" />
-                      <span>{t("userDetail.editProfile")}</span>
-                    </button>
-                  )}
                   {pageMode === "edit" && (
                     <button
                       onClick={handleSaveUser}
@@ -1673,14 +1664,18 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           {t("userDetail.tabPersonalDetail")}
                         </h3>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setPageMode("edit")}
-                        className="px-3.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 hover:bg-indigo-600 hover:text-content-inverse transition-all flex items-center gap-1 cursor-pointer border border-indigo-500/20"
-                      >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit</span>
-                      </button>
+                      {(isAdmin || isSelf) && pageMode === "view" && (
+                        <button
+                          type="button"
+                          onClick={enterEditMode}
+                          aria-label="Edit Profile"
+                          title="Edit Profile"
+                          className="px-3.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 hover:bg-indigo-600 hover:text-content-inverse transition-all flex items-center gap-1 cursor-pointer border border-indigo-500/20"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>Edit</span>
+                        </button>
+                      )}
                     </div>
                     <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 text-xs items-baseline pt-1">
                       <span className="font-medium text-content-muted whitespace-nowrap">
@@ -1919,8 +1914,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         {t("userDetail.noActivity")}
                       </p>
                     ) : (
-                      <div className="max-h-[300px] overflow-y-auto pr-2 pl-3 py-1 custom-scrollbar">
-                        <div className="relative pl-6 ml-3 space-y-6 border-l-2 border-border-subtle">
+                      <div className="max-h-[300px] overflow-y-auto pr-2 pl-4 py-1 custom-scrollbar">
+                        <div className="relative pl-8 space-y-6 border-l-2 border-border-subtle ml-2">
                           {userActivityLogsFiltered.map((log) => {
                             const actDate = ensureDate(log.createdAt);
 
@@ -1938,31 +1933,33 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                             return (
                               <div key={log.id} className="relative group">
-                                <div className="absolute -left-[37px] top-0 flex items-center justify-center">
+                                {/* Small green dot sitting directly on the vertical line */}
+                                <div className="absolute -left-[37px] top-2.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-surface shadow-xs" />
+
+                                <div className="flex items-start gap-3">
                                   <UserAvatar
                                     user={user}
-                                    className="w-6 h-6 text-xs ring-4 ring-surface shadow-xs"
+                                    className="w-7 h-7 text-xs shrink-0 ring-2 ring-surface shadow-xs mt-0.5"
                                   />
-                                </div>
-
-                                <div className="space-y-1.5 ml-1">
-                                  <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                                    <span className="font-semibold text-content-strong">
-                                      {user.displayName || user.username}
-                                    </span>
-                                    <span className="text-content-subtle">
-                                      {humanizeActivityAction(log.action, formattedDetails)}
-                                    </span>
-                                    <span className="text-content-subtle text-xs">
-                                      • {formatDistanceToNow(actDate, { addSuffix: true })}
-                                    </span>
-                                  </div>
-
-                                  {formattedDetails && formattedDetails !== log.action && (
-                                    <div className="text-xs text-content-secondary leading-relaxed bg-surface-sunken/80 p-3.5 rounded-xl border border-border-subtle/50 mt-2">
-                                      {formattedDetails}
+                                  <div className="space-y-1.5 flex-1 min-w-0">
+                                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                                      <span className="font-semibold text-content-strong">
+                                        {user.displayName || user.username}
+                                      </span>
+                                      <span className="text-content-subtle">
+                                        {humanizeActivityAction(log.action, formattedDetails)}
+                                      </span>
+                                      <span className="text-content-subtle text-xs">
+                                        • {formatDistanceToNow(actDate, { addSuffix: true })}
+                                      </span>
                                     </div>
-                                  )}
+
+                                    {formattedDetails && formattedDetails !== log.action && (
+                                      <div className="text-xs text-content-secondary leading-relaxed bg-surface-sunken/80 p-3.5 rounded-xl border border-border-subtle/50 mt-1.5">
+                                        {formattedDetails}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             );
