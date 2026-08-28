@@ -1699,10 +1699,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
                 {/* LEFT: kartu "Info" ala Velzon, Team, dan Login History */}
                 <div className="lg:col-span-4 space-y-5">
-                  <div className="bg-surface p-4 sm:p-5 rounded-lg border border-border-subtle shadow-xs space-y-3">
+                  <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4 text-indigo-600" />
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                          <User className="w-4.5 h-4.5" />
+                        </div>
                         <h3 className="text-xs font-semibold text-content-strong uppercase tracking-wider">
                           {t("userDetail.tabPersonalDetail")}
                         </h3>
@@ -1710,13 +1712,13 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       <button
                         type="button"
                         onClick={() => setPageMode("edit")}
-                        className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 hover:bg-indigo-600 hover:text-content-inverse transition-all flex items-center gap-1 cursor-pointer border border-indigo-500/20"
+                        className="px-3.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 hover:bg-indigo-600 hover:text-content-inverse transition-all flex items-center gap-1 cursor-pointer border border-indigo-500/20"
                       >
-                        <Edit3 className="w-3 h-3" />
+                        <Edit3 className="w-3.5 h-3.5" />
                         <span>Edit</span>
                       </button>
                     </div>
-                    <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2.5 text-xs items-baseline pt-1">
+                    <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-3 text-xs items-baseline pt-1">
                       <span className="font-medium text-content-muted whitespace-nowrap">
                         {t("userDetail.fullName")} :
                       </span>
@@ -1752,19 +1754,20 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Team Members */}
-                  <div className="bg-surface p-4 rounded-lg border border-border-subtle shadow-xs space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-indigo-600" />
-                        <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider">
+                  <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                        <Users className="w-4.5 h-4.5" />
+                      </div>
+                      <div>
+                        <h3 className="text-xs font-semibold text-content-strong uppercase tracking-wider">
                           {t("userDetail.teamTitle")} ({teammates.length})
                         </h3>
+                        <p className="text-[11px] text-content-muted mt-0.5">
+                          {t("userDetail.teamHint")}
+                        </p>
                       </div>
                     </div>
-                    <p className="text-xs sm:text-[11px] text-content-muted -mt-2">
-                      {t("userDetail.teamHint")}
-                    </p>
                     {teammates.length === 0 ? (
                       <p className="text-xs text-content-subtle italic py-4 text-center">
                         {t("userDetail.noTeammates")}
@@ -1774,14 +1777,14 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         {teammates.map((tm) => (
                           <div
                             key={tm.id || tm.uid}
-                            className="flex items-center gap-2.5 py-2 first:pt-0 last:pb-0"
+                            className="flex items-center gap-3 py-2.5 first:pt-1 last:pb-0"
                           >
-                            <UserAvatar user={tm} className="w-8 h-8 text-xs shrink-0" />
+                            <UserAvatar user={tm} className="w-9 h-9 text-xs shrink-0" />
                             <div className="min-w-0">
-                              <div className="text-xs font-medium text-content-strong truncate">
+                              <div className="text-xs font-semibold text-content-strong truncate">
                                 {tm.displayName || tm.username || tm.email}
                               </div>
-                              <div className="text-xs sm:text-[10px] text-indigo-500 truncate">
+                              <div className="text-xs text-content-muted font-medium truncate mt-0.5">
                                 {getPosName(tm.position) || tm.role || ""}
                               </div>
                             </div>
@@ -1791,12 +1794,13 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     )}
                   </div>
 
-                  {/* Section: Login History di bawah Panel Team ala Velzon */}
-                  <div className="bg-surface p-4 rounded-lg border border-border-subtle shadow-xs space-y-3">
+                  <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Laptop className="w-4 h-4 text-indigo-600" />
-                        <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                          <Laptop className="w-4.5 h-4.5" />
+                        </div>
+                        <h3 className="text-xs font-semibold text-content-strong uppercase tracking-wider">
                           {t("userDetail.loginHistory")}
                         </h3>
                       </div>
@@ -1804,15 +1808,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <button
                           type="button"
                           onClick={handleRevokeAllOtherSessions}
-                          className="text-xs sm:text-[10px] text-rose-600 hover:underline font-medium cursor-pointer"
+                          className="text-xs text-rose-600 hover:underline font-semibold cursor-pointer"
                         >
                           {t("userDetail.allLogout")}
                         </button>
                       )}
                     </div>
-                    <p className="text-xs sm:text-[11px] text-content-muted -mt-2">
-                      {t("userDetail.loginHistoryHint")}
-                    </p>
 
                     <div className="divide-y divide-border-faint max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
                       {userSessions.map((item) => {
@@ -1826,45 +1827,40 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         return (
                           <div
                             key={item.id}
-                            className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between gap-2"
+                            className="py-3 first:pt-1 last:pb-0 flex items-center justify-between gap-3"
                           >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="p-1.5 rounded-md bg-surface-sunken border border-border-subtle text-indigo-600 shrink-0">
-                                <DeviceIcon className="w-3.5 h-3.5" />
+                            <div className="flex items-center gap-3 min-w-0 flex-1">
+                              <div className="w-9 h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                                <DeviceIcon className="w-4.5 h-4.5" />
                               </div>
                               <div className="min-w-0">
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-2">
                                   <span className="text-xs font-semibold text-content-strong truncate">
                                     {item.device}
                                   </span>
                                   {item.isCurrent && (
-                                    <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/15 text-emerald-700 shrink-0">
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-700 shrink-0">
                                       {t("userDetail.currentDevice")}
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-[10px] text-content-muted truncate mt-0.5">
-                                  <span className="font-medium text-content-body">
-                                    {item.location}
-                                  </span>
-                                  <span> • </span>
+                                <div className="text-xs text-content-subtle truncate mt-0.5 flex items-center gap-1.5">
+                                  <span>{item.location}</span>
+                                  <span>•</span>
                                   <span>{item.ip}</span>
-                                  <span> • </span>
-                                  <span>{item.time}</span>
                                 </div>
                               </div>
                             </div>
 
-                            <div className="shrink-0">
-                              {item.isCurrent ? (
-                                <span className="text-[10px] text-emerald-600 font-semibold px-1.5 py-0.5">
-                                  {t("userDetail.active")}
-                                </span>
-                              ) : (
+                            <div className="shrink-0 text-right">
+                              <div className="text-xs text-content-subtle font-medium">
+                                {item.time}
+                              </div>
+                              {!item.isCurrent && (
                                 <button
                                   type="button"
                                   onClick={() => handleRevokeSession(item.id)}
-                                  className="text-[10px] text-rose-600 hover:bg-rose-500/10 px-1.5 py-0.5 rounded transition cursor-pointer"
+                                  className="text-[10px] text-rose-600 hover:bg-rose-500/10 px-2 py-0.5 rounded transition cursor-pointer mt-0.5 inline-block font-semibold"
                                 >
                                   Logout
                                 </button>
@@ -1919,21 +1915,22 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Item #187 — "Recent Activity" Velzon Vertical Timeline UI */}
-                  <div className="bg-surface p-4 sm:p-5 rounded-lg border border-border-subtle shadow-xs space-y-4">
+                  <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-border-subtle/60 pb-3">
-                      <div className="flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-indigo-600" />
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                          <Activity className="w-4.5 h-4.5" />
+                        </div>
                         <h3 className="text-xs font-semibold text-content-strong uppercase tracking-wider">
                           {t("userDetail.recentActivityTitle")}
                         </h3>
                       </div>
-                      <div className="flex items-center gap-1 bg-surface-sunken border border-border-subtle rounded-md p-0.5">
+                      <div className="flex items-center gap-1.5">
                         {(
                           [
-                            { id: "today", label: t("userDetail.filterToday") },
-                            { id: "week", label: t("userDetail.filterWeek") },
-                            { id: "month", label: t("userDetail.filterMonth") },
+                            { id: "today", label: "Today" },
+                            { id: "week", label: "Weekly" },
+                            { id: "month", label: "Monthly" },
                           ] as const
                         ).map((f) => (
                           <button
@@ -1941,10 +1938,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             type="button"
                             onClick={() => setActivityFilter(f.id)}
                             className={cn(
-                              "px-2.5 py-1 rounded text-xs sm:text-[10px] font-semibold uppercase transition-colors cursor-pointer",
+                              "px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer",
                               activityFilter === f.id
                                 ? "bg-indigo-600 text-content-inverse shadow-xs"
-                                : "text-content-muted hover:text-content-body"
+                                : "bg-indigo-500/10 text-indigo-600 hover:bg-indigo-500/20"
                             )}
                           >
                             {f.label}
@@ -1963,7 +1960,6 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           {userActivityLogsFiltered.map((log) => {
                             const actDate = ensureDate(log.createdAt);
 
-                            // Format activity details: ganti Task UUID mentah dengan nama tugas yang manusiawi jika cocok
                             let formattedDetails = log.details || "";
                             if (formattedDetails) {
                               (tasks || []).forEach((t) => {
@@ -1978,7 +1974,6 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                             return (
                               <div key={log.id} className="relative group">
-                                {/* Dot / Avatar Node on the Vertical Timeline */}
                                 <div className="absolute -left-[37px] top-0 flex items-center justify-center">
                                   <UserAvatar
                                     user={user}
@@ -1986,24 +1981,23 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                   />
                                 </div>
 
-                                <div className="space-y-1 ml-1">
+                                <div className="space-y-1.5 ml-1">
                                   <div className="flex flex-wrap items-center gap-1.5 text-xs">
                                     <span className="font-semibold text-content-strong">
                                       {user.displayName || user.username}
                                     </span>
-                                    <span className="text-content-muted">
+                                    <span className="text-content-subtle">
                                       {humanizeActivityAction(log.action, formattedDetails)}
                                     </span>
-                                    <span className="text-content-subtle text-xs sm:text-[10px] font-mono">
+                                    <span className="text-content-subtle text-xs">
                                       • {formatDistanceToNow(actDate, { addSuffix: true })}
                                     </span>
                                   </div>
 
-                                  {/* Activity Details / Attachment preview if present */}
                                   {formattedDetails && formattedDetails !== log.action && (
-                                    <p className="text-xs text-content-secondary leading-relaxed bg-surface-sunken/60 border border-border-subtle/50 p-2.5 rounded-md mt-1.5">
+                                    <div className="text-xs text-content-secondary leading-relaxed bg-surface-sunken/80 p-3.5 rounded-xl border border-border-subtle/50 mt-2">
                                       {formattedDetails}
-                                    </p>
+                                    </div>
                                   )}
                                 </div>
                               </div>
@@ -2014,11 +2008,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     )}
                   </div>
 
-                  {/* Item #187 — "Recently Created" Items (Task, Meeting, Flowchart, Doc) ala Velzon */}
-                  <div className="bg-surface p-4 sm:p-5 rounded-lg border border-border-subtle shadow-xs space-y-3">
+                  <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-border-subtle/60 pb-3">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-indigo-600" />
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                          <Sparkles className="w-4.5 h-4.5" />
+                        </div>
                         <h3 className="text-xs font-semibold text-content-strong uppercase tracking-wider">
                           {t("userDetail.recentlyCreated")} ({userCreatedItems.length})
                         </h3>
@@ -2033,42 +2028,20 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         {userCreatedItems.map((item) => {
                           const ItemIcon = item.icon;
 
-                          // Badge type styles
-                          const typeBadge =
-                            item.type === "meeting"
-                              ? {
-                                  bg: "bg-purple-500/10 text-purple-700 border-purple-500/30",
-                                  label: "Meeting",
-                                }
-                              : item.type === "flowchart"
-                                ? {
-                                    bg: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
-                                    label: "Flowchart",
-                                  }
-                                : item.type === "doc"
-                                  ? {
-                                      bg: "bg-amber-500/10 text-amber-700 border-amber-500/30",
-                                      label: "Document",
-                                    }
-                                  : {
-                                      bg: "bg-indigo-500/10 text-indigo-700 border-indigo-500/30",
-                                      label: "Task",
-                                    };
-
                           return (
                             <div
                               key={item.id}
-                              className="flex items-center justify-between gap-3 p-3 bg-surface-sunken hover:bg-surface-muted/60 border border-border-subtle rounded-lg transition-colors"
+                              className="flex items-center justify-between gap-3 p-3 bg-surface hover:bg-surface-muted/60 border border-border-subtle/60 rounded-xl transition-colors"
                             >
                               <div className="flex items-center gap-3 min-w-0 flex-1">
-                                <div className="w-8 h-8 rounded-lg bg-surface border border-border-subtle flex items-center justify-center text-indigo-600 shrink-0 shadow-2xs">
-                                  <ItemIcon className="w-4 h-4" />
+                                <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0">
+                                  <ItemIcon className="w-4.5 h-4.5" />
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="text-xs font-semibold text-content-strong truncate">
                                     {item.title}
                                   </div>
-                                  <div className="flex items-center gap-2 text-xs sm:text-[10px] text-content-subtle mt-0.5">
+                                  <div className="flex items-center gap-2 text-xs text-content-subtle mt-0.5">
                                     {item.subtitle && (
                                       <>
                                         <span className="font-mono text-indigo-600 font-medium uppercase truncate max-w-[120px]">
@@ -2087,19 +2060,9 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               </div>
 
                               <div className="flex items-center gap-2 shrink-0">
-                                <span
-                                  className={cn(
-                                    "text-xs sm:text-[10px] font-semibold px-2 py-0.5 rounded-md border uppercase",
-                                    typeBadge.bg
-                                  )}
-                                >
-                                  {typeBadge.label}
+                                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20">
+                                  {item.status || "To Do"}
                                 </span>
-                                {item.status && item.status !== item.type && (
-                                  <span className="text-xs sm:text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface border border-border-subtle text-content-secondary uppercase hidden sm:inline-block">
-                                    {item.status}
-                                  </span>
-                                )}
                               </div>
                             </div>
                           );
