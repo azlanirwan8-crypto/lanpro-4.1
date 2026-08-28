@@ -14,6 +14,7 @@ import {
   EyeOff,
   Search,
   User,
+  Edit3,
   CheckCircle,
   Layout,
   Key,
@@ -1698,40 +1699,56 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
                 {/* LEFT: kartu "Info" ala Velzon, Team, dan Login History */}
                 <div className="lg:col-span-4 space-y-5">
-                  <div className="bg-surface p-4 rounded-lg border border-border-subtle shadow-xs space-y-3">
-                    <div className="flex items-center gap-2">
-                      <IdCard className="w-4 h-4 text-indigo-600" />
-                      <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider">
-                        {t("userDetail.tabPersonalDetail")}
-                      </h3>
+                  <div className="bg-surface p-4 sm:p-5 rounded-lg border border-border-subtle shadow-xs space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4 text-indigo-600" />
+                        <h3 className="text-xs font-semibold text-content-strong uppercase tracking-wider">
+                          {t("userDetail.tabPersonalDetail")}
+                        </h3>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setPageMode("edit")}
+                        className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 hover:bg-indigo-600 hover:text-content-inverse transition-all flex items-center gap-1 cursor-pointer border border-indigo-500/20"
+                      >
+                        <Edit3 className="w-3 h-3" />
+                        <span>Edit</span>
+                      </button>
                     </div>
-                    <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-2.5 text-xs items-baseline">
-                      <span className="font-medium text-content-strong whitespace-nowrap">
+                    <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-2.5 text-xs items-baseline pt-1">
+                      <span className="font-medium text-content-muted whitespace-nowrap">
                         {t("userDetail.fullName")} :
                       </span>
-                      <span className="text-content-body break-words">
+                      <span className="font-semibold text-content-strong break-words">
                         {user.displayName || user.username}
                       </span>
 
-                      <span className="font-medium text-content-strong whitespace-nowrap">
+                      <span className="font-medium text-content-muted whitespace-nowrap">
                         {t("userDetail.email")} :
                       </span>
-                      <span className="text-content-body break-all">{user.email || "—"}</span>
+                      <span className="font-medium text-content-body break-all">
+                        {user.email || "—"}
+                      </span>
 
-                      <span className="font-medium text-content-strong whitespace-nowrap">
+                      <span className="font-medium text-content-muted whitespace-nowrap">
                         {t("userDetail.phone")} :
                       </span>
-                      <span className="text-content-body">{user.phone || "—"}</span>
+                      <span className="font-medium text-content-body">{user.phone || "—"}</span>
 
-                      <span className="font-medium text-content-strong whitespace-nowrap">
+                      <span className="font-medium text-content-muted whitespace-nowrap">
                         {t("userDetail.department")} :
                       </span>
-                      <span className="text-content-body">{getDeptName(user.department)}</span>
+                      <span className="font-medium text-content-body">
+                        {getDeptName(user.department)}
+                      </span>
 
-                      <span className="font-medium text-content-strong whitespace-nowrap">
+                      <span className="font-medium text-content-muted whitespace-nowrap">
                         {t("userDetail.position")} :
                       </span>
-                      <span className="text-content-body">{getPosName(user.position)}</span>
+                      <span className="font-medium text-content-body">
+                        {getPosName(user.position)}
+                      </span>
                     </div>
                   </div>
 
@@ -1753,7 +1770,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         {t("userDetail.noTeammates")}
                       </p>
                     ) : (
-                      <div className="divide-y divide-border-faint max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+                      <div className="divide-y divide-border-faint max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
                         {teammates.map((tm) => (
                           <div
                             key={tm.id || tm.uid}
@@ -1797,7 +1814,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       {t("userDetail.loginHistoryHint")}
                     </p>
 
-                    <div className="divide-y divide-border-faint max-h-64 overflow-y-auto pr-1 custom-scrollbar">
+                    <div className="divide-y divide-border-faint max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
                       {userSessions.map((item) => {
                         const DeviceIcon =
                           item.deviceType === "smartphone"
@@ -1865,31 +1882,38 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       "Popular Posts": tugas yang dilaporkan/dibuat pengguna
                       ini), lalu deretan Projects ala Velzon. */}
                 <div className="lg:col-span-8 space-y-5">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-surface border border-border-subtle p-4 rounded-lg flex items-center gap-3 shadow-xs">
-                      <div className="w-9 h-9 rounded-md bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
-                        <Server className="w-4 h-4" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="bg-surface border border-border-subtle p-4 sm:p-5 rounded-xl flex items-center gap-4 shadow-xs">
+                      <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0 border border-indigo-500/20">
+                        <Folder className="w-6 h-6" />
                       </div>
                       <div>
-                        <span className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase tracking-wider block">
-                          {t("userDetail.totalRelatedProjects")}
+                        <span className="text-xs text-content-muted font-semibold uppercase tracking-wider block">
+                          Total Related Projects
                         </span>
-                        <span className="text-base font-medium text-content-strong leading-none">
-                          {t("rakit.projectsCount", { count: userProjectsList.length })}
-                        </span>
+                        <div className="text-xl font-bold text-content-strong mt-0.5">
+                          {userProjectsList.length}{" "}
+                          <span className="text-xs font-semibold text-content-muted">Project</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="bg-surface border border-border-subtle p-4 rounded-lg flex items-center gap-3 shadow-xs">
-                      <div className="w-9 h-9 rounded-md bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0">
-                        <CheckCircle className="w-4 h-4" />
+                    <div className="bg-surface border border-border-subtle p-4 sm:p-5 rounded-xl flex items-center gap-4 shadow-xs">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 shrink-0 border border-emerald-500/20">
+                        <CheckCircle className="w-6 h-6" />
                       </div>
                       <div>
-                        <span className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase tracking-wider block">
-                          {t("userDetail.assignedTasks")}
+                        <span className="text-xs text-content-muted font-semibold uppercase tracking-wider block">
+                          Assigned Tasks
                         </span>
-                        <span className="text-base font-medium text-content-strong leading-none">
-                          {t("rakit.tasksCount", { count: userTasks.length })}
+                        <div className="text-xl font-bold text-content-strong mt-0.5">
+                          {userTasks.length}{" "}
+                          <span className="text-xs font-semibold text-content-muted">Tasks</span>
+                        </div>
+                        <span className="text-[10px] text-content-subtle block mt-0.5">
+                          {userTasks.length === 0
+                            ? "No pending tasks"
+                            : `${userTasks.filter((t) => t.status !== "Done" && t.status !== "Selesai").length} active tasks`}
                         </span>
                       </div>
                     </div>
@@ -1934,7 +1958,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         {t("userDetail.noActivity")}
                       </p>
                     ) : (
-                      <div className="max-h-80 overflow-y-auto pr-2 pl-3 py-1 custom-scrollbar">
+                      <div className="max-h-[300px] overflow-y-auto pr-2 pl-3 py-1 custom-scrollbar">
                         <div className="relative pl-6 ml-3 space-y-6 border-l-2 border-border-subtle">
                           {userActivityLogsFiltered.map((log) => {
                             const actDate = ensureDate(log.createdAt);
@@ -2005,7 +2029,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         {t("userDetail.noRecentlyCreated")}
                       </p>
                     ) : (
-                      <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+                      <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
                         {userCreatedItems.map((item) => {
                           const ItemIcon = item.icon;
 
