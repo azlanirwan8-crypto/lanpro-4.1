@@ -54,6 +54,10 @@ import {
   FileSpreadsheet,
   FileArchive,
   Image as ImageIcon,
+  Building2,
+  Briefcase,
+  UserCheck,
+  LogOut,
 } from "lucide-react";
 import { formatDistanceToNow, isToday, isThisWeek, isThisMonth } from "date-fns";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
@@ -2464,63 +2468,70 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
             {/* MODE EDIT: Full-Width Clean Form Layout ala Velzon */}
             {pageMode === "edit" && (
-              <div className="bg-surface p-5 sm:p-6 rounded-lg border border-border-subtle shadow-xs space-y-6">
+              <div className="space-y-6">
                 {/* Tab: Personal Detail Form */}
                 {activeTab === "personal" && (
-                  <div className="space-y-6">
-                    <div className="border-b border-border-subtle pb-3.5">
-                      <h3 className="text-sm font-semibold text-content-strong uppercase tracking-wider">
-                        {t("userDetail.personalInfoTitle")}
+                  <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-border-subtle shadow-xs space-y-6">
+                    <div className="border-b border-border-subtle/60 pb-4">
+                      <h3 className="text-sm font-bold text-content-strong uppercase tracking-wider">
+                        {t("userDetail.personalInfoTitle", "PERSONAL DETAILS")}
                       </h3>
-                      <p className="text-xs text-content-muted mt-0.5">
-                        {t("userDetail.personalInfoDesc")}
+                      <p className="text-xs text-content-muted mt-1">
+                        {t(
+                          "userDetail.personalInfoDesc",
+                          "Update your full name, contact details, department, and organizational settings."
+                        )}
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Full Name */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-content-strong">
-                          {t("userDetail.fullName")}
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                          <User className="w-4 h-4 text-content-subtle" />
+                          <span>{t("userDetail.fullName")}</span>
                         </label>
                         <input
                           value={editFullName}
                           onChange={(e) => setEditFullName(e.target.value)}
                           placeholder={t("userDetail.fullNamePlaceholder")}
-                          className="w-full px-3.5 py-2 border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface-sunken text-content-strong transition"
+                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-indigo-500 text-content-strong transition shadow-2xs"
                         />
                       </div>
 
                       {/* Email Address */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-content-strong">
-                          {t("userDetail.email")}
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                          <Mail className="w-4 h-4 text-content-subtle" />
+                          <span>{t("userDetail.email")}</span>
                         </label>
                         <input
                           value={editEmail}
                           onChange={(e) => setEditEmail(e.target.value)}
                           placeholder={t("userDetail.emailPlaceholder")}
-                          className="w-full px-3.5 py-2 border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface-sunken text-content-strong transition"
+                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-indigo-500 text-content-strong transition shadow-2xs"
                         />
                       </div>
 
                       {/* Phone / WhatsApp */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-content-strong">
-                          {t("userDetail.phone")}
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-content-subtle" />
+                          <span>{t("userDetail.phone")} / WhatsApp Number</span>
                         </label>
                         <input
                           value={editPhone}
                           onChange={(e) => setEditPhone(e.target.value)}
                           placeholder={t("userDetail.phonePlaceholder")}
-                          className="w-full px-3.5 py-2 border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface-sunken text-content-strong transition"
+                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-indigo-500 text-content-strong transition shadow-2xs"
                         />
                       </div>
 
                       {/* Department */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-content-strong">
-                          {t("userDetail.department")}
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-content-subtle" />
+                          <span>{t("userDetail.department")}</span>
                         </label>
                         <StyledDropdown
                           value={editDepartment}
@@ -2545,14 +2556,15 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           type="department"
                           masterData={masterData}
                           className="w-full"
-                          buttonClassName="w-full px-3.5 py-2 bg-surface-sunken border border-border-subtle rounded-md text-xs font-medium text-content-strong"
+                          buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium text-content-strong"
                         />
                       </div>
 
                       {/* Position / Jabatan */}
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-semibold text-content-strong">
-                          {t("userDetail.position")}
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                          <Briefcase className="w-4 h-4 text-content-subtle" />
+                          <span>{t("userDetail.position")}</span>
                         </label>
                         <StyledDropdown
                           value={editPosition}
@@ -2579,15 +2591,16 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           type="jabatan"
                           masterData={masterData}
                           className="w-full"
-                          buttonClassName="w-full px-3.5 py-2 bg-surface-sunken border border-border-subtle rounded-md text-xs font-medium text-content-strong"
+                          buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium text-content-strong"
                         />
                       </div>
 
                       {/* System Role (Admin only) */}
                       {isAdmin && (
-                        <div className="space-y-1.5">
-                          <label className="text-xs font-semibold text-content-strong">
-                            {t("userDetail.systemRole")}
+                        <div className="space-y-2">
+                          <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                            <UserCheck className="w-4 h-4 text-content-subtle" />
+                            <span>{t("userDetail.systemRole")}</span>
                           </label>
                           <StyledDropdown
                             value={editRole}
@@ -2614,21 +2627,22 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             type="project_role"
                             masterData={masterData}
                             className="w-full"
-                            buttonClassName="w-full px-3.5 py-2 bg-surface-sunken border border-border-subtle rounded-md text-xs font-medium text-content-strong"
+                            buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium text-content-strong"
                           />
                         </div>
                       )}
 
                       {/* Account Status */}
                       {isAdmin && (
-                        <div className="space-y-1.5 md:col-span-2">
-                          <label className="text-xs font-semibold text-content-strong">
-                            {t("userDetail.accountStatus")}
+                        <div className="space-y-2 md:col-span-2">
+                          <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4 text-content-subtle" />
+                            <span>{t("userDetail.accountStatus")}</span>
                           </label>
                           <select
                             value={editStatus}
                             onChange={(e) => setEditStatus(e.target.value as any)}
-                            className="w-full px-3.5 py-2 bg-surface-sunken border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-indigo-500 transition-all cursor-pointer"
+                            className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium text-content-strong outline-none focus:border-indigo-500 transition-all cursor-pointer shadow-2xs"
                           >
                             <option value="approved">{t("userDetail.activeApproved")}</option>
                             <option value="pending">{t("userDetail.waitingApproval")}</option>
@@ -2638,27 +2652,27 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       )}
                     </div>
 
-                    {/* Action Buttons ala Velzon */}
-                    <div className="flex items-center justify-end gap-3 pt-5 border-t border-border-subtle">
+                    {/* Action Buttons */}
+                    <div className="flex items-center justify-end gap-3 pt-6 border-t border-border-subtle/60">
                       <button
                         type="button"
                         onClick={exitEditMode}
-                        className="px-4 py-2 bg-surface-sunken hover:bg-surface-muted text-content-body rounded-md text-xs font-medium border border-border-subtle transition cursor-pointer"
+                        className="px-5 py-2.5 bg-surface-sunken/80 hover:bg-surface-muted text-content-body rounded-xl text-xs font-semibold border border-border-subtle transition cursor-pointer"
                       >
-                        {t("userDetail.cancel")}
+                        {t("userDetail.cancel", "Cancel")}
                       </button>
                       <button
                         type="button"
                         onClick={handleSaveUser}
                         disabled={isSaving}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-md text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-xl text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
                       >
                         {isSaving ? (
                           <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                         ) : (
                           <Save className="w-3.5 h-3.5" />
                         )}
-                        <span>{t("userDetail.updates")}</span>
+                        <span>{t("userDetail.saveUserChanges", "Save Changes")}</span>
                       </button>
                     </div>
                   </div>
@@ -2666,23 +2680,31 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                 {/* Tab: Change Password Form (3-Column Layout + Login History ala Velzon) */}
                 {activeTab === "password" && (
-                  <div className="space-y-8">
-                    {/* Section: Change Password Fields */}
-                    <div className="space-y-5">
-                      <div className="border-b border-border-subtle pb-3.5">
-                        <h3 className="text-sm font-semibold text-content-strong uppercase tracking-wider">
-                          {t("userDetail.tabChangePassword")}
-                        </h3>
-                        <p className="text-xs text-content-muted mt-0.5">
-                          {t("userDetail.passwordUnchangedHint")}
-                        </p>
+                  <div className="space-y-6">
+                    {/* Card 1: Change Password Fields */}
+                    <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-border-subtle shadow-xs space-y-6">
+                      <div className="flex items-center gap-3 border-b border-border-subtle/60 pb-4">
+                        <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                          <Lock className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-content-strong">
+                            {t("userDetail.tabChangePassword", "Change Password")}
+                          </h3>
+                          <p className="text-xs text-content-muted mt-0.5">
+                            {t(
+                              "userDetail.passwordUnchangedHint",
+                              "Update your password to keep your account secure."
+                            )}
+                          </p>
+                        </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
                         {/* Old Password */}
-                        <div className="space-y-1.5">
+                        <div className="space-y-2">
                           <label className="text-xs font-semibold text-content-strong">
-                            {t("userDetail.oldPassword")}*
+                            {t("userDetail.oldPassword")} <span className="text-rose-500">*</span>
                           </label>
                           <div className="relative">
                             <input
@@ -2690,12 +2712,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               value={editOldPassword}
                               onChange={(e) => setEditOldPassword(e.target.value)}
                               placeholder={t("userDetail.oldPasswordPlaceholder")}
-                              className="w-full pl-3 pr-9 py-2 border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface-sunken text-content-strong transition"
+                              className="w-full pl-4 pr-10 py-2.5 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-indigo-500 bg-surface-sunken/60 text-content-strong transition"
                             />
                             <button
                               type="button"
                               onClick={() => setShowOldPassword((v) => !v)}
-                              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-body cursor-pointer"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-body cursor-pointer"
                             >
                               {showOldPassword ? (
                                 <EyeOff className="w-4 h-4" />
@@ -2707,59 +2729,63 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           <button
                             type="button"
                             onClick={() => setShowForgotPasswordModal(true)}
-                            className="text-xs sm:text-[11px] text-indigo-600 hover:underline pt-0.5 block cursor-pointer"
+                            className="text-xs text-indigo-600 hover:underline pt-0.5 block cursor-pointer"
                           >
                             {t("userDetail.forgotPassword")}
                           </button>
                         </div>
 
-                        {/* New Password */}
-                        <div className="space-y-1.5">
+                        {/* New Password with Generate Button */}
+                        <div className="space-y-2">
                           <div className="flex items-center justify-between">
                             <label className="text-xs font-semibold text-content-strong">
-                              {t("userDetail.newPassword")}*
+                              {t("userDetail.newPassword")} <span className="text-rose-500">*</span>
                             </label>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="relative flex-1">
+                              <input
+                                type={showEditPassword ? "text" : "password"}
+                                value={editPassword}
+                                onChange={(e) => setEditPassword(e.target.value)}
+                                placeholder={t("userDetail.passwordPlaceholder")}
+                                className="w-full pl-4 pr-10 py-2.5 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-indigo-500 bg-surface-sunken/60 text-content-strong transition"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowEditPassword((v) => !v)}
+                                title={
+                                  showEditPassword ? t("ui2.hidePassword") : t("ui2.showPassword")
+                                }
+                                aria-label={
+                                  showEditPassword ? t("ui2.hidePassword") : t("ui2.showPassword")
+                                }
+                                aria-pressed={showEditPassword}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-body cursor-pointer"
+                              >
+                                {showEditPassword ? (
+                                  <EyeOff className="w-4 h-4" />
+                                ) : (
+                                  <Eye className="w-4 h-4" />
+                                )}
+                              </button>
+                            </div>
                             <button
                               type="button"
                               onClick={generateRandomPassword}
-                              className="text-xs sm:text-[11px] text-indigo-600 hover:underline flex items-center gap-1 font-medium cursor-pointer"
+                              className="px-3.5 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 text-xs font-semibold flex items-center gap-1.5 transition shrink-0 cursor-pointer border border-indigo-500/20"
                             >
-                              <Key className="w-3 h-3" /> {t("jsx.j163")}
-                            </button>
-                          </div>
-                          <div className="relative">
-                            <input
-                              type={showEditPassword ? "text" : "password"}
-                              value={editPassword}
-                              onChange={(e) => setEditPassword(e.target.value)}
-                              placeholder={t("userDetail.passwordPlaceholder")}
-                              className="w-full pl-3 pr-9 py-2 border border-border-subtle rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface-sunken text-content-strong transition"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowEditPassword((v) => !v)}
-                              title={
-                                showEditPassword ? t("ui2.hidePassword") : t("ui2.showPassword")
-                              }
-                              aria-label={
-                                showEditPassword ? t("ui2.hidePassword") : t("ui2.showPassword")
-                              }
-                              aria-pressed={showEditPassword}
-                              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-body cursor-pointer"
-                            >
-                              {showEditPassword ? (
-                                <EyeOff className="w-4 h-4" />
-                              ) : (
-                                <Eye className="w-4 h-4" />
-                              )}
+                              <RefreshCw className="w-3.5 h-3.5" />
+                              <span>Generate</span>
                             </button>
                           </div>
                         </div>
 
                         {/* Confirm New Password */}
-                        <div className="space-y-1.5">
+                        <div className="space-y-2">
                           <label className="text-xs font-semibold text-content-strong">
-                            {t("userDetail.confirmPassword")}*
+                            {t("userDetail.confirmPassword")}{" "}
+                            <span className="text-rose-500">*</span>
                           </label>
                           <div className="relative">
                             <input
@@ -2768,16 +2794,16 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               onChange={(e) => setEditConfirmPassword(e.target.value)}
                               placeholder={t("userDetail.confirmPasswordPlaceholder")}
                               className={cn(
-                                "w-full pl-3 pr-9 py-2 border rounded-md text-xs font-medium outline-none focus:border-indigo-500 bg-surface-sunken text-content-strong transition",
+                                "w-full pl-4 pr-10 py-2.5 border rounded-xl text-xs font-medium outline-none focus:border-indigo-500 bg-surface-sunken/60 text-content-strong transition",
                                 editConfirmPassword && editPassword !== editConfirmPassword
                                   ? "border-rose-500"
-                                  : "border-border-subtle"
+                                  : "border-border-subtle/70"
                               )}
                             />
                             <button
                               type="button"
                               onClick={() => setShowConfirmPassword((v) => !v)}
-                              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-body cursor-pointer"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-body cursor-pointer"
                             >
                               {showConfirmPassword ? (
                                 <EyeOff className="w-4 h-4" />
@@ -2787,55 +2813,71 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             </button>
                           </div>
                           {editConfirmPassword && editPassword !== editConfirmPassword && (
-                            <p className="text-xs sm:text-[11px] text-rose-600">
+                            <p className="text-xs text-rose-600">
                               {t("userDetail.passwordMismatch")}
                             </p>
                           )}
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-end pt-3">
+                      <div className="flex items-center justify-end gap-3 pt-5 border-t border-border-subtle/60">
+                        <button
+                          type="button"
+                          onClick={exitEditMode}
+                          className="px-5 py-2.5 bg-surface-sunken/80 hover:bg-surface-muted text-content-body rounded-xl text-xs font-semibold border border-border-subtle transition cursor-pointer"
+                        >
+                          {t("userDetail.cancel", "Cancel")}
+                        </button>
                         <button
                           type="button"
                           onClick={handleSaveUser}
                           disabled={
                             isSaving || !editPassword.trim() || editPassword !== editConfirmPassword
                           }
-                          className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-content-inverse rounded-md text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
+                          className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-xl text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
                         >
                           {isSaving ? (
                             <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                           ) : (
-                            <Key className="w-3.5 h-3.5" />
+                            <Lock className="w-3.5 h-3.5" />
                           )}
-                          <span>{t("userDetail.changePasswordAction")}</span>
+                          <span>{t("userDetail.changePasswordAction", "Change Password")}</span>
                         </button>
                       </div>
                     </div>
 
-                    {/* Section: Login History ala Velzon (Real Interactive State) */}
-                    <div className="space-y-4 pt-4 border-t border-border-subtle">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="text-xs font-semibold text-content-strong uppercase tracking-wider">
-                            {t("userDetail.loginHistory")}
-                          </h4>
-                          <p className="text-xs sm:text-[11px] text-content-muted mt-0.5">
-                            {t("userDetail.loginHistoryHint")}
-                          </p>
+                    {/* Card 2: Login History Session Manager */}
+                    <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-border-subtle shadow-xs space-y-5">
+                      <div className="flex items-center justify-between border-b border-border-subtle/60 pb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                            <Clock className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="text-sm font-bold text-content-strong">
+                              {t("userDetail.loginHistory", "Login History")}
+                            </h3>
+                            <p className="text-xs text-content-muted mt-0.5">
+                              {t(
+                                "userDetail.loginHistoryHint",
+                                "List of devices and locations that recently accessed your account."
+                              )}
+                            </p>
+                          </div>
                         </div>
                         {userSessions.filter((s) => !s.isCurrent).length > 0 && (
                           <button
                             type="button"
                             onClick={handleRevokeAllOtherSessions}
-                            className="text-xs sm:text-[11px] text-rose-600 hover:underline font-medium cursor-pointer"
+                            className="px-4 py-2 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50/50 hover:bg-rose-100 border border-rose-200 transition cursor-pointer flex items-center gap-1.5"
                           >
-                            {t("userDetail.allLogout")}
+                            <LogOut className="w-3.5 h-3.5" />
+                            <span>{t("userDetail.allLogout", "Log out all sessions")}</span>
                           </button>
                         )}
                       </div>
 
-                      <div className="divide-y divide-border-faint border border-border-subtle rounded-lg overflow-hidden bg-surface-sunken">
+                      <div className="space-y-3">
                         {userSessions.map((item) => {
                           const DeviceIcon =
                             item.deviceType === "smartphone"
@@ -2847,45 +2889,48 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           return (
                             <div
                               key={item.id}
-                              className="flex items-center justify-between p-3 sm:p-3.5 hover:bg-surface-muted/50 transition-colors"
+                              className="flex items-center justify-between p-4 bg-surface-sunken/60 rounded-xl border border-border-subtle/50 hover:border-indigo-500/30 transition-all"
                             >
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-md bg-surface border border-border-subtle text-indigo-600 shrink-0">
-                                  <DeviceIcon className="w-4 h-4" />
+                              <div className="flex items-center gap-3.5">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                                  <DeviceIcon className="w-5 h-5" />
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-content-strong">
+                                    <span className="text-xs font-bold text-content-strong">
                                       {item.device}
                                     </span>
-                                    {item.isCurrent && (
-                                      <span className="px-1.5 py-0.5 rounded text-xs sm:text-[9px] font-bold bg-emerald-500/20 text-emerald-700">
-                                        {t("userDetail.currentDevice")}
-                                      </span>
-                                    )}
                                   </div>
-                                  <div className="flex items-center gap-2 text-xs sm:text-[10px] text-content-muted mt-0.5">
+                                  <div className="flex flex-wrap items-center gap-2 text-xs text-content-subtle mt-0.5">
                                     <span>{item.location}</span>
                                     <span>•</span>
                                     <span className="font-mono">{item.ip}</span>
                                     <span>•</span>
-                                    <span>{item.time}</span>
+                                    <span>🕒 {item.time}</span>
                                   </div>
                                 </div>
                               </div>
 
-                              <div>
+                              <div className="flex items-center gap-2">
                                 {item.isCurrent ? (
-                                  <span className="text-xs sm:text-[11px] text-emerald-600 font-medium px-2 py-1">
-                                    {t("userDetail.active")}
-                                  </span>
+                                  <>
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                                      <span>
+                                        {t("userDetail.currentDevice", "Current Session")}
+                                      </span>
+                                    </span>
+                                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700">
+                                      {t("userDetail.active", "Active")}
+                                    </span>
+                                  </>
                                 ) : (
                                   <button
                                     type="button"
                                     onClick={() => handleRevokeSession(item.id)}
-                                    className="text-xs sm:text-[11px] text-content-muted hover:text-rose-600 px-2 py-1 rounded hover:bg-surface transition cursor-pointer"
+                                    className="px-4 py-1.5 rounded-full text-xs font-semibold text-rose-600 bg-rose-50/50 hover:bg-rose-100 border border-rose-200 transition cursor-pointer"
                                   >
-                                    {t("userDetail.logoutAction")}
+                                    {t("userDetail.logoutAction", "Log out")}
                                   </button>
                                 )}
                               </div>

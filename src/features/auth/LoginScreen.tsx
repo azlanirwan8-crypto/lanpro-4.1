@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
-import { ArrowRight, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, AlertCircle, User, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { safeLocalStorage } from "../../lib/safeStorage";
@@ -120,11 +120,11 @@ export const LoginScreen = ({
         ) : (
           <motion.div
             key="login-form-card"
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            transition={{ duration: 0.25 }}
-            className="w-full max-w-md bg-surface rounded-2xl shadow-2xl border border-border-faint/90 p-8 sm:p-10 relative z-10 font-sans mx-auto"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
+            className="w-full max-w-md bg-surface rounded-2xl shadow-xl border border-border-subtle/80 p-8 sm:p-10 relative z-10 font-sans mx-auto"
           >
             {/* Velzon Card Header */}
             <div className="text-center space-y-1.5 mb-6">
@@ -140,18 +140,21 @@ export const LoginScreen = ({
                 <label className="text-xs font-semibold text-content-body tracking-wide block">
                   {t("jsx.k18")} <span className="text-rose-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  placeholder={t("login.usernamePlaceholder")}
-                  value={username}
-                  onChange={(e) => handleUsernameChange(e.target.value)}
-                  className={cn(
-                    "w-full px-4 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-sm font-medium text-content placeholder:text-content-subtle",
-                    fieldErrors.username
-                      ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
-                      : "border-border-subtle focus:ring-primary/20 focus:border-primary"
-                  )}
-                />
+                <div className="relative">
+                  <User className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    placeholder={t("login.usernamePlaceholder")}
+                    value={username}
+                    onChange={(e) => handleUsernameChange(e.target.value)}
+                    className={cn(
+                      "w-full pl-10 pr-4 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-sm font-medium text-content placeholder:text-content-subtle hover:border-border-subtle",
+                      fieldErrors.username
+                        ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                        : "border-border-subtle focus:ring-primary/20 focus:border-primary"
+                    )}
+                  />
+                </div>
                 {fieldErrors.username && (
                   <p className="text-xs sm:text-[11px] font-medium text-rose-500 flex items-center gap-1 mt-1">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
@@ -166,13 +169,14 @@ export const LoginScreen = ({
                   {t("jsx.kPassword")} <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
+                  <Lock className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder={t("login.passwordPlaceholder")}
                     value={password}
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     className={cn(
-                      "w-full pl-4 pr-11 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-sm font-medium text-content placeholder:text-content-subtle",
+                      "w-full pl-10 pr-11 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-sm font-medium text-content placeholder:text-content-subtle hover:border-border-subtle",
                       fieldErrors.password
                         ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
                         : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -182,7 +186,7 @@ export const LoginScreen = ({
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-content-subtle hover:text-primary focus:outline-none cursor-pointer transition-colors"
-                    title={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                    title={showPassword ? t("ui2.hidePassword") : t("ui2.showPassword")}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
