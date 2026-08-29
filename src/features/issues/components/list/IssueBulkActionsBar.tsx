@@ -50,14 +50,14 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
       {/* Pagination Controls */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2 border-t border-border-subtle bg-surface-sunken shrink-0">
         <div className="flex items-center gap-3">
-          <span className="text-xs sm:text-[10px] font-medium text-content-muted">
+          <span className="text-xs sm:text-[10px] font-normal text-content-muted">
             {t("common.showing")}{" "}
             {displayRoots.length === 0 ? 0 : (listPage - 1) * itemsPerPage + 1} {t("common.to")}{" "}
             {Math.min(listPage * itemsPerPage, displayRoots.length)} {t("common.of")}{" "}
             {displayRoots.length} {t("common.entries")}
           </span>
           <div className="flex items-center gap-1.5 pl-2 border-l border-border-subtle">
-            <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
+            <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-wider">
               {t("bulkActions.perPage")}
             </span>
             <select
@@ -66,7 +66,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                 setItemsPerPage(Number(e.target.value));
                 setListPage(1);
               }}
-              className="text-xs sm:text-[10px] font-medium bg-surface border border-border-subtle rounded-lg px-2 py-0.5 text-content-body outline-none focus:border-indigo-500 cursor-pointer shadow-soft"
+              className="text-xs sm:text-[10px] font-normal bg-surface border border-border-subtle rounded-lg px-2 py-0.5 text-content-body outline-none focus:border-indigo-500 cursor-pointer shadow-soft"
             >
               <option value={10}>10</option>
               <option value={20}>20</option>
@@ -82,7 +82,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
           <button
             onClick={() => setListPage((p) => Math.max(1, p - 1))}
             disabled={listPage === 1}
-            className="px-2.5 py-1 text-xs sm:text-[10px] font-medium text-content-secondary bg-surface border border-border-subtle rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
+            className="px-2.5 py-1 text-xs sm:text-[10px] font-normal text-content-secondary bg-surface border border-border-subtle rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
           >
             {t("bulkActions.prev")}
           </button>
@@ -92,7 +92,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                 key={i}
                 onClick={() => setListPage(i + 1)}
                 className={cn(
-                  "w-6 h-6 rounded-lg flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-medium transition-all cursor-pointer active:scale-95 shrink-0",
+                  "w-6 h-6 rounded-lg flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-normal transition-all cursor-pointer active:scale-95 shrink-0",
                   listPage === i + 1
                     ? "bg-primary-surface text-content-inverse shadow-xs"
                     : "text-content-muted hover:bg-surface-strong/80"
@@ -105,7 +105,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
           <button
             onClick={() => setListPage((p) => Math.min(totalPages, p + 1))}
             disabled={listPage >= totalPages}
-            className="px-2.5 py-1 text-xs sm:text-[10px] font-medium text-content-secondary bg-surface border border-border-subtle rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
+            className="px-2.5 py-1 text-xs sm:text-[10px] font-normal text-content-secondary bg-surface border border-border-subtle rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-surface-sunken transition-all active:scale-95 cursor-pointer shadow-soft"
           >
             {t("bulkActions.next")}
           </button>
