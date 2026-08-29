@@ -14,7 +14,10 @@ export interface DocumentEntity {
   canvasData?: string | null;
   /** Kategori dokumen. Item #144 — dulu tidak punya kolom sama sekali. */
   category?: string | null;
+  /** Id pembuat — dipakai untuk otorisasi, BUKAN untuk ditampilkan (Item #268). */
   createdBy?: string;
+  /** Nama tampilan pembuat — untuk ditampilkan, BUKAN untuk otorisasi (Item #268). */
+  createdByName?: string | null;
   downloadCount?: number;
   createdAt?: string;
   updatedAt?: string;
@@ -25,7 +28,7 @@ export class DocumentRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        "SELECT id, projectId, title, description, type, link, fileName, fileType, canvasData, category, createdBy, downloadCount, createdAt, updatedAt FROM Documents WHERE projectId = ? ORDER BY createdAt DESC",
+        "SELECT id, projectId, title, description, type, link, fileName, fileType, canvasData, category, createdBy, createdByName, downloadCount, createdAt, updatedAt FROM Documents WHERE projectId = ? ORDER BY createdAt DESC",
         [projectId]
       );
       return rows || [];
@@ -70,7 +73,7 @@ export class DocumentRepository {
     const connection = await db.getConnection();
     try {
       await connection.query(
-        "INSERT INTO Documents (id, projectId, title, description, type, link, fileData, fileName, fileType, canvasData, category, createdBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO Documents (id, projectId, title, description, type, link, fileData, fileName, fileType, canvasData, category, createdBy, createdByName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           doc.id,
           doc.projectId,
@@ -84,6 +87,7 @@ export class DocumentRepository {
           doc.canvasData || null,
           doc.category || null,
           doc.createdBy || "guest",
+          doc.createdByName || null,
         ]
       );
     } finally {

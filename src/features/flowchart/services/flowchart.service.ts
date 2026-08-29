@@ -30,6 +30,7 @@ interface DocumentRow {
   type?: string;
   link?: string;
   createdBy?: string;
+  createdByName?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -73,7 +74,8 @@ function toFlowchartData(doc: DocumentRow): FlowchartData {
     createdAt: doc.createdAt
       ? new Date(doc.createdAt).toLocaleDateString("id-ID")
       : new Date().toLocaleDateString("id-ID"),
-    createdBy: doc.createdBy || "Administrator",
+    createdBy: doc.createdBy || "",
+    createdByName: doc.createdByName ?? null,
     lastEditedAt: doc.updatedAt
       ? new Date(doc.updatedAt).toLocaleString("id-ID")
       : new Date().toLocaleString("id-ID"),

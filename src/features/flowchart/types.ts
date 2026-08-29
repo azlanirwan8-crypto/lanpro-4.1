@@ -6,19 +6,76 @@
  */
 
 export type FlowNodeType =
-  | "oval" | "rect" | "diamond" | "cylinder" | "text" | "sticky" | "cloud"
-  | "circle" | "card" | "parallelogram" | "document" | "subprocess" | "actor"
-  | "folder" | "decision" | "predefined" | "database" | "triangle" | "pentagon"
-  | "hexagon" | "octagon" | "star" | "arrowRight" | "arrowLeft" | "arrowLeftRight"
-  | "trapezoid" | "cross" | "curlyLeft" | "curlyRight" | "chevron" | "delay"
-  | "callout" | "awsLambda" | "awsEc2" | "awsS3" | "awsVpc" | "awsRds"
-  | "awsCloudwatch" | "awsDynamo" | "umlClass" | "umlInterface" | "umlUseCase"
-  | "umlBoundary" | "umlControl" | "umlEntity" | "umlNote" | "multiDocument"
-  | "manualInput" | "manualOperation" | "preparation" | "display"
-  | "summingJunction" | "collate" | "connectorOr" | "sort" | "merge"
-  | "azureUser" | "azureSql" | "azureFunctions" | "azureKeyVault" | "azureCosmos"
-  | "azurePowerBi" | "azureVm" | "azureStorage" | "bpmnActivity" | "bpmnEvent"
-  | "bpmnGateway" | "bpmnDataStore" | "bpmnDataObject" | "bpmnEventEnd";
+  | "oval"
+  | "rect"
+  | "diamond"
+  | "cylinder"
+  | "text"
+  | "sticky"
+  | "cloud"
+  | "circle"
+  | "card"
+  | "parallelogram"
+  | "document"
+  | "subprocess"
+  | "actor"
+  | "folder"
+  | "decision"
+  | "predefined"
+  | "database"
+  | "triangle"
+  | "pentagon"
+  | "hexagon"
+  | "octagon"
+  | "star"
+  | "arrowRight"
+  | "arrowLeft"
+  | "arrowLeftRight"
+  | "trapezoid"
+  | "cross"
+  | "curlyLeft"
+  | "curlyRight"
+  | "chevron"
+  | "delay"
+  | "callout"
+  | "awsLambda"
+  | "awsEc2"
+  | "awsS3"
+  | "awsVpc"
+  | "awsRds"
+  | "awsCloudwatch"
+  | "awsDynamo"
+  | "umlClass"
+  | "umlInterface"
+  | "umlUseCase"
+  | "umlBoundary"
+  | "umlControl"
+  | "umlEntity"
+  | "umlNote"
+  | "multiDocument"
+  | "manualInput"
+  | "manualOperation"
+  | "preparation"
+  | "display"
+  | "summingJunction"
+  | "collate"
+  | "connectorOr"
+  | "sort"
+  | "merge"
+  | "azureUser"
+  | "azureSql"
+  | "azureFunctions"
+  | "azureKeyVault"
+  | "azureCosmos"
+  | "azurePowerBi"
+  | "azureVm"
+  | "azureStorage"
+  | "bpmnActivity"
+  | "bpmnEvent"
+  | "bpmnGateway"
+  | "bpmnDataStore"
+  | "bpmnDataObject"
+  | "bpmnEventEnd";
 
 /** Tema kanvas yang tersedia. */
 export type CanvasTheme = "miro" | "blueprint";
@@ -72,7 +129,10 @@ export interface FlowchartData {
   edges: FlowEdge[];
   theme: CanvasTheme;
   createdAt: string;
+  /** Id pembuat — menentukan siapa yang boleh mengedit (Item #268). */
   createdBy?: string;
+  /** Nama tampilan pembuat — untuk ditampilkan saja (Item #268). */
+  createdByName?: string | null;
   lastEditedAt?: string;
 }
 

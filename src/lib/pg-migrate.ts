@@ -553,6 +553,17 @@ export async function runMigrations(pool: Pool): Promise<void> {
       -- wiki ia justru kategorinya. Akibatnya kategori flowchart tidak punya
       -- tempat, dan pilihan pengguna di modal dibuang diam-diam.
       ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS category VARCHAR(255);
+
+      -- Item #268 — nama tampilan pembuat, TERPISAH dari "createdBy" yang
+      -- menyimpan id. Sebelumnya backend menimpa nama yang dikirim klien
+      -- dengan id mentah, sehingga nama pembuat hilang dari data DAN
+      -- pengecekan "apakah saya pembuatnya" di frontend jadi menebak-nebak:
+      -- ia mencocokkan satu nilai ke enam field identitas sekaligus
+      -- (id/uid/username/email/name/displayName), dan gagal secara TIDAK
+      -- KONSISTEN begitu format yang tersimpan berbeda dari field yang
+      -- kebetulan ada di sesi. Dua kolom terpisah membuat keduanya punya
+      -- sumber kebenaran sendiri: id untuk otorisasi, nama untuk ditampilkan.
+      ALTER TABLE "Documents" ADD COLUMN IF NOT EXISTS "createdByName" VARCHAR(255);
     `);
 
     // Item #136 — payload kanvas flowchart pindah dari `description` ke kolom

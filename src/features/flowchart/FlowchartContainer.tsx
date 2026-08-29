@@ -57,6 +57,7 @@ import { NodeContextMenu } from "./components/NodeContextMenu";
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
 import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData } from "./types";
 import { parseDrawIoXML, parseMiroContent } from "./lib/importers";
+import { apakahPembuat } from "./lib/authorIdentity";
 import { colorPalettes } from "./constants";
 // Diberi akhiran Api karena useFlowchartList() juga mengekspos updateFlowchart
 // dan deleteFlowchart untuk state daftar lokal. Nama berbeda mencegah salah
@@ -139,40 +140,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const userRoleStr = effectiveUser?.role || effectiveUser?.system_role || "user";
   const isAdmin = ["admin", "sadm", "admn"].includes(String(userRoleStr).toLowerCase());
 
-  const isAuthor = (fw: FlowchartData) => {
-    if (!fw || !effectiveUser) return false;
-    const author = String(fw.createdBy || "")
-      .trim()
-      .toLowerCase();
-    const curId = String(effectiveUser.id || "")
-      .trim()
-      .toLowerCase();
-    const curUid = String(effectiveUser.uid || "")
-      .trim()
-      .toLowerCase();
-    const curUser = String(effectiveUser.username || "")
-      .trim()
-      .toLowerCase();
-    const curEmail = String(effectiveUser.email || "")
-      .trim()
-      .toLowerCase();
-    const curName = String(effectiveUser.name || "")
-      .trim()
-      .toLowerCase();
-    const curDisplay = String(effectiveUser.displayName || "")
-      .trim()
-      .toLowerCase();
-
-    return (
-      author !== "" &&
-      (author === curId ||
-        author === curUid ||
-        author === curUser ||
-        author === curEmail ||
-        author === curName ||
-        author === curDisplay)
-    );
-  };
+  // Item #268 — logikanya pindah ke `lib/authorIdentity.ts` supaya bisa diuji
+  // tanpa merender kanvas. Versi lama di sini mencocokkan satu nilai tersimpan
+  // ke enam field identitas sekaligus dan gagal secara tidak konsisten; alasan
+  // lengkapnya ditulis di berkas itu.
+  const isAuthor = (fw: FlowchartData) => apakahPembuat(fw, effectiveUser);
   const canModifyFlowchart = (fw: FlowchartData) => isAuthor(fw) || isAdmin;
 
   // Canvas Viewport & Theme Management
@@ -1385,7 +1357,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         edges: [],
         theme: "miro",
         createdAt: new Date().toLocaleDateString("id-ID"),
-        createdBy: flowCreator || currentAuthor,
+        // Item #268 — baris optimistik ini dibuat SEBELUM server menjawab, dan
+        // dulu bentuknya berbeda dari yang nanti dipulangkan server: di sini
+        // `createdBy` berisi nama, di server ia berisi id. Begitu daftarnya
+        // disegarkan, bentuknya berganti diam-diam dan pemeriksaan kepemilikan
+        // ikut berubah hasilnya. Sekarang keduanya diisi sama seperti bentuk
+        // dari server, jadi tampilan sebelum dan sesudah refresh konsisten.
+        createdBy: currentUserId || flowCreator || currentAuthor,
+        createdByName: flowCreator || currentAuthor,
         lastEditedAt: currentTimestamp,
         externalUrl: flowExternalUrl,
       };

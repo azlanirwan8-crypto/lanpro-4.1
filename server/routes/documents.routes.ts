@@ -74,7 +74,23 @@ router.post(
         category,
         createdBy,
       } = req.body;
-      const currentUserId = req.user?.id || req.user?.uid || createdBy || "guest";
+      // Item #268 — id dan nama pembuat disimpan TERPISAH.
+      //
+      // Sebelumnya keduanya berebut satu kolom: klien mengirim `createdBy`
+      // berisi nama tampilan, lalu baris ini menimpanya dengan id sesi. Nama
+      // pembuat karena itu tidak pernah sampai ke basis data, dan frontend
+      // terpaksa menebak — `isAuthor()` mencocokkan satu nilai tersimpan ke
+      // ENAM field identitas sekaligus (id/uid/username/email/name/
+      // displayName). Tebakan itu gagal secara TIDAK KONSISTEN begitu format
+      // yang tersimpan berbeda dari field yang kebetulan ada di sesi, dan
+      // ketika gagal tombol Edit/Hapus flowchart hilang tanpa pesan apa pun —
+      // kanvasnya terbuka baca-saja, yang oleh pemilik proyek terbaca sebagai
+      // "klik edit malah ke detail".
+      //
+      // Id tetap yang menentukan otorisasi (tidak berubah saat pengguna ganti
+      // nama tampilan); nama hanya untuk ditampilkan.
+      const currentUserId = req.user?.id || req.user?.uid || "guest";
+      const currentUserName = req.user?.displayName || req.user?.username || createdBy || null;
       const newId = crypto.randomUUID();
 
       await documentRepository.create({
@@ -90,6 +106,7 @@ router.post(
         canvasData: canvasData || null,
         category: category || null,
         createdBy: currentUserId,
+        createdByName: currentUserName,
       });
 
       res.json({
@@ -104,6 +121,7 @@ router.post(
           fileName,
           fileType,
           createdBy: currentUserId,
+          createdByName: currentUserName,
         },
       });
     } catch (error: any) {
