@@ -449,26 +449,26 @@ html {
   h1,
   .h1 {
     font-size: 1.125rem; /* 18px */
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.35;
   }
   h2,
   .h2 {
     font-size: 1rem; /* 16px */
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1.35;
   }
   h3,
   .h3 {
     font-size: 0.875rem; /* 14px */
-    font-weight: 600;
+    font-weight: 500;
   }
 
   /* Densitas Sel Tabel Standar Jira */
   th {
     padding: 0.5rem 0.75rem; /* py-2 px-3 */
     font-size: 0.625rem; /* 10px */
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }

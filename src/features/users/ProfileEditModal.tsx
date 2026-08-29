@@ -242,7 +242,7 @@ export const ProfileEditModal = ({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
+            <label className="block text-xs font-normal text-content-muted uppercase tracking-wider">
               {t("profile.fullName")}
             </label>
             <Input
@@ -252,7 +252,7 @@ export const ProfileEditModal = ({
           </div>
 
           <div className="space-y-1">
-            <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
+            <label className="block text-xs font-normal text-content-muted uppercase tracking-wider">
               {t("profile.username")}
             </label>
             <Input
@@ -262,7 +262,7 @@ export const ProfileEditModal = ({
           </div>
 
           <div className="space-y-1 md:col-span-2">
-            <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
+            <label className="block text-xs font-normal text-content-muted uppercase tracking-wider">
               {t("profile.email")}
             </label>
             <Input
@@ -272,7 +272,7 @@ export const ProfileEditModal = ({
           </div>
 
           <div className="space-y-1 md:col-span-2">
-            <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
+            <label className="block text-xs font-normal text-content-muted uppercase tracking-wider">
               {t("profile.phone")}
             </label>
             <Input
@@ -286,7 +286,7 @@ export const ProfileEditModal = ({
           <h4 className="text-sm font-medium text-content-strong">{t("profile.changePassword")}</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1 relative">
-              <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
+              <label className="block text-xs font-normal text-content-muted uppercase tracking-wider">
                 {t("profile.oldPassword")}
               </label>
               <Input
@@ -309,7 +309,7 @@ export const ProfileEditModal = ({
               </button>
             </div>
             <div className="space-y-1 relative">
-              <label className="block text-xs font-medium text-content-muted uppercase tracking-wider">
+              <label className="block text-xs font-normal text-content-muted uppercase tracking-wider">
                 {t("profile.newPassword")}
               </label>
               <Input

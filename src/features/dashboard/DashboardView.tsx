@@ -651,10 +651,10 @@ export function DashboardView(props: DashboardViewProps) {
             (Epic ikut). Selisihnya nyata (3 lawan 12) dan sebelumnya tidak
             berlabel, sehingga terbaca sebagai angka yang bertentangan. */}
         <div className="flex items-baseline justify-between mb-2">
-          <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
+          <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
             {t("dashboard.taskSummary")}
           </span>
-          <span className="text-xs sm:text-[11px] font-medium text-content-muted">
+          <span className="text-xs sm:text-[11px] font-normal text-content-muted">
             {t("dashboard.epicExcluded")}
           </span>
         </div>
@@ -663,7 +663,7 @@ export function DashboardView(props: DashboardViewProps) {
           <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
+                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
                   {t("dashboard.totalTasks")}
                 </span>
                 <h3 className="text-2xl font-medium text-content-strong mt-1">{totalTasks}</h3>
@@ -701,7 +701,7 @@ export function DashboardView(props: DashboardViewProps) {
           <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
+                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
                   {t("dashboard.runningTasks")}
                 </span>
                 <h3 className="text-2xl font-medium text-content-strong mt-1">
@@ -729,7 +729,7 @@ export function DashboardView(props: DashboardViewProps) {
           <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
+                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
                   {t("dashboard.doneTasks")}
                 </span>
                 <h3 className="text-2xl font-medium text-content-strong mt-1">
@@ -773,7 +773,7 @@ export function DashboardView(props: DashboardViewProps) {
           <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
+                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
                   {t("dashboard.blockedTasks")}
                 </span>
                 {/* #111 — nol berarti TIDAK ADA yang tersumbat, itu kabar baik.
