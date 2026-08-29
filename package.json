@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx server.ts",
+    "dev": "tsx watch --clear-screen=false server.ts",
     "doctor": "node scripts/doctor.cjs",
     "fix:warna": "node scripts/fix/warna-ke-token.cjs",
     "audit:warna": "node scripts/validate/audit-warna.cjs",
