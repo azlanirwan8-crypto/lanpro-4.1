@@ -281,9 +281,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                       </div>
                       {!isSidebarCollapsed && (
                         <>
-                          <span className="flex-1 text-left font-medium truncate">
-                            {t(item.label)}
-                          </span>
+                          <span className="flex-1 text-left truncate">{t(item.label)}</span>
                           {item.badge && renderBadge(item.badge, item.badgeColor)}
                           {hasChildren && (
                             <div

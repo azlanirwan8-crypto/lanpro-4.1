@@ -117,41 +117,76 @@ for (const [ditulis, nyata, nama] of pasangan) {
   }
 }
 
-// 4. Item di tabel BELUM tidak boleh berstatus SELESAI, dan sebaliknya.
-const statusDi = (a, z) =>
-  baris
-    .slice(a, z)
-    .filter((l) => /^\|\s*\d+\s*\|/.test(l))
-    .map((l) => ({
-      nomor: Number(/^\|\s*(\d+)\s*\|/.exec(l)[1]),
-      status: (l.split("|")[7] || "").trim(),
-    }));
+// 4 & 5. Sejak #255, §1.1 dikelompokkan per fase dalam beberapa mini-tabel
+// 10 kolom (masing-masing punya baris header sendiri), sementara §1.2/§1.3
+// tetap satu tabel 8 kolom lama. Gerbang lama mengasumsikan SATU layout tetap
+// per bagian dan membaca Status lewat POSISI (potongan ke-7) — itu pecah
+// begitu ada dua layout kolom berbeda dalam satu berkas. Sekarang gerbang
+// mendeteksi setiap baris HEADER tabel (baris `|...|` yang diikuti baris
+// pemisah `| --- | ... |`), membaca NAMA kolom dari situ, dan memakai NAMA itu
+// untuk mencari indeks kolom Status secara dinamis per tabel — bukan
+// mengandalkan posisi yang bisa bergeser kalau kolom ditambah/dikurangi.
+// Jumlah sel per baris data juga dibandingkan terhadap jumlah sel HEADER
+// tabelnya sendiri (bukan angka 9 yang dihardcode), supaya baris yang pecah
+// oleh karakter pipa di dalam teks (persis kasus #183 dan #259) tetap
+// tertangkap apa pun jumlah kolom tabelnya.
+const isBarisPemisah = (l) => /^\|[\s:-]+\|/.test(l);
+const isBarisData = (l) => /^\|\s*\d+\s*\|/.test(l);
 
-for (const { nomor, status } of statusDi(i11, i12)) {
+const analisaBagian = (a, z) => {
+  const hasil = [];
+  let kolom = null; // { nama: string[], idxStatus: number, jumlahSel: number }
+  for (let i = a; i < z; i++) {
+    const l = baris[i];
+    if (l.startsWith("|") && i + 1 < z && isBarisPemisah(baris[i + 1])) {
+      const sel = l.split("|");
+      const nama = sel.slice(1, -1).map((s) => s.trim());
+      const idxStatus = nama.findIndex((n) => /^status$/i.test(n));
+      kolom = { nama, idxStatus, jumlahSel: (l.match(/\|/g) || []).length };
+      continue;
+    }
+    if (!isBarisData(l)) continue;
+    const nomor = Number(/^\|\s*(\d+)\s*\|/.exec(l)[1]);
+    const jumlahSel = (l.match(/\|/g) || []).length;
+    let status = "";
+    if (kolom && kolom.idxStatus !== -1) {
+      status = (l.split("|")[kolom.idxStatus + 1] || "").trim();
+    }
+    hasil.push({
+      nomor,
+      status,
+      jumlahSel,
+      jumlahSelDiharapkan: kolom ? kolom.jumlahSel : null,
+      adaHeader: kolom !== null,
+    });
+  }
+  return hasil;
+};
+
+const belumRinci = analisaBagian(i11, i12);
+const selesaiRinci = analisaBagian(i12, i13);
+const ditahanRinci = analisaBagian(i13, iAkhir);
+
+for (const { nomor, status, adaHeader } of belumRinci) {
+  if (!adaHeader) {
+    lapor(`#${nomor} ada di tabel BELUM tanpa baris header tabel di atasnya — gerbang tidak bisa membaca Status-nya`);
+    continue;
+  }
   if (/SELESAI/.test(status)) lapor(`#${nomor} ada di tabel BELUM tetapi statusnya SELESAI`);
 }
-for (const { nomor, status } of statusDi(i12, i13)) {
+for (const { nomor, status, adaHeader } of selesaiRinci) {
+  if (!adaHeader) {
+    lapor(`#${nomor} ada di tabel SELESAI tanpa baris header tabel di atasnya — gerbang tidak bisa membaca Status-nya`);
+    continue;
+  }
   if (!/SELESAI/.test(status)) lapor(`#${nomor} ada di tabel SELESAI tetapi statusnya '${status}'`);
 }
 
-// 5. Item #255/#259 — satu karakter pipa DI DALAM sebuah baris memecahnya jadi
-// lebih dari 9 sel, dan gerbang lama membaca kolom yang salah TANPA berteriak
-// (ia hanya mengambil potongan ke-N secara buta, lihat statusDi di atas).
-// Baris #183 dan baris #259 sempat rusak begini sebelum ketahuan lewat
-// pembacaan manual. Jumlah sel yang benar SELALU 9 pada baris tabel berformat
-// '| # | temuan | fase | sev | biaya | blokir | status | detail |'.
-const cacatSel = [];
-for (let i = i11; i < iAkhir; i++) {
-  const l = baris[i];
-  if (!/^\|\s*\d+\s*\|/.test(l)) continue;
-  const jumlahSel = (l.match(/\|/g) || []).length;
-  if (jumlahSel !== 9) {
-    const nomor = /^\|\s*(\d+)\s*\|/.exec(l)[1];
-    cacatSel.push({ nomor, jumlahSel });
-  }
-}
-for (const { nomor, jumlahSel } of cacatSel) {
-  lapor(`#${nomor} punya ${jumlahSel} sel, seharusnya 9 — kemungkinan karakter pipa di dalam teks`);
+const cacatSel = [...belumRinci, ...selesaiRinci, ...ditahanRinci].filter(
+  (r) => r.jumlahSelDiharapkan !== null && r.jumlahSel !== r.jumlahSelDiharapkan
+);
+for (const { nomor, jumlahSel, jumlahSelDiharapkan } of cacatSel) {
+  lapor(`#${nomor} punya ${jumlahSel} sel, seharusnya ${jumlahSelDiharapkan} (sesuai header tabelnya) — kemungkinan karakter pipa di dalam teks`);
 }
 if (cacatSel.length) {
   console.log(warna.redup("         cari code span yang memuat karakter pipa; eja cara kerjanya, jangan mengutip kode"));

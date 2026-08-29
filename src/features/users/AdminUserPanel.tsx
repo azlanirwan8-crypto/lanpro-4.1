@@ -1149,7 +1149,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
                 {t("users.username")}
               </label>
               <Input
@@ -1169,7 +1169,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
                 {t("users.fullName")}
               </label>
               <Input
@@ -1196,7 +1196,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
                 {t("users.email")}
               </label>
               <Input
@@ -1214,7 +1214,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
                 {t("users.phone")}
               </label>
               <Input
@@ -1224,7 +1224,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
                 {t("users.password")}
               </label>
               <Input
@@ -1282,7 +1282,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               )}
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
                 {t("users.department")}
               </label>
               <div className="relative group/select">
@@ -1309,7 +1309,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
                 {t("users.position")}
               </label>
               <div className="relative group/select">
@@ -1336,7 +1336,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-content-subtle uppercase tracking-wider mb-1">
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
                 {t("users.systemRole")}
               </label>
               <div className="relative group/select">
