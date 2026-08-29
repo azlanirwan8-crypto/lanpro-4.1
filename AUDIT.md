@@ -476,7 +476,7 @@ sulit diuji sendiri-sendiri.
 
 ---
 
-## §1 PAPAN PRIORITAS — 15 BELUM · 233 SELESAI · 3 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 15 BELUM · 234 SELESAI · 3 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
