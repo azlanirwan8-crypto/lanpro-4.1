@@ -168,6 +168,8 @@ export const en = {
     "srv.nama_role_tidak_boleh": "The role name cannot contain junk or repeated characters.",
     "srv.nama_role_tidak_boleh_2": "The role name cannot be junk or random characters.",
     "srv.data_master_bawaan_sistem": "Built-in master data is locked and cannot be deleted.",
+    "srv.data_master_sedang_digunakan":
+      "This master data is currently used by {{count}} active tasks and cannot be deleted.",
     "srv.pemrosesan_dibatalkan": "Processing cancelled.",
     "srv.proses_pemrosesan_ai_stt": "AI processing (STT & LLM) has started in the background.",
     "srv.menganalisis_video_audio_multimodal":

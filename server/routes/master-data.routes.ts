@@ -25,13 +25,11 @@ router.get("/api/master-data", async (req, res) => {
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/master-data error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -65,13 +63,11 @@ router.post("/api/master-data", verifyGlobalAdmin, async (req, res) => {
     if (type === "project_role") {
       const trimmedLabel = itemLabel.trim();
       if (trimmedLabel.length < 3) {
-        return res
-          .status(400)
-          .json({
-            status: "error",
-            code: "srv.nama_role_minimal_harus",
-            message: "Nama Role minimal harus 3 karakter.",
-          });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.nama_role_minimal_harus",
+          message: "Nama Role minimal harus 3 karakter.",
+        });
       }
       if (/^(.)\1+$/i.test(trimmedLabel)) {
         return res.status(400).json({
@@ -124,13 +120,11 @@ router.post("/api/master-data", verifyGlobalAdmin, async (req, res) => {
     res.json({ status: "success", data: created });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: POST /api/master-data error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -170,13 +164,11 @@ router.put("/api/master-data/:id", verifyGlobalAdmin, async (req, res) => {
     if (itemType === "project_role") {
       const trimmedLabel = itemLabel.trim();
       if (trimmedLabel.length < 3) {
-        return res
-          .status(400)
-          .json({
-            status: "error",
-            code: "srv.nama_role_minimal_harus",
-            message: "Nama Role minimal harus 3 karakter.",
-          });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.nama_role_minimal_harus",
+          message: "Nama Role minimal harus 3 karakter.",
+        });
       }
       if (/^(.)\1+$/i.test(trimmedLabel)) {
         return res.status(400).json({
@@ -217,13 +209,11 @@ router.put("/api/master-data/:id", verifyGlobalAdmin, async (req, res) => {
     res.json({ status: "success", code: "srv.masterdata_updated", message: "MasterData updated" });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: PUT /api/master-data error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -237,13 +227,11 @@ router.delete("/api/master-data/:id", verifyGlobalAdmin, async (req, res) => {
     const { id } = req.params;
     const item = await masterDataRepository.findById(id);
     if (!item) {
-      return res
-        .status(404)
-        .json({
-          status: "error",
-          code: "srv.master_data_tidak_ditemukan",
-          message: "Master data tidak ditemukan.",
-        });
+      return res.status(404).json({
+        status: "error",
+        code: "srv.master_data_tidak_ditemukan",
+        message: "Master data tidak ditemukan.",
+      });
     }
 
     if (item.is_system_default === 1 || item.is_system_default === true) {
@@ -258,6 +246,8 @@ router.delete("/api/master-data/:id", verifyGlobalAdmin, async (req, res) => {
     if (usageCount > 0) {
       return res.status(400).json({
         status: "error",
+        code: "srv.data_master_sedang_digunakan",
+        params: { count: usageCount },
         message: `Data master ini sedang digunakan oleh ${usageCount} Task aktif dan tidak dapat dihapus.`,
       });
     }
@@ -266,13 +256,11 @@ router.delete("/api/master-data/:id", verifyGlobalAdmin, async (req, res) => {
     res.json({ status: "success", code: "srv.masterdata_deleted", message: "MasterData deleted" });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: DELETE /api/master-data error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
