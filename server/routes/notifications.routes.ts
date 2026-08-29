@@ -149,22 +149,72 @@ router.post("/api/users/:userId/notifications", async (req: any, res) => {
     const { type, title, message, relatedId, read } = req.body;
     const senderId = req.user?.id || req.user?.uid || null;
 
+    if (!userId || typeof userId !== "string") {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.id_penerima_tidak_valid",
+        message: "ID penerima tidak valid.",
+      });
+    }
+
+    const recipient = await userRepository.findByIdOrUid(userId);
+    if (!recipient) {
+      return res.status(404).json({
+        status: "error",
+        code: "srv.pengguna_tidak_ditemukan",
+        message: "Pengguna tidak ditemukan.",
+      });
+    }
+
+    if (recipient.status === "inactive" || recipient.status === "suspended") {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.pengguna_tidak_aktif",
+        message: "Pengguna penerima notifikasi tidak aktif.",
+      });
+    }
+
+    if (title && typeof title === "string" && title.length > 200) {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.judul_terlalu_panjang",
+        message: "Judul notifikasi terlalu panjang (maksimum 200 karakter).",
+      });
+    }
+
+    if (message && typeof message === "string" && message.length > 2000) {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.pesan_notifikasi_terlalu_panjang",
+        message: "Pesan notifikasi terlalu panjang (maksimum 2000 karakter).",
+      });
+    }
+
     const newId = crypto.randomUUID();
+    const finalRecipientId = recipient.id || userId;
 
     await notificationRepository.create({
       id: newId,
-      recipientId: userId,
+      recipientId: finalRecipientId,
       senderId: senderId || null,
-      title: title || "New Notification",
-      message: message || "",
-      type: type || "system",
+      title: title && typeof title === "string" ? title.trim() : "New Notification",
+      message: message && typeof message === "string" ? message.trim() : "",
+      type: type && typeof type === "string" ? type.trim() : "system",
       relatedId: relatedId || null,
       read: read ? true : false,
     });
 
     res.json({
       status: "success",
-      data: { id: newId, type, title, message, relatedId, senderId, read },
+      data: {
+        id: newId,
+        type: type && typeof type === "string" ? type.trim() : "system",
+        title: title && typeof title === "string" ? title.trim() : "New Notification",
+        message: message && typeof message === "string" ? message.trim() : "",
+        relatedId: relatedId || null,
+        senderId: senderId || null,
+        read: read ? true : false,
+      },
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: POST /api/users/:userId/notifications error:", error);

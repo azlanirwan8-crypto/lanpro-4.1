@@ -182,6 +182,11 @@ export const en = {
     "srv.pesan_tidak_ditemukan": "Message not found.",
     "srv.pesan_berhasil_dihapus": "The message was deleted.",
     "srv.pesan_terlalu_panjang": "Message is too long (maximum 5000 characters).",
+    "srv.pesan_notifikasi_terlalu_panjang":
+      "Notification message is too long (maximum 2000 characters).",
+    "srv.judul_terlalu_panjang": "Notification title is too long (maximum 200 characters).",
+    "srv.pengguna_tidak_aktif": "Notification recipient user is not active.",
+    "srv.id_penerima_tidak_valid": "Invalid recipient ID.",
     "srv.akses_ditolak_hapus_pesan":
       "Access denied: you can only delete messages you sent yourself.",
     "srv.akses_ditolak_hapus_notifikasi":
