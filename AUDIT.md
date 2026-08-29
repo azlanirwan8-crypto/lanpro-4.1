@@ -7518,6 +7518,41 @@ Yang masih menahan rilis production tercatat di §1.1 dan §20.3 — terutama
 **#30** (storage drive-per-user) dan **#46** (`SSO_ALLOWED_DOMAINS=gmail.com`).
 Keduanya menunggu keputusan pemilik proyek dan **tidak boleh ditebak**.
 
+### 21.7 Sisa `dark:` di `issues/styles.ts` — ditelusuri, BUKAN celah baru
+
+Ditelusuri 29 Agu 2026 atas permintaan pemilik proyek: apakah 11 kemunculan
+`dark:` yang tersisa di `src/features/issues/styles.ts` (dicatat sejak §0.2 /
+#13) sudah disengaja atau terlewat migrasi Antigravity. **Tidak ada kode yang
+diubah** — ini murni pengukuran, sesuai §22 dan aturan wajib nomor di §23.
+
+**Dicocokkan satu per satu dengan token di `src/index.css`, hasilnya terbagi
+dua:**
+
+| Kelompok | Baris                        | Isi                                                                                                                                                                                                                                                  | Status                                                                                                        |
+| -------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| A        | 3, 8, 19, 21, 22, 24, 26, 28 | `dark:bg-surface-inverse`, `dark:border-border-inverse`, `dark:text-content-inverse-*`, dst. — token resmi                                                                                                                                           | **Disengaja.** Token repo ini berbasis kelas (`html.dark`), jadi `dark:` tetap wajib menempel di nama token   |
+| B        | 5, 8, 10, 12, 17, 21         | `dark:bg-slate-800/30`, `dark:bg-slate-950`, `dark:bg-indigo-950/20`, `dark:text-indigo-400`, `dark:border-indigo-900`, `dark:bg-amber-950/20`, `dark:text-amber-400`, `dark:border-amber-900`, `dark:bg-slate-950/50`, `dark:hover:bg-slate-800/50` | Warna Tailwind mentah, tidak ada padanan token di `index.css` untuk `slate-950` atau aksen indigo/amber gelap |
+
+**Dicocokkan ke gerbang resmi, bukan cuma dibaca:**
+
+```
+npm run audit:warna
+  87 kelas di 35 berkas (garis dasar 88)
+  turun  src/features/users/UserDetailView.tsx — 2 → 1
+  LULUS — tidak ada warna keras baru.
+```
+
+`src/features/issues/styles.ts` **sudah eksplisit tercatat** di
+`scripts/validate/warna-baseline.json` dengan batas **7 kelas** — persis
+Kelompok B di atas. Artinya residu ini **sudah diketahui gerbang ratchet**
+sejak sebelumnya, bukan sesuatu yang lolos tanpa terdeteksi.
+
+**Kesimpulan jujur:** ini bukan temuan baru dan bukan regresi — ini utang lama
+#13/#14 (§19.50 langkah 4) yang memang belum ditutup, karena menutupnya
+membutuhkan token baru (level `slate-950`, aksen indigo/amber gelap) yang
+belum ada di `index.css`. Menambahkan token itu adalah keputusan desain warna
+— **menunggu pemilik proyek**, sesuai §22.4, bukan tebakan sesi ini.
+
 ## §22 ATURAN MENYENTUH TEMA — baca SEBELUM mengubah warna apa pun
 
 Bagian ini ada karena tema repo ini **pernah dirusak** oleh perkakas AI yang
