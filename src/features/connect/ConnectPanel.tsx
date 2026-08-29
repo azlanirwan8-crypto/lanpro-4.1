@@ -102,7 +102,9 @@ export const ConnectPanel = () => {
             <h3 className="text-xs font-medium text-content-strong uppercase tracking-wide">
               {t("connect.mysqlHelp")}
             </h3>
-            <p className="text-content-secondary mt-1 text-xs leading-relaxed">{t("jsx.k27")}</p>
+            <p className="text-content-secondary mt-1 text-xs leading-relaxed">
+              {t("connect.theAppIsConnectedTo")}
+            </p>
           </div>
         </div>
 
@@ -118,7 +120,9 @@ export const ConnectPanel = () => {
           <form onSubmit={handleTestConnection} className="p-4 md:p-5 space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-content-body">{t("jsx.k28")}</label>
+                <label className="text-xs font-medium text-content-body">
+                  {t("connect.databaseHostDb_host")}
+                </label>
                 <input
                   name="host"
                   value={config.host}
@@ -127,7 +131,9 @@ export const ConnectPanel = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-content-body">{t("jsx.k29")}</label>
+                <label className="text-xs font-medium text-content-body">
+                  {t("connect.databasePortDb_port")}
+                </label>
                 <input
                   name="port"
                   value={config.port}
@@ -138,7 +144,9 @@ export const ConnectPanel = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-medium text-content-body">{t("jsx.k30")}</label>
+              <label className="text-xs font-medium text-content-body">
+                {t("connect.databaseNameDb_name")}
+              </label>
               <input
                 name="database"
                 value={config.database}
@@ -148,9 +156,11 @@ export const ConnectPanel = () => {
               <div className="bg-amber-500/10 rounded-md p-3 border border-amber-500/30 mt-2 flex gap-2.5 text-amber-800 text-xs">
                 <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <p className="font-medium text-amber-900">{t("jsx.j29")}</p>
+                  <p className="font-medium text-amber-900">
+                    {t("connect.importantFixResolvingUnknownDatabase")}
+                  </p>
                   <p className="leading-relaxed">
-                    {t("jsx.k31")}{" "}
+                    {t("connect.thisErrorHappensWhenThe")}{" "}
                     <strong className="font-medium underline text-amber-900 bg-amber-500/15 px-1 py-[3px] rounded">
                       defaultdb
                     </strong>
@@ -171,7 +181,9 @@ export const ConnectPanel = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-content-body">{t("jsx.k32")}</label>
+                <label className="text-xs font-medium text-content-body">
+                  {t("connect.usernameDb_user")}
+                </label>
                 <input
                   name="user"
                   value={config.user}
@@ -180,7 +192,9 @@ export const ConnectPanel = () => {
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-content-body">{t("jsx.k33")}</label>
+                <label className="text-xs font-medium text-content-body">
+                  {t("connect.passwordDb_password")}
+                </label>
                 <input
                   type="password"
                   name="password"

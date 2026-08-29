@@ -395,7 +395,7 @@ export function useAuth(
 
         const isRejected = cleanMsg.toLowerCase().includes("ditolak");
         showErrorAlert(
-          isRejected ? i18n.t("ui2.registrationRejected") : i18n.t("ui2.accessDenied"),
+          isRejected ? i18n.t("auth.registrationRejected") : i18n.t("auth.accessDenied"),
           cleanMsg,
           isRejected ? "error" : "warning"
         );

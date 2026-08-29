@@ -127,7 +127,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* FULL NAME INPUT */}
         <div className="space-y-1">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            {t("ui2.fullName")} <span className="text-rose-500">*</span>
+            {t("register.fullName")} <span className="text-rose-500">*</span>
           </label>
           <input
             type="text"
@@ -153,7 +153,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* EMAIL ADDRESS INPUT */}
         <div className="space-y-1">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            {t("ui2.emailAddress")} <span className="text-rose-500">*</span>
+            {t("forgotPwd.emailAddress")} <span className="text-rose-500">*</span>
           </label>
           <input
             type="email"
@@ -178,9 +178,9 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* USERNAME INPUT */}
         <div className="space-y-1">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            {t("jsx.k18")} <span className="text-rose-500">*</span>{" "}
+            {t("common.username")} <span className="text-rose-500">*</span>{" "}
             <span className="text-xs sm:text-[11px] text-content-subtle font-normal">
-              {t("jsx.k21")}
+              {t("register.lettersOnlyMax10")}
             </span>
           </label>
           <input
@@ -207,7 +207,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* PASSWORD INPUT & STRENGTH METER */}
         <div className="space-y-1">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            {t("ui2.password")} <span className="text-rose-500">*</span>
+            {t("register.password")} <span className="text-rose-500">*</span>
           </label>
           <div className="relative">
             <input
@@ -226,7 +226,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-content-subtle hover:text-primary focus:outline-none cursor-pointer transition-colors"
-              title={showPassword ? t("ui2.hidePassword") : t("ui2.showPassword")}
+              title={showPassword ? t("common.hidePassword") : t("common.showPassword")}
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -260,7 +260,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
                   )}
                 >
                   <span>{passStrength.criteria.minLength ? "[✓]" : "[ ]"}</span>{" "}
-                  {t("ui2.min8Chars")}
+                  {t("register.min8Chars")}
                 </div>
                 <div
                   className={cn(
@@ -270,7 +270,8 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
                       : "text-content-subtle"
                   )}
                 >
-                  <span>{passStrength.criteria.upper ? "[✓]" : "[ ]"}</span> {t("jsx.k22")}
+                  <span>{passStrength.criteria.upper ? "[✓]" : "[ ]"}</span>{" "}
+                  {t("register.uppercaseAZ")}
                 </div>
                 <div
                   className={cn(
@@ -280,7 +281,8 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
                       : "text-content-subtle"
                   )}
                 >
-                  <span>{passStrength.criteria.digit ? "[✓]" : "[ ]"}</span> {t("jsx.k23")}
+                  <span>{passStrength.criteria.digit ? "[✓]" : "[ ]"}</span>{" "}
+                  {t("register.digits09")}
                 </div>
                 <div
                   className={cn(
@@ -290,7 +292,8 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
                       : "text-content-subtle"
                   )}
                 >
-                  <span>{passStrength.criteria.special ? "[✓]" : "[ ]"}</span> {t("jsx.k24")}
+                  <span>{passStrength.criteria.special ? "[✓]" : "[ ]"}</span>{" "}
+                  {t("register.symbols")}
                 </div>
               </div>
             </div>
@@ -328,7 +331,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
       <SsoButtons mode="daftar" />
 
       <p className="text-center text-xs font-medium text-content-muted pt-5 mt-4 border-t border-border-faint">
-        {t("jsx.k25")}{" "}
+        {t("register.alreadyHaveAnAccount")}{" "}
         <button
           type="button"
           onClick={onBackToLogin}

@@ -2755,10 +2755,14 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 type="button"
                                 onClick={() => setShowEditPassword((v) => !v)}
                                 title={
-                                  showEditPassword ? t("ui2.hidePassword") : t("ui2.showPassword")
+                                  showEditPassword
+                                    ? t("common.hidePassword")
+                                    : t("common.showPassword")
                                 }
                                 aria-label={
-                                  showEditPassword ? t("ui2.hidePassword") : t("ui2.showPassword")
+                                  showEditPassword
+                                    ? t("common.hidePassword")
+                                    : t("common.showPassword")
                                 }
                                 aria-pressed={showEditPassword}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-content-muted hover:text-content-body cursor-pointer"
@@ -3069,12 +3073,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                                     role="img"
                                                     aria-label={`${moduleInfo.label} ${action}: ${
                                                       isChecked
-                                                        ? t("ui2.granted")
-                                                        : t("ui2.revoked")
+                                                        ? t("userDetail.granted")
+                                                        : t("userDetail.revoked")
                                                     } (${
                                                       isOverride
-                                                        ? t("ui2.explicitOverride")
-                                                        : t("ui2.roleDefault")
+                                                        ? t("userDetail.explicitOverride")
+                                                        : t("userDetail.roleDefault")
                                                     })`}
                                                     className={cn(
                                                       "w-5 h-5 rounded-md flex items-center justify-center mx-auto border relative cursor-pointer select-none transition-all",
@@ -3086,12 +3090,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                                     )}
                                                     title={`${
                                                       isChecked
-                                                        ? t("ui2.granted")
-                                                        : t("ui2.revoked")
+                                                        ? t("userDetail.granted")
+                                                        : t("userDetail.revoked")
                                                     } · ${
                                                       isOverride
-                                                        ? t("ui2.explicitOverride")
-                                                        : t("ui2.roleDefault")
+                                                        ? t("userDetail.explicitOverride")
+                                                        : t("userDetail.roleDefault")
                                                     }`}
                                                   >
                                                     <Check

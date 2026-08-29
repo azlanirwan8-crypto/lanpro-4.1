@@ -226,7 +226,9 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
               <h3 className="text-xl font-medium text-content tracking-tight mb-2">
                 {t("session.expiring")}
               </h3>
-              <p className="text-sm text-content-muted px-2 mb-6">{t("jsx.j17")}</p>
+              <p className="text-sm text-content-muted px-2 mb-6">
+                {t("session.yourSessionWillCloseAutomatically")}
+              </p>
 
               {/* Countdown Progress Card */}
               <div className="bg-surface-sunken rounded-xl border border-border-faint p-5 mb-6 relative">

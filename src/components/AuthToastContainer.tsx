@@ -79,7 +79,7 @@ export const AuthNotificationProvider: React.FC<AuthNotificationProviderProps> =
           // Dynamic error message for incorrect credentials or account lockout
           triggerNotification({
             type: "error",
-            title: status === 429 ? i18n.t("ui2.accountBlocked") : i18n.t("ui2.signInFailed"),
+            title: status === 429 ? i18n.t("auth.accountBlocked") : i18n.t("auth.signInFailed"),
             message:
               payload?.message ||
               "Kata sandi atau nama pengguna yang Anda masukkan salah. Silakan periksa kembali kredensial Anda.",
@@ -91,7 +91,7 @@ export const AuthNotificationProvider: React.FC<AuthNotificationProviderProps> =
           // Case 2: Akun Belum Aktif / Pending Approval (Kondisi Peringatan - Warning Alert)
           triggerNotification({
             type: "warning",
-            title: i18n.t("ui2.accountInactive"),
+            title: i18n.t("auth.accountInactive"),
             message: payload?.message || "Akun Anda belum aktif, silakan hubungi admin.",
             actionLabel: "Lihat Instruksi Aktivasi",
             onAction: onActivationClick || (() => {}),
@@ -103,7 +103,7 @@ export const AuthNotificationProvider: React.FC<AuthNotificationProviderProps> =
           // Case 3: Berhasil Daftar Akun Baru (Kondisi Sukses - Success Alert)
           triggerNotification({
             type: "success",
-            title: i18n.t("ui2.registrationOk"),
+            title: i18n.t("auth.registrationOk"),
             message:
               "Akun Anda telah berhasil didaftarkan di platform LanPro. Silakan menunggu persetujuan admin untuk aktivasi.",
             duration: 8000,
@@ -114,7 +114,7 @@ export const AuthNotificationProvider: React.FC<AuthNotificationProviderProps> =
           // Fallback dynamic error alert
           triggerNotification({
             type: "error",
-            title: i18n.t("ui2.authFailed"),
+            title: i18n.t("auth.authFailed"),
             message,
             duration: 5000,
           });
@@ -469,9 +469,9 @@ const VelzonSweetAlertModal: React.FC<VelzonSweetAlertModalProps> = ({
   // komponen ia benar saat render pertama lalu membeku; hanya `useTranslation`
   // yang memicu render ulang saat bahasa diganti.
   const defaultTitles = {
-    success: t("ui2.wellDone"),
-    error: t("ui2.oopsWrong"),
-    warning: t("ui2.accountInactive"),
+    success: t("auth.wellDone"),
+    error: t("auth.oopsWrong"),
+    warning: t("auth.accountInactive"),
   };
 
   const defaultButtonLabels = {

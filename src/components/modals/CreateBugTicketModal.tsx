@@ -90,7 +90,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
                   {t("bugTicket.title")}
                 </h3>
                 <p className="text-xs sm:text-[11px] text-content-muted font-medium">
-                  {t("jsx.j13")}
+                  {t("bugTicket.createdFromTestCase")}
                   {testCase.rowNum}
                 </p>
               </div>
@@ -121,7 +121,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
             {/* Parent Task Searchable Combobox */}
             <div className="space-y-1.5 relative">
               <label className="text-xs sm:text-[10px] font-medium text-danger-text uppercase tracking-wider block">
-                {t("jsx.k12")}
+                {t("bugTicket.targetEpicParentTaskRequired")}
               </label>
 
               <div
@@ -261,7 +261,9 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
                 className="flex-1 py-3 bg-danger-surface hover:bg-danger-hover text-content-inverse text-xs font-medium rounded-md uppercase tracking-wider cursor-pointer shadow-xs flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
               >
                 <Bug className="w-4 h-4" />
-                <span>{isSubmitting ? t("ui2.savingTicket") : t("ui2.saveLinkBug")}</span>
+                <span>
+                  {isSubmitting ? t("bugTicket.savingTicket") : t("bugTicket.saveLinkBug")}
+                </span>
               </button>
             </div>
           </form>

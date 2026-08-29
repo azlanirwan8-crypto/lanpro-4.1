@@ -538,7 +538,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 disabled={isSaving}
                 className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs disabled:opacity-50 cursor-pointer"
               >
-                {isSaving ? t("ui2.saving") : t("ui2.saveChanges2")}
+                {isSaving ? t("common.saving") : t("common.saveChanges2")}
               </button>
             </div>
           </div>

@@ -308,7 +308,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       ]);
 
       if (exitCode !== 0) {
-        throw new Error(t("ui2.ffmpegFailed"));
+        throw new Error(t("aiMeeting.ffmpegFailed"));
       }
 
       const data = await ffmpeg.readFile(outputFileName);
@@ -790,7 +790,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
-              <FileText className="w-3.5 h-3.5 text-primary" /> {t("jsx.j108")}
+              <FileText className="w-3.5 h-3.5 text-primary" /> {t("aiMeeting.summary")}
             </button>
             <button
               onClick={() => setActiveTab("chronology")}
@@ -800,7 +800,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
-              <Brain className="w-3.5 h-3.5 text-primary" /> {t("jsx.j109")}
+              <Brain className="w-3.5 h-3.5 text-primary" /> {t("aiMeeting.meetingChronology")}
             </button>
             <button
               onClick={() => setActiveTab("conclusions")}
@@ -810,7 +810,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t("jsx.j110")}
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> {t("aiMeeting.conclusions")}
             </button>
             <button
               onClick={() => setActiveTab("suggestions")}
@@ -820,7 +820,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
-              <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> {t("jsx.k70")}
+              <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> {t("aiMeeting.suggestionsIdeas")}
             </button>
             <button
               onClick={() => setActiveTab("actionItems")}
@@ -830,7 +830,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
-              <ListChecks className="w-3.5 h-3.5 text-primary" /> {t("jsx.j111")}
+              <ListChecks className="w-3.5 h-3.5 text-primary" /> {t("aiMeeting.followUp")}
               {activeMeetingData?.tab_tindak_lanjut?.length > 0 && (
                 <span className="ml-1 px-1.5 py-0.5 bg-primary-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] rounded-full font-medium min-w-[16px] text-center inline-block">
                   {activeMeetingData.tab_tindak_lanjut.length}
@@ -845,7 +845,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
-              <ArrowRight className="w-3.5 h-3.5 text-pink-500" /> {t("jsx.j112")}
+              <ArrowRight className="w-3.5 h-3.5 text-pink-500" /> {t("aiMeeting.nextPlan")}
             </button>
             <button
               onClick={() => setActiveTab("toBeScenario")}
@@ -855,7 +855,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-cyan-600" /> {t("jsx.j113")}
+              <Sparkles className="w-3.5 h-3.5 text-cyan-600" /> {t("aiMeeting.toBeTarget")}
             </button>
             <button
               onClick={() => setActiveTab("metadata")}
@@ -865,7 +865,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
-              <Clock className="w-3.5 h-3.5 text-teal-600" /> {t("jsx.j114")}
+              <Clock className="w-3.5 h-3.5 text-teal-600" /> {t("aiMeeting.metadata")}
             </button>
             <button
               onClick={() => setActiveTab("transcript")}
@@ -875,16 +875,18 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                   : "text-content-secondary hover:text-content hover:bg-surface-muted"
               }`}
             >
-              <FileText className="w-3.5 h-3.5 text-content-muted" /> {t("jsx.j115")}
+              <FileText className="w-3.5 h-3.5 text-content-muted" />{" "}
+              {t("aiMeeting.viewTranscript")}
             </button>
           </div>
 
           <button
             onClick={() => setShowFeedbackModal(true)}
             className="px-3 py-1.5 bg-surface hover:bg-surface-muted border border-border-subtle text-content-body text-xs font-medium rounded-md transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs shrink-0"
-            title={t("jsx.j106")}
+            title={t("aiMeeting.giveFeedbackOnMinuteQuality")}
           >
-            <Brain className="w-3.5 h-3.5 text-primary" /> {t("jsx.j106")}
+            <Brain className="w-3.5 h-3.5 text-primary" />{" "}
+            {t("aiMeeting.giveFeedbackOnMinuteQuality")}
           </button>
         </div>
       )}
@@ -896,7 +898,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
             <Loader2 className="w-10 h-10 text-indigo-600 animate-spin mb-4" />
             <h5 className="text-sm font-medium text-content-strong">{t("aiMeeting.composing")}</h5>
             <p className="text-xs text-content-subtle mt-1.5 max-w-sm leading-relaxed">
-              {t("jsx.j116")}
+              {t("aiMeeting.theAiSecretaryIsAnalysing")}
             </p>
           </div>
         ) : (
@@ -986,7 +988,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       <div className="flex items-center gap-2">
                         <h4 className="text-xs font-medium text-content-strong uppercase tracking-widest flex items-center gap-2">
                           <FileText className="w-4 h-4 text-indigo-600" />
-                          {t("jsx.k73")}
+                          {t("aiMeeting.rawSpeechToTextResult")}
                         </h4>
                         <span className="px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 text-[10px] leading-none font-medium rounded-lg">
                           {transcript ? `${transcript.split(/\s+/).length} Kata` : "0 Kata"}
@@ -1012,8 +1014,9 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-xs text-amber-800 leading-relaxed flex items-start gap-2.5">
                           <Sparkles className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5 animate-pulse" />
                           <div>
-                            {t("jsx.j119")} <span className="underline">{t("jsx.m4")}</span>{" "}
-                            {t("jsx.j120")}
+                            {t("aiMeeting.editModeAddCorrectOr")}{" "}
+                            <span className="underline">{t("aiMeeting.saveReRunAnalysis")}</span>{" "}
+                            {t("aiMeeting.toReprocessYourMeetingMinutes")}
                           </div>
                         </div>
 
@@ -1086,7 +1089,9 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               }`}
                             >
                               <Filter className="w-3.5 h-3.5" />
-                              {filterOnlyMatches ? t("ui2.onlyMatchingRows") : t("ui2.showAll")}
+                              {filterOnlyMatches
+                                ? t("aiMeeting.onlyMatchingRows")
+                                : t("aiMeeting.showAll")}
                             </button>
                           </div>
 
@@ -1140,14 +1145,16 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             ))
                           ) : (
                             <div className="text-center py-8 text-content-subtle italic">
-                              {t("jsx.j121")}
+                              {t("aiMeeting.noTranscriptLineMatchesThe")}
                               {searchTerm}".
                             </div>
                           )}
                         </div>
                       </div>
                     ) : (
-                      <p className="text-xs text-content-subtle italic">{t("jsx.m2")}</p>
+                      <p className="text-xs text-content-subtle italic">
+                        {t("aiMeeting.noRawTranscriptAvailableThe")}
+                      </p>
                     )}
                   </div>
                 )}
@@ -1157,9 +1164,11 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft">
                     <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
                       <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                      {t("jsx.k76")}
+                      {t("aiMeeting.recordLiveMicrophone")}
                     </div>
-                    <p className="text-xs sm:text-[11px] text-content-subtle">{t("jsx.m3")}</p>
+                    <p className="text-xs sm:text-[11px] text-content-subtle">
+                      {t("aiMeeting.recordsTheMeetingThroughYour")}
+                    </p>
 
                     <div className="flex flex-col items-center justify-center gap-3 w-full py-4">
                       <button
@@ -1167,7 +1176,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                         className={`px-8 py-4 ${isRecording ? "bg-surface-inverse" : "bg-red-600"} hover:opacity-90 text-content-inverse rounded-xl text-sm font-medium shadow-soft-lg  flex items-center gap-3 cursor-pointer transition-transform hover:scale-[1.02]`}
                       >
                         <Brain className="w-5 h-5" />{" "}
-                        {isRecording ? t("ui2.stopRecording") : t("ui2.startRecording")}
+                        {isRecording ? t("aiMeeting.stopRecording") : t("aiMeeting.startRecording")}
                       </button>
                       <span className="text-sm font-mono text-content-muted">
                         {formatTime(recordingTime)}
@@ -1179,7 +1188,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   <div className="space-y-4 p-6 bg-surface rounded-xl border border-border-faint shadow-soft flex flex-col justify-between">
                     <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
                       <FileText className="w-4 h-4 text-indigo-600" />
-                      {t("jsx.j122")}
+                      {t("aiMeeting.uploadARecordingOrTranscript")}
                     </div>
 
                     {uploadState !== "IDLE" ? (
@@ -1368,7 +1377,8 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     onClick={handleAnalyze}
                     className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-xl text-xs font-medium shadow-soft-lg flex items-center gap-2 cursor-pointer hover:scale-[1.01] transition-transform"
                   >
-                    <Sparkles className="w-4 h-4 text-indigo-200" /> {t("jsx.j123")}
+                    <Sparkles className="w-4 h-4 text-indigo-200" />{" "}
+                    {t("aiMeeting.startAiAnalysis")}
                   </button>
                 </div>
               </div>
@@ -1403,7 +1413,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                   {item.timestamp}
                                 </span>
                                 <h4 className="text-sm font-medium text-content-strong tracking-tight leading-snug">
-                                  {t("jsx.j124")} {item.aktivitas_visual}
+                                  {t("aiMeeting.visual")} {item.aktivitas_visual}
                                 </h4>
                               </div>
                             </div>
@@ -1430,7 +1440,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  {t("jsx.k78")}
+                  {t("aiMeeting.agreedDecisionsFinalOutcomes")}
                 </div>
 
                 {activeMeetingData.tab_kesimpulan.length === 0 ? (
@@ -1476,7 +1486,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       >
                         <div className="flex items-center gap-2">
                           <span className="px-2 py-[3px] bg-amber-500/10 text-[10px] leading-none sm:text-[9px] font-medium uppercase rounded border border-amber-500/30">
-                            {t("jsx.j125")} {item.diusulkan_oleh}
+                            {t("aiMeeting.proposedBy")} {item.diusulkan_oleh}
                           </span>
                         </div>
                         <p className="text-xs text-content-body leading-relaxed pl-1">
@@ -1495,7 +1505,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-2">
                   <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider">
                     <ListChecks className="w-4 h-4 text-indigo-600" />
-                    {t("jsx.k79")}
+                    {t("aiMeeting.followUpItemsActionPlan")}
                   </div>
 
                   {activeMeetingData.tab_tindak_lanjut.length > 0 && (
@@ -1504,7 +1514,8 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       disabled={importingIds.length > 0}
                       className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-xl text-xs font-medium flex items-center gap-1.5 shadow-soft transition-colors cursor-pointer disabled:opacity-55"
                     >
-                      <Database className="w-3.5 h-3.5 text-indigo-200" /> {t("jsx.j126")}
+                      <Database className="w-3.5 h-3.5 text-indigo-200" />{" "}
+                      {t("aiMeeting.importAllIntoDiscussionPoints")}
                     </button>
                   )}
                 </div>
@@ -1574,11 +1585,12 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             >
                               {isImporting ? (
                                 <>
-                                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("jsx.j127")}
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />{" "}
+                                  {t("aiMeeting.importing")}
                                 </>
                               ) : (
                                 <>
-                                  {t("jsx.j128")} <ArrowRight className="w-3.5 h-3.5" />
+                                  {t("aiMeeting.import")} <ArrowRight className="w-3.5 h-3.5" />
                                 </>
                               )}
                             </button>
@@ -1596,7 +1608,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
               <div className="space-y-6">
                 <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2">
                   <ArrowRight className="w-4 h-4 text-pink-600" />
-                  {t("jsx.k80")}
+                  {t("aiMeeting.nextPlanExecutionRoadmap")}
                 </div>
 
                 {activeMeetingData.tab_next_plan.length === 0 ? (
@@ -1616,7 +1628,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </span>
                             {item.due_date && (
                               <span className="px-2 py-[3px] bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 text-[10px] leading-none font-medium rounded-full">
-                                {t("jsx.j129")} {item.due_date}
+                                {t("aiMeeting.target")} {item.due_date}
                               </span>
                             )}
                           </div>
@@ -1626,7 +1638,8 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             </p>
                             {item.pic && (
                               <div className="text-xs sm:text-[11px] text-content-muted font-medium flex items-center gap-1">
-                                <UserCheck className="w-3.5 h-3.5 text-pink-500" /> {t("jsx.k81")}{" "}
+                                <UserCheck className="w-3.5 h-3.5 text-pink-500" />{" "}
+                                {t("aiMeeting.personInChargePic")}{" "}
                                 <span className="text-pink-600 font-medium">{item.pic}</span>
                               </div>
                             )}
@@ -1644,7 +1657,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
               <div className="space-y-6">
                 <div className="flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2">
                   <Sparkles className="w-4 h-4 text-cyan-600 animate-pulse" />
-                  {t("jsx.k82")}
+                  {t("aiMeeting.architectureRecommendationTargetProcess")}
                 </div>
 
                 <div className="space-y-6">
@@ -1653,7 +1666,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     <div className="bg-surface-sunken border border-border-subtle p-5 rounded-xl shadow-soft space-y-3">
                       <div className="flex items-center gap-2 text-content-body font-medium text-xs sm:text-[10px] uppercase tracking-widest">
                         <span className="w-2 h-2 rounded-full bg-slate-400" />
-                        {t("jsx.k83")}
+                        {t("aiMeeting.currentStateAsIs")}
                       </div>
                       <p className="text-xs text-content-secondary leading-relaxed whitespace-pre-wrap">
                         {activeMeetingData.tab_target_to_be.proses_bisnis_as_is ||
@@ -1665,7 +1678,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     <div className="bg-indigo-500/10 border border-indigo-500/30 p-5 rounded-xl shadow-soft space-y-3">
                       <div className="flex items-center gap-2 text-indigo-700 font-medium text-xs sm:text-[10px] uppercase tracking-widest">
                         <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-                        {t("jsx.k84")}
+                        {t("aiMeeting.futureTargetToBe")}
                       </div>
                       <p className="text-xs text-indigo-950 font-medium leading-relaxed whitespace-pre-wrap">
                         {activeMeetingData.tab_target_to_be.proses_bisnis_to_be ||
@@ -1677,7 +1690,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   {/* Transition Steps Card */}
                   <div className="bg-surface border border-border-subtle p-5 rounded-xl shadow-soft space-y-4">
                     <div className="flex items-center gap-2 text-content-body font-medium text-xs sm:text-[10px] uppercase tracking-widest">
-                      {t("jsx.k85")}
+                      {t("aiMeeting.migrationTransitionSteps")}
                     </div>
 
                     {!activeMeetingData.tab_target_to_be.langkah_transisi ||
@@ -1720,26 +1733,26 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     </h5>
                     <div className="space-y-2">
                       <div className="text-xs text-content-secondary">
-                        {t("jsx.j130")}{" "}
+                        {t("aiMeeting.meetingHost")}{" "}
                         <span className="text-content-strong font-medium">
                           {activeMeetingData.tab_metadata.host_rapat || "TBD"}
                         </span>
                       </div>
                       <div className="text-xs text-content-secondary">
-                        {t("jsx.j131")}{" "}
+                        {t("aiMeeting.meetingDate")}{" "}
                         <span className="text-content-strong font-medium">
                           {activeMeetingData.tab_metadata.tanggal_rapat || "TBD"}
                         </span>
                       </div>
                       <div className="text-xs text-content-secondary">
-                        {t("jsx.j132")}{" "}
+                        {t("aiMeeting.platform")}{" "}
                         <span className="font-medium px-1.5 py-0.5 bg-surface-muted rounded border border-border-subtle">
                           {activeMeetingData.tab_metadata.platform_digunakan || "Zoom"}
                         </span>
                       </div>
                       {activeMeetingData.tab_metadata.durasi_detik > 0 && (
                         <div className="text-xs text-content-secondary">
-                          {t("jsx.j133")}{" "}
+                          {t("aiMeeting.duration")}{" "}
                           <span className="font-medium">
                             {t("rakit.minutesCount", {
                               count: Math.floor(activeMeetingData.tab_metadata.durasi_detik / 60),
@@ -1753,7 +1766,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                   {/* Active Speakers / Participants */}
                   <div className="bg-surface p-5 rounded-xl border border-border-subtle/50 shadow-soft space-y-3">
                     <h5 className="text-xs sm:text-[10px] font-medium text-indigo-600 uppercase tracking-widest">
-                      {t("jsx.k86")}
+                      {t("aiMeeting.allDetectedMeetingParticipants")}
                     </h5>
 
                     {!activeMeetingData.tab_metadata.peserta_rapat ||
@@ -1828,7 +1841,8 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
               <div className="space-y-2 text-left">
                 <label className="text-xs font-medium text-content-strong flex items-center gap-1.5">
-                  <FileText className="w-3.5 h-3.5 text-indigo-500" /> {t("jsx.k87")}
+                  <FileText className="w-3.5 h-3.5 text-indigo-500" />{" "}
+                  {t("aiMeeting.yourEvaluationAndCorrectionNotes")}
                 </label>
                 <textarea
                   value={feedbackText}
@@ -1856,11 +1870,11 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
               >
                 {submittingFeedback ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("jsx.kSaving")}
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("aiMeeting.saving")}
                   </>
                 ) : (
                   <>
-                    <Brain className="w-3.5 h-3.5" /> {t("jsx.j138")}
+                    <Brain className="w-3.5 h-3.5" /> {t("aiMeeting.saveEvaluation")}
                   </>
                 )}
               </button>

@@ -69,14 +69,14 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
           </h3>
           {myActiveTasks.some((task) => isDueSoon24h(task.endDate)) && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
-              {t("jsx.k34")}
+              {t("dashboard.urgent24h")}
             </span>
           )}
         </div>
         <div className="space-y-2.5 max-h-[290px] overflow-y-auto custom-scrollbar pr-1">
           {myActiveTasks.length === 0 ? (
             <div className="text-xs text-content-muted font-medium italic text-center p-3">
-              {t("jsx.j31")}
+              {t("dashboard.noActiveTasksAssignedTo")}
             </div>
           ) : (
             myActiveTasks.map((task) => (
@@ -126,7 +126,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
           </h3>
           {blockedTasks.some((task) => isDueSoon24h(task.endDate)) && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
-              {t("jsx.k34")}
+              {t("dashboard.urgent24h")}
             </span>
           )}
         </div>
@@ -198,7 +198,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                 <div className="flex justify-between items-start mb-1">
                   <div className="text-xs sm:text-[10px] font-medium text-primary">{task.key}</div>
                   <div className="text-xs sm:text-[10px] font-medium text-danger uppercase tracking-wider">
-                    {t("jsx.j32")}
+                    {t("dashboard.overdue")}
                   </div>
                 </div>
                 <div className="text-xs font-medium text-content-strong leading-snug line-clamp-2">
@@ -218,7 +218,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
           </h3>
           {dueSoonTasks.some((task) => isDueSoon24h(task.endDate)) && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
-              {t("jsx.k34")}
+              {t("dashboard.urgent24h")}
             </span>
           )}
         </div>
@@ -296,7 +296,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                     {format(ensureDate(meeting.createdAt), "MMM dd, yyyy")}
                   </span>
                   <span className="text-info flex items-center gap-1 font-medium">
-                    {t("jsx.j33")} <ArrowRight className="w-3 h-3" />
+                    {t("dashboard.open")} <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
               </div>
@@ -333,7 +333,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                     {doc.type || "DOC"}
                   </span>
                   <span className="text-success flex items-center gap-1 font-medium">
-                    {t("jsx.j34")} <ArrowRight className="w-3 h-3" />
+                    {t("dashboard.view")} <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
               </div>

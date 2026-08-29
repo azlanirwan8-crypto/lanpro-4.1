@@ -156,7 +156,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
           {/* Label Filter */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
-              {t("jsx.j79")}
+              {t("filters.label")}
             </label>
             <select
               value={listFilterLabel}
@@ -178,7 +178,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
           {/* Category Filter */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
-              {t("jsx.k60")}
+              {t("filters.categoryCustom")}
             </label>
             <StyledDropdown
               value={listFilterCategory}
@@ -199,7 +199,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
           {/* Environment Filter */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
-              {t("jsx.k61")}
+              {t("filters.environmentCustom")}
             </label>
             <StyledDropdown
               value={listFilterEnvironment}
@@ -242,7 +242,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
           {/* Release Filter */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
-              {t("jsx.k62")}
+              {t("filters.releaseCustom")}
             </label>
             <StyledDropdown
               value={listFilterRelease}
@@ -261,7 +261,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
           {/* Resolution Filter */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
-              {t("jsx.k63")}
+              {t("filters.resolutionCustom")}
             </label>
             <StyledDropdown
               value={listFilterResolution}
@@ -344,7 +344,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               title={t("filters.clearAllFields")}
             >
               <X className="w-3.5 h-3.5" />
-              {t("jsx.j80")}
+              {t("filters.reset")}
             </button>
           </div>
         </div>

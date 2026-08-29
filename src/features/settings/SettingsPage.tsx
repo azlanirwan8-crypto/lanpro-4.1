@@ -38,7 +38,7 @@ export const SettingsPage: React.FC = () => {
       <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
         <div className="px-5 py-3.5 border-b border-border-subtle/80 bg-surface-sunken/80 shrink-0 flex items-center justify-between">
           <h1 className="text-xs font-medium text-content-strong uppercase tracking-wide">
-            {t("jsx.k99")}
+            {t("settings.systemIntegrationConfiguration")}
           </h1>
         </div>
 
@@ -54,7 +54,7 @@ export const SettingsPage: React.FC = () => {
               }`}
             >
               <Mail size={15} />
-              {t("jsx.j152")}
+              {t("settings.emailConfiguration")}
             </button>
             <button
               onClick={() => setActiveTab("whatsapp")}
@@ -65,7 +65,7 @@ export const SettingsPage: React.FC = () => {
               }`}
             >
               <MessageSquare size={15} />
-              {t("jsx.j153")}
+              {t("settings.whatsappGateway")}
             </button>
           </div>
 

@@ -490,7 +490,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               detectedType = "miro";
             }
           } catch (e) {
-            throw new Error(t("ui2.jsonUnreadable"));
+            throw new Error(t("flowchart.jsonUnreadable"));
           }
         } else if (fileName.endsWith(".csv")) {
           result = parseMiroContent(text, true);
@@ -2517,7 +2517,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 <h2 className="text-base font-medium text-content-strong mb-1">
                   {t("flowchart.canvasDocManagement")}
                 </h2>
-                <p className="text-xs text-content-muted font-medium">{t("jsx.j64")}</p>
+                <p className="text-xs text-content-muted font-medium">
+                  {t("flowchart.pickADocumentInThe")}
+                </p>
                 <button
                   onClick={openCreateModal}
                   className="mt-4 btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-xs"
@@ -2564,7 +2566,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             : "text-content-muted hover:text-content-strong"
                         )}
                       >
-                        <Workflow className="w-3.5 h-3.5" /> {t("jsx.j65")}
+                        <Workflow className="w-3.5 h-3.5" /> {t("flowchart.flowDiagram")}
                       </button>
                     </div>
 
@@ -2596,22 +2598,22 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     {/* Category Badge */}
                     {currentFlowMetadata?.category === "PRD" && (
                       <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-surface-muted text-content-body border border-border-subtle/80 rounded-full">
-                        {t("jsx.kCatPrd")}
+                        {t("flowchart.prd")}
                       </span>
                     )}
                     {currentFlowMetadata?.category === "Panduan" && (
                       <span className="px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-blue-500/10 text-blue-700 border border-blue-500/30 rounded-full">
-                        {t("jsx.kCatGuide")}
+                        {t("flowchart.guideline")}
                       </span>
                     )}
                     {currentFlowMetadata?.category === "Laporan" && (
                       <span className="px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 rounded-full">
-                        {t("jsx.kCatReport")}
+                        {t("flowchart.report")}
                       </span>
                     )}
                     {!currentFlowMetadata?.category && (
                       <span className="px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-violet-500/10 text-violet-700 border border-violet-500/30 rounded-full">
-                        {t("jsx.kCatGeneral")}
+                        {t("flowchart.general")}
                       </span>
                     )}
 
@@ -2638,7 +2640,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           className="text-[10px] leading-none font-medium bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-[3px] rounded-full truncate max-w-[180px]"
                           title={linkedEpic.title}
                         >
-                          {t("jsx.j70")} {linkedEpic.title}
+                          {t("flowchart.epic")} {linkedEpic.title}
                         </span>
                       </>
                     )}
@@ -3133,7 +3135,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             )}
                             title={
                               isSimulating
-                                ? t("ui2.stopSim")
+                                ? t("flowchart.stopSim")
                                 : "Jalankan Simulasi Alur Kerja Visual"
                             }
                           >
@@ -3275,7 +3277,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             <div className="space-y-2 text-xs sm:text-[11px] leading-relaxed">
                               <div className="flex justify-between items-center">
                                 <span className="text-content-subtle font-medium font-sans">
-                                  {t("jsx.k49")}
+                                  {t("flowchart.undoAction")}
                                 </span>
                                 <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Ctrl + Z
@@ -3283,7 +3285,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-content-subtle font-medium font-sans">
-                                  {t("jsx.k51")}
+                                  {t("flowchart.redoAction")}
                                 </span>
                                 <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
                                   Ctrl + Y / Ctrl+Shift+Z
@@ -3299,10 +3301,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               </div>
                               <div className="flex justify-between items-center">
                                 <span className="text-content-subtle font-medium font-sans">
-                                  {t("jsx.k54")}
+                                  {t("flowchart.nudgeFlow")}
                                 </span>
                                 <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
-                                  {t("jsx.k55")}
+                                  {t("flowchart.arrowKeys")}
                                 </kbd>
                               </div>
                               <div className="flex justify-between items-center">
@@ -3486,7 +3488,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               <div className="grid grid-cols-2 gap-2">
                                 <div>
                                   <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
-                                    {t("jsx.k57")}
+                                    {t("flowchart.widthW")}
                                   </span>
                                   <input
                                     type="number"
@@ -3503,7 +3505,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 </div>
                                 <div>
                                   <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
-                                    {t("jsx.k58")}
+                                    {t("flowchart.heightH")}
                                   </span>
                                   <input
                                     type="number"
@@ -3530,7 +3532,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span>{t("flowchart.linkTaskBacklog")}</span>
                               </label>
                               <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted mb-2 font-medium">
-                                {t("jsx.j75")}
+                                {t("flowchart.linkTheShapeToThe")}
                               </p>
 
                               <select
@@ -3584,7 +3586,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               onClick={handleDeleteSelected}
                               className="w-full p-2 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/30 text-rose-700 font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
                             >
-                              <Trash2 className="w-3.5 h-3.5" /> {t("jsx.j76")}
+                              <Trash2 className="w-3.5 h-3.5" /> {t("flowchart.disconnectFlow")}
                             </button>
                           </div>
                         ) : (
@@ -3596,7 +3598,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               {t("flowchart.noComponentSelected")}
                             </div>
                             <p className="text-xs sm:text-[10px] text-content-muted max-w-[190px] mx-auto leading-relaxed">
-                              {t("jsx.j77")}
+                              {t("flowchart.clickAShapeStickyNote")}
                             </p>
                           </div>
                         )}
@@ -3852,7 +3854,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     {t("flowchart.pickOrDrag")}
                   </p>
                   <p className="text-xs sm:text-[10px] text-content-subtle font-medium">
-                    {t("jsx.k59")}
+                    {t("flowchart.supportsPdfWordExcelMax")}
                   </p>
 
                   {uploadDocFile && (

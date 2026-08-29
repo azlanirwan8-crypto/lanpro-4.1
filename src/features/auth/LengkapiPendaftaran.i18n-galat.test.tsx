@@ -88,7 +88,7 @@ describe("#164 pesan galat Lengkapi Pendaftaran ikut bahasa aktif", () => {
  * #170 (sebagian) — satu layar, satu namespace.
  *
  * Layar ini dulu memanggil empat namespace sekaligus (`completeReg.*`,
- * `rakit.*`, `ui2.*`) dan label utamanya `t("jsx.k18")` — kunci yang tidak
+ * `rakit.*`, `ui2.*`) dan label utamanya `t("common.username")` — kunci yang tidak
  * menyebutkan apa pun tentang isinya. Kunci lama TIDAK dihapus dari kamus
  * sebab layar lain masih memakainya; yang diperbaiki hanya layar ini.
  */

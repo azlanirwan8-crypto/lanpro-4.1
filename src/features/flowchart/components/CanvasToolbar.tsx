@@ -50,7 +50,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           </div>
           <div className="text-left font-sans">
             <p className="text-xs sm:text-[10px] sm:text-[8px] font-medium text-content-subtle uppercase tracking-widest leading-none mb-0.5">
-              {t("jsx.j49")}
+              {t("flowchart.flowchart")}
             </p>
             <span className="text-xs sm:text-[11px] font-medium text-content-strong truncate max-w-[150px] block leading-tight">
               {currentFlowMetadata?.name || "Untitled Workspace"}
@@ -75,20 +75,20 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                 ? "bg-surface-muted hover:bg-surface-strong text-content-body"
                 : "bg-blue-950/40 hover:bg-blue-900/40 text-blue-400"
             )}
-            title={`Ubah Tema Kanvas (Saat ini: ${canvasTheme === "miro" ? t("ui2.miroLight") : t("ui2.blueprintDark")})`}
+            title={`Ubah Tema Kanvas (Saat ini: ${canvasTheme === "miro" ? t("flowchart.miroLight") : t("flowchart.blueprintDark")})`}
           >
             {canvasTheme === "miro" ? (
               <>
                 <Sun className="w-3.5 h-3.5 text-amber-500 fill-amber-200 animate-spin-slow" />
                 <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider hidden sm:inline px-0.5">
-                  {t("jsx.j50")}
+                  {t("flowchart.miroTheme")}
                 </span>
               </>
             ) : (
               <>
                 <Moon className="w-3.5 h-3.5 text-blue-400 fill-blue-950" />
                 <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider hidden sm:inline px-0.5">
-                  {t("jsx.j51")}
+                  {t("flowchart.blueprintTheme")}
                 </span>
               </>
             )}
@@ -118,7 +118,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
               )}
             />
             <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider hidden sm:inline px-0.5">
-              {isSnapToGrid ? t("ui2.snapGrid") : t("ui2.freeMove")}
+              {isSnapToGrid ? t("flowchart.snapGrid") : t("flowchart.freeMove")}
             </span>
           </button>
         </div>
@@ -131,13 +131,13 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             onClick={handleExportJPG}
             className="flex items-center gap-1 px-2.5 py-1 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/15 border border-emerald-500/30 rounded-lg text-[10px] leading-none font-medium transition-all cursor-pointer"
           >
-            <Download className="w-3 h-3" /> {t("jsx.j52")}
+            <Download className="w-3 h-3" /> {t("flowchart.export")}
           </button>
           <button
             onClick={handleExportJSON}
             className="flex items-center gap-1 px-2.5 py-1 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/15 border border-indigo-500/30 rounded-lg text-[10px] leading-none font-medium transition-all cursor-pointer"
           >
-            <Database className="w-3 h-3" /> {t("jsx.j53")}
+            <Database className="w-3 h-3" /> {t("flowchart.backup")}
           </button>
         </div>
 

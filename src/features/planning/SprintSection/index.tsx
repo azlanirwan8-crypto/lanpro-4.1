@@ -407,7 +407,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                         <div className="flex items-center gap-2">
                                           <Target className="w-3.5 h-3.5 text-content-muted" />
                                           <span className="text-xs sm:text-[10px] font-medium text-content-secondary uppercase tracking-wider leading-none">
-                                            {t("jsx.j139")}
+                                            {t("planning.standaloneTasks")}
                                           </span>
                                         </div>
                                         <div className="text-xs sm:text-[10px] font-medium text-content-secondary bg-surface border border-border-subtle/60 px-2 py-0.2 rounded-md">

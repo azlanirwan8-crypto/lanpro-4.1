@@ -102,7 +102,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
               >
                 <span className={styles.logoText}>LANPRO</span>
                 <span className="text-[10px] font-semibold text-sidebar-title tracking-wider uppercase whitespace-nowrap block mt-0.5">
-                  {t("jsx.j154")}
+                  {t("sidebar.projectManagement2")}
                 </span>
               </motion.div>
             )}

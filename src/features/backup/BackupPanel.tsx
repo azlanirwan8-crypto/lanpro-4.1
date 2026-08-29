@@ -352,9 +352,11 @@ export const BackupPanel = (_props: {
               ) : (
                 <tr>
                   <td colSpan={5} className="py-8 text-center text-content-subtle italic text-xs">
-                    {t("jsx.j27")}{" "}
-                    <strong className="font-medium text-content-secondary">{t("jsx.m5")}</strong>{" "}
-                    {t("jsx.j27akhir")}
+                    {t("backup.noBackupExportHistoryYet")}{" "}
+                    <strong className="font-medium text-content-secondary">
+                      {t("backup.exportProjectBackup")}
+                    </strong>{" "}
+                    {t("backup.buttonAboveToCreateA")}
                   </td>
                 </tr>
               )}
@@ -370,8 +372,8 @@ export const BackupPanel = (_props: {
           onConfirm={executeRestore}
           title={t("backupPanel.confirmRestore")}
           message="Apakah Anda yakin ingin melakukan restore? Tindakan ini akan menimpa seluruh data saat ini dengan data dari file backup. Tindakan ini tidak dapat dibatalkan!"
-          confirmText={t("ui2.yesRestoreNow")}
-          cancelText={t("ui2.cancel")}
+          confirmText={t("backup.yesRestoreNow")}
+          cancelText={t("common.cancel")}
           variant="danger"
           isLoading={isRestoring}
         />

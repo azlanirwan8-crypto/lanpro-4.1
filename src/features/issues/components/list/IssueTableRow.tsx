@@ -411,7 +411,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                 // `canManage` (Admin/Manager/Head atau Reporter task ini),
                 // sama seperti dropdown Reporter di sidebar detail issue.
                 const reporterOptions = [
-                  { id: "", label: t("ui2.linkNone") },
+                  { id: "", label: t("common.linkNone") },
                   ...projectMembers.map((m) => ({
                     id: m?.uid || "",
                     label: m?.displayName || m?.email || "Unknown",

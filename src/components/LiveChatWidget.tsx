@@ -584,7 +584,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
       } catch (e) {
         return (
           <span className="italic text-rose-500 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" /> {t("jsx.j5")}
+            <AlertCircle className="w-3 h-3" /> {t("chat.failedToLoadTheImage")}
           </span>
         );
       }
@@ -621,7 +621,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
       } catch (e) {
         return (
           <span className="italic text-rose-500 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" /> {t("jsx.j6")}
+            <AlertCircle className="w-3 h-3" /> {t("chat.failedToLoadTheFile")}
           </span>
         );
       }
@@ -691,7 +691,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     <button
                       onClick={() => setSoundEnabled(!soundEnabled)}
                       className="text-content-subtle hover:text-content-inverse transition-colors"
-                      title={soundEnabled ? t("ui2.muteSound") : t("ui2.unmuteSound")}
+                      title={soundEnabled ? t("chat.muteSound") : t("chat.unmuteSound")}
                     >
                       {soundEnabled ? (
                         <Volume2 className="w-4 h-4" />
@@ -791,7 +791,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                   {/* Direct Message Section */}
                   <div className="bg-surface">
                     <p className="px-4 pt-3 pb-1 text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-widest text-content-subtle uppercase">
-                      {t("jsx.k4")}
+                      {t("chat.colleaguesDm")}
                     </p>
                     {filteredUsers.length === 0 ? (
                       <div className="p-6 text-center text-content-subtle text-xs">
@@ -980,7 +980,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     <div className="h-full flex flex-col items-center justify-center text-center p-4">
                       <MessageSquare className="w-8 h-8 text-content-inverse-muted mb-1.5" />
                       <p className="text-xs text-content-subtle font-medium">
-                        {msgSearchQuery ? t("ui2.noMatchingMessage") : t("ui2.noConversation")}
+                        {msgSearchQuery ? t("chat.noMatchingMessage") : t("chat.noConversation")}
                       </p>
                     </div>
                   ) : (
@@ -1217,7 +1217,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
                   <input
                     type="text"
-                    placeholder={isUploading ? t("ui2.uploadingFile") : t("ui2.typeMessage")}
+                    placeholder={isUploading ? t("chat.uploadingFile") : t("chat.typeMessage")}
                     value={inputMessage}
                     onChange={(e) => setInputMessage(e.target.value)}
                     disabled={isUploading}

@@ -44,14 +44,14 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
     <div className="space-y-4 pt-4 border-t border-border-faint">
       <div className="flex items-center justify-between">
         <h4 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-subtle">
-          {t("jsx.j92")}
+          {t("issues.relatedIssues")}
         </h4>
         {isEditable && (
           <button
             onClick={() => setIsAddingTaskLinkLocal(!isAddingTaskLinkLocal)}
             className="text-xs sm:text-[10px] font-medium text-indigo-600 hover:underline"
           >
-            {t("jsx.j93")}
+            {t("issues.link")}
           </button>
         )}
       </div>
@@ -125,7 +125,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
           />
           <div className="flex gap-2 justify-end">
             <Button size="sm" variant="secondary" onClick={() => setIsAddingTaskLinkLocal(false)}>
-              {t("jsx.k64")}
+              {t("issues.cancel")}
             </Button>
             <Button
               size="sm"
@@ -135,7 +135,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
               })}
               disabled={isSubmitting["addLinkedTask"] || !taskLinkTargetId}
             >
-              {t("jsx.j95")}
+              {t("issues.addLink2")}
             </Button>
           </div>
         </motion.div>

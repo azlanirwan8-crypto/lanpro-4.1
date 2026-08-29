@@ -98,7 +98,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   : "text-content-muted hover:text-content-body"
               }`}
             >
-              {t("jsx.k9")}
+              {t("qa.singleInputManual")}
             </button>
             <button
               type="button"
@@ -109,15 +109,15 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   : "text-content-muted hover:text-content-body"
               }`}
             >
-              {t("jsx.k10")}
+              {t("qa.bulkUploadExcel")}
             </button>
           </div>
 
           {/* Target Suite Banner */}
           <div className="bg-primary-surface/5 border border-primary/10 px-4 py-2.5 rounded-md flex items-center justify-between text-xs">
             <span className="font-medium text-primary">
-              {t("jsx.j11")}{" "}
-              <strong>{activeSuite ? activeSuite.name : t("ui2.noModuleSelected")}</strong>
+              {t("qa.targetModule")}{" "}
+              <strong>{activeSuite ? activeSuite.name : t("qa.noModuleSelected")}</strong>
             </span>
             <span className="px-2.5 py-0.5 bg-primary-surface text-content-inverse font-medium rounded-full text-xs sm:text-[10px]">
               {activeSuite ? activeSuite.phase : "SIT"}
@@ -153,25 +153,25 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                       options={[
                         {
                           id: "Critical",
-                          label: t("ui2.criticalPriority"),
+                          label: t("components.criticalPriority"),
                           icon: "Flame",
                           color: "#EF4444",
                         },
                         {
                           id: "High",
-                          label: t("ui2.highPriority"),
+                          label: t("components.highPriority"),
                           icon: "ChevronUp",
                           color: "#F97316",
                         },
                         {
                           id: "Medium",
-                          label: t("ui2.mediumPriority"),
+                          label: t("components.mediumPriority"),
                           icon: "Circle",
                           color: "#F59E0B",
                         },
                         {
                           id: "Low",
-                          label: t("ui2.lowPriority"),
+                          label: t("components.lowPriority"),
                           icon: "ChevronDown",
                           color: "#10B981",
                         },
@@ -226,7 +226,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   type="submit"
                   className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
                 >
-                  <Plus className="w-4 h-4" /> {t("jsx.j12")}
+                  <Plus className="w-4 h-4" /> {t("qa.saveTestCase")}
                 </button>
               </div>
             </form>
@@ -254,7 +254,9 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
               <div className="border-2 border-dashed border-border-subtle hover:border-primary rounded-md p-8 text-center space-y-3 transition-colors bg-surface-sunken/50">
                 <Upload className="w-10 h-10 text-primary mx-auto" />
                 <div>
-                  <p className="text-xs font-medium text-content-body">{t("jsx.k11")}</p>
+                  <p className="text-xs font-medium text-content-body">
+                    {t("qa.uploadAnExcelFileXlsx")}
+                  </p>
                   <p className="text-xs sm:text-[10px] text-content-subtle mt-1">
                     {t("testCase.columnFormat")}
                   </p>
@@ -270,7 +272,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                   htmlFor="bulk_upload_input"
                   className="inline-block px-4 py-2 bg-primary-surface/10 hover:bg-primary-surface/20 text-primary text-xs font-medium rounded-md cursor-pointer transition-colors"
                 >
-                  {uploadFile ? uploadFile.name : t("ui2.chooseExcel")}
+                  {uploadFile ? uploadFile.name : t("qa.chooseExcel")}
                 </label>
               </div>
 

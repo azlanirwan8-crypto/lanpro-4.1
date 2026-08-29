@@ -897,7 +897,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                           {editingMeeting.fileName}
                         </span>
                         <span className="text-xs sm:text-[10px] text-content-subtle">
-                          {t("jsx.k89")}
+                          {t("meetings.existing")}
                         </span>
                       </div>
                       {canModify && (

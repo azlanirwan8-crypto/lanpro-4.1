@@ -81,7 +81,7 @@ class ErrorBoundary extends Component<Props, State> {
               cursor: "pointer",
             }}
           >
-            {i18n.t("jsx.k102")}
+            {i18n.t("common.clearCacheReload")}
           </button>
         </div>
       );

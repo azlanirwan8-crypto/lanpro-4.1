@@ -128,7 +128,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               isFiltersPanelOpen &&
                 "bg-primary-surface/10 border-primary/30 text-primary hover:bg-primary-surface/15"
             )}
-            title={t("ui2.toggleFilterPanel")}
+            title={t("filters.toggleFilterPanel")}
           >
             <Filter className="w-3.5 h-3.5 text-content-muted shrink-0" />
             <span className="hidden sm:inline">{t("filters.advancedFilters")}</span>
@@ -148,7 +148,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
                   "flex items-center gap-1 py-1 px-2.5 rounded-full text-xs sm:text-[11px] font-medium"
                 )}
               >
-                {t("jsx.j81")} {listFilterStatus}
+                {t("filters.status2")} {listFilterStatus}
                 <button
                   type="button"
                   onClick={() => setListFilterStatus("All")}
@@ -165,7 +165,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
                   "flex items-center gap-1 py-1 px-2.5 rounded-full text-xs sm:text-[11px] font-medium"
                 )}
               >
-                {t("jsx.j82")} {listFilterPriority}
+                {t("filters.priority2")} {listFilterPriority}
                 <button
                   type="button"
                   onClick={() => setListFilterPriority("All")}
@@ -177,7 +177,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterAssignee !== "All" && (
               <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/30 flex items-center gap-1 shadow-soft">
-                {t("jsx.j83")}{" "}
+                {t("filters.assignee")}{" "}
                 {projectMembers.find((m) => m.uid === listFilterAssignee)?.displayName ||
                   t("newTask.unassigned")}
                 <button
@@ -191,7 +191,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterSprint !== "All" && (
               <span className="text-xs sm:text-[11px] font-medium text-content-secondary bg-surface-muted px-2.5 py-1 rounded-full border border-border-subtle flex items-center gap-1 shadow-soft">
-                {t("jsx.j84")}{" "}
+                {t("filters.sprint2")}{" "}
                 {listFilterSprint === "Backlog"
                   ? "Backlog"
                   : sprints?.find((s) => s.id === listFilterSprint)?.name || listFilterSprint}
@@ -206,7 +206,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterCategory !== "All" && (
               <span className="text-[10px] leading-none font-medium text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1 shadow-soft">
-                {t("jsx.j85")} {listFilterCategory}
+                {t("filters.category")} {listFilterCategory}
                 <button
                   type="button"
                   onClick={() => setListFilterCategory("All")}
@@ -218,7 +218,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterLabel !== "All" && (
               <span className="text-xs sm:text-[11px] font-medium text-sky-600 bg-sky-500/10 px-2.5 py-1 rounded-full border border-sky-500/30 flex items-center gap-1 shadow-soft">
-                {t("jsx.j86")} {listFilterLabel}
+                {t("filters.label2")} {listFilterLabel}
                 <button
                   type="button"
                   onClick={() => setListFilterLabel("All")}
@@ -230,7 +230,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterEnvironment !== "All" && (
               <span className="text-xs sm:text-[11px] font-medium text-orange-600 bg-orange-500/10 px-2.5 py-1 rounded-full border border-orange-500/30 flex items-center gap-1 shadow-soft">
-                {t("jsx.j87")} {listFilterEnvironment}
+                {t("filters.environment")} {listFilterEnvironment}
                 <button
                   type="button"
                   onClick={() => setListFilterEnvironment("All")}
@@ -242,7 +242,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterProjectRisk !== "All" && (
               <span className="text-[10px] leading-none font-medium text-rose-600 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/30 flex items-center gap-1 shadow-soft">
-                {t("jsx.j88")} {listFilterProjectRisk}
+                {t("filters.risk")} {listFilterProjectRisk}
                 <button
                   type="button"
                   onClick={() => setListFilterProjectRisk("All")}
@@ -254,7 +254,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterRelease !== "All" && (
               <span className="text-xs sm:text-[11px] font-medium text-teal-600 bg-teal-500/10 px-2.5 py-1 rounded-full border border-teal-500/30 flex items-center gap-1 shadow-soft">
-                {t("jsx.j89")} {listFilterRelease}
+                {t("filters.release")} {listFilterRelease}
                 <button
                   type="button"
                   onClick={() => setListFilterRelease("All")}
@@ -266,7 +266,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             )}
             {listFilterResolution !== "All" && (
               <span className="text-[10px] leading-none font-medium text-violet-600 bg-violet-500/10 px-2.5 py-1 rounded-full border border-violet-500/30 flex items-center gap-1 shadow-soft">
-                {t("jsx.j90")} {listFilterResolution}
+                {t("filters.resolution")} {listFilterResolution}
                 <button
                   type="button"
                   onClick={() => setListFilterResolution("All")}

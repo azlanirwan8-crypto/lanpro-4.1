@@ -70,7 +70,9 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
             <Mail className="w-6 h-6" />
           </div>
           <h3 className="text-lg font-bold text-content-strong">{t("forgotPwd.title")}</h3>
-          <p className="text-xs text-content-muted mt-1 max-w-xs mx-auto">{t("ui2.fpIntro")}</p>
+          <p className="text-xs text-content-muted mt-1 max-w-xs mx-auto">
+            {t("forgotPwd.fpIntro")}
+          </p>
         </div>
 
         {isSuccess ? (
@@ -83,7 +85,8 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
                     alamat ini" akan mengonfirmasi bahwa alamat itu punya akun,
                     dan membocorkan lagi hal yang baru saja ditutup di backend. */}
                 <p className="text-content-muted">
-                  {t("ui2.fpSentPrefix")} <strong>{email}</strong> {t("ui2.fpSentSuffix")}
+                  {t("forgotPwd.fpSentPrefix")} <strong>{email}</strong>{" "}
+                  {t("forgotPwd.fpSentSuffix")}
                 </p>
               </div>
             </div>
@@ -100,7 +103,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-content-body block">
-                {t("ui2.emailAddress")} <span className="text-rose-500">*</span>
+                {t("forgotPwd.emailAddress")} <span className="text-rose-500">*</span>
               </label>
               <input
                 type="email"
@@ -140,7 +143,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
                 disabled={loading || !email.trim()}
                 className="flex-1 py-2.5 px-4 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover font-semibold rounded-lg text-xs transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <span>{loading ? t("ui2.sending") : t("ui2.sendLink")}</span>
+                <span>{loading ? t("common.sending") : t("forgotPwd.sendLink")}</span>
                 {!loading && <ArrowRight className="w-3.5 h-3.5" />}
               </button>
             </div>

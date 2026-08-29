@@ -1105,7 +1105,9 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             : "bg-surface border-border-subtle text-content-body hover:bg-surface-sunken"
                         )}
                         title={
-                          isFullscreenPreview ? t("ui2.exitFullscreen") : t("ui2.fullscreenPreview")
+                          isFullscreenPreview
+                            ? t("common.exitFullscreen")
+                            : t("wiki.fullscreenPreview")
                         }
                       >
                         {isFullscreenPreview ? (
@@ -1114,7 +1116,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           <Maximize2 className="w-3.5 h-3.5" />
                         )}
                         <span className="hidden sm:inline">
-                          {isFullscreenPreview ? "Normal" : t("ui2.fullscreen")}
+                          {isFullscreenPreview ? "Normal" : t("common.fullscreen")}
                         </span>
                       </button>
                     )}
@@ -1447,7 +1449,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   {t("wiki.pickOrCreate")}
                 </h2>
                 <p className="text-xs font-medium text-content-subtle mt-1 max-w-sm leading-relaxed mx-auto">
-                  {t("jsx.j164")}
+                  {t("wiki.pickADocumentInThe")}
                 </p>
                 {canCreate && (
                   <button

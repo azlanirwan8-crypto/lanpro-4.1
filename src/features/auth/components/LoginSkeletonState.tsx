@@ -32,7 +32,7 @@ export const LoginSkeletonState = ({ loadingText }: LoginSkeletonStateProps) => 
       {/* Loading Status & Message */}
       <div className="space-y-1.5">
         <h3 className="text-base font-semibold text-content-strong tracking-tight flex items-center justify-center gap-1.5">
-          <span>{loadingText || t("ui2.authenticating")}</span>
+          <span>{loadingText || t("auth.authenticating")}</span>
           <span className="flex space-x-1">
             <span className="w-1.5 h-1.5 bg-primary-surface rounded-full animate-bounce" />
             <span className="w-1.5 h-1.5 bg-primary-surface rounded-full animate-bounce [animation-delay:0.2s]" />

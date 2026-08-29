@@ -43,7 +43,9 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">{t("jsx.k13")}</label>
+          <label className="block text-sm font-medium text-content-body mb-1">
+            {t("newProject.projectKeyShort")}
+          </label>
           <Input
             value={newProjectKey}
             onChange={(e: any) => setNewProjectKey(e.target.value.toUpperCase())}

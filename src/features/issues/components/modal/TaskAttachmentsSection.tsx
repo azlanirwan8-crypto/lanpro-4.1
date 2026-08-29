@@ -50,7 +50,7 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
               onClick={() => setIsAddingLinkLocal(!isAddingLink)}
               className="text-xs sm:text-[10px] font-medium text-indigo-600 hover:underline"
             >
-              {t("jsx.j91")}
+              {t("issues.addLink")}
             </button>
           </div>
         )}

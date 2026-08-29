@@ -45,7 +45,9 @@ export const ConfigureColumnsModal: React.FC<ConfigureColumnsModalProps> = ({
 
           <div className="p-5 flex-1 overflow-y-auto max-h-[60vh] text-xs">
             <div className="space-y-3">
-              <p className="text-xs text-content-muted font-medium">{t("jsx.j96")}</p>
+              <p className="text-xs text-content-muted font-medium">
+                {t("issueColumns.dragToReorderColumnsAnd")}
+              </p>
               <DragDropContext onDragEnd={handleReorderColumns}>
                 <Droppable droppableId="columns">
                   {(provided) => (
@@ -116,7 +118,7 @@ export const ConfigureColumnsModal: React.FC<ConfigureColumnsModalProps> = ({
               onClick={onClose}
               className="px-4 py-2 font-medium bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md transition-all text-xs shadow-xs cursor-pointer"
             >
-              {t("jsx.j97")}
+              {t("issueColumns.close")}
             </button>
           </div>
         </motion.div>

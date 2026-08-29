@@ -128,9 +128,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
       { id: "task", label: "Task", icon: "CheckSquare", color: "#3B82F6" },
       { id: "subtask", label: "Subtask", icon: "GitCommit", color: "#06B6D4" },
       { id: "bug", label: "Bug", icon: "AlertCircle", color: "#EF4444" },
-      { id: "meeting", label: t("ui2.linkMeeting"), icon: "Calendar", color: "#F59E0B" },
-      { id: "document", label: t("ui2.linkDocument"), icon: "FileText", color: "#10B981" },
-      { id: "approval", label: t("ui2.linkApproval"), icon: "ShieldCheck", color: "#EC4899" },
+      { id: "meeting", label: t("newTask.linkMeeting"), icon: "Calendar", color: "#F59E0B" },
+      { id: "document", label: t("newTask.linkDocument"), icon: "FileText", color: "#10B981" },
+      { id: "approval", label: t("newTask.linkApproval"), icon: "ShieldCheck", color: "#EC4899" },
     ];
   }, [masterData]);
 
@@ -147,7 +147,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
   }, [sprints]);
 
   const parentTaskOptions = React.useMemo(() => {
-    const emptyOpt = { id: "", label: t("ui2.selectParent"), icon: "Layers", color: "#64748B" };
+    const emptyOpt = { id: "", label: t("newTask.selectParent"), icon: "Layers", color: "#64748B" };
     const parentList = tasks
       .filter((t) => t.type !== "subtask")
       .map((t) => ({
@@ -327,7 +327,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           </div>
           <div>
             <label className="block text-sm font-medium text-content-body mb-1">
-              {t("jsx.k14")}
+              {t("newTask.labelsCommaSeparated")}
             </label>
             <Input
               value={newTaskLabels}
@@ -377,7 +377,7 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             value={newTaskEnvironment}
             onChange={(val) => setNewTaskEnvironment(val)}
             options={[
-              { id: "none", label: t("ui2.linkNone") },
+              { id: "none", label: t("common.linkNone") },
               ...masterData.filter((d) => d.type === "environment"),
             ]}
             type="environment"

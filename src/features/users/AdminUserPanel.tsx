@@ -693,7 +693,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     disabled={isBulkActionPending}
                     className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    <CheckCircle className="w-3.5 h-3.5" /> {t("jsx.j156")}
+                    <CheckCircle className="w-3.5 h-3.5" /> {t("users.approve")}
                   </button>
                   <button
                     onClick={() => handleBulkAction("reject")}
@@ -756,7 +756,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     disabled={isBulkActionPending}
                     className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-content-inverse text-xs font-medium rounded-lg shadow-soft transition-all flex items-center gap-1.5 cursor-pointer"
                   >
-                    <Trash2 className="w-3.5 h-3.5" /> {t("jsx.j157")}
+                    <Trash2 className="w-3.5 h-3.5" /> {t("users.bulkDelete")}
                   </button>
                   <button
                     onClick={() => setSelectedUserIds([])}
@@ -1105,7 +1105,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   disabled={currentPage === 1}
                   className="rounded-lg h-8 px-2.5 text-xs font-medium"
                 >
-                  <ChevronLeft className="w-4 h-4 mr-1" /> {t("jsx.j158")}
+                  <ChevronLeft className="w-4 h-4 mr-1" /> {t("users.prev")}
                 </Button>
                 {Array.from({ length: totalPages }).map((_, i) => (
                   <button
@@ -1128,7 +1128,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   disabled={currentPage === totalPages || totalPages === 0}
                   className="rounded-lg h-8 px-2.5 text-xs font-medium"
                 >
-                  {t("jsx.j159")} <ChevronRight className="w-4 h-4 ml-1" />
+                  {t("users.next")} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </div>
             </div>
@@ -1271,7 +1271,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           : "text-emerald-500"
                     )}
                   >
-                    {t("jsx.j160")}{" "}
+                    {t("users.passwordStrength")}{" "}
                     {passwordStrength === "weak"
                       ? "Lemah"
                       : passwordStrength === "medium"
@@ -1400,8 +1400,9 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           <div>
             <h3 className="text-lg font-medium text-content">{t("users.usernameRecorded")}</h3>
             <p className="text-sm text-content-muted mt-2">
-              {t("jsx.k18")} <span className="font-medium text-content">{addPeopleEmail}</span>{" "}
-              {t("jsx.j161")}
+              {t("common.username")}{" "}
+              <span className="font-medium text-content">{addPeopleEmail}</span>{" "}
+              {t("users.hasBeenSavedInThe")}
             </p>
           </div>
 
@@ -1414,7 +1415,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               }}
               className="w-full justify-center py-3"
             >
-              <Copy className="w-4 h-4" /> {t("jsx.j162")}
+              <Copy className="w-4 h-4" /> {t("users.copyJoinLink")}
             </Button>
           </div>
 

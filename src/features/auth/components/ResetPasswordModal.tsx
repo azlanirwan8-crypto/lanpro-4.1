@@ -118,7 +118,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-content-body block">
-                {t("ui2.newPassword")} <span className="text-rose-500">*</span>
+                {t("resetPwd.newPassword")} <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -149,7 +149,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
 
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-content-body block">
-                {t("ui2.confirmNewPassword")} <span className="text-rose-500">*</span>
+                {t("resetPwd.confirmNewPassword")} <span className="text-rose-500">*</span>
               </label>
               <input
                 type={showPassword ? "text" : "password"}
@@ -199,7 +199,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
                 disabled={loading || !newPassword || !confirmPassword}
                 className="flex-1 py-2.5 px-4 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover font-semibold rounded-lg text-xs transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <span>{loading ? t("ui2.saving") : t("ui2.savePassword")}</span>
+                <span>{loading ? t("common.saving") : t("resetPwd.savePassword")}</span>
                 {!loading && <ArrowRight className="w-3.5 h-3.5" />}
               </button>
             </div>

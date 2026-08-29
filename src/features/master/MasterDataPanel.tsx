@@ -1228,17 +1228,17 @@ export const MasterDataPanel = ({
             </label>
             <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-xl">
               {[
-                { hex: "#ef4444", label: t("ui2.colorRed") },
-                { hex: "#f97316", label: t("ui2.colorOrange") },
-                { hex: "#eab308", label: t("ui2.colorYellow") },
-                { hex: "#22c55e", label: t("ui2.colorGreen") },
-                { hex: "#06b6d4", label: t("ui2.colorCyan") },
-                { hex: "#3b82f6", label: t("ui2.colorBlue") },
-                { hex: "#6366f1", label: t("ui2.colorIndigo") },
-                { hex: "#a855f7", label: t("ui2.colorPurple") },
-                { hex: "#ec4899", label: t("ui2.colorPink") },
-                { hex: "#64748b", label: t("ui2.colorSlate") },
-                { hex: "#0f172a", label: t("ui2.colorDark") },
+                { hex: "#ef4444", label: t("master.colorRed") },
+                { hex: "#f97316", label: t("master.colorOrange") },
+                { hex: "#eab308", label: t("master.colorYellow") },
+                { hex: "#22c55e", label: t("master.colorGreen") },
+                { hex: "#06b6d4", label: t("master.colorCyan") },
+                { hex: "#3b82f6", label: t("master.colorBlue") },
+                { hex: "#6366f1", label: t("master.colorIndigo") },
+                { hex: "#a855f7", label: t("master.colorPurple") },
+                { hex: "#ec4899", label: t("master.colorPink") },
+                { hex: "#64748b", label: t("master.colorSlate") },
+                { hex: "#0f172a", label: t("master.colorDark") },
               ].map((p) => (
                 <button
                   key={p.hex}
@@ -1295,7 +1295,7 @@ export const MasterDataPanel = ({
                 ))
               ) : (
                 <div className="col-span-full py-6 text-center text-xs text-content-subtle font-medium">
-                  {t("jsx.j105")}
+                  {t("master.noIconMatchesTheKeyword")}
                   {iconSearch}"
                 </div>
               )}
@@ -1411,17 +1411,17 @@ export const MasterDataPanel = ({
               </label>
               <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-xl">
                 {[
-                  { hex: "#ef4444", label: t("ui2.colorRed") },
-                  { hex: "#f97316", label: t("ui2.colorOrange") },
-                  { hex: "#eab308", label: t("ui2.colorYellow") },
-                  { hex: "#22c55e", label: t("ui2.colorGreen") },
-                  { hex: "#06b6d4", label: t("ui2.colorCyan") },
-                  { hex: "#3b82f6", label: t("ui2.colorBlue") },
-                  { hex: "#6366f1", label: t("ui2.colorIndigo") },
-                  { hex: "#a855f7", label: t("ui2.colorPurple") },
-                  { hex: "#ec4899", label: t("ui2.colorPink") },
-                  { hex: "#64748b", label: t("ui2.colorSlate") },
-                  { hex: "#0f172a", label: t("ui2.colorDark") },
+                  { hex: "#ef4444", label: t("master.colorRed") },
+                  { hex: "#f97316", label: t("master.colorOrange") },
+                  { hex: "#eab308", label: t("master.colorYellow") },
+                  { hex: "#22c55e", label: t("master.colorGreen") },
+                  { hex: "#06b6d4", label: t("master.colorCyan") },
+                  { hex: "#3b82f6", label: t("master.colorBlue") },
+                  { hex: "#6366f1", label: t("master.colorIndigo") },
+                  { hex: "#a855f7", label: t("master.colorPurple") },
+                  { hex: "#ec4899", label: t("master.colorPink") },
+                  { hex: "#64748b", label: t("master.colorSlate") },
+                  { hex: "#0f172a", label: t("master.colorDark") },
                 ].map((p) => (
                   <button
                     key={p.hex}
@@ -1478,7 +1478,7 @@ export const MasterDataPanel = ({
                   ))
                 ) : (
                   <div className="col-span-full py-6 text-center text-xs text-content-subtle font-medium">
-                    {t("jsx.j105")}
+                    {t("master.noIconMatchesTheKeyword")}
                     {editIconSearch}"
                   </div>
                 )}
@@ -1501,7 +1501,7 @@ export const MasterDataPanel = ({
                 disabled={isSaving}
                 className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
               >
-                {isSaving ? t("ui2.saving") : t("ui2.saveChanges2")}
+                {isSaving ? t("common.saving") : t("common.saveChanges2")}
               </Button>
             </div>
           </div>
@@ -1572,7 +1572,7 @@ export const MasterDataPanel = ({
               disabled={isSaving}
               className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
             >
-              {isSaving ? t("ui2.saving") : t("ui2.addModule")}
+              {isSaving ? t("common.saving") : t("master.addModule")}
             </Button>
           </div>
         </div>
@@ -1642,7 +1642,7 @@ export const MasterDataPanel = ({
               disabled={isSaving}
               className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
             >
-              {isSaving ? t("ui2.saving") : t("ui2.saveChanges2")}
+              {isSaving ? t("common.saving") : t("common.saveChanges2")}
             </Button>
           </div>
         </div>

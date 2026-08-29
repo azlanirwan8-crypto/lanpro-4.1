@@ -190,7 +190,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                         {t("issueDetail.epicTimelineWarning")}
                       </p>
                       <p className="font-normal text-content-body">
-                        {t("jsx.j99")}
+                        {t("issueDetail.theTaskDateRangeFalls")}
                         {parentEpic?.title}" (
                         {parentEpic?.startDate
                           ? format(ensureDate(parentEpic.startDate), "yyyy-MM-dd")
@@ -488,8 +488,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         title={t("issueDetail.discardChanges")}
         message={t("issueDetail.discardChangesMessage")}
         variant="warning"
-        confirmText={t("ui2.yesDiscard")}
-        cancelText={t("ui2.cancel")}
+        confirmText={t("issueDetail.yesDiscard")}
+        cancelText={t("common.cancel")}
         onConfirm={() => {
           setShowDiscardConfirm(false);
           setIsEditingDescription(false);
@@ -506,8 +506,8 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         title={confirmModalState.title}
         message={confirmModalState.message}
         variant={confirmModalState.variant || "danger"}
-        confirmText={confirmModalState.confirmText || t("ui2.delete")}
-        cancelText={t("ui2.cancel")}
+        confirmText={confirmModalState.confirmText || t("issueDetail.delete")}
+        cancelText={t("common.cancel")}
         onConfirm={() => {
           confirmModalState.onConfirm();
           setConfirmModalState((prev) => ({ ...prev, isOpen: false }));

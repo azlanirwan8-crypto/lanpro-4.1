@@ -60,7 +60,9 @@ export function SuccessModal({ isOpen, onClose, title, message }: SuccessModalPr
                   <path d="M32 18L33 16" stroke="#4F46E5" strokeWidth="3" strokeLinecap="round" />
                 </svg>
               </div>
-              <h2 className="text-xl font-medium text-content mb-2">{title || t("ui2.success")}</h2>
+              <h2 className="text-xl font-medium text-content mb-2">
+                {title || t("common.success")}
+              </h2>
               <p className="text-content-muted mb-8">{message}</p>
               <button
                 onClick={onClose}

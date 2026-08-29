@@ -595,7 +595,7 @@ export function DashboardView(props: DashboardViewProps) {
     }
     return [
       {
-        name: t("ui2.allTasks"),
+        name: t("dashboard.allTasks"),
         Planned: totalTasks,
         Completed: completedTasks.length,
       },
@@ -1114,7 +1114,7 @@ export function DashboardView(props: DashboardViewProps) {
                         } else {
                           capacityBadge = (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] font-medium bg-surface-muted text-content-secondary border border-border-subtle">
-                              <Minus className="w-3 h-3" /> {t("jsx.j35")}
+                              <Minus className="w-3 h-3" /> {t("dashboard.available")}
                             </span>
                           );
                         }
@@ -1156,7 +1156,7 @@ export function DashboardView(props: DashboardViewProps) {
                     ) : (
                       <tr>
                         <td colSpan={6} className="py-6 text-center text-content-subtle italic">
-                          {t("jsx.j36")}
+                          {t("dashboard.noTasksAllocatedToTeam")}
                         </td>
                       </tr>
                     )}
@@ -1219,7 +1219,7 @@ export function DashboardView(props: DashboardViewProps) {
                   ))
                 ) : (
                   <div className="p-4 text-center bg-surface-sunken/50 rounded-lg border border-dashed border-border-subtle text-xs text-content-subtle">
-                    {t("jsx.j37")}
+                    {t("dashboard.noEpicsConfiguredYetCreate")}
                   </div>
                 )}
               </div>
@@ -1293,13 +1293,13 @@ export function DashboardView(props: DashboardViewProps) {
                       last7DaysData && last7DaysData.length > 0
                         ? last7DaysData
                         : [
-                            { name: t("ui2.mon"), Activity: 4, Completed: 3 },
-                            { name: t("ui2.tue"), Activity: 6, Completed: 5 },
-                            { name: t("ui2.wed"), Activity: 8, Completed: 7 },
-                            { name: t("ui2.thu"), Activity: 5, Completed: 6 },
-                            { name: t("ui2.fri"), Activity: 9, Completed: 8 },
-                            { name: t("ui2.sat"), Activity: 2, Completed: 4 },
-                            { name: t("ui2.sun"), Activity: 1, Completed: 2 },
+                            { name: t("dashboard.mon"), Activity: 4, Completed: 3 },
+                            { name: t("dashboard.tue"), Activity: 6, Completed: 5 },
+                            { name: t("dashboard.wed"), Activity: 8, Completed: 7 },
+                            { name: t("dashboard.thu"), Activity: 5, Completed: 6 },
+                            { name: t("dashboard.fri"), Activity: 9, Completed: 8 },
+                            { name: t("dashboard.sat"), Activity: 2, Completed: 4 },
+                            { name: t("dashboard.sun"), Activity: 1, Completed: 2 },
                           ]
                     }
                     margin={{ top: 10, right: 10, left: -20, bottom: 0 }}

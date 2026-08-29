@@ -48,7 +48,7 @@ export const parseDrawIoXML = (xmlText: string): ParsedDiagram => {
 
   const parseError = xmlDoc.getElementsByTagName("parsererror");
   if (parseError.length > 0) {
-    throw new Error(i18n.t("ui2.xmlInvalid"));
+    throw new Error(i18n.t("flowchart.xmlInvalid"));
   }
 
   const cells = xmlDoc.getElementsByTagName("mxCell");
@@ -178,7 +178,7 @@ export const parseMiroContent = (fileContent: string, isCsv: boolean): ParsedDia
   if (isCsv) {
     const lines = fileContent.split(/\r?\n/);
     if (lines.length < 2) {
-      throw new Error(i18n.t("ui2.csvEmpty"));
+      throw new Error(i18n.t("flowchart.csvEmpty"));
     }
 
     const headers = lines[0].split(",").map((h) =>

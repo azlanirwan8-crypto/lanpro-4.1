@@ -133,12 +133,12 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
           ) : emailStatus?.aktif ? (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
               <CheckCircle2 size={12} />
-              {t("jsx.k96")}
+              {t("emailCfg.configuredResend")}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/15 text-amber-700 border border-amber-500/30">
               <AlertTriangle size={12} />
-              {t("jsx.k97")}
+              {t("emailCfg.simulationModeDev")}
             </span>
           )}
         </div>
@@ -183,7 +183,9 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
       {/* Template Notifikasi Assignment */}
       <div className="space-y-3 pt-1">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-content-body">{t("jsx.k98")}</label>
+          <label className="text-xs font-medium text-content-body">
+            {t("emailCfg.defaultEmailSubjectTaskAssignment")}
+          </label>
           <input
             value={formData.subjectTemplate || ""}
             onChange={(e) => setFormData({ ...formData, subjectTemplate: e.target.value })}
@@ -243,7 +245,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
                 {t("emailCfg.testSend")}
               </h3>
             </div>
-            <p className="text-xs text-content-muted">{t("jsx.j150")}</p>
+            <p className="text-xs text-content-muted">{t("emailCfg.sendASimulatedEmailTo")}</p>
             <div className="space-y-1">
               <label className="text-xs text-content-body font-medium">
                 {t("emailCfg.recipient")}
@@ -274,7 +276,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-emerald-600 text-content-inverse text-xs font-medium hover:bg-emerald-700 shadow-xs transition-colors cursor-pointer disabled:opacity-50"
               >
                 {isTesting ? <Loader2 size={13} className="animate-spin" /> : <Mail size={13} />}
-                {isTesting ? t("ui2.sending") : t("ui2.sendTest")}
+                {isTesting ? t("common.sending") : t("emailCfg.sendTest")}
               </button>
             </div>
           </div>

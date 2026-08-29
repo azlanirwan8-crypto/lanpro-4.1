@@ -43,8 +43,12 @@ export function TestQAPanel({
         <div className="p-4 bg-indigo-500/10 text-indigo-600 rounded-full mb-4 animate-bounce">
           <ShieldAlert className="w-8 h-8" />
         </div>
-        <h3 className="text-xl font-medium text-content-strong">{t("jsx.j146")}</h3>
-        <p className="text-sm text-content-muted mt-2 leading-relaxed">{t("jsx.j147")}</p>
+        <h3 className="text-xl font-medium text-content-strong">
+          {t("qa.pleasePickAProjectFirst")}
+        </h3>
+        <p className="text-sm text-content-muted mt-2 leading-relaxed">
+          {t("qa.theQaTestingModuleNeeds")}
+        </p>
       </div>
     );
   }

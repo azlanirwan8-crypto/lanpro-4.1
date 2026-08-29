@@ -115,7 +115,7 @@ export const LoginScreen = ({
       <AnimatePresence mode="wait">
         {loading ? (
           <div key="login-skeleton" className="w-full">
-            <LoginSkeletonState loadingText={loadingText || t("ui2.authenticating")} />
+            <LoginSkeletonState loadingText={loadingText || t("auth.authenticating")} />
           </div>
         ) : (
           <motion.div
@@ -138,7 +138,7 @@ export const LoginScreen = ({
               {/* USERNAME FIELD */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-content-body tracking-wide block">
-                  {t("jsx.k18")} <span className="text-rose-500">*</span>
+                  {t("common.username")} <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -166,7 +166,7 @@ export const LoginScreen = ({
               {/* PASSWORD FIELD */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-content-body tracking-wide block">
-                  {t("jsx.kPassword")} <span className="text-rose-500">*</span>
+                  {t("login.password")} <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -186,7 +186,7 @@ export const LoginScreen = ({
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-content-subtle hover:text-primary focus:outline-none cursor-pointer transition-colors"
-                    title={showPassword ? t("ui2.hidePassword") : t("ui2.showPassword")}
+                    title={showPassword ? t("common.hidePassword") : t("common.showPassword")}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -236,7 +236,7 @@ export const LoginScreen = ({
             <SsoButtons mode="login" />
 
             <p className="text-center text-xs font-medium text-content-muted pt-5 mt-4 border-t border-border-faint">
-              {t("jsx.k20")}{" "}
+              {t("login.donTHaveAnAccount")}{" "}
               <button
                 type="button"
                 onClick={onRegisterClick}

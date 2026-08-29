@@ -121,7 +121,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             >
               <span className="text-xl">🟡</span>
               <div className="text-xs sm:text-[10px] font-medium uppercase tracking-wider">
-                {t("jsx.j54")}
+                {t("importDiagram.miroBoard")}
               </div>
               <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium">
                 {t("importDiagram.miroFile")}
@@ -157,22 +157,23 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
             {importType === "drawio" && (
               <p>
                 💡 <strong>{t("importDiagram.drawioHint")}</strong>
-                {t("jsx.j55")} <strong>{t("importDiagram.xmlHint")}</strong>
-                {t("jsx.j56")}
+                {t("importDiagram.youCanExportADraw")} <strong>{t("importDiagram.xmlHint")}</strong>
+                {t("importDiagram.ourSystemAutomaticallyConvertsBasic")}
               </p>
             )}
             {importType === "miro" && (
               <p>
                 💡 <strong>{t("importDiagram.miroHint")}</strong>
-                {t("jsx.j57")} <strong>JSON</strong> {t("jsx.k40")}{" "}
-                <strong>{t("importDiagram.csvMetadata")}</strong>
-                {t("jsx.k41")}
+                {t("importDiagram.exportYourMiroBoardIn")} <strong>JSON</strong>{" "}
+                {t("importDiagram.or")} <strong>{t("importDiagram.csvMetadata")}</strong>
+                {t("importDiagram.geometryCoordinatesTextAndConnectors")}
               </p>
             )}
             {importType === "native" && (
               <p>
                 💡 <strong>{t("importDiagram.backupHint")}</strong>
-                {t("jsx.j59")} <strong>JSON</strong> {t("jsx.k42")}
+                {t("importDiagram.uploadAWorkspaceBackupFile")} <strong>JSON</strong>{" "}
+                {t("importDiagram.downloadedFromThisAppTo")}
               </p>
             )}
           </div>
@@ -252,7 +253,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
           {parsedImportData && (
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 space-y-2 text-[10px] leading-none animate-fade-in text-emerald-900 leading-relaxed font-sans font-medium">
               <span className="font-medium uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-emerald-800 flex items-center gap-1.5 shadow-soft bg-surface p-1 px-2.5 w-fit rounded-full border border-emerald-500/30">
-                {t("jsx.j60")}
+                {t("importDiagram.diagramReadinessReview")}
               </span>
 
               <div className="grid grid-cols-2 gap-3 pt-1">
@@ -263,7 +264,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                       {parsedImportData.nodes.length}
                     </div>
                     <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wider">
-                      {t("jsx.k43")}
+                      {t("importDiagram.shapesOrnamentsNodes")}
                     </div>
                   </div>
                 </div>
@@ -275,14 +276,14 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                       {parsedImportData.edges.length}
                     </div>
                     <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wider">
-                      {t("jsx.k44")}
+                      {t("importDiagram.connectingArrowsEdges")}
                     </div>
                   </div>
                 </div>
               </div>
 
               <p className="text-xs sm:text-[10px] text-emerald-700 italic pt-1 font-medium leading-relaxed">
-                {t("jsx.j61")}
+                {t("importDiagram.fullyReadyEveryComponentMapped")}
               </p>
             </div>
           )}
