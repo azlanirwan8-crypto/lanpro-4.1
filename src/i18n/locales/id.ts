@@ -2666,6 +2666,12 @@ export const id = {
     passwordDigit: "Password harus mengandung minimal 1 angka (0-9)",
     passwordSymbol: "Password harus mengandung minimal 1 simbol khusus (@$!%*?&)",
   },
+  logoutConfirm: {
+    title: "Logout Akun",
+    message: "Apakah Anda yakin ingin keluar? Sesi Anda akan diakhiri.",
+    confirm: "Ya, Keluar",
+    cancel: "Batal",
+  },
   teamLead2: {
     sprintProgress: "Progres Sprint",
     openPlanning: "Buka Panel Perencanaan Sprint Lengkap",
