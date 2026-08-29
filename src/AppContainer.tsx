@@ -563,9 +563,52 @@ function AppContainer() {
           await handleLogout(true);
         }
       } catch (e: any) {
-        console.warn("Token verification failed (session expired or invalid):", e?.message || e);
-        // Silent logout - clear state and go back to login without throwing loud error toasts
-        await handleLogout(true);
+        /**
+         * Item #252 — `catch` ini dulu memanggil `handleLogout(true)` untuk
+         * SEMUA kegagalan, tanpa membedakan dua hal yang sama sekali berbeda:
+         *
+         *   token DITOLAK server  -> sesi memang sudah tidak sah, keluar benar
+         *   server TIDAK TERJAWAB -> sesi tidak diketahui, keluar itu keliru
+         *
+         * Bedanya bukan teoretis di proyek ini. Log server memuat
+         * `read ECONNRESET` pada pool PostgreSQL dan kegagalan koneksi Neon,
+         * jadi satu kedipan basis data saat aplikasi dibuka sudah cukup untuk
+         * membuang pengguna ke layar Masuk dengan token yang masih sah — dan
+         * karena putusnya acak, gejalanya terbaca "kadang bisa kadang tidak".
+         *
+         * `apiRequest` SUDAH mengulang tiga kali dengan backoff sebelum
+         * menyerah (`src/lib/api.ts:108`). Jadi galat yang sampai ke sini
+         * bukan kedipan sekejap, dan justru karena itu membuang sesinya makin
+         * tidak beralasan: keadaan jaringan tidak mengatakan apa pun tentang
+         * keabsahan token.
+         *
+         * PEMBEDAANNYA memakai bentuk galat yang memang sudah disediakan
+         * `api.ts`, bukan mencocokkan teks pesan:
+         *   - gagal menghubungi server -> `ApiError` status 503 + `networkError`
+         *   - server menjawab tapi rusak -> status 5xx
+         *   - dibatasi laju             -> status 429
+         *   - token ditolak             -> status 401
+         *
+         * Yang TIDAK diubah: token sengaja tidak dihapus pada jalur jaringan,
+         * sehingga muat ulang berikutnya masih membawa sesi yang sama.
+         */
+        const status = typeof e?.status === "number" ? e.status : null;
+        const serverTidakTerjawab =
+          e?.data?.networkError === true ||
+          status === 503 ||
+          status === 429 ||
+          (status !== null && status >= 500);
+
+        if (serverTidakTerjawab) {
+          console.warn(
+            "Verifikasi token tidak sampai ke server; sesi DIPERTAHANKAN:",
+            e?.message || e
+          );
+        } else {
+          console.warn("Token verification failed (session expired or invalid):", e?.message || e);
+          // Silent logout - clear state and go back to login without throwing loud error toasts
+          await handleLogout(true);
+        }
       } finally {
         setLoading(false);
       }
