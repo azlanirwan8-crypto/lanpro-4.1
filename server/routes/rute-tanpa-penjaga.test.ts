@@ -43,24 +43,33 @@ function semuaRute(): Rute[] {
   const hasil: Rute[] = [];
   for (const berkas of fs.readdirSync(DIR).filter((f) => f.endsWith(".routes.ts"))) {
     const sumber = fs.readFileSync(path.join(DIR, berkas), "utf8");
+    // Menerima path string tunggal maupun array: `["/a", "/b"]` (#242)
     // Penutupnya menerima TIGA bentuk: handler inline `async (`, `(req`, dan
-    // HANDLER BERNAMA seperti `getCommentsHandler);`. Bentuk ketiga sempat
-    // terlewat, dan dua dari empat rute komentar #94 karena itu tidak terdata
-    // sama sekali — pengurai yang buta sebagian lebih berbahaya daripada tidak
-    // ada pengurai.
+    // HANDLER BERNAMA seperti `getCommentsHandler);`.
     const pola =
-      /(?:app|router)\.(get|post|put|patch|delete)\(\s*["']([^"']+)["']([\s\S]{0,900}?)(?:async\s*\(|\(req|\w+\s*\)\s*;)/g;
+      /(?:app|router)\.(get|post|put|patch|delete)\(\s*(\[[^\]]*\]|["'][^"']+["'])([\s\S]{0,900}?)(?:async\s*\(|\(req|\w+\s*\)\s*;)/g;
     let m: RegExpExecArray | null;
     while ((m = pola.exec(sumber)) !== null) {
-      hasil.push({
-        berkas,
-        metode: m[1].toUpperCase(),
-        jalur: m[2],
-        // Komentar dibuang: berkas rute penuh catatan sejarah yang menyebut
-        // nama penjaga, dan menghitungnya sebagai penjaga menghasilkan rute
-        // telanjang yang terbaca "sudah dijaga" (§19.20).
-        penjaga: m[3].replace(/\/\/.*/g, "").replace(/\/\*[\s\S]*?\*\//g, ""),
-      });
+      const mentah = m[2];
+      const jalurs = mentah.startsWith("[")
+        ? mentah
+            .replace(/[[\]"']/g, "")
+            .split(",")
+            .map((x) => x.trim())
+            .filter(Boolean)
+        : [mentah.replace(/["']/g, "")];
+      // Komentar dibuang: berkas rute penuh catatan sejarah yang menyebut
+      // nama penjaga, dan menghitungnya sebagai penjaga menghasilkan rute
+      // telanjang yang terbaca "sudah dijaga" (§19.20).
+      const penjaga = m[3].replace(/\/\/.*/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
+      for (const j of jalurs) {
+        hasil.push({
+          berkas,
+          metode: m[1].toUpperCase(),
+          jalur: j,
+          penjaga,
+        });
+      }
     }
   }
   return hasil;
@@ -113,5 +122,54 @@ describe("#94 setiap rute berlingkup proyek punya penjaga", () => {
     for (const r of komentar) {
       expect(r.penjaga).toMatch(/jagaProyek\(/);
     }
+  });
+
+  it("#242 pengurai mengekstrak seluruh jalur pada pendaftaran rute berbentuk array", () => {
+    const contohSumber = `
+      router.post(["/api/v1/meetings/:meetingId/analyze-video", "/analyze-video"], jagaProyek("meetings", "edit"), async (req, res) => {});
+      router.get(["/api/projects/:projectId/info", "/api/projects/:projectId/details"], async (req, res) => {});
+    `;
+    const hasil: Rute[] = [];
+    const pola =
+      /(?:app|router)\.(get|post|put|patch|delete)\(\s*(\[[^\]]*\]|["'][^"']+["'])([\s\S]{0,900}?)(?:async\s*\(|\(req|\w+\s*\)\s*;)/g;
+    let m: RegExpExecArray | null;
+    while ((m = pola.exec(contohSumber)) !== null) {
+      const mentah = m[2];
+      const jalurs = mentah.startsWith("[")
+        ? mentah
+            .replace(/[[\]"']/g, "")
+            .split(",")
+            .map((x) => x.trim())
+            .filter(Boolean)
+        : [mentah.replace(/["']/g, "")];
+      const penjaga = m[3].replace(/\/\/.*/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
+      for (const j of jalurs) {
+        hasil.push({
+          berkas: "sample.routes.ts",
+          metode: m[1].toUpperCase(),
+          jalur: j,
+          penjaga,
+        });
+      }
+    }
+
+    expect(hasil).toHaveLength(4);
+    expect(hasil.map((r) => r.jalur)).toEqual([
+      "/api/v1/meetings/:meetingId/analyze-video",
+      "/analyze-video",
+      "/api/projects/:projectId/info",
+      "/api/projects/:projectId/details",
+    ]);
+
+    // Rute analyze-video berpenjaga
+    const berpenjaga = hasil.filter(berlingkupProyek).filter((r) => PENJAGA.test(r.penjaga));
+    expect(berpenjaga.map((r) => r.jalur)).toEqual(["/api/v1/meetings/:meetingId/analyze-video"]);
+
+    // Rute proyek tanpa penjaga terdeteksi telanjang
+    const telanjang = hasil.filter(berlingkupProyek).filter((r) => !PENJAGA.test(r.penjaga));
+    expect(telanjang.map((r) => r.jalur)).toEqual([
+      "/api/projects/:projectId/info",
+      "/api/projects/:projectId/details",
+    ]);
   });
 });
