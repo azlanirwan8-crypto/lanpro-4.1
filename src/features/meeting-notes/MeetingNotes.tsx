@@ -442,7 +442,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
             <div className="flex-1 overflow-x-auto overflow-y-auto m-4 md:m-6 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs">
               <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
-                  <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-medium uppercase tracking-wider text-primary whitespace-nowrap">
+                  <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap">
                     <th className="py-3 px-4 w-14 text-center">{t("meetings.thNo")}</th>
                     <th className="py-3 px-4 min-w-[180px] max-w-[260px]">
                       {t("meetings.thTitle")}
@@ -600,7 +600,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
             {/* Table Footer / Pagination */}
             <div className="px-6 py-3.5 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-              <div className="text-xs sm:text-[10px] text-content-muted font-normal">
+              <div className="text-[11px] text-content-subtle font-normal">
                 {t("common.showing")}{" "}
                 {filteredMeetings.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
                 {t("common.to")} {Math.min(currentPage * itemsPerPage, filteredMeetings.length)}{" "}
@@ -639,7 +639,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 <div className="bg-surface border border-border-subtle/80 rounded-lg p-4 flex items-center justify-between shadow-2xs shrink-0">
                   <button
                     onClick={() => setActiveMeetingId(null)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken rounded-md text-xs font-medium text-content-body transition-all cursor-pointer shadow-2xs"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken rounded-md text-xs font-normal text-content-body transition-all cursor-pointer shadow-2xs"
                   >
                     <ChevronLeft className="w-4 h-4" /> {t("meetings.backToList")}
                   </button>
@@ -654,7 +654,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-normal transition-all shadow-xs cursor-pointer"
                       >
                         <Video className="w-3.5 h-3.5" /> {t("rakit.joinMeeting")}{" "}
                         <ExternalLink className="w-3 h-3 opacity-80" />
@@ -663,7 +663,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     {(isUserAdmin || isMeetingAuthor(activeMeeting)) && (
                       <button
                         onClick={() => startEdit(activeMeeting)}
-                        className="px-3.5 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken text-content-body rounded-md text-xs font-medium transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
+                        className="px-3.5 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken text-content-body rounded-md text-xs font-normal transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
                       >
                         <Edit2 className="w-3.5 h-3.5 text-primary" /> {t("meetings.edit")}
                       </button>
@@ -671,7 +671,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     {canDeleteMeeting(activeMeeting) && (
                       <button
                         onClick={() => handleDeleteMeeting(activeMeeting.id!)}
-                        className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 rounded-md text-xs font-medium transition-all cursor-pointer border border-rose-500/30 flex items-center gap-1.5"
+                        className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 rounded-md text-xs font-normal transition-all cursor-pointer border border-rose-500/30 flex items-center gap-1.5"
                       >
                         <Trash2 className="w-3.5 h-3.5" /> {t("meetings.delete")}
                       </button>
@@ -688,12 +688,12 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   {activeMeeting.description && (
                     <div className="mt-4 p-4 border border-indigo-500/30 bg-indigo-500/10 rounded-lg border-l-4 border-l-primary flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <span className="text-xs sm:text-[10px] font-medium text-primary tracking-wider uppercase block mb-1">
+                        <span className="text-xs font-normal text-primary block mb-1">
                           {t("meetings.meetingDescriptionAgenda")}
                         </span>
                         <div className="flex items-center gap-2 text-xs sm:text-[11px] text-content-muted mb-2 not-italic">
                           <Calendar className="w-3.5 h-3.5 text-content-subtle" />
-                          <span className="text-content-secondary font-medium">
+                          <span className="text-content-secondary font-normal">
                             {formatDate(activeMeeting.createdAt)}
                           </span>
                         </div>
@@ -706,12 +706,12 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                           onClick={() =>
                             handleDownloadMeeting(activeMeeting.id!, activeMeeting.fileName!)
                           }
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 rounded-md text-xs font-medium transition-all border border-emerald-500/30 cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 rounded-md text-xs font-normal transition-all border border-emerald-500/30 cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
                           title={t("meetingExtra.downloadAttachment")}
                         >
                           <FileText className="w-3.5 h-3.5 text-emerald-600" />
                           <span className="truncate max-w-[140px]">{activeMeeting.fileName}</span>
-                          <span className="text-xs sm:text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded font-medium">
+                          <span className="text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded font-normal">
                             {t("meetingExtra.download")}
                           </span>
                         </button>
