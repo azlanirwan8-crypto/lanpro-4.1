@@ -7,16 +7,16 @@ export const styles = {
   searchInput:
     "pl-9 pr-4 py-2 bg-surface dark:bg-slate-950 border border-border-subtle dark:border-border-inverse rounded-md text-xs font-normal text-content-body dark:text-content-inverse-muted w-full sm:w-64 placeholder:font-normal placeholder:text-content-subtle focus:ring-1 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-2xs",
   filterPill:
-    "px-2.5 py-1 bg-indigo-500/10 dark:bg-indigo-950/20 text-primary dark:text-indigo-400 border border-indigo-500/30 dark:border-indigo-900 rounded-md text-[10px] font-medium uppercase tracking-tight shadow-2xs",
+    "px-2.5 py-1 bg-indigo-500/10 dark:bg-indigo-950/20 text-primary dark:text-indigo-400 border border-indigo-500/30 dark:border-indigo-900 rounded-md text-[10px] font-normal tracking-tight shadow-2xs",
   filterPillAmber:
-    "px-2.5 py-1 bg-amber-500/10 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 dark:border-amber-900 rounded-md text-[10px] font-medium uppercase tracking-tight shadow-2xs",
+    "px-2.5 py-1 bg-amber-500/10 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 dark:border-amber-900 rounded-md text-[10px] font-normal tracking-tight shadow-2xs",
   tableWrapper:
     "overflow-auto w-full custom-scrollbar relative flex-1 min-h-0 max-h-[calc(100vh-220px)]",
   table: "w-full text-left border-collapse flex-none",
   tableHeader:
     "bg-primary-surface/5 dark:bg-slate-950/50 border-b border-primary/15 sticky top-0 z-10 shadow-2xs",
   tableHeaderCell:
-    "group relative px-4 py-3 text-[10px] font-medium text-content-subtle uppercase tracking-wider whitespace-nowrap border-r border-primary/10 dark:border-border-inverse",
+    "group relative px-4 py-2.5 text-[10px] font-normal text-content-subtle whitespace-nowrap border-r border-primary/10 dark:border-border-inverse",
   tableRow:
     "group hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-all duration-150 cursor-default border-b border-border-faint dark:border-border-inverse",
   selectedTableRow: "bg-primary-surface/5 dark:bg-primary-surface/20",
