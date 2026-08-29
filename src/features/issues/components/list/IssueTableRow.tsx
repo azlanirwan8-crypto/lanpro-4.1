@@ -444,7 +444,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     masterData={mArr}
                     type="priority"
                     disabled={!isEditable}
-                    className="text-xs sm:text-[10px]"
+                    className="w-fit"
                   />
                 );
                 break;
@@ -461,7 +461,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     masterData={mArr}
                     type="status"
                     disabled={!isEditable}
-                    className="text-xs sm:text-[10px]"
+                    className="w-fit"
                   />
                 );
                 break;
@@ -501,7 +501,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     </div>
                     <span
                       className={cn(
-                        "text-xs sm:text-[10px] font-medium font-mono w-8 text-right shrink-0",
+                        "text-xs sm:text-[10px] font-normal font-mono w-8 text-right shrink-0",
                         progressValue === 100
                           ? "text-emerald-600"
                           : progressValue === 75
@@ -531,7 +531,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     options={resOptions}
                     masterData={mArr}
                     disabled={!isEditable}
-                    className="text-xs sm:text-[10px]"
+                    className="max-w-[120px]"
                   />
                 );
                 break;
@@ -550,7 +550,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     options={catOptions}
                     masterData={mArr}
                     disabled={!isEditable}
-                    className="text-xs sm:text-[10px]"
+                    className="max-w-[120px]"
                   />
                 );
                 break;
@@ -564,7 +564,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     onSave={(val: any) =>
                       updateTaskField(task.id, "storyPoints", val ? Number(val) : null)
                     }
-                    className="bg-transparent border border-transparent hover:border-border-subtle focus:border-indigo-500 rounded px-2 py-1 text-xs sm:text-[11px] font-medium text-content-body w-full outline-none transition-colors"
+                    className="bg-transparent border border-transparent hover:border-border-subtle focus:border-indigo-500 rounded px-2 py-1 text-xs font-normal text-content-body w-full outline-none transition-colors"
                     placeholder="-"
                   />
                 );

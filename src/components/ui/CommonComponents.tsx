@@ -46,7 +46,7 @@ export const UserBadge = ({
       )}
     >
       <UserAvatar uid={uid} members={members} size="sm" />
-      <span className="text-xs font-medium text-content-secondary group-hover:text-content truncate">
+      <span className="text-xs font-normal text-content-body group-hover:text-content truncate">
         {member?.displayName || member?.email?.split("@")[0] || "Unknown"}
       </span>
     </div>
@@ -268,23 +268,23 @@ export const StyledDropdown = ({
           }}
           disabled={disabled}
           className={cn(
-            "flex items-center gap-2 group/dd transition-all cursor-pointer w-full justify-between focus:ring-2 focus:ring-blue-100",
+            "flex items-center gap-1.5 group/dd transition-all cursor-pointer w-full justify-between focus:ring-1 focus:ring-primary/20",
             isStatus
               ? cn(
-                  "px-3 py-1 border rounded-full font-medium text-xs sm:text-[10px] tracking-wider uppercase shadow-soft transition-colors",
+                  "px-2 py-0.5 border rounded-md font-medium text-[10px] tracking-tight uppercase transition-colors",
                   getStatusClasses(selected?.label || value)
                 )
               : isPriority
                 ? cn(
-                    "px-2.5 py-1.5 border rounded-md font-medium text-xs sm:text-[10px] tracking-wider uppercase shadow-soft transition-colors",
+                    "px-2 py-0.5 border rounded-md font-medium text-[10px] tracking-tight uppercase transition-colors",
                     getPriorityClasses(selected?.label || value)
                   )
-                : "px-2 py-1 bg-surface border border-transparent hover:border-border-subtle rounded",
+                : "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-subtle rounded text-xs font-normal",
             disabled && "opacity-50 cursor-not-allowed",
             buttonClassName
           )}
         >
-          <div className="flex items-center gap-2 overflow-hidden">
+          <div className="flex items-center gap-1.5 overflow-hidden">
             {type === "member" &&
             selected?.id &&
             selected.id !== "Unassigned" &&
@@ -292,9 +292,7 @@ export const StyledDropdown = ({
               <UserAvatar uid={selected.id} members={members} className="w-4 h-4 flex-shrink-0" />
             ) : type === "member" && (!selected?.id || selected.id === "Unassigned") ? (
               <div className="w-4 h-4 rounded-full bg-surface-muted border border-border-subtle border-dashed flex items-center justify-center flex-shrink-0">
-                <span className="text-xs sm:text-[10px] sm:text-[8px] text-content-subtle font-medium">
-                  ?
-                </span>
+                <span className="text-[9px] text-content-subtle font-normal">?</span>
               </div>
             ) : isStatus ? (
               selected?.icon ? (
@@ -305,7 +303,7 @@ export const StyledDropdown = ({
                 />
               ) : (
                 <div
-                  className="w-2.5 h-2.5 rounded-full shrink-0 shadow-inner border border-black/10"
+                  className="w-2 h-2 rounded-full shrink-0 shadow-inner border border-black/10"
                   style={{ backgroundColor: selected?.color || "#cbd5e1" }}
                 />
               )
@@ -324,14 +322,14 @@ export const StyledDropdown = ({
             ) : null}
             <span
               className={cn(
-                "text-[12px] capitalize tracking-tight truncate",
+                "capitalize tracking-tight truncate",
                 !selected?.label && !value
-                  ? "text-content-subtle font-medium opacity-80"
+                  ? "text-content-subtle font-normal opacity-80 text-xs"
                   : isStatus
-                    ? "font-medium text-xs sm:text-[10px] text-inherit tracking-wider uppercase"
+                    ? "font-medium text-[10px] text-inherit tracking-tight uppercase"
                     : isPriority
-                      ? "font-medium text-xs sm:text-[10px] text-inherit tracking-wider uppercase"
-                      : "font-medium text-content-secondary"
+                      ? "font-medium text-[10px] text-inherit tracking-tight uppercase"
+                      : "font-normal text-xs text-content-body"
               )}
             >
               {selected?.label || value || "Select..."}
