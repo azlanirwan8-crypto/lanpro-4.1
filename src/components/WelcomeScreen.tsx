@@ -131,7 +131,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
           {/* Pratinjau modul — supaya layar terbaca "terkunci", bukan "rusak" */}
           <div className="mt-9">
-            <div className="text-xs font-semibold uppercase tracking-wider text-content-subtle mb-3">
+            <div className="text-xs font-normal uppercase tracking-wider text-content-subtle mb-3">
               {t("welcome.lockedTitle")}
             </div>
             {/*

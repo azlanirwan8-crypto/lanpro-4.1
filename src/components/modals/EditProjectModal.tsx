@@ -176,7 +176,7 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
             currentUserProfile?.permissions
           ) && (
             <div className="mt-6 pt-6 border-t border-red-50">
-              <p className="text-xs sm:text-[10px] font-medium text-red-400 uppercase tracking-widest mb-3">
+              <p className="text-xs sm:text-[10px] font-normal text-red-400 uppercase tracking-widest mb-3">
                 {t("ui.dangerZone")}
               </p>
               <Button

@@ -55,7 +55,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
       <div className="flex items-center gap-6 border-b border-border-faint">
         <button
           className={cn(
-            "pb-4 text-xs font-medium uppercase tracking-widest transition-all relative",
+            "pb-4 text-xs font-normal uppercase tracking-widest transition-all relative",
             activeTab === "comments"
               ? "text-indigo-600"
               : "text-content-subtle hover:text-content-secondary"
@@ -72,7 +72,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
         </button>
         <button
           className={cn(
-            "pb-4 text-xs font-medium uppercase tracking-widest transition-all relative",
+            "pb-4 text-xs font-normal uppercase tracking-widest transition-all relative",
             activeTab === "history"
               ? "text-indigo-600"
               : "text-content-subtle hover:text-content-secondary"
@@ -150,7 +150,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
 
               {mentionState.active && (
                 <div className="absolute z-50 w-72 bg-surface rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden transform bottom-[110%] left-0 animate-in fade-in slide-in-from-bottom-2">
-                  <div className="p-3 bg-surface-sunken border-b border-border-faint text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
+                  <div className="p-3 bg-surface-sunken border-b border-border-faint text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest">
                     {t("comments.suggestedPeople")}
                   </div>
                   <div className="max-h-60 overflow-y-auto py-1">
@@ -189,7 +189,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                   size="sm"
                   onClick={wrapSubmit("addComment", handleAddComment)}
                   disabled={isSubmitting["addComment"] || !newCommentText.trim() || !isLoggedIn}
-                  className="shadow-soft-lg shadow-indigo-500/20 px-6 font-medium uppercase tracking-widest text-xs sm:text-[10px]"
+                  className="shadow-soft-lg shadow-indigo-500/20 px-6 font-normal uppercase tracking-widest text-xs sm:text-[10px]"
                 >
                   {t("comments.save")}
                 </Button>
@@ -280,7 +280,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                     <span className="text-xs font-medium text-content-strong">
                       {actor?.displayName}
                     </span>
-                    <span className="text-xs sm:text-[10px] font-medium text-content-subtle bg-surface border border-border-subtle/60 px-1.5 py-0.2 rounded uppercase tracking-tight">
+                    <span className="text-xs sm:text-[10px] font-normal text-content-subtle bg-surface border border-border-subtle/60 px-1.5 py-0.2 rounded uppercase tracking-tight">
                       {safeFormat(log.createdAt, "MMM d, HH:mm")}
                     </span>
                   </div>

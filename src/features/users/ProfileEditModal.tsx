@@ -222,7 +222,7 @@ export const ProfileEditModal = ({
               </span>
             )}
             <label className="absolute inset-0 bg-black/50 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
-              <span className="text-xs sm:text-[10px] font-medium uppercase tracking-wider">
+              <span className="text-xs sm:text-[10px] font-normal uppercase tracking-wider">
                 {isUploading ? "..." : t("profile.choosePhoto")}
               </span>
               <input

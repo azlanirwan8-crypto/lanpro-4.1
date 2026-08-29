@@ -171,7 +171,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
             {qaStatus && (
               <span
                 className={cn(
-                  "font-medium uppercase rounded tracking-widest",
+                  "font-normal uppercase rounded tracking-widest",
                   isCompact
                     ? "text-xs sm:text-[10px] sm:text-[7.5px] px-1 py-0.5"
                     : "text-xs sm:text-[10px] sm:text-[8.5px] px-1.5 py-0.5",

@@ -106,7 +106,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
           <div className="flex-1 overflow-x-auto overflow-y-auto m-6 bg-surface rounded-md border border-border-subtle/60 shadow-xs">
             <ResponsiveTable className="w-full text-left border-collapse min-w-[880px]">
               <thead>
-                <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-semibold text-primary uppercase tracking-wider whitespace-nowrap">
+                <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-normal text-primary uppercase tracking-wider whitespace-nowrap">
                   <th className="py-3.5 px-4 w-14 text-center">No</th>
                   <th className="py-3.5 px-4 min-w-[180px] max-w-[280px]">
                     {t("flowchart.thTitle")}

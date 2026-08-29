@@ -171,7 +171,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-primary-surface text-content-inverse font-medium text-[10px] rounded-md uppercase tracking-wider">
+              <span className="px-2 py-0.5 bg-primary-surface text-content-inverse font-normal text-[10px] rounded-md uppercase tracking-wider">
                 {activeSuite.phase}
               </span>
               <h2 className="text-sm font-semibold text-content-strong tracking-tight">
@@ -355,7 +355,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     onClick={() => setIsBulkPicDropdownOpen(false)}
                   />
                   <div className="absolute right-0 top-full mt-1.5 w-60 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                    <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-medium uppercase tracking-wider text-primary border-b border-border-faint mb-1">
+                    <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-wider text-primary border-b border-border-faint mb-1">
                       {t("rakit.assignPicToTasks", { count: selectedCaseIds.length })}
                     </div>
                     <button
@@ -450,7 +450,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="overflow-x-auto">
           <ResponsiveTable className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-primary-surface/5 border-b border-primary/15 text-[10px] font-medium uppercase tracking-wider text-content-subtle">
+              <tr className="bg-primary-surface/5 border-b border-primary/15 text-[10px] font-normal uppercase tracking-wider text-content-subtle">
                 {/* SELECT ALL CHECKBOX (For Admin / Users with edit access) */}
                 <th className="py-2.5 px-3 w-8 text-center" onClick={(e) => e.stopPropagation()}>
                   {(canUpdate || isAdminRole) && (
@@ -532,7 +532,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       {/* Velzon Priority Compact Pill Badge */}
                       <td className="py-2.5 px-3 text-center">
                         <span
-                          className={`px-2 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider inline-block ${
+                          className={`px-2 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-wider inline-block ${
                             tc.priority === "Critical" || tc.priority === "High"
                               ? "bg-rose-500/10 text-danger-text border border-rose-500/30"
                               : tc.priority === "Low"
@@ -575,7 +575,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                             ]}
                             masterData={[]}
                             className="min-w-[100px]"
-                            buttonClassName={`py-1 px-2.5 rounded-md text-xs sm:text-[10px] font-medium uppercase tracking-wider border shadow-2xs ${
+                            buttonClassName={`py-1 px-2.5 rounded-md text-xs sm:text-[10px] font-normal uppercase tracking-wider border shadow-2xs ${
                               tc.status === "Passed"
                                 ? "bg-emerald-500/10 text-success-text border-emerald-500/30"
                                 : tc.status === "Failed"
@@ -634,7 +634,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                   }}
                                 />
                                 <div className="absolute right-0 top-full mt-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                                  <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-medium uppercase tracking-wider text-primary border-b border-border-faint mb-1">
+                                  <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-wider text-primary border-b border-border-faint mb-1">
                                     {t("qa.assignPicTask")}
                                   </div>
                                   <button

@@ -209,7 +209,7 @@ export const DbExplorerPanel: React.FC<any> = ({
           <div className="flex-1 flex overflow-hidden">
             {/* Sidebar: Table List */}
             <div className="w-[240px] bg-surface-sunken/50 border-r border-border-subtle/80 flex flex-col overflow-y-auto shrink-0 custom-scrollbar">
-              <div className="px-3.5 py-2.5 text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider sticky top-0 bg-surface-sunken border-b border-border-subtle/80 flex justify-between items-center z-10">
+              <div className="px-3.5 py-2.5 text-xs sm:text-[11px] font-normal text-content-muted uppercase tracking-wider sticky top-0 bg-surface-sunken border-b border-border-subtle/80 flex justify-between items-center z-10">
                 {t("dbExplorer.tables")}
               </div>
               <div className="p-2 flex flex-col gap-1">
@@ -289,7 +289,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                 {!loading && result && Array.isArray(result) && (
                   <div className="border border-border-subtle rounded-lg overflow-x-auto">
                     <ResponsiveTable className="w-full text-left border-collapse text-sm">
-                      <thead className="bg-primary-surface/5 text-primary font-medium uppercase tracking-wider">
+                      <thead className="bg-primary-surface/5 text-primary font-normal uppercase tracking-wider">
                         <tr>
                           {result.length > 0 ? (
                             Object.keys(result[0]).map((key) => (

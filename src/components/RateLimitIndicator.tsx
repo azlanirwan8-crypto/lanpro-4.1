@@ -69,7 +69,7 @@ export function RateLimitIndicator() {
             <ShieldAlert className="w-5 h-5 text-amber-100" />
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className="text-xs font-medium uppercase tracking-wider text-amber-50">
+            <h4 className="text-xs font-normal uppercase tracking-wider text-amber-50">
               {t("network.serverQueueRateLimit")}
             </h4>
             <p className="text-xs sm:text-[11px] text-amber-100/90 leading-tight mt-0.5 font-medium">
@@ -79,7 +79,7 @@ export function RateLimitIndicator() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider bg-surface/15 px-2 py-1 rounded-lg border border-white/5 whitespace-nowrap">
+            <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-wider bg-surface/15 px-2 py-1 rounded-lg border border-white/5 whitespace-nowrap">
               {t("network.remaining")} {maxLimit.retriesLeft}x
             </span>
             <Loader2 className="w-4 h-4 animate-spin text-white/80 shrink-0" />

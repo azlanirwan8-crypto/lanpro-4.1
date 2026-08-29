@@ -41,7 +41,7 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
   return (
     <div className="space-y-4 pt-4 border-t border-border-faint">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-subtle">
+        <h4 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-content-subtle">
           {t("attachments.resources")}
         </h4>
         {isEditable && (
@@ -86,7 +86,7 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
                 <p className="text-xs font-medium text-content truncate tracking-tight hover:underline">
                   {att.name}
                 </p>
-                <p className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-subtle uppercase tracking-widest">
+                <p className="text-xs sm:text-[11px] sm:text-[9px] font-normal text-content-subtle uppercase tracking-widest">
                   {att.type} • {safeFormat(att.createdAt, "MMM d")}
                   {att.uploadedByName && ` • Uploaded by ${att.uploadedByName}`}
                 </p>
@@ -104,7 +104,7 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
           </div>
         ))}
         {task.attachments?.length === 0 && !isAddingLink && (
-          <div className="py-4 text-center opacity-20 italic text-xs sm:text-[10px] uppercase font-medium tracking-widest">
+          <div className="py-4 text-center opacity-20 italic text-xs sm:text-[10px] uppercase font-normal tracking-widest">
             {t("attachments.noResources")}
           </div>
         )}

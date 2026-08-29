@@ -63,12 +63,12 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       {/* My Active Tasks */}
       <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-primary flex items-center gap-2">
+          <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-primary flex items-center gap-2">
             <Zap className="w-4 h-4 text-primary" /> {t("widgets.myActiveTasks")} (
             {myActiveTasks.length})
           </h3>
           {myActiveTasks.some((task) => isDueSoon24h(task.endDate)) && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
               {t("dashboard.urgent24h")}
             </span>
           )}
@@ -99,12 +99,12 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                       {task.key}
                     </div>
                     {isDueSoon24h(task.endDate) && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-wider bg-warning text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
                   </div>
-                  <div className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider">
+                  <div className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider">
                     {task.priority}
                   </div>
                 </div>
@@ -120,12 +120,12 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       {/* Blocked / Stoppers */}
       <div className="bg-surface shadow-soft border border-danger-border/40 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-danger flex items-center gap-2">
+          <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-danger flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-danger animate-bounce" />{" "}
             {t("widgets.stoppersBlocked")} ({blockedTasks.length})
           </h3>
           {blockedTasks.some((task) => isDueSoon24h(task.endDate)) && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
               {t("dashboard.urgent24h")}
             </span>
           )}
@@ -156,12 +156,12 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                       {task.key}
                     </div>
                     {isDueSoon24h(task.endDate) && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-wider bg-warning text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
                   </div>
-                  <div className="text-xs sm:text-[10px] font-medium text-danger uppercase tracking-wider">
+                  <div className="text-xs sm:text-[10px] font-normal text-danger uppercase tracking-wider">
                     Blocked
                   </div>
                 </div>
@@ -176,7 +176,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
 
       {/* Needs Attention / Overdue */}
       <div className="bg-surface shadow-soft border border-danger-border/30 rounded-xl p-5">
-        <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2 mb-3">
+        <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-content-strong flex items-center gap-2 mb-3">
           <AlertCircle className="w-4 h-4 text-danger animate-pulse" />{" "}
           {t("widgets.needsAttention")} ({overdueTasks.length})
         </h3>
@@ -197,7 +197,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
               >
                 <div className="flex justify-between items-start mb-1">
                   <div className="text-xs sm:text-[10px] font-medium text-primary">{task.key}</div>
-                  <div className="text-xs sm:text-[10px] font-medium text-danger uppercase tracking-wider">
+                  <div className="text-xs sm:text-[10px] font-normal text-danger uppercase tracking-wider">
                     {t("dashboard.overdue")}
                   </div>
                 </div>
@@ -213,11 +213,11 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       {/* Due Soon */}
       <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2">
+          <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-content-strong flex items-center gap-2">
             <Zap className="w-4 h-4 text-warning" /> {t("widgets.dueSoon")} ({dueSoonTasks.length})
           </h3>
           {dueSoonTasks.some((task) => isDueSoon24h(task.endDate)) && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-wider bg-warning text-content-inverse animate-pulse shrink-0">
               {t("dashboard.urgent24h")}
             </span>
           )}
@@ -248,7 +248,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
                       {task.key}
                     </div>
                     {isDueSoon24h(task.endDate) && (
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider bg-warning text-content-inverse animate-pulse">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-wider bg-warning text-content-inverse animate-pulse">
                         ⏰ {getRemainingHours(task.endDate)}
                       </span>
                     )}
@@ -271,7 +271,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       {/* Recent Meeting Notes */}
       <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2">
+          <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-content-strong flex items-center gap-2">
             <Video className="w-4 h-4 text-info" /> {t("widgets.recentMeetings")} ({meetings.length}
             )
           </h3>
@@ -308,7 +308,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
       {/* Recent Documentation */}
       <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2">
+          <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-content-strong flex items-center gap-2">
             <FileText className="w-4 h-4 text-success" /> {t("widgets.documentation")} (
             {documents.length})
           </h3>
@@ -347,7 +347,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
         <div className="absolute top-0 right-0 -translate-y-4 translate-x-4 opacity-10 pointer-events-none">
           <Globe className="w-32 h-32" />
         </div>
-        <h3 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-indigo-300 flex items-center gap-2 mb-3 relative z-10">
+        <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-indigo-300 flex items-center gap-2 mb-3 relative z-10">
           <Clock className="w-4 h-4 text-indigo-400" /> {t("widgets.liveActivity")}
         </h3>
         <div className="space-y-3 max-h-[260px] overflow-y-auto custom-scrollbar pr-1 relative z-10">
@@ -374,7 +374,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
         </div>
         <button
           onClick={() => setCurrentView("activity")}
-          className="w-full mt-4 py-3 min-h-11 text-xs font-medium uppercase tracking-wider text-content-inverse bg-surface/10 hover:bg-surface/20 rounded-lg transition-colors border border-white/10 cursor-pointer"
+          className="w-full mt-4 py-3 min-h-11 text-xs font-normal uppercase tracking-wider text-content-inverse bg-surface/10 hover:bg-surface/20 rounded-lg transition-colors border border-white/10 cursor-pointer"
         >
           {t("widgets.viewFullAuditLog")}
         </button>

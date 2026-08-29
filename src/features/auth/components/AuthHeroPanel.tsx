@@ -56,7 +56,7 @@ export const AuthHeroPanel = () => {
           <h1 className="text-6xl font-medium text-content-inverse leading-[0.9] tracking-tighter drop-shadow-md">
             LAN <span className="text-amber-400">PRO</span>
           </h1>
-          <p className="text-xs font-medium text-content-inverse-muted mt-3 tracking-widest uppercase">
+          <p className="text-xs font-normal text-content-inverse-muted mt-3 tracking-widest uppercase">
             {t("ui.platformTagline")}
           </p>
         </motion.div>

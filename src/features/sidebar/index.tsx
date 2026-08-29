@@ -46,7 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
     return (
       <span
         className={cn(
-          "text-xs sm:text-[10px] font-medium px-1.5 py-0.5 rounded shadow-xs uppercase tracking-wider shrink-0",
+          "text-xs sm:text-[10px] font-normal px-1.5 py-0.5 rounded shadow-xs uppercase tracking-wider shrink-0",
           colorClasses
         )}
       >

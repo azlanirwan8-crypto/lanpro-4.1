@@ -186,7 +186,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-lg flex items-start gap-2.5 shadow-2xs">
                     <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                     <div className="text-xs text-amber-900 space-y-0.5">
-                      <p className="font-medium uppercase tracking-wider text-amber-800 text-xs sm:text-[11px]">
+                      <p className="font-normal uppercase tracking-wider text-amber-800 text-xs sm:text-[11px]">
                         {t("issueDetail.epicTimelineWarning")}
                       </p>
                       <p className="font-normal text-content-body">
@@ -260,7 +260,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               {/* Description Card */}
               <div className="bg-surface border border-border-subtle/80 rounded-lg p-4 md:p-5 shadow-2xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-medium text-content-body uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-body uppercase tracking-wider flex items-center gap-2">
                     <ListTodo className="w-4 h-4 text-indigo-500" />
                     {t("issueDetail.description")}
                   </h3>
@@ -306,7 +306,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               {/* Acceptance Criteria Card */}
               <div className="bg-surface border border-border-subtle/80 rounded-lg p-4 md:p-5 shadow-2xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-medium text-content-body uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-body uppercase tracking-wider flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                     {t("issueDetail.acceptanceCriteria")}
                   </h3>
@@ -363,7 +363,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               {task.figmaUrl?.includes("figma.com") && (
                 <div className="space-y-4 pt-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-content uppercase tracking-widest flex items-center gap-2">
+                    <h3 className="text-sm font-normal text-content uppercase tracking-widest flex items-center gap-2">
                       <Figma className="w-4 h-4 text-purple-500" />
                       {t("issueDetail.designSpec")}
                     </h3>

@@ -43,7 +43,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
   return (
     <div className="space-y-4 pt-4 border-t border-border-faint">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-subtle">
+        <h4 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-content-subtle">
           {t("issues.relatedIssues")}
         </h4>
         {isEditable && (
@@ -66,7 +66,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
               className="p-3 bg-surface rounded-xl border border-border-faint shadow-soft space-y-2 group/link relative"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] leading-none sm:text-[9px] font-medium uppercase text-indigo-500 bg-indigo-500/10 px-1.5 py-[3px] rounded tracking-widest">
+                <span className="text-[10px] leading-none sm:text-[9px] font-normal uppercase text-indigo-500 bg-indigo-500/10 px-1.5 py-[3px] rounded tracking-widest">
                   {link.relationType.replace(/_/g, " ")}
                 </span>
                 <button

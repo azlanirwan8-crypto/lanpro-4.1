@@ -70,7 +70,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
     >
       {/* Header Title */}
       <div className="flex items-center justify-between pb-2.5 border-b border-border-subtle/80">
-        <h4 className="text-[11px] font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
+        <h4 className="text-[11px] font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
           <Activity className="w-3.5 h-3.5 text-indigo-500" />
           {t("issueDetail.issueAttributes")}
         </h4>

@@ -440,7 +440,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
             <div className="p-5 overflow-y-auto flex-1 space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
+                <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-wider">
                   {t("discussion.concernTopic")} *
                 </label>
                 <textarea
@@ -452,7 +452,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
+                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-wider">
                     {t("discussion.notesLabel")}
                   </label>
                   <input
@@ -463,7 +463,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
+                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-wider">
                     {t("discussion.followUp")}
                   </label>
                   <input
@@ -477,7 +477,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
+                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-wider">
                     {t("discussion.picAssignedTo")}
                   </label>
                   <StyledDropdown
@@ -491,7 +491,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
+                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-wider">
                     {t("discussion.feature")}
                   </label>
                   <StyledDropdown
@@ -506,7 +506,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider">
+                  <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-wider">
                     {t("discussion.targetDate")}
                   </label>
                   <input
@@ -910,7 +910,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   <MessageSquare className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-xs sm:text-[10px] font-medium uppercase tracking-widest text-indigo-600 block">
+                  <span className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-indigo-600 block">
                     {t("discussion.threadDiscussions")}
                   </span>
                   <h3 className="text-sm font-medium text-content truncate">

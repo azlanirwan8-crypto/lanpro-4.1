@@ -32,7 +32,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
         >
           <Trash2 className="w-10 h-10 text-danger-text mx-auto" />
           <div>
-            <h3 className="text-sm font-medium text-content-strong uppercase tracking-wider">
+            <h3 className="text-sm font-normal text-content-strong uppercase tracking-wider">
               {title}
             </h3>
             <p className="text-xs text-content-muted mt-1">

@@ -56,7 +56,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
         title={t("shapePalette.openCollection")}
       >
         <Layers className="w-4 h-4" />
-        <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-medium uppercase tracking-tight text-indigo-600 mt-0.5 flex items-center">
+        <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-normal uppercase tracking-tight text-indigo-600 mt-0.5 flex items-center">
           {t("shapePalette.shapes")} <ChevronDown className="w-2 h-2 ml-0.5" />
         </span>
       </button>
@@ -69,7 +69,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
               <div className="p-1 px-1.5 bg-indigo-500/15 rounded text-indigo-700">
                 <Layers className="w-3.5 h-3.5" />
               </div>
-              <span className="text-xs font-medium text-content-strong uppercase tracking-tight">
+              <span className="text-xs font-normal text-content-strong uppercase tracking-tight">
                 {t("shapePalette.diagrammingShapes")}
               </span>
             </div>
@@ -83,7 +83,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
 
           {/* Preset Colors Bar */}
           <div className="px-3.5 py-2 border-b border-border-faint bg-surface-sunken/20 flex items-center justify-between shrink-0">
-            <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wide">
+            <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-wide">
               {t("shapePalette.defaultColor")}
             </span>
             <div className="flex items-center gap-1">
@@ -166,7 +166,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                     className="w-full flex items-center justify-between text-left py-1.5 hover:bg-surface-sunken/70 p-1 rounded-lg transition-colors group"
                   >
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs sm:text-[10px] font-medium text-content-strong uppercase tracking-widest font-mono">
+                      <span className="text-xs sm:text-[10px] font-normal text-content-strong uppercase tracking-widest font-mono">
                         {group.title}
                       </span>
                       {(group.title === "AWS" ||

@@ -268,7 +268,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
 
             <div className="p-5 overflow-y-auto space-y-6 text-left">
               <div className="space-y-3">
-                <div className="text-xs font-medium text-content-subtle uppercase tracking-wider flex items-center gap-2">
+                <div className="text-xs font-normal text-content-subtle uppercase tracking-wider flex items-center gap-2">
                   <div className="p-1 bg-blue-500/10 text-blue-500 rounded">
                     <Mail size={14} />
                   </div>
@@ -283,7 +283,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
               </div>
 
               <div className="space-y-3">
-                <div className="text-xs font-medium text-content-subtle uppercase tracking-wider flex items-center gap-2">
+                <div className="text-xs font-normal text-content-subtle uppercase tracking-wider flex items-center gap-2">
                   <div className="p-1 bg-emerald-500/10 text-emerald-500 rounded">
                     <MessageSquare size={14} />
                   </div>

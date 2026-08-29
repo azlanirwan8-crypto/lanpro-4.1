@@ -309,7 +309,7 @@ export const Badge = ({
     <span
       className={cn(
         "inline-flex items-center gap-1 px-2.5 py-1 rounded-md border",
-        "text-xs sm:text-[11px] font-medium uppercase tracking-wide whitespace-nowrap",
+        "text-xs sm:text-[11px] font-normal uppercase tracking-wide whitespace-nowrap",
         variants[variant],
         className
       )}

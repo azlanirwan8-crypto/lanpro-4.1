@@ -829,7 +829,7 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                 <div>
-                  <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-indigo-500" />
                     {t("dashboard.sprintOverview")}
                   </h3>
@@ -962,7 +962,7 @@ export function DashboardView(props: DashboardViewProps) {
               {/* {t("dashboard.breakdownByType")} (Epic, Story, Task, Bug, Subtask) */}
               <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
-                  <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <LayoutGrid className="w-4 h-4 text-purple-500" />
                     {t("dashboard.breakdownByType")}
                   </h3>
@@ -1010,7 +1010,7 @@ export function DashboardView(props: DashboardViewProps) {
               {/* {t("dashboard.breakdownByStatus")} (To Do, In Progress, Review, Done, Blocked) */}
               <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
-                  <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <PieChartIcon className="w-4 h-4 text-emerald-500" />
                     {t("dashboard.breakdownByStatus")}
                   </h3>
@@ -1056,7 +1056,7 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-border-faint pb-3 gap-2">
                 <div>
-                  <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <Users className="w-4 h-4 text-indigo-500" />
                     {t("dashboard.workloadTitle")}
                   </h3>
@@ -1075,7 +1075,7 @@ export function DashboardView(props: DashboardViewProps) {
               <div className="overflow-x-auto">
                 <ResponsiveTable className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-border-faint text-xs sm:text-[11px] font-medium uppercase tracking-wider text-content-subtle">
+                    <tr className="border-b border-border-faint text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
                       <th className="py-2.5 px-2">{t("dashboard.thMember")}</th>
                       <th className="py-2.5 px-2">{t("dashboard.thRunning")}</th>
                       <th className="py-2.5 px-2">{t("dashboard.thDone")}</th>
@@ -1169,7 +1169,7 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <div>
-                  <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <Target className="w-4 h-4 text-purple-500" />
                     {t("dashboard.epicTitle")}
                   </h3>
@@ -1229,7 +1229,7 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <div>
-                  <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <Clock className="w-4 h-4 text-blue-500" />
                     {t("dashboard.timeTitle")}
                   </h3>
@@ -1276,7 +1276,7 @@ export function DashboardView(props: DashboardViewProps) {
             <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <div>
-                  <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
                     <Activity className="w-4 h-4 text-emerald-500" />
                     {t("dashboard.trendTitle")}
                   </h3>
@@ -1371,7 +1371,7 @@ export function DashboardView(props: DashboardViewProps) {
             {/* Priority Breakdown */}
             <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
-                <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
                   <Zap className="w-4 h-4 text-amber-500" />
                   {t("dashboard.priorityBreakdown")}
                 </h3>
@@ -1421,7 +1421,7 @@ export function DashboardView(props: DashboardViewProps) {
             {/* Blocked & Overdue Watchlist */}
             <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
-                <h3 className="text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-rose-500" />
                   {t("dashboard.blockedOverdueTitle")}
                 </h3>

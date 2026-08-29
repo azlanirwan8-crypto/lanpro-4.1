@@ -53,7 +53,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
           <div className="bg-surface-sunken border border-border-subtle rounded-xl p-4 mb-6">
             <div className="flex items-center gap-2 mb-3">
               <Activity className="w-4 h-4 text-emerald-500" />
-              <span className="text-xs font-medium text-content-secondary uppercase tracking-wider">
+              <span className="text-xs font-normal text-content-secondary uppercase tracking-wider">
                 {t("collision.currentSession")}
               </span>
             </div>

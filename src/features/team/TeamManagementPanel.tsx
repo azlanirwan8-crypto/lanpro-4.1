@@ -281,7 +281,7 @@ export const TeamManagementPanel = ({
                 <Users className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider">
+                <div className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase tracking-wider">
                   {t("team.activeTeam")}
                 </div>
                 <div className="text-xl font-medium text-content-strong mt-0.5">
@@ -297,7 +297,7 @@ export const TeamManagementPanel = ({
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider">
+                <div className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase tracking-wider">
                   {t("team.assignedTasks")}
                 </div>
                 <div className="text-xl font-medium text-content-strong mt-0.5">
@@ -313,7 +313,7 @@ export const TeamManagementPanel = ({
                 <Clock className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider">
+                <div className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase tracking-wider">
                   {t("team.pendingInvites")}
                 </div>
                 <div className="text-xl font-medium text-content-strong mt-0.5">
@@ -329,7 +329,7 @@ export const TeamManagementPanel = ({
                 <Briefcase className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider">
+                <div className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase tracking-wider">
                   {t("team.projectTasks")}
                 </div>
                 <div className="text-xl font-medium text-content-strong mt-0.5">
@@ -462,7 +462,7 @@ export const TeamManagementPanel = ({
                         <span className="block font-medium text-content-strong text-sm">
                           {userAssignedTasks.length}
                         </span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase tracking-wider">
+                        <span className="text-xs sm:text-[10px] text-content-subtle font-normal uppercase tracking-wider">
                           {t("teamPanel.assigned")}
                         </span>
                       </div>
@@ -470,7 +470,7 @@ export const TeamManagementPanel = ({
                         <span className="block font-medium text-content-strong text-sm">
                           {completedTasks.length}
                         </span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase tracking-wider">
+                        <span className="text-xs sm:text-[10px] text-content-subtle font-normal uppercase tracking-wider">
                           {t("teamPanel.done")}
                         </span>
                       </div>
@@ -496,7 +496,7 @@ export const TeamManagementPanel = ({
             <div className="overflow-x-auto">
               <ResponsiveTable className="w-full text-left">
                 <thead>
-                  <tr className="bg-surface-sunken/80 border-b border-border-subtle/80 text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider">
+                  <tr className="bg-surface-sunken/80 border-b border-border-subtle/80 text-xs sm:text-[11px] font-normal text-content-muted uppercase tracking-wider">
                     <th className="px-5 py-3">{t("team.member")}</th>
                     <th className="px-5 py-3">{t("team.role")}</th>
                     <th className="px-5 py-3 text-center">{t("team.assignedTasks")}</th>
@@ -668,7 +668,7 @@ export const TeamManagementPanel = ({
 
                   {/* Task list preview */}
                   <div className="mt-4">
-                    <h4 className="text-xs font-medium text-content-body uppercase tracking-wider mb-2">
+                    <h4 className="text-xs font-normal text-content-body uppercase tracking-wider mb-2">
                       {t("teamPanel.assignedTasksTitle")}
                     </h4>
                     <div className="max-h-40 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">

@@ -59,7 +59,7 @@ export const UserBadge = ({
             {name}
           </span>
           {showRole && role && (
-            <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-subtle uppercase tracking-wider leading-none mt-0.5">
+            <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal text-content-subtle uppercase tracking-wider leading-none mt-0.5">
               {role}
             </span>
           )}

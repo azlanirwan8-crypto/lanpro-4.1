@@ -2655,7 +2655,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                 <Bug className="w-5 h-5 animate-bounce text-emerald-400" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs sm:text-[10px] font-medium text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                <p className="text-xs sm:text-[10px] font-normal text-emerald-400 uppercase tracking-widest flex items-center gap-1">
                   <span>🔔</span> {t("appShell.qaNotification")}
                 </p>
                 <p className="text-xs font-medium text-content-inverse-strong mt-0.5 leading-snug">
@@ -2673,7 +2673,7 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
                   new CustomEvent("lanpro_qa_retest_updated", { detail: { bugKey } })
                 );
               }}
-              className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-slate-950 text-xs font-medium rounded-xl uppercase tracking-wider shrink-0 transition-all cursor-pointer shadow-md flex items-center gap-1"
+              className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-slate-950 text-xs font-normal rounded-xl uppercase tracking-wider shrink-0 transition-all cursor-pointer shadow-md flex items-center gap-1"
             >
               <span>{t("appShell.viewBug")}</span>
             </button>

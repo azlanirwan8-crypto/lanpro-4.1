@@ -626,7 +626,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 <Users className="w-4.5 h-4.5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
+                <div className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-wider">
                   {t("users.totalUser")}
                 </div>
                 <div className="text-lg font-medium text-content-strong leading-none mt-1">
@@ -639,7 +639,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 <CheckCircle className="w-4.5 h-4.5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
+                <div className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-wider">
                   {t("users.approved")}
                 </div>
                 <div className="text-lg font-medium text-content-strong leading-none mt-1">
@@ -652,7 +652,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 <Clock className="w-4.5 h-4.5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
+                <div className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-wider">
                   {t("users.pending")}
                 </div>
                 <div className="text-lg font-medium text-content-strong leading-none mt-1">
@@ -665,7 +665,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 <Shield className="w-4.5 h-4.5" />
               </div>
               <div>
-                <div className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
+                <div className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-wider">
                   {t("users.administrator")}
                 </div>
                 <div className="text-lg font-medium text-content-strong leading-none mt-1">
@@ -772,7 +772,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             <div className="overflow-x-auto flex-1">
               <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
-                  <tr className="bg-surface-sunken/80 border-b border-border-faint text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wider whitespace-nowrap">
+                  <tr className="bg-surface-sunken/80 border-b border-border-faint text-xs sm:text-[11px] font-normal text-content-muted uppercase tracking-wider whitespace-nowrap">
                     <th className="py-3.5 px-4 text-center w-12">
                       <input
                         type="checkbox"
@@ -949,7 +949,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         <td className="py-3.5 px-4">
                           <span
                             className={cn(
-                              "inline-flex font-medium text-xs sm:text-[11px] sm:text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-md border",
+                              "inline-flex font-normal text-xs sm:text-[11px] sm:text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-md border",
                               normalkanPeran(user.role) === "admin"
                                 ? "bg-rose-500/10 text-rose-600 border-rose-500/30"
                                 : normalkanPeran(user.role) === "head"
@@ -1263,7 +1263,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   </div>
                   <p
                     className={cn(
-                      "text-xs sm:text-[10px] font-medium uppercase tracking-wider",
+                      "text-xs sm:text-[10px] font-normal uppercase tracking-wider",
                       passwordStrength === "weak"
                         ? "text-rose-500"
                         : passwordStrength === "medium"

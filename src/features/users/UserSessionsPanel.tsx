@@ -240,7 +240,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
       {/* Velzon Header & Breadcrumb */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
-          <nav className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-content-subtle mb-0.5">
+          <nav className="flex items-center gap-1.5 text-[11px] font-normal uppercase tracking-wider text-content-subtle mb-0.5">
             <span>{t("sessionMonitor.breadcrumbGroup", "ADMINISTRATION")}</span>
             <ArrowRight className="w-3 h-3 text-content-subtle" />
             <span className="text-primary">
@@ -282,7 +282,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
         <div className="bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-emerald-500/30">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-content-subtle">
+              <p className="text-[10px] font-normal uppercase tracking-wider text-content-subtle">
                 {t("sessionMonitor.activeSessions", "Sesi Aktif Sekarang")}
               </p>
               <h3 className="text-xl font-bold text-content-strong mt-0.5">
@@ -305,7 +305,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
         <div className="bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-primary/30">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-content-subtle">
+              <p className="text-[10px] font-normal uppercase tracking-wider text-content-subtle">
                 {t("sessionMonitor.onlineUsers", "Pengguna Online")}
               </p>
               <h3 className="text-xl font-bold text-content-strong mt-0.5">
@@ -327,7 +327,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
         <div className="bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-amber-500/30">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-content-subtle">
+              <p className="text-[10px] font-normal uppercase tracking-wider text-content-subtle">
                 {t("sessionMonitor.todayLogins", "Login Hari Ini")}
               </p>
               <h3 className="text-xl font-bold text-content-strong mt-0.5">
@@ -349,7 +349,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
         <div className="bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-info/30">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-content-subtle">
+              <p className="text-[10px] font-normal uppercase tracking-wider text-content-subtle">
                 {t("sessionMonitor.totalHistory", "Total Riwayat Sesi")}
               </p>
               <h3 className="text-xl font-bold text-content-strong mt-0.5">
@@ -423,7 +423,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
         <div className="overflow-x-auto min-h-[350px]">
           <table className="w-full text-left border-collapse table-fixed">
             <thead>
-              <tr className="bg-surface-sunken/70 border-b border-border-subtle text-[11px] font-bold uppercase tracking-wider text-content-subtle">
+              <tr className="bg-surface-sunken/70 border-b border-border-subtle text-[11px] font-normal uppercase tracking-wider text-content-subtle">
                 <th className="py-2.5 px-3 w-[22%]">{t("sessionMonitor.colUser", "PENGGUNA")}</th>
                 <th className="py-2.5 px-3 w-[16%]">
                   {t("sessionMonitor.colIp", "IP & GEOLOKASI")}
@@ -693,7 +693,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                       {selectedUserForActivity.name}
                     </h2>
                     {selectedUserForActivity.role && (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-normal uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
                         {selectedUserForActivity.role}
                       </span>
                     )}
@@ -713,7 +713,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
             {/* Modal Body: Activity Log Timeline */}
             <div className="p-6 overflow-y-auto flex-1 bg-surface-sunken space-y-4">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-content-subtle flex items-center gap-2">
+                <h3 className="text-xs font-normal uppercase tracking-wider text-content-subtle flex items-center gap-2">
                   <Activity className="w-4 h-4 text-primary" />
                   {t("sessionMonitor.activityFeedTitle", "Riwayat Aktivitas & Audit Log")}
                 </h3>
@@ -850,7 +850,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 pb-2 border-b border-border-subtle">
                             <div className="flex items-center gap-2">
                               <span
-                                className={`px-2 py-0.5 rounded text-xs font-bold border uppercase tracking-wider ${actionBadgeBg}`}
+                                className={`px-2 py-0.5 rounded text-xs font-normal border uppercase tracking-wider ${actionBadgeBg}`}
                               >
                                 {act.action}
                               </span>
@@ -881,7 +881,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                             <div className="mt-3 overflow-x-auto border border-border-subtle rounded-lg bg-surface-sunken">
                               <table className="w-full text-left text-xs">
                                 <thead>
-                                  <tr className="border-b border-border-subtle text-[11px] font-semibold uppercase tracking-wider text-content-subtle bg-surface/50">
+                                  <tr className="border-b border-border-subtle text-[11px] font-normal uppercase tracking-wider text-content-subtle bg-surface/50">
                                     <th className="py-1.5 px-3">
                                       {t("sessionMonitor.fieldHeader", "Properti")}
                                     </th>
@@ -948,7 +948,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                                 </span>
                               )}
                             </div>
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-normal uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
                               {act.source}
                             </span>
                           </div>

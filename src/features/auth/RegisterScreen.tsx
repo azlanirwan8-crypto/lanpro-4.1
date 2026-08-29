@@ -310,7 +310,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         <button
           type="submit"
           disabled={isRegistering}
-          className="w-full bg-primary-surface text-content-inverse py-3 rounded-lg font-semibold uppercase tracking-wider text-xs hover:bg-primary-surface-hover transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full bg-primary-surface text-content-inverse py-3 rounded-lg font-normal uppercase tracking-wider text-xs hover:bg-primary-surface-hover transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isRegistering ? (
             <>

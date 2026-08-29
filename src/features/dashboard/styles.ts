@@ -5,7 +5,7 @@ export const styles = {
   header:
     "flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-border-subtle pb-6 mb-2",
   headerSubtitleWrapper: "flex items-center gap-2 mb-2",
-  headerSubtitleLeft: "text-[10px] font-medium tracking-widest text-indigo-600 uppercase",
+  headerSubtitleLeft: "text-[10px] font-normal tracking-widest text-indigo-600 uppercase",
   // `slate-300` tidak punya token setara; `content-subtle` (slate-400) yang
   // paling dekat. `text-border-*` tidak sah secara semantik — itu kosakata GARIS.
   headerSubtitleDot: "text-content-subtle",
@@ -17,7 +17,7 @@ export const styles = {
   healthProgress:
     "w-12 h-12 rounded-full border-4 border-indigo-50 relative flex items-center justify-center shrink-0",
   healthLabelWrapper: "flex flex-col",
-  healthLabelTop: "text-[10px] font-medium uppercase tracking-widest text-content-subtle",
+  healthLabelTop: "text-[10px] font-normal uppercase tracking-widest text-content-subtle",
   healthLabelBottom: "text-sm font-medium text-content-strong",
   statsGrid: "grid grid-cols-2 lg:grid-cols-4 gap-4",
   statCard:
@@ -27,9 +27,9 @@ export const styles = {
   statIconBackground:
     "absolute right-[-10px] bottom-[-10px] opacity-[0.03] transform group-hover:scale-110 transition-transform",
   statLabel:
-    "text-[10px] font-medium uppercase tracking-widest text-content-subtle mb-4 flex items-center gap-2",
+    "text-[10px] font-normal uppercase tracking-widest text-content-subtle mb-4 flex items-center gap-2",
   statLabelRose:
-    "text-[10px] font-medium uppercase tracking-widest text-rose-500 mb-4 flex items-center gap-2",
+    "text-[10px] font-normal uppercase tracking-widest text-rose-500 mb-4 flex items-center gap-2",
   statValueWrapper: "flex items-end gap-2",
   statValue: "text-4xl font-medium text-content-strong leading-none",
   statValueRose: "text-4xl font-medium text-rose-600 leading-none",
@@ -51,7 +51,7 @@ export const styles = {
   chartGrid: "grid grid-cols-1 lg:grid-cols-2 gap-6",
   chartCard: "bg-surface shadow-sm border border-border-faint/80 rounded-xl p-6 flex flex-col",
   chartTitle:
-    "text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center gap-2 mb-6",
+    "text-[10px] font-normal uppercase tracking-widest text-content-strong flex items-center gap-2 mb-6",
   rightSidebar: "w-full xl:w-[380px] shrink-0 space-y-6",
   actionCard: "bg-surface shadow-sm border border-rose-500/30 rounded-xl p-6",
   actionCardSlate: "bg-surface shadow-sm border border-border-faint/80 rounded-xl p-6",

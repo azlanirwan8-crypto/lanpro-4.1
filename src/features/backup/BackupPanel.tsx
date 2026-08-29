@@ -202,7 +202,7 @@ export const BackupPanel = (_props: {
                 <Download className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-xs font-medium text-content-strong uppercase tracking-wide">
+                <h2 className="text-xs font-normal text-content-strong uppercase tracking-wide">
                   {t("backup.exportDatabase")}
                 </h2>
                 <p className="text-xs text-content-muted mt-0.5">{t("backupPanel.exportHint")}</p>
@@ -228,7 +228,7 @@ export const BackupPanel = (_props: {
                 <Upload className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-xs font-medium text-content-strong uppercase tracking-wide">
+                <h2 className="text-xs font-normal text-content-strong uppercase tracking-wide">
                   {t("backupPanel.restoreTitle")}
                 </h2>
                 <p className="text-xs text-content-muted flex items-center gap-1 mt-0.5">
@@ -262,7 +262,7 @@ export const BackupPanel = (_props: {
         <div className="px-4 py-3 bg-surface-sunken/80 border-b border-border-subtle/80 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="w-4 h-4 text-content-muted" />
-            <h3 className="text-xs font-medium text-content-body uppercase tracking-wider">
+            <h3 className="text-xs font-normal text-content-body uppercase tracking-wider">
               {t("backup.resultTitle")}
             </h3>
           </div>
@@ -273,7 +273,7 @@ export const BackupPanel = (_props: {
 
         <div className="overflow-x-auto">
           <ResponsiveTable className="w-full text-left border-collapse text-xs">
-            <thead className="bg-surface-muted/70 text-content-body border-b border-border-subtle/80 font-medium uppercase tracking-wider text-xs sm:text-[11px]">
+            <thead className="bg-surface-muted/70 text-content-body border-b border-border-subtle/80 font-normal uppercase tracking-wider text-xs sm:text-[11px]">
               <tr>
                 <th className="py-2.5 px-3.5">{t("backup.exportTime")}</th>
                 <th className="py-2.5 px-3.5">{t("backup.fileName")}</th>

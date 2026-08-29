@@ -816,7 +816,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                               setSelectedTaskForDetail(task);
                               setIsTaskDetailModalOpen(true);
                             }}
-                            className="text-[9px] leading-none font-semibold text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/30 rounded px-1 py-0.5 tracking-tight text-left uppercase transition-colors shrink-0"
+                            className="text-[9px] leading-none font-normal text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/30 rounded px-1 py-0.5 tracking-tight text-left uppercase transition-colors shrink-0"
                           >
                             {task.key}
                           </button>
@@ -825,7 +825,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           </span>
                           <span
                             className={cn(
-                              "text-[10px] font-semibold uppercase tracking-tight shrink-0",
+                              "text-[10px] font-normal uppercase tracking-tight shrink-0",
                               task.status === "Done"
                                 ? "text-emerald-600"
                                 : task.status === "In Progress"

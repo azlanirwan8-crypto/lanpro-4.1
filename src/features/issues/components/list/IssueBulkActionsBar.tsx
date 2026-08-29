@@ -126,7 +126,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
               <span className="bg-indigo-600 text-content-inverse text-xs sm:text-[10px] font-medium rounded-full px-2 py-0.5 min-w-[20px] text-center">
                 {selectedTaskIds.size}
               </span>
-              <span className="text-content-subtle font-medium uppercase tracking-wider text-xs sm:text-[10px]">
+              <span className="text-content-subtle font-normal uppercase tracking-wider text-xs sm:text-[10px]">
                 {t("bulkActions.selectedTasks")}
               </span>
             </div>

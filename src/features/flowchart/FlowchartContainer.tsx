@@ -2576,22 +2576,22 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   <div className="flex flex-wrap items-center gap-2 select-none mb-3">
                     {/* Category Badge */}
                     {currentFlowMetadata?.category === "PRD" && (
-                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-surface-muted text-content-body border border-border-subtle/80 rounded-full">
+                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-normal uppercase tracking-wider bg-surface-muted text-content-body border border-border-subtle/80 rounded-full">
                         {t("flowchart.prd")}
                       </span>
                     )}
                     {currentFlowMetadata?.category === "Panduan" && (
-                      <span className="px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-blue-500/10 text-blue-700 border border-blue-500/30 rounded-full">
+                      <span className="px-2.5 py-1 text-[10px] leading-none font-normal uppercase tracking-wider bg-blue-500/10 text-blue-700 border border-blue-500/30 rounded-full">
                         {t("flowchart.guideline")}
                       </span>
                     )}
                     {currentFlowMetadata?.category === "Laporan" && (
-                      <span className="px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 rounded-full">
+                      <span className="px-2.5 py-1 text-[10px] leading-none font-normal uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 rounded-full">
                         {t("flowchart.report")}
                       </span>
                     )}
                     {!currentFlowMetadata?.category && (
-                      <span className="px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-violet-500/10 text-violet-700 border border-violet-500/30 rounded-full">
+                      <span className="px-2.5 py-1 text-[10px] leading-none font-normal uppercase tracking-wider bg-violet-500/10 text-violet-700 border border-violet-500/30 rounded-full">
                         {t("flowchart.general")}
                       </span>
                     )}
@@ -2780,7 +2780,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           title={t("flowchart.toolSticky")}
                         >
                           <StickyNote className="w-4 h-4 text-amber-500 fill-amber-300" />
-                          <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-medium uppercase tracking-tight text-amber-600 mt-0.5">
+                          <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-normal uppercase tracking-tight text-amber-600 mt-0.5">
                             {t("flowchart.sticky")}
                           </span>
                         </button>
@@ -2816,7 +2816,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           title={t("flowchart.toolArrow")}
                         >
                           <ArrowRight className="w-4 h-4" />
-                          <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-medium uppercase tracking-tight mt-0.5">
+                          <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-normal uppercase tracking-tight mt-0.5">
                             {t("flowchart.arrow")}
                           </span>
                         </button>
@@ -2827,7 +2827,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           title={t("flowchart.toolText")}
                         >
                           <Type className="w-4 h-4" />
-                          <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-medium uppercase tracking-tight mt-0.5">
+                          <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-normal uppercase tracking-tight mt-0.5">
                             {t("flowchart.text")}
                           </span>
                         </button>
@@ -3032,7 +3032,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             )}>
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs sm:text-[11px] sm:text-[9px] text-emerald-400 font-medium uppercase tracking-wider">{t("flowchart.canvas")}</span>
+                <span className="text-xs sm:text-[11px] sm:text-[9px] text-emerald-400 font-normal uppercase tracking-wider">{t("flowchart.canvas")}</span>
               </span>
               <div className="w-px h-3.5" />
               <span className="font-medium">X: <span className="text-content-inverse-strong">{hoverCoords.x}</span> Y: <span className="text-content-inverse-strong">{hoverCoords.y}</span></span>
@@ -3243,7 +3243,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         {isKeyboardHelpOpen && (
                           <div className="absolute left-4 right-4 md:left-auto md:right-4 bottom-20 z-40 bg-overlay/95 backdrop-blur text-content-inverse p-4 rounded-xl border shadow-2xl max-w-sm space-y-3 p-4 select-none">
                             <div className="flex justify-between items-center pb-2 border-b border-border-inverse">
-                              <span className="font-medium uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-violet-400">
+                              <span className="font-normal uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-violet-400">
                                 {t("flowchart.shortcutsTitle")}
                               </span>
                               <button
@@ -3334,7 +3334,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           <div className="space-y-4">
                             <div className="flex justify-between items-center bg-surface-sunken p-2.5 rounded-lg border border-border-subtle">
                               <div>
-                                <span className="text-xs sm:text-[10px] sm:text-[8.5px] font-medium tracking-wider text-content-muted uppercase">
+                                <span className="text-xs sm:text-[10px] sm:text-[8.5px] font-normal tracking-wider text-content-muted uppercase">
                                   {t("flowchart.selectedComponent")}
                                 </span>
                                 <div className="text-content font-medium capitalize flex items-center gap-1.5 mt-0.5 text-xs">
@@ -3533,7 +3533,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         ) : selectedEdgeId ? (
                           <div className="space-y-4">
                             <div className="bg-surface-sunken p-3 rounded-lg border border-border-subtle">
-                              <span className="text-xs sm:text-[10px] sm:text-[8px] font-mono text-content-muted uppercase tracking-widest block font-medium">
+                              <span className="text-xs sm:text-[10px] sm:text-[8px] font-mono text-content-muted uppercase tracking-widest block font-normal">
                                 {t("flowchart.selectedRelation")}
                               </span>
                               <div className="text-content font-medium mt-1 text-xs">

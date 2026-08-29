@@ -727,7 +727,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                   {/* Channels / Virtual Bots Section */}
                   {filteredVirtuals.length > 0 && (
                     <div className="bg-surface-sunken/40">
-                      <p className="px-4 pt-2.5 pb-1 text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-widest text-content-subtle uppercase">
+                      <p className="px-4 pt-2.5 pb-1 text-xs sm:text-[11px] sm:text-[9px] font-normal tracking-widest text-content-subtle uppercase">
                         {t("chat.channelsAssistant")}
                       </p>
                       {filteredVirtuals.map((virtual) => {
@@ -790,7 +790,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
                   {/* Direct Message Section */}
                   <div className="bg-surface">
-                    <p className="px-4 pt-3 pb-1 text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-widest text-content-subtle uppercase">
+                    <p className="px-4 pt-3 pb-1 text-xs sm:text-[11px] sm:text-[9px] font-normal tracking-widest text-content-subtle uppercase">
                       {t("chat.colleaguesDm")}
                     </p>
                     {filteredUsers.length === 0 ? (
@@ -1088,7 +1088,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     <button
                       type="button"
                       onClick={() => setSimulationEnabled(!simulationEnabled)}
-                      className={`px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase tracking-wider transition-colors ${
+                      className={`px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-wider transition-colors ${
                         simulationEnabled
                           ? "bg-emerald-500/15 text-emerald-700 hover:bg-emerald-200"
                           : "bg-surface-strong text-content-secondary hover:bg-surface-marker"
@@ -1109,7 +1109,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       className="p-3 bg-surface-sunken border-t border-border-faint flex flex-col gap-2 shrink-0 border-b border-border-faint"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-xs sm:text-[10px] font-medium tracking-widest text-content-muted uppercase">
+                        <span className="text-xs sm:text-[10px] font-normal tracking-widest text-content-muted uppercase">
                           {t("chat.sendAttachment")}
                         </span>
                         <button
@@ -1176,7 +1176,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-full py-1.5 bg-surface-inverse-strong text-content-inverse rounded-xl text-xs sm:text-[10px] font-medium tracking-wider uppercase flex items-center justify-center gap-1.5 hover:bg-orange-600 transition-colors shadow-soft"
+                        className="w-full py-1.5 bg-surface-inverse-strong text-content-inverse rounded-xl text-xs sm:text-[10px] font-normal tracking-wider uppercase flex items-center justify-center gap-1.5 hover:bg-orange-600 transition-colors shadow-soft"
                       >
                         <FileUp className="w-3.5 h-3.5" />
                         {t("chat.uploadFromComputer")}

@@ -42,7 +42,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
 
   return (
     <div className="overflow-hidden rounded-xl border border-border-subtle bg-surface">
-      <div className="grid grid-cols-12 gap-0 bg-surface-sunken border-b border-border-subtle text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-widest p-3">
+      <div className="grid grid-cols-12 gap-0 bg-surface-sunken border-b border-border-subtle text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-widest p-3">
         <div className="col-span-4 px-2">{t("diff.fieldName")}</div>
         <div className="col-span-4 px-2 border-l border-border-subtle">{t("diff.oldValue")}</div>
         <div className="col-span-4 px-2 border-l border-border-subtle">{t("diff.newValue")}</div>

@@ -106,7 +106,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
 
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
+              <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider block">
                 {t("bugTicket.ticketTitle")}
               </label>
               <input
@@ -120,7 +120,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
 
             {/* Parent Task Searchable Combobox */}
             <div className="space-y-1.5 relative">
-              <label className="text-xs sm:text-[10px] font-medium text-danger-text uppercase tracking-wider block">
+              <label className="text-xs sm:text-[10px] font-normal text-danger-text uppercase tracking-wider block">
                 {t("bugTicket.targetEpicParentTaskRequired")}
               </label>
 
@@ -189,7 +189,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
+                <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider block">
                   {t("bugTicket.severity")}
                 </label>
                 <StyledDropdown
@@ -208,7 +208,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
+                <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider block">
                   {t("bugTicket.assigneeDev")}
                 </label>
                 <StyledDropdown
@@ -236,7 +236,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block">
+              <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider block">
                 {t("bugTicket.description")}
               </label>
               <textarea
@@ -251,14 +251,14 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-3 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium rounded-md uppercase tracking-wider cursor-pointer"
+                className="flex-1 py-3 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-normal rounded-md uppercase tracking-wider cursor-pointer"
               >
                 {t("bugTicket.cancel")}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !selectedParentId}
-                className="flex-1 py-3 bg-danger-surface hover:bg-danger-hover text-content-inverse text-xs font-medium rounded-md uppercase tracking-wider cursor-pointer shadow-xs flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
+                className="flex-1 py-3 bg-danger-surface hover:bg-danger-hover text-content-inverse text-xs font-normal rounded-md uppercase tracking-wider cursor-pointer shadow-xs flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
               >
                 <Bug className="w-4 h-4" />
                 <span>

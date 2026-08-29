@@ -49,7 +49,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             <Workflow className="w-3.5 h-3.5 text-violet-600" />
           </div>
           <div className="text-left font-sans">
-            <p className="text-xs sm:text-[10px] sm:text-[8px] font-medium text-content-subtle uppercase tracking-widest leading-none mb-0.5">
+            <p className="text-xs sm:text-[10px] sm:text-[8px] font-normal text-content-subtle uppercase tracking-widest leading-none mb-0.5">
               {t("flowchart.flowchart")}
             </p>
             <span className="text-xs sm:text-[11px] font-medium text-content-strong truncate max-w-[150px] block leading-tight">
@@ -80,14 +80,14 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             {canvasTheme === "miro" ? (
               <>
                 <Sun className="w-3.5 h-3.5 text-amber-500 fill-amber-200 animate-spin-slow" />
-                <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider hidden sm:inline px-0.5">
+                <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-wider hidden sm:inline px-0.5">
                   {t("flowchart.miroTheme")}
                 </span>
               </>
             ) : (
               <>
                 <Moon className="w-3.5 h-3.5 text-blue-400 fill-blue-950" />
-                <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider hidden sm:inline px-0.5">
+                <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-wider hidden sm:inline px-0.5">
                   {t("flowchart.blueprintTheme")}
                 </span>
               </>
@@ -117,7 +117,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
                 isSnapToGrid ? "text-violet-600" : "text-content-subtle"
               )}
             />
-            <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider hidden sm:inline px-0.5">
+            <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-wider hidden sm:inline px-0.5">
               {isSnapToGrid ? t("flowchart.snapGrid") : t("flowchart.freeMove")}
             </span>
           </button>

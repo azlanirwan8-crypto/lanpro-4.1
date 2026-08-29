@@ -234,14 +234,14 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
         <div className="flex items-center gap-3">
           <div className="flex bg-surface-sunken rounded-md p-2 border border-border-subtle/80 items-center gap-4 text-xs">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
+              <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-wider">
                 {t("audit.totalLog")}
               </span>
               <span className="font-medium text-content-strong">{logs.length}</span>
             </div>
             <div className="h-4 w-px bg-surface-strong" />
             <div className="flex items-center gap-1.5">
-              <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider">
+              <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-wider">
                 {t("audit.status")}
               </span>
               <div className="flex items-center gap-1 text-emerald-600 font-medium">
@@ -338,7 +338,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                 <div className="w-12 h-12 border-3 border-indigo-500/30 rounded-full animate-pulse" />
                 <div className="absolute inset-0 w-12 h-12 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin" />
               </div>
-              <p className="text-xs font-medium animate-pulse uppercase tracking-wider text-content-secondary">
+              <p className="text-xs font-normal animate-pulse uppercase tracking-wider text-content-secondary">
                 {t("audit.syncing")}
               </p>
             </div>
@@ -478,7 +478,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                       {t("audit.changeDetail")}
                     </h3>
                     <div className="flex items-center gap-3 mt-1">
-                      <span className="text-xs font-medium text-content-muted uppercase tracking-widest">
+                      <span className="text-xs font-normal text-content-muted uppercase tracking-widest">
                         {selectedLog.entityName}
                       </span>
                       <span className="text-content-subtle">•</span>
@@ -498,7 +498,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
               {/* Modal Info Stats */}
               <div className="grid grid-cols-2 bg-surface-sunken/30 border-b border-border-faint">
                 <div className="p-6 border-r border-border-faint">
-                  <p className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-2">
+                  <p className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-2">
                     {t("audit.authorActivity")}
                   </p>
                   <div className="flex items-center gap-3">
@@ -516,7 +516,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                   </div>
                 </div>
                 <div className="p-6">
-                  <p className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-2">
+                  <p className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-2">
                     {t("audit.timestampWib")}
                   </p>
                   <div className="flex items-center gap-3 text-content-strong font-medium">
@@ -534,7 +534,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
               <div className="flex-1 overflow-y-auto p-8 bg-surface custom-scrollbar">
                 <div className="mb-6 flex items-center gap-2">
                   <div className="h-5 w-1 bg-indigo-500 rounded-full" />
-                  <h4 className="text-xs font-medium text-content uppercase tracking-widest">
+                  <h4 className="text-xs font-normal text-content uppercase tracking-widest">
                     {t("audit.objectComparison")}
                   </h4>
                 </div>

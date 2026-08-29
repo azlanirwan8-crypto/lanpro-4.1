@@ -35,7 +35,7 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-content uppercase tracking-widest flex items-center gap-2">
+        <h3 className="text-sm font-normal text-content uppercase tracking-widest flex items-center gap-2">
           <Layout className="w-4 h-4 text-blue-500" />
           {t("subtasks.list")}
         </h3>
@@ -110,7 +110,7 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
         ))}
         {childSubtasks.length === 0 && (
           <div className="py-4 text-center">
-            <p className="text-xs font-medium text-content-subtle uppercase tracking-widest italic">
+            <p className="text-xs font-normal text-content-subtle uppercase tracking-widest italic">
               {t("subtasks.empty")}
             </p>
           </div>
