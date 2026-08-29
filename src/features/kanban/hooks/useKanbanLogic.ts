@@ -56,7 +56,7 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
   const standaloneTasks = useMemo(() => {
     const epicIds = new Set(epics.map((e) => e.id));
     return tArr.filter(
-      (t) => (t.type || "").toLowerCase() !== "epic" && (!t.parentId || epicIds.has(t.parentId))
+      (t) => (t.type || "").toLowerCase() !== "epic" && (!t.parentId || !epicIds.has(t.parentId))
     );
   }, [tArr, epics]);
 
@@ -105,7 +105,7 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
     const taskToMove = tArr.find((t) => t.id === draggableId);
 
     const parts = destination.droppableId.split(":");
-    const newStatus = parts.length > 1 ? parts[1] : destination.droppableId;
+    const newStatus = parts.length > 1 ? parts.slice(1).join(":") : destination.droppableId;
 
     // Check for unfinished subtasks when moving to DONE / UAT / Completed
     const isTerminalStatus = (status: string) => {

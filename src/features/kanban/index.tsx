@@ -300,10 +300,10 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                       >
                         <KanbanColumn
                           status={status}
-                          tasks={groupedTasks[`epic:${epic.id}:${status.label}`] || []}
+                          tasks={groupedTasks[`${epic.id}:${status.label}`] || []}
                           mArr={mArr}
                           pArr={pArr}
-                          columnId={`epic:${epic.id}:${status.label}`}
+                          columnId={`${epic.id}:${status.label}`}
                           showHeader={false}
                           shakingTaskId={shakingTaskId}
                           onTaskClick={(task) => {
