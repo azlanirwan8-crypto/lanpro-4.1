@@ -12,6 +12,7 @@ import {
   kirimEmailSelamatDatang,
   kirimEmailResetPassword,
   kirimEmailPasswordBaru,
+  kirimEmailLatarBelakang,
 } from "../services/email.service";
 import crypto from "crypto";
 import { validasiBody } from "../middleware/validate";
@@ -489,16 +490,14 @@ router.post("/api/auth/register", async (req, res) => {
       }
     }
 
-    kirimEmailSelamatDatang({
-      email,
-      nama: fullName || insertDisplayName,
-      username,
-    }).catch((emailErr) => {
-      console.error(
-        "[EMAIL] Gagal mengirim email selamat datang pendaftaran:",
-        emailErr?.message || emailErr
-      );
-    });
+    kirimEmailLatarBelakang(
+      kirimEmailSelamatDatang({
+        email,
+        nama: fullName || insertDisplayName,
+        username,
+      }),
+      `Email selamat datang pendaftaran untuk ${email}`
+    );
 
     return res.status(201).json({
       status: "success",
@@ -554,14 +553,15 @@ router.post("/api/auth/forgot-password", async (req, res) => {
       activeUserSessions.delete(user.uid);
     }
 
-    kirimEmailPasswordBaru({
-      email: user.email,
-      nama: user.displayName || user.nama_lengkap || user.username,
-      username: user.username || user.email,
-      temporaryPassword,
-    }).catch((emailErr) => {
-      console.error("[EMAIL] Gagal mengirim kata sandi sementara:", emailErr?.message || emailErr);
-    });
+    kirimEmailLatarBelakang(
+      kirimEmailPasswordBaru({
+        email: user.email,
+        nama: user.displayName || user.nama_lengkap || user.username,
+        username: user.username || user.email,
+        temporaryPassword,
+      }),
+      `Kata sandi sementara untuk ${user.email}`
+    );
 
     return res.json(balasanNetral);
   } catch (error: any) {

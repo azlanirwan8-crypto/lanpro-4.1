@@ -27,6 +27,8 @@ jest.mock("../services/email.service", () => ({
   kirimEmailPasswordBaru: jest.fn().mockResolvedValue({ success: true }),
   kirimEmailTaskDigest: jest.fn().mockResolvedValue({ success: true }),
   emailTerkonfigurasi: () => false,
+  // Wajib ada sejak #277: pemanggil non-blocking kini melewati helper ini.
+  kirimEmailLatarBelakang: jest.fn(),
 }));
 
 import express from "express";

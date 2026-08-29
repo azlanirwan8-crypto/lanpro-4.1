@@ -19,7 +19,7 @@ import { AuthenticatedRequest } from "../types/express";
 import { userRepository } from "../repositories/user.repository";
 import { matchesCaller } from "../services/task.service";
 import { createAuditLog } from "../services/audit.service";
-import { kirimEmailAktivasiAkun } from "../services/email.service";
+import { kirimEmailAktivasiAkun, kirimEmailLatarBelakang } from "../services/email.service";
 export { sanitizeAvatarValue };
 
 // Item #210 — dulu memakai `sanitizeAvatarValue` (yang sengaja menolak URL
@@ -537,13 +537,14 @@ router.put(
           displayName || oldUser.displayName || oldUser.nama_lengkap || targetUsername;
 
         if (targetEmail) {
-          kirimEmailAktivasiAkun({
-            email: targetEmail,
-            username: targetUsername,
-            nama: targetName,
-          }).catch((err) => {
-            console.error("[EMAIL] Gagal mengirim email aktivasi akun:", err?.message || err);
-          });
+          kirimEmailLatarBelakang(
+            kirimEmailAktivasiAkun({
+              email: targetEmail,
+              username: targetUsername,
+              nama: targetName,
+            }),
+            `Email aktivasi akun untuk ${targetEmail}`
+          );
         }
       }
 

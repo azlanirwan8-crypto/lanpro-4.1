@@ -26,6 +26,38 @@ export interface KirimEmailResult {
   error?: string;
 }
 
+/**
+ * Menjalankan pengiriman email latar belakang dengan kegagalan yang TERLIHAT.
+ *
+ * MASALAH YANG DIPECAHKAN (item #277). Empat pemanggil non-blocking hanya
+ * memasang `.catch()`. Padahal `kirimEmail()` TIDAK melempar saat gagal — ia
+ * mengembalikan `{ success: false, error }` yang resolved. Cabang `.catch` itu
+ * karenanya tidak pernah dieksekusi, hasilnya tidak pernah diperiksa, dan
+ * kegagalan kirim lenyap tanpa jejak. Terbukti nyata 30 Agu 2026: SMTP host
+ * salah menyebabkan setiap email pendaftaran gagal selama berhari-hari, dan
+ * satu-satunya cara pemilik proyek mengetahuinya adalah menunggu email yang
+ * tidak kunjung datang.
+ *
+ * Menangani KEDUA bentuk kegagalan: promise yang ditolak, dan hasil resolved
+ * yang `success`-nya false.
+ */
+export function kirimEmailLatarBelakang(
+  pengiriman: Promise<KirimEmailResult>,
+  konteks: string
+): void {
+  pengiriman
+    .then((hasil) => {
+      if (!hasil?.success) {
+        console.error(
+          `[EMAIL] ${konteks} TIDAK terkirim: ${hasil?.error || "penyebab tidak dilaporkan"}`
+        );
+      }
+    })
+    .catch((err: any) => {
+      console.error(`[EMAIL] ${konteks} gagal dengan galat: ${err?.message || err}`);
+    });
+}
+
 const RESEND_API_URL = "https://api.resend.com/emails";
 
 export function validasiFormatEmail(email: string): boolean {
