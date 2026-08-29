@@ -148,8 +148,10 @@ export const BackupPanel = (_props: {
     toast.success(t("toast.backupDownloaded"));
   };
 
-  const handleDeleteItem = (id: string) => {
-    setExportHistory((prev) => prev.filter((item) => item.id !== id));
+  const confirmDeleteItem = () => {
+    if (!deleteId) return;
+    setExportHistory((prev) => prev.filter((item) => item.id !== deleteId));
+    setDeleteId(null);
     toast.success(t("toast.backupHistoryCleared"));
   };
 
@@ -339,7 +341,7 @@ export const BackupPanel = (_props: {
                         </button>
                       )}
                       <button
-                        onClick={() => handleDeleteItem(item.id)}
+                        onClick={() => setDeleteId(item.id)}
                         className="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 border border-rose-500/30 rounded font-medium text-[10px] leading-none transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
                         title={t("backupPanel.deleteHistory")}
                       >
@@ -364,6 +366,19 @@ export const BackupPanel = (_props: {
           </ResponsiveTable>
         </div>
       </div>
+
+      {deleteId && (
+        <ConfirmationModal
+          isOpen={Boolean(deleteId)}
+          onClose={() => setDeleteId(null)}
+          onConfirm={confirmDeleteItem}
+          title={t("backupPanel.confirmDeleteHistory")}
+          message={t("backupPanel.confirmDeleteHistoryMessage")}
+          confirmText={t("backupPanel.delete")}
+          cancelText={t("common.cancel")}
+          variant="danger"
+        />
+      )}
 
       {isRestoreConfirmOpen && (
         <ConfirmationModal

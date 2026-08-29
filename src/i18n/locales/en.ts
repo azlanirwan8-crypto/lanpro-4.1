@@ -2359,6 +2359,9 @@ export const en = {
     deleteHistory: "Delete history",
     delete: "Delete",
     confirmRestore: "Confirm Database Restore",
+    confirmDeleteHistory: "Delete Export History Row",
+    confirmDeleteHistoryMessage:
+      "This row disappears from this session's export history. Files you already downloaded are not deleted.",
   },
   bulkActions: {
     changeRole: "Change Role",
@@ -2436,6 +2439,12 @@ export const en = {
     totalEvents: "Total events",
     lastEvent: "Last event",
     inspect: "Inspect",
+    detailTitle: "Event Detail",
+    detailAction: "Action",
+    detailDetails: "Details",
+    detailProject: "Project",
+    detailNoProject: "No project",
+    detailClose: "Close",
   },
   attachments: {
     resources: "Resources",

@@ -2379,6 +2379,9 @@ export const id = {
     deleteHistory: "Hapus riwayat",
     delete: "Hapus",
     confirmRestore: "Konfirmasi Pemulihan Basis Data",
+    confirmDeleteHistory: "Hapus Baris Riwayat Ekspor",
+    confirmDeleteHistoryMessage:
+      "Baris ini akan hilang dari daftar riwayat ekspor sesi ini. Berkas yang sudah diunduh tidak ikut terhapus.",
   },
   bulkActions: {
     changeRole: "Ubah Peran",
@@ -2457,6 +2460,12 @@ export const id = {
     totalEvents: "Total Kejadian",
     lastEvent: "Kejadian Terakhir",
     inspect: "Periksa",
+    detailTitle: "Detail Peristiwa",
+    detailAction: "Aksi",
+    detailDetails: "Rincian",
+    detailProject: "Proyek",
+    detailNoProject: "Tanpa proyek",
+    detailClose: "Tutup",
   },
   attachments: {
     resources: "Sumber Daya",

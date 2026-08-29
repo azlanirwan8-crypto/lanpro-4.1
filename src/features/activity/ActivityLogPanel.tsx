@@ -16,6 +16,7 @@ import {
 import { ActivityLog, UserProfile } from "../../types";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
+import { Modal } from "../../components/ui/Modal";
 
 export const ActivityLogPanel = ({
   activityLogs: propLogs,
@@ -30,6 +31,7 @@ export const ActivityLogPanel = ({
 }) => {
   const { t } = useTranslation();
   const [auditLogSearch, setAuditLogSearch] = useState("");
+  const [inspectedLog, setInspectedLog] = useState<ActivityLog | null>(null);
   const activityLogs = Array.isArray(propLogs) ? propLogs : [];
   const projectMembers = Array.isArray(propMembers) ? propMembers : [];
 
@@ -300,7 +302,11 @@ export const ActivityLogPanel = ({
                             >
                               ...{log.id?.substring((log.id?.length || 0) - 8)}
                             </div>
-                            <button className="text-xs sm:text-[10px] font-normal text-indigo-600 hover:text-indigo-800 uppercase tracking-widest flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={() => setInspectedLog(log)}
+                              className="text-xs sm:text-[10px] font-normal text-indigo-600 hover:text-indigo-800 uppercase tracking-widest flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                            >
                               {t("activityLog.inspect")} <ChevronRight className="w-3 h-3" />
                             </button>
                           </div>
@@ -314,6 +320,92 @@ export const ActivityLogPanel = ({
           )}
         </div>
       </div>
+
+      <Modal
+        isOpen={Boolean(inspectedLog)}
+        onClose={() => setInspectedLog(null)}
+        title={t("activityLog.detailTitle")}
+      >
+        {inspectedLog && (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 shrink-0 border-2 border-surface rounded-full bg-surface-muted flex items-center justify-center ring-1 ring-border-subtle">
+                <UserAvatar
+                  uid={inspectedLog.userId}
+                  members={projectMembers}
+                  className="w-full h-full text-xs font-medium"
+                />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[13px] font-medium text-content-strong truncate">
+                  {getActor(inspectedLog).displayName}
+                </span>
+                <span className="text-xs text-content-muted truncate">
+                  {getActor(inspectedLog).email}
+                </span>
+              </div>
+            </div>
+
+            <dl className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
+                <dt className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
+                  {t("activityLog.detailAction")}
+                </dt>
+                <dd className="text-[13px] font-medium text-content-body">
+                  {inspectedLog.action?.replace(/_/g, " ") || "ACTION_EXECUTED"}
+                </dd>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <dt className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
+                  {t("activityLog.timestamp")}
+                </dt>
+                <dd className="text-[13px] font-medium text-content-body tabular-nums">
+                  {safeFormat(inspectedLog.createdAt, "MMM dd, yyyy")}{" "}
+                  {safeFormat(inspectedLog.createdAt, "HH:mm:ss.SSS")}
+                </dd>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <dt className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
+                  {t("activityLog.detailProject")}
+                </dt>
+                <dd className="text-[13px] font-medium text-content-body">
+                  {inspectedLog.projectId || t("activityLog.detailNoProject")}
+                </dd>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <dt className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
+                  {t("activityLog.auditTrailId")}
+                </dt>
+                <dd className="font-mono text-xs text-content-body select-all break-all">
+                  {inspectedLog.id}
+                </dd>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <dt className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
+                  {t("activityLog.detailDetails")}
+                </dt>
+                <dd className="font-mono text-xs text-content-body bg-surface-sunken border border-border-subtle p-2.5 rounded-lg whitespace-pre-wrap break-words">
+                  {inspectedLog.details || "No payload details provided."}
+                </dd>
+              </div>
+            </dl>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setInspectedLog(null)}
+                className="text-[13px] font-medium px-3 py-1.5 rounded-md border border-border-subtle text-content-secondary hover:bg-surface-muted transition-colors"
+              >
+                {t("activityLog.detailClose")}
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
