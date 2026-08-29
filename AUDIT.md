@@ -57,7 +57,7 @@ bagian ini, berurutan. Sisanya rujukan, bukan bacaan awal.
 | §20     | **Serah terima untuk perkakas lain**                                                               |
 | §21     | Pekerjaan yang ditahan 17 Agu 2026 — keadaan persis saat berhenti, dan pemindai kontras            |
 | §22     | **Aturan menyentuh TEMA** — wajib dibaca sebelum mengubah warna apa pun                            |
-| §23     | **Prompt awal sesi** — teks siap salin-tempel untuk Antigravity/perkakas AI lain                   |
+| §23     | **Prompt awal sesi** — §23.0 pesan pertama serah terima, §23.1 aturan kerja                        |
 
 ---
 
@@ -7661,6 +7661,97 @@ Perkakas AI tidak otomatis membaca `AUDIT.md`. Bila sesi dimulai dengan
 "perbaiki tema gelap", peta jalannya datang dari tebakannya sendiri — dan itulah
 yang terjadi sebelumnya. Salin-tempel teks di bawah **sebagai pesan pertama**,
 sebelum meminta pekerjaan apa pun.
+
+### 23.0 PESAN PERTAMA saat serah terima — salin ini lebih dulu
+
+§23.1 memuat aturan kerja untuk sesi biasa. Bagian ini untuk **kontak pertama
+dengan agen yang belum pernah menyentuh repositori ini**, dan bedanya satu hal:
+ia tidak cuma menyuruh membaca, ia **memeriksa apakah bacaannya masuk**.
+
+Alasannya sederhana. Menyuruh "baca §0.8" menghasilkan jawaban "sudah saya baca"
+dari perkakas mana pun, terbaca maupun tidak. Tujuh pertanyaan di bawah hanya
+bisa dijawab dari isinya, dan jawaban yang meleset langsung memberi tahu Anda
+bahwa bacaannya belum masuk — sebelum ada satu baris kode pun tersentuh.
+
+Salin blok di bawah apa adanya sebagai **pesan pertama**. Jangan tambahkan
+permintaan pekerjaan di pesan yang sama.
+
+---
+
+Anda mengambil alih pekerjaan pada repositori ini dari agen sebelumnya. Sebelum
+menerima tugas apa pun, kerjakan serah terima berikut dan laporkan hasilnya.
+
+**Langkah 1 — baca, berurutan:**
+
+1. `AGENTS.md` di akar repositori, seluruhnya.
+2. `AUDIT.md` bagian **MULAI DARI SINI**.
+3. `AUDIT.md` **§0.8 SERAH TERIMA** — ini bagian terpenting. Isinya cara kerja
+   yang dituntut papan ini, batas tiap gerbang, jebakan yang sudah memakan
+   korban, dan kekeliruan yang sudah dilakukan agen sebelumnya.
+4. `AUDIT.md` **§0.5** (aturan) dan **§0.6** (jebakan teknis).
+5. `AUDIT.md` **§1.1** — satu-satunya daftar pekerjaan yang sah.
+
+**Langkah 2 — jawab ketujuh pertanyaan ini.** Jawablah dari yang Anda baca,
+bukan dari tebakan. Bila sebuah jawaban tidak Anda temukan, tulis "tidak
+ketemu" — itu jauh lebih berguna daripada karangan yang terdengar yakin.
+
+1. Berapa item terbuka di §1.1, dan bagaimana sebarannya per fase?
+2. Sebutkan **tiga hal** yang TIDAK diperiksa `npm run audit:papan`.
+3. §20.2 mendaftar 12 item sebagai "boleh dikerjakan tanpa bertanya". Berapa
+   yang masih terbuka hari ini, dan apa artinya bagi Anda?
+4. Di mana token sesi disimpan, dan apa akibat praktisnya bagi pengujian?
+5. Kenapa dilarang menulis karakter pipa di dalam baris tabel §1?
+6. Sebutkan tiga item yang menahan rilis production, dan mana yang menunggu
+   keputusan pemilik proyek.
+7. Ada satu berkas test yang merah tetapi BUKAN tanggung jawab Anda. Yang mana,
+   dan kenapa?
+
+**Langkah 3 — jalankan kelima gerbang dan laporkan apa adanya:**
+
+`npm run audit:papan && npm run audit:warna && npm run audit:tema && npm run audit:kelas && npm run audit:navigasi`
+
+Kelimanya harus hijau sebelum Anda mulai. Bila ada yang merah, itu keadaan yang
+Anda warisi — laporkan, jangan perbaiki diam-diam, dan jangan anggap sebagai
+kerusakan Anda sendiri.
+
+**Langkah 4 — berhenti.** Jangan menyentuh kode. Tunggu saya memberi nomor item
+dari §1.1. Setelah itu, aturan kerja penuh ada di **§23.1** dan mengikat seluruh
+sesi.
+
+Tiga hal yang paling sering membuat agen baru tersesat di repositori ini, dan
+seluruhnya sudah terjadi:
+
+- **Mengerjakan pekerjaan yang sudah selesai**, karena §20 dan §1.4 masih memuat
+  daftar dari Agustus awal. Sumber kebenaran hanya §1.1.
+- **Mengira gerbang hijau berarti benar.** Tidak. Batas tiap gerbang ada di
+  tabel §0.8; dua bug terakhir lolos `tsc`, eslint, dan Jest sekaligus.
+- **Menyimpulkan tanpa mereproduksi.** Agen sebelumnya sempat menyalahkan menu
+  yang ternyata sehat, dan memasang penjaga yang ternyata nol perubahan
+  perilaku. Keduanya tertulis di §0.8.
+
+---
+
+### 23.0b Kenapa berbentuk pertanyaan, bukan daftar perintah
+
+Perintah dijawab dengan kepatuhan yang terdengar meyakinkan. Pertanyaan dijawab
+dengan isi — dan isi bisa salah dengan cara yang **terlihat**.
+
+Ketujuh pertanyaan itu dipilih karena masing-masing menutup satu kegagalan yang
+sudah pernah terjadi di repositori ini:
+
+| Pertanyaan                | Menutup                                                                    |
+| ------------------------- | -------------------------------------------------------------------------- |
+| Jumlah & sebaran item     | agen memakai angka ringkasan basi alih-alih menghitung dari tabel          |
+| Batas `audit:papan`       | "gerbang hijau" dipakai sebagai bukti kebenaran                            |
+| 12 item §20.2             | agen diarahkan mengerjakan pekerjaan yang sudah tutup berbulan-bulan       |
+| Lokasi token sesi         | verifikasi login disangka rusak padahal tab baru memang tidak membawa sesi |
+| Larangan pipa             | baris tabel pecah dan gerbang membaca kolom yang salah tanpa berteriak     |
+| Penahan rilis             | agen mengerjakan yang murah lebih dulu tanpa tahu mana yang menahan rilis  |
+| Test merah bukan miliknya | agen "memperbaiki" pekerjaan sesi lain yang sedang berjalan                |
+
+Bila jawaban atas salah satu pertanyaan meleset, jangan lanjut ke pemberian
+tugas. Suruh ia membaca ulang bagian yang bersangkutan. Biaya lima menit di sini
+jauh lebih murah daripada satu hari pekerjaan yang salah arah.
 
 ### 23.1 Teks untuk disalin
 
