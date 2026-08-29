@@ -171,14 +171,14 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-primary-surface text-content-inverse font-medium text-xs sm:text-[11px] sm:text-[9px] rounded-md uppercase tracking-wider">
+              <span className="px-2 py-0.5 bg-primary-surface text-content-inverse font-medium text-[10px] rounded-md uppercase tracking-wider">
                 {activeSuite.phase}
               </span>
-              <h2 className="text-base font-medium text-content-strong tracking-tight">
+              <h2 className="text-sm font-semibold text-content-strong tracking-tight">
                 {cleanSuiteName}
               </h2>
             </div>
-            <p className="text-xs sm:text-[11px] text-content-subtle font-medium mt-0.5">
+            <p className="text-xs text-content-subtle font-normal mt-0.5">
               {t("qa.uploadedBy")} {activeSuite.uploadedBy} •{" "}
               {new Date(activeSuite.uploadedAt).toLocaleDateString("id-ID")}
             </p>
@@ -192,7 +192,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                   setIsAddCaseOpen(true);
                   setActiveAddTab("single");
                 }}
-                className="btn-animation waves-effect waves-light btn-primary h-8 px-3 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
+                className="btn-animation waves-effect waves-light btn-primary h-8 px-3 rounded-lg text-xs font-medium flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t("qa.addTask")}</span>
@@ -238,50 +238,50 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         {/* Velzon Compact Micro Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
           <div className="bg-primary-surface/5 border border-primary/10 p-2 rounded-md text-center">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] text-primary font-medium uppercase tracking-wider block">
+            <span className="text-[9px] text-primary font-normal uppercase tracking-wider block">
               {t("qa.totalCase")}
             </span>
-            <span className="text-base font-medium text-primary block mt-0.5">
+            <span className="text-sm font-semibold text-primary block mt-0.5">
               {totalCasesCount}
             </span>
           </div>
           <div className="bg-surface-sunken p-2 rounded-md border border-border-subtle/60 text-center">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wider block">
+            <span className="text-[9px] text-content-muted font-normal uppercase tracking-wider block">
               {t("qaTable.passedRate")}
             </span>
-            <span className="text-base font-medium text-content-strong block mt-0.5">
+            <span className="text-sm font-semibold text-content-strong block mt-0.5">
               {passedPercent}%
             </span>
           </div>
           <div className="bg-emerald-500/10 p-2 rounded-md border border-emerald-500/30 text-center">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] text-success-text font-medium uppercase tracking-wider block">
+            <span className="text-[9px] text-success-text font-normal uppercase tracking-wider block">
               {t("qa.passed")}
             </span>
-            <span className="text-base font-medium text-success-text block mt-0.5">
+            <span className="text-sm font-semibold text-success-text block mt-0.5">
               {passedCasesCount}
             </span>
           </div>
           <div className="bg-rose-500/10 p-2 rounded-md border border-rose-500/30 text-center">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] text-danger-text font-medium uppercase tracking-wider block">
+            <span className="text-[9px] text-danger-text font-normal uppercase tracking-wider block">
               {t("qa.failed")}
             </span>
-            <span className="text-base font-medium text-danger-text block mt-0.5">
+            <span className="text-sm font-semibold text-danger-text block mt-0.5">
               {failedCasesCount}
             </span>
           </div>
           <div className="bg-amber-500/10 p-2 rounded-md border border-amber-500/30 text-center">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] text-warning-text font-medium uppercase tracking-wider block">
+            <span className="text-[9px] text-warning-text font-normal uppercase tracking-wider block">
               BLOCKED
             </span>
-            <span className="text-base font-medium text-warning-text block mt-0.5">
+            <span className="text-sm font-semibold text-warning-text block mt-0.5">
               {blockedCasesCount}
             </span>
           </div>
           <div className="bg-surface-sunken p-2 rounded-md border border-border-subtle/60 text-center">
-            <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wider block">
+            <span className="text-[9px] text-content-muted font-normal uppercase tracking-wider block">
               {t("qa.retestPend")}
             </span>
-            <span className="text-base font-medium text-content-body block mt-0.5">
+            <span className="text-sm font-semibold text-content-body block mt-0.5">
               {retestCasesCount + pendingCasesCount}
             </span>
           </div>
@@ -289,7 +289,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
         {/* ELEGANT TOP RIGHT SEARCH & FILTER BAR */}
         <div className="flex items-center justify-between gap-2.5 pt-2.5 border-t border-border-faint">
-          <div className="text-xs sm:text-[11px] font-medium text-content-strong uppercase tracking-wider flex items-center gap-1.5">
+          <div className="text-[10px] font-medium text-content-strong uppercase tracking-wider flex items-center gap-1.5">
             <FileSpreadsheet className="w-3.5 h-3.5 text-primary" />
             <span>Matriks Skenario Test Case ({searchedCases.length})</span>
           </div>
@@ -303,7 +303,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 placeholder={t("qaTable.searchScenario")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-7 pr-2.5 py-1 bg-surface-sunken border border-border-subtle/80 rounded-md text-xs font-medium text-content-body focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-36 sm:w-48"
+                className="pl-7 pr-2.5 py-1 bg-surface-sunken border border-border-subtle/80 rounded-md text-xs font-normal text-content-body focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary transition-all w-36 sm:w-48"
               />
             </div>
 
@@ -456,7 +456,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="overflow-x-auto">
           <ResponsiveTable className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[10px] font-medium uppercase tracking-wider text-primary">
+              <tr className="bg-primary-surface/5 border-b border-primary/15 text-[10px] font-medium uppercase tracking-wider text-content-subtle">
                 {/* SELECT ALL CHECKBOX (For Admin / Users with edit access) */}
                 <th className="py-2.5 px-3 w-8 text-center" onClick={(e) => e.stopPropagation()}>
                   {(canUpdate || isAdminRole) && (
@@ -475,10 +475,10 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                 <th className="py-2.5 px-3 w-28 text-center">{t("qaTable.actions")}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border-faint text-xs font-medium text-content-body">
+            <tbody className="divide-y divide-border-faint text-xs font-normal text-content-body">
               {searchedCases.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-10 text-content-subtle font-medium">
+                  <td colSpan={6} className="text-center py-10 text-content-subtle font-normal">
                     {t("qaTable.emptyFilter")}
                   </td>
                 </tr>
@@ -516,12 +516,12 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       </td>
 
                       {/* Row Num */}
-                      <td className="py-2.5 px-3 text-center font-medium text-content-subtle text-xs group-hover:text-primary">
+                      <td className="py-2.5 px-3 text-center font-normal text-content-subtle text-xs group-hover:text-primary">
                         {tc.rowNum || idx + 1}
                       </td>
 
                       {/* Title & Linked Bug Key */}
-                      <td className="py-2.5 px-4 font-medium text-content-strong">
+                      <td className="py-2.5 px-4 font-normal text-content-strong">
                         <div className="flex items-center gap-2">
                           <span className="line-clamp-1 text-xs group-hover:text-primary transition-colors">
                             {tc.title}

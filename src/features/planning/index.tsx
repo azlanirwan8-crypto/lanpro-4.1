@@ -237,10 +237,10 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
           <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
             <div className="bg-surface px-5 py-3.5 rounded-lg border border-border-subtle/80 mb-4 flex justify-between items-center shadow-2xs shrink-0">
               <div>
-                <h2 className="text-base font-medium text-content-strong tracking-tight">
+                <h2 className="text-sm font-semibold text-content-strong tracking-tight">
                   {t("planning.sprintPlanning")}
                 </h2>
-                <p className="text-xs font-medium text-content-muted mt-0.5">
+                <p className="text-xs font-normal text-content-muted mt-0.5">
                   {t("planning.subtitle")}
                 </p>
               </div>

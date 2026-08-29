@@ -355,7 +355,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                         </tr>
                       </thead>
                       {displayRoots.length === 0 ? (
-                        <tbody className="divide-y divide-border-faint italic-rows text-[13px]">
+                        <tbody className="divide-y divide-border-faint italic-rows text-xs font-normal">
                           <tr>
                             <td
                               colSpan={
@@ -367,7 +367,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                             >
                               <div className="flex flex-col items-center gap-3 opacity-40">
                                 <Search className="w-8 h-8 text-content-subtle" />
-                                <p className="text-xs font-medium text-content-muted uppercase tracking-widest">
+                                <p className="text-xs font-normal text-content-muted uppercase tracking-wider">
                                   {t("issues.noMatchingRecordsFound")}
                                 </p>
                               </div>
@@ -390,7 +390,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                     ref={providedDraggable.innerRef}
                                     {...providedDraggable.draggableProps}
                                     className={cn(
-                                      "divide-y divide-border-faint italic-rows text-[13px]",
+                                      "divide-y divide-border-faint italic-rows text-xs font-normal",
                                       snapshot.isDragging &&
                                         "bg-surface-muted/50 shadow-soft border border-indigo-500/30"
                                     )}

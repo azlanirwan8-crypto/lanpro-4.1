@@ -107,12 +107,12 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                     </div>
                     <div className="flex flex-col min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-bold text-content-strong text-base truncate">
+                        <h3 className="font-semibold text-content-strong text-sm truncate">
                           {sprint.name?.trim() || t("planning.untitledSprint")}
                         </h3>
                         <span
                           className={cn(
-                            "text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full border shrink-0 tracking-wider",
+                            "text-[10px] font-medium uppercase px-2.5 py-0.5 rounded-full border shrink-0 tracking-wider",
                             sprint.status === "active"
                               ? isOverdue
                                 ? "bg-red-500/10 text-red-600 border-red-500/20"
@@ -131,7 +131,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                               : "COMPLETED"}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-xs text-content-subtle font-medium mt-0.5">
+                      <div className="flex items-center gap-1.5 text-xs text-content-subtle font-normal mt-0.5">
                         <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
                         <span>
                           {sprint.startDate && sprint.endDate
@@ -152,8 +152,8 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
 
                   {/* Sisi Tengah: Sprint Goal (Pemisah Garis Vertikal - Tanpa Ikon Pensil) */}
                   <div className="hidden lg:flex flex-col min-w-0 flex-1 border-l border-border-subtle/80 pl-5 my-0.5 max-w-md">
-                    <div className="text-xs font-bold text-indigo-600">Sprint Goal</div>
-                    <p className="text-xs text-content-body font-medium leading-relaxed line-clamp-2 mt-0.5">
+                    <div className="text-xs font-semibold text-indigo-600">Sprint Goal</div>
+                    <p className="text-xs text-content-body font-normal leading-relaxed line-clamp-2 mt-0.5">
                       {sprint.goal ||
                         t(
                           "planning.defaultGoal",
@@ -172,7 +172,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                               e.stopPropagation();
                               handleStartSprint(sprint.id);
                             }}
-                            className="btn-animation waves-effect waves-light btn-primary h-9 px-4 text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
+                            className="btn-animation waves-effect waves-light btn-primary h-9 px-4 text-xs font-medium rounded-lg flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
                           >
                             <Zap className="w-3.5 h-3.5 fill-current" />{" "}
                             <span>{t("planning.start")}</span>
@@ -184,7 +184,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                               e.stopPropagation();
                               handleCompleteSprint(sprint.id);
                             }}
-                            className="btn-animation waves-effect waves-light btn-success h-9 px-4 text-xs font-semibold rounded-lg flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
+                            className="btn-animation waves-effect waves-light btn-success h-9 px-4 text-xs font-medium rounded-lg flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
                           >
                             <CheckCircle2 className="w-3.5 h-3.5" />{" "}
                             <span>{t("planning.complete")}</span>

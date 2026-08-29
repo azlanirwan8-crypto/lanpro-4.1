@@ -48,11 +48,11 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <LayoutGrid className="w-4 h-4 text-content-muted" />
-            <h3 className="font-medium text-content-strong text-sm tracking-tight">
+            <h3 className="font-semibold text-content-strong text-xs tracking-tight">
               {t("planning.backlogTasks")}
             </h3>
           </div>
-          <div className="px-2 py-[3px] bg-indigo-500/10 border border-indigo-500/30 rounded-md text-xs font-semibold text-primary">
+          <div className="px-2 py-[3px] bg-indigo-500/10 border border-indigo-500/30 rounded-md text-[11px] font-medium text-primary">
             {t("planning.issueCount", { count: filteredBacklogTasks.length })}
           </div>
         </div>
@@ -64,7 +64,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               placeholder={t("planning.searchBacklog")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-3 h-[38px] bg-surface-sunken/70 border border-border-subtle/80 rounded-md text-xs font-medium outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-surface transition-all shadow-2xs"
+              className="w-full pl-8 pr-3 h-[38px] bg-surface-sunken/70 border border-border-subtle/80 rounded-md text-xs font-normal outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-surface transition-all shadow-2xs"
             />
           </div>
 
@@ -83,7 +83,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 type="priority"
                 masterData={masterData}
                 className="w-full"
-                buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-3 text-xs font-medium"
+                buttonClassName="h-[38px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-3 text-xs font-normal"
               />
             </div>
           </div>
@@ -97,7 +97,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           return [
             <div key={`header-${epic.id}`} className="flex items-center gap-2 px-1 mt-3 mb-2">
               <Zap className="w-3.5 h-3.5 text-purple-600" />
-              <span className="text-xs sm:text-[10px] font-medium text-purple-700 uppercase tracking-wider leading-none">
+              <span className="text-xs sm:text-[10px] font-normal text-purple-700 uppercase tracking-wider leading-none">
                 {epic.title}
               </span>
               <div className="ml-auto text-[10px] leading-none font-medium text-purple-600 bg-purple-500/10 px-2 py-0.2 rounded-md border border-purple-500/30">
@@ -121,7 +121,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           return [
             <div key="header-standalone" className="flex items-center gap-2 px-1 mt-3 mb-2">
               <Target className="w-3.5 h-3.5 text-content-muted" />
-              <span className="text-xs sm:text-[10px] font-medium text-content-secondary uppercase tracking-wider leading-none">
+              <span className="text-xs sm:text-[10px] font-normal text-content-secondary uppercase tracking-wider leading-none">
                 {t("planning.standaloneBacklog")}
               </span>
               <div className="ml-auto text-xs sm:text-[10px] font-medium text-content-secondary bg-surface-muted px-2 py-0.2 rounded-md border border-border-subtle/60">
@@ -140,7 +140,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
         })()}
 
         {filteredBacklogTasks.length === 0 && (
-          <div className="py-12 text-center text-xs font-medium text-content-subtle italic">
+          <div className="py-12 text-center text-xs font-normal text-content-subtle italic">
             {t("planning.emptyBacklog")}
           </div>
         )}

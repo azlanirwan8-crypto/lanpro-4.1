@@ -335,7 +335,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
 
                     {task.type !== "epic" && (
                       <span
-                        className="text-[10px] font-bold text-indigo-600 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded select-all shrink-0 uppercase tracking-tighter ml-1"
+                        className="text-[10px] font-medium text-indigo-600 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded select-all shrink-0 uppercase tracking-tighter ml-1"
                         title={task.key}
                       >
                         {task.key}
@@ -352,14 +352,14 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                         setIsTaskDetailModalOpen(false);
                         setCurrentView("issueDetail" as any);
                       }}
-                      className="text-[13px] font-medium text-content-body hover:text-blue-600 transition-colors cursor-pointer truncate max-w-[320px] block"
+                      className="text-xs font-normal text-content-body hover:text-blue-600 transition-colors cursor-pointer truncate max-w-[320px] block"
                       title={t("issueRow.openDetail")}
                     >
                       {task.title || (task as any).summary || (task as any).name || ""}
                     </span>
 
                     {!!task.parentId && (
-                      <span className="text-xs sm:text-[10px] text-content-subtle font-medium bg-surface-muted px-1.5 py-0.5 rounded border border-border-subtle shrink-0">
+                      <span className="text-xs sm:text-[10px] text-content-subtle font-normal bg-surface-muted px-1.5 py-0.5 rounded border border-border-subtle shrink-0">
                         {t("issueRow.subtask")}
                       </span>
                     )}

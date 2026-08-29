@@ -73,15 +73,15 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
               <FileSpreadsheet className="w-3.5 h-3.5" />
             </div>
             <div>
-              <h3 className="text-xs sm:text-[11px] font-medium text-content-strong uppercase tracking-wider">
+              <h3 className="text-xs font-semibold text-content-strong uppercase tracking-wider">
                 {t("qaSuite.moduleList")}
               </h3>
-              <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
+              <p className="text-xs sm:text-[10px] text-content-subtle font-normal">
                 {t("qaSuite.docScenario")}
               </p>
             </div>
           </div>
-          <span className="px-2 py-[3px] bg-primary-surface/10 text-primary text-[10px] leading-none sm:text-[9px] font-medium rounded-md">
+          <span className="px-2 py-[3px] bg-primary-surface/10 text-primary text-[10px] leading-none font-medium rounded-md">
             {t("rakit.modulesCount", { count: suitesForFilter.length })}
           </span>
         </div>
@@ -98,14 +98,14 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
               ]}
               masterData={[]}
               className="w-full"
-              buttonClassName="h-8 bg-surface-sunken/80 rounded-md border border-border-subtle hover:border-border-subtle px-2.5 text-xs font-medium text-content-body"
+              buttonClassName="h-8 bg-surface-sunken/80 rounded-md border border-border-subtle hover:border-border-subtle px-2.5 text-xs font-normal text-content-body"
             />
           </div>
 
           {canCreate && (
             <button
               onClick={() => setIsAddSuiteOpen(true)}
-              className="btn-animation waves-effect waves-light btn-primary h-8 px-3 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer shrink-0"
+              className="btn-animation waves-effect waves-light btn-primary h-8 px-3 rounded-lg text-xs font-medium flex items-center gap-1 cursor-pointer shrink-0"
               title={t("qaSuite.addModule")}
             >
               <Plus className="w-3.5 h-3.5" />
@@ -117,7 +117,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
         {/* Suite Cards List */}
         <div className="space-y-2.5 max-h-[480px] overflow-y-auto pr-1 custom-scrollbar pb-10">
           {suitesForFilter.length === 0 ? (
-            <div className="text-center py-10 text-content-subtle text-xs font-medium">
+            <div className="text-center py-10 text-content-subtle text-xs font-normal">
               {t("qaSuite.emptyFilter")}
             </div>
           ) : (

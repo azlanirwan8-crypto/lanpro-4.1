@@ -189,10 +189,10 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
           <div className="sticky left-0 z-50 bg-surface border-r border-border-subtle/80 h-[56px] flex items-center px-3.5 relative">
             <div className="text-xs font-medium text-content-body tracking-wider flex items-center justify-between w-full gap-2">
               <div className="flex items-center gap-2">
-                <span className="font-medium text-xs text-content-strong">
+                <span className="font-normal text-xs text-content-strong">
                   {t("kanban.swimlanes")}
                 </span>
-                <label className="flex items-center gap-1 cursor-pointer bg-surface-muted px-2 py-0.5 rounded-md text-xs sm:text-[10px] font-medium text-content-secondary hover:bg-surface-sunken transition-colors select-none">
+                <label className="flex items-center gap-1 cursor-pointer bg-surface-muted px-2 py-0.5 rounded-md text-xs sm:text-[10px] font-normal text-content-secondary hover:bg-surface-sunken transition-colors select-none">
                   <input
                     type="checkbox"
                     checked={showEmptySwimlanes}
@@ -206,7 +206,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                 <select
                   value={groupBy}
                   onChange={(e) => setGroupBy(e.target.value as any)}
-                  className="bg-primary-surface/10 text-primary border border-primary/20 rounded-md text-[10px] leading-none font-semibold px-2 py-1 cursor-pointer outline-none focus:ring-1 focus:ring-primary/30 max-w-[110px]"
+                  className="bg-primary-surface/10 text-primary border border-primary/20 rounded-md text-[10px] leading-none font-medium px-2 py-1 cursor-pointer outline-none focus:ring-1 focus:ring-primary/30 max-w-[110px]"
                 >
                   <option value="epic">{t("kanban.byEpic")}</option>
                   <option value="assignee">{t("kanban.byAssignee")}</option>
@@ -238,11 +238,11 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                           style={{ backgroundColor: statusStyle.borderColor }}
                         />
                       )}
-                      <span className="text-xs font-medium uppercase tracking-wider text-content-strong truncate">
+                      <span className="text-[11px] font-medium uppercase tracking-wider text-content-strong truncate">
                         {status.label}
                       </span>
                     </div>
-                    <span className="px-2 py-0.5 rounded-md text-xs sm:text-[10px] font-medium bg-surface text-content-secondary border border-border-subtle/60 shadow-2xs shrink-0">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-surface text-content-secondary border border-border-subtle/60 shadow-2xs shrink-0">
                       {taskCount}
                     </span>
                   </div>

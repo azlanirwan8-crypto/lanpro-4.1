@@ -137,7 +137,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                 )}
               />
             )}
-            <span className="font-mono font-semibold text-[10px] leading-none tracking-tight text-primary bg-primary-surface/10 px-1.5 py-[3px] rounded border border-primary/20">
+            <span className="font-mono font-medium text-[10px] leading-none tracking-tight text-primary bg-primary-surface/10 px-1.5 py-[3px] rounded border border-primary/20">
               {task.key}
             </span>
             {task.priority && (
@@ -227,7 +227,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
         <h4
           className={cn(
             "text-content-body leading-snug group-hover:text-content transition-colors duration-200",
-            isCompact ? "font-medium text-xs line-clamp-1" : "font-medium text-sm line-clamp-2"
+            isCompact ? "font-normal text-xs line-clamp-1" : "font-normal text-xs line-clamp-2"
           )}
         >
           {task.title}

@@ -109,7 +109,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
             onChange={(e) => setQuickCreateTitle(e.target.value)}
             placeholder={t("issueQuick.placeholder")}
             onKeyDown={(e) => e.key === "Enter" && createGlobalIssue()}
-            className="flex-1 min-w-0 bg-transparent border-none text-[12px] font-medium text-content-body placeholder:text-content-subtle focus:ring-0 outline-none px-2"
+            className="flex-1 min-w-0 bg-transparent border-none text-xs font-normal text-content-body placeholder:text-content-subtle focus:ring-0 outline-none px-2"
           />
         </div>
 
@@ -172,7 +172,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
             type="button"
             onClick={createGlobalIssue}
             disabled={isCreating || !quickCreateTitle.trim()}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover active:bg-primary-active rounded-lg text-xs sm:text-[11px] font-semibold transition-all shadow-xs disabled:opacity-50 shrink-0 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover active:bg-primary-active rounded-lg text-xs sm:text-[11px] font-medium transition-all shadow-xs disabled:opacity-50 shrink-0 cursor-pointer"
           >
             {isCreating ? (
               <div className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" />
