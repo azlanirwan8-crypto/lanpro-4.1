@@ -30,10 +30,20 @@ export function sanitizeAvatarValue(nilai: unknown): string | null {
 
   // Tolak query string: di situlah presigned token menumpang.
   if (v.includes("?") || v.includes("#")) return null;
-  // Tolak URL absolut dan protokol apa pun (termasuk data: dan javascript:).
-  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v) || v.startsWith("//")) return null;
   // Tolak upaya keluar direktori.
   if (v.includes("..")) return null;
+
+  const publicUrl = (process.env.STORAGE_PUBLIC_URL || "").trim().replace(/\/$/, "");
+  if (publicUrl && v.startsWith(publicUrl + "/")) {
+    const filename = v.slice(publicUrl.length + 1);
+    const cocok = /^avatar-[A-Za-z0-9._-]+\.([A-Za-z0-9]+)$/.exec(filename);
+    if (!cocok) return null;
+    if (!AVATAR_ALLOWED_EXT.has(cocok[1].toLowerCase())) return null;
+    return v;
+  }
+
+  // Tolak URL absolut dan protokol apa pun selain STORAGE_PUBLIC_URL kita sendiri.
+  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(v) || v.startsWith("//")) return null;
 
   const cocok = /^\/uploads\/(avatar-[A-Za-z0-9._-]+)\.([A-Za-z0-9]+)$/.exec(v);
   if (!cocok) return null;

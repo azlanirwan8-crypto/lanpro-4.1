@@ -59,6 +59,24 @@ describe("sanitizeAvatarValue", () => {
     expect(sanitizeAvatarValue("data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=")).toBeNull();
   });
 
+  it("menerima URL absolut HANYA bila prefiksnya STORAGE_PUBLIC_URL kita (driver s3 / R2)", () => {
+    const oldPublic = process.env.STORAGE_PUBLIC_URL;
+    process.env.STORAGE_PUBLIC_URL = "https://pub-abc123.r2.dev";
+    try {
+      expect(sanitizeAvatarValue("https://pub-abc123.r2.dev/avatar-user1-1786634777587.png")).toBe(
+        "https://pub-abc123.r2.dev/avatar-user1-1786634777587.png"
+      );
+      expect(
+        sanitizeAvatarValue("https://pub-abc123.r2.dev/avatar-user1-1786634777587.exe")
+      ).toBeNull();
+      expect(
+        sanitizeAvatarValue("https://jahat.example/avatar-user1-1786634777587.png")
+      ).toBeNull();
+    } finally {
+      process.env.STORAGE_PUBLIC_URL = oldPublic;
+    }
+  });
+
   it("menolak upaya keluar direktori unggahan", () => {
     expect(sanitizeAvatarValue("/uploads/../../.env")).toBeNull();
     expect(sanitizeAvatarValue("/uploads/avatar-../../../etc/passwd.png")).toBeNull();
