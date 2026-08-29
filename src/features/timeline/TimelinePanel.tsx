@@ -704,7 +704,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
         >
           <div className="w-64 md:w-80 shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative">
             <div className="sticky top-0 z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-subtle px-5 flex items-center justify-between">
-              <span className="font-medium text-xs sm:text-[11px] text-content-muted uppercase tracking-widest">
+              <span className="font-normal text-xs sm:text-[11px] text-content-muted uppercase tracking-widest">
                 {t("roadmap.itemHierarchy")}
               </span>
             </div>
@@ -877,7 +877,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             className="flex items-center px-2 py-1 border-r border-border-subtle/50"
                             style={{ width: `${actualDays * pixelsPerDay}px` }}
                           >
-                            <span className="text-xs sm:text-[11px] font-medium text-content-secondary uppercase tracking-wider">
+                            <span className="text-xs sm:text-[11px] font-normal text-content-secondary uppercase tracking-wider">
                               {format(m, "MMM yyyy")}
                             </span>
                           </div>
@@ -896,7 +896,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             className="flex items-center px-2 py-1 border-r border-border-subtle/50"
                             style={{ width: `${actualDays * pixelsPerDay}px` }}
                           >
-                            <span className="text-xs sm:text-[11px] font-medium text-content-secondary uppercase tracking-wider">
+                            <span className="text-xs sm:text-[11px] font-normal text-content-secondary uppercase tracking-wider">
                               {format(y, "yyyy")}
                             </span>
                           </div>
@@ -911,7 +911,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                         className="flex items-center justify-center border-r border-border-subtle/50 shrink-0"
                         style={{ width: `${pixelsPerDay}px` }}
                       >
-                        <span className="text-xs sm:text-[10px] font-medium text-content-subtle">
+                        <span className="text-xs sm:text-[10px] font-normal text-content-subtle">
                           {format(d, "d")}
                         </span>
                       </div>
@@ -930,7 +930,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           className="flex items-center justify-center border-r border-border-subtle/50 shrink-0"
                           style={{ width: `${actualDays * pixelsPerDay}px` }}
                         >
-                          <span className="text-xs sm:text-[10px] font-medium text-content-subtle">
+                          <span className="text-xs sm:text-[10px] font-normal text-content-subtle">
                             W{format(w, "w")}
                           </span>
                         </div>
@@ -950,7 +950,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           className="flex items-center justify-center border-r border-border-subtle/50 shrink-0"
                           style={{ width: `${actualDays * pixelsPerDay}px` }}
                         >
-                          <span className="text-xs sm:text-[10px] font-medium text-content-subtle">
+                          <span className="text-xs sm:text-[10px] font-normal text-content-subtle">
                             {format(m, "MMM")}
                           </span>
                         </div>

@@ -238,11 +238,11 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                           style={{ backgroundColor: statusStyle.borderColor }}
                         />
                       )}
-                      <span className="text-[11px] font-medium uppercase tracking-wider text-content-strong truncate">
+                      <span className="text-[11px] font-normal uppercase tracking-wider text-content-strong truncate">
                         {status.label}
                       </span>
                     </div>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-surface text-content-secondary border border-border-subtle/60 shadow-2xs shrink-0">
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-normal bg-surface text-content-secondary border border-border-subtle/60 shadow-2xs shrink-0">
                       {taskCount}
                     </span>
                   </div>
