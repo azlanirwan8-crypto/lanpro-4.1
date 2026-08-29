@@ -60,7 +60,7 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
               }
               disabled={!isEditable}
             />
-            <span className="text-xs sm:text-[10px] font-mono font-medium text-content-subtle bg-surface-sunken px-1.5 py-0.5 rounded border border-border-subtle shrink-0 select-all uppercase tracking-tighter">
+            <span className="text-xs sm:text-[10px] font-mono font-normal text-content-subtle bg-surface-sunken px-1.5 py-0.5 rounded border border-border-subtle shrink-0 select-all uppercase tracking-tighter">
               {st.key}
             </span>
             <UncontrolledInput

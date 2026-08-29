@@ -509,7 +509,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
                       <p className="text-sm font-medium text-content-strong">
                         {selectedLog.userName || "Unknown User"}
                       </p>
-                      <p className="text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-tighter">
+                      <p className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-tighter">
                         {t("audit.auditorAccess")}
                       </p>
                     </div>
