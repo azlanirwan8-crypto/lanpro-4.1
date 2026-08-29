@@ -37,7 +37,7 @@ export const NewSprintModal: React.FC<NewSprintModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={t("newSprint.title")}>
       <div className="space-y-4 max-h-[80vh] overflow-y-auto pr-2">
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">
+          <label className="block text-xs font-normal text-content-body mb-1">
             {t("newSprint.name")}
           </label>
           <Input
@@ -47,7 +47,7 @@ export const NewSprintModal: React.FC<NewSprintModalProps> = ({
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-content-body mb-1">
+          <label className="block text-xs font-normal text-content-body mb-1">
             {t("newSprint.goal")}
           </label>
           <Textarea
@@ -58,25 +58,25 @@ export const NewSprintModal: React.FC<NewSprintModalProps> = ({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-content-body mb-1">
+            <label className="block text-xs font-normal text-content-body mb-1">
               {t("newSprint.startDate")}
             </label>
             <input
               type="date"
               value={newSprintStartDate}
               onChange={(e: any) => setNewSprintStartDate(e.target.value)}
-              className="w-full px-3 py-2 border border-border-subtle rounded-md text-xs focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none"
+              className="w-full px-3 py-2 border border-border-subtle rounded-md text-xs font-normal text-content-body focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-content-body mb-1">
+            <label className="block text-xs font-normal text-content-body mb-1">
               {t("newSprint.endDate")}
             </label>
             <input
               type="date"
               value={newSprintEndDate}
               onChange={(e: any) => setNewSprintEndDate(e.target.value)}
-              className="w-full px-3 py-2 border border-border-subtle rounded-md text-xs focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none"
+              className="w-full px-3 py-2 border border-border-subtle rounded-md text-xs font-normal text-content-body focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none"
             />
           </div>
         </div>
@@ -84,7 +84,7 @@ export const NewSprintModal: React.FC<NewSprintModalProps> = ({
         <Button
           onClick={onSubmit}
           disabled={isSubmitting}
-          className="w-full justify-center bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse shadow-xs py-2.5 rounded-md font-medium text-xs cursor-pointer"
+          className="w-full justify-center bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse shadow-xs py-2 rounded-md font-normal text-xs cursor-pointer"
         >
           {t("newSprint.createAssign")}
         </Button>

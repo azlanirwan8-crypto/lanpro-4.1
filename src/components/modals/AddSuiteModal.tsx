@@ -51,18 +51,14 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
               <Plus className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-sm font-medium text-content-strong uppercase tracking-wider">
-                {t("addSuite.title")}
-              </h3>
-              <p className="text-xs sm:text-[11px] text-content-subtle font-medium">
-                {t("addSuite.subtitle")}
-              </p>
+              <h3 className="text-sm font-semibold text-content-strong">{t("addSuite.title")}</h3>
+              <p className="text-xs text-content-subtle font-normal">{t("addSuite.subtitle")}</p>
             </div>
           </div>
 
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs sm:text-[11px] text-content-body font-medium block">
+              <label className="text-xs text-content-body font-normal block">
                 {t("addSuite.docName")}
               </label>
               <input
@@ -71,13 +67,13 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
                 required
                 value={suiteName}
                 onChange={(e) => onNameChange(e.target.value)}
-                className="w-full text-xs p-3 bg-surface-sunken/80 border border-border-subtle rounded-md focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none font-medium text-content-strong"
+                className="w-full text-xs p-2.5 bg-surface-sunken/80 border border-border-subtle rounded-md focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none font-normal text-content-body"
                 placeholder={t("addSuite.docNamePlaceholder")}
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs sm:text-[11px] text-content-body font-medium block">
+              <label className="text-xs text-content-body font-normal block">
                 {t("addSuite.testPhase")}
               </label>
               <StyledDropdown
@@ -87,7 +83,7 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
                 type="qa_phase"
                 masterData={[]}
                 className="w-full"
-                buttonClassName="w-full text-xs p-3 bg-surface-sunken/80 border border-border-subtle rounded-md font-medium text-primary"
+                buttonClassName="w-full text-xs p-2.5 bg-surface-sunken/80 border border-border-subtle rounded-md font-normal text-content-body"
               />
             </div>
 
@@ -95,13 +91,13 @@ export const AddSuiteModal: React.FC<AddSuiteModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium uppercase tracking-wider rounded-md transition-all cursor-pointer"
+                className="px-4 py-2 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-normal rounded-md transition-all cursor-pointer"
               >
                 {t("addSuite.cancel")}
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+                className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-normal rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
               >
                 <Plus className="w-4 h-4" /> {t("addSuite.createDocument")}
               </button>

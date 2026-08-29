@@ -73,12 +73,10 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
               <FileSpreadsheet className="w-3.5 h-3.5" />
             </div>
             <div>
-              <h3 className="text-xs font-semibold text-content-strong uppercase tracking-wider">
+              <h3 className="text-xs font-semibold text-content-strong">
                 {t("qaSuite.moduleList")}
               </h3>
-              <p className="text-xs sm:text-[10px] text-content-subtle font-normal">
-                {t("qaSuite.docScenario")}
-              </p>
+              <p className="text-xs text-content-subtle font-normal">{t("qaSuite.docScenario")}</p>
             </div>
           </div>
           <span className="px-2 py-[3px] bg-primary-surface/10 text-primary text-[10px] leading-none font-medium rounded-md">

@@ -45,23 +45,21 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
           exit={{ scale: 0.95, opacity: 0 }}
           className="bg-surface border border-border-subtle/80 rounded-md p-6 max-w-lg w-full shadow-2xl space-y-4"
         >
-          <h3 className="text-sm font-medium text-content-strong uppercase tracking-wider">
-            {t("editCase.title")}
-          </h3>
+          <h3 className="text-sm font-semibold text-content-strong">{t("editCase.title")}</h3>
           <div className="space-y-3">
             <div className="space-y-1">
-              <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
+              <label className="text-xs font-normal text-content-body block">
                 {t("editCase.caseTitle")}
               </label>
               <input
                 type="text"
                 value={editTitle}
                 onChange={(e) => onTitleChange(e.target.value)}
-                className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong"
+                className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-normal text-content-body"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
+              <label className="text-xs font-normal text-content-body block">
                 {t("editCase.priority")}
               </label>
               <StyledDropdown
@@ -95,42 +93,42 @@ export const EditCaseModal: React.FC<EditCaseModalProps> = ({
                 ]}
                 masterData={[]}
                 className="w-full"
-                buttonClassName="h-10 bg-surface-sunken rounded-md border border-border-subtle hover:border-border-subtle px-3 text-xs font-medium text-content-strong"
+                buttonClassName="h-9 bg-surface-sunken rounded-md border border-border-subtle hover:border-border-subtle px-3 text-xs font-normal text-content-body"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
+              <label className="text-xs font-normal text-content-body block">
                 {t("editCase.steps")}
               </label>
               <textarea
                 rows={3}
                 value={editSteps}
                 onChange={(e) => onStepsChange(e.target.value)}
-                className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong"
+                className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-normal text-content-body"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block">
+              <label className="text-xs font-normal text-content-body block">
                 {t("editCase.expected")}
               </label>
               <textarea
                 rows={2}
                 value={editExpected}
                 onChange={(e) => onExpectedChange(e.target.value)}
-                className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-medium text-content-strong"
+                className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md font-normal text-content-body"
               />
             </div>
           </div>
           <div className="flex justify-end gap-2.5 pt-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-surface-muted text-content-secondary text-xs font-medium rounded-md cursor-pointer"
+              className="px-4 py-2 bg-surface-muted text-content-secondary text-xs font-normal rounded-md cursor-pointer"
             >
               {t("editCase.cancel")}
             </button>
             <button
               onClick={onSubmit}
-              className="px-4 py-2 bg-primary-surface text-content-inverse text-xs font-medium rounded-md cursor-pointer shadow-xs active:scale-95"
+              className="px-4 py-2 bg-primary-surface text-content-inverse text-xs font-normal rounded-md cursor-pointer shadow-xs active:scale-95"
             >
               {t("editCase.save")}
             </button>

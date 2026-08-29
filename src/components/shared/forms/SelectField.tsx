@@ -27,14 +27,14 @@ export const SelectField: React.FC<SelectFieldProps> = ({
   return (
     <div className="space-y-1.5">
       {label && (
-        <label className="text-xs sm:text-[10px] text-content-body font-medium block uppercase tracking-wider">
+        <label className="text-xs text-content-body font-normal block">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <select
         {...props}
-        className={`w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-medium text-content-strong cursor-pointer transition-all ${
+        className={`w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-normal text-content-body cursor-pointer transition-all ${
           error ? "border-red-500/30 focus:border-red-400" : ""
         } ${className}`}
       >
@@ -45,7 +45,7 @@ export const SelectField: React.FC<SelectFieldProps> = ({
           </option>
         ))}
       </select>
-      {error && <p className="text-xs sm:text-[10px] text-red-600 font-medium">{error}</p>}
+      {error && <p className="text-xs sm:text-[10px] text-red-600 font-normal">{error}</p>}
       {helperText && !error && (
         <p className="text-xs sm:text-[10px] text-content-muted">{helperText}</p>
       )}

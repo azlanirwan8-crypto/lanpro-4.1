@@ -143,10 +143,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
             {task.priority && (
               <span
                 className={cn(
-                  "font-medium uppercase rounded tracking-wider border",
-                  isCompact
-                    ? "text-xs sm:text-[10px] sm:text-[8px] px-1 py-0.2"
-                    : "text-xs sm:text-[11px] sm:text-[9px] px-1.5 py-0.2",
+                  "font-normal rounded border text-[10px] px-1.5 py-0.5",
                   task.priority === "Highest" || task.priority === "High"
                     ? "bg-danger/10 text-danger-text border-danger/20"
                     : task.priority === "Medium"
@@ -160,10 +157,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
             {task.isBlocked && (
               <span
                 className={cn(
-                  "font-medium uppercase text-danger-text bg-danger/10 rounded tracking-widest animate-pulse border border-danger/20",
-                  isCompact
-                    ? "text-xs sm:text-[10px] sm:text-[8px] px-1 py-0.5"
-                    : "text-xs sm:text-[11px] sm:text-[9px] px-1.5 py-0.5"
+                  "font-normal text-danger-text bg-danger/10 rounded animate-pulse border border-danger/20 text-[10px] px-1.5 py-0.5"
                 )}
               >
                 Blocked
@@ -250,8 +244,8 @@ export const KanbanCard = React.memo<KanbanCardProps>(
               <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusColor }} />
               <span
                 className={cn(
-                  "font-medium text-content-muted group-hover:text-primary uppercase tracking-wider transition-colors duration-300",
-                  isCompact ? "text-xs sm:text-[10px] sm:text-[8px]" : "text-xs sm:text-[10px]"
+                  "font-normal text-content-muted group-hover:text-primary transition-colors duration-300",
+                  isCompact ? "text-[10px]" : "text-xs"
                 )}
               >
                 {task.status}

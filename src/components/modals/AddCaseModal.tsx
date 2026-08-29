@@ -42,6 +42,8 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
   onTitleChange,
   casePriority,
   onPriorityChange,
+  caseAssignedTo,
+  onAssignedToChange,
   caseSteps,
   onStepsChange,
   caseExpected,
@@ -70,12 +72,10 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 <Plus className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-sm font-medium text-content-strong uppercase tracking-wider">
+                <h3 className="text-sm font-semibold text-content-strong">
                   {t("testCase.addTitle")}
                 </h3>
-                <p className="text-xs sm:text-[11px] text-content-subtle font-medium">
-                  {t("testCase.addHint")}
-                </p>
+                <p className="text-xs text-content-subtle font-normal">{t("testCase.addHint")}</p>
               </div>
             </div>
             <button
@@ -92,9 +92,9 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
             <button
               type="button"
               onClick={() => onTabChange("single")}
-              className={`flex-1 py-2 text-xs font-medium uppercase tracking-wider rounded-md transition-all cursor-pointer ${
+              className={`flex-1 py-1.5 text-xs font-normal rounded-md transition-all cursor-pointer ${
                 activeTab === "single"
-                  ? "bg-surface text-primary shadow-xs border border-border-subtle/80"
+                  ? "bg-surface text-primary shadow-xs border border-border-subtle/80 font-medium"
                   : "text-content-muted hover:text-content-body"
               }`}
             >
@@ -103,9 +103,9 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
             <button
               type="button"
               onClick={() => onTabChange("bulk")}
-              className={`flex-1 py-2 text-xs font-medium uppercase tracking-wider rounded-md transition-all cursor-pointer ${
+              className={`flex-1 py-1.5 text-xs font-normal rounded-md transition-all cursor-pointer ${
                 activeTab === "bulk"
-                  ? "bg-surface text-primary shadow-xs border border-border-subtle/80"
+                  ? "bg-surface text-primary shadow-xs border border-border-subtle/80 font-medium"
                   : "text-content-muted hover:text-content-body"
               }`}
             >
@@ -115,11 +115,11 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
 
           {/* Target Suite Banner */}
           <div className="bg-primary-surface/5 border border-primary/10 px-4 py-2.5 rounded-md flex items-center justify-between text-xs">
-            <span className="font-medium text-primary">
+            <span className="font-normal text-primary">
               {t("qa.targetModule")}{" "}
               <strong>{activeSuite ? activeSuite.name : t("qa.noModuleSelected")}</strong>
             </span>
-            <span className="px-2.5 py-0.5 bg-primary-surface text-content-inverse font-medium rounded-full text-xs sm:text-[10px]">
+            <span className="px-2.5 py-0.5 bg-primary-surface text-content-inverse font-normal rounded-full text-xs">
               {activeSuite ? activeSuite.phase : "SIT"}
             </span>
           </div>
@@ -130,7 +130,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[calc(100vh-320px)] overflow-y-auto pr-1 custom-scrollbar">
                 <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <label className="text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider block">
+                    <label className="text-xs text-content-body font-normal block">
                       {t("testCase.caseTitle")} *
                     </label>
                     <input
@@ -139,54 +139,49 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                       value={caseTitle}
                       onChange={(e) => onTitleChange(e.target.value)}
                       placeholder={t("testCase.caseTitlePlaceholder")}
-                      className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-medium"
+                      className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-normal text-content-body"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider block">
+                    <label className="text-xs text-content-body font-normal block">
                       {t("testCase.priorityLevel")} *
                     </label>
                     <StyledDropdown
                       value={casePriority}
-                      onChange={(val) => onPriorityChange(val as any)}
+                      onChange={(val) =>
+                        onPriorityChange(val as "High" | "Medium" | "Low" | "Critical")
+                      }
                       options={[
-                        {
-                          id: "Critical",
-                          label: t("components.criticalPriority"),
-                          icon: "Flame",
-                          color: "#EF4444",
-                        },
-                        {
-                          id: "High",
-                          label: t("components.highPriority"),
-                          icon: "ChevronUp",
-                          color: "#F97316",
-                        },
-                        {
-                          id: "Medium",
-                          label: t("components.mediumPriority"),
-                          icon: "Circle",
-                          color: "#F59E0B",
-                        },
-                        {
-                          id: "Low",
-                          label: t("components.lowPriority"),
-                          icon: "ChevronDown",
-                          color: "#10B981",
-                        },
+                        { id: "Critical", label: "Critical Priority", color: "#DC2626" },
+                        { id: "High", label: "High Priority", color: "#EF4444" },
+                        { id: "Medium", label: "Medium Priority", color: "#F59E0B" },
+                        { id: "Low", label: "Low Priority", color: "#10B981" },
                       ]}
+                      type="priority"
                       masterData={[]}
                       className="w-full"
-                      buttonClassName="h-10 bg-surface-sunken rounded-md border border-border-subtle hover:border-border-subtle px-3 text-xs font-medium text-content-body"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs text-content-body font-normal block">
+                      {t("qa.assignPicTask")}
+                    </label>
+                    <input
+                      type="text"
+                      value={caseAssignedTo}
+                      onChange={(e) => onAssignedToChange(e.target.value)}
+                      placeholder="Contoh: dev@company.com"
+                      className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-normal text-content-body"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <div className="space-y-1.5">
-                    <label className="text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider block">
-                      {t("testCase.testSteps")} *
+                    <label className="text-xs text-content-body font-normal block">
+                      {t("qa.testSteps")} *
                     </label>
                     <textarea
                       required
@@ -194,21 +189,21 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                       value={caseSteps}
                       onChange={(e) => onStepsChange(e.target.value)}
                       placeholder={t("testCase.testStepsPlaceholder")}
-                      className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-medium"
+                      className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none resize-none font-normal text-content-body"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider block">
-                      {t("testCase.expectedResult")} *
+                    <label className="text-xs text-content-body font-normal block">
+                      {t("qa.expectedResult")} *
                     </label>
                     <textarea
                       required
-                      rows={2}
+                      rows={3}
                       value={caseExpected}
                       onChange={(e) => onExpectedChange(e.target.value)}
                       placeholder={t("testCase.expectedPlaceholder")}
-                      className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-medium"
+                      className="w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-normal text-content-body"
                     />
                   </div>
                 </div>
@@ -218,13 +213,13 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium uppercase tracking-wider rounded-md cursor-pointer"
+                  className="px-4 py-2 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-normal rounded-md cursor-pointer"
                 >
                   {t("testCase.cancel")}
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-normal rounded-md shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
                 >
                   <Plus className="w-4 h-4" /> {t("qa.saveTestCase")}
                 </button>
@@ -236,15 +231,15 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
               {/* Download Template Banner */}
               <div className="flex items-center justify-between bg-indigo-500/10 border border-indigo-500/30 p-3 rounded-md">
                 <div>
-                  <h4 className="text-xs font-medium text-primary">{t("testCase.needTemplate")}</h4>
-                  <p className="text-xs sm:text-[10px] text-content-muted font-medium">
+                  <h4 className="text-xs font-normal text-primary">{t("testCase.needTemplate")}</h4>
+                  <p className="text-xs sm:text-[10px] text-content-muted font-normal">
                     {t("testCase.downloadStructure")}
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={onDownloadTemplate}
-                  className="px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium rounded-md transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                  className="px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-normal rounded-md transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>{t("testCase.downloadTemplate")}</span>
@@ -254,10 +249,10 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
               <div className="border-2 border-dashed border-border-subtle hover:border-primary rounded-md p-8 text-center space-y-3 transition-colors bg-surface-sunken/50">
                 <Upload className="w-10 h-10 text-primary mx-auto" />
                 <div>
-                  <p className="text-xs font-medium text-content-body">
+                  <p className="text-xs font-normal text-content-body">
                     {t("qa.uploadAnExcelFileXlsx")}
                   </p>
-                  <p className="text-xs sm:text-[10px] text-content-subtle mt-1">
+                  <p className="text-xs sm:text-[10px] text-content-subtle mt-1 font-normal">
                     {t("testCase.columnFormat")}
                   </p>
                 </div>
@@ -270,7 +265,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 />
                 <label
                   htmlFor="bulk_upload_input"
-                  className="inline-block px-4 py-2 bg-primary-surface/10 hover:bg-primary-surface/20 text-primary text-xs font-medium rounded-md cursor-pointer transition-colors"
+                  className="inline-block px-4 py-2 bg-primary-surface/10 hover:bg-primary-surface/20 text-primary text-xs font-normal rounded-md cursor-pointer transition-colors"
                 >
                   {uploadFile ? uploadFile.name : t("qa.chooseExcel")}
                 </label>
@@ -280,14 +275,14 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium uppercase tracking-wider rounded-md cursor-pointer"
+                  className="px-4 py-2 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-normal rounded-md cursor-pointer"
                 >
                   {t("testCase.cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={!uploadFile}
-                  className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-medium uppercase tracking-wider rounded-md shadow-xs disabled:opacity-50 cursor-pointer active:scale-95"
+                  className="px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs font-normal rounded-md shadow-xs disabled:opacity-50 cursor-pointer active:scale-95"
                 >
                   {t("testCase.processBulk")}
                 </button>
