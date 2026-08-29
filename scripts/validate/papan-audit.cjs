@@ -134,6 +134,29 @@ for (const { nomor, status } of statusDi(i12, i13)) {
   if (!/SELESAI/.test(status)) lapor(`#${nomor} ada di tabel SELESAI tetapi statusnya '${status}'`);
 }
 
+// 5. Item #255/#259 — satu karakter pipa DI DALAM sebuah baris memecahnya jadi
+// lebih dari 9 sel, dan gerbang lama membaca kolom yang salah TANPA berteriak
+// (ia hanya mengambil potongan ke-N secara buta, lihat statusDi di atas).
+// Baris #183 dan baris #259 sempat rusak begini sebelum ketahuan lewat
+// pembacaan manual. Jumlah sel yang benar SELALU 9 pada baris tabel berformat
+// '| # | temuan | fase | sev | biaya | blokir | status | detail |'.
+const cacatSel = [];
+for (let i = i11; i < iAkhir; i++) {
+  const l = baris[i];
+  if (!/^\|\s*\d+\s*\|/.test(l)) continue;
+  const jumlahSel = (l.match(/\|/g) || []).length;
+  if (jumlahSel !== 9) {
+    const nomor = /^\|\s*(\d+)\s*\|/.exec(l)[1];
+    cacatSel.push({ nomor, jumlahSel });
+  }
+}
+for (const { nomor, jumlahSel } of cacatSel) {
+  lapor(`#${nomor} punya ${jumlahSel} sel, seharusnya 9 — kemungkinan karakter pipa di dalam teks`);
+}
+if (cacatSel.length) {
+  console.log(warna.redup("         cari code span yang memuat karakter pipa; eja cara kerjanya, jangan mengutip kode"));
+}
+
 console.log("");
 console.log("──────────────────────────────────────────────────────────");
 if (gagal) {
