@@ -182,6 +182,7 @@ export const id = {
       "Akses ditolak: Anda hanya dapat mengubah notifikasi milik Anda sendiri.",
     "srv.pesan_tidak_ditemukan": "Pesan tidak ditemukan.",
     "srv.pesan_berhasil_dihapus": "Pesan berhasil dihapus.",
+    "srv.pesan_terlalu_panjang": "Pesan terlalu panjang (maksimum 5000 karakter).",
     "srv.akses_ditolak_hapus_pesan":
       "Akses ditolak: Anda hanya dapat menghapus pesan yang Anda kirim sendiri.",
     "srv.akses_ditolak_hapus_notifikasi":

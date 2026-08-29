@@ -181,6 +181,7 @@ export const en = {
     "srv.akses_ditolak_anda_hanya_4": "Access denied: you can only change your own notifications.",
     "srv.pesan_tidak_ditemukan": "Message not found.",
     "srv.pesan_berhasil_dihapus": "The message was deleted.",
+    "srv.pesan_terlalu_panjang": "Message is too long (maximum 5000 characters).",
     "srv.akses_ditolak_hapus_pesan":
       "Access denied: you can only delete messages you sent yourself.",
     "srv.akses_ditolak_hapus_notifikasi":
