@@ -168,6 +168,8 @@ export const id = {
     "srv.nama_role_tidak_boleh": "Nama peran tidak boleh berisi karakter sampah atau berulang.",
     "srv.nama_role_tidak_boleh_2": "Nama peran tidak boleh berupa karakter sampah atau acak.",
     "srv.data_master_bawaan_sistem": "Master Data bawaan sistem terkunci dan tidak dapat dihapus.",
+    "srv.data_master_sedang_digunakan":
+      "Data master ini sedang digunakan oleh {{count}} Task aktif dan tidak dapat dihapus.",
     "srv.pemrosesan_dibatalkan": "Pemrosesan dibatalkan.",
     "srv.proses_pemrosesan_ai_stt": "Pemrosesan AI (STT & LLM) mulai berjalan di latar belakang.",
     "srv.menganalisis_video_audio_multimodal":
