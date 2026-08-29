@@ -855,18 +855,18 @@ export function DashboardView(props: DashboardViewProps) {
               {/* Active Sprint Sub-metrics Bar */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5 p-4 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
                 <div>
-                  <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
+                  <span className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.activeSprint")}
                   </span>
-                  <p className="text-sm font-medium text-content-strong mt-0.5 truncate">
+                  <p className="text-sm font-normal text-content-strong mt-0.5 truncate">
                     {activeSprint?.name || "No Sprint"}
                   </p>
                 </div>
                 <div>
-                  <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
+                  <span className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.sprintProgress")}
                   </span>
-                  <p className="text-sm font-medium text-success-text mt-0.5">
+                  <p className="text-sm font-normal text-success-text mt-0.5">
                     {t("dashboard.sprintProgressValue", {
                       percent: sprintProgress,
                       done: sprintCompletedTasks,
@@ -875,15 +875,15 @@ export function DashboardView(props: DashboardViewProps) {
                   </p>
                 </div>
                 <div>
-                  <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
+                  <span className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.weeklyVelocity")}
                   </span>
-                  <p className="text-sm font-medium text-primary mt-0.5">
+                  <p className="text-sm font-normal text-primary mt-0.5">
                     {t("rakit.pointsPerSprint", { nilai: weeklyVelocity ? weeklyVelocity : "0.0" })}
                   </p>
                 </div>
                 <div>
-                  <span className="text-xs sm:text-[11px] font-medium text-content-subtle uppercase">
+                  <span className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase">
                     {t("dashboard.daysLeft")}
                   </span>
                   <p className="text-sm font-medium text-content-strong mt-0.5">

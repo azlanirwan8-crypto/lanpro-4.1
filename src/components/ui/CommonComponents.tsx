@@ -271,12 +271,12 @@ export const StyledDropdown = ({
             "flex items-center gap-1.5 group/dd transition-all cursor-pointer w-full justify-between focus:ring-1 focus:ring-primary/20",
             isStatus
               ? cn(
-                  "px-2 py-0.5 border rounded-md font-medium text-[10px] tracking-tight uppercase transition-colors",
+                  "px-2 py-0.5 border rounded-md font-normal text-[10px] tracking-tight uppercase transition-colors",
                   getStatusClasses(selected?.label || value)
                 )
               : isPriority
                 ? cn(
-                    "px-2 py-0.5 border rounded-md font-medium text-[10px] tracking-tight uppercase transition-colors",
+                    "px-2 py-0.5 border rounded-md font-normal text-[10px] tracking-tight uppercase transition-colors",
                     getPriorityClasses(selected?.label || value)
                   )
                 : "px-1.5 py-0.5 bg-surface border border-transparent hover:border-border-subtle rounded text-xs font-normal",
@@ -326,9 +326,9 @@ export const StyledDropdown = ({
                 !selected?.label && !value
                   ? "text-content-subtle font-normal opacity-80 text-xs"
                   : isStatus
-                    ? "font-medium text-[10px] text-inherit tracking-tight uppercase"
+                    ? "font-normal text-[10px] text-inherit tracking-tight uppercase"
                     : isPriority
-                      ? "font-medium text-[10px] text-inherit tracking-tight uppercase"
+                      ? "font-normal text-[10px] text-inherit tracking-tight uppercase"
                       : "font-normal text-xs text-content-body"
               )}
             >

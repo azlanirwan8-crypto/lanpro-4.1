@@ -101,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 className="flex flex-col"
               >
                 <span className={styles.logoText}>LANPRO</span>
-                <span className="text-[10px] font-semibold text-sidebar-title tracking-wider uppercase whitespace-nowrap block mt-0.5">
+                <span className="text-[10px] font-normal text-sidebar-title tracking-wider uppercase whitespace-nowrap block mt-0.5">
                   {t("sidebar.projectManagement2")}
                 </span>
               </motion.div>
@@ -250,7 +250,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
             <React.Fragment key={section.id}>
               {!isSidebarCollapsed && (
                 <div className="flex items-center justify-between px-3 mt-5 mb-1.5">
-                  <div className="text-xs sm:text-[11px] font-semibold text-sidebar-title uppercase tracking-wider">
+                  <div className="text-xs sm:text-[11px] font-normal text-sidebar-title uppercase tracking-wider">
                     {t(section.title)}
                   </div>
                 </div>

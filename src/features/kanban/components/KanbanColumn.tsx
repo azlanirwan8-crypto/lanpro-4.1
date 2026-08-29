@@ -46,7 +46,7 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                   style={{ backgroundColor: status.color }}
                 />
               )}
-              <span className="text-xs font-medium text-content-strong">{status.label}</span>
+              <span className="text-xs font-normal text-content-strong">{status.label}</span>
             </div>
             <span className="bg-surface-muted text-content-secondary px-2 py-0.5 rounded-md text-[10px] font-normal border border-border-subtle/60">
               {tasks.length}
