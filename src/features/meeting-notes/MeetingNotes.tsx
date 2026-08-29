@@ -721,7 +721,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 </div>
 
                 {/* Panel 3: Discussion Points Table */}
-                <div className="bg-surface border border-border-subtle/80 rounded-lg p-5 md:p-6 shadow-2xs flex-1 flex flex-col min-h-0">
+                <div className="flex-1 flex flex-col min-h-0">
                   <DiscussionPointsTable
                     projectId={projectId}
                     meetingId={activeMeeting.id!}

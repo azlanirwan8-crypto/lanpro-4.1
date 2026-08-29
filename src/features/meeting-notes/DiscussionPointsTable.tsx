@@ -354,9 +354,9 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   }));
 
   return (
-    <div className="bg-surface flex flex-col font-sans text-left">
+    <div className="bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden flex-1 flex flex-col min-h-0 font-sans text-left">
       {/* Header Bar Clean Title */}
-      <div className="px-5 py-4 border-b border-border-subtle/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface-sunken/40">
+      <div className="px-5 py-3.5 border-b border-border-subtle/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface-sunken/40 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-primary shadow-2xs">
             <MessageSquare className="w-4 h-4" />
@@ -559,319 +559,316 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
           />
         </div>
       ) : (
-        <div className="space-y-4">
-          {/* STREAMLINED LIVE EDITABLE DATA TABLE */}
-          <div className="bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <ResponsiveTable className="w-full border-collapse text-left text-xs">
-                <thead>
-                  <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap">
-                    <th className="py-3 px-4 w-12 text-center">{t("discussion.thNo")}</th>
-                    <th className="py-3 px-4 min-w-[220px]">{t("discussion.thConcern")}</th>
-                    <th className="py-3 px-4 min-w-[200px]">{t("discussion.thNotes")}</th>
-                    <th className="py-3 px-4 min-w-[150px]">{t("discussion.thContextTags")}</th>
-                    <th className="py-3 px-4 min-w-[140px]">{t("discussion.thPic")}</th>
-                    <th className="py-3 px-4 min-w-[130px]">{t("discussion.thTargetDate")}</th>
-                    <th className="py-3 px-4 w-24 text-center">{t("discussion.thThread")}</th>
-                    <th className="py-3 px-4 w-28 text-center">{t("discussion.status")}</th>
-                    <th className="py-3 px-4 w-24 text-center">{t("discussion.action")}</th>
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="overflow-x-auto flex-1">
+            <ResponsiveTable className="w-full border-collapse text-left text-xs">
+              <thead>
+                <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap">
+                  <th className="py-3 px-4 w-12 text-center">{t("discussion.thNo")}</th>
+                  <th className="py-3 px-4 min-w-[220px]">{t("discussion.thConcern")}</th>
+                  <th className="py-3 px-4 min-w-[200px]">{t("discussion.thNotes")}</th>
+                  <th className="py-3 px-4 min-w-[150px]">{t("discussion.thContextTags")}</th>
+                  <th className="py-3 px-4 min-w-[140px]">{t("discussion.thPic")}</th>
+                  <th className="py-3 px-4 min-w-[130px]">{t("discussion.thTargetDate")}</th>
+                  <th className="py-3 px-4 w-24 text-center">{t("discussion.thThread")}</th>
+                  <th className="py-3 px-4 w-28 text-center">{t("discussion.status")}</th>
+                  <th className="py-3 px-4 w-24 text-center">{t("discussion.action")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border-faint text-content-body">
+                {paginatedPoints.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="text-center py-12 text-content-subtle">
+                      <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
+                        <MessageSquare className="w-5 h-5" />
+                      </div>
+                      <p className="font-normal text-content-strong text-xs">
+                        {t("meetings.emptyTitle")}
+                      </p>
+                      <p className="text-[11px] text-content-subtle mt-0.5">
+                        {t("meetings.emptyHint")}
+                      </p>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-border-faint text-content-body">
-                  {paginatedPoints.length === 0 ? (
-                    <tr>
-                      <td colSpan={9} className="text-center py-12 text-content-subtle">
-                        <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
-                          <MessageSquare className="w-5 h-5" />
-                        </div>
-                        <p className="font-normal text-content-strong text-xs">
-                          {t("meetings.emptyTitle")}
-                        </p>
-                        <p className="text-[11px] text-content-subtle mt-0.5">
-                          {t("meetings.emptyHint")}
-                        </p>
-                      </td>
-                    </tr>
-                  ) : (
-                    paginatedPoints.map((p, index) => {
-                      const isCompleted = p.status === "completed";
-                      const srNo = (currentPage - 1) * itemsPerPage + index + 1;
-                      const assigneeUser = projectMembers.find(
-                        (m) => (m.uid || m.id) === (p.assignTo || p.assignee_id)
-                      );
-                      const assigneeName = assigneeUser
-                        ? assigneeUser.displayName || assigneeUser.username
-                        : p.assignTo || t("newTask.unassigned");
-                      const isOwner = p.authorId === (currentUser?.uid || "");
+                ) : (
+                  paginatedPoints.map((p, index) => {
+                    const isCompleted = p.status === "completed";
+                    const srNo = (currentPage - 1) * itemsPerPage + index + 1;
+                    const assigneeUser = projectMembers.find(
+                      (m) => (m.uid || m.id) === (p.assignTo || p.assignee_id)
+                    );
+                    const assigneeName = assigneeUser
+                      ? assigneeUser.displayName || assigneeUser.username
+                      : p.assignTo || t("newTask.unassigned");
+                    const isOwner = p.authorId === (currentUser?.uid || "");
 
-                      return (
-                        <tr
-                          key={p.id || index}
-                          className={`hover:bg-surface-sunken/60 transition-colors group ${
-                            isCompleted ? "opacity-75" : ""
-                          }`}
-                        >
-                          {/* No. */}
-                          <td className="py-3 px-4 text-center text-content-subtle font-normal align-middle">
-                            {String(srNo).padStart(2, "0")}
-                          </td>
+                    return (
+                      <tr
+                        key={p.id || index}
+                        className={`hover:bg-surface-sunken/60 transition-colors group ${
+                          isCompleted ? "opacity-75" : ""
+                        }`}
+                      >
+                        {/* No. */}
+                        <td className="py-3 px-4 text-center text-content-subtle font-normal align-middle">
+                          {String(srNo).padStart(2, "0")}
+                        </td>
 
-                          {/* Concern (Topic) */}
-                          <td className="py-3 px-4 align-middle">
-                            <div className="font-normal text-content-strong leading-snug">
-                              {p.concern}
+                        {/* Concern (Topic) */}
+                        <td className="py-3 px-4 align-middle">
+                          <div className="font-normal text-content-strong leading-snug">
+                            {p.concern}
+                          </div>
+                          {(p.tindakanLanjut || p.next_action) && (
+                            <div className="text-[11px] text-primary font-normal mt-0.5 flex items-center gap-1">
+                              <span className="text-content-subtle font-normal">
+                                {t("discussion.next")}
+                              </span>{" "}
+                              {p.tindakanLanjut || p.next_action}
                             </div>
-                            {(p.tindakanLanjut || p.next_action) && (
-                              <div className="text-[11px] text-primary font-normal mt-0.5 flex items-center gap-1">
-                                <span className="text-content-subtle font-normal">
-                                  {t("discussion.next")}
-                                </span>{" "}
-                                {p.tindakanLanjut || p.next_action}
-                              </div>
-                            )}
-                          </td>
+                          )}
+                        </td>
 
-                          {/* Notes / Keterangan */}
-                          <td className="py-3 px-4 align-middle text-content-body font-normal">
-                            <div className="line-clamp-2 max-w-sm">
-                              {p.keterangan || p.comment || "-"}
-                            </div>
-                          </td>
+                        {/* Notes / Keterangan */}
+                        <td className="py-3 px-4 align-middle text-content-body font-normal">
+                          <div className="line-clamp-2 max-w-sm">
+                            {p.keterangan || p.comment || "-"}
+                          </div>
+                        </td>
 
-                          {/* Context / Fitur Tag */}
-                          <td className="py-3 px-4 align-middle">
-                            <div className="flex flex-wrap gap-1">
-                              {p.fitur ? (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-normal bg-indigo-500/10 text-primary border border-indigo-500/30">
-                                  {p.fitur}
-                                </span>
-                              ) : (
-                                <span className="text-content-subtle text-xs italic">-</span>
-                              )}
-                            </div>
-                          </td>
-
-                          {/* PIC */}
-                          <td className="py-3 px-4 align-middle">
-                            <div className="text-xs font-normal text-content-strong">
-                              {assigneeName}
-                            </div>
-                          </td>
-
-                          {/* Target Date */}
-                          <td className="py-3 px-4 align-middle">
-                            {p.targetDate || p.target_date ? (
-                              <div className="flex items-center gap-1 text-xs text-content-secondary font-normal">
-                                <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
-                                <span>{p.targetDate || p.target_date}</span>
-                              </div>
+                        {/* Context / Fitur Tag */}
+                        <td className="py-3 px-4 align-middle">
+                          <div className="flex flex-wrap gap-1">
+                            {p.fitur ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-normal bg-indigo-500/10 text-primary border border-indigo-500/30">
+                                {p.fitur}
+                              </span>
                             ) : (
                               <span className="text-content-subtle text-xs italic">-</span>
                             )}
-                          </td>
+                          </div>
+                        </td>
 
-                          {/* Thread Icon Button */}
-                          <td className="py-3 px-4 text-center align-middle">
-                            {(() => {
-                              const commentsList = p.id ? commentsMap[p.id] || [] : [];
-                              const count = commentsList.length;
+                        {/* PIC */}
+                        <td className="py-3 px-4 align-middle">
+                          <div className="text-xs font-normal text-content-strong">
+                            {assigneeName}
+                          </div>
+                        </td>
 
-                              return (
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenThreadDrawer(p)}
-                                  className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95 ${
-                                    count > 0
-                                      ? "bg-indigo-500/10 hover:bg-indigo-500/15 text-primary border-indigo-500/30"
-                                      : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
-                                  }`}
-                                  title={t("discussion.openThread")}
-                                >
-                                  <MessageSquare
-                                    className={`w-3.5 h-3.5 ${count > 0 ? "text-primary fill-indigo-100" : "text-content-subtle"}`}
-                                  />
-                                  <span>{count}</span>
-                                </button>
-                              );
-                            })()}
-                          </td>
-
-                          {/* Status Badge */}
-                          <td className="py-3 px-4 text-center align-middle">
-                            <button
-                              type="button"
-                              onClick={() => handleToggleStatus(p)}
-                              className="cursor-pointer transition-all active:scale-95 inline-block"
-                              title={t("discussion.toggleStatus")}
-                            >
-                              {isCompleted ? (
-                                <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 shadow-2xs hover:bg-emerald-500/15">
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                                  {t("discussion.statusDone")}
-                                </span>
-                              ) : (
-                                <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30 shadow-2xs hover:bg-amber-500/15">
-                                  <Clock className="w-3 h-3 text-amber-600" />
-                                  {t("discussion.statusPending")}
-                                </span>
-                              )}
-                            </button>
-                          </td>
-
-                          {/* Actions */}
-                          <td className="py-3 px-4 text-center align-middle">
-                            <div className="flex items-center justify-center gap-1">
-                              {hasPermission(
-                                userRole,
-                                "meetingNotes",
-                                "update",
-                                isOwner,
-                                permissions
-                              ) && (
-                                <button
-                                  onClick={() => startEdit(p)}
-                                  className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
-                                  title={t("discussion.editRow")}
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                </button>
-                              )}
-                              {hasPermission(
-                                userRole,
-                                "meetingNotes",
-                                "delete",
-                                isOwner,
-                                permissions
-                              ) && (
-                                <button
-                                  onClick={() => handleDelete(p.id!)}
-                                  className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
-                                  title={t("discussion.deleteRow")}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              )}
+                        {/* Target Date */}
+                        <td className="py-3 px-4 align-middle">
+                          {p.targetDate || p.target_date ? (
+                            <div className="flex items-center gap-1 text-xs text-content-secondary font-normal">
+                              <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
+                              <span>{p.targetDate || p.target_date}</span>
                             </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
+                          ) : (
+                            <span className="text-content-subtle text-xs italic">-</span>
+                          )}
+                        </td>
 
-                  {/* LIVE QUICK ADD INLINE ROW (Separate columns matching headers) */}
-                  {canAdd && (
-                    <tr className="bg-indigo-500/10 hover:bg-indigo-500/10 transition-colors">
-                      <td className="py-2.5 px-4 text-center text-indigo-400 text-xs align-middle font-normal">
-                        +
-                      </td>
+                        {/* Thread Icon Button */}
+                        <td className="py-3 px-4 text-center align-middle">
+                          {(() => {
+                            const commentsList = p.id ? commentsMap[p.id] || [] : [];
+                            const count = commentsList.length;
 
-                      {/* Concern */}
-                      <td className="py-2.5 px-4 align-middle">
-                        <input
-                          type="text"
-                          placeholder={t("discussion.newConcernPlaceholder")}
-                          value={quickConcern}
-                          onChange={(e) => setQuickConcern(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") handleLiveQuickAdd();
-                          }}
-                          className="w-full px-3 py-1.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle"
-                        />
-                      </td>
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenThreadDrawer(p)}
+                                className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95 ${
+                                  count > 0
+                                    ? "bg-indigo-500/10 hover:bg-indigo-500/15 text-primary border-indigo-500/30"
+                                    : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
+                                }`}
+                                title={t("discussion.openThread")}
+                              >
+                                <MessageSquare
+                                  className={`w-3.5 h-3.5 ${count > 0 ? "text-primary fill-indigo-100" : "text-content-subtle"}`}
+                                />
+                                <span>{count}</span>
+                              </button>
+                            );
+                          })()}
+                        </td>
 
-                      {/* Catatan / Keterangan */}
-                      <td className="py-2.5 px-4 align-middle">
-                        <input
-                          type="text"
-                          placeholder={t("discussion.notesPlaceholder")}
-                          value={quickCatatan}
-                          onChange={(e) => setQuickCatatan(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") handleLiveQuickAdd();
-                          }}
-                          className="w-full px-3 py-1.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none placeholder:text-content-subtle shadow-2xs"
-                        />
-                      </td>
+                        {/* Status Badge */}
+                        <td className="py-3 px-4 text-center align-middle">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleStatus(p)}
+                            className="cursor-pointer transition-all active:scale-95 inline-block"
+                            title={t("discussion.toggleStatus")}
+                          >
+                            {isCompleted ? (
+                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 shadow-2xs hover:bg-emerald-500/15">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                {t("discussion.statusDone")}
+                              </span>
+                            ) : (
+                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30 shadow-2xs hover:bg-amber-500/15">
+                                <Clock className="w-3 h-3 text-amber-600" />
+                                {t("discussion.statusPending")}
+                              </span>
+                            )}
+                          </button>
+                        </td>
 
-                      {/* Context / Tags */}
-                      <td className="py-2.5 px-4 align-middle">
-                        <StyledDropdown
-                          value={quickFitur}
-                          onChange={(val) => setQuickFitur(val)}
-                          options={masterData
-                            .filter((m) => m.type?.toLowerCase() === "fitur")
-                            .map((m) => ({
-                              id: m.label,
-                              label: m.label,
-                              color: m.color,
-                              icon: m.icon,
-                            }))}
-                          type="fitur"
-                          masterData={masterData}
-                          buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-normal shadow-2xs"
-                        />
-                      </td>
+                        {/* Actions */}
+                        <td className="py-3 px-4 text-center align-middle">
+                          <div className="flex items-center justify-center gap-1">
+                            {hasPermission(
+                              userRole,
+                              "meetingNotes",
+                              "update",
+                              isOwner,
+                              permissions
+                            ) && (
+                              <button
+                                onClick={() => startEdit(p)}
+                                className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
+                                title={t("discussion.editRow")}
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                            )}
+                            {hasPermission(
+                              userRole,
+                              "meetingNotes",
+                              "delete",
+                              isOwner,
+                              permissions
+                            ) && (
+                              <button
+                                onClick={() => handleDelete(p.id!)}
+                                className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
+                                title={t("discussion.deleteRow")}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
 
-                      {/* PIC */}
-                      <td className="py-2.5 px-4 align-middle">
-                        <StyledDropdown
-                          value={quickAssignTo}
-                          onChange={(val) => setQuickAssignTo(val)}
-                          options={[
-                            { id: "Unassigned", label: t("discussion.assignPic") },
-                            ...userOptions,
-                          ]}
-                          members={projectMembers}
-                          type="member"
-                          masterData={masterData}
-                          buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-normal shadow-2xs"
-                        />
-                      </td>
+                {/* LIVE QUICK ADD INLINE ROW (Separate columns matching headers) */}
+                {canAdd && (
+                  <tr className="bg-indigo-500/10 hover:bg-indigo-500/10 transition-colors">
+                    <td className="py-2.5 px-4 text-center text-indigo-400 text-xs align-middle font-normal">
+                      +
+                    </td>
 
-                      {/* Target Date */}
-                      <td className="py-2.5 px-4 align-middle">
-                        <input
-                          type="date"
-                          value={quickTargetDate}
-                          onChange={(e) => setQuickTargetDate(e.target.value)}
-                          className="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs font-normal text-content-body rounded-md outline-none shadow-2xs"
-                        />
-                      </td>
+                    {/* Concern */}
+                    <td className="py-2.5 px-4 align-middle">
+                      <input
+                        type="text"
+                        placeholder={t("discussion.newConcernPlaceholder")}
+                        value={quickConcern}
+                        onChange={(e) => setQuickConcern(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleLiveQuickAdd();
+                        }}
+                        className="w-full px-3 py-1.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle"
+                      />
+                    </td>
 
-                      {/* Thread */}
-                      <td className="py-2.5 px-4 text-center align-middle text-content-subtle text-xs">
-                        -
-                      </td>
+                    {/* Catatan / Keterangan */}
+                    <td className="py-2.5 px-4 align-middle">
+                      <input
+                        type="text"
+                        placeholder={t("discussion.notesPlaceholder")}
+                        value={quickCatatan}
+                        onChange={(e) => setQuickCatatan(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleLiveQuickAdd();
+                        }}
+                        className="w-full px-3 py-1.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none placeholder:text-content-subtle shadow-2xs"
+                      />
+                    </td>
 
-                      {/* Status */}
-                      <td className="py-2.5 px-4 text-center align-middle">
-                        <span className="px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30">
-                          {t("discussion.statusPending")}
-                        </span>
-                      </td>
+                    {/* Context / Tags */}
+                    <td className="py-2.5 px-4 align-middle">
+                      <StyledDropdown
+                        value={quickFitur}
+                        onChange={(val) => setQuickFitur(val)}
+                        options={masterData
+                          .filter((m) => m.type?.toLowerCase() === "fitur")
+                          .map((m) => ({
+                            id: m.label,
+                            label: m.label,
+                            color: m.color,
+                            icon: m.icon,
+                          }))}
+                        type="fitur"
+                        masterData={masterData}
+                        buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-normal shadow-2xs"
+                      />
+                    </td>
 
-                      {/* Action */}
-                      <td className="py-2.5 px-4 text-center align-middle">
-                        <button
-                          type="button"
-                          onClick={() => handleLiveQuickAdd()}
-                          disabled={isSaving || !quickConcern.trim()}
-                          className="px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-normal shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
-                          title={t("discussion.addPoint")}
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>{t("discussion.add")}</span>
-                        </button>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </ResponsiveTable>
-            </div>
+                    {/* PIC */}
+                    <td className="py-2.5 px-4 align-middle">
+                      <StyledDropdown
+                        value={quickAssignTo}
+                        onChange={(val) => setQuickAssignTo(val)}
+                        options={[
+                          { id: "Unassigned", label: t("discussion.assignPic") },
+                          ...userOptions,
+                        ]}
+                        members={projectMembers}
+                        type="member"
+                        masterData={masterData}
+                        buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-normal shadow-2xs"
+                      />
+                    </td>
+
+                    {/* Target Date */}
+                    <td className="py-2.5 px-4 align-middle">
+                      <input
+                        type="date"
+                        value={quickTargetDate}
+                        onChange={(e) => setQuickTargetDate(e.target.value)}
+                        className="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs font-normal text-content-body rounded-md outline-none shadow-2xs"
+                      />
+                    </td>
+
+                    {/* Thread */}
+                    <td className="py-2.5 px-4 text-center align-middle text-content-subtle text-xs">
+                      -
+                    </td>
+
+                    {/* Status */}
+                    <td className="py-2.5 px-4 text-center align-middle">
+                      <span className="px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30">
+                        {t("discussion.statusPending")}
+                      </span>
+                    </td>
+
+                    {/* Action */}
+                    <td className="py-2.5 px-4 text-center align-middle">
+                      <button
+                        type="button"
+                        onClick={() => handleLiveQuickAdd()}
+                        disabled={isSaving || !quickConcern.trim()}
+                        className="px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-normal shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
+                        title={t("discussion.addPoint")}
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>{t("discussion.add")}</span>
+                      </button>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </ResponsiveTable>
           </div>
 
           {/* Pagination Footer */}
-          <div className="px-6 py-3.5 bg-surface-sunken/60 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-subtle font-normal">
+          <div className="px-5 py-3 bg-surface-sunken/40 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-subtle font-normal shrink-0">
             <div>
               {t("discussion.showingPoints", {
                 shown: paginatedPoints.length,
