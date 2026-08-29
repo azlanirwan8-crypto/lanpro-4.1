@@ -238,15 +238,13 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         {/* Velzon Compact Micro Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
           <div className="bg-primary-surface/5 border border-primary/10 p-2 rounded-md text-center">
-            <span className="text-[9px] text-primary font-normal uppercase tracking-wider block">
-              {t("qa.totalCase")}
-            </span>
+            <span className="text-[10px] text-primary font-normal block">{t("qa.totalCase")}</span>
             <span className="text-sm font-semibold text-primary block mt-0.5">
               {totalCasesCount}
             </span>
           </div>
           <div className="bg-surface-sunken p-2 rounded-md border border-border-subtle/60 text-center">
-            <span className="text-[9px] text-content-muted font-normal uppercase tracking-wider block">
+            <span className="text-[10px] text-content-muted font-normal block">
               {t("qaTable.passedRate")}
             </span>
             <span className="text-sm font-semibold text-content-strong block mt-0.5">
@@ -254,7 +252,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             </span>
           </div>
           <div className="bg-emerald-500/10 p-2 rounded-md border border-emerald-500/30 text-center">
-            <span className="text-[9px] text-success-text font-normal uppercase tracking-wider block">
+            <span className="text-[10px] text-success-text font-normal block">
               {t("qa.passed")}
             </span>
             <span className="text-sm font-semibold text-success-text block mt-0.5">
@@ -262,23 +260,19 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             </span>
           </div>
           <div className="bg-rose-500/10 p-2 rounded-md border border-rose-500/30 text-center">
-            <span className="text-[9px] text-danger-text font-normal uppercase tracking-wider block">
-              {t("qa.failed")}
-            </span>
+            <span className="text-[10px] text-danger-text font-normal block">{t("qa.failed")}</span>
             <span className="text-sm font-semibold text-danger-text block mt-0.5">
               {failedCasesCount}
             </span>
           </div>
           <div className="bg-amber-500/10 p-2 rounded-md border border-amber-500/30 text-center">
-            <span className="text-[9px] text-warning-text font-normal uppercase tracking-wider block">
-              BLOCKED
-            </span>
+            <span className="text-[10px] text-warning-text font-normal block">Blocked</span>
             <span className="text-sm font-semibold text-warning-text block mt-0.5">
               {blockedCasesCount}
             </span>
           </div>
           <div className="bg-surface-sunken p-2 rounded-md border border-border-subtle/60 text-center">
-            <span className="text-[9px] text-content-muted font-normal uppercase tracking-wider block">
+            <span className="text-[10px] text-content-muted font-normal block">
               {t("qa.retestPend")}
             </span>
             <span className="text-sm font-semibold text-content-body block mt-0.5">
@@ -289,7 +283,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
         {/* ELEGANT TOP RIGHT SEARCH & FILTER BAR */}
         <div className="flex items-center justify-between gap-2.5 pt-2.5 border-t border-border-faint">
-          <div className="text-[10px] font-medium text-content-strong uppercase tracking-wider flex items-center gap-1.5">
+          <div className="text-xs font-normal text-content-strong flex items-center gap-1.5">
             <FileSpreadsheet className="w-3.5 h-3.5 text-primary" />
             <span>Matriks Skenario Test Case ({searchedCases.length})</span>
           </div>

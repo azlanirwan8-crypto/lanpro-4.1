@@ -615,7 +615,7 @@ jadi §1.1 tetap sumber kebenarannya; halaman itu acuan, bukan pengganti.
 
 ---
 
-## §1 PAPAN PRIORITAS — 5 BELUM · 257 SELESAI · 3 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 5 BELUM · 258 SELESAI · 3 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -675,6 +675,563 @@ Sebaran di baris ini sebelumnya tertulis `F0 1 · F12 10` — keliru sejak sebel
 | :------: | :-: | ------ | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----: | :----------------: |
 |   263    | 🟠  | Rendah | `MENUNGGU` keputusan: perbaikan cepat sekarang, atau tunggu #264       | **Field koneksi WhatsApp di UI Settings dekoratif — mengaku tersimpan, padahal tidak berpengaruh apa pun.** Ditemukan 29 Agu 2026 lewat pembacaan kode langsung: `src/features/settings/components/WhatsAppConfigForm.tsx` baris 166-218 punya field `provider`/`endpoint`/`token`/`senderNumber`/`deviceId` yang terlihat seperti pengaturan koneksi WA sungguhan. Admin mengisi field-field ini, klik "Simpan Konfigurasi", UI tampak berhasil (`handleSaveConfig`) — TAPI payload yang benar-benar dikirim ke `POST /api/settings/whatsapp/broadcast-config` cuma berisi `scheduleDays`/`scheduleTime`/`recipientIds`/`messageTemplate` (baris 140-145). Kelima field koneksi itu cuma nyangkut di state React lokal (`formData`) dan HILANG begitu halaman dimuat ulang, tanpa peringatan apa pun ke admin. `handleTestWhatsApp` (baris 110-117) juga MOCK — `setTimeout` tanpa panggilan API nyata, komentar kode sendiri menulis "Mock API Call". Ini persis pola "mesin kegagalan senyap" yang sudah dua kali ditemukan di repo ini untuk email (#127, #157): admin percaya sudah mengganti token WA, kenyataannya server tetap memakai `WHATSAPP_API_TOKEN` lama dari env var — dan tidak ada satu baris log pun yang bilang begitu. | Dua opsi, TIDAK saling meniadakan — bisa jalan (a) dulu sebagai mitigasi cepat, lalu (b) menyusul lewat #264: (a) **perbaikan cepat**: nonaktifkan/beri keterangan eksplisit pada lima field ini ("belum tersambung ke backend, tidak berpengaruh") sampai #264 selesai — murah, langsung menghentikan kebohongan UI; (b) **perbaikan penuh**: sambungkan field-field ini ke backend sungguhan — ini PERSIS lingkup #264, jadi menyelesaikan #264 otomatis menutup item ini juga.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Bila mengerjakan (a) sekarang: 1) Di `WhatsAppConfigForm.tsx`, tambahkan `disabled` + teks peringatan pada lima field (`provider`, `endpoint`, `token`, `senderNumber`, `deviceId`). 2) Ganti `handleTestWhatsApp` supaya tidak berpura-pura sukses — tampilkan pesan "fitur test koneksi belum tersedia" alih-alih animasi sukses palsu. 3) Kunci dengan test yang menegaskan field ini `disabled`, supaya tidak diam-diam diaktifkan lagi tanpa backend-nya. Bila menunggu (b): tidak ada pekerjaan terpisah — tutup item ini bersamaan dengan #264.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | **Jangan** anggap field ini sudah berfungsi hanya karena tampil di UI dan "tersimpan" tanpa error — sudah terbukti dua kali (email #157, WA di sini) bahwa UI Settings di repo ini pernah berbohong diam-diam. Sebelum menyentuh `WhatsAppConfigForm.tsx`, cek dulu apakah #264 sudah SELESAI — kalau sudah, item ini closed otomatis, jangan kerjakan (a) di atas kode yang sudah diganti.                                                                                                                                                                                                                                                                                                                                                                            | **F13** |       Tidak        |
 |   264    | 🟠  | Tinggi | `MENUNGGU` keputusan pemilik (tiga sub-keputusan, lihat kolom sebelah) | **Permintaan fitur: pindahkan domain email, API key WA, dan konfigurasi broadcast dari env var/kode ke Settings UI**, supaya pemilik proyek tidak perlu menyentuh backend/kode setiap kali ganti domain atau provider. Cakupan penuh mencakup TIGA nilai yang saat ini env-var-only: `EMAIL_FROM` (domain pengirim — BUKAN secret, aman di DB polos), `RESEND_API_KEY` (secret), `WHATSAPP_API_TOKEN` + endpoint WA (`WA_API_URL`, saat ini malah hardcode, bukan cuma env var) (keduanya secret/semi-secret). Pola `BroadcastConfig` (upsert satu baris per `channel`, endpoint `GET`/`POST` dengan `verifyGlobalAdmin`) sudah terbukti jalan untuk jadwal/penerima/template WA (#193) — bisa dipakai sebagai TEMPLATE arsitektur, bukan diprogram dari nol.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | **Rancangan yang direkomendasikan** (tunggu konfirmasi pemilik proyek sebelum kode disentuh — tiga sub-keputusan eksplisit di bawah): 1) Tabel baru, mis. `AppSecrets` atau `IntegrationSettings` — satu baris per integrasi (`'email'`, `'whatsapp'`), kolom NON-secret polos (`emailFrom`, `waEndpoint`, `waSenderNumber`, `waProvider`) + kolom secret **terenkripsi** (`resendApiKeyEnc`, `waApiTokenEnc`) memakai AES-256-GCM dengan kunci server (`ENCRYPTION_KEY`, satu env var BARU — sama filosofinya dengan rancangan refresh token OAuth yang sudah disetujui pemilik proyek di §18.8/§18.9, JANGAN dirancang ulang dari nol, ikuti pola yang sama). 2) `email.service.ts` (`ambilApiKey()`/`ambilEmailPengirim()`) dan `whatsapp.service.ts` (`ambilToken()`, plus `WA_API_URL` diubah dari konstanta jadi kolom DB) dibaca ULANG: cek DB dulu, **env var jadi fallback** (bukan dihapus) — supaya deploy yang belum sempat diisi lewat UI tidak mendadak mati. 3) Endpoint baru `GET`/`POST /api/settings/email/config` dan `GET`/`POST /api/settings/whatsapp/config` (terpisah dari `broadcast-config` yang sudah ada), dijaga `verifyGlobalAdmin` (pola sama seperti #193), dan dicatat ke `AuditLogs` setiap kali secret diganti (siapa, kapan — BUKAN nilai secret-nya). 4) Field secret di response API **write-only** — setelah disimpan, GET berikutnya memulangkan mask (`"••••••••"` atau `"tersimpan (4 karakter terakhir: ...ab12)"`), TIDAK PERNAH memulangkan plaintext ke frontend, mengikuti pola aman standar (GitHub/Stripe token masking) supaya secret tidak bocor lewat DevTools/log jaringan. 5) `WhatsAppConfigForm.tsx` disambungkan ke endpoint baru ini (menutup #263 sekaligus) — field yang sudah ada di UI (`provider`/`endpoint`/`token`/`senderNumber`/`deviceId`) dipakai, tinggal disambung, TIDAK perlu didesain ulang. `EmailConfigForm.tsx` ditambah field domain (`emailFrom`) + API key (masked) — saat ini formnya cuma tampilan status baca-saja plus simpan template ke `localStorage` (bukan server, lihat #24 versi lama yang sudah basi), jadi field kredensial ini benar-benar baru di form itu. | Tiga keputusan yang **wajib** dijawab pemilik proyek sebelum satu baris kode pun ditulis: **(a) Metode enkripsi** — AES-256-GCM dengan `ENCRYPTION_KEY` di env var server (murah, konsisten dengan §18.8/§18.9, TAPI kunci enkripsi sendiri tetap di env var — kalau server env var-nya bocor, secret di DB bisa didekripsi) — cukup, atau perlu KMS/secrets-manager eksternal (AWS KMS, HashiCorp Vault dsb — jauh lebih aman tapi jauh lebih besar lingkupnya dan perlu infrastruktur baru)? **(b) Fallback env var** — tetap dipertahankan selamanya sebagai jalur darurat, atau suatu saat env var dilarang sepenuhnya dan HARUS lewat DB? **(c) Lingkup "email untuk broadcast"** — permintaan pemilik proyek menyebut ganti "email untuk broadcast" sebagai kebutuhan terpisah dari WA. Saat ini **tidak ada fitur broadcast email sama sekali** — `email.service.ts` cuma kirim transaksional (bukan broadcast massal seperti WA). Apakah ini berarti (c1) HANYA kredensial pengirim email yang perlu bisa diganti dari UI (cakupan item ini sudah cukup), atau (c2) diminta juga FITUR broadcast email baru setara WA (kirim massal terjadwal, tabel `BroadcastConfig` baru dengan `channel = 'email'`) — itu proyek terpisah yang jauh lebih besar, perlu item baru sendiri kalau memang dimaksud. | Jangan asumsikan sendiri jawaban (a)/(b)/(c) di atas dan langsung mulai coding — ketiganya mengubah bentuk skema database dan arsitektur endpoint, salah tebak berarti menulis ulang dari nol. Ikuti pola `BroadcastConfig`/`broadcastConfig.service.ts`/endpoint `system.routes.ts` (#193) sebagai referensi struktur kode yang sudah disetujui pemilik proyek — jangan merancang pola baru yang beda gaya tanpa alasan. `EmailConfigForm.tsx` saat ini punya panggilan API sungguhan untuk `fetchEmailSettings()`/`testEmailConnection()` (tampilan status + test kirim) — JANGAN dianggap seluruhnya statis; yang perlu ditambah cuma field kredensial baru, bukan membangun ulang form ini. Setelah #264 selesai, #263 otomatis closed — jangan kerjakan dua kali. | **F13** |       Tidak        |
+
+#### F0 tambahan — Tipografi seluruh aplikasi, lanjutan #265 (1 item)
+
+**#265 SELESAI 29 Agu 2026 tapi cakupannya sempit** — ditutup lewat 4 commit (`1c18eb5`, `2bfe0b4`, `5b66006`, `b45a680`, digabung `6394bb7`) yang menyentuh `src/index.css` (h1/h2/h3/th) dan **±19 berkas** di 4 modul: sidebar, Dashboard, beberapa modal (`ProfileEditModal.tsx`, `EditSprintModal.tsx`), `AdminUserPanel.tsx`, `MasterDataPanel.tsx`, plus modul Daftar Isu/Perencanaan/Kanban/QA. Pemilik proyek melampirkan **screenshot BARU** 29 Agu 2026 (panel Advanced Filters: STATUS/PRIORITY/SPRINT/LABEL/CATEGORY/FROM DATE/TO DATE, dan header tabel WORK/ASSIGNEE/REPORTER/PRIORITY) yang MASIH menunjukkan pola gemuk yang sama, dan secara eksplisit meminta **pemindaian ulang SELURUH modul** ("banyak lagi di menu lain... cek semua di lanpro").
+
+**Pemindaian ulang 29 Agu 2026 (SETELAH #265 di-merge ke `main`, mode laporan-saja, TIDAK ada kode yang diubah):** grep pola yang sama persis (`uppercase` + `tracking-wide(r)` + `font-medium`/`font-semibold`/`font-bold`; `text-[10px]`/`text-[11px]`/`text-xs` + `font-semibold`/`font-bold`; seluruh `<th>`/`<thead>` asli) di SELURUH `src/` menemukan **493 lokasi tersisa di 78 berkas, 25 folder modul** — membuktikan #265 baru menuntaskan sebagian kecil. Modul yang SAMA SEKALI belum tersentuh #265: `src/features/auth` (layar Login/Register/Forgot/Reset Password), `src/features/backup`, `src/features/connect`, `src/features/enterprise-audit`, `src/features/explorer` (DB Explorer), `src/features/flowchart` (9 berkas), `src/features/meeting-notes` (5 berkas, termasuk `AiMeetingCompanion.tsx` — 27 kemunculan, TERBANYAK di seluruh app), `src/features/settings`, `src/features/team`, `src/features/timeline`, `src/features/users/UserDetailView.tsx` (24 kemunculan, termasuk 5 `<th>` asli baris 3434-3446) & `UserSessionsPanel.tsx` (2 `<th>`), `src/features/wiki`, `src/components/modals/*` (8 berkas), `src/components/shared/forms/*` (4 berkas field generik — dampaknya BESAR karena dipakai berulang di banyak form), `src/components/ui/CoreUI.tsx`, `src/components/LiveChatWidget.tsx`/`RateLimitIndicator.tsx`/`SingleLoginCollisionModal.tsx`/`UserProfileDropdown.tsx`/`WelcomeScreen.tsx`, dan `src/AppContainer.tsx`. Modul yang #265 SUDAH sentuh (dashboard/sidebar/master-data/issues/planning/kanban/qa) TERNYATA juga masih menyisakan lokasi yang lolos — lihat lampiran lengkap, kolom "Sudah disentuh #265?" per baris tidak tersedia tapi file yang disebut di catatan #265 di atas boleh diasumsikan SEBAGIAN sudah beres, verifikasi dulu sebelum menganggap seluruh baris di modul itu masih rusak.
+
+**Akar masalah SAMA seperti #265** (bukan temuan baru secara teknis, cuma cakupannya jauh lebih luas): kombinasi `uppercase` + `tracking-wide`/`tracking-wider` + ukuran kecil (10-11px, kadang `text-xs` ~12px) + weight `font-medium` (500) atau lebih berat (`font-semibold` 600, `font-bold` 700) dipasang big berulang-ulang sebagai class literal di tiap komponen — BUKAN dari aturan global CSS (itu sudah diperbaiki #265). Tabel WORK/ASSIGNEE/REPORTER/PRIORITY di screenshot pemilik proyek persisnya `src/features/issues/styles.ts:19` (`tableHeaderCell`) dipakai oleh `IssueListView.tsx:333-345` — class eksplisit `text-[10px] font-medium ... uppercase tracking-wider`, MENGALAHKAN aturan global `th{font-weight:600}` di `index.css:471` (yang sudah diturunkan dari 700 oleh #265) karena spesifisitas class Tailwind lebih tinggi daripada selector element polos. Filter pill chip di panel Advanced Filters (`src/features/issues/styles.ts:10,12` — `filterPill`/`filterPillAmber` = `text-[10px] font-medium uppercase tracking-tight`) juga belum disentuh #265.
+
+**Rekomendasi strategi, BUKAN cuma daftar file** (mengingat skalanya 78 berkas — perbaikan satu-satu tanpa pola akan memakan puluhan sesi dan gampang tidak konsisten): pertimbangkan mendefinisikan 2-3 kelas utilitas bersama di `src/index.css` atau helper `cn()` terpusat (mis. `.label-caps` = `text-[10px] font-normal text-content-subtle uppercase tracking-wider`, `.table-header-cell` = turunan sama), lalu SELURUH lokasi di lampiran diarahkan memakai kelas itu alih-alih menulis kombinasi weight/size/tracking berulang secara manual di 493 tempat berbeda. Ini juga mencegah drift berikutnya — sekali kelas pusatnya benar, seluruh app ikut benar, dan revisi berikutnya (kalau pemilik proyek masih kurang puas) cukup ubah SATU definisi. Keputusan pola vs per-file tetap milik pemilik proyek/Antigravity yang mengerjakan — dicatat sebagai rekomendasi, bukan keputusan final.
+
+Lampiran — inventaris lengkap 493 lokasi, ditelusuri 29 Agu 2026 (pasca-merge #265, mode laporan-saja):
+
+```
+## src/root
+src/AppContainer.tsx:2658 | p | text-xs sm:text-[10px] font-medium text-emerald-400 uppercase tracking-widest flex items-c
+src/AppContainer.tsx:2676 | element | px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-slate-950 text-
+
+## src/components
+src/components/LiveChatWidget.tsx:730 | p | px-4 pt-2.5 pb-1 text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-widest text-con
+src/components/LiveChatWidget.tsx:793 | p | px-4 pt-3 pb-1 text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-widest text-conte
+src/components/LiveChatWidget.tsx:1091 | element | px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px] font-medium upperca
+src/components/LiveChatWidget.tsx:1112 | span | text-xs sm:text-[10px] font-medium tracking-widest text-content-muted uppercase
+src/components/LiveChatWidget.tsx:1179 | element | w-full py-1.5 bg-surface-inverse-strong text-content-inverse rounded-xl text-xs sm:text-[1
+src/components/RateLimitIndicator.tsx:72 | heading | text-xs font-medium uppercase tracking-wider text-amber-50
+src/components/RateLimitIndicator.tsx:82 | span | text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider bg-surface/15 px
+src/components/SingleLoginCollisionModal.tsx:56 | span | text-xs font-medium text-content-secondary uppercase tracking-wider
+src/components/UserProfileDropdown.tsx:102 | span | text-xs font-semibold text-content-strong truncate max-w-[130px]
+src/components/UserProfileDropdown.tsx:130 | p | text-xs font-semibold text-content-subtle truncate
+src/components/WelcomeScreen.tsx:102 | element | mt-3 px-6 py-2 min-h-9 rounded-lg bg-primary hover:bg-primary-hover text-content-inverse t
+src/components/WelcomeScreen.tsx:122 | element | mt-3 px-6 py-2 min-h-9 rounded-lg bg-primary hover:bg-primary-hover text-content-inverse t
+src/components/WelcomeScreen.tsx:134 | div | text-xs font-semibold uppercase tracking-wider text-content-subtle mb-3
+
+## src/components/modals
+src/components/modals/AddCaseModal.tsx:73 | heading | text-sm font-medium text-content-strong uppercase tracking-wider
+src/components/modals/AddCaseModal.tsx:95 | element | flex-1 py-2 text-xs font-medium uppercase tracking-wider rounded-md transition
+src/components/modals/AddCaseModal.tsx:106 | element | flex-1 py-2 text-xs font-medium uppercase tracking-wider rounded-md transition
+src/components/modals/AddCaseModal.tsx:133 | label | text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider block
+src/components/modals/AddCaseModal.tsx:147 | label | text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider block
+src/components/modals/AddCaseModal.tsx:188 | label | text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider block
+src/components/modals/AddCaseModal.tsx:202 | label | text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider block
+src/components/modals/AddCaseModal.tsx:221 | element | px-4 py-2 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium u
+src/components/modals/AddCaseModal.tsx:227 | element | px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs f
+src/components/modals/AddCaseModal.tsx:283 | element | px-4 py-2 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium u
+src/components/modals/AddCaseModal.tsx:290 | element | px-5 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs f
+src/components/modals/AddSuiteModal.tsx:54 | heading | text-sm font-medium text-content-strong uppercase tracking-wider
+src/components/modals/AddSuiteModal.tsx:98 | element | px-4 py-2.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium
+src/components/modals/AddSuiteModal.tsx:104 | element | px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse text-xs
+src/components/modals/CreateBugTicketModal.tsx:109 | label | text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block
+src/components/modals/CreateBugTicketModal.tsx:123 | label | text-xs sm:text-[10px] font-medium text-danger-text uppercase tracking-wider block
+src/components/modals/CreateBugTicketModal.tsx:192 | label | text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block
+src/components/modals/CreateBugTicketModal.tsx:211 | label | text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block
+src/components/modals/CreateBugTicketModal.tsx:239 | label | text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block
+src/components/modals/CreateBugTicketModal.tsx:254 | element | flex-1 py-3 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium
+src/components/modals/CreateBugTicketModal.tsx:261 | element | flex-1 py-3 bg-danger-surface hover:bg-danger-hover text-content-inverse text-xs font-medi
+src/components/modals/DeleteConfirmationModal.tsx:35 | heading | text-sm font-medium text-content-strong uppercase tracking-wider
+src/components/modals/EditCaseModal.tsx:48 | heading | text-sm font-medium text-content-strong uppercase tracking-wider
+src/components/modals/EditCaseModal.tsx:53 | label | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block
+src/components/modals/EditCaseModal.tsx:64 | label | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block
+src/components/modals/EditCaseModal.tsx:102 | label | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block
+src/components/modals/EditCaseModal.tsx:113 | label | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block
+src/components/modals/EditProjectModal.tsx:179 | p | text-xs sm:text-[10px] font-medium text-red-400 uppercase tracking-widest mb-3
+src/components/modals/EditSuiteModal.tsx:35 | heading | text-sm font-medium text-content-strong uppercase tracking-wider
+src/components/modals/EditSuiteModal.tsx:40 | label | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider block
+
+## src/components/shared
+src/components/shared/forms/FileUploadField.tsx:28 | label | text-xs sm:text-[10px] text-content-body font-medium block uppercase tracking-wider
+src/components/shared/forms/SelectField.tsx:30 | label | text-xs sm:text-[10px] text-content-body font-medium block uppercase tracking-wider
+src/components/shared/forms/TextAreaField.tsx:22 | label | text-xs sm:text-[10px] text-content-body font-medium block uppercase tracking-wider
+src/components/shared/forms/TextField.tsx:21 | label | text-xs sm:text-[10px] text-content-body font-medium block uppercase tracking-wider
+
+## src/components/ui
+src/components/ui/CoreUI.tsx:312 | element | text-xs sm:text-[11px] font-medium uppercase tracking-wide whitespace-nowrap
+
+## src/features/activity
+src/features/activity/ActivityLogPanel.tsx:101 | element | px-4 py-2.5 bg-indigo-600 border border-indigo-600 text-content-inverse rounded-xl text-xs
+src/features/activity/ActivityLogPanel.tsx:171 | thead | bg-surface
+src/features/activity/ActivityLogPanel.tsx:173 | th | px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em]
+src/features/activity/ActivityLogPanel.tsx:176 | th | px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em]
+src/features/activity/ActivityLogPanel.tsx:179 | th | px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em]
+src/features/activity/ActivityLogPanel.tsx:182 | th | px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em]
+src/features/activity/ActivityLogPanel.tsx:199 | div | text-xs sm:text-[10px] font-medium text-content-subtle tabular-nums uppercase mt-1 trackin
+src/features/activity/ActivityLogPanel.tsx:298 | element | font-mono text-xs sm:text-[11px] sm:text-[9px] bg-surface-muted text-content-muted px-2 py
+src/features/activity/ActivityLogPanel.tsx:303 | button | text-xs sm:text-[10px] font-medium text-indigo-600 hover:text-indigo-800 uppercase trackin
+
+## src/features/auth
+src/features/auth/LoginScreen.tsx:140 | label | text-xs font-semibold text-content-body tracking-wide block
+src/features/auth/LoginScreen.tsx:168 | label | text-xs font-semibold text-content-body tracking-wide block
+src/features/auth/LoginScreen.tsx:228 | element | w-full bg-primary-surface text-content-inverse py-3 rounded-lg font-semibold uppercase tra
+src/features/auth/RegisterScreen.tsx:129 | label | text-xs font-semibold text-content-body tracking-wide block
+src/features/auth/RegisterScreen.tsx:155 | label | text-xs font-semibold text-content-body tracking-wide block
+src/features/auth/RegisterScreen.tsx:180 | label | text-xs font-semibold text-content-body tracking-wide block
+src/features/auth/RegisterScreen.tsx:209 | label | text-xs font-semibold text-content-body tracking-wide block
+src/features/auth/RegisterScreen.tsx:313 | element | w-full bg-primary-surface text-content-inverse py-3 rounded-lg font-semibold uppercase tra
+src/features/auth/components/AuthHeroPanel.tsx:59 | p | text-xs font-medium text-content-inverse-muted mt-3 tracking-widest uppercase
+src/features/auth/components/ForgotPasswordModal.tsx:105 | label | text-xs font-semibold text-content-body block
+src/features/auth/components/ForgotPasswordModal.tsx:144 | element | flex-1 py-2.5 px-4 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover
+src/features/auth/components/ResetPasswordModal.tsx:112 | element | w-full py-2.5 px-4 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover
+src/features/auth/components/ResetPasswordModal.tsx:120 | label | text-xs font-semibold text-content-body block
+src/features/auth/components/ResetPasswordModal.tsx:151 | label | text-xs font-semibold text-content-body block
+src/features/auth/components/ResetPasswordModal.tsx:200 | element | flex-1 py-2.5 px-4 bg-primary-surface text-content-inverse hover:bg-primary-surface-hover
+
+## src/features/backup
+src/features/backup/BackupPanel.tsx:205 | heading | text-xs font-medium text-content-strong uppercase tracking-wide
+src/features/backup/BackupPanel.tsx:231 | heading | text-xs font-medium text-content-strong uppercase tracking-wide
+src/features/backup/BackupPanel.tsx:265 | heading | text-xs font-medium text-content-body uppercase tracking-wider
+src/features/backup/BackupPanel.tsx:276 | thead | bg-surface-muted/70 text-content-body border-b border-border-subtle/80 font-medium upperca
+src/features/backup/BackupPanel.tsx:278 | th | py-2.5 px-3.5
+src/features/backup/BackupPanel.tsx:279 | th | py-2.5 px-3.5
+src/features/backup/BackupPanel.tsx:280 | th | py-2.5 px-3.5
+src/features/backup/BackupPanel.tsx:281 | th | py-2.5 px-3.5
+src/features/backup/BackupPanel.tsx:282 | th | py-2.5 px-3.5 text-right
+
+## src/features/connect
+src/features/connect/ConnectPanel.tsx:102 | heading | text-xs font-medium text-content-strong uppercase tracking-wide
+src/features/connect/ConnectPanel.tsx:114 | heading | text-xs font-medium text-content-strong uppercase tracking-wide flex items-center gap-2
+
+## src/features/dashboard
+src/features/dashboard/DashboardView.tsx:832 | heading | text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2
+src/features/dashboard/DashboardView.tsx:965 | heading | text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2
+src/features/dashboard/DashboardView.tsx:1013 | heading | text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2
+src/features/dashboard/DashboardView.tsx:1059 | heading | text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2
+src/features/dashboard/DashboardView.tsx:1077 | thead | <thead>
+src/features/dashboard/DashboardView.tsx:1078 | element | border-b border-border-faint text-xs sm:text-[11px] font-medium uppercase tracking-wider t
+src/features/dashboard/DashboardView.tsx:1079 | th | py-2.5 px-2
+src/features/dashboard/DashboardView.tsx:1080 | th | py-2.5 px-2
+src/features/dashboard/DashboardView.tsx:1081 | th | py-2.5 px-2
+src/features/dashboard/DashboardView.tsx:1082 | th | py-2.5 px-2
+src/features/dashboard/DashboardView.tsx:1083 | th | py-2.5 px-2
+src/features/dashboard/DashboardView.tsx:1084 | th | py-2.5 px-2 text-right
+src/features/dashboard/DashboardView.tsx:1098 | span | inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-bo
+src/features/dashboard/DashboardView.tsx:1172 | heading | text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2
+src/features/dashboard/DashboardView.tsx:1232 | heading | text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2
+src/features/dashboard/DashboardView.tsx:1279 | heading | text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2
+src/features/dashboard/DashboardView.tsx:1374 | heading | text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2
+src/features/dashboard/DashboardView.tsx:1424 | heading | text-xs font-medium text-content-strong uppercase tracking-wider flex items-center gap-2
+src/features/dashboard/components/SidebarWidgetsStack.tsx:66 | heading | text-xs sm:text-[10px] font-medium uppercase tracking-widest text-primary flex items-cente
+src/features/dashboard/components/SidebarWidgetsStack.tsx:71 | span | inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8p
+src/features/dashboard/components/SidebarWidgetsStack.tsx:102 | span | inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px
+src/features/dashboard/components/SidebarWidgetsStack.tsx:107 | div | text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider
+src/features/dashboard/components/SidebarWidgetsStack.tsx:123 | heading | text-xs sm:text-[10px] font-medium uppercase tracking-widest text-danger flex items-center
+src/features/dashboard/components/SidebarWidgetsStack.tsx:128 | span | inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8p
+src/features/dashboard/components/SidebarWidgetsStack.tsx:159 | span | inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px
+src/features/dashboard/components/SidebarWidgetsStack.tsx:164 | div | text-xs sm:text-[10px] font-medium text-danger uppercase tracking-wider
+src/features/dashboard/components/SidebarWidgetsStack.tsx:179 | heading | text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex item
+src/features/dashboard/components/SidebarWidgetsStack.tsx:200 | div | text-xs sm:text-[10px] font-medium text-danger uppercase tracking-wider
+src/features/dashboard/components/SidebarWidgetsStack.tsx:216 | heading | text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex item
+src/features/dashboard/components/SidebarWidgetsStack.tsx:220 | span | inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[10px] sm:text-[8p
+src/features/dashboard/components/SidebarWidgetsStack.tsx:251 | span | inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs sm:text-[10px] sm:text-[8px
+src/features/dashboard/components/SidebarWidgetsStack.tsx:274 | heading | text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex item
+src/features/dashboard/components/SidebarWidgetsStack.tsx:311 | heading | text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-strong flex item
+src/features/dashboard/components/SidebarWidgetsStack.tsx:350 | heading | text-xs sm:text-[10px] font-medium uppercase tracking-widest text-indigo-300 flex items-ce
+src/features/dashboard/components/SidebarWidgetsStack.tsx:377 | element | w-full mt-4 py-3 min-h-11 text-xs font-medium uppercase tracking-wider text-content-invers
+src/features/dashboard/styles.ts:8 | element | headerSubtitleLeft: "text-[10px] font-medium tracking-widest text-indigo-600 uppercase"
+src/features/dashboard/styles.ts:20 | element | healthLabelTop: "text-[10px] font-medium uppercase tracking-widest text-content-subtle"
+src/features/dashboard/styles.ts:30 | element | text-[10px] font-medium uppercase tracking-widest text-content-subtle mb-4 flex items-cen
+src/features/dashboard/styles.ts:32 | element | text-[10px] font-medium uppercase tracking-widest text-rose-500 mb-4 flex items-center ga
+src/features/dashboard/styles.ts:54 | element | text-[10px] font-medium uppercase tracking-widest text-content-strong flex items-center g
+
+## src/features/enterprise-audit
+src/features/enterprise-audit/DiffViewer.tsx:45 | div | grid grid-cols-12 gap-0 bg-surface-sunken border-b border-border-subtle text-xs sm:text-[1
+src/features/enterprise-audit/EnterpriseAuditDashboard.tsx:237 | span | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider
+src/features/enterprise-audit/EnterpriseAuditDashboard.tsx:244 | span | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider
+src/features/enterprise-audit/EnterpriseAuditDashboard.tsx:341 | p | text-xs font-medium animate-pulse uppercase tracking-wider text-content-secondary
+src/features/enterprise-audit/EnterpriseAuditDashboard.tsx:481 | span | text-xs font-medium text-content-muted uppercase tracking-widest
+src/features/enterprise-audit/EnterpriseAuditDashboard.tsx:501 | p | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-2
+src/features/enterprise-audit/EnterpriseAuditDashboard.tsx:519 | p | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-2
+src/features/enterprise-audit/EnterpriseAuditDashboard.tsx:537 | heading | text-xs font-medium text-content uppercase tracking-widest
+
+## src/features/explorer
+src/features/explorer/DbExplorerPanel.tsx:212 | div | px-3.5 py-2.5 text-xs sm:text-[11px] font-medium text-content-muted uppercase tracking-wid
+src/features/explorer/DbExplorerPanel.tsx:292 | thead | bg-primary-surface/5 text-primary font-medium uppercase tracking-wider
+src/features/explorer/DbExplorerPanel.tsx:304 | th | p-3 border-b border-border-subtle font-medium text-content-subtle
+
+## src/features/flowchart
+src/features/flowchart/FlowchartContainer.tsx:2525 | element | mt-4 btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-s
+src/features/flowchart/FlowchartContainer.tsx:2600 | span | px-2.5 py-1 text-xs sm:text-[10px] font-medium uppercase tracking-wider bg-surface-muted t
+src/features/flowchart/FlowchartContainer.tsx:2605 | span | px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-blue-500/10 t
+src/features/flowchart/FlowchartContainer.tsx:2610 | span | px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-emerald-500/1
+src/features/flowchart/FlowchartContainer.tsx:2615 | span | px-2.5 py-1 text-[10px] leading-none font-medium uppercase tracking-wider bg-violet-500/10
+src/features/flowchart/FlowchartContainer.tsx:3056 | span | text-xs sm:text-[11px] sm:text-[9px] text-emerald-400 font-medium uppercase tracking-wider
+src/features/flowchart/FlowchartContainer.tsx:3267 | span | font-medium uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-violet-4
+src/features/flowchart/FlowchartContainer.tsx:3358 | span | text-xs sm:text-[10px] sm:text-[8.5px] font-medium tracking-wider text-content-muted upper
+src/features/flowchart/FlowchartContainer.tsx:3557 | span | text-xs sm:text-[10px] sm:text-[8px] font-mono text-content-muted uppercase tracking-wides
+src/features/flowchart/components/CanvasContextMenu.tsx:148 | div | px-3 py-1.5 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider text
+src/features/flowchart/components/CanvasContextMenu.tsx:157 | div | px-3 py-1 flex items-center gap-1.5 text-xs sm:text-[11px] sm:text-[9px] font-medium upper
+src/features/flowchart/components/CanvasToolbar.tsx:52 | p | text-xs sm:text-[10px] sm:text-[8px] font-medium text-content-subtle uppercase tracking-wi
+src/features/flowchart/components/CanvasToolbar.tsx:83 | span | text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider hidden sm:inline
+src/features/flowchart/components/CanvasToolbar.tsx:90 | span | text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider hidden sm:inline
+src/features/flowchart/components/CanvasToolbar.tsx:120 | span | text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider hidden sm:inline
+src/features/flowchart/components/FlowchartDashboard.tsx:108 | thead | <thead>
+src/features/flowchart/components/FlowchartDashboard.tsx:109 | element | bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-semibold text-
+src/features/flowchart/components/FlowchartDashboard.tsx:110 | th | py-3.5 px-4 w-14 text-center
+src/features/flowchart/components/FlowchartDashboard.tsx:111 | th | py-3.5 px-4 min-w-[180px] max-w-[280px]
+src/features/flowchart/components/FlowchartDashboard.tsx:114 | th | py-3.5 px-4 w-36
+src/features/flowchart/components/FlowchartDashboard.tsx:115 | th | py-3.5 px-4 min-w-[180px] max-w-[280px]
+src/features/flowchart/components/FlowchartDashboard.tsx:118 | th | py-3.5 px-4 w-44
+src/features/flowchart/components/FlowchartDashboard.tsx:119 | th | py-3.5 px-4 w-40
+src/features/flowchart/components/FlowchartDashboard.tsx:120 | th | py-3.5 px-4 w-36
+src/features/flowchart/components/FlowchartDashboard.tsx:121 | th | py-3.5 px-4 w-28 text-center
+src/features/flowchart/components/FlowchartMinimap.tsx:258 | div | flex justify-between items-center mt-1 px-1 text-xs sm:text-[10px] sm:text-[8px] font-medi
+src/features/flowchart/components/FlowchartMinimap.tsx:273 | element | flex items-center gap-2 px-3 py-1.5 rounded-xl border font-medium text-xs sm:text-[11px]
+src/features/flowchart/components/FlowchartNode.tsx:387 | element | flex items-center gap-1 text-xs sm:text-[10px] sm:text-[8.5px] font-medium uppercase trac
+src/features/flowchart/components/ImportDiagramModal.tsx:100 | div | text-xs sm:text-[10px] font-medium uppercase tracking-wider
+src/features/flowchart/components/ImportDiagramModal.tsx:123 | div | text-xs sm:text-[10px] font-medium uppercase tracking-wider
+src/features/flowchart/components/ImportDiagramModal.tsx:146 | div | text-xs sm:text-[10px] font-medium uppercase tracking-wider
+src/features/flowchart/components/ImportDiagramModal.tsx:227 | span | text-emerald-700 text-xs sm:text-[11px] uppercase tracking-wider font-medium block mb-1
+src/features/flowchart/components/ImportDiagramModal.tsx:255 | span | font-medium uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-emerald-
+src/features/flowchart/components/ImportDiagramModal.tsx:266 | div | text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wid
+src/features/flowchart/components/ImportDiagramModal.tsx:278 | div | text-xs sm:text-[11px] sm:text-[9px] text-content-muted font-medium uppercase tracking-wid
+src/features/flowchart/components/NodeContextMenu.tsx:89 | div | px-3 py-1.5 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider text
+src/features/flowchart/components/NodeContextMenu.tsx:123 | div | px-3 py-1 flex items-center gap-1.5 text-xs sm:text-[11px] sm:text-[9px] font-medium upper
+src/features/flowchart/components/ShapePalette.tsx:86 | span | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wide
+src/features/flowchart/components/ShapePalette.tsx:169 | span | text-xs sm:text-[10px] font-medium text-content-strong uppercase tracking-widest font-mono
+
+## src/features/issues
+src/features/issues/IssueListView.tsx:314 | thead | <thead>
+src/features/issues/IssueListView.tsx:316 | th | w-8 px-1 text-center bg-surface-sunken
+src/features/issues/IssueListView.tsx:317 | th | w-12 px-4, isCompact ? py-1 : py-2.5
+src/features/issues/TaskDetailModal.tsx:189 | p | font-medium uppercase tracking-wider text-amber-800 text-xs sm:text-[11px]
+src/features/issues/TaskDetailModal.tsx:263 | heading | text-xs font-medium text-content-body uppercase tracking-wider flex items-center gap-2
+src/features/issues/TaskDetailModal.tsx:309 | heading | text-xs font-medium text-content-body uppercase tracking-wider flex items-center gap-2
+src/features/issues/TaskDetailModal.tsx:366 | heading | text-sm font-medium text-content uppercase tracking-widest flex items-center gap-2
+src/features/issues/components/list/IssueAdvancedFiltersPanel.tsx:137 | span | ml-1 bg-primary-surface text-content-inverse rounded-full px-1.5 py-0.5 flex items-center
+src/features/issues/components/list/IssueBulkActionsBar.tsx:60 | span | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider
+src/features/issues/components/list/IssueBulkActionsBar.tsx:129 | span | text-content-subtle font-medium uppercase tracking-wider text-xs sm:text-[10px]
+src/features/issues/components/modal/TaskAttachmentsSection.tsx:44 | heading | text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-subtle
+src/features/issues/components/modal/TaskAttachmentsSection.tsx:89 | p | text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-subtle uppercase tracking-wi
+src/features/issues/components/modal/TaskAttachmentsSection.tsx:107 | div | py-4 text-center opacity-20 italic text-xs sm:text-[10px] uppercase font-medium tracking-w
+src/features/issues/components/modal/TaskCommentsSection.tsx:58 | element | pb-4 text-xs font-medium uppercase tracking-widest transition-all relative
+src/features/issues/components/modal/TaskCommentsSection.tsx:75 | element | pb-4 text-xs font-medium uppercase tracking-widest transition-all relative
+src/features/issues/components/modal/TaskCommentsSection.tsx:153 | div | p-3 bg-surface-sunken border-b border-border-faint text-xs sm:text-[10px] font-medium text
+src/features/issues/components/modal/TaskCommentsSection.tsx:192 | element | shadow-soft-lg shadow-indigo-500/20 px-6 font-medium uppercase tracking-widest text-xs sm:
+src/features/issues/components/modal/TaskDetailSidebar.tsx:73 | heading | text-[11px] font-medium text-content-strong uppercase tracking-wider flex items-center gap
+src/features/issues/components/modal/TaskLinksSection.tsx:46 | heading | text-xs sm:text-[10px] font-medium uppercase tracking-widest text-content-subtle
+src/features/issues/components/modal/TaskLinksSection.tsx:69 | span | text-[10px] leading-none sm:text-[9px] font-medium uppercase text-indigo-500 bg-indigo-500
+src/features/issues/components/modal/TaskSubtasksSection.tsx:38 | heading | text-sm font-medium text-content uppercase tracking-widest flex items-center gap-2
+src/features/issues/components/modal/TaskSubtasksSection.tsx:113 | p | text-xs font-medium text-content-subtle uppercase tracking-widest italic
+src/features/issues/styles.ts:19 | element | group relative px-4 py-3 text-[10px] font-medium text-content-subtle uppercase tracking-w
+
+## src/features/kanban
+src/features/kanban/components/KanbanCard.tsx:146 | element | font-medium uppercase rounded tracking-wider border
+src/features/kanban/components/KanbanCard.tsx:163 | element | font-medium uppercase text-danger-text bg-danger/10 rounded tracking-widest animate-pulse
+src/features/kanban/components/KanbanCard.tsx:180 | element | font-medium uppercase rounded tracking-widest
+src/features/kanban/components/KanbanCard.tsx:253 | element | font-medium text-content-muted group-hover:text-primary uppercase tracking-wider transiti
+src/features/kanban/components/KanbanColumn.tsx:49 | span | text-xs font-semibold uppercase tracking-wider text-content-strong
+src/features/kanban/components/KanbanColumn.tsx:53 | span | bg-surface-muted text-content-secondary px-2 py-0.5 rounded-md text-xs sm:text-[10px] font
+src/features/kanban/components/KanbanColumn.tsx:105 | span | text-xs sm:text-[10px] font-semibold text-primary uppercase tracking-wider
+src/features/kanban/index.tsx:241 | span | text-[11px] font-medium uppercase tracking-wider text-content-strong truncate
+src/features/kanban/index.tsx:399 | span | text-xs sm:text-[10px] font-medium uppercase tracking-wider text-content-muted truncate
+
+## src/features/master
+src/features/master/MasterDataPanel.tsx:608 | element | btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibo
+src/features/master/MasterDataPanel.tsx:1059 | span | text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-widest text-indigo-400
+src/features/master/MasterDataPanel.tsx:1071 | label | block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest ml-
+src/features/master/MasterDataPanel.tsx:1358 | label | block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-
+src/features/master/MasterDataPanel.tsx:1370 | label | block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-
+src/features/master/MasterDataPanel.tsx:1409 | label | block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-
+src/features/master/MasterDataPanel.tsx:1445 | label | block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest
+src/features/master/MasterDataPanel.tsx:1520 | label | block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-
+src/features/master/MasterDataPanel.tsx:1538 | label | block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-
+src/features/master/MasterDataPanel.tsx:1550 | label | block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-
+src/features/master/MasterDataPanel.tsx:1590 | label | block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-
+src/features/master/MasterDataPanel.tsx:1608 | label | block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-
+src/features/master/MasterDataPanel.tsx:1620 | label | block text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mb-
+
+## src/features/meeting-notes
+src/features/meeting-notes/AiMeetingCompanion.tsx:913 | span | text-[10px] leading-none text-indigo-800 font-medium uppercase tracking-widest bg-indigo-5
+src/features/meeting-notes/AiMeetingCompanion.tsx:989 | heading | text-xs font-medium text-content-strong uppercase tracking-widest flex items-center gap-2
+src/features/meeting-notes/AiMeetingCompanion.tsx:1101 | span | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest mr-1
+src/features/meeting-notes/AiMeetingCompanion.tsx:1128 | div | text-[10px] leading-none font-medium uppercase tracking-wider px-2.5 py-1 bg-amber-500/10
+src/features/meeting-notes/AiMeetingCompanion.tsx:1165 | div | flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider
+src/features/meeting-notes/AiMeetingCompanion.tsx:1189 | div | flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider
+src/features/meeting-notes/AiMeetingCompanion.tsx:1317 | div | flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider
+src/features/meeting-notes/AiMeetingCompanion.tsx:1348 | div | flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider
+src/features/meeting-notes/AiMeetingCompanion.tsx:1362 | div | flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider
+src/features/meeting-notes/AiMeetingCompanion.tsx:1390 | div | flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2
+src/features/meeting-notes/AiMeetingCompanion.tsx:1408 | span | text-xs sm:text-[10px] text-indigo-600 font-medium uppercase tracking-widest block mb-1
+src/features/meeting-notes/AiMeetingCompanion.tsx:1423 | heading | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest
+src/features/meeting-notes/AiMeetingCompanion.tsx:1441 | div | flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2
+src/features/meeting-notes/AiMeetingCompanion.tsx:1471 | div | flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2
+src/features/meeting-notes/AiMeetingCompanion.tsx:1506 | div | flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider
+src/features/meeting-notes/AiMeetingCompanion.tsx:1550 | heading | text-xs font-medium text-content-subtle uppercase tracking-wider mb-1
+src/features/meeting-notes/AiMeetingCompanion.tsx:1559 | heading | text-xs sm:text-[10px] font-medium text-emerald-600 uppercase tracking-wider mb-0.5
+src/features/meeting-notes/AiMeetingCompanion.tsx:1609 | div | flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2
+src/features/meeting-notes/AiMeetingCompanion.tsx:1658 | div | flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider mb-2
+src/features/meeting-notes/AiMeetingCompanion.tsx:1667 | div | flex items-center gap-2 text-content-body font-medium text-xs sm:text-[10px] uppercase tra
+src/features/meeting-notes/AiMeetingCompanion.tsx:1679 | div | flex items-center gap-2 text-indigo-700 font-medium text-xs sm:text-[10px] uppercase track
+src/features/meeting-notes/AiMeetingCompanion.tsx:1692 | div | flex items-center gap-2 text-content-body font-medium text-xs sm:text-[10px] uppercase tra
+src/features/meeting-notes/AiMeetingCompanion.tsx:1723 | div | flex items-center gap-2 text-indigo-950 font-medium text-xs uppercase tracking-wider
+src/features/meeting-notes/AiMeetingCompanion.tsx:1731 | heading | text-xs sm:text-[10px] font-medium text-indigo-600 uppercase tracking-widest
+src/features/meeting-notes/AiMeetingCompanion.tsx:1768 | heading | text-xs sm:text-[10px] font-medium text-indigo-600 uppercase tracking-widest
+src/features/meeting-notes/DiscussionPointsTable.tsx:368 | p | text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider
+src/features/meeting-notes/DiscussionPointsTable.tsx:445 | label | text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider
+src/features/meeting-notes/DiscussionPointsTable.tsx:457 | label | text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider
+src/features/meeting-notes/DiscussionPointsTable.tsx:468 | label | text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider
+src/features/meeting-notes/DiscussionPointsTable.tsx:482 | label | text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider
+src/features/meeting-notes/DiscussionPointsTable.tsx:496 | label | text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider
+src/features/meeting-notes/DiscussionPointsTable.tsx:511 | label | text-xs sm:text-[10px] uppercase font-medium text-content-muted tracking-wider
+src/features/meeting-notes/DiscussionPointsTable.tsx:569 | thead | <thead>
+src/features/meeting-notes/DiscussionPointsTable.tsx:570 | element | bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-medium upperca
+src/features/meeting-notes/DiscussionPointsTable.tsx:571 | th | py-3 px-4 w-12 text-center
+src/features/meeting-notes/DiscussionPointsTable.tsx:572 | th | py-3 px-4 min-w-[220px]
+src/features/meeting-notes/DiscussionPointsTable.tsx:573 | th | py-3 px-4 min-w-[200px]
+src/features/meeting-notes/DiscussionPointsTable.tsx:574 | th | py-3 px-4 min-w-[150px]
+src/features/meeting-notes/DiscussionPointsTable.tsx:575 | th | py-3 px-4 min-w-[140px]
+src/features/meeting-notes/DiscussionPointsTable.tsx:576 | th | py-3 px-4 min-w-[130px]
+src/features/meeting-notes/DiscussionPointsTable.tsx:577 | th | py-3 px-4 w-24 text-center
+src/features/meeting-notes/DiscussionPointsTable.tsx:578 | th | py-3 px-4 w-28 text-center
+src/features/meeting-notes/DiscussionPointsTable.tsx:579 | th | py-3 px-4 w-24 text-center
+src/features/meeting-notes/DiscussionPointsTable.tsx:708 | span | flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none fon
+src/features/meeting-notes/DiscussionPointsTable.tsx:713 | span | flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none fon
+src/features/meeting-notes/DiscussionPointsTable.tsx:847 | span | px-2.5 py-1 rounded-md text-[10px] leading-none font-medium uppercase tracking-wider bg-am
+src/features/meeting-notes/DiscussionPointsTable.tsx:915 | span | text-xs sm:text-[10px] font-medium uppercase tracking-widest text-indigo-600 block
+src/features/meeting-notes/MeetingNotes.tsx:433 | element | btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibo
+src/features/meeting-notes/MeetingNotes.tsx:444 | thead | <thead>
+src/features/meeting-notes/MeetingNotes.tsx:445 | element | bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-medium upperca
+src/features/meeting-notes/MeetingNotes.tsx:446 | th | py-3 px-4 w-14 text-center
+src/features/meeting-notes/MeetingNotes.tsx:447 | th | py-3 px-4 min-w-[180px] max-w-[260px]
+src/features/meeting-notes/MeetingNotes.tsx:450 | th | py-3 px-4 w-44
+src/features/meeting-notes/MeetingNotes.tsx:451 | th | py-3 px-4 w-40
+src/features/meeting-notes/MeetingNotes.tsx:452 | th | py-3 px-4 w-40
+src/features/meeting-notes/MeetingNotes.tsx:453 | th | py-3 px-4 w-36
+src/features/meeting-notes/MeetingNotes.tsx:454 | th | py-3 px-4 min-w-[180px] max-w-[260px]
+src/features/meeting-notes/MeetingNotes.tsx:457 | th | py-3 px-4 w-28 text-center
+src/features/meeting-notes/MeetingNotes.tsx:691 | span | text-xs sm:text-[10px] font-medium text-primary tracking-wider uppercase block mb-1
+src/features/meeting-notes/MeetingNotes.tsx:775 | label | block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5
+src/features/meeting-notes/MeetingNotes.tsx:789 | label | block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5 flex items-cen
+src/features/meeting-notes/MeetingNotes.tsx:803 | label | block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5 flex items-cen
+src/features/meeting-notes/MeetingNotes.tsx:818 | label | block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5 flex items-cen
+src/features/meeting-notes/MeetingNotes.tsx:837 | label | block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5
+src/features/meeting-notes/MeetingNotes.tsx:851 | label | block text-content-body font-medium text-xs tracking-wider uppercase mb-1.5 flex items-cen
+src/features/meeting-notes/UserBadge.tsx:62 | span | text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-subtle uppercase tracking-wi
+
+## src/features/planning
+src/features/planning/BacklogSection/index.tsx:51 | heading | font-semibold text-content-strong text-xs tracking-tight
+src/features/planning/SprintSection/index.tsx:115 | element | text-[10px] font-medium uppercase px-2.5 py-0.5 rounded-full border shrink-0 tracking-wid
+src/features/planning/SprintSection/index.tsx:155 | div | text-xs font-semibold text-indigo-600
+src/features/planning/SprintSection/index.tsx:377 | span | text-xs sm:text-[10px] font-medium text-purple-700 uppercase tracking-wider leading-none
+src/features/planning/SprintSection/index.tsx:409 | span | text-xs sm:text-[10px] font-medium text-content-secondary uppercase tracking-wider leading
+src/features/planning/index.tsx:107 | span | text-[10px] leading-none tracking-tight font-mono font-semibold text-primary bg-indigo-500
+src/features/planning/index.tsx:113 | element | text-xs sm:text-[10px] font-medium uppercase tracking-wider
+src/features/planning/index.tsx:168 | span | text-[10px] leading-none tracking-tight font-mono font-semibold text-primary bg-indigo-500
+
+## src/features/qa
+src/features/qa/components/QADetailDrawer.tsx:102 | element | buttonClassName py-1 px-2.5 rounded-md text-xs sm:text-[11px] font-medium uppercase trac
+src/features/qa/components/QADetailDrawer.tsx:135 | element | flex-1 py-1.5 text-xs sm:text-[10px] font-medium uppercase tracking-wider roun
+src/features/qa/components/QADetailDrawer.tsx:150 | element | flex-1 py-1.5 text-xs sm:text-[10px] font-medium uppercase tracking-wider roun
+src/features/qa/components/QADetailDrawer.tsx:172 | heading | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider flex items
+src/features/qa/components/QADetailDrawer.tsx:256 | heading | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider mb-1
+src/features/qa/components/QADetailDrawer.tsx:266 | heading | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider mb-1
+src/features/qa/components/QADetailDrawer.tsx:277 | heading | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider
+src/features/qa/components/QADetailDrawer.tsx:322 | heading | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider mb-1.5
+src/features/qa/components/QASuiteSidebar.tsx:76 | heading | text-xs font-semibold text-content-strong uppercase tracking-wider
+src/features/qa/components/QASuiteSidebar.tsx:186 | element | px-2 py-0.2 text-xs sm:text-[10px] sm:text-[8px] font-medium uppercase rounded
+src/features/qa/components/QASuiteSidebar.tsx:266 | div | px-3 py-1 text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase tracking-wider text-p
+src/features/qa/components/QATestCaseTable.tsx:174 | span | px-2 py-0.5 bg-primary-surface text-content-inverse font-medium text-[10px] rounded-md upp
+src/features/qa/components/QATestCaseTable.tsx:292 | div | text-[10px] font-medium text-content-strong uppercase tracking-wider flex items-center gap
+src/features/qa/components/QATestCaseTable.tsx:364 | div | px-3.5 py-1.5 text-xs sm:text-[10px] font-medium uppercase tracking-wider text-primary bor
+src/features/qa/components/QATestCaseTable.tsx:458 | thead | <thead>
+src/features/qa/components/QATestCaseTable.tsx:459 | element | bg-primary-surface/5 border-b border-primary/15 text-[10px] font-medium uppercase tracking
+src/features/qa/components/QATestCaseTable.tsx:461 | th | py-2.5 px-3 w-8 text-center
+src/features/qa/components/QATestCaseTable.tsx:471 | th | py-2.5 px-3 w-8 text-center
+src/features/qa/components/QATestCaseTable.tsx:472 | th | py-2.5 px-4 min-w-[280px]
+src/features/qa/components/QATestCaseTable.tsx:473 | th | py-2.5 px-3 min-w-[90px] text-center
+src/features/qa/components/QATestCaseTable.tsx:474 | th | py-2.5 px-3 min-w-[180px] text-center
+src/features/qa/components/QATestCaseTable.tsx:475 | th | py-2.5 px-3 w-28 text-center
+src/features/qa/components/QATestCaseTable.tsx:541 | element | px-2 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] font-medium uppercase
+src/features/qa/components/QATestCaseTable.tsx:584 | element | buttonClassName py-1 px-2.5 rounded-md text-xs sm:text-[10px] font-medium uppercase trac
+src/features/qa/components/QATestCaseTable.tsx:643 | div | px-3.5 py-1.5 text-xs sm:text-[10px] font-medium uppercase tracking-wider text-primary bor
+src/features/qa/components/QATopBar.tsx:62 | span | text-xs sm:text-[10px] text-danger-text font-medium uppercase tracking-wider block
+src/features/qa/components/QATopBar.tsx:74 | element | ml-auto md:ml-2 px-2.5 py-1.5 bg-danger-surface hover:bg-danger-hover text-content-inverse
+src/features/qa/components/QATopBar.tsx:88 | span | text-xs sm:text-[10px] text-success-text font-medium uppercase tracking-wider
+src/features/qa/components/QATopBar.tsx:101 | element | ml-auto md:ml-2 px-2.5 py-1.5 bg-surface-muted hover:bg-surface-sunken text-content-body t
+
+## src/features/settings
+src/features/settings/SettingsPage.tsx:40 | heading | text-xs font-medium text-content-strong uppercase tracking-wide
+src/features/settings/components/BroadcastMonitor.tsx:271 | div | text-xs font-medium text-content-subtle uppercase tracking-wider flex items-center gap-2
+src/features/settings/components/BroadcastMonitor.tsx:286 | div | text-xs font-medium text-content-subtle uppercase tracking-wider flex items-center gap-2
+src/features/settings/components/EmailConfigForm.tsx:124 | span | text-xs font-semibold text-content-strong
+
+## src/features/sidebar
+src/features/sidebar/index.tsx:49 | element | text-xs sm:text-[10px] font-medium px-1.5 py-0.5 rounded shadow-xs uppercase tracking-wid
+src/features/sidebar/index.tsx:104 | span | text-[10px] font-semibold text-sidebar-title tracking-wider uppercase whitespace-nowrap bl
+src/features/sidebar/index.tsx:253 | div | text-xs sm:text-[11px] font-semibold text-sidebar-title uppercase tracking-wider
+src/features/sidebar/styles.ts:18 | element | logoText: "font-bold text-lg tracking-wider text-sidebar-text-active uppercase font-sans"
+src/features/sidebar/styles.ts:21 | element | sectionLabel: "text-[11px] font-semibold text-sidebar-title uppercase tracking-wider"
+
+## src/features/team
+src/features/team/TeamManagementPanel.tsx:284 | div | text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider
+src/features/team/TeamManagementPanel.tsx:300 | div | text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider
+src/features/team/TeamManagementPanel.tsx:316 | div | text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider
+src/features/team/TeamManagementPanel.tsx:332 | div | text-xs sm:text-[11px] font-medium text-content-subtle uppercase tracking-wider
+src/features/team/TeamManagementPanel.tsx:465 | span | text-xs sm:text-[10px] text-content-subtle font-medium uppercase tracking-wider
+src/features/team/TeamManagementPanel.tsx:473 | span | text-xs sm:text-[10px] text-content-subtle font-medium uppercase tracking-wider
+src/features/team/TeamManagementPanel.tsx:498 | thead | <thead>
+src/features/team/TeamManagementPanel.tsx:499 | element | bg-surface-sunken/80 border-b border-border-subtle/80 text-xs sm:text-[11px] font-medium t
+src/features/team/TeamManagementPanel.tsx:500 | th | px-5 py-3
+src/features/team/TeamManagementPanel.tsx:501 | th | px-5 py-3
+src/features/team/TeamManagementPanel.tsx:502 | th | px-5 py-3 text-center
+src/features/team/TeamManagementPanel.tsx:503 | th | px-5 py-3 text-center
+src/features/team/TeamManagementPanel.tsx:504 | th | px-5 py-3 text-center
+src/features/team/TeamManagementPanel.tsx:505 | th | px-5 py-3 text-right
+src/features/team/TeamManagementPanel.tsx:671 | heading | text-xs font-medium text-content-body uppercase tracking-wider mb-2
+
+## src/features/timeline
+src/features/timeline/TimelinePanel.tsx:673 | element | h-9 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse round
+src/features/timeline/TimelinePanel.tsx:707 | span | font-medium text-xs sm:text-[11px] text-content-muted uppercase tracking-widest
+src/features/timeline/TimelinePanel.tsx:828 | element | text-[10px] font-semibold uppercase tracking-tight shrink-0
+src/features/timeline/TimelinePanel.tsx:880 | span | text-xs sm:text-[11px] font-medium text-content-secondary uppercase tracking-wider
+src/features/timeline/TimelinePanel.tsx:899 | span | text-xs sm:text-[11px] font-medium text-content-secondary uppercase tracking-wider
+src/features/timeline/TimelinePanel.tsx:1180 | element | text-xs sm:text-[10.5px] font-semibold truncate tracking-tight select-none pr-1
+src/features/timeline/TimelinePanel.tsx:1228 | div | bg-danger-surface text-content-inverse text-xs sm:text-[11px] sm:text-[9px] font-semibold
+
+## src/features/users
+src/features/users/AdminUserPanel.tsx:614 | element | btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibo
+src/features/users/AdminUserPanel.tsx:629 | div | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider
+src/features/users/AdminUserPanel.tsx:642 | div | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider
+src/features/users/AdminUserPanel.tsx:655 | div | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider
+src/features/users/AdminUserPanel.tsx:668 | div | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider
+src/features/users/AdminUserPanel.tsx:774 | thead | <thead>
+src/features/users/AdminUserPanel.tsx:775 | element | bg-surface-sunken/80 border-b border-border-faint text-xs sm:text-[11px] font-medium text-
+src/features/users/AdminUserPanel.tsx:776 | th | py-3.5 px-4 text-center w-12
+src/features/users/AdminUserPanel.tsx:822 | th | py-3.5 px-4 w-40
+src/features/users/AdminUserPanel.tsx:845 | th | py-3.5 px-4 w-28 text-center
+src/features/users/AdminUserPanel.tsx:952 | element | inline-flex font-medium text-xs sm:text-[11px] sm:text-[9px] tracking-widest uppercase px
+src/features/users/AdminUserPanel.tsx:1266 | element | text-xs sm:text-[10px] font-medium uppercase tracking-wider
+src/features/users/ProfileEditModal.tsx:220 | span | absolute -bottom-1.5 left-1/2 -translate-x-1/2 bg-amber-500 text-content-inverse text-xs s
+src/features/users/ProfileEditModal.tsx:225 | span | text-xs sm:text-[10px] font-medium uppercase tracking-wider
+src/features/users/UserDetailView.tsx:1637 | element | flex items-center gap-2 py-3.5 text-xs font-semibold whitespace-nowrap transition-all bor
+src/features/users/UserDetailView.tsx:1667 | heading | text-xs font-semibold text-content-strong uppercase tracking-wider
+src/features/users/UserDetailView.tsx:1677 | element | px-3.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 hover:bg-i
+src/features/users/UserDetailView.tsx:1726 | heading | text-xs font-semibold text-content-strong uppercase tracking-wider
+src/features/users/UserDetailView.tsx:1747 | div | text-xs font-semibold text-content-strong truncate
+src/features/users/UserDetailView.tsx:1766 | heading | text-xs font-semibold text-content-strong uppercase tracking-wider
+src/features/users/UserDetailView.tsx:1774 | element | text-xs text-rose-600 hover:underline font-semibold cursor-pointer
+src/features/users/UserDetailView.tsx:1801 | span | text-xs font-semibold text-content-strong truncate
+src/features/users/UserDetailView.tsx:1805 | span | px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-700 shrink-0
+src/features/users/UserDetailView.tsx:1826 | element | text-[10px] text-rose-600 hover:bg-rose-500/10 px-2 py-0.5 rounded transition cursor-point
+src/features/users/UserDetailView.tsx:1850 | span | text-xs text-content-muted font-semibold uppercase tracking-wider block
+src/features/users/UserDetailView.tsx:1855 | span | text-xs font-semibold text-content-muted
+src/features/users/UserDetailView.tsx:1865 | span | text-xs text-content-muted font-semibold uppercase tracking-wider block
+src/features/users/UserDetailView.tsx:1870 | span | text-xs font-semibold text-content-muted
+src/features/users/UserDetailView.tsx:1887 | heading | text-xs font-semibold text-content-strong uppercase tracking-wider
+src/features/users/UserDetailView.tsx:1982 | heading | text-xs font-semibold text-content-strong uppercase tracking-wider
+src/features/users/UserDetailView.tsx:2006 | div | text-xs font-semibold text-content-strong truncate
+src/features/users/UserDetailView.tsx:2028 | span | px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 border borde
+src/features/users/UserDetailView.tsx:2051 | heading | text-sm font-semibold text-content-strong uppercase tracking-wider
+src/features/users/UserDetailView.tsx:2242 | span | text-xs font-semibold text-content-strong uppercase tracking-wider
+src/features/users/UserDetailView.tsx:2265 | span | text-xs font-semibold text-content-strong truncate
+src/features/users/UserDetailView.tsx:2273 | element | px-1.5 py-0.2 rounded text-[10px] font-semibold uppercase
+src/features/users/UserDetailView.tsx:2299 | span | inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-s
+src/features/users/UserDetailView.tsx:2323 | heading | text-xs font-semibold text-content-strong uppercase tracking-wider
+src/features/users/UserDetailView.tsx:2412 | heading | text-xs font-semibold text-content-strong uppercase tracking-wider
+src/features/users/UserDetailView.tsx:2447 | heading | text-xs font-bold text-content-strong
+src/features/users/UserDetailView.tsx:2476 | heading | text-sm font-bold text-content-strong uppercase tracking-wider
+src/features/users/UserDetailView.tsx:2490 | label | text-xs font-semibold text-content-strong flex items-center gap-2
+src/features/users/UserDetailView.tsx:2504 | label | text-xs font-semibold text-content-strong flex items-center gap-2
+src/features/users/UserDetailView.tsx:2518 | label | text-xs font-semibold text-content-strong flex items-center gap-2
+src/features/users/UserDetailView.tsx:2532 | label | text-xs font-semibold text-content-strong flex items-center gap-2
+src/features/users/UserDetailView.tsx:2565 | label | text-xs font-semibold text-content-strong flex items-center gap-2
+src/features/users/UserDetailView.tsx:2601 | label | text-xs font-semibold text-content-strong flex items-center gap-2
+src/features/users/UserDetailView.tsx:2638 | label | text-xs font-semibold text-content-strong flex items-center gap-2
+src/features/users/UserDetailView.tsx:2660 | element | px-5 py-2.5 bg-surface-sunken/80 hover:bg-surface-muted text-content-body rounded-xl text-
+src/features/users/UserDetailView.tsx:2668 | element | flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse
+src/features/users/UserDetailView.tsx:2706 | label | text-xs font-semibold text-content-strong
+src/features/users/UserDetailView.tsx:2741 | label | text-xs font-semibold text-content-strong
+src/features/users/UserDetailView.tsx:2780 | element | px-3.5 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 text-xs f
+src/features/users/UserDetailView.tsx:2790 | label | text-xs font-semibold text-content-strong
+src/features/users/UserDetailView.tsx:2831 | element | px-5 py-2.5 bg-surface-sunken/80 hover:bg-surface-muted text-content-body rounded-xl text-
+src/features/users/UserDetailView.tsx:2841 | element | flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse
+src/features/users/UserDetailView.tsx:2876 | element | px-4 py-2 rounded-xl text-xs font-semibold text-rose-600 bg-rose-50/50 hover:bg-rose-100 b
+src/features/users/UserDetailView.tsx:2904 | span | text-xs font-bold text-content-strong
+src/features/users/UserDetailView.tsx:2921 | span | inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-5
+src/features/users/UserDetailView.tsx:2927 | span | px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700
+src/features/users/UserDetailView.tsx:2935 | element | px-4 py-1.5 rounded-full text-xs font-semibold text-rose-600 bg-rose-50/50 hover:bg-rose-1
+src/features/users/UserDetailView.tsx:2954 | heading | font-semibold text-content-strong text-sm uppercase tracking-wider
+src/features/users/UserDetailView.tsx:2997 | span | text-xs font-bold text-content-strong uppercase tracking-wider
+src/features/users/UserDetailView.tsx:3018 | thead | bg-surface-sunken/40 border-b border-border-subtle text-content-muted
+src/features/users/UserDetailView.tsx:3020 | th | py-2.5 px-4 font-semibold text-xs uppercase w-2/5
+src/features/users/UserDetailView.tsx:3027 | element | py-2.5 px-2 font-semibold text-xs uppercase text-center w-20
+src/features/users/UserDetailView.tsx:3138 | heading | font-medium text-indigo-950 text-xs uppercase tracking-wider flex items-center gap-1.5
+src/features/users/UserDetailView.tsx:3209 | label | text-xs sm:text-[11px] font-medium text-indigo-950 uppercase tracking-wider block
+src/features/users/UserDetailView.tsx:3258 | heading | text-xs font-medium text-content-strong uppercase tracking-wider
+src/features/users/UserDetailView.tsx:3316 | span | w-5 h-5 rounded-full bg-surface-muted text-content-subtle text-xs sm:text-[8px] font-semib
+src/features/users/UserDetailView.tsx:3377 | div | flex items-center justify-between text-xs sm:text-[10px] text-content-subtle font-semibold
+src/features/users/UserDetailView.tsx:3418 | heading | text-xs font-semibold text-content-strong uppercase tracking-wider
+src/features/users/UserDetailView.tsx:3432 | thead | bg-surface-sunken/40 border-b border-border-subtle text-content-muted
+src/features/users/UserDetailView.tsx:3434 | th | py-3 px-4 font-semibold text-xs uppercase tracking-wider
+src/features/users/UserDetailView.tsx:3437 | th | py-3 px-4 font-semibold text-xs uppercase tracking-wider
+src/features/users/UserDetailView.tsx:3440 | th | py-3 px-4 font-semibold text-xs uppercase tracking-wider
+src/features/users/UserDetailView.tsx:3443 | th | py-3 px-4 font-semibold text-xs uppercase tracking-wider
+src/features/users/UserDetailView.tsx:3446 | th | py-3 px-4 font-semibold text-xs uppercase tracking-wider text-right
+src/features/users/UserSessionsPanel.tsx:243 | element | flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-content-
+src/features/users/UserSessionsPanel.tsx:254 | span | inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emera
+src/features/users/UserSessionsPanel.tsx:271 | element | flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-content-strong bg-surface
+src/features/users/UserSessionsPanel.tsx:285 | p | text-[10px] font-bold uppercase tracking-wider text-content-subtle
+src/features/users/UserSessionsPanel.tsx:308 | p | text-[10px] font-bold uppercase tracking-wider text-content-subtle
+src/features/users/UserSessionsPanel.tsx:330 | p | text-[10px] font-bold uppercase tracking-wider text-content-subtle
+src/features/users/UserSessionsPanel.tsx:352 | p | text-[10px] font-bold uppercase tracking-wider text-content-subtle
+src/features/users/UserSessionsPanel.tsx:425 | thead | <thead>
+src/features/users/UserSessionsPanel.tsx:426 | element | bg-surface-sunken/70 border-b border-border-subtle text-[11px] font-bold uppercase trackin
+src/features/users/UserSessionsPanel.tsx:427 | th | py-2.5 px-3 w-[22%]
+src/features/users/UserSessionsPanel.tsx:428 | th | py-2.5 px-3 w-[16%]
+src/features/users/UserSessionsPanel.tsx:431 | th | py-2.5 px-3 w-[26%]
+src/features/users/UserSessionsPanel.tsx:434 | th | py-2.5 px-3 w-[18%]
+src/features/users/UserSessionsPanel.tsx:437 | th | py-2.5 px-3 w-[12%]
+src/features/users/UserSessionsPanel.tsx:440 | th | py-2.5 px-3 w-[6%] text-center
+src/features/users/UserSessionsPanel.tsx:546 | span | text-xs font-semibold text-content-strong block truncate
+src/features/users/UserSessionsPanel.tsx:573 | span | inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-5
+src/features/users/UserSessionsPanel.tsx:579 | span | inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-danger/10
+src/features/users/UserSessionsPanel.tsx:589 | span | inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-s
+src/features/users/UserSessionsPanel.tsx:656 | element | flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-content-strong bg-surface h
+src/features/users/UserSessionsPanel.tsx:662 | span | px-3 py-1 bg-surface-sunken border border-border-subtle rounded-lg text-xs font-bold text-
+src/features/users/UserSessionsPanel.tsx:669 | element | flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-content-strong bg-surface h
+src/features/users/UserSessionsPanel.tsx:696 | span | px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text
+src/features/users/UserSessionsPanel.tsx:716 | heading | text-xs font-bold uppercase tracking-wider text-content-subtle flex items-center gap-2
+src/features/users/UserSessionsPanel.tsx:853 | element | px-2 py-0.5 rounded text-xs font-bold border uppercase tracking-wider action
+src/features/users/UserSessionsPanel.tsx:858 | span | px-2 py-0.5 rounded text-[11px] font-semibold bg-surface-sunken text-content-strong border
+src/features/users/UserSessionsPanel.tsx:883 | thead | <thead>
+src/features/users/UserSessionsPanel.tsx:884 | element | border-b border-border-subtle text-[11px] font-semibold uppercase tracking-wider text-cont
+src/features/users/UserSessionsPanel.tsx:885 | th | py-1.5 px-3
+src/features/users/UserSessionsPanel.tsx:888 | th | py-1.5 px-3
+src/features/users/UserSessionsPanel.tsx:891 | th | py-1.5 px-3
+src/features/users/UserSessionsPanel.tsx:951 | span | px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-pr
+src/features/users/UserSessionsPanel.tsx:967 | element | px-4 py-2 text-xs font-semibold text-content-strong bg-surface hover:bg-surface-hover bord
+
+## src/features/wiki
+src/features/wiki/WikiView.tsx:776 | element | bg-indigo-500/10 text-primary border border-indigo-500/30 text-[10px] leading-none font-m
+src/features/wiki/WikiView.tsx:783 | element | bg-blue-500/10 text-blue-700 border border-blue-500/30 text-[10px] leading-none font-medi
+src/features/wiki/WikiView.tsx:790 | element | bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 text-[10px] leading-none
+src/features/wiki/WikiView.tsx:797 | element | bg-purple-500/10 text-purple-700 border border-purple-500/30 text-[10px] leading-none fon
+src/features/wiki/WikiView.tsx:804 | element | bg-surface-sunken text-content-body border border-border-subtle text-xs sm:text-[10px] fo
+src/features/wiki/WikiView.tsx:890 | element | btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibo
+src/features/wiki/WikiView.tsx:901 | thead | <thead>
+src/features/wiki/WikiView.tsx:902 | element | bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-semibold text-
+src/features/wiki/WikiView.tsx:903 | th | py-3 px-4 w-14 text-center
+src/features/wiki/WikiView.tsx:904 | th | py-3 px-4 min-w-[200px] max-w-[320px]
+src/features/wiki/WikiView.tsx:905 | th | py-3 px-4 w-44
+src/features/wiki/WikiView.tsx:906 | th | py-3 px-4 w-44
+src/features/wiki/WikiView.tsx:907 | th | py-3 px-4 w-40
+src/features/wiki/WikiView.tsx:908 | th | py-3 px-4 w-36
+src/features/wiki/WikiView.tsx:909 | th | py-3 px-4 w-28 text-center
+src/features/wiki/WikiView.tsx:1179 | span | text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider flex items-
+src/features/wiki/WikiView.tsx:1184 | span | text-[10px] leading-none sm:text-[8px] font-medium bg-emerald-500/10 text-emerald-700 bord
+src/features/wiki/WikiView.tsx:1225 | element | inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-surface hover:bg-pr
+src/features/wiki/WikiView.tsx:1233 | element | inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-surface hover:bg-surface-su
+src/features/wiki/WikiView.tsx:1329 | span | text-xs sm:text-[11px] font-medium text-content-body uppercase tracking-wider flex items-c
+src/features/wiki/WikiView.tsx:1492 | p | text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-wider mt-0.5
+src/features/wiki/WikiView.tsx:1509 | label | text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block
+src/features/wiki/WikiView.tsx:1524 | label | text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block
+src/features/wiki/WikiView.tsx:1543 | label | text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block
+src/features/wiki/WikiView.tsx:1558 | label | text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block
+src/features/wiki/WikiView.tsx:1573 | label | text-xs sm:text-[10px] font-medium text-content-muted uppercase tracking-wider block
+src/features/wiki/WikiView.tsx:1603 | p | text-xs sm:text-[10px] sm:text-[8px] font-medium text-content-subtle uppercase tracking-wi
+src/features/wiki/WikiView.tsx:1619 | p | text-xs sm:text-[10px] sm:text-[8px] font-medium text-content-subtle uppercase tracking-wi
+```
 
 ### 1.2 SUDAH SELESAI — 257 item
 
@@ -1026,22 +1583,22 @@ item apa saja, syarat masuk, definisi selesai, target terukur, dan gerbang kelua
 
 ### Indeks cepat
 
-|  Fase   |  Prio  | Nama                               | Item                                                      | Sesi | Risiko            | Status                                        | TERTAHAN OLEH APA — dan siapa yang harus bergerak                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| :-----: | :----: | ---------------------------------- | --------------------------------------------------------- | ---- | ----------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **F0**  |   P3   | Kejelasan & fondasi dokumen        | #1, #10, #12, #38, #39, #79, #175, #211, #255, #257, #265 | 1–2  | Sangat rendah     | `JALAN` — 1 item terbuka (baru 29 Agu 2026)   | — bisa jalan tanpa pemilik untuk penyelidikan lebih lanjut, tapi #265 (font tebal/gemuk di seluruh app) MENUNGGU persetujuan nilai revisi konkret sebelum kode disentuh — murni visual, nol blokir production                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| **F1**  | **P0** | Cabut kredensial lama              | #15 (#2 DITAHAN)                                          | <1   | Sangat rendah     | `SELESAI` 21 Agu (diselaraskan)               | — tidak ada. #15 terverifikasi SELESAI 17 Agu: nol API key tersisa di Google Cloud Console                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| **F2**  | **P0** | Audit & perbaikan LOGIKA           | #16, #18–#20, #49–#75                                     | 3–5  | Rendah            | `SELESAI` 21 Agu (diselaraskan)               | — tidak ada. Seluruh item F2 SELESAI; #18 DIBATALKAN atas keputusan pemilik (§1.3). Sembilan keputusan yang dulu tertulis di sini semuanya sudah dijawab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| **F3**  |   P1   | Audit UI menyeluruh                | #17                                                       | 2–4  | Sangat rendah     | `SELESAI` 21 Agu (diselaraskan)               | — tidak ada. #17 SELESAI 20 Agu. Audit UI dilanjutkan lewat gelombang /design-review 21 Agu (#101–#126)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| **F4**  |   —    | Performa muat                      | #3                                                        | 1    | Rendah–sedang     | `SELESAI` 16 Agu                              | — tidak ada                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| **F5**  |   —    | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                                           | 4–6  | Tinggi            | `SELESAI` 16 Agu                              | — tidak ada                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| **F6**  |   P1   | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28, #261, #262          | 3–4  | Rendah–sedang     | `MULAI ULANG` 29 Agu 2026 (instruksi pemilik) | **DUA hal, satu PEMILIK satu DOMAIN:** #261 masih menunggu keputusan pemilik proyek (endpoint aktivasi khusus vs deteksi transisi status di endpoint generik) — satu-satunya keputusan pendekatan yang tersisa di F6. #262 pendekatannya **SUDAH DIPUTUSKAN** 29 Agu (kembali ke password random, membatalkan #121) — tinggal menunggu domain baru + implementasi. #26 sudah SELESAI, kodenya tidak berubah, tinggal verifikasi ulang pasca domain baru. **Domain pengirim akan DIGANTI LAGI** (pemilik proyek, 29 Agu) — riwayat domain lama `rajonet.com` tidak pernah lolos verifikasi Resend (#44/#127/#157). Sampai domain baru terverifikasi (`npm run doctor` 6b/6c), tak satu pun dari tiga sub-item bisa dibuktikan benar-benar terkirim. |
-| **F7**  |   P3   | **Two-Tier RBAC** & validasi       | **#76**, #4, #81, #82, #83, #156, #244, #247              | 5–8  | **Tinggi**        | `JALAN` — 2 item terbuka                      | — Penguatan mutasi & validasi skema: #244, #247 (#245, #246, #251 SELESAI 29 Agu)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| **F8**  |   P2   | Jaring pengaman                    | #9, #8                                                    | 4–6  | Rendah            | `SELESAI` 21 Agu (diselaraskan)               | — tidak ada. #9 dan #8 SELESAI                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| **F9**  |   P3   | Lapisan backend                    | #6                                                        | 6–10 | Tinggi            | `SELESAI` 21 Agu (diselaraskan)               | — tidak ada. #6 SELESAI 20 Agu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| **F10** |   P3   | Arsitektur frontend                | #5, #7, #21                                               | 8–15 | **Sangat tinggi** | `SELESAI` 21 Agu (diselaraskan)               | — tidak ada. #5, #7, #21 SELESAI                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| **F11** | **P0** | **Drive-per-user — JALUR RILIS**   | #30 (prasyarat #46)                                       | 6–10 | **Tinggi**        | `SIAP DIRANCANG`                              | **PEMILIK, 3 hal.** 6 keputusan desain sudah DIJAWAB 16 Agu (§11.1). Sisa: konfirmasi D1b & D3b · perbaiki **#46** (`SSO_ALLOWED_DOMAINS=gmail.com` membatalkan asumsi kuota corporate, §11.1b) · setujui rancangan penyimpanan refresh token terenkripsi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| **F12** |   P3   | **i18n & Aksesibilitas**           | **#55**, #174, #176, #242, #152, #172                     | 6–10 | **Rendah**        | `JALAN` — 4 item terbuka                      | — i18n teks keras & aksesibilitas: #176, #242, #152, #172 (#236 & #249 SELESAI 29 Agu)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| **F13** |   P1   | **Pengaturan kredensial via UI**   | #263, #264                                                | 4–8  | Sedang            | `JALAN` — 2 item terbuka (baru 29 Agu 2026)   | **PEMILIK:** #264 (tiga sub-keputusan — metode enkripsi, fallback env var, lingkup broadcast email) menahan seluruh fase; #263 (field WA dekoratif di UI) menunggu keputusan mengerjakan mitigasi cepat sekarang atau menunggu #264 menutupnya sekaligus. Bukan penahan rilis — fitur baru atas permintaan pemilik proyek, nol item blokir production                                                                                                                                                                                                                                                                                                                                                                                              |
+|  Fase   |  Prio  | Nama                               | Item                                                            | Sesi | Risiko            | Status                                        | TERTAHAN OLEH APA — dan siapa yang harus bergerak                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| :-----: | :----: | ---------------------------------- | --------------------------------------------------------------- | ---- | ----------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **F0**  |   P3   | Kejelasan & fondasi dokumen        | #1, #10, #12, #38, #39, #79, #175, #211, #255, #257, #265, #266 | 1–2  | Sangat rendah     | `JALAN` — 1 item terbuka (29 Agu 2026)        | — bisa langsung dikerjakan tanpa pemilik. #265 SUDAH SELESAI (§1.2) tapi cakupannya sempit (±19 dari 78 berkas bermasalah); #266 lanjutannya — 493 lokasi tersisa di 78 berkas, lampiran lengkap file:baris sudah ada di papan, tinggal dieksekusi. Murni visual, nol blokir production                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **F1**  | **P0** | Cabut kredensial lama              | #15 (#2 DITAHAN)                                                | <1   | Sangat rendah     | `SELESAI` 21 Agu (diselaraskan)               | — tidak ada. #15 terverifikasi SELESAI 17 Agu: nol API key tersisa di Google Cloud Console                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **F2**  | **P0** | Audit & perbaikan LOGIKA           | #16, #18–#20, #49–#75                                           | 3–5  | Rendah            | `SELESAI` 21 Agu (diselaraskan)               | — tidak ada. Seluruh item F2 SELESAI; #18 DIBATALKAN atas keputusan pemilik (§1.3). Sembilan keputusan yang dulu tertulis di sini semuanya sudah dijawab                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **F3**  |   P1   | Audit UI menyeluruh                | #17                                                             | 2–4  | Sangat rendah     | `SELESAI` 21 Agu (diselaraskan)               | — tidak ada. #17 SELESAI 20 Agu. Audit UI dilanjutkan lewat gelombang /design-review 21 Agu (#101–#126)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **F4**  |   —    | Performa muat                      | #3                                                              | 1    | Rendah–sedang     | `SELESAI` 16 Agu                              | — tidak ada                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **F5**  |   —    | **SSO Google/Microsoft** (poin 1)  | #11 → #29 → #32                                                 | 4–6  | Tinggi            | `SELESAI` 16 Agu                              | — tidak ada                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **F6**  |   P1   | **Email: 3 fungsi** (poin 2, 3, 4) | #22, #23, #24 → #25 → #26, #27 → #28, #261, #262                | 3–4  | Rendah–sedang     | `MULAI ULANG` 29 Agu 2026 (instruksi pemilik) | **DUA hal, satu PEMILIK satu DOMAIN:** #261 masih menunggu keputusan pemilik proyek (endpoint aktivasi khusus vs deteksi transisi status di endpoint generik) — satu-satunya keputusan pendekatan yang tersisa di F6. #262 pendekatannya **SUDAH DIPUTUSKAN** 29 Agu (kembali ke password random, membatalkan #121) — tinggal menunggu domain baru + implementasi. #26 sudah SELESAI, kodenya tidak berubah, tinggal verifikasi ulang pasca domain baru. **Domain pengirim akan DIGANTI LAGI** (pemilik proyek, 29 Agu) — riwayat domain lama `rajonet.com` tidak pernah lolos verifikasi Resend (#44/#127/#157). Sampai domain baru terverifikasi (`npm run doctor` 6b/6c), tak satu pun dari tiga sub-item bisa dibuktikan benar-benar terkirim. |
+| **F7**  |   P3   | **Two-Tier RBAC** & validasi       | **#76**, #4, #81, #82, #83, #156, #244, #247                    | 5–8  | **Tinggi**        | `JALAN` — 2 item terbuka                      | — Penguatan mutasi & validasi skema: #244, #247 (#245, #246, #251 SELESAI 29 Agu)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **F8**  |   P2   | Jaring pengaman                    | #9, #8                                                          | 4–6  | Rendah            | `SELESAI` 21 Agu (diselaraskan)               | — tidak ada. #9 dan #8 SELESAI                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **F9**  |   P3   | Lapisan backend                    | #6                                                              | 6–10 | Tinggi            | `SELESAI` 21 Agu (diselaraskan)               | — tidak ada. #6 SELESAI 20 Agu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **F10** |   P3   | Arsitektur frontend                | #5, #7, #21                                                     | 8–15 | **Sangat tinggi** | `SELESAI` 21 Agu (diselaraskan)               | — tidak ada. #5, #7, #21 SELESAI                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **F11** | **P0** | **Drive-per-user — JALUR RILIS**   | #30 (prasyarat #46)                                             | 6–10 | **Tinggi**        | `SIAP DIRANCANG`                              | **PEMILIK, 3 hal.** 6 keputusan desain sudah DIJAWAB 16 Agu (§11.1). Sisa: konfirmasi D1b & D3b · perbaiki **#46** (`SSO_ALLOWED_DOMAINS=gmail.com` membatalkan asumsi kuota corporate, §11.1b) · setujui rancangan penyimpanan refresh token terenkripsi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **F12** |   P3   | **i18n & Aksesibilitas**           | **#55**, #174, #176, #242, #152, #172                           | 6–10 | **Rendah**        | `JALAN` — 4 item terbuka                      | — i18n teks keras & aksesibilitas: #176, #242, #152, #172 (#236 & #249 SELESAI 29 Agu)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **F13** |   P1   | **Pengaturan kredensial via UI**   | #263, #264                                                      | 4–8  | Sedang            | `JALAN` — 2 item terbuka (baru 29 Agu 2026)   | **PEMILIK:** #264 (tiga sub-keputusan — metode enkripsi, fallback env var, lingkup broadcast email) menahan seluruh fase; #263 (field WA dekoratif di UI) menunggu keputusan mengerjakan mitigasi cepat sekarang atau menunggu #264 menutupnya sekaligus. Bukan penahan rilis — fitur baru atas permintaan pemilik proyek, nol item blokir production                                                                                                                                                                                                                                                                                                                                                                                              |
 
 \*Perkiraan kasar dan **belum terverifikasi** — untuk membandingkan bobot antar
 fase, bukan janji jadwal. Perbarui dengan angka nyata setelah fase pertama tutup.

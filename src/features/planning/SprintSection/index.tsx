@@ -112,7 +112,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                         </h3>
                         <span
                           className={cn(
-                            "text-[10px] font-medium uppercase px-2.5 py-0.5 rounded-full border shrink-0 tracking-wider",
+                            "text-[10px] font-normal px-2 py-0.5 rounded-full border shrink-0",
                             sprint.status === "active"
                               ? isOverdue
                                 ? "bg-red-500/10 text-red-600 border-red-500/20"
@@ -124,11 +124,11 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                         >
                           {sprint.status === "active"
                             ? isOverdue
-                              ? "OVERDUE"
-                              : "ACTIVE"
+                              ? "Overdue"
+                              : "Active"
                             : sprint.status === "planned"
-                              ? "PLANNED"
-                              : "COMPLETED"}
+                              ? "Planned"
+                              : "Completed"}
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5 text-xs text-content-subtle font-normal mt-0.5">
@@ -152,7 +152,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
 
                   {/* Sisi Tengah: Sprint Goal (Pemisah Garis Vertikal - Tanpa Ikon Pensil) */}
                   <div className="hidden lg:flex flex-col min-w-0 flex-1 border-l border-border-subtle/80 pl-5 my-0.5 max-w-md">
-                    <div className="text-xs font-semibold text-indigo-600">Sprint Goal</div>
+                    <div className="text-xs font-normal text-indigo-600">Sprint Goal</div>
                     <p className="text-xs text-content-body font-normal leading-relaxed line-clamp-2 mt-0.5">
                       {sprint.goal ||
                         t(
@@ -172,7 +172,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                               e.stopPropagation();
                               handleStartSprint(sprint.id);
                             }}
-                            className="btn-animation waves-effect waves-light btn-primary h-9 px-4 text-xs font-medium rounded-lg flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
+                            className="btn-animation waves-effect waves-light btn-primary h-8 px-3 text-xs font-normal rounded-lg flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
                           >
                             <Zap className="w-3.5 h-3.5 fill-current" />{" "}
                             <span>{t("planning.start")}</span>
@@ -184,7 +184,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                               e.stopPropagation();
                               handleCompleteSprint(sprint.id);
                             }}
-                            className="btn-animation waves-effect waves-light btn-success h-9 px-4 text-xs font-medium rounded-lg flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
+                            className="btn-animation waves-effect waves-light btn-success h-8 px-3 text-xs font-normal rounded-lg flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
                           >
                             <CheckCircle2 className="w-3.5 h-3.5" />{" "}
                             <span>{t("planning.complete")}</span>
@@ -200,7 +200,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                 activeSprintMenuId === sprint.id ? null : sprint.id
                               );
                             }}
-                            className="btn-animation waves-effect waves-light p-2.5 text-content-subtle hover:text-content-strong hover:bg-surface border border-border-subtle rounded-lg transition-colors cursor-pointer"
+                            className="btn-animation waves-effect waves-light p-2 text-content-subtle hover:text-content-strong hover:bg-surface border border-border-subtle rounded-lg transition-colors cursor-pointer"
                             title={t("planning.sprintOptions", "Opsi Sprint")}
                           >
                             <MoreVertical className="w-4 h-4" />
@@ -217,7 +217,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                   setEditingSprint(sprint);
                                   setIsEditSprintModalOpen(true);
                                 }}
-                                className="w-full px-3 py-2 text-left text-xs font-medium text-content-strong hover:bg-surface-sunken flex items-center gap-2 transition-colors cursor-pointer"
+                                className="w-full px-3 py-2 text-left text-xs font-normal text-content-strong hover:bg-surface-sunken flex items-center gap-2 transition-colors cursor-pointer"
                               >
                                 <Edit2 className="w-3.5 h-3.5 text-indigo-500" />
                                 <span>{t("planning.editSprint", "Edit Sprint")}</span>
@@ -227,7 +227,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                   setActiveSprintMenuId(null);
                                   handleDeleteSprint(sprint.id);
                                 }}
-                                className="w-full px-3 py-2 text-left text-xs font-medium text-red-600 hover:bg-red-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                                className="w-full px-3 py-2 text-left text-xs font-normal text-red-600 hover:bg-red-500/10 flex items-center gap-2 transition-colors cursor-pointer"
                               >
                                 <Trash2 className="w-3.5 h-3.5 text-red-500" />
                                 <span>{t("planning.deleteSprint", "Hapus Sprint")}</span>
@@ -248,10 +248,10 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                       <Calendar className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-content-strong leading-none">
+                      <div className="text-sm font-semibold text-content-strong leading-none">
                         {totalTasks}
                       </div>
-                      <div className="text-[11px] font-medium text-content-subtle mt-0.5">
+                      <div className="text-[11px] font-normal text-content-subtle mt-0.5">
                         {t("planning.issues", "Issues")}
                       </div>
                     </div>
@@ -263,10 +263,10 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                       <Star className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-content-strong leading-none">
+                      <div className="text-sm font-semibold text-content-strong leading-none">
                         {sprintTasks.reduce((acc, t) => acc + (t.storyPoints || 0), 0)}
                       </div>
-                      <div className="text-[11px] font-medium text-content-subtle mt-0.5">
+                      <div className="text-[11px] font-normal text-content-subtle mt-0.5">
                         {t("planning.points", "Points")}
                       </div>
                     </div>
@@ -278,10 +278,10 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                       <PieChart className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-content-strong leading-none">
+                      <div className="text-sm font-semibold text-content-strong leading-none">
                         {completionPercentage}%
                       </div>
-                      <div className="text-[11px] font-medium text-content-subtle mt-0.5">
+                      <div className="text-[11px] font-normal text-content-subtle mt-0.5">
                         {t("planning.progress", "Progress")}
                       </div>
                     </div>
@@ -293,10 +293,10 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                       <CheckCircle2 className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-content-strong leading-none">
-                        {doneTasks} / {totalTasks}
+                      <div className="text-sm font-semibold text-content-strong leading-none">
+                        {doneTasks}/{totalTasks}
                       </div>
-                      <div className="text-[11px] font-medium text-content-subtle mt-0.5">
+                      <div className="text-[11px] font-normal text-content-subtle mt-0.5">
                         {t("planning.completed", "Completed")}
                       </div>
                     </div>
@@ -374,11 +374,11 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                       >
                                         <div className="flex items-center gap-2">
                                           <Zap className="w-3.5 h-3.5 text-purple-600" />
-                                          <span className="text-xs sm:text-[10px] font-medium text-purple-700 uppercase tracking-wider leading-none">
+                                          <span className="text-xs font-normal text-purple-700 leading-none">
                                             {epic.title}
                                           </span>
                                         </div>
-                                        <div className="text-xs sm:text-[10px] font-medium text-purple-600 bg-surface border border-purple-500/30 px-2 py-0.2 rounded-md">
+                                        <div className="text-[10px] font-normal text-purple-600 bg-surface border border-purple-500/30 px-2 py-0.2 rounded-md">
                                           {items.length}
                                         </div>
                                       </div>,
@@ -406,11 +406,11 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                       >
                                         <div className="flex items-center gap-2">
                                           <Target className="w-3.5 h-3.5 text-content-muted" />
-                                          <span className="text-xs sm:text-[10px] font-medium text-content-secondary uppercase tracking-wider leading-none">
+                                          <span className="text-xs font-normal text-content-secondary leading-none">
                                             {t("planning.standaloneTasks")}
                                           </span>
                                         </div>
-                                        <div className="text-xs sm:text-[10px] font-medium text-content-secondary bg-surface border border-border-subtle/60 px-2 py-0.2 rounded-md">
+                                        <div className="text-[10px] font-normal text-content-secondary bg-surface border border-border-subtle/60 px-2 py-0.2 rounded-md">
                                           {items.length}
                                         </div>
                                       </div>,

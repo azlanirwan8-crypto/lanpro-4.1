@@ -285,7 +285,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                           )}
                         </span>
                       </div>
-                      <h3 className="font-medium text-content-strong text-xs leading-snug line-clamp-2">
+                      <h3 className="font-normal text-content-strong text-xs leading-snug line-clamp-2">
                         {epic.title}
                       </h3>
                     </div>
@@ -300,10 +300,10 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                       >
                         <KanbanColumn
                           status={status}
-                          tasks={groupedTasks[`${epic.id}:${status.label}`] || []}
+                          tasks={groupedTasks[`epic:${epic.id}:${status.label}`] || []}
                           mArr={mArr}
                           pArr={pArr}
-                          columnId={`${epic.id}:${status.label}`}
+                          columnId={`epic:${epic.id}:${status.label}`}
                           showHeader={false}
                           shakingTaskId={shakingTaskId}
                           onTaskClick={(task) => {
@@ -327,10 +327,10 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                         isCompact ? "p-2.5" : "p-3"
                       )}
                     >
-                      <h3 className="font-medium text-content-body text-xs leading-snug">
+                      <h3 className="font-normal text-content-body text-xs leading-snug">
                         {t("kanban.otherTasks")}
                       </h3>
-                      <p className="mt-0.5 text-xs sm:text-[10px] font-medium text-content-subtle">
+                      <p className="mt-0.5 text-xs sm:text-[10px] font-normal text-content-subtle">
                         {t("kanban.otherTasksHint")}
                       </p>
                     </div>
@@ -390,20 +390,20 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                       >
                         <div className="flex items-center gap-2 mb-1.5">
                           {isUnassigned ? (
-                            <div className="w-5 h-5 rounded-full flex items-center justify-center font-medium text-xs sm:text-[10px] uppercase bg-surface-muted text-content-secondary shrink-0">
+                            <div className="w-5 h-5 rounded-full flex items-center justify-center font-normal text-xs sm:text-[10px] uppercase bg-surface-muted text-content-secondary shrink-0">
                               ?
                             </div>
                           ) : (
                             <UserAvatar user={member} className="w-5 h-5 text-xs sm:text-[10px]" />
                           )}
-                          <span className="text-xs sm:text-[10px] font-medium uppercase tracking-wider text-content-muted truncate">
+                          <span className="text-xs sm:text-[10px] font-normal text-content-muted truncate">
                             {isUnassigned ? t("newTask.unassigned") : t("issueColumns.assignee")}
                           </span>
-                          <span className="ml-auto bg-surface-muted text-content-secondary px-1.5 py-0.2 rounded text-xs sm:text-[10px] font-medium shrink-0">
+                          <span className="ml-auto bg-surface-muted text-content-secondary px-1.5 py-0.2 rounded text-xs sm:text-[10px] font-normal shrink-0">
                             {totalIssueCount}
                           </span>
                         </div>
-                        <h3 className="font-medium text-content-strong text-xs leading-snug truncate">
+                        <h3 className="font-normal text-content-strong text-xs leading-snug truncate">
                           {member.displayName}
                         </h3>
                       </div>

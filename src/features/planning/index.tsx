@@ -110,7 +110,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                       {task.priority && (
                         <span
                           className={cn(
-                            "text-xs sm:text-[10px] font-medium uppercase tracking-wider",
+                            "text-[10px] font-normal",
                             task.priority === "Highest"
                               ? "text-red-600"
                               : task.priority === "High"
@@ -125,7 +125,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                       )}
                     </div>
                   </div>
-                  <h4 className="text-xs font-medium text-content-strong leading-snug line-clamp-2">
+                  <h4 className="text-xs font-normal text-content-body leading-snug line-clamp-2">
                     {task.title}
                   </h4>
                   <div className="flex items-center justify-between mt-1 pt-1 border-t border-border-faint">

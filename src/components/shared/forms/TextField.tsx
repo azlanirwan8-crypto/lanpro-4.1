@@ -18,18 +18,18 @@ export const TextField: React.FC<TextFieldProps> = ({
   return (
     <div className="space-y-1.5">
       {label && (
-        <label className="text-xs sm:text-[10px] text-content-body font-medium block uppercase tracking-wider">
+        <label className="text-xs text-content-body font-normal block">
           {label}
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <input
         {...props}
-        className={`w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-medium text-content-strong transition-all ${
+        className={`w-full text-xs p-2.5 bg-surface-sunken border border-border-subtle rounded-md focus:border-primary focus:outline-none font-normal text-content-body transition-all ${
           error ? "border-red-500/30 focus:border-red-400" : ""
         } ${className}`}
       />
-      {error && <p className="text-xs sm:text-[10px] text-red-600 font-medium">{error}</p>}
+      {error && <p className="text-xs sm:text-[10px] text-red-600 font-normal">{error}</p>}
       {helperText && !error && (
         <p className="text-xs sm:text-[10px] text-content-muted">{helperText}</p>
       )}
