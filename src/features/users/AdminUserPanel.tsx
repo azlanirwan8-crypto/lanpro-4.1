@@ -44,7 +44,7 @@ const Input = ({ value, onChange, placeholder, type = "text", className = "", ..
     value={value}
     onChange={onChange}
     placeholder={placeholder}
-    className={`w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium text-content-strong placeholder:text-content-subtle placeholder:font-medium focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all ${className}`}
+    className={`w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle placeholder:font-normal focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all ${className}`}
     {...props}
   />
 );
@@ -600,7 +600,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     placeholder={t("users.searchPlaceholder")}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded focus:bg-surface focus:ring-1 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none text-xs h-8.5 font-medium text-content-strong placeholder:text-content-subtle"
+                    className="w-full pl-9 pr-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded focus:bg-surface focus:ring-1 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none text-xs h-8.5 font-normal text-content-strong placeholder:text-content-subtle"
                   />
                 </div>
                 <button

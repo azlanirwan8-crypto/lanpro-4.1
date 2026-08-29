@@ -1514,7 +1514,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
                     placeholder={t("wiki.titlePlaceholder")}
-                    className="w-full bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-medium text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
+                    className="w-full bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
                   />
                 </div>
 
@@ -1532,7 +1532,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
                     placeholder={t("wiki.summaryPlaceholder")}
-                    className="w-full bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-medium text-content-body outline-none transition-all placeholder:text-content-subtle min-h-[100px] resize-y font-sans shadow-2xs"
+                    className="w-full bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-normal text-content-body outline-none transition-all placeholder:text-content-subtle min-h-[100px] resize-y font-sans shadow-2xs"
                   />
                 </div>
 
@@ -1563,7 +1563,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       value={editLink}
                       onChange={(e) => setEditLink(e.target.value)}
                       placeholder={t("wiki.googleLinkPlaceholder")}
-                      className="w-full bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-medium text-content-body outline-none transition-all placeholder:text-content-subtle font-mono shadow-2xs"
+                      className="w-full bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-normal text-content-body outline-none transition-all placeholder:text-content-subtle font-mono shadow-2xs"
                     />
                   </div>
                 </div>

@@ -777,7 +777,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 </label>
                 <input
                   disabled={!canModify}
-                  className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
+                  className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
                   placeholder={t("meetings.titlePlaceholder")}
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
@@ -793,7 +793,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   <input
                     type="date"
                     disabled={!canModify}
-                    className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none transition-all shadow-2xs cursor-pointer"
+                    className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all shadow-2xs cursor-pointer"
                     value={newMeetingDate}
                     onChange={(e) => setNewMeetingDate(e.target.value)}
                   />
@@ -807,7 +807,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   <input
                     type="time"
                     disabled={!canModify}
-                    className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none transition-all shadow-2xs cursor-pointer"
+                    className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all shadow-2xs cursor-pointer"
                     value={newMeetingTime}
                     onChange={(e) => setNewMeetingTime(e.target.value)}
                   />
@@ -825,7 +825,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   </div>
                   <input
                     disabled={!canModify}
-                    className="w-full pl-9 pr-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
+                    className="w-full pl-9 pr-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all placeholder:text-content-subtle shadow-2xs"
                     placeholder={t("meetings.linkPlaceholder")}
                     value={newMeetingLink}
                     onChange={(e) => setNewMeetingLink(e.target.value)}
@@ -839,7 +839,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 </label>
                 <textarea
                   disabled={!canModify}
-                  className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none transition-all resize-none min-h-[80px] placeholder:text-content-subtle shadow-2xs"
+                  className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all resize-none min-h-[80px] placeholder:text-content-subtle shadow-2xs"
                   placeholder={t("meetings.agendaPlaceholder")}
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}

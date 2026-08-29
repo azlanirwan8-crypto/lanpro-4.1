@@ -383,7 +383,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-9 pr-3 py-2 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none shadow-2xs"
+                className="w-full pl-9 pr-3 py-2 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs"
               />
             </div>
           )}
@@ -446,7 +446,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   {t("discussion.concernTopic")} *
                 </label>
                 <textarea
-                  className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 min-h-[80px] shadow-2xs"
+                  className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 min-h-[80px] shadow-2xs"
                   value={editForm.concern || ""}
                   onChange={(e) => setEditForm({ ...editForm, concern: e.target.value })}
                 />
@@ -459,7 +459,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   </label>
                   <input
                     type="text"
-                    className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs"
+                    className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs"
                     value={editForm.keterangan || ""}
                     onChange={(e) => setEditForm({ ...editForm, keterangan: e.target.value })}
                   />
@@ -470,7 +470,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   </label>
                   <input
                     type="text"
-                    className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs"
+                    className="w-full px-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs font-normal text-content-strong outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 shadow-2xs"
                     value={editForm.tindakanLanjut || ""}
                     onChange={(e) => setEditForm({ ...editForm, tindakanLanjut: e.target.value })}
                   />
@@ -774,7 +774,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           onKeyDown={(e) => {
                             if (e.key === "Enter") handleLiveQuickAdd();
                           }}
-                          className="w-full px-3 py-1.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-medium text-content-strong outline-none shadow-2xs placeholder:text-content-subtle"
+                          className="w-full px-3 py-1.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle"
                         />
                       </td>
 
@@ -1032,7 +1032,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                       handleSendThreadComment();
                     }
                   }}
-                  className="w-full bg-transparent border-0 focus:ring-0 outline-none text-xs font-medium text-content-strong placeholder:text-content-subtle py-1"
+                  className="w-full bg-transparent border-0 focus:ring-0 outline-none text-xs font-normal text-content-strong placeholder:text-content-subtle py-1"
                 />
                 <button
                   onClick={handleSendThreadComment}

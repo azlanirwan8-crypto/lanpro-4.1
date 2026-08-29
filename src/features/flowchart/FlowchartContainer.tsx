@@ -3665,7 +3665,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   placeholder={t("flowchart.docNamePlaceholder")}
                   value={flowName}
                   onChange={(e) => setFlowName(e.target.value)}
-                  className="w-full text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+                  className="w-full text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
                 />
               </div>
 
@@ -3681,7 +3681,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   type="jenis_dokumen"
                   masterData={[]}
                   className="w-full"
-                  buttonClassName="w-full text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong"
+                  buttonClassName="w-full text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong"
                 />
               </div>
 
@@ -3695,7 +3695,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   placeholder={t("flowchart.docLinkPlaceholder")}
                   value={flowExternalUrl}
                   onChange={(e) => setFlowExternalUrl(e.target.value)}
-                  className="w-full text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+                  className="w-full text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
                 />
                 <p className="text-xs sm:text-[10px] text-content-subtle leading-normal">
                   {t("flowchart.externalLinkHint")}
@@ -3710,7 +3710,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 <select
                   value={flowEpicId}
                   onChange={(e) => setFlowEpicId(e.target.value)}
-                  className="w-full text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+                  className="w-full text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
                 >
                   <option value="">{t("flowchart.connectWithEpic")}</option>
                   {availableEpics.map((epic) => (
@@ -3732,7 +3732,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   placeholder={t("flowchart.architecturePlaceholder")}
                   value={flowDescription}
                   onChange={(e) => setFlowDescription(e.target.value)}
-                  className="w-full h-24 text-xs font-medium bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+                  className="w-full h-24 text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
                 />
               </div>
 

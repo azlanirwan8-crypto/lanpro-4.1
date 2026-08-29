@@ -157,7 +157,7 @@ export const ActivityLogPanel = ({
                 placeholder={t("activityLog.searchEvents")}
                 value={auditLogSearch}
                 onChange={(e) => setAuditLogSearch(e.target.value)}
-                className="w-full pl-14 pr-6 py-4 bg-surface border border-border-subtle rounded-xl text-[13px] font-medium text-content-body tracking-wide focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:font-medium placeholder:text-content-subtle"
+                className="w-full pl-14 pr-6 py-4 bg-surface border border-border-subtle rounded-xl text-[13px] font-normal text-content-body tracking-wide focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:font-normal placeholder:text-content-subtle"
               />
             </div>
           </div>

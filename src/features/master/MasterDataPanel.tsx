@@ -35,7 +35,7 @@ const Input = ({ value, onChange, placeholder, type = "text", className = "", ..
     value={value}
     onChange={onChange}
     placeholder={placeholder}
-    className={`w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium text-content-strong placeholder:text-content-subtle placeholder:font-medium focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all ${className}`}
+    className={`w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle placeholder:font-normal focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all ${className}`}
     {...props}
   />
 );
@@ -1145,7 +1145,7 @@ export const MasterDataPanel = ({
                 <select
                   value={newMasterHierarchy}
                   onChange={(e) => setNewMasterHierarchy(e.target.value)}
-                  className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-medium text-content-strong outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-normal text-content-strong outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500"
                 >
                   <option value="Epic">Epic</option>
                   <option value="Standard">Standard</option>
@@ -1162,7 +1162,7 @@ export const MasterDataPanel = ({
                 <select
                   value={newMasterStatusGroup}
                   onChange={(e) => setNewMasterStatusGroup(e.target.value)}
-                  className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-medium text-content-strong outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-normal text-content-strong outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500"
                 >
                   <option value="To Do">To Do</option>
                   <option value="In Progress">In Progress</option>
@@ -1270,7 +1270,7 @@ export const MasterDataPanel = ({
                 placeholder={t("master.searchIcon")}
                 value={iconSearch}
                 onChange={(e) => setIconSearch(e.target.value)}
-                className="w-full px-10 py-2.5 bg-surface border border-border-subtle rounded-xl text-xs font-medium text-content-body placeholder:text-content-subtle focus:outline-none focus:border-indigo-500 transition-all pl-10"
+                className="w-full px-10 py-2.5 bg-surface border border-border-subtle rounded-xl text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none focus:border-indigo-500 transition-all pl-10"
               />
               <Search className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
             </div>
@@ -1453,7 +1453,7 @@ export const MasterDataPanel = ({
                   placeholder={t("master.searchIcon")}
                   value={editIconSearch}
                   onChange={(e) => setEditIconSearch(e.target.value)}
-                  className="w-full px-10 py-2.5 bg-surface border border-border-subtle rounded-xl text-xs font-medium text-content-body placeholder:text-content-subtle focus:outline-none focus:border-indigo-500 transition-all pl-10"
+                  className="w-full px-10 py-2.5 bg-surface border border-border-subtle rounded-xl text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none focus:border-indigo-500 transition-all pl-10"
                 />
                 <Search className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
               </div>
@@ -1523,7 +1523,7 @@ export const MasterDataPanel = ({
             <select
               value={newModuleProjectId}
               onChange={(e) => setNewModuleProjectId(e.target.value)}
-              className="w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium text-content-strong focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all"
+              className="w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-normal text-content-strong focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all"
             >
               <option value="">{t("master.selectProject")}</option>
               {projects.map((p: any) => (
@@ -1555,7 +1555,7 @@ export const MasterDataPanel = ({
               onChange={(e) => setNewModuleKeterangan(e.target.value)}
               placeholder={t("master.remarksPlaceholder")}
               rows={3}
-              className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-medium text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+              className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
             />
           </div>
 
@@ -1593,7 +1593,7 @@ export const MasterDataPanel = ({
             <select
               value={editingModuleProjectId}
               onChange={(e) => setEditingModuleProjectId(e.target.value)}
-              className="w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-medium text-content-strong focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all"
+              className="w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-normal text-content-strong focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all"
             >
               <option value="">{t("master.pickProject")}</option>
               {projects.map((p: any) => (
@@ -1625,7 +1625,7 @@ export const MasterDataPanel = ({
               onChange={(e) => setEditingModuleKeterangan(e.target.value)}
               placeholder={t("master.remarksPlaceholder")}
               rows={3}
-              className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-medium text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+              className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
             />
           </div>
 
