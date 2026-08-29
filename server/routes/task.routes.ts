@@ -1,6 +1,6 @@
 import express from "express";
 import crypto from "crypto";
-import { authenticateJWT } from "../middleware/auth";
+import { authenticateJWT, verifyGlobalAdmin } from "../middleware/auth";
 import { createAuditLog } from "../services/audit.service";
 import {
   broadcastProjectNotification,
@@ -1090,7 +1090,7 @@ router.delete(
   }
 );
 
-router.post("/api/tasks/trigger-digest", async (req, res) => {
+router.post("/api/tasks/trigger-digest", verifyGlobalAdmin, async (req, res) => {
   try {
     const { targetUserId } = req.body || {};
     const { kirimDailyTaskDigestEmail } = await import("../services/taskDigest.service");
