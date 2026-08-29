@@ -111,7 +111,7 @@ export async function getEmailIntegrationConfig(): Promise<EmailIntegrationConfi
     return toEmailConfigRow(created && created[0] ? created[0] : DEFAULT_EMAIL_CONFIG);
   } catch (err) {
     console.error("[INTEGRATION] Gagal membaca konfigurasi email dari DB:", err);
-    return DEFAULT_EMAIL_CONFIG;
+    throw err;
   } finally {
     connection.release();
   }
