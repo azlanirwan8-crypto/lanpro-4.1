@@ -10,6 +10,8 @@ import {
 } from "../services/email.service";
 import { systemRepository } from "../repositories/system.repository";
 import { getBroadcastConfig, saveBroadcastConfig } from "../services/broadcastConfig.service";
+import { validasiBody } from "../middleware/validate";
+import { testEmailSchema, whatsappBroadcastConfigSchema } from "../schemas/system.schema";
 
 const router = Router();
 
@@ -154,52 +156,57 @@ router.get("/api/settings/whatsapp/broadcast-config", verifyGlobalAdmin, async (
   }
 });
 
-router.post("/api/settings/whatsapp/broadcast-config", verifyGlobalAdmin, async (req, res) => {
-  try {
-    const { scheduleDays, scheduleTime, recipientIds, messageTemplate } = req.body || {};
+router.post(
+  "/api/settings/whatsapp/broadcast-config",
+  verifyGlobalAdmin,
+  validasiBody(whatsappBroadcastConfigSchema),
+  async (req, res) => {
+    try {
+      const { scheduleDays, scheduleTime, recipientIds, messageTemplate } = req.body || {};
 
-    if (!Array.isArray(scheduleDays) || scheduleDays.length === 0) {
-      return res.status(400).json({
+      if (!Array.isArray(scheduleDays) || scheduleDays.length === 0) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.pilih_minimal_satu_hari",
+          message: "Pilih minimal satu hari untuk jadwal broadcast",
+        });
+      }
+      const cleanDays = scheduleDays.map(String).filter((d) => VALID_DAYS.includes(d));
+      if (cleanDays.length === 0) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.hari_tidak_valid",
+          message: "Hari yang dipilih tidak valid",
+        });
+      }
+
+      if (typeof scheduleTime !== "string" || !TIME_RE.test(scheduleTime)) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.jam_tidak_valid",
+          message: "Format jam tidak valid, gunakan HH:MM",
+        });
+      }
+
+      const cleanRecipients = Array.isArray(recipientIds) ? recipientIds.map(String) : [];
+
+      const config = await saveBroadcastConfig("whatsapp", {
+        scheduleDays: cleanDays,
+        scheduleTime,
+        recipientIds: cleanRecipients,
+        messageTemplate: typeof messageTemplate === "string" ? messageTemplate : "",
+      });
+
+      res.json({ status: "success", data: config });
+    } catch (error: any) {
+      console.error("[SETTINGS] Gagal menyimpan konfigurasi broadcast WhatsApp:", error);
+      res.status(500).json({
         status: "error",
-        code: "srv.pilih_minimal_satu_hari",
-        message: "Pilih minimal satu hari untuk jadwal broadcast",
+        code: "srv.gagal_menyimpan_konfigurasi_broadcast",
+        message: "Gagal menyimpan konfigurasi broadcast",
       });
     }
-    const cleanDays = scheduleDays.map(String).filter((d) => VALID_DAYS.includes(d));
-    if (cleanDays.length === 0) {
-      return res.status(400).json({
-        status: "error",
-        code: "srv.hari_tidak_valid",
-        message: "Hari yang dipilih tidak valid",
-      });
-    }
-
-    if (typeof scheduleTime !== "string" || !TIME_RE.test(scheduleTime)) {
-      return res.status(400).json({
-        status: "error",
-        code: "srv.jam_tidak_valid",
-        message: "Format jam tidak valid, gunakan HH:MM",
-      });
-    }
-
-    const cleanRecipients = Array.isArray(recipientIds) ? recipientIds.map(String) : [];
-
-    const config = await saveBroadcastConfig("whatsapp", {
-      scheduleDays: cleanDays,
-      scheduleTime,
-      recipientIds: cleanRecipients,
-      messageTemplate: typeof messageTemplate === "string" ? messageTemplate : "",
-    });
-
-    res.json({ status: "success", data: config });
-  } catch (error: any) {
-    console.error("[SETTINGS] Gagal menyimpan konfigurasi broadcast WhatsApp:", error);
-    res.status(500).json({
-      status: "error",
-      code: "srv.gagal_menyimpan_konfigurasi_broadcast",
-      message: "Gagal menyimpan konfigurasi broadcast",
-    });
   }
-});
+);
 
 export default router;

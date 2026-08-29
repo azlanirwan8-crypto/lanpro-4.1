@@ -7,6 +7,8 @@ import { Router } from "express";
 import crypto from "crypto";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { documentRepository } from "../repositories/document.repository";
+import { validasiBody } from "../middleware/validate";
+import { createDocumentSchema, updateDocumentSchema } from "../schemas/document.schema";
 
 const router = Router();
 
@@ -17,13 +19,11 @@ router.get("/api/projects/:projectId/documents", jagaProyek("wiki", "R"), async 
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error(error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -46,13 +46,11 @@ router.get(
       }
     } catch (error: any) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -60,6 +58,7 @@ router.get(
 router.post(
   "/api/projects/:projectId/documents",
   jagaProyek("wiki", "C"),
+  validasiBody(createDocumentSchema),
   async (req: any, res) => {
     try {
       const { projectId } = req.params;
@@ -109,13 +108,11 @@ router.post(
       });
     } catch (error: any) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -123,6 +120,7 @@ router.post(
 router.put(
   "/api/projects/:projectId/documents/:id",
   jagaProyek("wiki", "U"),
+  validasiBody(updateDocumentSchema),
   async (req: any, res) => {
     try {
       const { id } = req.params;
@@ -164,13 +162,11 @@ router.put(
       res.json({ status: "success", code: "srv.document_updated", message: "Document updated" });
     } catch (error: any) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -205,13 +201,11 @@ router.delete(
       res.json({ status: "success", code: "srv.document_deleted", message: "Document deleted" });
     } catch (error: any) {
       console.error(error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );

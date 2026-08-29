@@ -9,6 +9,12 @@ import { GoogleGenAI } from "@google/genai";
 import { generateContentWithFallback } from "../services/ai.service";
 import { matchesCaller } from "../services/task.service";
 import { chatRepository } from "../repositories/chat.repository";
+import { validasiBody } from "../middleware/validate";
+import {
+  sendChatMessageSchema,
+  markChatReadSchema,
+  simulateReplySchema,
+} from "../schemas/chat.schema";
 
 const router = express.Router();
 
@@ -121,16 +127,9 @@ router.post("/api/chat/messages", async (req: any, res) => {
   }
 });
 
-router.put("/api/chat/messages/read", async (req: any, res) => {
+router.put("/api/chat/messages/read", validasiBody(markChatReadSchema), async (req: any, res) => {
   try {
     const { senderId, receiverId } = req.body;
-    if (!senderId || !receiverId) {
-      return res.status(400).json({
-        status: "error",
-        code: "srv.senderid_dan_receiverid_diperlukan",
-        message: "senderId dan receiverId diperlukan.",
-      });
-    }
     if (!matchesCaller(req.user, receiverId)) {
       return res.status(403).json({
         status: "error",
@@ -235,7 +234,7 @@ router.get("/api/chat/unread-counts", async (req: any, res) => {
   }
 });
 
-router.post("/api/chat/simulate-reply", async (req, res) => {
+router.post("/api/chat/simulate-reply", validasiBody(simulateReplySchema), async (req, res) => {
   try {
     const { senderId, receiverId, message, senderName, senderRole } = req.body;
     if (!senderId || !receiverId || !message) {

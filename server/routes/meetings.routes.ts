@@ -18,6 +18,15 @@ import { runAIPipeline } from "../services/meeting.service";
 import { MULTIMODAL_ANALYSIS_SCHEMA } from "../services/meeting-ai.schema";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { meetingRepository } from "../repositories/meeting.repository";
+import { validasiBody } from "../middleware/validate";
+import {
+  createMeetingSchema,
+  updateMeetingSchema,
+  analyzeTranscriptSchema,
+  analyzeVideoSchema,
+  analyzeMeetingSchema,
+  cancelMeetingAnalysisSchema,
+} from "../schemas/meeting.schema";
 
 const io = { emit: (event: string, ...args: any[]) => getSocketServer()?.emit(event, ...args) };
 
@@ -371,6 +380,7 @@ router.get(
 router.post(
   "/api/v1/meetings/:meetingId/cancel",
   jagaProyek("meetingNotes", "U", "meeting"),
+  validasiBody(cancelMeetingAnalysisSchema),
   async (req, res) => {
     try {
       const { meetingId } = req.params;
@@ -404,6 +414,7 @@ router.post(
 router.post(
   "/api/v1/meetings/:meetingId/analyze",
   jagaProyek("meetingNotes", "U", "meeting"),
+  validasiBody(analyzeMeetingSchema),
   async (req, res) => {
     try {
       const { meetingId } = req.params;
@@ -487,6 +498,7 @@ router.post(
 router.post(
   "/api/v1/meetings/:meetingId/analyze-video",
   jagaProyek("meetingNotes", "U", "meeting"),
+  validasiBody(analyzeVideoSchema),
   async (req, res) => {
     try {
       const meetingId = req.params.meetingId;
@@ -768,6 +780,7 @@ ${learningSection}`;
 router.post(
   "/api/projects/:projectId/meetings/:id/analyze-transcript",
   jagaProyek("meetingNotes", "U"),
+  validasiBody(analyzeTranscriptSchema),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -1057,6 +1070,7 @@ router.get(
 router.post(
   "/api/projects/:projectId/meetings",
   jagaProyek("meetingNotes", "C"),
+  validasiBody(createMeetingSchema),
   async (req, res) => {
     try {
       const { projectId } = req.params;
@@ -1103,6 +1117,7 @@ router.post(
 router.put(
   "/api/projects/:projectId/meetings/:id",
   jagaProyek("meetingNotes", "U"),
+  validasiBody(updateMeetingSchema),
   async (req: any, res) => {
     try {
       const { id } = req.params;

@@ -8,6 +8,13 @@ import crypto from "crypto";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { discussionPointsRepository } from "../repositories/discussion-points.repository";
 import { matchesCaller } from "../services/task.service";
+import { validasiBody } from "../middleware/validate";
+import {
+  createDiscussionPointSchema,
+  updateDiscussionPointSchema,
+  createCommentSchema,
+  updateCommentSchema,
+} from "../schemas/discussion-points.schema";
 
 const router = Router();
 
@@ -46,6 +53,7 @@ router.get(
 router.post(
   "/api/projects/:projectId/meetings/:id/discussionPoints",
   jagaProyek("meetingNotes", "C"),
+  validasiBody(createDiscussionPointSchema),
   async (req, res) => {
     try {
       const { id } = req.params;
@@ -97,6 +105,7 @@ router.post(
 router.put(
   "/api/projects/:projectId/meetings/:id/discussionPoints/:pointId",
   jagaProyek("meetingNotes", "U"),
+  validasiBody(updateDiscussionPointSchema),
   async (req, res) => {
     try {
       const { pointId } = req.params;
@@ -335,11 +344,13 @@ router.get(
 router.post(
   "/api/discussion-points/:pointId/comments",
   jagaProyek("meetingNotes", "C", "discussionPoint"),
+  validasiBody(createCommentSchema),
   postCommentHandler
 );
 router.post(
   "/api/projects/:projectId/meetings/:meetingId/discussionPoints/:pointId/comments",
   jagaProyek("meetingNotes", "C"),
+  validasiBody(createCommentSchema),
   postCommentHandler
 );
 
@@ -351,11 +362,13 @@ router.post(
 router.put(
   "/api/discussion-points/:pointId/comments/:commentId",
   jagaProyek("meetingNotes", "U", "discussionPoint"),
+  validasiBody(updateCommentSchema),
   putCommentHandler
 );
 router.put(
   "/api/projects/:projectId/meetings/:meetingId/discussionPoints/:pointId/comments/:commentId",
   jagaProyek("meetingNotes", "U"),
+  validasiBody(updateCommentSchema),
   putCommentHandler
 );
 router.delete(

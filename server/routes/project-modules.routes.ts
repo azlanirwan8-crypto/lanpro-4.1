@@ -6,6 +6,11 @@
 import { Router } from "express";
 import { jagaSetelanProyek } from "../middleware/jagaProyek";
 import { projectModuleRepository } from "../repositories/project-module.repository";
+import { validasiBody } from "../middleware/validate";
+import {
+  createProjectModuleSchema,
+  updateProjectModuleSchema,
+} from "../schemas/project-module.schema";
 
 const router = Router();
 
@@ -16,72 +21,67 @@ router.get("/api/project-modules", async (req, res) => {
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("GET /api/project-modules error:", error);
-    res
-      .status(500)
-      .json({
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
+  }
+});
+
+router.post(
+  "/api/project-modules",
+  jagaSetelanProyek(),
+  validasiBody(createProjectModuleSchema),
+  async (req, res) => {
+    try {
+      const { id, projectId, namaModul, keterangan } = req.body;
+
+      await projectModuleRepository.create({
+        id: id || String(Date.now()),
+        projectId,
+        namaModul,
+        keterangan,
+      });
+
+      res.json({ status: "success", code: "srv.module_created", message: "Module created" });
+    } catch (error: any) {
+      console.error("POST /api/project-modules error:", error);
+      res.status(500).json({
         status: "error",
         code: "srv.terjadi_kesalahan_internal_server",
         message: "Terjadi kesalahan internal server",
       });
-  }
-});
-
-router.post("/api/project-modules", jagaSetelanProyek(), async (req, res) => {
-  try {
-    const { id, projectId, namaModul, keterangan } = req.body;
-    if (!projectId || !namaModul) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          code: "srv.projectid_and_namamodul_are",
-          message: "projectId and namaModul are required",
-        });
     }
+  }
+);
 
-    await projectModuleRepository.create({
-      id: id || String(Date.now()),
-      projectId,
-      namaModul,
-      keterangan,
-    });
+router.put(
+  "/api/project-modules/:id",
+  jagaSetelanProyek("projectModule"),
+  validasiBody(updateProjectModuleSchema),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { projectId, namaModul, keterangan } = req.body;
 
-    res.json({ status: "success", code: "srv.module_created", message: "Module created" });
-  } catch (error: any) {
-    console.error("POST /api/project-modules error:", error);
-    res
-      .status(500)
-      .json({
+      await projectModuleRepository.update(id, {
+        projectId,
+        namaModul,
+        keterangan,
+      });
+
+      res.json({ status: "success", code: "srv.module_updated", message: "Module updated" });
+    } catch (error: any) {
+      console.error("PUT /api/project-modules/:id error:", error);
+      res.status(500).json({
         status: "error",
         code: "srv.terjadi_kesalahan_internal_server",
         message: "Terjadi kesalahan internal server",
       });
+    }
   }
-});
-
-router.put("/api/project-modules/:id", jagaSetelanProyek("projectModule"), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { projectId, namaModul, keterangan } = req.body;
-
-    await projectModuleRepository.update(id, {
-      projectId,
-      namaModul,
-      keterangan,
-    });
-
-    res.json({ status: "success", code: "srv.module_updated", message: "Module updated" });
-  } catch (error: any) {
-    console.error("PUT /api/project-modules/:id error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
-  }
-});
+);
 
 router.delete("/api/project-modules/:id", jagaSetelanProyek("projectModule"), async (req, res) => {
   try {
@@ -94,13 +94,11 @@ router.delete("/api/project-modules/:id", jagaSetelanProyek("projectModule"), as
     });
   } catch (error: any) {
     console.error("DELETE /api/project-modules/:id error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 

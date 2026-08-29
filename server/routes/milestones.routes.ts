@@ -8,6 +8,8 @@ import crypto from "crypto";
 import { createAuditLog } from "../services/audit.service";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { milestoneRepository } from "../repositories/milestone.repository";
+import { validasiBody } from "../middleware/validate";
+import { createMilestoneSchema, updateMilestoneSchema } from "../schemas/milestone.schema";
 
 const router = Router();
 
@@ -19,19 +21,18 @@ router.get("/api/projects/:projectId/milestones", jagaProyek("timeline", "R"), a
     res.json({ status: "success", data: milestones });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET milestones error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.gagal_mengambil_milestone",
-        message: "Gagal mengambil Milestone.",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_mengambil_milestone",
+      message: "Gagal mengambil Milestone.",
+    });
   }
 });
 
 router.post(
   "/api/projects/:projectId/milestones",
   jagaProyek("timeline", "C"),
+  validasiBody(createMilestoneSchema),
   async (req, res) => {
     try {
       const { projectId } = req.params;
@@ -57,13 +58,11 @@ router.post(
       res.json({ status: "success", data: { id: milestoneId, name, milestoneId } });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: POST milestones error:", error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.gagal_membuat_milestone",
-          message: "Gagal membuat Milestone.",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.gagal_membuat_milestone",
+        message: "Gagal membuat Milestone.",
+      });
     }
   }
 );
@@ -71,6 +70,7 @@ router.post(
 router.put(
   "/api/projects/:projectId/milestones/:id",
   jagaProyek("timeline", "U"),
+  validasiBody(updateMilestoneSchema),
   async (req, res) => {
     try {
       const { id, projectId } = req.params;
@@ -88,13 +88,11 @@ router.put(
       await createAuditLog(userId as string, projectId, "UPDATE", "Milestones", id, null, req.body);
       res.json({ status: "success", code: "srv.milestone_updated", message: "Milestone updated" });
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -112,13 +110,11 @@ router.delete(
 
       res.json({ status: "success", code: "srv.milestone_deleted", message: "Milestone deleted" });
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
