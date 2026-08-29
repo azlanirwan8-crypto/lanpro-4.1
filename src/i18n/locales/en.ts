@@ -2651,6 +2651,12 @@ export const en = {
     passwordDigit: "Password must contain at least 1 number (0-9)",
     passwordSymbol: "Password must contain at least 1 special symbol (@$!%*?&)",
   },
+  logoutConfirm: {
+    title: "Log Out Account",
+    message: "Are you sure you want to log out? Your session will be ended.",
+    confirm: "Yes, Log Out",
+    cancel: "Cancel",
+  },
   teamLead2: {
     sprintProgress: "Sprint Progress",
     openPlanning: "Open the full sprint planning panel",

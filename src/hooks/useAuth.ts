@@ -195,11 +195,11 @@ export function useAuth(
   const handleLogoutRequest = () => {
     setConfirmAction?.({
       isOpen: true,
-      title: "Logout Akun",
-      message: "Apakah Anda yakin ingin keluar? Sesi Anda akan diakhiri.",
+      title: i18n.t("logoutConfirm.title"),
+      message: i18n.t("logoutConfirm.message"),
       variant: "warning",
-      confirmText: "Ya, Keluar",
-      cancelText: "Batal",
+      confirmText: i18n.t("logoutConfirm.confirm"),
+      cancelText: i18n.t("logoutConfirm.cancel"),
       onConfirm: async () => {
         await handleLogout(false);
       },
