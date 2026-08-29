@@ -11,6 +11,18 @@ import { matchesCaller } from "../services/task.service";
 
 const router = Router();
 
+/**
+ * Penulis sebuah titik diskusi atau komentar, diambil dari TOKEN — item #248 & #251.
+ *
+ * Dulu `authorId`/`userId` dibaca dari body dengan cadangan header `x-user-id` lalu
+ * `"guest"`, jadi penulisnya bisa ditulis sendiri oleh pemanggil. Mengambil penulis
+ * langsung dari token mencegah pemalsuan kepemilikan.
+ */
+const penulisDari = (req: any) => ({
+  id: String(req.user?.id || req.user?.uid || ""),
+  nama: req.user?.displayName || req.user?.username || "Member",
+});
+
 // Discussion Points API
 router.get(
   "/api/projects/:projectId/meetings/:id/discussionPoints",
@@ -39,7 +51,6 @@ router.post(
       const { id } = req.params;
       const {
         parentPointId,
-        authorId,
         assignTo,
         concern,
         fitur,
@@ -50,8 +61,8 @@ router.post(
         status,
         targetDate,
         tanggalUpdateStatus,
-      } = req.body;
-      const effectiveAuthorId = authorId || req.headers["x-user-id"] || "guest";
+      } = req.body || {};
+      const effectiveAuthorId = penulisDari(req).id || "guest";
       const newId = crypto.randomUUID();
 
       await discussionPointsRepository.createPoint({
@@ -163,22 +174,6 @@ const getCommentsHandler = async (req: any, res: any) => {
     });
   }
 };
-
-/**
- * Penulis sebuah komentar, diambil dari TOKEN — item #248.
- *
- * Dulu `userId` dibaca dari body dengan cadangan header `x-user-id` lalu
- * `"guest"`, jadi penulisnya bisa ditulis sendiri oleh pemanggil. Selama tidak
- * ada jalur sunting/hapus, itu "hanya" pemalsuan nama. Begitu U dan D lahir,
- * kepemilikan berhenti jadi hiasan dan mulai jadi KUNCI: seluruh keputusan
- * "ini komentar Anda atau bukan" bersandar padanya. Membangun U/D di atas
- * penulis yang bisa dipalsukan sama dengan tidak menjaganya sama sekali —
- * bentuk yang sama persis dengan `senderId` di #69.
- */
-const penulisDari = (req: any) => ({
-  id: String(req.user?.id || req.user?.uid || ""),
-  nama: req.user?.displayName || req.user?.username || "Member",
-});
 
 const postCommentHandler = async (req: any, res: any) => {
   try {
