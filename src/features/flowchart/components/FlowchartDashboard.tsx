@@ -265,7 +265,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
 
           {/* Pagination Footer */}
           <div className="px-6 py-4 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-            <div className="text-xs text-content-muted font-medium">
+            <div className="text-xs text-content-muted font-normal">
               {t("common.showing")} {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
               {t("common.to")} {Math.min(currentPage * itemsPerPage, totalItems)} {t("common.of")}{" "}
               {totalItems} {t("common.entries")}
@@ -276,17 +276,17 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs font-medium disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
                 >
                   {t("flowchart.previous")}
                 </button>
-                <span className="px-3.5 py-1.5 bg-primary-surface text-content-inverse rounded-md text-xs font-medium shadow-xs">
+                <span className="px-3.5 py-1.5 bg-primary-surface text-content-inverse rounded-md text-xs font-normal shadow-xs">
                   {currentPage}
                 </span>
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs font-medium disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
                 >
                   {t("flowchart.next")}
                 </button>

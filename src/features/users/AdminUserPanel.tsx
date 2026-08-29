@@ -1073,13 +1073,13 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             {/* Enterprise DataTable Pagination & Entries Controls */}
             <div className="border-t border-border-faint p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-sunken/50 mt-auto">
               <div className="flex items-center gap-3">
-                <span className="text-xs font-medium text-content-muted">
+                <span className="text-xs font-normal text-content-muted">
                   {t("common.showing")}{" "}
                   {filteredUsers.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
                   {t("common.to")} {Math.min(currentPage * itemsPerPage, filteredUsers.length)}{" "}
                   {t("common.of")} {filteredUsers.length} {t("common.entries")}
                 </span>
-                <div className="flex items-center gap-1.5 text-xs text-content-muted font-medium">
+                <div className="flex items-center gap-1.5 text-xs text-content-muted font-normal">
                   <span>{t("users.rowsPerPage")}</span>
                   <select
                     value={itemsPerPage}
@@ -1087,7 +1087,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                       setItemsPerPage(Number(e.target.value));
                       setCurrentPage(1);
                     }}
-                    className="bg-surface border border-border-subtle rounded-md px-2 py-1 text-xs font-medium text-content-body outline-none focus:border-indigo-500 cursor-pointer"
+                    className="bg-surface border border-border-subtle rounded-md px-2 py-1 text-xs font-normal text-content-body outline-none focus:border-indigo-500 cursor-pointer"
                   >
                     <option value={10}>10</option>
                     <option value={25}>25</option>
@@ -1103,7 +1103,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   size="sm"
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="rounded-lg h-8 px-2.5 text-xs font-medium"
+                  className="rounded-lg h-8 px-2.5 text-xs font-normal"
                 >
                   <ChevronLeft className="w-4 h-4 mr-1" /> {t("users.prev")}
                 </Button>
@@ -1112,7 +1112,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     key={i}
                     onClick={() => setCurrentPage(i + 1)}
                     className={cn(
-                      "w-7 h-7 rounded-lg text-xs font-medium transition-colors",
+                      "w-7 h-7 rounded-lg text-xs font-normal transition-colors",
                       currentPage === i + 1
                         ? "bg-indigo-600 text-content-inverse shadow-2xs"
                         : "bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken"
@@ -1126,7 +1126,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   size="sm"
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages || totalPages === 0}
-                  className="rounded-lg h-8 px-2.5 text-xs font-medium"
+                  className="rounded-lg h-8 px-2.5 text-xs font-normal"
                 >
                   {t("users.next")} <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
