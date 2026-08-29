@@ -365,9 +365,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             <h3 className="text-sm font-medium text-content-strong tracking-tight">
               {t("discussion.heading2")}
             </h3>
-            <p className="text-xs sm:text-[10px] text-content-muted font-medium uppercase tracking-wider">
-              {t("discussion.subheading")}
-            </p>
+            <p className="text-xs font-normal text-content-subtle">{t("discussion.subheading")}</p>
           </div>
         </div>
 
@@ -391,7 +389,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
           <button
             onClick={() => setShowAiAssistant(!showAiAssistant)}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-medium transition-all border shadow-2xs cursor-pointer shrink-0",
+              "inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-normal transition-all border shadow-2xs cursor-pointer shrink-0",
               showAiAssistant
                 ? "bg-surface-muted hover:bg-surface-strong text-content-body border-border-subtle"
                 : "bg-indigo-500/10 hover:bg-indigo-500/15 text-primary border-indigo-500/30"
@@ -423,7 +421,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   <h3 className="text-sm font-medium text-content-strong tracking-tight">
                     {t("discussion.editPoint")}
                   </h3>
-                  <p className="text-xs sm:text-[11px] text-content-muted font-medium">
+                  <p className="text-xs text-content-muted font-normal">
                     {t("discussion.editPointHint")}
                   </p>
                 </div>
@@ -567,7 +565,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             <div className="overflow-x-auto">
               <ResponsiveTable className="w-full border-collapse text-left text-xs">
                 <thead>
-                  <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-medium uppercase tracking-wider text-primary">
+                  <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap">
                     <th className="py-3 px-4 w-12 text-center">{t("discussion.thNo")}</th>
                     <th className="py-3 px-4 min-w-[220px]">{t("discussion.thConcern")}</th>
                     <th className="py-3 px-4 min-w-[200px]">{t("discussion.thNotes")}</th>
@@ -580,187 +578,190 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border-faint text-content-body">
-                  {paginatedPoints.map((p, idx) => {
-                    const isOwner = p.authorId === (currentUser?.uid || "");
-                    const isCompleted = p.status === "completed";
-                    const assigneeName =
-                      projectMembers.find((m) => (m.uid || m.id) === (p.assignTo || p.assignee_id))
-                        ?.displayName ||
-                      projectMembers.find((m) => (m.uid || m.id) === (p.assignTo || p.assignee_id))
-                        ?.username ||
-                      p.assignTo ||
-                      t("newTask.unassigned");
+                  {paginatedPoints.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="text-center py-12 text-content-subtle">
+                        <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
+                          <MessageSquare className="w-5 h-5" />
+                        </div>
+                        <p className="font-normal text-content-strong text-xs">
+                          {t("meetings.emptyTitle")}
+                        </p>
+                        <p className="text-[11px] text-content-subtle mt-0.5">
+                          {t("meetings.emptyHint")}
+                        </p>
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedPoints.map((p, index) => {
+                      const isCompleted = p.status === "completed";
+                      const srNo = (currentPage - 1) * itemsPerPage + index + 1;
+                      const assigneeUser = projectMembers.find(
+                        (m) => (m.uid || m.id) === (p.assignTo || p.assignee_id)
+                      );
+                      const assigneeName = assigneeUser
+                        ? assigneeUser.displayName || assigneeUser.username
+                        : p.assignTo || t("newTask.unassigned");
+                      const isOwner = p.authorId === (currentUser?.uid || "");
 
-                    return (
-                      <tr key={p.id} className="hover:bg-surface-sunken/70 transition-colors group">
-                        <td className="py-3 px-4 text-center text-content-subtle font-medium text-xs align-middle">
-                          {String((currentPage - 1) * itemsPerPage + idx + 1).padStart(2, "0")}
-                        </td>
+                      return (
+                        <tr
+                          key={p.id || index}
+                          className={`hover:bg-surface-sunken/60 transition-colors group ${
+                            isCompleted ? "opacity-75" : ""
+                          }`}
+                        >
+                          {/* No. */}
+                          <td className="py-3 px-4 text-center text-content-subtle font-normal align-middle">
+                            {String(srNo).padStart(2, "0")}
+                          </td>
 
-                        {/* Concern */}
-                        <td className="py-3 px-4 align-middle">
-                          <div
-                            className={`font-medium text-content text-xs leading-snug ${isCompleted ? "line-through text-content-subtle" : ""}`}
-                          >
-                            {p.concern}
-                          </div>
-                          {(p.tindakanLanjut || p.next_action) && (
-                            <div className="text-primary text-xs sm:text-[11px] font-medium flex items-center gap-1 mt-1 pt-1 border-t border-border-faint">
-                              <span className="uppercase text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
-                                {t("discussion.next")}
-                              </span>
-                              {p.tindakanLanjut || p.next_action}
+                          {/* Concern (Topic) */}
+                          <td className="py-3 px-4 align-middle">
+                            <div className="font-normal text-content-strong leading-snug">
+                              {p.concern}
                             </div>
-                          )}
-                        </td>
+                            {(p.tindakanLanjut || p.next_action) && (
+                              <div className="text-[11px] text-primary font-normal mt-0.5 flex items-center gap-1">
+                                <span className="text-content-subtle font-normal">
+                                  {t("discussion.next")}
+                                </span>{" "}
+                                {p.tindakanLanjut || p.next_action}
+                              </div>
+                            )}
+                          </td>
 
-                        {/* Catatan / Keterangan */}
-                        <td className="py-3 px-4 align-middle">
-                          <div className="text-content-secondary text-xs font-normal leading-relaxed">
-                            {p.keterangan || p.comment || (
-                              <span className="text-content-subtle italic">
-                                {t("discussion.noNotes")}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Context / Tags */}
-                        <td className="py-3 px-4 align-middle">
-                          <div className="flex flex-wrap gap-1">
-                            {p.fitur && (
-                              <span className="px-2 py-[3px] bg-indigo-500/10 text-primary border border-indigo-500/30 rounded-md text-[10px] leading-none font-medium">
-                                {p.fitur}
-                              </span>
-                            )}
-                            {p.system && (
-                              <span className="px-2 py-[3px] bg-purple-500/10 text-purple-700 border border-purple-500/30 rounded-md text-[10px] leading-none font-medium">
-                                {p.system}
-                              </span>
-                            )}
-                            {p.surrounding && (
-                              <span className="px-2 py-[3px] bg-amber-500/10 text-amber-700 border border-amber-500/30 rounded-md text-[10px] leading-none font-medium">
-                                {p.surrounding}
-                              </span>
-                            )}
-                            {!p.fitur && !p.system && !p.surrounding && (
-                              <span className="text-content-subtle text-xs sm:text-[11px] italic">
-                                {t("discussion.noTags")}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* PIC */}
-                        <td className="py-3 px-4 align-middle">
-                          <div className="text-xs font-medium text-content-strong">
-                            {assigneeName}
-                          </div>
-                        </td>
-
-                        {/* Target Date */}
-                        <td className="py-3 px-4 align-middle">
-                          {p.targetDate || p.target_date ? (
-                            <div className="flex items-center gap-1 text-xs text-content-secondary font-medium">
-                              <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
-                              <span>{p.targetDate || p.target_date}</span>
+                          {/* Notes / Keterangan */}
+                          <td className="py-3 px-4 align-middle text-content-body font-normal">
+                            <div className="line-clamp-2 max-w-sm">
+                              {p.keterangan || p.comment || "-"}
                             </div>
-                          ) : (
-                            <span className="text-content-subtle text-xs italic">-</span>
-                          )}
-                        </td>
+                          </td>
 
-                        {/* Thread Icon Button */}
-                        <td className="py-3 px-4 text-center align-middle">
-                          {(() => {
-                            const commentsList = p.id ? commentsMap[p.id] || [] : [];
-                            const count = commentsList.length;
+                          {/* Context / Fitur Tag */}
+                          <td className="py-3 px-4 align-middle">
+                            <div className="flex flex-wrap gap-1">
+                              {p.fitur ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-normal bg-indigo-500/10 text-primary border border-indigo-500/30">
+                                  {p.fitur}
+                                </span>
+                              ) : (
+                                <span className="text-content-subtle text-xs italic">-</span>
+                              )}
+                            </div>
+                          </td>
 
-                            return (
-                              <button
-                                type="button"
-                                onClick={() => handleOpenThreadDrawer(p)}
-                                className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all cursor-pointer border shadow-2xs active:scale-95 ${
-                                  count > 0
-                                    ? "bg-indigo-500/10 hover:bg-indigo-500/15 text-primary border-indigo-500/30"
-                                    : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
-                                }`}
-                                title={t("discussion.openThread")}
-                              >
-                                <MessageSquare
-                                  className={`w-3.5 h-3.5 ${count > 0 ? "text-primary fill-indigo-100" : "text-content-subtle"}`}
-                                />
-                                <span>{count}</span>
-                              </button>
-                            );
-                          })()}
-                        </td>
+                          {/* PIC */}
+                          <td className="py-3 px-4 align-middle">
+                            <div className="text-xs font-normal text-content-strong">
+                              {assigneeName}
+                            </div>
+                          </td>
 
-                        {/* Status Badge */}
-                        <td className="py-3 px-4 text-center align-middle">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleStatus(p)}
-                            className="cursor-pointer transition-all active:scale-95 inline-block"
-                            title={t("discussion.toggleStatus")}
-                          >
-                            {isCompleted ? (
-                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-medium uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 shadow-2xs hover:bg-emerald-500/15">
-                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                                {t("discussion.statusDone")}
-                              </span>
+                          {/* Target Date */}
+                          <td className="py-3 px-4 align-middle">
+                            {p.targetDate || p.target_date ? (
+                              <div className="flex items-center gap-1 text-xs text-content-secondary font-normal">
+                                <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
+                                <span>{p.targetDate || p.target_date}</span>
+                              </div>
                             ) : (
-                              <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-medium uppercase tracking-wider bg-amber-500/10 text-amber-700 border border-amber-500/30 shadow-2xs hover:bg-amber-500/15">
-                                <Clock className="w-3 h-3 text-amber-600" />
-                                {t("discussion.statusPending")}
-                              </span>
+                              <span className="text-content-subtle text-xs italic">-</span>
                             )}
-                          </button>
-                        </td>
+                          </td>
 
-                        {/* Actions */}
-                        <td className="py-3 px-4 text-center align-middle">
-                          <div className="flex items-center justify-center gap-1">
-                            {hasPermission(
-                              userRole,
-                              "meetingNotes",
-                              "update",
-                              isOwner,
-                              permissions
-                            ) && (
-                              <button
-                                onClick={() => startEdit(p)}
-                                className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
-                                title={t("discussion.editRow")}
-                              >
-                                <Edit2 className="w-4 h-4" />
-                              </button>
-                            )}
-                            {hasPermission(
-                              userRole,
-                              "meetingNotes",
-                              "delete",
-                              isOwner,
-                              permissions
-                            ) && (
-                              <button
-                                onClick={() => handleDelete(p.id!)}
-                                className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
-                                title={t("discussion.deleteRow")}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                          {/* Thread Icon Button */}
+                          <td className="py-3 px-4 text-center align-middle">
+                            {(() => {
+                              const commentsList = p.id ? commentsMap[p.id] || [] : [];
+                              const count = commentsList.length;
+
+                              return (
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenThreadDrawer(p)}
+                                  className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95 ${
+                                    count > 0
+                                      ? "bg-indigo-500/10 hover:bg-indigo-500/15 text-primary border-indigo-500/30"
+                                      : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
+                                  }`}
+                                  title={t("discussion.openThread")}
+                                >
+                                  <MessageSquare
+                                    className={`w-3.5 h-3.5 ${count > 0 ? "text-primary fill-indigo-100" : "text-content-subtle"}`}
+                                  />
+                                  <span>{count}</span>
+                                </button>
+                              );
+                            })()}
+                          </td>
+
+                          {/* Status Badge */}
+                          <td className="py-3 px-4 text-center align-middle">
+                            <button
+                              type="button"
+                              onClick={() => handleToggleStatus(p)}
+                              className="cursor-pointer transition-all active:scale-95 inline-block"
+                              title={t("discussion.toggleStatus")}
+                            >
+                              {isCompleted ? (
+                                <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 shadow-2xs hover:bg-emerald-500/15">
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                  {t("discussion.statusDone")}
+                                </span>
+                              ) : (
+                                <span className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30 shadow-2xs hover:bg-amber-500/15">
+                                  <Clock className="w-3 h-3 text-amber-600" />
+                                  {t("discussion.statusPending")}
+                                </span>
+                              )}
+                            </button>
+                          </td>
+
+                          {/* Actions */}
+                          <td className="py-3 px-4 text-center align-middle">
+                            <div className="flex items-center justify-center gap-1">
+                              {hasPermission(
+                                userRole,
+                                "meetingNotes",
+                                "update",
+                                isOwner,
+                                permissions
+                              ) && (
+                                <button
+                                  onClick={() => startEdit(p)}
+                                  className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
+                                  title={t("discussion.editRow")}
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                              )}
+                              {hasPermission(
+                                userRole,
+                                "meetingNotes",
+                                "delete",
+                                isOwner,
+                                permissions
+                              ) && (
+                                <button
+                                  onClick={() => handleDelete(p.id!)}
+                                  className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
+                                  title={t("discussion.deleteRow")}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
 
                   {/* LIVE QUICK ADD INLINE ROW (Separate columns matching headers) */}
                   {canAdd && (
                     <tr className="bg-indigo-500/10 hover:bg-indigo-500/10 transition-colors">
-                      <td className="py-2.5 px-4 text-center text-indigo-400 text-xs align-middle font-medium">
+                      <td className="py-2.5 px-4 text-center text-indigo-400 text-xs align-middle font-normal">
                         +
                       </td>
 
@@ -807,7 +808,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                             }))}
                           type="fitur"
                           masterData={masterData}
-                          buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-medium shadow-2xs"
+                          buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-normal shadow-2xs"
                         />
                       </td>
 
@@ -823,7 +824,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           members={projectMembers}
                           type="member"
                           masterData={masterData}
-                          buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-medium shadow-2xs"
+                          buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-normal shadow-2xs"
                         />
                       </td>
 
@@ -833,7 +834,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           type="date"
                           value={quickTargetDate}
                           onChange={(e) => setQuickTargetDate(e.target.value)}
-                          className="w-full h-8 px-2 bg-surface border border-border-subtle text-xs font-medium text-content-body rounded-md outline-none shadow-2xs"
+                          className="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs font-normal text-content-body rounded-md outline-none shadow-2xs"
                         />
                       </td>
 
@@ -844,7 +845,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
                       {/* Status */}
                       <td className="py-2.5 px-4 text-center align-middle">
-                        <span className="px-2.5 py-1 rounded-md text-[10px] leading-none font-medium uppercase tracking-wider bg-amber-500/10 text-amber-700 border border-amber-500/30">
+                        <span className="px-2.5 py-1 rounded-md text-[10px] leading-none font-normal bg-amber-500/10 text-amber-700 border border-amber-500/30">
                           {t("discussion.statusPending")}
                         </span>
                       </td>
@@ -855,7 +856,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           type="button"
                           onClick={() => handleLiveQuickAdd()}
                           disabled={isSaving || !quickConcern.trim()}
-                          className="px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
+                          className="px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-normal shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1 mx-auto"
                           title={t("discussion.addPoint")}
                         >
                           <Plus className="w-3.5 h-3.5" />
@@ -870,7 +871,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
           </div>
 
           {/* Pagination Footer */}
-          <div className="px-6 py-3.5 bg-surface-sunken/60 border-t border-border-subtle flex items-center justify-between text-xs  text-content-secondary">
+          <div className="px-6 py-3.5 bg-surface-sunken/60 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-subtle font-normal">
             <div>
               {t("discussion.showingPoints", {
                 shown: paginatedPoints.length,
@@ -882,17 +883,17 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1.5 bg-surface border border-border-subtle rounded-lg text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer"
+                className="px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer text-xs font-normal"
               >
                 <ChevronLeft className="w-3.5 h-3.5" /> {t("discussion.prev")}
               </button>
-              <span className="px-3 py-1  bg-surface border border-border-subtle rounded-lg text-indigo-600 shadow-2xs">
+              <span className="px-3 py-1 bg-surface border border-border-subtle rounded-md text-indigo-600 shadow-2xs text-xs font-normal">
                 {currentPage} {t("common.of")} {totalPages}
               </span>
               <button
                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={currentPage >= totalPages}
-                className="px-3 py-1.5 bg-surface border border-border-subtle rounded-lg text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer"
+                className="px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-content-body hover:bg-surface-muted disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shadow-2xs cursor-pointer text-xs font-normal"
               >
                 {t("discussion.nextPage")} <ChevronRight className="w-3.5 h-3.5" />
               </button>
