@@ -72,12 +72,19 @@ router.get("/api/chat/messages", async (req: any, res) => {
 
 router.post("/api/chat/messages", async (req: any, res) => {
   try {
-    const { senderId, receiverId, message, timestamp } = req.body;
-    if (!senderId || !receiverId || !message) {
+    const { senderId, receiverId, message } = req.body || {};
+    if (!senderId || !receiverId || typeof message !== "string" || message.trim().length === 0) {
       return res.status(400).json({
         status: "error",
         code: "srv.senderid_receiverid_dan_message",
         message: "senderId, receiverId, dan message diperlukan.",
+      });
+    }
+    if (message.length > 5000) {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.pesan_terlalu_panjang",
+        message: "Pesan terlalu panjang (maksimum 5000 karakter).",
       });
     }
     if (!matchesCaller(req.user, senderId)) {
@@ -89,7 +96,7 @@ router.post("/api/chat/messages", async (req: any, res) => {
     }
 
     const id = crypto.randomUUID();
-    const finalTs = timestamp || new Date().toISOString();
+    const finalTs = new Date().toISOString();
 
     await chatRepository.createMessage({
       id,
