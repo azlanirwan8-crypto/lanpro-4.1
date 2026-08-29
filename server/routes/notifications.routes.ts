@@ -5,7 +5,7 @@
  */
 import express from "express";
 import crypto from "crypto";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { matchesCaller } from "../services/task.service";
 import { notificationRepository } from "../repositories/notification.repository";
 import { userRepository } from "../repositories/user.repository";
@@ -30,7 +30,19 @@ const notifikasiPostLimiter = rateLimit({
   max: 30,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req: any) => req.user?.id || req.user?.uid || req.ip,
+  /**
+   * Bug ditemukan 29 Agu 2026 lewat `npm run dev` sungguhan — bukan lewat
+   * test: `express-rate-limit` v8 MENOLAK `keyGenerator` yang jatuh ke
+   * `req.ip` mentah, sebab alamat IPv6 punya banyak representasi string
+   * untuk host yang sama dan itu bisa dipakai melewati batas laju. Ia
+   * melempar `ValidationError` saat `rateLimit(...)` DIPANGGIL — bukan saat
+   * ada permintaan — sehingga error-nya muncul di baris impor modul, dan
+   * SELURUH `notifications.routes.ts` gagal dimuat sejak server dinyalakan.
+   * `npx jest` tidak menangkapnya karena test memasang `req.user` manual di
+   * setiap kasus; jalur fallback ke `req.ip` tidak pernah benar-benar
+   * ditempuh di lingkungan test.
+   */
+  keyGenerator: (req: any) => req.user?.id || req.user?.uid || ipKeyGenerator(req.ip),
   message: {
     status: "error",
     code: "srv.notifikasi_terlalu_sering",
