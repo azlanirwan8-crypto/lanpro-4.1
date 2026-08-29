@@ -71,6 +71,9 @@ export const en = {
     "srv.akses_tidak_sah_sesi": "Unauthorised: invalid session, or not signed in.",
     "srv.notifikasi_tidak_ditemukan": "Notification not found.",
     "srv.akses_ditolak_notifikasi_ini": "Access denied: this notification is not yours.",
+    "srv.tipe_notifikasi_tidak_diizinkan":
+      "You are not allowed to send this notification type to another user.",
+    "srv.notifikasi_terlalu_sering": "Too many notifications sent. Please try again in 15 minutes.",
     "srv.notification_updated": "Notification updated",
     "srv.projectid_and_namamodul_are": "projectId and namaModul are required",
     "srv.module_created": "Module created",

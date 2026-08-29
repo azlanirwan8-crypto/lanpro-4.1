@@ -5,6 +5,8 @@
 
 import { Router } from "express";
 import { verifyGlobalAdmin } from "../middleware/auth";
+import { validasiBody } from "../middleware/validate";
+import { dbQuerySchema, dbConfigSchema } from "../schemas/system.schema";
 import path from "path";
 import fs from "fs";
 import { dbAdminRepository } from "../repositories/db-admin.repository";
@@ -29,13 +31,11 @@ router.get("/api/test-db", verifyGlobalAdmin, async (req, res) => {
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Database connection error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -44,7 +44,18 @@ router.get("/api/test-db", verifyGlobalAdmin, async (req, res) => {
  * POST /api/db-query
  * Body: { query: "SELECT * FROM table" }
  */
-router.post("/api/db-query", verifyGlobalAdmin, async (req, res) => {
+/**
+ * Item #259 — sisa #247: `dbQuerySchema` sudah dibuat di `system.schema.ts`
+ * saat #247 dikerjakan, tetapi TIDAK PERNAH dipasang di rute ini — skema
+ * yatim, ditemukan lewat grep langsung ke berkas ini. Dipasang sekarang.
+ *
+ * Ini tidak menggantikan pemeriksaan SQL di bawah (satu statement, awalan
+ * SELECT/SHOW/DESCRIBE, tanpa kata kunci terlarang) — itu tetap baris
+ * pertahanan utamanya. Yang ditambah skema ini: batas panjang string (skema
+ * membatasi ke 5000 karakter di bawah), sehingga query raksasa tidak lolos
+ * sampai ke `dbAdminRepository.runReadOnlyQuery`.
+ */
+router.post("/api/db-query", verifyGlobalAdmin, validasiBody(dbQuerySchema), async (req, res) => {
   try {
     const { query: sqlString } = req.body;
     if (!sqlString || typeof sqlString !== "string")
@@ -59,26 +70,22 @@ router.post("/api/db-query", verifyGlobalAdmin, async (req, res) => {
       );
 
     if (!isSingleStatement || !isReadOnly || hasForbiddenKeyword) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          code: "srv.db_explorer_hanya_mengizinkan",
-          message: "DB Explorer hanya mengizinkan satu statement SELECT/SHOW/DESCRIBE read-only.",
-        });
+      return res.status(400).json({
+        status: "error",
+        code: "srv.db_explorer_hanya_mengizinkan",
+        message: "DB Explorer hanya mengizinkan satu statement SELECT/SHOW/DESCRIBE read-only.",
+      });
     }
 
     const rows = await dbAdminRepository.runReadOnlyQuery(trimmed);
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: Database query error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -161,46 +168,59 @@ router.post("/api/system/db-status", verifyGlobalAdmin, async (req, res) => {
  * POST /api/system/db-config
  * Body: { connectionString: "postgresql://..." }
  */
-router.post("/api/system/db-config", verifyGlobalAdmin, async (req, res) => {
-  try {
-    const { connectionString } = req.body;
-    const { Pool } = await import("pg");
-    const testPool = new Pool({
-      connectionString: connectionString || process.env.DATABASE_URL || process.env.POSTGRES_URL,
-      ssl: { rejectUnauthorized: false },
-    });
-    await testPool.query("SELECT 1");
-    await testPool.end();
-    res.json({
-      status: "success",
-      code: "srv.koneksi_postgresql_berhasil",
-      message: "Koneksi PostgreSQL Berhasil!",
-    });
-  } catch (e: any) {
-    console.error(e);
-    res.status(500).json({ status: "error", message: e.message });
+// Item #259 — sisa #247: dbConfigSchema dibuat #247 tetapi tidak pernah dipasang di sini (skema yatim).
+router.post(
+  "/api/system/db-config",
+  verifyGlobalAdmin,
+  validasiBody(dbConfigSchema),
+  async (req, res) => {
+    try {
+      const { connectionString } = req.body;
+      const { Pool } = await import("pg");
+      const testPool = new Pool({
+        connectionString: connectionString || process.env.DATABASE_URL || process.env.POSTGRES_URL,
+        ssl: { rejectUnauthorized: false },
+      });
+      await testPool.query("SELECT 1");
+      await testPool.end();
+      res.json({
+        status: "success",
+        code: "srv.koneksi_postgresql_berhasil",
+        message: "Koneksi PostgreSQL Berhasil!",
+      });
+    } catch (e: any) {
+      console.error(e);
+      res.status(500).json({ status: "error", message: e.message });
+    }
   }
-});
+);
 
 /**
  * Save and hot-swap DB config connection
  * POST /api/system/db-config/save
  * Body: { connectionString: "postgresql://..." }
  */
-router.post("/api/system/db-config/save", verifyGlobalAdmin, async (req, res) => {
-  try {
-    const { connectionString } = req.body;
-    const { updatePoolConfig } = await import("../../src/lib/db");
-    updatePoolConfig({ connectionString, force: true });
-    res.json({
-      status: "success",
-      code: "srv.konfigurasi_postgresql_berhasil_diperbarui",
-      message: "Konfigurasi PostgreSQL berhasil diperbarui!",
-    });
-  } catch (e: any) {
-    console.error(e);
-    res.status(500).json({ status: "error", message: e.message });
+// Item #259 — sama dengan di atas: rute ini yang MENGUBAH koneksi produksi
+// (force: true), jadi lebih penting membatasi input daripada rute uji-coba.
+router.post(
+  "/api/system/db-config/save",
+  verifyGlobalAdmin,
+  validasiBody(dbConfigSchema),
+  async (req, res) => {
+    try {
+      const { connectionString } = req.body;
+      const { updatePoolConfig } = await import("../../src/lib/db");
+      updatePoolConfig({ connectionString, force: true });
+      res.json({
+        status: "success",
+        code: "srv.konfigurasi_postgresql_berhasil_diperbarui",
+        message: "Konfigurasi PostgreSQL berhasil diperbarui!",
+      });
+    } catch (e: any) {
+      console.error(e);
+      res.status(500).json({ status: "error", message: e.message });
+    }
   }
-});
+);
 
 export default router;

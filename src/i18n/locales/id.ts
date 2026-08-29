@@ -72,6 +72,10 @@ export const id = {
     "srv.akses_tidak_sah_sesi": "Akses tidak sah: sesi tidak valid atau belum masuk.",
     "srv.notifikasi_tidak_ditemukan": "Notifikasi tidak ditemukan.",
     "srv.akses_ditolak_notifikasi_ini": "Akses ditolak: notifikasi ini bukan milik Anda.",
+    "srv.tipe_notifikasi_tidak_diizinkan":
+      "Anda tidak diizinkan mengirim notifikasi jenis ini ke pengguna lain.",
+    "srv.notifikasi_terlalu_sering":
+      "Terlalu banyak notifikasi dikirim. Silakan coba lagi dalam 15 menit.",
     "srv.notification_updated": "Notifikasi diperbarui",
     "srv.projectid_and_namamodul_are": "projectId dan namaModul diperlukan",
     "srv.module_created": "Modul dibuat",

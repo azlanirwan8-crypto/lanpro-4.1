@@ -134,10 +134,16 @@ describe("POST /api/users/:userId/notifications (Item #244)", () => {
     });
     const createSpy = jest.spyOn(notificationRepository, "create").mockResolvedValueOnce();
 
+    // Item #258 — `type` diganti dari "task" (bebas, tak pernah dipakai
+    // pemanggil sungguhan) ke "mention" (satu dari dua tipe yang benar-benar
+    // dipakai di src/). "task" kini ditolak 403 untuk pengirim non-admin yang
+    // menotifikasi pengguna lain — persis celah yang ditutup #258, dan test
+    // ini SENGAJA tidak lagi menjadi contoh cara mengeksploitasinya. Lihat
+    // notifications.otorisasi-258.test.ts untuk pembatasan tipenya sendiri.
     const res = await request(app).post("/api/users/uid-dani/notifications").send({
       title: "Tugas Baru",
       message: "Anda ditugaskan pada tugas X",
-      type: "task",
+      type: "mention",
       relatedId: "task-123",
     });
 
@@ -151,7 +157,7 @@ describe("POST /api/users/:userId/notifications (Item #244)", () => {
         senderId: "sender-1",
         title: "Tugas Baru",
         message: "Anda ditugaskan pada tugas X",
-        type: "task",
+        type: "mention",
         relatedId: "task-123",
       })
     );

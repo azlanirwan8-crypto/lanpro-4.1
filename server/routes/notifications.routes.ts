@@ -5,11 +5,46 @@
  */
 import express from "express";
 import crypto from "crypto";
+import rateLimit from "express-rate-limit";
 import { matchesCaller } from "../services/task.service";
 import { notificationRepository } from "../repositories/notification.repository";
 import { userRepository } from "../repositories/user.repository";
 
 const router = express.Router();
+
+/**
+ * Item #258 — sisa #244 yang belum tertutup: batas laju.
+ *
+ * Dikunci ke SENDER yang terautentikasi (`req.user`), bukan ke IP seperti
+ * `globalLimiter`/`loginLimiter` di `server.ts`. Menotifikasi orang lain
+ * adalah tindakan PER PENGGUNA — mengunci ke IP akan membebani seluruh
+ * kantor/NAT yang berbagi alamat yang sama, dan longgar untuk penyerang yang
+ * gonta-ganti IP.
+ *
+ * 30/15 menit dipilih dari pemakaian sah yang ada: satu-satunya pemanggil di
+ * `src/` adalah notifikasi @mention pada komentar, satu per pengguna yang
+ * disebut per komentar — jauh di bawah 30 dalam keadaan normal.
+ */
+const notifikasiPostLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: any) => req.user?.id || req.user?.uid || req.ip,
+  message: {
+    status: "error",
+    code: "srv.notifikasi_terlalu_sering",
+    message: "Terlalu banyak notifikasi dikirim. Silakan coba lagi dalam 15 menit.",
+  },
+});
+
+/**
+ * Item #258 — sisa #244: "tanpa cek peran". Satu-satunya dua pemanggil sah di
+ * `src/` (`AppContainer.tsx:2638`, `:3415`) memakai `type` ini persis. Bukan
+ * daftar sembarang: memperluasnya berarti menambah jalur yang bisa dipakai
+ * mengaku sebagai notifikasi sistem/keamanan.
+ */
+const TIPE_AMAN_PENGIRIM_BUKAN_ADMIN = new Set(["mention", "bug_retest"]);
 
 router.get("/api/users/:userId/notifications", async (req, res) => {
   try {
@@ -143,11 +178,29 @@ router.get("/api/users/:userId/notifications", async (req, res) => {
   }
 });
 
-router.post("/api/users/:userId/notifications", async (req: any, res) => {
+router.post("/api/users/:userId/notifications", notifikasiPostLimiter, async (req: any, res) => {
   try {
     const { userId } = req.params;
     const { type, title, message, relatedId, read } = req.body;
+
+    /**
+     * Item #258 — sisa #244: "tanpa cek peran, tanpa cek kepemilikan". Sebelum
+     * perbaikan ini, `senderId` boleh `null` dan permintaan tetap diproses —
+     * satu-satunya yang mencegah pengiriman anonim adalah gerbang auth GLOBAL
+     * di `server.ts`, bukan rute ini sendiri. GET di atas memeriksa ini
+     * eksplisit; POST tidak, dan itu bukan cacat kosmetik: bila gerbang
+     * global suatu saat dilonggarkan untuk jalur ini (mis. ditambah ke
+     * RUTE_PUBLIK karena kekeliruan), rute ini akan tetap menerima pengirim
+     * anonim tanpa ada yang menyadarinya di sini.
+     */
     const senderId = req.user?.id || req.user?.uid || null;
+    if (!senderId) {
+      return res.status(401).json({
+        status: "error",
+        code: "srv.akses_tidak_sah_sesi",
+        message: "Akses tidak sah: Sesi tidak valid atau belum login.",
+      });
+    }
 
     if (!userId || typeof userId !== "string") {
       return res.status(400).json({
@@ -187,6 +240,45 @@ router.post("/api/users/:userId/notifications", async (req: any, res) => {
         status: "error",
         code: "srv.pesan_notifikasi_terlalu_panjang",
         message: "Pesan notifikasi terlalu panjang (maksimum 2000 karakter).",
+      });
+    }
+
+    /**
+     * Item #258 — sisa #244: "tanpa cek peran". Pengirim non-admin yang
+     * menotifikasi PENGGUNA LAIN (bukan dirinya sendiri) dibatasi ke
+     * `TIPE_AMAN_PENGIRIM_BUKAN_ADMIN`. Ini menutup dua hal sekaligus:
+     *
+     *   - default lama `type` jatuh ke `"system"` bila tidak dikirim —
+     *     sekarang non-admin yang menotifikasi orang lain WAJIB
+     *     mencantumkan tipe dari daftar aman, tidak bisa mengandalkan
+     *     default itu untuk terlihat seperti pesan sistem.
+     *   - non-admin tidak bisa mengarang `type` bebas (mis. "security_alert",
+     *     "password_reset") untuk membuat notifikasinya terlihat resmi.
+     *
+     * Menotifikasi DIRI SENDIRI (userId === senderId) dan pengirim BERPERAN
+     * ADMIN keduanya dikecualikan — mengunci admin ke daftar yang sama akan
+     * mematahkan kasus pakai admin yang sah (mis. broadcast) tanpa menutup
+     * risiko baru: admin sudah dipercaya untuk tindakan yang lebih berat.
+     *
+     * Diletakkan PALING AKHIR dari seluruh pemeriksaan bentuk permintaan
+     * (eksistensi penerima, status, panjang judul/pesan): tiga test lama
+     * (#244) mengirim permintaan tanpa `type` sama sekali sambil menguji
+     * kesalahan BENTUK lain (penerima hilang, tidak aktif, teks kepanjangan),
+     * dan urutan ini memastikan kesalahan bentuknya tetap terlihat sebagai
+     * kesalahan bentuk (404/400) — bukan tertutupi jadi 403 otorisasi hanya
+     * karena kebetulan `type` juga tidak disertakan.
+     */
+    const requesterRole = req.user?.role || "user";
+    const menotifikasiOrangLain = userId !== senderId;
+    if (
+      menotifikasiOrangLain &&
+      requesterRole !== "admin" &&
+      (typeof type !== "string" || !TIPE_AMAN_PENGIRIM_BUKAN_ADMIN.has(type.trim()))
+    ) {
+      return res.status(403).json({
+        status: "error",
+        code: "srv.tipe_notifikasi_tidak_diizinkan",
+        message: "Anda tidak diizinkan mengirim notifikasi jenis ini ke pengguna lain.",
       });
     }
 
