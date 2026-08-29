@@ -183,6 +183,11 @@ export const id = {
     "srv.pesan_tidak_ditemukan": "Pesan tidak ditemukan.",
     "srv.pesan_berhasil_dihapus": "Pesan berhasil dihapus.",
     "srv.pesan_terlalu_panjang": "Pesan terlalu panjang (maksimum 5000 karakter).",
+    "srv.pesan_notifikasi_terlalu_panjang":
+      "Pesan notifikasi terlalu panjang (maksimum 2000 karakter).",
+    "srv.judul_terlalu_panjang": "Judul notifikasi terlalu panjang (maksimum 200 karakter).",
+    "srv.pengguna_tidak_aktif": "Pengguna penerima notifikasi tidak aktif.",
+    "srv.id_penerima_tidak_valid": "ID penerima tidak valid.",
     "srv.akses_ditolak_hapus_pesan":
       "Akses ditolak: Anda hanya dapat menghapus pesan yang Anda kirim sendiri.",
     "srv.akses_ditolak_hapus_notifikasi":
