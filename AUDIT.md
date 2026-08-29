@@ -561,7 +561,8 @@ Ketiganya dilakukan oleh sesi 23–29 Agu ini sendiri:
 
 #### Papan turunan untuk 19 item terbuka
 
-Halaman "Papan Tiket LanPro" memuat item terbuka dengan kolom yang diminta
+Halaman **Papan Tiket LanPro** —
+https://claude.ai/code/artifact/1250ef05-6fb8-4b60-940d-a1717b67dea3 — memuat item terbuka dengan kolom yang diminta
 pemilik proyek — `no tiket`, `sev`, `biaya`, `status`, `isi`, `solusi masalah`,
 `proses perbaikan`, `catatan jika dikerjakan oleh AI lain` — tiga kolom terakhir
 BELUM ada di papan ini dan sedang ditangani #255. Isinya diturunkan dari §1.1,
