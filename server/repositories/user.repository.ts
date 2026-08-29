@@ -121,6 +121,41 @@ export class UserRepository {
   }
 
   /**
+   * Detail satu pengguna TANPA `email`, `phone`, dan `permissions` — item #243.
+   *
+   * Pasangan per-id dari `findAllRingkas()`, dan lahir karena alasan yang sama
+   * persis. #162 menutup kebocoran ketiga field itu di endpoint DAFTAR, tetapi
+   * endpoint DETAIL (`GET /api/users/:id`) tetap memanggil `findByIdOrUid()`
+   * tanpa memeriksa peran. Karena `findAllRingkas()` memulangkan `id` SEMUA
+   * pengguna, id-nya tidak perlu ditebak: ambil daftarnya, lalu panggil
+   * detailnya satu per satu. Redaksi yang hanya terpasang di satu dari dua
+   * pintu bukan redaksi.
+   *
+   * Kenapa method baru dan bukan `findByIdOrUid()` yang dipersempit: sebelas
+   * pemanggil internalnya — login, ganti sandi, penjaga proyek, notifikasi —
+   * memang butuh `email`/`permissions` untuk bekerja. Mempersempit sumbernya
+   * akan mematikan mereka. Yang dipersempit karena itu jalur TAMPILAN-nya,
+   * dan pemilihannya dilakukan di rute yang tahu siapa pemanggilnya.
+   *
+   * Daftar kolomnya ditulis ulang penuh dan bukan hasil `findByIdOrUid()` yang
+   * disaring di JavaScript, alasan yang sama seperti #162 dan #241: menyaring
+   * setelah kueri berarti datanya SUDAH meninggalkan database, dan satu
+   * `console.log` atau satu jalur galat cukup untuk membocorkannya kembali.
+   */
+  async findByIdOrUidRingkas(idOrUid: string): Promise<UserEntity | null> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        'SELECT id, uid, username, nama_lengkap, displayName, role, status, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, "coverUrl", createdAt, lastSeen FROM Users WHERE id = ? OR uid = ?',
+        [idOrUid, idOrUid]
+      );
+      return rows && rows.length > 0 ? rows[0] : null;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
    * Hash sandi tersimpan, HANYA untuk verifikasi — item #241.
    *
    * Dipisah dari `findByIdOrUid()` supaya hash tidak lagi ikut menumpang di

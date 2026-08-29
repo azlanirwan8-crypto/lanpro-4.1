@@ -17,6 +17,7 @@ import { validasiBody } from "../middleware/validate";
 import { updateUserSchema, updateProfileSchema } from "../schemas/user.schema";
 import { AuthenticatedRequest } from "../types/express";
 import { userRepository } from "../repositories/user.repository";
+import { matchesCaller } from "../services/task.service";
 import { createAuditLog } from "../services/audit.service";
 export { sanitizeAvatarValue };
 
@@ -207,10 +208,25 @@ router.get("/api/users", async (req: any, res) => {
   }
 });
 
-router.get("/api/users/:id", async (req, res) => {
+router.get("/api/users/:id", async (req: any, res) => {
   try {
     const { id } = req.params;
-    const user = await userRepository.findByIdOrUid(id);
+
+    // Item #243 — `email`, `phone`, dan `permissions` hanya untuk Global Admin
+    // dan untuk pemilik akunnya sendiri. Pemeriksaan perannya SAMA PERSIS
+    // dengan `GET /api/users` di atas (`req.user.role === "admin"`, diisi
+    // `authenticateJWT` dari JWT yang ditandatangani) supaya tidak lahir
+    // kosakata otorisasi kedua di repo ini.
+    //
+    // Bedanya dengan endpoint daftar cuma satu: di sini ada pemanggil yang
+    // BUKAN admin tetapi tetap berhak atas isi penuh — dirinya sendiri, yang
+    // memang perlu membaca email dan nomornya di halaman profil.
+    // `matchesCaller` dipakai karena `:id` boleh berupa `id` MAUPUN `uid`,
+    // persis seperti `findByIdOrUid()` yang melayaninya.
+    const bolehPenuh = req.user?.role === "admin" || matchesCaller(req.user, id);
+    const user = bolehPenuh
+      ? await userRepository.findByIdOrUid(id)
+      : await userRepository.findByIdOrUidRingkas(id);
     if (user) {
       res.json({ status: "success", data: user });
     } else {
