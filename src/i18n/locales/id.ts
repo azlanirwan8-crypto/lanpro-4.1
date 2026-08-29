@@ -178,6 +178,18 @@ export const id = {
     "srv.gagal_memproses_analisis_video": "Gagal memproses analisis video multimodal: ",
     "srv.akses_ditolak_anda_hanya_4":
       "Akses ditolak: Anda hanya dapat mengubah notifikasi milik Anda sendiri.",
+    "srv.pesan_tidak_ditemukan": "Pesan tidak ditemukan.",
+    "srv.pesan_berhasil_dihapus": "Pesan berhasil dihapus.",
+    "srv.akses_ditolak_hapus_pesan":
+      "Akses ditolak: Anda hanya dapat menghapus pesan yang Anda kirim sendiri.",
+    "srv.akses_ditolak_hapus_notifikasi":
+      "Akses ditolak: Anda hanya dapat menghapus notifikasi milik Anda sendiri.",
+    "srv.notification_deleted": "Notifikasi dihapus",
+    "srv.komentar_tidak_ditemukan": "Komentar tidak ditemukan.",
+    "srv.akses_ditolak_hanya_penulis":
+      "Akses ditolak: hanya penulis komentar yang dapat menyuntingnya.",
+    "srv.comment_updated": "Komentar diperbarui",
+    "srv.comment_deleted": "Komentar dihapus",
     "srv.gagal_memperbarui_metodologi_ke":
       "Gagal memperbarui metodologi ke Waterfall akibat masalah integritas data server.",
     "srv.proyek_berhasil_dihapus_beserta": "Proyek dihapus beserta seluruh dependensinya.",

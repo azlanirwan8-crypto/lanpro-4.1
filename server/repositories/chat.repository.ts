@@ -100,6 +100,36 @@ export class ChatRepository {
     }
   }
 
+  /**
+   * Pengirim sebuah pesan — item #248.
+   *
+   * Memulangkan `senderId` telanjang dan bukan seluruh barisnya: nilai yang
+   * dipakai untuk MEMUTUSKAN otorisasi tidak boleh ikut menumpang di objek yang
+   * kelak ter-`res.json()`. Pola yang sama dengan `findRecipientIdById()` di
+   * repositori notifikasi, yang sudah melayani jalur "tandai terbaca".
+   */
+  async findSenderIdById(id: string): Promise<string | null> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query("SELECT senderId FROM Messages WHERE id = ?", [
+        id,
+      ]);
+      return rows && rows.length > 0 ? rows[0].senderId : null;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /** Menghapus satu pesan — item #248. */
+  async deleteMessage(id: string): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query("DELETE FROM Messages WHERE id = ?", [id]);
+    } finally {
+      connection.release();
+    }
+  }
+
   async markAsRead(senderId: string, receiverId: string): Promise<void> {
     const connection = await db.getConnection();
     try {

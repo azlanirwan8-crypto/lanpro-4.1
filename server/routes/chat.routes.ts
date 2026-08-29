@@ -32,13 +32,11 @@ router.get("/api/chat/last-messages", async (req: any, res) => {
     res.json({ status: "success", data: allRows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/chat/last-messages error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -46,13 +44,11 @@ router.get("/api/chat/messages", async (req: any, res) => {
   try {
     const { senderId, receiverId } = req.query;
     if (!senderId || !receiverId) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          code: "srv.senderid_dan_receiverid_diperlukan",
-          message: "senderId dan receiverId diperlukan.",
-        });
+      return res.status(400).json({
+        status: "error",
+        code: "srv.senderid_dan_receiverid_diperlukan",
+        message: "senderId dan receiverId diperlukan.",
+      });
     }
     if (!matchesCaller(req.user, senderId) && !matchesCaller(req.user, receiverId)) {
       return res.status(403).json({
@@ -66,13 +62,11 @@ router.get("/api/chat/messages", async (req: any, res) => {
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/chat/messages error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -80,13 +74,11 @@ router.post("/api/chat/messages", async (req: any, res) => {
   try {
     const { senderId, receiverId, message, timestamp } = req.body;
     if (!senderId || !receiverId || !message) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          code: "srv.senderid_receiverid_dan_message",
-          message: "senderId, receiverId, dan message diperlukan.",
-        });
+      return res.status(400).json({
+        status: "error",
+        code: "srv.senderid_receiverid_dan_message",
+        message: "senderId, receiverId, dan message diperlukan.",
+      });
     }
     if (!matchesCaller(req.user, senderId)) {
       return res.status(403).json({
@@ -114,13 +106,11 @@ router.post("/api/chat/messages", async (req: any, res) => {
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: POST /api/chat/messages error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -128,13 +118,11 @@ router.put("/api/chat/messages/read", async (req: any, res) => {
   try {
     const { senderId, receiverId } = req.body;
     if (!senderId || !receiverId) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          code: "srv.senderid_dan_receiverid_diperlukan",
-          message: "senderId dan receiverId diperlukan.",
-        });
+      return res.status(400).json({
+        status: "error",
+        code: "srv.senderid_dan_receiverid_diperlukan",
+        message: "senderId dan receiverId diperlukan.",
+      });
     }
     if (!matchesCaller(req.user, receiverId)) {
       return res.status(403).json({
@@ -152,13 +140,63 @@ router.put("/api/chat/messages/read", async (req: any, res) => {
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: PUT /api/chat/messages/read error:", error);
-    res
-      .status(500)
-      .json({
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
+  }
+});
+
+/**
+ * Menghapus satu pesan — item #248.
+ *
+ * SIAPA YANG BOLEH: pengirimnya saja. Bukan penerimanya, dan bukan admin.
+ * Percakapan ini privat antar dua orang; memberi peran lain hak menghapus
+ * berarti memberi mereka hak mengubah isi percakapan yang tidak mereka ikuti.
+ * Penerima yang terganggu punya jalur lain — itu urusan moderasi, dan moderasi
+ * yang belum diputuskan lebih baik tidak ada daripada ditebak.
+ *
+ * HAPUS KERAS, bukan penanda. Setiap DELETE di repo ini menghapus barisnya
+ * (`master-data`, `milestones`, `documents`, `users`); memperkenalkan
+ * soft-delete di sini berarti melahirkan konsep baru yang harus dipahami
+ * setiap kueri `Messages` yang sudah ada — dan satu kueri yang lupa menyaring
+ * akan menampilkan pesan yang pengirimnya yakin sudah hilang.
+ */
+router.delete("/api/chat/messages/:id", async (req: any, res) => {
+  try {
+    const { id } = req.params;
+
+    const senderId = await chatRepository.findSenderIdById(id);
+    if (!senderId) {
+      return res.status(404).json({
         status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
+        code: "srv.pesan_tidak_ditemukan",
+        message: "Pesan tidak ditemukan.",
       });
+    }
+
+    if (!matchesCaller(req.user, senderId)) {
+      return res.status(403).json({
+        status: "error",
+        code: "srv.akses_ditolak_hapus_pesan",
+        message: "Akses ditolak: Anda hanya dapat menghapus pesan yang Anda kirim sendiri.",
+      });
+    }
+
+    await chatRepository.deleteMessage(id);
+    res.json({
+      status: "success",
+      code: "srv.pesan_berhasil_dihapus",
+      message: "Pesan berhasil dihapus.",
+    });
+  } catch (error: any) {
+    console.error("LOG ANOMALI CRITICAL: DELETE /api/chat/messages/:id error:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -182,13 +220,11 @@ router.get("/api/chat/unread-counts", async (req: any, res) => {
     res.json({ status: "success", data: rows });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/chat/unread-counts error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -196,13 +232,11 @@ router.post("/api/chat/simulate-reply", async (req, res) => {
   try {
     const { senderId, receiverId, message, senderName, senderRole } = req.body;
     if (!senderId || !receiverId || !message) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          code: "srv.senderid_receiverid_dan_message",
-          message: "senderId, receiverId, dan message diperlukan.",
-        });
+      return res.status(400).json({
+        status: "error",
+        code: "srv.senderid_receiverid_dan_message",
+        message: "senderId, receiverId, dan message diperlukan.",
+      });
     }
 
     const replySenderName = senderName || "Rekan Tim";
@@ -341,13 +375,11 @@ Balasan Anda harus singkat (1-3 kalimat saja) layaknya pesan instan di Slack ata
     });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: POST /api/chat/simulate-reply error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.gagal_membuat_simulasi_balasan",
-        message: "Gagal membuat simulasi balasan: " + error.message,
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_membuat_simulasi_balasan",
+      message: "Gagal membuat simulasi balasan: " + error.message,
+    });
   }
 });
 

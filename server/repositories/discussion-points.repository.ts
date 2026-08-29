@@ -71,7 +71,14 @@ export class DiscussionPointsRepository {
         console.warn("[POST DiscussionPoint Resilient Retry]:", insertErr?.message);
         await connection.query(
           'INSERT INTO DiscussionPoints (id, meetingId, "authorId", concern, status, content) VALUES (?, ?, ?, ?, ?, ?)',
-          [point.id, point.meetingId, point.authorId || "guest", point.concern || "Poin Diskusi", point.status || "pending", contentVal]
+          [
+            point.id,
+            point.meetingId,
+            point.authorId || "guest",
+            point.concern || "Poin Diskusi",
+            point.status || "pending",
+            contentVal,
+          ]
         );
       }
       return point;
@@ -173,7 +180,9 @@ export class DiscussionPointsRepository {
     }
   }
 
-  async createComment(comment: DiscussionPointCommentEntity): Promise<DiscussionPointCommentEntity> {
+  async createComment(
+    comment: DiscussionPointCommentEntity
+  ): Promise<DiscussionPointCommentEntity> {
     const connection = await db.getConnection();
     try {
       await connection.query(
@@ -188,6 +197,51 @@ export class DiscussionPointsRepository {
         ]
       );
       return comment;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * Pemilik sebuah komentar — item #248.
+   *
+   * Memulangkan `userId` telanjang dan bukan seluruh barisnya, alasan yang sama
+   * seperti `findPasswordHashById()` di #241: nilai yang dipakai untuk MEMUTUSKAN
+   * otorisasi tidak boleh ikut menumpang di objek yang kelak ter-`res.json()`.
+   * Pemanggilnya cuma dua — jalur sunting dan jalur hapus — dan keduanya hanya
+   * perlu tahu satu hal: ini komentar siapa.
+   */
+  async findCommentOwnerId(commentId: string): Promise<string | null> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        'SELECT "userId" AS "userId" FROM discussion_point_comments WHERE id = ?',
+        [commentId]
+      );
+      return rows && rows.length > 0 ? rows[0].userId : null;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /** Menyunting teks satu komentar — item #248. Hanya teksnya yang boleh berubah. */
+  async updateComment(commentId: string, commentText: string): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query("UPDATE discussion_point_comments SET commentText = ? WHERE id = ?", [
+        commentText,
+        commentId,
+      ]);
+    } finally {
+      connection.release();
+    }
+  }
+
+  /** Menghapus satu komentar — item #248. */
+  async deleteComment(commentId: string): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query("DELETE FROM discussion_point_comments WHERE id = ?", [commentId]);
     } finally {
       connection.release();
     }

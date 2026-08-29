@@ -177,6 +177,17 @@ export const en = {
       "The multimodal video analysis succeeded and has been saved.",
     "srv.gagal_memproses_analisis_video": "Failed to process the multimodal video analysis: ",
     "srv.akses_ditolak_anda_hanya_4": "Access denied: you can only change your own notifications.",
+    "srv.pesan_tidak_ditemukan": "Message not found.",
+    "srv.pesan_berhasil_dihapus": "The message was deleted.",
+    "srv.akses_ditolak_hapus_pesan":
+      "Access denied: you can only delete messages you sent yourself.",
+    "srv.akses_ditolak_hapus_notifikasi":
+      "Access denied: you can only delete your own notifications.",
+    "srv.notification_deleted": "Notification deleted",
+    "srv.komentar_tidak_ditemukan": "Comment not found.",
+    "srv.akses_ditolak_hanya_penulis": "Access denied: only the comment author can edit it.",
+    "srv.comment_updated": "Comment updated",
+    "srv.comment_deleted": "Comment deleted",
     "srv.gagal_memperbarui_metodologi_ke":
       "Failed to switch the methodology to Waterfall because of a server data integrity problem.",
     "srv.proyek_berhasil_dihapus_beserta": "The project and all its dependencies were deleted.",

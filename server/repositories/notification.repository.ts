@@ -83,6 +83,23 @@ export class NotificationRepository {
       connection.release();
     }
   }
+
+  /**
+   * Menghapus satu notifikasi — item #248.
+   *
+   * Kepemilikannya diperiksa di rute lewat `findRecipientIdById()` yang sudah
+   * ada, persis seperti jalur "tandai terbaca". Method ini sengaja tidak ikut
+   * memeriksa: satu tempat yang memutuskan otorisasi lebih mudah dijaga
+   * daripada dua yang bisa berbeda pendapat.
+   */
+  async delete(id: string): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query("DELETE FROM Notifications WHERE id = ?", [id]);
+    } finally {
+      connection.release();
+    }
+  }
 }
 
 export const notificationRepository = new NotificationRepository();
