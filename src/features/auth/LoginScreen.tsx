@@ -148,7 +148,7 @@ export const LoginScreen = ({
                     value={username}
                     onChange={(e) => handleUsernameChange(e.target.value)}
                     className={cn(
-                      "w-full pl-10 pr-4 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-sm font-medium text-content placeholder:text-content-subtle hover:border-border-subtle",
+                      "w-full pl-10 pr-4 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-sm font-normal text-content placeholder:text-content-subtle hover:border-border-subtle",
                       fieldErrors.username
                         ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
                         : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -176,7 +176,7 @@ export const LoginScreen = ({
                     value={password}
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     className={cn(
-                      "w-full pl-10 pr-11 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-sm font-medium text-content placeholder:text-content-subtle hover:border-border-subtle",
+                      "w-full pl-10 pr-11 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-sm font-normal text-content placeholder:text-content-subtle hover:border-border-subtle",
                       fieldErrors.password
                         ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
                         : "border-border-subtle focus:ring-primary/20 focus:border-primary"

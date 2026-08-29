@@ -115,7 +115,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
                 }}
                 disabled={loading}
                 className={cn(
-                  "w-full px-3.5 py-2.5 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-xs font-medium text-content placeholder:text-content-subtle",
+                  "w-full px-3.5 py-2.5 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-xs font-normal text-content placeholder:text-content-subtle",
                   error
                     ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
                     : "border-border-subtle focus:ring-primary/20 focus:border-primary"

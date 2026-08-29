@@ -101,7 +101,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
             <div className="flex-1 relative group">
               <div className="border border-border-subtle rounded-xl bg-surface overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500/30 transition-all shadow-soft">
                 <div className="flex items-center gap-1 p-1.5 border-b border-border-faint bg-surface-sunken/50 text-content-muted overflow-x-auto custom-scrollbar">
-                  <button className="flex items-center gap-1.5 px-2 py-1 hover:bg-surface-strong rounded text-xs sm:text-[11px] font-medium text-content-secondary transition-colors shrink-0">
+                  <button className="flex items-center gap-1.5 px-2 py-1 hover:bg-surface-strong rounded text-xs sm:text-[11px] font-normal text-content-secondary transition-colors shrink-0">
                     <Sparkles className="w-3 h-3 text-indigo-500" />
                     {t("comments.improveWriting")}
                   </button>
@@ -110,7 +110,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                     className="p-1 hover:bg-surface-strong rounded text-content-secondary shrink-0"
                     title={t("comments.textFormat")}
                   >
-                    <span className="text-xs font-medium leading-none px-0.5 border border-border-subtle rounded font-serif">
+                    <span className="text-xs font-normal leading-none px-0.5 border border-border-subtle rounded font-serif">
                       Tt
                     </span>
                   </button>
@@ -144,7 +144,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                   value={newCommentText}
                   onChange={handleCommentChange}
                   placeholder={t("comments.editorPlaceholder")}
-                  className="border-none shadow-none focus:ring-0 !ring-0 !outline-none p-4 resize-none bg-surface text-[13px] font-medium leading-relaxed min-h-[100px] w-full"
+                  className="border-none shadow-none focus:ring-0 !ring-0 !outline-none p-4 resize-none bg-surface text-[13px] font-normal leading-relaxed min-h-[100px] w-full"
                 />
               </div>
 
