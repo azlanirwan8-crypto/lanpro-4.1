@@ -138,19 +138,29 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
             <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.sprint")}
             </label>
-            <select
+            <StyledDropdown
               value={listFilterSprint}
-              onChange={(e) => setListFilterSprint(e.target.value)}
-              className="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 focus:border-indigo-500 outline-none"
-            >
-              <option value="All">{t("filters.allSprints")}</option>
-              <option value="Backlog">Backlog</option>
-              {sprints?.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setListFilterSprint(val)}
+              options={[
+                {
+                  id: "All",
+                  label: t("filters.allSprints"),
+                  icon: "IterationCcw",
+                  color: "#6366F1",
+                },
+                { id: "Backlog", label: "Backlog", icon: "Box", color: "#94a3b8" },
+                ...(sprints || []).map((s) => ({
+                  id: s.id,
+                  label: s.name,
+                  icon: "IterationCcw",
+                  color: "#6366F1",
+                })),
+              ]}
+              type="filter_sprint"
+              masterData={mArr}
+              className="w-full"
+              buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 hover:border-border-subtle"
+            />
           </div>
 
           {/* Label Filter */}
@@ -158,18 +168,23 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
             <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.label")}
             </label>
-            <select
+            <StyledDropdown
               value={listFilterLabel}
-              onChange={(e) => setListFilterLabel(e.target.value)}
-              className="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 focus:border-indigo-500 outline-none"
-            >
-              <option value="All">{t("filters.allLabels")}</option>
-              {allLabels.map((l) => (
-                <option key={l} value={l}>
-                  {l}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setListFilterLabel(val)}
+              options={[
+                { id: "All", label: t("filters.allLabels"), icon: "Tag", color: "#6366F1" },
+                ...(allLabels || []).map((l) => ({
+                  id: l,
+                  label: l,
+                  icon: "Tag",
+                  color: "#6366F1",
+                })),
+              ]}
+              type="filter_label"
+              masterData={mArr}
+              className="w-full"
+              buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 hover:border-border-subtle"
+            />
           </div>
         </div>
 
@@ -285,17 +300,31 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
             <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.dateRangeType")}
             </label>
-            <select
+            <StyledDropdown
               value={listFilterDateType}
-              onChange={(e) => setListFilterDateType(e.target.value)}
-              className="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 focus:border-indigo-500 outline-none text-left"
-            >
-              <option value="dueDate">{t("filters.dueDate")}</option>
-              <option value="startDate">{t("filters.startDate")}</option>
-              <option value="endDate">{t("filters.endDate")}</option>
-              <option value="createdAt">{t("filters.createdDate")}</option>
-              <option value="any">{t("filters.anyOfAbove")}</option>
-            </select>
+              onChange={(val) => setListFilterDateType(val)}
+              options={[
+                { id: "dueDate", label: t("filters.dueDate"), icon: "Calendar", color: "#6366F1" },
+                {
+                  id: "startDate",
+                  label: t("filters.startDate"),
+                  icon: "Calendar",
+                  color: "#6366F1",
+                },
+                { id: "endDate", label: t("filters.endDate"), icon: "Calendar", color: "#6366F1" },
+                {
+                  id: "createdAt",
+                  label: t("filters.createdDate"),
+                  icon: "Clock",
+                  color: "#6366F1",
+                },
+                { id: "any", label: t("filters.anyOfAbove"), icon: "Layers", color: "#6366F1" },
+              ]}
+              type="filter_date"
+              masterData={mArr}
+              className="w-full"
+              buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 hover:border-border-subtle"
+            />
           </div>
 
           {/* Start Date */}
