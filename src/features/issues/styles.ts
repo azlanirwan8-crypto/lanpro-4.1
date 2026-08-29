@@ -16,7 +16,7 @@ export const styles = {
   tableHeader:
     "bg-primary-surface/5 dark:bg-slate-950/50 border-b border-primary/15 sticky top-0 z-10 shadow-2xs",
   tableHeaderCell:
-    "group relative px-4 py-3 text-[10px] font-medium text-content-subtle uppercase tracking-wider border-r border-primary/10 dark:border-border-inverse",
+    "group relative px-4 py-3 text-[10px] font-medium text-content-subtle uppercase tracking-wider whitespace-nowrap border-r border-primary/10 dark:border-border-inverse",
   tableRow:
     "group hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-all duration-150 cursor-default border-b border-border-faint dark:border-border-inverse",
   selectedTableRow: "bg-primary-surface/5 dark:bg-primary-surface/20",

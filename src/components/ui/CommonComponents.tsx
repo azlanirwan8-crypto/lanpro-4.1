@@ -373,7 +373,7 @@ export const StyledDropdown = ({
                         setIsOpen(false);
                       }}
                       className={cn(
-                        "w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg transition-all text-left group/opt",
+                        "w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md transition-all text-left group/opt",
                         isActive
                           ? "bg-indigo-500/10 text-indigo-700"
                           : "hover:bg-surface-sunken text-content-secondary"
@@ -391,9 +391,7 @@ export const StyledDropdown = ({
                           />
                         ) : type === "member" && (!opt.id || opt.id === "Unassigned") ? (
                           <div className="w-5 h-5 rounded-full bg-surface-muted border border-border-subtle border-dashed flex items-center justify-center flex-shrink-0">
-                            <span className="text-xs sm:text-[10px] text-content-subtle font-medium">
-                              ?
-                            </span>
+                            <span className="text-[9px] text-content-subtle font-normal">?</span>
                           </div>
                         ) : isStatus ? (
                           opt.icon ? (
@@ -421,7 +419,7 @@ export const StyledDropdown = ({
                             style={{ color: opt.color }}
                           />
                         ) : null}
-                        <span className="text-xs sm:text-[11px] font-medium truncate uppercase tracking-tight">
+                        <span className="text-xs font-normal truncate text-content-body tracking-tight">
                           {opt.label}
                         </span>
                       </div>
@@ -430,7 +428,7 @@ export const StyledDropdown = ({
                   );
                 })}
                 {safeOptions.length === 0 && (
-                  <div className="p-4 text-center text-xs text-content-subtle italic font-medium">
+                  <div className="p-4 text-center text-xs text-content-subtle italic font-normal">
                     {t("ui.noOptions")}
                   </div>
                 )}
@@ -507,9 +505,7 @@ export const TableStatusBadge = ({
             style={{ backgroundColor: current?.color || "#cbd5e1" }}
           />
         )}
-        <span className="text-xs sm:text-[10px] font-medium uppercase text-content-body tracking-tight">
-          {value}
-        </span>
+        <span className="text-[10px] font-normal text-content-body tracking-tight">{value}</span>
         <ChevronDown className="w-3 h-3 text-content-subtle group-hover:text-content-secondary transition-colors" />
       </button>
       {isOpen &&
@@ -540,7 +536,7 @@ export const TableStatusBadge = ({
                     onChange(s.label);
                     setIsOpen(false);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 hover:bg-surface-sunken rounded-md transition-colors text-xs sm:text-[10px] font-medium uppercase text-content-body text-left"
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 hover:bg-surface-sunken rounded-md transition-colors text-xs font-normal text-content-body text-left"
                 >
                   {s.icon ? (
                     <RenderIcon iconName={s.icon} className="w-3 h-3" style={{ color: s.color }} />

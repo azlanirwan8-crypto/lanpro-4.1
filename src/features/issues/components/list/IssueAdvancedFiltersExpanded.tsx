@@ -88,7 +88,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {/* Status Filter */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
+            <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.status")}
             </label>
             <StyledDropdown
@@ -100,16 +100,16 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
                   .filter((m) => m.type === "status")
                   .map((m) => ({ id: m.label, label: m.label, icon: m.icon, color: m.color })),
               ]}
-              type="status"
+              type="filter_status"
               masterData={mArr}
               className="w-full"
-              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 hover:border-border-subtle"
+              buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 hover:border-border-subtle"
             />
           </div>
 
           {/* Priority Filter */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
+            <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.priority")}
             </label>
             <StyledDropdown
@@ -126,22 +126,22 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
                   .filter((m) => m.type === "priority")
                   .map((m) => ({ id: m.label, label: m.label, icon: m.icon, color: m.color })),
               ]}
-              type="priority"
+              type="filter_priority"
               masterData={mArr}
               className="w-full"
-              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 hover:border-border-subtle"
+              buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 hover:border-border-subtle"
             />
           </div>
 
           {/* Sprint Filter */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
+            <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.sprint")}
             </label>
             <select
               value={listFilterSprint}
               onChange={(e) => setListFilterSprint(e.target.value)}
-              className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
+              className="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 focus:border-indigo-500 outline-none"
             >
               <option value="All">{t("filters.allSprints")}</option>
               <option value="Backlog">Backlog</option>
@@ -155,13 +155,13 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
 
           {/* Label Filter */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
+            <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.label")}
             </label>
             <select
               value={listFilterLabel}
               onChange={(e) => setListFilterLabel(e.target.value)}
-              className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none"
+              className="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 focus:border-indigo-500 outline-none"
             >
               <option value="All">{t("filters.allLabels")}</option>
               {allLabels.map((l) => (
@@ -177,7 +177,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-4 border-t border-border-faint pt-4">
           {/* Category Filter */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
+            <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.categoryCustom")}
             </label>
             <StyledDropdown
@@ -192,13 +192,13 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               type="category"
               masterData={mArr}
               className="w-full"
-              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 hover:border-border-subtle"
+              buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 hover:border-border-subtle"
             />
           </div>
 
           {/* Environment Filter */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
+            <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.environmentCustom")}
             </label>
             <StyledDropdown
@@ -216,13 +216,13 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               type="environment"
               masterData={mArr}
               className="w-full"
-              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5"
+              buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 hover:border-border-subtle"
             />
           </div>
 
           {/* Project Risk Filter */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
+            <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.projectRisk")}
             </label>
             <StyledDropdown
@@ -235,13 +235,13 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               type="project_risk"
               masterData={mArr}
               className="w-full"
-              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5"
+              buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 hover:border-border-subtle"
             />
           </div>
 
           {/* Release Filter */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
+            <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.releaseCustom")}
             </label>
             <StyledDropdown
@@ -254,13 +254,13 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               type="release"
               masterData={mArr}
               className="w-full"
-              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5"
+              buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 hover:border-border-subtle"
             />
           </div>
 
           {/* Resolution Filter */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
+            <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.resolutionCustom")}
             </label>
             <StyledDropdown
@@ -273,7 +273,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               type="resolution"
               masterData={mArr}
               className="w-full"
-              buttonClassName="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5"
+              buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 hover:border-border-subtle"
             />
           </div>
         </div>
@@ -282,13 +282,13 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 border-t border-border-faint pt-4 items-end">
           {/* Date Column Selector */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
+            <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.dateRangeType")}
             </label>
             <select
               value={listFilterDateType}
               onChange={(e) => setListFilterDateType(e.target.value)}
-              className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none text-left"
+              className="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 focus:border-indigo-500 outline-none text-left"
             >
               <option value="dueDate">{t("filters.dueDate")}</option>
               <option value="startDate">{t("filters.startDate")}</option>
@@ -300,28 +300,28 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
 
           {/* Start Date */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
+            <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
               {t("filters.fromDate")}
             </label>
             <input
               type="date"
               value={listFilterStartDate}
               onChange={(e) => setListFilterStartDate(e.target.value)}
-              className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none h-[34px]"
+              className="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 focus:border-indigo-500 outline-none h-[34px]"
             />
           </div>
 
           {/* End Date & Reset controls inside grid */}
           <div className="flex items-center gap-3">
             <div className="flex flex-col gap-1.5 flex-1 font-sans">
-              <label className="text-xs sm:text-[10px] uppercase font-medium text-content-subtle tracking-wider">
+              <label className="text-xs sm:text-[10px] uppercase font-normal text-content-subtle tracking-wider">
                 {t("filters.toDate")}
               </label>
               <input
                 type="date"
                 value={listFilterEndDate}
                 onChange={(e) => setListFilterEndDate(e.target.value)}
-                className="w-full text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle rounded-xl px-2.5 py-1.5 focus:border-indigo-500 outline-none h-[34px]"
+                className="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-lg px-2.5 py-1.5 focus:border-indigo-500 outline-none h-[34px]"
               />
             </div>
 
@@ -340,7 +340,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
                 setListFilterStartDate("");
                 setListFilterEndDate("");
               }}
-              className="px-4 h-[34px] bg-surface-muted hover:bg-surface-strong text-content-secondary rounded-xl text-xs font-medium transition-all shrink-0 flex items-center justify-center gap-1.5 select-none"
+              className="px-4 h-[34px] bg-surface-muted hover:bg-surface-strong text-content-secondary rounded-lg text-xs font-normal transition-all shrink-0 flex items-center justify-center gap-1.5 select-none cursor-pointer border border-border-subtle"
               title={t("filters.clearAllFields")}
             >
               <X className="w-3.5 h-3.5" />
