@@ -767,6 +767,41 @@ export async function runMigrations(pool: Pool): Promise<void> {
       );
     `);
 
+    // ── IntegrationSettings (item #264, #270) ─────────────────────────────────
+    //
+    // Menyimpan konfigurasi integrasi pihak ketiga (email SMTP / Resend, WhatsApp)
+    // langsung ke database PostgreSQL, menggantikan ketergantungan pada variabel
+    // lingkungan .env agar admin dapat mengonfigurasi email/domain langsung dari UI.
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "IntegrationSettings" (
+        id                SERIAL PRIMARY KEY,
+        channel           VARCHAR(20) NOT NULL UNIQUE,
+        provider          VARCHAR(50) NOT NULL DEFAULT 'smtp',
+        "smtpHost"        VARCHAR(255),
+        "smtpPort"        INT DEFAULT 465,
+        "smtpUser"        VARCHAR(255),
+        "smtpPass"        TEXT,
+        "smtpSecure"      BOOLEAN DEFAULT TRUE,
+        "senderEmail"     VARCHAR(255),
+        "senderName"      VARCHAR(255),
+        "apiKey"          TEXT,
+        "subjectTemplate" TEXT,
+        "bodyTemplate"    TEXT,
+        "updatedAt"       TIMESTAMP DEFAULT NOW()
+      );
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS provider VARCHAR(50) DEFAULT 'smtp';
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "smtpHost" VARCHAR(255);
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "smtpPort" INT DEFAULT 465;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "smtpUser" VARCHAR(255);
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "smtpPass" TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "smtpSecure" BOOLEAN DEFAULT TRUE;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "senderEmail" VARCHAR(255);
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "senderName" VARCHAR(255);
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "apiKey" TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "subjectTemplate" TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "bodyTemplate" TEXT;
+    `);
+
     // ── PENYETARAAN SCHEMA (item #79) ─────────────────────────────────────────
     //
     // Diukur 16 Agu 2026: 13 tabel dan 54 kolom ADA di database production tetapi

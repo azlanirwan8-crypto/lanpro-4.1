@@ -15,6 +15,20 @@ export const whatsappBroadcastConfigSchema = z.object({
   messageTemplate: z.string().optional(),
 });
 
+export const emailIntegrationConfigSchema = z.object({
+  provider: z.enum(["smtp", "resend"]).optional(),
+  smtpHost: z.string().max(255).optional(),
+  smtpPort: z.union([z.number(), z.string()]).optional(),
+  smtpUser: z.string().max(255).optional(),
+  smtpPass: z.string().optional(),
+  smtpSecure: z.boolean().optional(),
+  senderEmail: z.string().max(255).optional(),
+  senderName: z.string().max(255).optional(),
+  apiKey: z.string().optional(),
+  subjectTemplate: z.string().optional(),
+  bodyTemplate: z.string().optional(),
+});
+
 /**
  * Item #259 — batas panjang ditambahkan; skema aslinya (#247) tidak
  * membatasi panjang `query` sama sekali. Pemeriksa SQL di

@@ -4,14 +4,24 @@ import fs from "fs";
 import { verifyGlobalAdmin } from "../middleware/auth";
 import {
   statusEmailService,
+  statusEmailServiceAsync,
   kirimEmail,
   validasiFormatEmail,
   ambilApiKey,
 } from "../services/email.service";
+import {
+  getEmailIntegrationConfig,
+  saveEmailIntegrationConfig,
+} from "../services/integrationSettings.service";
 import { systemRepository } from "../repositories/system.repository";
 import { getBroadcastConfig, saveBroadcastConfig } from "../services/broadcastConfig.service";
 import { validasiBody } from "../middleware/validate";
-import { testEmailSchema, whatsappBroadcastConfigSchema } from "../schemas/system.schema";
+import {
+  testEmailSchema,
+  whatsappBroadcastConfigSchema,
+  emailIntegrationConfigSchema,
+} from "../schemas/system.schema";
+import { createAuditLog } from "../services/audit.service";
 
 const router = Router();
 
@@ -61,17 +71,14 @@ router.post("/api/migrate-db", verifyGlobalAdmin, async (req, res) => {
 });
 
 /**
- * Item #45: Endpoint status integrasi email (Khusus Global Admin)
+ * Item #45, #264: Endpoint status integrasi email (Khusus Global Admin)
  */
 router.get("/api/settings/email", verifyGlobalAdmin, async (req, res) => {
   try {
-    const status = statusEmailService();
+    const status = await statusEmailServiceAsync();
     res.json({
       status: "success",
-      data: {
-        ...status,
-        isMock: !ambilApiKey() && process.env.NODE_ENV !== "production",
-      },
+      data: status,
     });
   } catch (error: any) {
     console.error("[SETTINGS] Gagal mengambil status konfigurasi email:", error);
@@ -82,6 +89,102 @@ router.get("/api/settings/email", verifyGlobalAdmin, async (req, res) => {
     });
   }
 });
+
+/**
+ * Item #264, #270: Endpoint mengambil konfigurasi lengkap email dari database (Khusus Global Admin)
+ */
+router.get("/api/settings/email/config", verifyGlobalAdmin, async (req, res) => {
+  try {
+    const config = await getEmailIntegrationConfig();
+    res.json({
+      status: "success",
+      data: {
+        provider: config.provider,
+        smtpHost: config.smtpHost,
+        smtpPort: config.smtpPort,
+        smtpUser: config.smtpUser,
+        smtpPassMasked: config.smtpPass ? "••••••••" : "",
+        hasSmtpPass: Boolean(config.smtpPass),
+        smtpSecure: config.smtpSecure,
+        senderEmail: config.senderEmail,
+        senderName: config.senderName,
+        apiKeyMasked: config.apiKey ? "••••••••" + config.apiKey.slice(-4) : "",
+        hasApiKey: Boolean(config.apiKey),
+        subjectTemplate: config.subjectTemplate,
+        bodyTemplate: config.bodyTemplate,
+        updatedAt: config.updatedAt,
+      },
+    });
+  } catch (error: any) {
+    console.error("[SETTINGS] Gagal mengambil konfigurasi email dari DB:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_mengambil_konfigurasi_email",
+      message: "Gagal mengambil konfigurasi email",
+    });
+  }
+});
+
+/**
+ * Item #264, #270: Endpoint menyimpan konfigurasi email ke database (Khusus Global Admin)
+ */
+router.post(
+  "/api/settings/email/config",
+  verifyGlobalAdmin,
+  validasiBody(emailIntegrationConfigSchema),
+  async (req: any, res) => {
+    try {
+      const currentUserId = req.user?.id || req.user?.uid;
+      const updated = await saveEmailIntegrationConfig(req.body);
+
+      createAuditLog({
+        userId: currentUserId,
+        projectId: null,
+        actionType: "UPDATE",
+        entityName: "EmailIntegrationSettings",
+        entityId: "email",
+        details: {
+          provider: updated.provider,
+          smtpHost: updated.smtpHost,
+          smtpPort: updated.smtpPort,
+          smtpUser: updated.smtpUser,
+          senderEmail: updated.senderEmail,
+          senderName: updated.senderName,
+          hasSmtpPass: Boolean(updated.smtpPass),
+          hasApiKey: Boolean(updated.apiKey),
+        },
+      });
+
+      res.json({
+        status: "success",
+        message: "Konfigurasi email berhasil disimpan ke basis data.",
+        data: {
+          provider: updated.provider,
+          smtpHost: updated.smtpHost,
+          smtpPort: updated.smtpPort,
+          smtpUser: updated.smtpUser,
+          smtpPassMasked: updated.smtpPass ? "••••••••" : "",
+          hasSmtpPass: Boolean(updated.smtpPass),
+          smtpSecure: updated.smtpSecure,
+          senderEmail: updated.senderEmail,
+          senderName: updated.senderName,
+          apiKeyMasked: updated.apiKey ? "••••••••" + updated.apiKey.slice(-4) : "",
+          hasApiKey: Boolean(updated.apiKey),
+          subjectTemplate: updated.subjectTemplate,
+          bodyTemplate: updated.bodyTemplate,
+          updatedAt: updated.updatedAt,
+        },
+      });
+    } catch (error: any) {
+      console.error("[SETTINGS] Gagal menyimpan konfigurasi email:", error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.gagal_menyimpan_konfigurasi_email",
+        message: "Gagal menyimpan konfigurasi email",
+      });
+    }
+  }
+);
 
 /**
  * Item #45: Endpoint uji coba kirim email (Khusus Global Admin)

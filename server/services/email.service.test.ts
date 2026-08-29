@@ -1,8 +1,19 @@
+jest.mock("../../src/lib/db", () => ({
+  __esModule: true,
+  default: {
+    getConnection: jest.fn(),
+    query: jest.fn(),
+    end: jest.fn(),
+  },
+}));
+
 import {
   validasiFormatEmail,
   ambilEmailPengirim,
   statusEmailService,
   kirimEmail,
+  kirimEmailSelamatDatang,
+  kirimEmailAktivasiAkun,
 } from "./email.service";
 
 describe("email.service - F6.2 Fondasi Layanan Email", () => {
@@ -11,6 +22,7 @@ describe("email.service - F6.2 Fondasi Layanan Email", () => {
   beforeEach(() => {
     jest.resetModules();
     process.env = { ...originalEnv };
+    process.env.NODE_ENV = "test";
     // Reset global fetch mock
     global.fetch = jest.fn();
   });
@@ -128,17 +140,22 @@ describe("email.service - F6.2 Fondasi Layanan Email", () => {
     });
 
     it("mengembalikan success false saat RESEND_API_KEY kosong di production", async () => {
-      delete process.env.RESEND_API_KEY;
-      process.env.NODE_ENV = "production";
+      const prevEnv = process.env.NODE_ENV;
+      try {
+        delete process.env.RESEND_API_KEY;
+        process.env.NODE_ENV = "production";
 
-      const res = await kirimEmail({
-        to: "user@rajonet.com",
-        subject: "Selamat Datang",
-        html: "<p>Selamat datang di LanPro</p>",
-      });
+        const res = await kirimEmail({
+          to: "user@rajonet.com",
+          subject: "Selamat Datang",
+          html: "<p>Selamat datang di LanPro</p>",
+        });
 
-      expect(res.success).toBe(false);
-      expect(res.error).toContain("RESEND_API_KEY belum dikonfigurasi");
+        expect(res.success).toBe(false);
+        expect(res.error).toContain("RESEND_API_KEY belum dikonfigurasi");
+      } finally {
+        process.env.NODE_ENV = prevEnv;
+      }
     });
   });
 
@@ -230,7 +247,6 @@ describe("email.service - F6.2 Fondasi Layanan Email", () => {
   describe("kirimEmailSelamatDatang (F6.3)", () => {
     it("mengirim email selamat datang dengan data akun yang lengkap", async () => {
       delete process.env.RESEND_API_KEY; // mock mode
-      const { kirimEmailSelamatDatang } = await import("./email.service");
 
       const res = await kirimEmailSelamatDatang({
         email: "budi@rajonet.com",
@@ -244,7 +260,6 @@ describe("email.service - F6.2 Fondasi Layanan Email", () => {
 
     it("menggunakan username bila nama tidak diisi", async () => {
       delete process.env.RESEND_API_KEY;
-      const { kirimEmailSelamatDatang } = await import("./email.service");
 
       const res = await kirimEmailSelamatDatang({
         email: "userbaru@rajonet.com",
@@ -255,16 +270,28 @@ describe("email.service - F6.2 Fondasi Layanan Email", () => {
     });
 
     it("menolak bila format email tidak valid", async () => {
-      const { kirimEmailSelamatDatang } = await import("./email.service");
-
       const res = await kirimEmailSelamatDatang({
-        email: "bukan-email-valid",
-        nama: "Budi",
-        username: "budi",
+        email: "bukan-email",
+        username: "userbaru",
       });
 
       expect(res.success).toBe(false);
       expect(res.error).toContain("Format alamat email tidak valid");
+    });
+  });
+
+  describe("kirimEmailAktivasiAkun (Item #261)", () => {
+    it("mengirim email aktivasi akun dengan format yang benar", async () => {
+      delete process.env.RESEND_API_KEY; // mock mode
+
+      const res = await kirimEmailAktivasiAkun({
+        email: "aktif@lanpro.my.id",
+        nama: "Pengguna Aktif",
+        username: "aktifuser",
+      });
+
+      expect(res.success).toBe(true);
+      expect(res.messageId).toMatch(/^mock-/);
     });
   });
 });

@@ -25,9 +25,46 @@ export async function fetchUsers(): Promise<SettingsApiResponse> {
   return apiRequest("/api/users");
 }
 
+export interface EmailConfigData {
+  provider: "smtp" | "resend";
+  smtpHost: string;
+  smtpPort: number;
+  smtpUser: string;
+  smtpPass?: string;
+  smtpPassMasked?: string;
+  hasSmtpPass?: boolean;
+  smtpSecure: boolean;
+  senderEmail: string;
+  senderName: string;
+  apiKey?: string;
+  apiKeyMasked?: string;
+  hasApiKey?: boolean;
+  subjectTemplate?: string;
+  bodyTemplate?: string;
+  updatedAt?: string;
+}
+
 /** Mengambil status konfigurasi integrasi email dari backend (Item #45). */
 export async function fetchEmailSettings(): Promise<SettingsApiResponse<EmailStatusData>> {
   return apiRequest("/api/settings/email");
+}
+
+/** Mengambil konfigurasi lengkap email dari database PostgreSQL (Item #264, #270). */
+export async function fetchEmailConfig(): Promise<SettingsApiResponse<EmailConfigData>> {
+  return apiRequest("/api/settings/email/config");
+}
+
+/** Menyimpan konfigurasi email ke database PostgreSQL (Item #264, #270). */
+export async function saveEmailConfig(
+  config: Partial<EmailConfigData>
+): Promise<SettingsApiResponse<EmailConfigData>> {
+  return apiRequest("/api/settings/email/config", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(config),
+  });
 }
 
 /** Mengirim email uji coba koneksi ke alamat email tujuan (Item #45). */

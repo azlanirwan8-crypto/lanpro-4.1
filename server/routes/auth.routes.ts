@@ -527,17 +527,11 @@ router.post("/api/auth/forgot-password", async (req, res) => {
       });
     }
 
-    /**
-     * #121 — Balasan ini SENGAJA sama persis untuk alamat yang terdaftar
-     * maupun yang tidak. Versi lama menjawab 404 "Alamat email tidak terdaftar
-     * dalam sistem", yang berarti siapa pun bisa memakai formulir ini untuk
-     * menguji satu per satu apakah sebuah email punya akun di sini.
-     */
     const balasanNetral = {
       status: "success",
       code: "srv.bila_alamat_email_itu",
       message:
-        "Bila alamat email itu terdaftar, tautan pengaturan ulang kata sandi sudah dikirim ke sana. Tautannya berlaku 15 menit.",
+        "Bila alamat email terdaftar, instruksi dan kata sandi sementara baru telah dikirimkan ke alamat email tersebut.",
     };
 
     const user = await authRepository.findUserByEmail(email);
@@ -545,36 +539,28 @@ router.post("/api/auth/forgot-password", async (req, res) => {
       return res.json(balasanNetral);
     }
 
-    /**
-     * #121 — Kata sandi TIDAK lagi diganti di sini. Versi lama langsung menimpa
-     * kata sandi pengguna atas permintaan yang tidak terautentikasi, sehingga
-     * siapa pun yang tahu sebuah alamat email bisa mengunci pemiliknya keluar
-     * dari akunnya sendiri kapan saja.
-     *
-     * Yang dikirim sekarang adalah TAUTAN bertoken. Kata sandi baru hanya
-     * berlaku setelah pemilik email membukanya dan mengetiknya sendiri lewat
-     * `/api/auth/reset-password`, yang sudah memverifikasi token bertipe
-     * `password_reset` dan menegakkan syarat kekuatan kata sandi.
-     */
+    // Item #262 — Buat password acak sementara, hash ke DB, dan kirim via email
     const userId = user.id || user.uid;
-    const token = jwt.sign(
-      { id: userId, email: user.email, type: "password_reset" },
-      getJwtSecret(),
-      { expiresIn: "15m" }
-    );
-    const resetUrl = `${urlFrontend(req)}/#reset-password?token=${encodeURIComponent(token)}`;
+    const temporaryPassword = generateRandomPassword(10);
+    const newPasswordHash = hashPassword(temporaryPassword);
 
-    kirimEmailResetPassword({
+    await authRepository.updateUserPassword(userId, newPasswordHash);
+
+    // Cabut sesi aktif lama
+    if (user.id) {
+      activeUserSessions.delete(user.id);
+    }
+    if (user.uid) {
+      activeUserSessions.delete(user.uid);
+    }
+
+    kirimEmailPasswordBaru({
       email: user.email,
       nama: user.displayName || user.nama_lengkap || user.username,
       username: user.username || user.email,
-      resetUrl,
-      expiresInMinutes: 15,
+      temporaryPassword,
     }).catch((emailErr) => {
-      console.error(
-        "[EMAIL] Gagal mengirim tautan pengaturan ulang:",
-        emailErr?.message || emailErr
-      );
+      console.error("[EMAIL] Gagal mengirim kata sandi sementara:", emailErr?.message || emailErr);
     });
 
     return res.json(balasanNetral);

@@ -218,6 +218,8 @@ export const id = {
     "srv.metodologi_waterfall_tidak_mendukung":
       "Metodologi Waterfall tidak mendukung pembuatan Sprint. Gunakan Milestone atau bagan GANTT.",
     "srv.gagal_mengambil_status_integrasi": "Gagal mengambil status integrasi email",
+    "srv.gagal_mengambil_konfigurasi_email": "Gagal mengambil konfigurasi email",
+    "srv.gagal_menyimpan_konfigurasi_email": "Gagal menyimpan konfigurasi email",
     "srv.alamat_email_tujuan_tidak": "Alamat email tujuan tidak valid atau kosong",
     "srv.terjadi_kesalahan_internal_saat":
       "Terjadi kesalahan internal saat mengirim email uji coba",

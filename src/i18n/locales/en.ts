@@ -212,6 +212,8 @@ export const en = {
     "srv.metodologi_waterfall_tidak_mendukung":
       "The Waterfall methodology does not support sprints. Use milestones or the GANTT chart instead.",
     "srv.gagal_mengambil_status_integrasi": "Failed to fetch the email integration status",
+    "srv.gagal_mengambil_konfigurasi_email": "Failed to fetch email configuration",
+    "srv.gagal_menyimpan_konfigurasi_email": "Failed to save email configuration",
     "srv.alamat_email_tujuan_tidak": "The destination email address is invalid or empty",
     "srv.terjadi_kesalahan_internal_saat":
       "An internal error occurred while sending the test email",

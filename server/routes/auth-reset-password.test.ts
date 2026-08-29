@@ -84,11 +84,11 @@ describe("Auth Routes - Forgot Password & Reset Password (Item #27)", () => {
 
       const res = await request(buatApp())
         .post("/api/auth/forgot-password")
-        .send({ email: "unknown@rajonet.com" });
+        .send({ email: "unknown@lanpro.my.id" });
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe("success");
-      expect(res.body.message).toContain("Bila alamat email itu terdaftar");
+      expect(res.body.message).toContain("Bila alamat email terdaftar");
       expect(res.body.message).not.toContain("tidak terdaftar dalam sistem");
 
       // Tidak ada email apa pun yang dikirim ke alamat yang tidak dikenal.
@@ -97,46 +97,37 @@ describe("Auth Routes - Forgot Password & Reset Password (Item #27)", () => {
     });
 
     /**
-     * #121 — Kata sandi TIDAK boleh berubah di titik ini. Versi lama langsung
-     * menimpanya atas permintaan tanpa autentikasi, sehingga siapa pun yang
-     * tahu sebuah alamat email bisa mengunci pemiliknya keluar dari akunnya.
+     * Item #262 — Mengirimkan kata sandi acak sementara ke email dan meng-hash ke database.
      */
-    it("mengirim tautan bertoken dan TIDAK mengubah kata sandi", async () => {
+    it("mengirimkan kata sandi sementara baru ke email pengguna terdaftar", async () => {
       const mockUser = {
         id: "usr-100",
         uid: "usr-100",
-        email: "member@rajonet.com",
+        email: "member@lanpro.my.id",
         username: "member1",
         displayName: "Member Satu",
       };
 
-      mockKueri.mockResolvedValueOnce([[mockUser]]); // findUserByEmail
+      mockKueri
+        .mockResolvedValueOnce([[mockUser]]) // findUserByEmail
+        .mockResolvedValueOnce([{ affectedRows: 1 }]); // updateUserPassword
 
       const res = await request(buatApp())
         .post("/api/auth/forgot-password")
-        .send({ email: "member@rajonet.com" });
+        .send({ email: "member@lanpro.my.id" });
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe("success");
-      // Balasannya identik dengan kasus email tak dikenal.
-      expect(res.body.message).toContain("Bila alamat email itu terdaftar");
+      expect(res.body.message).toContain("Bila alamat email terdaftar");
 
-      // Jalur kata sandi sementara tidak boleh dipakai lagi.
-      expect(kirimEmailPasswordBaru).not.toHaveBeenCalled();
-
-      expect(kirimEmailResetPassword).toHaveBeenCalledTimes(1);
-      const arg = (kirimEmailResetPassword as jest.Mock).mock.calls[0][0];
-      expect(arg.email).toBe("member@rajonet.com");
+      // Jalur kata sandi sementara baru dipanggil
+      expect(kirimEmailPasswordBaru).toHaveBeenCalledTimes(1);
+      const arg = (kirimEmailPasswordBaru as jest.Mock).mock.calls[0][0];
+      expect(arg.email).toBe("member@lanpro.my.id");
       expect(arg.username).toBe("member1");
-      expect(arg.temporaryPassword).toBeUndefined();
-      expect(arg.resetUrl).toContain("#reset-password?token=");
-
-      // Token di dalam tautan harus token reset yang sah dan berumur pendek.
-      const token = decodeURIComponent(arg.resetUrl.split("token=")[1]);
-      const decoded: any = jwt.verify(token, getJwtSecret());
-      expect(decoded.type).toBe("password_reset");
-      expect(decoded.id).toBe("usr-100");
-      expect(decoded.exp - decoded.iat).toBeLessThanOrEqual(15 * 60);
+      expect(arg.temporaryPassword).toBeDefined();
+      expect(typeof arg.temporaryPassword).toBe("string");
+      expect(arg.temporaryPassword.length).toBeGreaterThanOrEqual(8);
     });
   });
 

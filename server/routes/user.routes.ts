@@ -19,6 +19,7 @@ import { AuthenticatedRequest } from "../types/express";
 import { userRepository } from "../repositories/user.repository";
 import { matchesCaller } from "../services/task.service";
 import { createAuditLog } from "../services/audit.service";
+import { kirimEmailAktivasiAkun } from "../services/email.service";
 export { sanitizeAvatarValue };
 
 // Item #210 — dulu memakai `sanitizeAvatarValue` (yang sengaja menolak URL
@@ -522,6 +523,29 @@ router.put(
         oldValues: oldUser,
         newValues: { role, status, department, position, displayName, username, email, phone },
       });
+
+      // Item #261 — Kirim email notifikasi aktivasi akun bila status berubah menjadi ACTIVE
+      const isBeingActivated =
+        oldUser &&
+        String(oldUser.status || "").toLowerCase() !== "active" &&
+        String(status || "").toLowerCase() === "active";
+
+      if (isBeingActivated) {
+        const targetEmail = email || oldUser.email;
+        const targetUsername = username || oldUser.username || targetEmail;
+        const targetName =
+          displayName || oldUser.displayName || oldUser.nama_lengkap || targetUsername;
+
+        if (targetEmail) {
+          kirimEmailAktivasiAkun({
+            email: targetEmail,
+            username: targetUsername,
+            nama: targetName,
+          }).catch((err) => {
+            console.error("[EMAIL] Gagal mengirim email aktivasi akun:", err?.message || err);
+          });
+        }
+      }
 
       res.json({ status: "success", code: "srv.user_updated", message: "User updated" });
     } catch (error: any) {

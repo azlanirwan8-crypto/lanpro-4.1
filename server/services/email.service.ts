@@ -9,6 +9,9 @@
  * terstruktur mencegah crash maupun kegagalan senyap.
  */
 
+import nodemailer from "nodemailer";
+import { getEmailIntegrationConfig, EmailIntegrationConfig } from "./integrationSettings.service";
+
 export interface KirimEmailInput {
   to: string | string[];
   subject: string;
@@ -35,24 +38,43 @@ export function ambilApiKey(): string {
   return (process.env.RESEND_API_KEY || "").trim();
 }
 
-/**
- * #157 — TIDAK ADA alamat cadangan yang dikeraskan di sini.
- *
- * Versi lama memulangkan `LanPro <lanpro@rajonet.com>` bila `EMAIL_FROM` kosong.
- * Cadangan semacam itu terlihat membantu, padahal justru menjamin kegagalan
- * SENYAP: begitu domain berganti (atau, seperti #127, tidak pernah lolos
- * verifikasi DNS), setiap pengiriman ditolak Resend sementara log server
- * tetap melaporkan alamat pengirim yang tampak masuk akal. Lupa mengisi
- * `EMAIL_FROM` harus terlihat, bukan tertutup nilai bawaan.
- *
- * Mengganti domain sekarang benar-benar cuma satu variabel: `EMAIL_FROM`.
- */
 export function ambilEmailPengirim(): string {
   return (process.env.EMAIL_FROM || "").trim();
 }
 
+export async function emailTerkonfigurasiAsync(): Promise<boolean> {
+  try {
+    const config = await getEmailIntegrationConfig();
+    if (config.provider === "smtp") {
+      return Boolean(config.smtpHost && config.smtpUser);
+    }
+    return Boolean(config.apiKey || ambilApiKey());
+  } catch {
+    return emailTerkonfigurasi();
+  }
+}
+
 export function emailTerkonfigurasi(): boolean {
   return ambilApiKey().length > 0;
+}
+
+export async function statusEmailServiceAsync() {
+  const config = await getEmailIntegrationConfig();
+  if (config.provider === "smtp" && (config.smtpHost || config.smtpUser)) {
+    const sender = config.senderEmail || config.smtpUser || "admin@lanpro.my.id";
+    return {
+      aktif: Boolean(config.smtpHost && config.smtpUser && config.smtpPass),
+      provider: `SMTP (${config.smtpHost || "Domain Hosting"})`,
+      from: config.senderName ? `"${config.senderName}" <${sender}>` : sender,
+      isMock: !config.smtpPass && process.env.NODE_ENV !== "production",
+    };
+  }
+  return {
+    aktif: Boolean(config.apiKey || ambilApiKey()),
+    provider: "Resend",
+    from: config.senderEmail || ambilEmailPengirim(),
+    isMock: !config.apiKey && !ambilApiKey() && process.env.NODE_ENV !== "production",
+  };
 }
 
 export function statusEmailService() {
@@ -64,7 +86,7 @@ export function statusEmailService() {
 }
 
 /**
- * Mengirim email transaksional via Resend REST API.
+ * Mengirim email transaksional via SMTP hosting (Nodemailer) atau Resend REST API.
  */
 export async function kirimEmail(input: KirimEmailInput): Promise<KirimEmailResult> {
   const { to, subject, html, text, from } = input;
@@ -88,8 +110,70 @@ export async function kirimEmail(input: KirimEmailInput): Promise<KirimEmailResu
     return { success: false, error: "Konten HTML email tidak boleh kosong" };
   }
 
-  const apiKey = ambilApiKey();
-  const pengirim = (from || ambilEmailPengirim()).trim();
+  // Baca konfigurasi dari Database PostgreSQL
+  let dbConfig: EmailIntegrationConfig | null = null;
+  try {
+    dbConfig = await getEmailIntegrationConfig();
+  } catch (e) {
+    // Fallback silent
+  }
+
+  const apiKey = dbConfig?.apiKey || ambilApiKey();
+  const hasDbSmtpConfig = Boolean(dbConfig && dbConfig.provider === "smtp" && dbConfig.smtpPass);
+  const provider = hasDbSmtpConfig
+    ? "smtp"
+    : apiKey || dbConfig?.provider === "resend"
+      ? "resend"
+      : dbConfig?.provider || "smtp";
+
+  // ── Jalur 1: SMTP Server (Domain IDHost / cPanel / Custom) ──────────────────
+  if (provider === "smtp" && (dbConfig?.smtpPass || process.env.SMTP_PASS)) {
+    const smtpHost = dbConfig?.smtpHost || process.env.SMTP_HOST || "mail.lanpro.my.id";
+    const smtpPort = dbConfig?.smtpPort || Number(process.env.SMTP_PORT || 465);
+    const smtpUser = dbConfig?.smtpUser || process.env.SMTP_USER || "admin@lanpro.my.id";
+    const smtpPass = dbConfig?.smtpPass || process.env.SMTP_PASS || "";
+    const smtpSecure = dbConfig?.smtpSecure ?? smtpPort === 465;
+    const senderEmail = dbConfig?.senderEmail || smtpUser;
+    const senderName = dbConfig?.senderName || "LanPro System";
+    const pengirimFormatted = from || `"${senderName}" <${senderEmail}>`;
+
+    try {
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpSecure,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
+        },
+        tls: {
+          rejectUnauthorized: process.env.NODE_ENV === "production",
+        },
+      });
+
+      const info = await transporter.sendMail({
+        from: pengirimFormatted,
+        to: penerima,
+        subject,
+        html,
+        text,
+      });
+
+      return {
+        success: true,
+        messageId: info.messageId || `smtp-${Date.now()}`,
+      };
+    } catch (err: any) {
+      console.error("[EMAIL SMTP] Galat saat mengirim email via SMTP:", err?.message || err);
+      return {
+        success: false,
+        error: err?.message || "Gagal mengirim email melalui server SMTP",
+      };
+    }
+  }
+
+  // ── Jalur 2: Resend REST API ────────────────────────────────────────────────
+  const pengirim = (from || dbConfig?.senderEmail || ambilEmailPengirim()).trim();
 
   // Mode mock di development bila API key belum disetel
   if (!apiKey) {
@@ -110,12 +194,6 @@ export async function kirimEmail(input: KirimEmailInput): Promise<KirimEmailResu
     };
   }
 
-  /**
-   * #157 — Dijaga di sini, SESUDAH mode mock, supaya pengembangan lokal tanpa
-   * `EMAIL_FROM` tetap bisa jalan lewat log konsol. Yang tidak boleh terjadi
-   * adalah menembak Resend dengan alamat pengirim kosong: jawabannya akan
-   * berupa galat provider yang tidak menyebut sebab sebenarnya.
-   */
   if (!pengirim) {
     const err =
       "EMAIL_FROM belum dikonfigurasi — alamat pengirim harus memakai domain yang terverifikasi di Resend";
@@ -144,11 +222,18 @@ export async function kirimEmail(input: KirimEmailInput): Promise<KirimEmailResu
       body: JSON.stringify(payload),
     });
 
-    const data: any = await response.json().catch(() => ({}));
+    const data: any =
+      response && typeof response.json === "function"
+        ? await response.json().catch(() => ({}))
+        : {};
 
-    if (!response.ok) {
+    if (!response || !response.ok) {
       const errorMsg =
-        data?.message || data?.error || `HTTP ${response.status} ${response.statusText}`;
+        data?.message ||
+        data?.error ||
+        (response
+          ? `HTTP ${response.status} ${response.statusText}`
+          : "Layanan email tidak merespons");
       console.error(`[EMAIL] Resend API menolak pengiriman ke ${penerima.join(", ")}:`, errorMsg);
       return {
         success: false,
@@ -218,6 +303,58 @@ export async function kirimEmailSelamatDatang(data: WelcomeEmailData): Promise<K
   `;
 
   const text = `Halo ${namaPanggilan},\n\nAkun LanPro Anda berhasil didaftarkan.\nUsername: ${username}\nEmail: ${email}\nStatus: Menunggu Persetujuan Admin (Pending)\n\nKunjungi aplikasi: ${appUrl}`;
+
+  return kirimEmail({
+    to: email,
+    subject,
+    html,
+    text,
+  });
+}
+
+export interface ActivationEmailData {
+  email: string;
+  nama?: string;
+  username: string;
+}
+
+/**
+ * Mengirim email aktivasi akun setelah akun disetujui admin (Item #261).
+ */
+export async function kirimEmailAktivasiAkun(data: ActivationEmailData): Promise<KirimEmailResult> {
+  const { email, nama, username } = data;
+  const namaPanggilan = (nama || username || "").trim();
+  const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+
+  const subject = "[LanPro] Akun Anda Telah Diaktifkan";
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1e293b; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+      <div style="margin-bottom: 24px; text-align: center;">
+        <h1 style="color: #059669; font-size: 22px; margin: 0 0 8px 0; font-weight: 700;">Akun Anda Telah Aktif</h1>
+        <p style="color: #64748b; font-size: 14px; margin: 0;">LanPro Project Management System</p>
+      </div>
+
+      <div style="background-color: #f8fafc; border-radius: 6px; padding: 16px; margin-bottom: 20px;">
+        <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">Halo, ${namaPanggilan}!</p>
+        <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #334155;">
+          Kabar baik! Akun LanPro Anda dengan username <strong>${username}</strong> telah disetujui dan diaktifkan oleh Administrator.
+        </p>
+        <p style="margin: 8px 0 0 0; font-size: 13px; line-height: 1.5; color: #334155;">
+          Sekarang Anda sudah dapat masuk ke sistem dan mulai berkolaborasi bersama tim.
+        </p>
+      </div>
+
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${appUrl}" style="display: inline-block; background-color: #059669; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">Masuk ke LanPro Sekarang</a>
+      </div>
+
+      <p style="font-size: 11px; color: #94a3b8; text-align: center; margin-top: 24px;">
+        Email ini dikirim secara otomatis oleh sistem LanPro. Jangan membalas email ini.
+      </p>
+    </div>
+  `;
+
+  const text = `Halo ${namaPanggilan},\n\nAkun LanPro Anda (${username}) telah diaktifkan oleh Administrator.\n\nMasuk ke aplikasi: ${appUrl}`;
 
   return kirimEmail({
     to: email,
