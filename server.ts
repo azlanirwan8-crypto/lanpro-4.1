@@ -1176,7 +1176,43 @@ app.use(errorHandler);
 
   httpServer.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {
-      console.error(`[SERVER] Port ${PORT} is already in use. Exiting cleanly...`);
+      // Item #276. Pesan lama berbunyi "Port N is already in use. Exiting
+      // cleanly..." — dan kata "cleanly" itu berbohong: exit code-nya 1,
+      // ini kegagalan. Tiga hal bersekongkol menyembunyikannya: di bawah
+      // `tsx watch` supervisor tetap hidup walau anak prosesnya mati,
+      // aplikasinya tetap menjawab di port itu (dilayani proses LAIN), dan
+      // tidak ada satu pun kalimat yang menyebut kode yang sedang diuji
+      // mungkin bukan kode yang sedang berjalan. Satu putaran penuh debug
+      // pernah terbuang karenanya.
+      const cariPemegang =
+        process.platform === 'win32'
+          ? `netstat -ano | findstr :${PORT}`
+          : `lsof -i :${PORT}`;
+      console.error(
+        `
+${'='.repeat(70)}
+` +
+          `[SERVER] GAGAL MENYALA — port ${PORT} sudah dipakai proses lain.
+` +
+          `[SERVER] Server ini TIDAK berjalan.
+` +
+          `[SERVER]
+` +
+          `[SERVER] PERINGATAN: aplikasi yang masih menjawab di
+` +
+          `[SERVER] http://localhost:${PORT} dilayani proses LAIN, yang bisa
+` +
+          `[SERVER] jadi memuat versi kode LAMA. Perubahan Anda tidak akan
+` +
+          `[SERVER] terlihat, dan rute baru akan balas 404.
+` +
+          `[SERVER]
+` +
+          `[SERVER] Cari pemegang portnya:  ${cariPemegang}
+` +
+          `${'='.repeat(70)}
+`
+      );
       process.exit(1);
     } else {
       console.error("[SERVER] Fatal server error:", err);
