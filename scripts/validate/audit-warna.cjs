@@ -137,12 +137,36 @@ if (naik.length || baru.length) {
   process.exit(1);
 }
 
-console.log(warna.hijau("\x1b[1mLULUS — tidak ada warna keras baru.\x1b[0m"));
+/**
+ * KEMAJUAN WAJIB DIKUNCI (#288).
+ *
+ * Sebelum ini, penurunan hanya menghasilkan SARAN ("jalankan --perbarui").
+ * Saran boleh diabaikan, dan yang diabaikan tidak pernah terjadi: garis dasar
+ * tetap di angka lama, sehingga warna keras yang sudah dihapus boleh masuk
+ * kembali besok tanpa satu pun gerbang mengeluh. Ratchet yang tidak pernah
+ * dikencangkan hanyalah ambang batas dengan nama yang lebih baik.
+ *
+ * Sekarang penurunan MENGGAGALKAN gerbang sampai garis dasarnya diperbarui.
+ * Ini terdengar keras untuk sebuah perbaikan, dan memang disengaja: harganya
+ * satu perintah, dan yang dibelinya adalah kemajuan yang tidak bisa tergerus
+ * diam-diam. Bedakan dari kegagalan di atas — yang itu berarti "Anda merusak",
+ * yang ini berarti "Anda memperbaiki, kuncilah".
+ */
 if (turun.length || hilang.length) {
+  console.log(warna.kuning("\x1b[1mKUNCI KEMAJUANNYA — warna keras BERKURANG.\x1b[0m"));
   console.log(
-    warna.redup(
-      `${totalDasar - totalSekarang} kelas berkurang. Jalankan --perbarui untuk mengunci kemajuannya.`
-    )
+    warna.redup(`${totalDasar - totalSekarang} kelas berkurang, garis dasar masih di angka lama.`)
   );
+  console.log(warna.redup("Jalankan perintah ini, lalu ikutkan berkasnya dalam commit:"));
+  console.log("");
+  console.log("  npm run audit:warna -- --perbarui");
+  console.log("  git add scripts/validate/warna-baseline.json");
+  console.log("");
+  console.log(warna.redup("Tanpa langkah itu, kemajuan hari ini boleh hilang lagi besok"));
+  console.log(warna.redup("tanpa satu pun gerbang mengeluh."));
+  console.log("──────────────────────────────────────────────────────────\n");
+  process.exit(1);
 }
+
+console.log(warna.hijau("\x1b[1mLULUS — tidak ada warna keras baru.\x1b[0m"));
 console.log("──────────────────────────────────────────────────────────\n");
