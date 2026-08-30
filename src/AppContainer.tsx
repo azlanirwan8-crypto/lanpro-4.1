@@ -74,6 +74,7 @@ import { HeaderAvatarGroup } from "./components/HeaderAvatarGroup";
 import { UserProfileDropdown } from "./components/UserProfileDropdown";
 import { SingleLoginCollisionModal } from "./components/SingleLoginCollisionModal";
 import { apiRequest, getAuthToken, isNetworkOrAuthError } from "./lib/api";
+import { WajibGantiKataSandiModal } from "./features/auth/components/WajibGantiKataSandiModal";
 import {
   verifyAuth,
   fetchUsers,
@@ -4028,6 +4029,43 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
               </div>
             )}
           </Suspense>
+          {/*
+            Gerbang wajib ganti kata sandi (#296).
+
+            Dipasang di sini, DI DALAM cabang pengguna yang sudah masuk, supaya
+            ia hanya muncul sesudah sesi benar-benar ada. Menaruhnya di akar
+            akan membuatnya sempat berkedip saat aplikasi masih memulihkan
+            sesi, dan kedipan itu justru terlihat seperti aplikasi rusak.
+
+            Penandanya datang dari server (`mustChangePassword` di respons
+            login), bukan dihitung di klien. Klien tidak tahu kapan kata sandi
+            sementara diterbitkan, dan menebaknya di sini akan membuat penjaga
+            ini gampang dilewati.
+          */}
+          {(currentUserProfile as any)?.mustChangePassword === true && (
+            <WajibGantiKataSandiModal
+              onKeluar={handleLogoutRequest}
+              onGanti={async (kataSandiLama, kataSandiBaru) => {
+                const hasil = await apiRequest("/api/auth/change-password", {
+                  method: "POST",
+                  body: { currentPassword: kataSandiLama, newPassword: kataSandiBaru },
+                });
+                if (hasil?.status !== "success") {
+                  throw new Error(hasil?.message || t("gantiSandi.gagal"));
+                }
+                // Penanda dibersihkan di klien SESUDAH server memastikan
+                // berhasil; membersihkannya lebih dulu akan menutup gerbang
+                // ini walaupun penyimpanannya gagal.
+                setCurrentUserProfile({
+                  ...(currentUserProfile as any),
+                  mustChangePassword: false,
+                });
+                setCurrentUser({ ...(currentUser as any), mustChangePassword: false });
+                toast.success(t("gantiSandi.berhasil"));
+              }}
+            />
+          )}
+
           {/* </main> */}
 
           {/* Modals */}
