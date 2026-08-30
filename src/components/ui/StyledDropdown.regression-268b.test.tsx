@@ -26,7 +26,7 @@ describe("StyledDropdown di dalam <form>", () => {
     const onSubmit = jest.fn((e: React.FormEvent) => e.preventDefault());
     render(
       <form onSubmit={onSubmit}>
-        <StyledDropdown value="proses" onChange={jest.fn()} options={PILIHAN} />
+        <StyledDropdown masterData={[]} value="proses" onChange={jest.fn()} options={PILIHAN} />
       </form>
     );
 
@@ -40,7 +40,7 @@ describe("StyledDropdown di dalam <form>", () => {
     const onChange = jest.fn();
     render(
       <form onSubmit={onSubmit}>
-        <StyledDropdown value="proses" onChange={onChange} options={PILIHAN} />
+        <StyledDropdown masterData={[]} value="proses" onChange={onChange} options={PILIHAN} />
       </form>
     );
 
@@ -56,7 +56,7 @@ describe("StyledDropdown di dalam <form>", () => {
     // ditambahkan kelak tidak boleh lupa membawa `type`.
     const { baseElement } = render(
       <form>
-        <StyledDropdown value="proses" onChange={jest.fn()} options={PILIHAN} />
+        <StyledDropdown masterData={[]} value="proses" onChange={jest.fn()} options={PILIHAN} />
       </form>
     );
     fireEvent.click(screen.getByRole("button", { name: /proses/i }));
