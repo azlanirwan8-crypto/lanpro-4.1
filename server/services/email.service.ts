@@ -511,6 +511,52 @@ export interface TaskDigestEmailData {
 /**
  * Mengirim email digest tugas tertunda harian / mingguan (F6.4).
  */
+/**
+ * Mengganti placeholder `{{nama}}` di templat yang diatur admin (#299).
+ *
+ * KENAPA FUNGSI INI ADA. `subjectTemplate` dan `bodyTemplate` sudah lama
+ * tersimpan di `IntegrationSettings` dan bisa diubah dari halaman Pengaturan,
+ * tetapi **tidak ada satu pun jalur pengiriman yang membacanya** — admin
+ * mengisi, menekan Simpan, melihat notifikasi berhasil, dan tidak ada apa pun
+ * yang berubah pada email yang benar-benar terkirim. Itu pola "UI berbohong
+ * diam-diam" yang kelima di repo ini (#127, #157, #263, #273).
+ *
+ * Placeholder yang tidak dikenal DIBIARKAN apa adanya, bukan diganti string
+ * kosong: admin yang salah ketik akan melihat `{{user_nam}}` di email uji dan
+ * langsung tahu letak salahnya, sedangkan bagian yang hilang tanpa jejak
+ * justru membuatnya menebak-nebak.
+ */
+/**
+ * Membaca templat subjek & isi yang diatur admin dari `IntegrationSettings`.
+ *
+ * Dibungkus try/catch dan memulangkan nilai kosong bila gagal: templat adalah
+ * penyesuaian, bukan syarat. Satu galat basis data tidak boleh membuat email
+ * ringkasan tugas berhenti terkirim sama sekali — jalur bawaan tetap jalan.
+ */
+async function ambilTemplatEmail(): Promise<{
+  subjectTemplate: string | null;
+  bodyTemplate: string | null;
+}> {
+  try {
+    const { getEmailIntegrationConfig } = await import("./integrationSettings.service");
+    const cfg = await getEmailIntegrationConfig();
+    return {
+      subjectTemplate: (cfg.subjectTemplate || "").trim() || null,
+      bodyTemplate: (cfg.bodyTemplate || "").trim() || null,
+    };
+  } catch (err: any) {
+    console.warn("[EMAIL] Templat kustom tidak terbaca, memakai bawaan:", err?.message);
+    return { subjectTemplate: null, bodyTemplate: null };
+  }
+}
+
+export function isiPlaceholder(templat: string, nilai: Record<string, string | number>): string {
+  return templat.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (utuh, kunci) => {
+    const isi = nilai[kunci];
+    return isi === undefined || isi === null ? utuh : String(isi);
+  });
+}
+
 export async function kirimEmailTaskDigest(data: TaskDigestEmailData): Promise<KirimEmailResult> {
   const { email, nama, username, tasks, tanggal } = data;
   const namaPanggilan = (nama || username || "").trim();
@@ -530,7 +576,32 @@ export async function kirimEmailTaskDigest(data: TaskDigestEmailData): Promise<K
     ["high", "tinggi", "urgent", "kritis"].includes(t.priority?.toLowerCase())
   ).length;
 
-  const subject = `[LanPro] Ringkasan Tugas Tertunda: ${jumlahTugas} Tugas (${tanggalFormatted})`;
+  /**
+   * Subjek dan sapaan pembuka kini MEMBACA templat yang diatur admin (#299).
+   *
+   * Bila kolomnya kosong, nilai bawaan di bawah yang dipakai — jadi memasang
+   * ini tidak mengubah apa pun bagi yang belum pernah mengisinya. Tabel tugas,
+   * ringkasan angka, dan tombolnya tetap disusun kode, sebab itu struktur data
+   * yang tidak masuk akal diserahkan ke string bebas.
+   */
+  const konfigTemplat = await ambilTemplatEmail();
+  const nilaiPlaceholder = {
+    user_name: namaPanggilan,
+    username,
+    total_tugas: jumlahTugas,
+    tugas_terlambat: overdueCount,
+    tugas_prioritas_tinggi: highPriorityCount,
+    tanggal: tanggalFormatted,
+    app_url: appUrl,
+  };
+
+  const subject = konfigTemplat.subjectTemplate
+    ? isiPlaceholder(konfigTemplat.subjectTemplate, nilaiPlaceholder)
+    : `[LanPro] Ringkasan Tugas Tertunda: ${jumlahTugas} Tugas (${tanggalFormatted})`;
+
+  const sapaanKustom = konfigTemplat.bodyTemplate
+    ? isiPlaceholder(konfigTemplat.bodyTemplate, nilaiPlaceholder)
+    : null;
 
   const taskRowsHtml = tasks
     .map((t) => {
@@ -575,10 +646,14 @@ export async function kirimEmailTaskDigest(data: TaskDigestEmailData): Promise<K
       </div>
 
       <div style="margin-bottom: 16px;">
-        <p style="margin: 0 0 6px 0; font-size: 14px; font-weight: 600;">Halo, ${namaPanggilan}!</p>
+        ${
+          sapaanKustom
+            ? `<div style="margin: 0; font-size: 13px; line-height: 1.6; color: #334155; white-space: pre-line;">${sapaanKustom}</div>`
+            : `<p style="margin: 0 0 6px 0; font-size: 14px; font-weight: 600;">Halo, ${namaPanggilan}!</p>
         <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #475569;">
           Berikut adalah rekapitulasi tugas tertunda yang membutuhkan perhatian Anda hari ini:
-        </p>
+        </p>`
+        }
       </div>
 
       <div style="display: flex; gap: 10px; margin-bottom: 20px;">
@@ -640,7 +715,10 @@ export async function kirimEmailTaskDigest(data: TaskDigestEmailData): Promise<K
     )
     .join("\n");
 
-  const text = `Halo ${namaPanggilan},\n\nBerikut ringkasan ${jumlahTugas} tugas tertunda Anda (${tanggalFormatted}):\n\n${textTasks}\n\nBuka dashboard LanPro: ${appUrl}`;
+  const pembukaTeks = sapaanKustom
+    ? sapaanKustom
+    : `Halo ${namaPanggilan},\n\nBerikut ringkasan ${jumlahTugas} tugas tertunda Anda (${tanggalFormatted}):`;
+  const text = `${pembukaTeks}\n\n${textTasks}\n\nBuka dashboard LanPro: ${appUrl}`;
 
   return kirimEmail({
     to: email,
