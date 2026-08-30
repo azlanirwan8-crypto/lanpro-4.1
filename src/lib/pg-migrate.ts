@@ -958,3 +958,77 @@ export async function runMigrations(pool: Pool): Promise<void> {
     client.release();
   }
 }
+
+/**
+ * Tabel yang WAJIB ada sesudah migrasi berjalan (item #275).
+ *
+ * MASALAH YANG DIPECAHKAN. Status migrasi dulu hanya merekam "panggilan
+ * runMigrations() selesai tanpa melempar" — bukan "schema di database sudah
+ * lengkap". Saat insiden #273, GET /api/health-check menjawab
+ * {"migrasi":"berhasil"} PADAHAL tabel "IntegrationSettings" tidak ada di
+ * database, sebab proses itu boot dari kode lama yang blok DDL-nya memang
+ * belum memuat tabel tersebut. Jujur untuk versi kodenya sendiri, menyesatkan
+ * bagi orang yang membacanya untuk memutuskan apakah schema siap.
+ *
+ * Daftar ini SENGAJA ditulis eksplisit, bukan diturunkan dari string SQL saat
+ * runtime: parsing SQL sendiri rapuh dan justru menambah cara baru untuk gagal
+ * diam-diam. Sinkronnya dijaga oleh test `pg-migrate.tabel-wajib.test.ts`,
+ * yang membaca berkas ini dan MERAH bila ada CREATE TABLE yang tidak terdaftar
+ * di sini — jadi menambah tabel tanpa memperbarui daftar tidak mungkin lolos.
+ */
+export const TABEL_WAJIB: readonly string[] = [
+  "ActivityLogs",
+  "Attachments",
+  "AuditLogs",
+  "BroadcastConfig",
+  "Comments",
+  "DiscussionPoints",
+  "Documents",
+  "IntegrationSettings",
+  "LinkedTasks",
+  "MasterData",
+  "Meetings",
+  "Messages",
+  "MilestoneSprints",
+  "Milestones",
+  "Notifications",
+  "ProjectInvites",
+  "ProjectMembers",
+  "ProjectModules",
+  "Projects",
+  "QATestCaseExecutionLogs",
+  "QATestCases",
+  "QATestSuites",
+  "Sprints",
+  "TaskCustomFields",
+  "TaskExternalLinks",
+  "Tasks",
+  "TokenBlacklist",
+  "UserIdentities",
+  "UserSessions",
+  "Users",
+  "ai_learning_logs",
+  "discussion_point_comments",
+  "meeting_details",
+];
+
+/**
+ * Memeriksa tabel mana yang TIDAK ada di database (item #275).
+ *
+ * Dipakai sesudah migrasi untuk menjawab pertanyaan yang benar — "schema
+ * lengkap atau tidak" — bukan sekadar "fungsi migrasi tidak melempar".
+ * Menangkap juga kasus DDL berurutan yang putus di tengah: satu CREATE TABLE
+ * gagal membuat semua tabel sesudahnya ikut terlewat.
+ */
+export async function cariTabelHilang(pool: Pool): Promise<string[]> {
+  const client = await pool.connect();
+  try {
+    const hasil = await client.query(
+      `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`
+    );
+    const ada = new Set(hasil.rows.map((r: any) => r.table_name));
+    return TABEL_WAJIB.filter((t) => !ada.has(t));
+  } finally {
+    client.release();
+  }
+}

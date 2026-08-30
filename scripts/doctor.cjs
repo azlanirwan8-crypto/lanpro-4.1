@@ -435,8 +435,33 @@ section('6. Penyimpanan berkas unggahan');
       connectionTimeoutMillis: 15000,
     });
     try {
-      // Tabel inti yang ketiadaannya pasti merusak fitur, bukan seluruh daftar.
-      const wajib = ['Users', 'Projects', 'Tasks', 'Documents', 'UserIdentities'];
+      // Item #275: daftar diambil dari TABEL_WAJIB di src/lib/pg-migrate.ts —
+      // satu sumber kebenaran dengan yang diperiksa server saat boot. Yang
+      // dibaca adalah literal array-nya, BUKAN string SQL-nya: mengurai SQL
+      // rapuh dan justru menambah cara baru untuk gagal diam-diam. Bila
+      // pembacaan gagal, jatuh ke lima tabel inti yang ketiadaannya pasti
+      // merusak fitur — dilewati diam-diam bukan pilihan.
+      const INTI = ['Users', 'Projects', 'Tasks', 'Documents', 'UserIdentities'];
+      let wajib = INTI;
+      try {
+        const sumber = fs.readFileSync(
+          path.join(__dirname, '..', 'src', 'lib', 'pg-migrate.ts'),
+          'utf8'
+        );
+        const blok = sumber.match(/export const TABEL_WAJIB[^=]*=\s*\[([^\]]*)\]/);
+        if (blok) {
+          const nama = [...blok[1].matchAll(/"([A-Za-z_]+)"/g)].map((m) => m[1]);
+          if (nama.length > 0) wajib = nama;
+        }
+      } catch {
+        // biarkan memakai INTI
+      }
+      if (wajib === INTI) {
+        warn(
+          'TABEL_WAJIB tidak terbaca — memeriksa 5 tabel inti saja',
+          'Daftar lengkap ada di src/lib/pg-migrate.ts; pemeriksaan ini jadi lebih dangkal dari semestinya'
+        );
+      }
       const r = await pool.query(
         `SELECT table_name FROM information_schema.tables
          WHERE table_schema = 'public' AND table_name = ANY($1)`,

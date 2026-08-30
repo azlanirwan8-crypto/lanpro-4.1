@@ -211,10 +211,15 @@ async function startServer() {
   // percobaannya diulang, dan bila tetap gagal statusnya tercatat serta bisa
   // dibaca lewat /api/health dan npm run doctor. Lihat migrasi-status.ts.
   (async () => {
-    const { runMigrations } = await import('./src/lib/pg-migrate');
+    const { runMigrations, cariTabelHilang } = await import('./src/lib/pg-migrate');
     const { getPgPool } = await import('./src/lib/db');
     console.log("[SERVER] Memulai auto-migrasi schema PostgreSQL...");
-    await jalankanMigrasiDenganUlangan(() => runMigrations(getPgPool()));
+    // Item #275: verifikasi dijalankan SESUDAH migrasi mengaku sukses, supaya
+    // status yang dilaporkan menjawab "schema lengkap?" bukan sekadar
+    // "fungsi migrasi tidak melempar?".
+    await jalankanMigrasiDenganUlangan(() => runMigrations(getPgPool()), {
+      verifikasi: () => cariTabelHilang(getPgPool()),
+    });
   })();
   // ==========================================
 // WILAYAH II: Keamanan (Middleware Global, authenticateJWT, verifyProjectAccess)

@@ -30,6 +30,15 @@ interface KeadaanMigrasi {
   percobaan: number;
   galatTerakhir: string | null;
   selesaiPada: string | null;
+  /**
+   * Tabel yang WAJIB ada tetapi tidak ditemukan di database (item #275).
+   *
+   * Sebelum item ini, `status: "berhasil"` hanya berarti "runMigrations()
+   * selesai tanpa melempar" — dan itu pernah dilaporkan sebagai sehat padahal
+   * satu tabel tidak pernah terbentuk (#273). Kini bila daftar ini tidak
+   * kosong, statusnya `gagal`, apa pun hasil pemanggilan migrasinya.
+   */
+  tabelHilang: string[];
 }
 
 const keadaan: KeadaanMigrasi = {
@@ -37,11 +46,12 @@ const keadaan: KeadaanMigrasi = {
   percobaan: 0,
   galatTerakhir: null,
   selesaiPada: null,
+  tabelHilang: [],
 };
 
 /** Dibaca `/api/health` dan `npm run doctor`. Salinan, bukan rujukan. */
 export function statusMigrasi(): KeadaanMigrasi {
-  return { ...keadaan };
+  return { ...keadaan, tabelHilang: [...keadaan.tabelHilang] };
 }
 
 /** Hanya untuk test — mengembalikan keadaan ke awal. */
@@ -50,6 +60,7 @@ export function resetStatusMigrasi(): void {
   keadaan.percobaan = 0;
   keadaan.galatTerakhir = null;
   keadaan.selesaiPada = null;
+  keadaan.tabelHilang = [];
 }
 
 const jeda = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -62,7 +73,16 @@ const jeda = (ms: number) => new Promise((r) => setTimeout(r, ms));
  */
 export async function jalankanMigrasiDenganUlangan(
   jalankan: () => Promise<void>,
-  opsi: { maksPercobaan?: number; jedaAwalMs?: number } = {}
+  opsi: {
+    maksPercobaan?: number;
+    jedaAwalMs?: number;
+    /**
+     * Memeriksa schema SESUDAH migrasi mengaku sukses (item #275). Sengaja
+     * diterima sebagai parameter, sama alasannya dengan `jalankan`: supaya
+     * bisa diuji tanpa menyentuh database sungguhan.
+     */
+    verifikasi?: () => Promise<string[]>;
+  } = {}
 ): Promise<KeadaanMigrasi> {
   const maksPercobaan = opsi.maksPercobaan ?? 3;
   const jedaAwalMs = opsi.jedaAwalMs ?? 2000;
@@ -75,6 +95,38 @@ export async function jalankanMigrasiDenganUlangan(
     keadaan.percobaan = ke;
     try {
       await jalankan();
+
+      // Item #275. Sampai di sini yang terbukti hanyalah "migrasi tidak
+      // melempar" — dan itu pernah dilaporkan sebagai sehat padahal satu
+      // tabel tidak pernah terbentuk (#273). Pertanyaan yang benar adalah
+      // apakah schema-nya lengkap, jadi ditanyakan langsung ke database.
+      keadaan.tabelHilang = opsi.verifikasi ? await opsi.verifikasi() : [];
+
+      if (keadaan.tabelHilang.length > 0) {
+        keadaan.status = "gagal";
+        keadaan.galatTerakhir = `Tabel tidak ditemukan sesudah migrasi: ${keadaan.tabelHilang.join(", ")}`;
+        console.error(
+          `
+${"=".repeat(70)}
+` +
+            `[MIGRASI] Migrasi selesai TANPA GALAT, tetapi schema TIDAK lengkap.
+` +
+            `[MIGRASI] Tabel yang hilang (${keadaan.tabelHilang.length}): ${keadaan.tabelHilang.join(", ")}
+` +
+            `[MIGRASI] Penyebab tersering: satu DDL gagal di tengah, sehingga
+` +
+            `[MIGRASI] semua tabel sesudahnya ikut terlewat; atau proses ini
+` +
+            `[MIGRASI] boot dari kode lama yang DDL-nya memang belum memuatnya.
+` +
+            `[MIGRASI] Perbaiki dengan: npm run db:migrate
+` +
+            `${"=".repeat(70)}
+`
+        );
+        return statusMigrasi();
+      }
+
       keadaan.status = "berhasil";
       keadaan.galatTerakhir = null;
       keadaan.selesaiPada = new Date().toISOString();

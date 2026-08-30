@@ -43,13 +43,11 @@ const penjagaMetrik = (req: any, res: any, next: any) => {
     timingSafeEqual(Buffer.from(diberikan), Buffer.from(diharapkan));
 
   if (!cocok) {
-    return res
-      .status(401)
-      .json({
-        status: "error",
-        code: "srv.token_metrik_tidak_valid",
-        message: "Token metrik tidak valid.",
-      });
+    return res.status(401).json({
+      status: "error",
+      code: "srv.token_metrik_tidak_valid",
+      message: "Token metrik tidak valid.",
+    });
   }
 
   next();
@@ -96,6 +94,10 @@ router.get("/api/health-check", (req, res) => {
     timestamp: new Date().toISOString(),
     service: "LanPro Backend",
     migrasi: migrasi.status,
+    // Item #275: nama tabel yang hilang ikut dipaparkan. Tanpa ini,
+    // `migrasi: "gagal"` cuma memberi tahu ADA yang salah, bukan APA —
+    // dan orang yang membacanya tetap harus menebak.
+    tabelHilang: migrasi.tabelHilang,
   });
 });
 
