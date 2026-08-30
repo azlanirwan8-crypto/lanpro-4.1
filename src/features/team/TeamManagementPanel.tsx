@@ -62,12 +62,37 @@ export const TeamManagementPanel = ({
 
   const isGlobalAdmin =
     currentUserProfile?.role === "admin" || (currentUserProfile as any)?.systemRole === "admin";
-  const normalizedUserRole = String(userRole || "").toLowerCase();
-  const canManageTeam =
-    isGlobalAdmin ||
-    normalizedUserRole === "owner" ||
-    normalizedUserRole === "admin" ||
-    (typeof hasPermission === "function" && hasPermission("access", "U"));
+
+  /**
+   * Izin di sini datang dari CEKLIST, bukan dari peran proyek (#298).
+   *
+   * Versi sebelumnya berbunyi:
+   *
+   *   canManageTeam = isGlobalAdmin
+   *                   ATAU peran === "owner"
+   *                   ATAU peran === "admin"
+   *                   ATAU hasPermission("access", "U")
+   *
+   * Karena rantainya OR, akun berperan `owner`/`admin` di proyek langsung
+   * lolos dan `hasPermission` TIDAK PERNAH dipanggil. Pemilik proyek
+   * melaporkannya: ceklist "Akses Tim & Proyek" hanya READ, tetapi tombol
+   * hapus dan pemilih peran tetap muncul.
+   *
+   * Aturan yang disepakati — terdokumentasi di `issuePermissions.ts` sejak
+   * #202 — adalah: hak CRUD datang dari ceklist ATAU dari kepemilikan item,
+   * dan hanya Global Admin yang berakses penuh. Peran proyek bukan jalur
+   * ketiga.
+   *
+   * UPDATE dan DELETE juga DIPISAH. Sebelumnya keduanya memakai satu bendera
+   * yang menanyakan izin "U", sehingga akun yang hanya boleh mengubah peran
+   * ikut mendapat tombol keluarkan anggota — izin "D" tidak pernah diperiksa
+   * di mana pun.
+   */
+  const punyaIzin = (aksi: "U" | "D") =>
+    typeof hasPermission === "function" && hasPermission("access", aksi);
+
+  const bolehUbahPeran = isGlobalAdmin || punyaIzin("U");
+  const bolehKeluarkanAnggota = isGlobalAdmin || punyaIzin("D");
 
   const handleConfirmRemove = async () => {
     if (!memberToRemove || !removeProjectMember) return;
@@ -513,7 +538,7 @@ export const TeamManagementPanel = ({
                       <h3 className="font-medium text-content-strong text-sm leading-snug truncate group-hover:text-indigo-600 transition-colors">
                         {name}
                       </h3>
-                      {canManageTeam && !isOwner ? (
+                      {bolehUbahPeran && !isOwner ? (
                         <div className="mt-1 flex justify-center w-full max-w-[140px] mx-auto">
                           <CommonStyledDropdown
                             value={
@@ -562,7 +587,7 @@ export const TeamManagementPanel = ({
                       >
                         {t("team.viewProfile")}
                       </button>
-                      {canManageTeam &&
+                      {bolehKeluarkanAnggota &&
                         !isOwner &&
                         person.uid !== currentUserProfile?.uid &&
                         person.id !== currentUserProfile?.id && (
@@ -646,7 +671,7 @@ export const TeamManagementPanel = ({
                           </div>
                         </td>
                         <td className="px-5 py-3.5">
-                          {canManageTeam && !isOwner ? (
+                          {bolehUbahPeran && !isOwner ? (
                             <div className="w-[140px]">
                               <CommonStyledDropdown
                                 value={
@@ -696,7 +721,7 @@ export const TeamManagementPanel = ({
                             >
                               {t("teamPanel.viewProfile")}
                             </button>
-                            {canManageTeam &&
+                            {bolehKeluarkanAnggota &&
                               !isOwner &&
                               person.uid !== currentUserProfile?.uid &&
                               person.id !== currentUserProfile?.id && (
