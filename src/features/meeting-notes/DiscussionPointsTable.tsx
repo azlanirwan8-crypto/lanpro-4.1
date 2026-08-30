@@ -21,6 +21,7 @@ import {
   type MasterData,
 } from "../../types";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
+import { LanproDatePicker } from "../../components/ui/LanproDatePicker";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { AiMeetingCompanion } from "./AiMeetingCompanion";
 import { cn } from "../../lib/utils";
@@ -509,11 +510,10 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   <label className="text-xs sm:text-[10px] uppercase font-normal text-content-muted tracking-wider">
                     {t("discussion.targetDate")}
                   </label>
-                  <input
-                    type="date"
+                  <LanproDatePicker
                     value={editForm.targetDate || ""}
-                    onChange={(e) => setEditForm({ ...editForm, targetDate: e.target.value })}
-                    className="w-full h-9 px-3 bg-surface border border-border-subtle text-xs font-medium text-content-body rounded-md outline-none shadow-2xs"
+                    onChange={(val) => setEditForm({ ...editForm, targetDate: val })}
+                    buttonClassName="w-full h-9 px-3 bg-surface border border-border-subtle text-xs text-left font-medium text-content-body rounded-md shadow-2xs"
                   />
                 </div>
               </div>
@@ -828,11 +828,10 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
                     {/* Target Date */}
                     <td className="py-2.5 px-4 align-middle">
-                      <input
-                        type="date"
+                      <LanproDatePicker
                         value={quickTargetDate}
-                        onChange={(e) => setQuickTargetDate(e.target.value)}
-                        className="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs font-normal text-content-body rounded-md outline-none shadow-2xs"
+                        onChange={setQuickTargetDate}
+                        buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left font-normal text-content-body rounded-md shadow-2xs"
                       />
                     </td>
 
