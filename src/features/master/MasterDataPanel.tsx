@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { StyledDropdown } from "../../components/ui/CommonComponents";
 import React from "react";
 import { Settings, Plus, Trash2, Edit, Search, Layers, GripVertical, Tag } from "lucide-react";
 import {
@@ -1142,15 +1143,16 @@ export const MasterDataPanel = ({
                 <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
                   {t("master.hierarchyLevel")}
                 </label>
-                <select
+                <StyledDropdown
                   value={newMasterHierarchy}
-                  onChange={(e) => setNewMasterHierarchy(e.target.value)}
-                  className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-normal text-content-strong outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500"
-                >
-                  <option value="Epic">Epic</option>
-                  <option value="Standard">Standard</option>
-                  <option value="Subtask">Subtask</option>
-                </select>
+                  onChange={setNewMasterHierarchy}
+                  options={[
+                    { id: "Epic", label: "Epic" },
+                    { id: "Standard", label: "Standard" },
+                    { id: "Subtask", label: "Subtask" },
+                  ]}
+                  buttonClassName="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
+                />
               </div>
             )}
 
@@ -1159,15 +1161,16 @@ export const MasterDataPanel = ({
                 <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
                   {t("master.statusGroup")}
                 </label>
-                <select
+                <StyledDropdown
                   value={newMasterStatusGroup}
-                  onChange={(e) => setNewMasterStatusGroup(e.target.value)}
-                  className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-normal text-content-strong outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500"
-                >
-                  <option value="To Do">To Do</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Done">Done</option>
-                </select>
+                  onChange={setNewMasterStatusGroup}
+                  options={[
+                    { id: "To Do", label: "To Do" },
+                    { id: "In Progress", label: "In Progress" },
+                    { id: "Done", label: "Done" },
+                  ]}
+                  buttonClassName="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
+                />
               </div>
             )}
 
@@ -1520,18 +1523,15 @@ export const MasterDataPanel = ({
             <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
               {t("master.projectName")}
             </label>
-            <select
+            <StyledDropdown
               value={newModuleProjectId}
-              onChange={(e) => setNewModuleProjectId(e.target.value)}
-              className="w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-normal text-content-strong focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all"
-            >
-              <option value="">{t("master.selectProject")}</option>
-              {projects.map((p: any) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+              onChange={setNewModuleProjectId}
+              options={[
+                { id: "", label: t("master.selectProject") },
+                ...projects.map((p: any) => ({ id: p.id, label: p.name })),
+              ]}
+              buttonClassName="w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
+            />
           </div>
 
           <div>
@@ -1590,18 +1590,15 @@ export const MasterDataPanel = ({
             <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
               {t("master.projectName")}
             </label>
-            <select
+            <StyledDropdown
               value={editingModuleProjectId}
-              onChange={(e) => setEditingModuleProjectId(e.target.value)}
-              className="w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-normal text-content-strong focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all"
-            >
-              <option value="">{t("master.pickProject")}</option>
-              {projects.map((p: any) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+              onChange={setEditingModuleProjectId}
+              options={[
+                { id: "", label: t("master.pickProject") },
+                ...projects.map((p: any) => ({ id: p.id, label: p.name })),
+              ]}
+              buttonClassName="w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
+            />
           </div>
 
           <div>
