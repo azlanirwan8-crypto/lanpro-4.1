@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { StyledDropdown } from "../../components/ui/CommonComponents";
 import {
   ShieldCheck,
   Search,
@@ -394,23 +395,23 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
             {/* Filter Status */}
             <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-content-subtle shrink-0 hidden sm:inline" />
-              <select
+              <StyledDropdown
                 value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
+                onChange={(val) => {
+                  setStatusFilter(val);
                   setPage(1);
                 }}
-                className="px-3 py-2 bg-surface-sunken border border-border-subtle rounded-lg text-sm font-medium text-content-strong focus:outline-none focus:border-primary transition-all cursor-pointer"
-              >
-                <option value="ALL">{t("sessionMonitor.statusAll", "Semua Status")}</option>
-                <option value="ACTIVE">{t("sessionMonitor.statusActive", "Sesi Aktif")}</option>
-                <option value="LOGGED_OUT">
-                  {t("sessionMonitor.statusLoggedOut", "Sudah Keluar")}
-                </option>
-                <option value="FORCE_LOGOUT">
-                  {t("sessionMonitor.statusForceLogout", "Diputus Admin")}
-                </option>
-              </select>
+                options={[
+                  { id: "ALL", label: t("sessionMonitor.statusAll", "Semua Status") },
+                  { id: "ACTIVE", label: t("sessionMonitor.statusActive", "Sesi Aktif") },
+                  { id: "LOGGED_OUT", label: t("sessionMonitor.statusLoggedOut", "Sudah Keluar") },
+                  {
+                    id: "FORCE_LOGOUT",
+                    label: t("sessionMonitor.statusForceLogout", "Diputus Admin"),
+                  },
+                ]}
+                buttonClassName="px-3 py-2 bg-surface-sunken border border-border-subtle rounded-lg text-sm text-left font-medium text-content-strong"
+              />
             </div>
           </div>
 
