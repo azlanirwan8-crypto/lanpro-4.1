@@ -2,7 +2,8 @@ import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./i18n/LanguageSwitcher";
 import { safeLocalStorage, safeSessionStorage } from "./lib/safeStorage";
 import remarkGfm from "remark-gfm";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, Suspense } from "react";
+import { lazyWithRetry } from "./lib/lazyWithRetry";
 import io from "socket.io-client";
 
 import {
@@ -36,11 +37,36 @@ import { useNewProjectForm } from "./hooks/useNewProjectForm";
 import { useTaskSelection } from "./hooks/useTaskSelection";
 import { useAppSync } from "./hooks/useAppSync";
 import { useAppNavigation } from "./hooks/useAppNavigation";
-import { TaskDetailModal } from "./features/issues";
-import { UserDetailView } from "./features/users/UserDetailView";
+/**
+ * Lima tampilan besar di bawah dimuat SAAT DIBUTUHKAN (#293).
+ *
+ * Kelimanya dirender bersyarat di berkas ini, dan sebelumnya diimpor secara
+ * STATIS — sehingga ikut terkirim pada permintaan pertama walaupun pengguna
+ * hanya membuka Dashboard. Yang paling menipu: `MasterDataPanel` sudah dimuat
+ * malas di `AppRoutes.tsx`, tetapi impor statis di sini MENGALAHKANNYA tanpa
+ * satu pun galat maupun peringatan build.
+ *
+ * Diimpor dari berkasnya langsung, bukan dari barrel `./features/issues` atau
+ * `./features/users`: barrel mencampur ekspor yang malas dan yang tidak, dan
+ * Rollup menarik seluruh isinya ke potongan masuk begitu satu saja dipakai
+ * secara statis.
+ */
+const TaskDetailModal = lazyWithRetry(() =>
+  import("./features/issues/TaskDetailModal").then((m) => ({ default: m.TaskDetailModal }))
+);
+const UserDetailView = lazyWithRetry(() =>
+  import("./features/users/UserDetailView").then((m) => ({ default: m.UserDetailView }))
+);
 import { Sidebar } from "./features/sidebar";
-import { AdminUserPanel, UserSessionsPanel } from "./features/users";
-import { MasterDataPanel } from "./features/master/MasterDataPanel";
+const AdminUserPanel = lazyWithRetry(() =>
+  import("./features/users/AdminUserPanel").then((m) => ({ default: m.AdminUserPanel }))
+);
+const UserSessionsPanel = lazyWithRetry(() =>
+  import("./features/users/UserSessionsPanel").then((m) => ({ default: m.UserSessionsPanel }))
+);
+const MasterDataPanel = lazyWithRetry(() =>
+  import("./features/master/MasterDataPanel").then((m) => ({ default: m.MasterDataPanel }))
+);
 import { WelcomeScreen } from "./components/WelcomeScreen";
 import { LiveChatWidget } from "./components/LiveChatWidget";
 import { PresenceProvider } from "./contexts/PresenceContext";
@@ -3689,305 +3715,319 @@ Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"
             </div>
           </header>
 
-          {currentView === "userDetail" ? (
-            <UserDetailView
-              user={selectedUserForDetail}
-              onBack={() => setCurrentView(previousView as any)}
-              projects={projects}
-              tasks={tasks}
-              departments={masterData.filter((m) => m.type === "department")}
-              positions={masterData.filter((m) => m.type === "position" || m.type === "jabatan")}
-              masterData={masterData}
-              currentUser={currentUser || currentUserProfile}
-              activityLogs={activityLogs || []}
-              onUserUpdated={() => {
-                fetchProjects();
-              }}
-            />
-          ) : currentView === "users" ? (
-            /* Penjaga izin — item #161. `AdminUserPanel` tidak memeriksa izin
+          {/*
+            Batas Suspense untuk lima tampilan yang kini dimuat malas (#293).
+            Fallback-nya sengaja sama bentuknya dengan yang dipakai AppRoutes
+            supaya perpindahan antar tampilan tidak terasa berbeda tergantung
+            siapa yang merendernya.
+          */}
+          <Suspense
+            fallback={
+              <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
+                <p className="mt-3 text-sm text-content-muted">{t("appShell.loading")}</p>
+              </div>
+            }
+          >
+            {currentView === "userDetail" ? (
+              <UserDetailView
+                user={selectedUserForDetail}
+                onBack={() => setCurrentView(previousView as any)}
+                projects={projects}
+                tasks={tasks}
+                departments={masterData.filter((m) => m.type === "department")}
+                positions={masterData.filter((m) => m.type === "position" || m.type === "jabatan")}
+                masterData={masterData}
+                currentUser={currentUser || currentUserProfile}
+                activityLogs={activityLogs || []}
+                onUserUpdated={() => {
+                  fetchProjects();
+                }}
+              />
+            ) : currentView === "users" ? (
+              /* Penjaga izin — item #161. `AdminUserPanel` tidak memeriksa izin
                sama sekali di dalamnya, dan cabang ini berada DI ATAS penjaga
                `selectedProject`, jadi apa pun yang berhasil menyetel
                `currentView` ke "users" langsung mendapat daftar SELURUH
                pengguna. Menyembunyikan menunya di sidebar bukan penjaga:
                menu hanya salah satu jalan masuk. */
-            !hasPermission(
-              effectiveRole,
-              "userManagement",
-              "read",
-              false,
-              currentUserProfile?.permissions
-            ) ? (
-              <div className="flex flex-col items-center justify-center w-full flex-1 p-8 text-center bg-surface-sunken">
-                <ShieldAlert className="w-16 h-16 text-danger mb-4" />
-                <h2 className="text-2xl font-medium text-content-strong mb-2">
-                  {t("appShell.forbidden")}
-                </h2>
-                <p className="text-content-muted max-w-md">{t("appShell.forbiddenUsers")}</p>
-              </div>
-            ) : (
-              <AdminUserPanel
+              !hasPermission(
+                effectiveRole,
+                "userManagement",
+                "read",
+                false,
+                currentUserProfile?.permissions
+              ) ? (
+                <div className="flex flex-col items-center justify-center w-full flex-1 p-8 text-center bg-surface-sunken">
+                  <ShieldAlert className="w-16 h-16 text-danger mb-4" />
+                  <h2 className="text-2xl font-medium text-content-strong mb-2">
+                    {t("appShell.forbidden")}
+                  </h2>
+                  <p className="text-content-muted max-w-md">{t("appShell.forbiddenUsers")}</p>
+                </div>
+              ) : (
+                <AdminUserPanel
+                  projects={projects}
+                  tasks={tasks}
+                  masterData={masterData}
+                  userRole={effectiveRole}
+                  currentUserId={currentUser?.uid || user?.uid}
+                  onAddUser={() => {}}
+                  onRefreshProjects={fetchProjects}
+                  onSelectUserForDetail={(u) => bukaDetailPengguna(u)}
+                />
+              )
+            ) : currentView === "userSessions" ? (
+              !hasPermission(
+                effectiveRole,
+                "userManagement",
+                "read",
+                false,
+                currentUserProfile?.permissions
+              ) ? (
+                <div className="flex flex-col items-center justify-center w-full flex-1 p-8 text-center bg-surface-sunken">
+                  <ShieldAlert className="w-16 h-16 text-danger mb-4" />
+                  <h2 className="text-2xl font-medium text-content-strong mb-2">
+                    {t("appShell.forbidden")}
+                  </h2>
+                  <p className="text-content-muted max-w-md">{t("appShell.forbiddenUsers")}</p>
+                </div>
+              ) : (
+                <UserSessionsPanel
+                  userRole={effectiveRole}
+                  currentUserId={currentUser?.uid || user?.uid}
+                />
+              )
+            ) : currentView === "master" ? (
+              <MasterDataPanel
                 projects={projects}
                 tasks={tasks}
                 masterData={masterData}
                 userRole={effectiveRole}
-                currentUserId={currentUser?.uid || user?.uid}
-                onAddUser={() => {}}
-                onRefreshProjects={fetchProjects}
-                onSelectUserForDetail={(u) => bukaDetailPengguna(u)}
+                currentUserProfile={currentUserProfile!}
+                hasPermission={hasPermission}
+                onRefresh={fetchMasterData}
               />
-            )
-          ) : currentView === "userSessions" ? (
-            !hasPermission(
-              effectiveRole,
-              "userManagement",
-              "read",
-              false,
-              currentUserProfile?.permissions
-            ) ? (
-              <div className="flex flex-col items-center justify-center w-full flex-1 p-8 text-center bg-surface-sunken">
-                <ShieldAlert className="w-16 h-16 text-danger mb-4" />
-                <h2 className="text-2xl font-medium text-content-strong mb-2">
-                  {t("appShell.forbidden")}
-                </h2>
-                <p className="text-content-muted max-w-md">{t("appShell.forbiddenUsers")}</p>
-              </div>
-            ) : (
-              <UserSessionsPanel
-                userRole={effectiveRole}
-                currentUserId={currentUser?.uid || user?.uid}
-              />
-            )
-          ) : currentView === "master" ? (
-            <MasterDataPanel
-              projects={projects}
-              tasks={tasks}
-              masterData={masterData}
-              userRole={effectiveRole}
-              currentUserProfile={currentUserProfile!}
-              hasPermission={hasPermission}
-              onRefresh={fetchMasterData}
-            />
-          ) : selectedProject ? (
-            <React.Fragment>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentView + (selectedProject?.id || "")}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.22, ease: "easeOut" }}
-                  className="flex-1 flex flex-col min-h-0 bg-surface-sunken transition-colors duration-200"
-                >
-                  {currentView === "issueDetail" && (
-                    <div className="w-full flex-1 flex flex-col p-3 md:p-4 min-h-0 overflow-hidden bg-surface-muted text-left">
-                      <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
-                        {/* Velzon-style Action / Title Bar */}
-                        <div className="px-4 py-3 md:px-6 md:py-3.5 border-b border-border-subtle/80 bg-surface flex items-center justify-between gap-4 shrink-0 shadow-2xs">
-                          <div className="flex items-center gap-3">
-                            <button
-                              onClick={() => setIsTaskDetailModalOpen(false)}
-                              className="h-8 w-8 rounded-md bg-surface-sunken border border-border-subtle/80 text-content-secondary hover:bg-indigo-500/10 hover:text-indigo-600 hover:border-indigo-500/30 flex items-center justify-center transition-all shadow-2xs"
-                              title={t("appShell.back")}
-                            >
-                              <ArrowLeft className="w-4 h-4" />
-                            </button>
-                            <div className="flex items-center gap-2.5">
-                              <h3 className="text-sm font-medium text-content-strong tracking-tight">
-                                {t("appShell.issueDetails")}
-                              </h3>
-                              <span className="text-xs font-medium text-indigo-700 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
-                                {selectedTaskForDetail?.key || "TASK"}
-                              </span>
+            ) : selectedProject ? (
+              <React.Fragment>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentView + (selectedProject?.id || "")}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.22, ease: "easeOut" }}
+                    className="flex-1 flex flex-col min-h-0 bg-surface-sunken transition-colors duration-200"
+                  >
+                    {currentView === "issueDetail" && (
+                      <div className="w-full flex-1 flex flex-col p-3 md:p-4 min-h-0 overflow-hidden bg-surface-muted text-left">
+                        <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
+                          {/* Velzon-style Action / Title Bar */}
+                          <div className="px-4 py-3 md:px-6 md:py-3.5 border-b border-border-subtle/80 bg-surface flex items-center justify-between gap-4 shrink-0 shadow-2xs">
+                            <div className="flex items-center gap-3">
+                              <button
+                                onClick={() => setIsTaskDetailModalOpen(false)}
+                                className="h-8 w-8 rounded-md bg-surface-sunken border border-border-subtle/80 text-content-secondary hover:bg-indigo-500/10 hover:text-indigo-600 hover:border-indigo-500/30 flex items-center justify-center transition-all shadow-2xs"
+                                title={t("appShell.back")}
+                              >
+                                <ArrowLeft className="w-4 h-4" />
+                              </button>
+                              <div className="flex items-center gap-2.5">
+                                <h3 className="text-sm font-medium text-content-strong tracking-tight">
+                                  {t("appShell.issueDetails")}
+                                </h3>
+                                <span className="text-xs font-medium text-indigo-700 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
+                                  {selectedTaskForDetail?.key || "TASK"}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        <div className="flex-1 overflow-auto bg-surface custom-scrollbar w-full h-full relative">
-                          <TaskDetailModal
-                            projectRole={
-                              selectedProject && currentUser?.uid
-                                ? selectedProject.memberRoles?.[currentUser.uid]
-                                : undefined
-                            }
-                            isUpdatingTask={isUpdatingTask}
-                            isOpen={true}
-                            onClose={() => setIsTaskDetailModalOpen(false)}
-                            task={selectedTaskForDetail}
-                            tasks={tasks || []}
-                            projectMembers={projectMembers || []}
-                            masterData={masterData || []}
-                            userRole={effectiveRole}
-                            user={currentUser}
-                            currentUserProfile={currentUserProfile!}
-                            sprints={sprints || []}
-                            updateTaskField={updateTaskField}
-                            hasPermission={hasPermission}
-                            activityLogs={activityLogs || []}
-                            comments={comments || []}
-                            newCommentText={newCommentText}
-                            setNewCommentText={setNewCommentText}
-                            handleAddComment={handleAddComment}
-                            handleFileUpload={handleFileUpload}
-                            handleRemoveAttachment={handleRemoveAttachment}
-                            uploadProgress={uploadProgress}
-                            isLoggedIn={!!currentUser}
-                            handleQuickAddSubtask={handleQuickAddSubtask}
-                            mentionState={mentionState}
-                            handleSelectMention={handleSelectMention}
-                            handleCommentChange={handleCommentChange}
-                            removeTaskLink={removeTaskLink}
-                            handleAddLinkedTask={handleAddLinkedTask}
-                            handleRemoveLinkedTask={handleRemoveLinkedTask}
-                            taskLinkTargetId={taskLinkTargetId}
-                            setTaskLinkTargetId={setTaskLinkTargetId}
-                            taskLinkRelation={taskLinkRelation}
-                            setTaskLinkRelation={setTaskLinkRelation}
-                            isAddingTaskLink={isAddingTaskLink}
-                            setIsAddingTaskLink={setIsAddingTaskLink}
-                            isAddingExternalLink={isAddingExternalLink}
-                            setIsAddingExternalLink={setIsAddingExternalLink}
-                            newExternalLinkTitle={newExternalLinkTitle}
-                            setNewExternalLinkTitle={setNewExternalLinkTitle}
-                            newExternalLinkUrl={newExternalLinkUrl}
-                            setNewExternalLinkUrl={setNewExternalLinkUrl}
-                            handleAddExternalLink={handleAddExternalLink}
-                            removeExternalLink={removeExternalLink}
-                            toggleBlockedStatus={toggleBlockedStatus}
-                            handleSuggestStoryPoints={handleSuggestStoryPoints}
-                            handleAddLink={handleAddLink}
-                            newLinkTitle={newLinkTitle}
-                            setNewLinkTitle={setNewLinkTitle}
-                            newLinkUrl={newLinkUrl}
-                            setNewLinkUrl={setNewLinkUrl}
-                            isAddingLink={isAddingLink}
-                            setIsAddingLink={setIsAddingLink}
-                            deleteTask={deleteTask}
-                          />
+                          <div className="flex-1 overflow-auto bg-surface custom-scrollbar w-full h-full relative">
+                            <TaskDetailModal
+                              projectRole={
+                                selectedProject && currentUser?.uid
+                                  ? selectedProject.memberRoles?.[currentUser.uid]
+                                  : undefined
+                              }
+                              isUpdatingTask={isUpdatingTask}
+                              isOpen={true}
+                              onClose={() => setIsTaskDetailModalOpen(false)}
+                              task={selectedTaskForDetail}
+                              tasks={tasks || []}
+                              projectMembers={projectMembers || []}
+                              masterData={masterData || []}
+                              userRole={effectiveRole}
+                              user={currentUser}
+                              currentUserProfile={currentUserProfile!}
+                              sprints={sprints || []}
+                              updateTaskField={updateTaskField}
+                              hasPermission={hasPermission}
+                              activityLogs={activityLogs || []}
+                              comments={comments || []}
+                              newCommentText={newCommentText}
+                              setNewCommentText={setNewCommentText}
+                              handleAddComment={handleAddComment}
+                              handleFileUpload={handleFileUpload}
+                              handleRemoveAttachment={handleRemoveAttachment}
+                              uploadProgress={uploadProgress}
+                              isLoggedIn={!!currentUser}
+                              handleQuickAddSubtask={handleQuickAddSubtask}
+                              mentionState={mentionState}
+                              handleSelectMention={handleSelectMention}
+                              handleCommentChange={handleCommentChange}
+                              removeTaskLink={removeTaskLink}
+                              handleAddLinkedTask={handleAddLinkedTask}
+                              handleRemoveLinkedTask={handleRemoveLinkedTask}
+                              taskLinkTargetId={taskLinkTargetId}
+                              setTaskLinkTargetId={setTaskLinkTargetId}
+                              taskLinkRelation={taskLinkRelation}
+                              setTaskLinkRelation={setTaskLinkRelation}
+                              isAddingTaskLink={isAddingTaskLink}
+                              setIsAddingTaskLink={setIsAddingTaskLink}
+                              isAddingExternalLink={isAddingExternalLink}
+                              setIsAddingExternalLink={setIsAddingExternalLink}
+                              newExternalLinkTitle={newExternalLinkTitle}
+                              setNewExternalLinkTitle={setNewExternalLinkTitle}
+                              newExternalLinkUrl={newExternalLinkUrl}
+                              setNewExternalLinkUrl={setNewExternalLinkUrl}
+                              handleAddExternalLink={handleAddExternalLink}
+                              removeExternalLink={removeExternalLink}
+                              toggleBlockedStatus={toggleBlockedStatus}
+                              handleSuggestStoryPoints={handleSuggestStoryPoints}
+                              handleAddLink={handleAddLink}
+                              newLinkTitle={newLinkTitle}
+                              setNewLinkTitle={setNewLinkTitle}
+                              newLinkUrl={newLinkUrl}
+                              setNewLinkUrl={setNewLinkUrl}
+                              isAddingLink={isAddingLink}
+                              setIsAddingLink={setIsAddingLink}
+                              deleteTask={deleteTask}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                  <AppRoutes
-                    currentView={currentView}
-                    setCurrentView={setCurrentView}
-                    selectedProject={selectedProject}
-                    tasks={tasks}
-                    sprints={sprints}
-                    masterData={masterData}
-                    projectMembers={projectMembers}
-                    allUsers={allUsers}
-                    activityLogs={activityLogs}
-                    setTasks={setTasks}
-                    effectiveRole={userRoleForProject}
-                    currentUser={currentUser}
-                    currentUserProfile={currentUserProfile}
-                    selectedTaskForDetail={selectedTaskForDetail}
-                    expandedSprintId={expandedSprintId}
-                    hasPermission={hasPermission}
-                    updateTaskField={updateTaskField}
-                    updateTaskStatus={updateTaskStatus}
-                    handleQuickCreate={handleQuickCreate}
-                    setSelectedTaskForDetail={setSelectedTaskForDetail}
-                    setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-                    setIsNewTaskModalOpen={setIsNewTaskModalOpen}
-                    deleteTask={deleteTask}
-                    bulkDeleteTasks={bulkDeleteTasks}
-                    fetchTasks={fetchTasks}
-                    setExpandedSprintId={setExpandedSprintId}
-                    setIsNewSprintModalOpen={setIsNewSprintModalOpen}
-                    setIsEditSprintModalOpen={setIsEditSprintModalOpen}
-                    setEditingSprint={setEditingSprint}
-                    handleStartSprint={handleStartSprint}
-                    handleCompleteSprint={handleCompleteSprint}
-                    handleDeleteSprint={handleDeleteSprint}
-                    handleDragEndPlanning={handleDragEndPlanning}
-                    fetchMasterData={fetchMasterData}
-                    fetchProjects={fetchProjects}
-                    socket={socket}
-                    qaInitialStatusFilter={qaInitialStatusFilter}
-                    exportTasksToCSV={exportTasksToCSV}
-                    safeFormat={safeFormat}
-                    StyledDropdown={StyledDropdown}
-                    updateProjectRole={updateProjectRole}
-                    removeProjectMember={removeProjectMember}
-                  />
-                </motion.div>
-              </AnimatePresence>
-            </React.Fragment>
-          ) : projects.length === 0 ? (
-            /* Belum tergabung di proyek MANA PUN — item #160. Kartu di bawah
+                    )}
+                    <AppRoutes
+                      currentView={currentView}
+                      setCurrentView={setCurrentView}
+                      selectedProject={selectedProject}
+                      tasks={tasks}
+                      sprints={sprints}
+                      masterData={masterData}
+                      projectMembers={projectMembers}
+                      allUsers={allUsers}
+                      activityLogs={activityLogs}
+                      setTasks={setTasks}
+                      effectiveRole={userRoleForProject}
+                      currentUser={currentUser}
+                      currentUserProfile={currentUserProfile}
+                      selectedTaskForDetail={selectedTaskForDetail}
+                      expandedSprintId={expandedSprintId}
+                      hasPermission={hasPermission}
+                      updateTaskField={updateTaskField}
+                      updateTaskStatus={updateTaskStatus}
+                      handleQuickCreate={handleQuickCreate}
+                      setSelectedTaskForDetail={setSelectedTaskForDetail}
+                      setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+                      setIsNewTaskModalOpen={setIsNewTaskModalOpen}
+                      deleteTask={deleteTask}
+                      bulkDeleteTasks={bulkDeleteTasks}
+                      fetchTasks={fetchTasks}
+                      setExpandedSprintId={setExpandedSprintId}
+                      setIsNewSprintModalOpen={setIsNewSprintModalOpen}
+                      setIsEditSprintModalOpen={setIsEditSprintModalOpen}
+                      setEditingSprint={setEditingSprint}
+                      handleStartSprint={handleStartSprint}
+                      handleCompleteSprint={handleCompleteSprint}
+                      handleDeleteSprint={handleDeleteSprint}
+                      handleDragEndPlanning={handleDragEndPlanning}
+                      fetchMasterData={fetchMasterData}
+                      fetchProjects={fetchProjects}
+                      socket={socket}
+                      qaInitialStatusFilter={qaInitialStatusFilter}
+                      exportTasksToCSV={exportTasksToCSV}
+                      safeFormat={safeFormat}
+                      StyledDropdown={StyledDropdown}
+                      updateProjectRole={updateProjectRole}
+                      removeProjectMember={removeProjectMember}
+                    />
+                  </motion.div>
+                </AnimatePresence>
+              </React.Fragment>
+            ) : projects.length === 0 ? (
+              /* Belum tergabung di proyek MANA PUN — item #160. Kartu di bawah
                menyuruh memilih proyek dari sidebar, dan pada kondisi ini
                sidebar-nya justru kosong, jadi perintahnya mustahil dijalankan. */
-            <WelcomeScreen
-              /* Urutan field SENGAJA disamakan dengan footer sidebar
+              <WelcomeScreen
+                /* Urutan field SENGAJA disamakan dengan footer sidebar
                  (`user?.displayName || currentUser?.displayName ||
                  currentUser?.username`). Sebelumnya sapaan memulai dari
                  `name`, yang kosong pada akun ini, sehingga sapaan jatuh ke
                  "azlanirwan" sementara footer di layar yang SAMA menampilkan
                  "alan Ir" — dua identitas untuk satu orang dalam satu
                  tatapan. */
-              namaPengguna={
-                user?.displayName ||
-                currentUserProfile?.displayName ||
-                currentUser?.displayName ||
-                currentUserProfile?.name ||
-                currentUser?.name ||
-                currentUserProfile?.username ||
-                currentUser?.username ||
-                ""
-              }
-              onOpenProfile={() => bukaDetailPengguna(currentUserProfile || currentUser || user)}
-              bolehBuatProyek={hasPermission(
-                effectiveRole,
-                "configuration",
-                "create",
-                false,
-                currentUserProfile?.permissions
-              )}
-              onCreateProject={() => setIsNewProjectModalOpen(true)}
-            />
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8 text-center">
-              <div className="w-16 h-16 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 mb-4 shadow-soft">
-                <FolderKanban className="w-8 h-8" />
-              </div>
-              <h3 className="text-xl font-medium text-content-strong mb-2">
-                {t("appShell.pickOrCreateProject")}
-              </h3>
-              <p className="text-sm text-content-muted max-w-md mb-6">
+                namaPengguna={
+                  user?.displayName ||
+                  currentUserProfile?.displayName ||
+                  currentUser?.displayName ||
+                  currentUserProfile?.name ||
+                  currentUser?.name ||
+                  currentUserProfile?.username ||
+                  currentUser?.username ||
+                  ""
+                }
+                onOpenProfile={() => bukaDetailPengguna(currentUserProfile || currentUser || user)}
+                bolehBuatProyek={hasPermission(
+                  effectiveRole,
+                  "configuration",
+                  "create",
+                  false,
+                  currentUserProfile?.permissions
+                )}
+                onCreateProject={() => setIsNewProjectModalOpen(true)}
+              />
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8 text-center">
+                <div className="w-16 h-16 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 mb-4 shadow-soft">
+                  <FolderKanban className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-medium text-content-strong mb-2">
+                  {t("appShell.pickOrCreateProject")}
+                </h3>
+                <p className="text-sm text-content-muted max-w-md mb-6">
+                  {hasPermission(
+                    effectiveRole,
+                    "configuration",
+                    "create",
+                    false,
+                    currentUserProfile?.permissions
+                  )
+                    ? t("appShell.pickProjectHintAdmin")
+                    : t("appShell.pickProjectHint")}
+                </p>
+                {/* Penjaga izin memakai pemeriksaan yang SAMA dengan tombol di
+                  sidebar. Sebelumnya tombol ini tidak dijaga sama sekali,
+                  sehingga pengguna biasa melihat ajakan membuat proyek yang
+                  pasti ditolak backend. */}
                 {hasPermission(
                   effectiveRole,
                   "configuration",
                   "create",
                   false,
                   currentUserProfile?.permissions
-                )
-                  ? t("appShell.pickProjectHintAdmin")
-                  : t("appShell.pickProjectHint")}
-              </p>
-              {/* Penjaga izin memakai pemeriksaan yang SAMA dengan tombol di
-                  sidebar. Sebelumnya tombol ini tidak dijaga sama sekali,
-                  sehingga pengguna biasa melihat ajakan membuat proyek yang
-                  pasti ditolak backend. */}
-              {hasPermission(
-                effectiveRole,
-                "configuration",
-                "create",
-                false,
-                currentUserProfile?.permissions
-              ) && (
-                <button
-                  onClick={() => setIsNewProjectModalOpen(true)}
-                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-xl font-medium text-sm shadow-md shadow-indigo-200 transition-all flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>{t("appShell.createNewProject")}</span>
-                </button>
-              )}
-            </div>
-          )}
-
+                ) && (
+                  <button
+                    onClick={() => setIsNewProjectModalOpen(true)}
+                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-xl font-medium text-sm shadow-md shadow-indigo-200 transition-all flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>{t("appShell.createNewProject")}</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </Suspense>
           {/* </main> */}
 
           {/* Modals */}

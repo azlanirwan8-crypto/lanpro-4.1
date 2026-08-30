@@ -4,6 +4,7 @@ import { ShieldAlert, FolderKanban } from "lucide-react";
 import type { PeranEfektif } from "../types/roles";
 import type { Project, Sprint, Task, User } from "../types";
 import { useAppStore } from "../store/useAppStore";
+import { lazyWithRetry } from "../lib/lazyWithRetry";
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { useProjectStore } from "../store";
 
@@ -23,30 +24,16 @@ import { useProjectStore } from "../store";
  * salah satu huruf saja membuat tampilan itu gagal dimuat, dan gagalnya baru
  * terlihat saat tampilan dibuka, bukan saat build.
  */
-function lazyWithRetry<T extends React.ComponentType<any>>(
-  componentImport: () => Promise<{ default: T }>
-) {
-  return React.lazy(async () => {
-    try {
-      return await componentImport();
-    } catch (error) {
-      console.warn("[Vite/Lazy] Dynamic import failed, retrying...", error);
-      await new Promise((resolve) => setTimeout(resolve, 400));
-      try {
-        return await componentImport();
-      } catch (retryError) {
-        console.error("[Vite/Lazy] Dynamic import retry failed:", retryError);
-        throw retryError;
-      }
-    }
-  });
-}
 
 const DashboardView = lazyWithRetry(() =>
   import("../features/dashboard").then((m) => ({ default: m.DashboardView }))
 );
+// Dari BERKASNYA LANGSUNG, bukan barrel "../features/issues" (#293). Barrel
+// itu juga mengekspor TaskDetailModal, yang diimpor statis oleh AppContainer;
+// selama batas potongan malas ini adalah barrel, Rollup menarik keduanya ke
+// potongan masuk demi menghindari duplikasi.
 const IssueListView = lazyWithRetry(() =>
-  import("../features/issues").then((m) => ({ default: m.IssueListView }))
+  import("../features/issues/IssueListView").then((m) => ({ default: m.IssueListView }))
 );
 const PlanningView = lazyWithRetry(() =>
   import("../features/planning").then((m) => ({ default: m.PlanningView }))
