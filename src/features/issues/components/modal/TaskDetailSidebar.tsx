@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { cn, ensureDate } from "../../../../lib/utils";
 import { StyledDropdown } from "../../../../components/ui/CommonComponents";
 import { UncontrolledInput } from "./TaskDetailPrimitives";
+import { LanproDatePicker } from "../../../../components/ui/LanproDatePicker";
 import { confirmDeleteAlert, showSuccessAlert } from "../../../../lib/sweetalert";
 import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
 
@@ -294,12 +295,11 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               <Calendar className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.startDate")}
             </label>
-            <UncontrolledInput
-              type="date"
-              initialValue={task.startDate ? format(ensureDate(task.startDate), "yyyy-MM-dd") : ""}
-              onSave={(val: any) => updateTaskField(task.id, "startDate", val)}
-              className={cn(
-                "h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2 focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs outline-none text-content-body",
+            <LanproDatePicker
+              value={task.startDate ? format(ensureDate(task.startDate), "yyyy-MM-dd") : ""}
+              onChange={(val) => updateTaskField(task.id, "startDate", val)}
+              buttonClassName={cn(
+                "h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2 shadow-2xs text-content-body",
                 blockMember && "opacity-70 cursor-not-allowed"
               )}
               disabled={!isEditable || blockMember}
@@ -310,12 +310,14 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               <Calendar className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.endDate")}
             </label>
-            <UncontrolledInput
-              type="date"
-              initialValue={task.endDate ? format(ensureDate(task.endDate), "yyyy-MM-dd") : ""}
-              onSave={(val: any) => updateTaskField(task.id, "endDate", val)}
-              className={cn(
-                "h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2 focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs outline-none text-content-body",
+            <LanproDatePicker
+              value={task.endDate ? format(ensureDate(task.endDate), "yyyy-MM-dd") : ""}
+              onChange={(val) => updateTaskField(task.id, "endDate", val)}
+              minDate={
+                task.startDate ? format(ensureDate(task.startDate), "yyyy-MM-dd") : undefined
+              }
+              buttonClassName={cn(
+                "h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2 shadow-2xs text-content-body",
                 blockMember && "opacity-70 cursor-not-allowed"
               )}
               disabled={!isEditable || blockMember}
@@ -329,12 +331,14 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               <Calendar className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.dueDate")}
             </label>
-            <UncontrolledInput
-              type="date"
-              initialValue={task.dueDate ? format(ensureDate(task.dueDate), "yyyy-MM-dd") : ""}
-              onSave={(val: any) => updateTaskField(task.id, "dueDate", val)}
-              className={cn(
-                "h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2 focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs outline-none text-content-body",
+            <LanproDatePicker
+              value={task.dueDate ? format(ensureDate(task.dueDate), "yyyy-MM-dd") : ""}
+              onChange={(val) => updateTaskField(task.id, "dueDate", val)}
+              minDate={
+                task.startDate ? format(ensureDate(task.startDate), "yyyy-MM-dd") : undefined
+              }
+              buttonClassName={cn(
+                "h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2 shadow-2xs text-content-body",
                 blockMember && "opacity-70 cursor-not-allowed"
               )}
               disabled={!isEditable || blockMember}
