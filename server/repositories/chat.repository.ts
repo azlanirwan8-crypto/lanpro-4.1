@@ -1,5 +1,23 @@
 import db from "../../src/lib/db";
 
+/**
+ * Batas atas riwayat percakapan yang dimuat sekaligus (#284).
+ *
+ * Sebelumnya kedua kueri di bawah TANPA batas: seluruh riwayat sejak pesan
+ * pertama diambil setiap kali percakapan dibuka. Hari ini tidak terasa karena
+ * datanya kecil, tetapi percakapan adalah satu-satunya tabel di aplikasi ini
+ * yang tumbuh selamanya dan tidak pernah menyusut. Yang patah lebih dulu bukan
+ * tampilannya melainkan koneksinya: pool diklem maksimal 20, jadi satu kueri
+ * panjang menahan koneksi dan permintaan berikutnya mengantre sampai timeout
+ * -- gejala yang sama dengan #163/#175 walau akarnya berbeda.
+ *
+ * KENAPA HARUS DIBALIK. Urutan tampilnya ASC (terlama dulu), sehingga
+ * `LIMIT n` polos justru memulangkan n pesan TERTUA dan membuang yang baru --
+ * kebalikan dari yang berguna. Jadi diambil n TERBARU lewat subkueri DESC,
+ * lalu dibalik ke ASC untuk ditampilkan.
+ */
+const BATAS_RIWAYAT_PESAN = 500;
+
 export interface MessageEntity {
   id: string;
   senderId: string;
@@ -67,11 +85,18 @@ export class ChatRepository {
       let rows: any;
       if (receiverId === "group") {
         [rows] = await connection.query(
-          "SELECT * FROM Messages WHERE receiverId = 'group' ORDER BY timestamp ASC"
+          `SELECT * FROM (
+             SELECT * FROM Messages WHERE receiverId = 'group'
+             ORDER BY timestamp DESC LIMIT ${BATAS_RIWAYAT_PESAN}
+           ) AS terbaru ORDER BY timestamp ASC`
         );
       } else {
         [rows] = await connection.query(
-          "SELECT * FROM Messages WHERE (senderId = ? AND receiverId = ?) OR (senderId = ? AND receiverId = ?) ORDER BY timestamp ASC",
+          `SELECT * FROM (
+             SELECT * FROM Messages
+              WHERE (senderId = ? AND receiverId = ?) OR (senderId = ? AND receiverId = ?)
+              ORDER BY timestamp DESC LIMIT ${BATAS_RIWAYAT_PESAN}
+           ) AS terbaru ORDER BY timestamp ASC`,
           [senderId, receiverId, receiverId, senderId]
         );
       }

@@ -1,6 +1,16 @@
 import db from "../../src/lib/db";
 import crypto from "crypto";
 
+/**
+ * Batas atas test case yang dimuat sekaligus (#284).
+ *
+ * Angkanya mengikuti preseden `task.repository.ts` yang sudah memakai
+ * `LIMIT 2000` untuk daftar tugas: cukup longgar sehingga tidak ada proyek
+ * nyata yang terpotong hari ini, tetapi tetap menutup kemungkinan satu kueri
+ * menahan koneksi sampai permintaan lain mengantre (pool diklem 20).
+ */
+const BATAS_TEST_CASE = 2000;
+
 export interface QATestSuiteEntity {
   id: string;
   projectId: string;
@@ -96,7 +106,11 @@ export class QaRepository {
     }
   }
 
-  async updateSuite(id: string, projectId: string, suite: Partial<QATestSuiteEntity>): Promise<void> {
+  async updateSuite(
+    id: string,
+    projectId: string,
+    suite: Partial<QATestSuiteEntity>
+  ): Promise<void> {
     const connection = await db.getConnection();
     try {
       await connection.query(
@@ -208,7 +222,8 @@ export class QaRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        "SELECT * FROM QATestCases WHERE projectId = ? ORDER BY rowNum ASC, id ASC",
+        `SELECT * FROM QATestCases WHERE projectId = ?
+          ORDER BY rowNum ASC, id ASC LIMIT ${BATAS_TEST_CASE}`,
         [projectId]
       );
 
@@ -298,7 +313,11 @@ export class QaRepository {
     }
   }
 
-  async updateTestCase(id: string, projectId: string, tc: Partial<QATestCaseEntity>): Promise<void> {
+  async updateTestCase(
+    id: string,
+    projectId: string,
+    tc: Partial<QATestCaseEntity>
+  ): Promise<void> {
     const connection = await db.getConnection();
     try {
       await connection.query(
@@ -373,16 +392,20 @@ export class QaRepository {
     }
   }
 
-  async saveTestCaseEvidence(id: string, projectId: string, data: {
-    comment: string | null;
-    commentsList: any[];
-    evidenceUrl: string | null;
-    evidenceName: string | null;
-    evidenceType: string | null;
-    evidences: any[];
-    status: string;
-    linkedBugKey: string | null;
-  }): Promise<void> {
+  async saveTestCaseEvidence(
+    id: string,
+    projectId: string,
+    data: {
+      comment: string | null;
+      commentsList: any[];
+      evidenceUrl: string | null;
+      evidenceName: string | null;
+      evidenceType: string | null;
+      evidences: any[];
+      status: string;
+      linkedBugKey: string | null;
+    }
+  ): Promise<void> {
     const connection = await db.getConnection();
     try {
       await connection.query(
@@ -473,9 +496,7 @@ export class QaRepository {
     if (rows && rows.length > 0 && rows[0].history) {
       try {
         currentHistory =
-          typeof rows[0].history === "string"
-            ? JSON.parse(rows[0].history)
-            : rows[0].history || [];
+          typeof rows[0].history === "string" ? JSON.parse(rows[0].history) : rows[0].history || [];
       } catch (e) {
         currentHistory = [];
       }
@@ -674,10 +695,9 @@ export class QaRepository {
     const connection = await db.getConnection();
     try {
       for (const tc of testCases) {
-        const [existing]: any = await connection.query(
-          "SELECT id FROM QATestCases WHERE id = ?",
-          [tc.id]
-        );
+        const [existing]: any = await connection.query("SELECT id FROM QATestCases WHERE id = ?", [
+          tc.id,
+        ]);
 
         if (existing && existing.length > 0) {
           await connection.query(
@@ -803,7 +823,11 @@ export class QaRepository {
     }
   }
 
-  async findLinkedTestCasesByBug(taskKey: string, taskId: string, projectId: string): Promise<any[]> {
+  async findLinkedTestCasesByBug(
+    taskKey: string,
+    taskId: string,
+    projectId: string
+  ): Promise<any[]> {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
@@ -849,4 +873,3 @@ export class QaRepository {
 }
 
 export const qaRepository = new QaRepository();
-

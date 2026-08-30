@@ -2,6 +2,14 @@ import db from "../../src/lib/db";
 import crypto from "crypto";
 import { adalahTabelTidakAda } from "../helpers/pgErrors";
 
+/**
+ * Batas atas daftar proyek yang dimuat sekaligus (#284).
+ *
+ * Sudah ber-`ORDER BY createdAt DESC` sejak semula, jadi batasnya memulangkan
+ * proyek TERBARU -- yang memang paling mungkin dicari.
+ */
+const BATAS_PROYEK = 500;
+
 export interface ProjectEntity {
   id: string;
   name: string;
@@ -41,7 +49,7 @@ export class ProjectRepository {
       const role = callerRows[0]?.role || callerRole;
       const resolvedCallerId = callerRows[0]?.id || callerId;
 
-      let query = "SELECT * FROM Projects ORDER BY createdAt DESC";
+      let query = `SELECT * FROM Projects ORDER BY createdAt DESC LIMIT ${BATAS_PROYEK}`;
       let params: any[] = [];
 
       if (role !== "admin") {

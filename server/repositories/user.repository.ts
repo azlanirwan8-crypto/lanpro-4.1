@@ -1,5 +1,15 @@
 import db from "../../src/lib/db";
 
+/**
+ * Batas atas daftar pengguna yang dimuat sekaligus (#284).
+ *
+ * `ORDER BY createdAt DESC` ditambahkan bersama batasnya, dan itu penting:
+ * `LIMIT` tanpa urutan yang pasti memulangkan baris yang BERBEDA-BEDA antar
+ * pemanggilan, dan daftar yang berubah-ubah tanpa sebab jauh lebih
+ * membingungkan daripada daftar yang terpotong.
+ */
+const BATAS_PENGGUNA = 1000;
+
 export interface UserEntity {
   id: string;
   uid?: string | null;
@@ -28,7 +38,8 @@ export class UserRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        'SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, "coverUrl", createdAt, lastSeen FROM Users'
+        'SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, "coverUrl", createdAt, lastSeen FROM Users ORDER BY createdAt DESC LIMIT ' +
+          BATAS_PENGGUNA
       );
       return (rows || []).map((u: any) => {
         try {
@@ -64,7 +75,8 @@ export class UserRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        'SELECT id, uid, username, nama_lengkap, displayName, role, status, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, "coverUrl", createdAt, lastSeen FROM Users'
+        'SELECT id, uid, username, nama_lengkap, displayName, role, status, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, "coverUrl", createdAt, lastSeen FROM Users ORDER BY createdAt DESC LIMIT ' +
+          BATAS_PENGGUNA
       );
       return rows || [];
     } finally {
