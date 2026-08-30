@@ -1081,19 +1081,20 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                 </span>
                 <div className="flex items-center gap-1.5 text-xs sm:text-[10px] text-content-muted font-normal">
                   <span>{t("users.rowsPerPage")}</span>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                      setItemsPerPage(Number(e.target.value));
+                  <StyledDropdown
+                    value={String(itemsPerPage)}
+                    onChange={(val) => {
+                      setItemsPerPage(Number(val));
                       setCurrentPage(1);
                     }}
-                    className="bg-surface border border-border-subtle rounded-md px-2 py-1 text-xs sm:text-[10px] font-normal text-content-body outline-none focus:border-indigo-500 cursor-pointer"
-                  >
-                    <option value={10}>10</option>
-                    <option value={25}>25</option>
-                    <option value={50}>50</option>
-                    <option value={100}>100</option>
-                  </select>
+                    options={[
+                      { id: "10", label: "10" },
+                      { id: "25", label: "25" },
+                      { id: "50", label: "50" },
+                      { id: "100", label: "100" },
+                    ]}
+                    buttonClassName="bg-surface border border-border-subtle rounded-md px-2 py-1 text-xs sm:text-[10px] text-left font-normal text-content-body"
+                  />
                 </div>
               </div>
 
