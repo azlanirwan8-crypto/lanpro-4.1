@@ -2639,15 +2639,16 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             <ShieldCheck className="w-4 h-4 text-content-subtle" />
                             <span>{t("userDetail.accountStatus")}</span>
                           </label>
-                          <select
+                          <StyledDropdown
                             value={editStatus}
-                            onChange={(e) => setEditStatus(e.target.value as any)}
-                            className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium text-content-strong outline-none focus:border-indigo-500 transition-all cursor-pointer shadow-2xs"
-                          >
-                            <option value="approved">{t("userDetail.activeApproved")}</option>
-                            <option value="pending">{t("userDetail.waitingApproval")}</option>
-                            <option value="rejected">{t("userDetail.suspendedRejected")}</option>
-                          </select>
+                            onChange={(val) => setEditStatus(val as any)}
+                            options={[
+                              { id: "approved", label: t("userDetail.activeApproved") },
+                              { id: "pending", label: t("userDetail.waitingApproval") },
+                              { id: "rejected", label: t("userDetail.suspendedRejected") },
+                            ]}
+                            buttonClassName="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs text-left font-medium text-content-strong shadow-2xs"
+                          />
                         </div>
                       )}
                     </div>
@@ -3146,26 +3147,23 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-center">
                       <div className="sm:col-span-5">
-                        <select
+                        <StyledDropdown
                           value={selectedAssignProjectId}
-                          onChange={(e) => setSelectedAssignProjectId(e.target.value)}
-                          className="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none focus:border-indigo-500 truncate"
-                        >
-                          <option value="">{t("userDetail.pickProject")}</option>
-                          {projects
-                            .filter((p) => {
-                              const r = p.memberRoles || {};
-                              const uId = user.id || user.uid;
-                              return (
-                                !Object.keys(r).includes(uId) && !(p.members || []).includes(uId)
-                              );
-                            })
-                            .map((p) => (
-                              <option key={p.id} value={p.id}>
-                                {p.name}
-                              </option>
-                            ))}
-                        </select>
+                          onChange={setSelectedAssignProjectId}
+                          options={[
+                            { id: "", label: t("userDetail.pickProject") },
+                            ...projects
+                              .filter((p) => {
+                                const r = p.memberRoles || {};
+                                const uId = user.id || user.uid;
+                                return (
+                                  !Object.keys(r).includes(uId) && !(p.members || []).includes(uId)
+                                );
+                              })
+                              .map((p) => ({ id: p.id, label: p.name })),
+                          ]}
+                          buttonClassName="w-full px-3 py-1.5 bg-surface border border-border-subtle rounded-md text-xs text-left font-medium text-content-strong truncate"
+                        />
                       </div>
 
                       <div className="sm:col-span-4">
