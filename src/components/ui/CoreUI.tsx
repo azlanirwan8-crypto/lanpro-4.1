@@ -1,7 +1,6 @@
-import i18n from "../../i18n";
-import React, { useRef, useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { format, differenceInDays } from "date-fns";
-import { Calendar, AlertCircle } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 
 type Task = any;
@@ -152,52 +151,6 @@ export const Textarea = ({ value, onChange, placeholder, className = "", rows = 
     className={`w-full px-4 py-2.5 bg-surface text-content border border-border-subtle rounded-lg placeholder:text-content-subtle focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none ${className}`}
   />
 );
-
-// --- Error Handling ---
-
-class ErrorBoundary extends React.Component<any, any> {
-  constructor(props: any) {
-    super(props);
-    (this as any).state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error: any) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: any, errorInfo: any) {
-    console.error("ErrorBoundary caught an error", error, errorInfo);
-  }
-
-  render() {
-    const error = (this as any).state.error;
-    if ((this as any).state.hasError) {
-      let message = "Something went wrong. Please try refreshing the page.";
-      try {
-        const errObj = JSON.parse(error.message);
-        if (
-          errObj.error.includes("permission-denied") ||
-          errObj.error.includes("Missing or insufficient permissions")
-        ) {
-          message =
-            "You don't have permission to perform this action. Please check your project access.";
-        }
-      } catch (e) {
-        // Not a JSON error
-      }
-      return (
-        <div className="h-screen flex flex-col items-center justify-center bg-surface-sunken p-4 text-center">
-          <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-          <h2 className="text-2xl font-medium text-content mb-2">{i18n.t("ui.oops")}</h2>
-          <p className="text-content-secondary mb-6 max-w-md">{message}</p>
-          <Button onClick={() => window.location.reload()}>{i18n.t("ui.refreshPage")}</Button>
-        </div>
-      );
-    }
-
-    return (this as any).props.children;
-  }
-}
 
 export const VelzonFloatingParticles = () => {
   const particles = useMemo(() => {
