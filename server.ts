@@ -57,6 +57,7 @@ import { setSocketServer } from "./server/config/socket";
 
 import { getSecret } from "./server/config/secrets";
 import { initWhatsAppScheduler, sendDailyTaskDigest } from "./server/services/whatsapp.service";
+import { initEmailBroadcastScheduler } from "./server/services/emailBroadcast.service";
 import { initTaskDigestEmailScheduler } from "./server/services/taskDigest.service";
 import { jalankanMigrasiDenganUlangan, statusMigrasi } from "./server/services/migrasi-status";
 
@@ -1230,6 +1231,11 @@ ${'='.repeat(70)}
     // penjadwal tidak menghalangi server menerima permintaan. Bila token
     // belum dikonfigurasi, fungsinya melewat dengan pesan yang jelas.
     initWhatsAppScheduler();
+    // Item #297 — penjadwal broadcast task via email. Didaftarkan tanpa syarat:
+    // berbeda dari WhatsApp yang butuh token gateway, jalur email memakai
+    // konfigurasi yang sudah ada, dan penjadwalnya berhenti sendiri bila
+    // belum ada penerima yang dipilih dari UI.
+    initEmailBroadcastScheduler();
     initTaskDigestEmailScheduler();
 
     // PostgreSQL Neon Keep-Alive Warmup Engine (Mencegah Compute Node Cold-Start Sleep)

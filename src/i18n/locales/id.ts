@@ -259,6 +259,7 @@ export const id = {
     "srv.hari_tidak_valid": "Hari yang dipilih tidak valid",
     "srv.jam_tidak_valid": "Format jam tidak valid, gunakan HH:MM",
     "srv.gagal_menyimpan_konfigurasi_broadcast": "Gagal menyimpan konfigurasi broadcast",
+    "srv.gagal_mengirim_broadcast": "Gagal mengirim broadcast",
     "srv.akses_ditolak_anda_hanya_6":
       "Akses ditolak: Anda hanya dapat memperbarui profil Anda sendiri.",
     "srv.akses_ditolak_hanya_administrator":
@@ -2215,6 +2216,27 @@ export const id = {
     keluarAkun: "Keluar akun",
     gagal: "Kata sandi gagal diubah.",
     berhasil: "Kata sandi berhasil diubah.",
+  },
+  taskBroadcast: {
+    tab: "Broadcast Task",
+    judul: "Kirim ringkasan task lewat email",
+    penjelasan:
+      "Pada hari dan jam yang Anda pilih, tiap penerima mendapat satu email berisi task yang ditugaskan kepadanya. Penerima yang tidak punya task aktif tidak dikirimi apa pun.",
+    hari: "Hari pengiriman",
+    jam: "Jam pengiriman",
+    jamWib: "Mengikuti waktu Indonesia Barat (WIB).",
+    penerima: "Penerima ({{jumlah}} dipilih)",
+    pilihSemua: "Pilih semua",
+    kosongkan: "Kosongkan",
+    tidakAdaPengguna: "Belum ada pengguna dengan alamat email.",
+    simpan: "Simpan jadwal",
+    kirimSekarang: "Kirim sekarang",
+    tersimpan: "Jadwal broadcast tersimpan.",
+    terkirim: "{{dikirim}} email terkirim dari {{diperiksa}} penerima diperiksa.",
+    gagalSimpan: "Jadwal gagal disimpan.",
+    gagalKirim: "Broadcast gagal dikirim.",
+    pilihHariDulu: "Pilih minimal satu hari.",
+    pilihPenerimaDulu: "Pilih minimal satu penerima.",
   },
   whatsapp: {
     providerFonnte: "Fonnte (terpasang)",

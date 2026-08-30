@@ -21,6 +21,7 @@ import {
 } from "../services/integrationSettings.service";
 import { systemRepository } from "../repositories/system.repository";
 import { getBroadcastConfig, saveBroadcastConfig } from "../services/broadcastConfig.service";
+import { kirimBroadcastTaskEmail } from "../services/emailBroadcast.service";
 import { validasiBody } from "../middleware/validate";
 import {
   testEmailSchema,
@@ -321,6 +322,102 @@ router.post(
     }
   }
 );
+
+/**
+ * Item #297: Konfigurasi jadwal broadcast ringkasan task lewat EMAIL.
+ *
+ * Memakai penyimpanan yang sama dengan broadcast WhatsApp (`BroadcastConfig`,
+ * satu baris per `channel`), hanya dengan `channel = "email"`. Validasinya
+ * sengaja identik dengan jalur WhatsApp — dua jalur yang menulis ke tabel yang
+ * sama tidak boleh menerima bentuk data yang berbeda, sebab yang longgar akan
+ * menyimpan baris yang tidak bisa dibaca yang ketat.
+ *
+ * `messageTemplate` TIDAK dipakai di sini: isi emailnya disusun oleh templat
+ * HTML `kirimEmailTaskDigest()`, bukan oleh string bebas seperti WhatsApp.
+ * Kolomnya dibiarkan kosong alih-alih dihapus, karena tabelnya dibagi.
+ */
+router.get("/api/settings/email/broadcast-config", verifyGlobalAdmin, async (req, res) => {
+  try {
+    const config = await getBroadcastConfig("email");
+    res.json({ status: "success", data: config });
+  } catch (error: any) {
+    console.error("[SETTINGS] Gagal mengambil konfigurasi broadcast email:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_mengambil_konfigurasi_broadcast",
+      message: "Gagal mengambil konfigurasi broadcast",
+    });
+  }
+});
+
+router.post("/api/settings/email/broadcast-config", verifyGlobalAdmin, async (req, res) => {
+  try {
+    const { scheduleDays, scheduleTime, recipientIds } = req.body || {};
+
+    if (!Array.isArray(scheduleDays) || scheduleDays.length === 0) {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.pilih_minimal_satu_hari",
+        message: "Pilih minimal satu hari untuk jadwal broadcast",
+      });
+    }
+    const cleanDays = scheduleDays.map(String).filter((d) => VALID_DAYS.includes(d));
+    if (cleanDays.length === 0) {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.hari_tidak_valid",
+        message: "Hari yang dipilih tidak valid",
+      });
+    }
+
+    if (typeof scheduleTime !== "string" || !TIME_RE.test(scheduleTime)) {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.jam_tidak_valid",
+        message: "Format jam tidak valid, gunakan HH:MM",
+      });
+    }
+
+    const config = await saveBroadcastConfig("email", {
+      scheduleDays: cleanDays,
+      scheduleTime,
+      recipientIds: Array.isArray(recipientIds) ? recipientIds.map(String) : [],
+      messageTemplate: "",
+    });
+
+    res.json({ status: "success", data: config });
+  } catch (error: any) {
+    console.error("[SETTINGS] Gagal menyimpan konfigurasi broadcast email:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_menyimpan_konfigurasi_broadcast",
+      message: "Gagal menyimpan konfigurasi broadcast",
+    });
+  }
+});
+
+/**
+ * Item #297: Kirim broadcast task SEKARANG, di luar jadwal.
+ *
+ * Ada supaya jadwal bisa dibuktikan tanpa menunggu hari dan jamnya tiba.
+ * Tanpa ini, satu-satunya cara memastikan fitur bekerja adalah menyetel jam
+ * ke satu menit ke depan lalu menunggu -- dan kalau gagal, tidak ada yang
+ * tahu apakah yang salah kirimannya atau penjadwalnya.
+ */
+router.post("/api/settings/email/broadcast-now", verifyGlobalAdmin, async (req, res) => {
+  try {
+    const config = await getBroadcastConfig("email");
+    const hasil = await kirimBroadcastTaskEmail(config.recipientIds);
+    res.json({ status: "success", data: hasil });
+  } catch (error: any) {
+    console.error("[SETTINGS] Gagal mengirim broadcast email:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_mengirim_broadcast",
+      message: "Gagal mengirim broadcast",
+    });
+  }
+});
 
 /**
  * Item #279: Mengambil konfigurasi sistem operasional (SSO Domains, CORS Origins, Slack Webhook)

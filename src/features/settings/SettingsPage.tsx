@@ -1,14 +1,17 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
-import { Mail, MessageSquare, Shield } from "lucide-react";
+import { Mail, MessageSquare, Shield, CalendarClock } from "lucide-react";
 import { EmailConfigForm } from "./components/EmailConfigForm";
 import { WhatsAppConfigForm } from "./components/WhatsAppConfigForm";
 import { BroadcastMonitor } from "./components/BroadcastMonitor";
 import { SystemConfigForm } from "./components/SystemConfigForm";
+import { TaskBroadcastForm } from "./components/TaskBroadcastForm";
 
 export const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<"email" | "whatsapp" | "system">("email");
+  const [activeTab, setActiveTab] = useState<"email" | "whatsapp" | "taskBroadcast" | "system">(
+    "email"
+  );
 
   const [emailConfig, setEmailConfig] = useState({
     host: "",
@@ -69,6 +72,17 @@ export const SettingsPage: React.FC = () => {
               {t("settings.whatsappGateway")}
             </button>
             <button
+              onClick={() => setActiveTab("taskBroadcast")}
+              className={`flex items-center gap-2 px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer ${
+                activeTab === "taskBroadcast"
+                  ? "text-emerald-600 border-emerald-500 bg-emerald-500/10"
+                  : "text-content-muted border-transparent hover:text-content-body"
+              }`}
+            >
+              <CalendarClock size={15} />
+              {t("taskBroadcast.tab")}
+            </button>
+            <button
               onClick={() => setActiveTab("system")}
               className={`flex items-center gap-2 px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer ${
                 activeTab === "system"
@@ -83,16 +97,23 @@ export const SettingsPage: React.FC = () => {
 
           {/* Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 p-5">
-            <div className={activeTab === "system" ? "lg:col-span-8" : "lg:col-span-5"}>
+            <div
+              className={
+                activeTab === "system" || activeTab === "taskBroadcast"
+                  ? "lg:col-span-8"
+                  : "lg:col-span-5"
+              }
+            >
               {activeTab === "email" && (
                 <EmailConfigForm formData={emailConfig} setFormData={setEmailConfig} />
               )}
               {activeTab === "whatsapp" && (
                 <WhatsAppConfigForm formData={waConfig} setFormData={setWaConfig} />
               )}
+              {activeTab === "taskBroadcast" && <TaskBroadcastForm />}
               {activeTab === "system" && <SystemConfigForm />}
             </div>
-            {activeTab !== "system" && (
+            {activeTab !== "system" && activeTab !== "taskBroadcast" && (
               <div className="lg:col-span-7 border-l border-border-subtle/80 pl-5">
                 <BroadcastMonitor
                   emailTemplate={{

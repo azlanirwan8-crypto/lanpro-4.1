@@ -88,6 +88,39 @@ export interface BroadcastConfigData {
   messageTemplate: string | null;
 }
 
+/**
+ * Jadwal & penerima broadcast ringkasan task lewat email (Item #297).
+ *
+ * Endpoint-nya berbeda dari WhatsApp, tetapi penyimpanannya sama:
+ * `BroadcastConfig` baris `channel = "email"`. Tidak ada `messageTemplate` di
+ * sini -- isi emailnya disusun templat HTML di server.
+ */
+export async function fetchEmailBroadcastConfig(): Promise<
+  SettingsApiResponse<BroadcastConfigData>
+> {
+  return apiRequest("/api/settings/email/broadcast-config");
+}
+
+export async function saveEmailBroadcastConfig(
+  config: Pick<BroadcastConfigData, "scheduleDays" | "scheduleTime" | "recipientIds">
+): Promise<SettingsApiResponse<BroadcastConfigData>> {
+  return apiRequest("/api/settings/email/broadcast-config", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(config),
+  });
+}
+
+/** Mengirim broadcast task SEKARANG, di luar jadwal (Item #297). */
+export async function kirimBroadcastEmailSekarang(): Promise<
+  SettingsApiResponse<{ penerimaDiperiksa: number; emailDikirim: number }>
+> {
+  return apiRequest("/api/settings/email/broadcast-now", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 /** Mengambil jadwal, penerima, dan template broadcast WhatsApp (Item #193). */
 export async function fetchWhatsAppBroadcastConfig(): Promise<
   SettingsApiResponse<BroadcastConfigData>
