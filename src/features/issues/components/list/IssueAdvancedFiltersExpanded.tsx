@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { X } from "lucide-react";
 import { MasterData, Sprint } from "../../../../types";
 import { StyledDropdown } from "../../../../components/ui/CommonComponents";
+import { LanproDatePicker } from "../../../../components/ui/LanproDatePicker";
 
 interface IssueAdvancedFiltersExpandedProps {
   listFilterStatus: string;
@@ -326,11 +327,10 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
             <label className="text-xs font-normal text-content-subtle">
               {t("filters.fromDate")}
             </label>
-            <input
-              type="date"
+            <LanproDatePicker
               value={listFilterStartDate}
-              onChange={(e) => setListFilterStartDate(e.target.value)}
-              className="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-md px-2.5 h-[32px] focus:border-indigo-500 outline-none"
+              onChange={setListFilterStartDate}
+              buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-md px-2.5 h-[32px]"
             />
           </div>
 
@@ -340,11 +340,11 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               <label className="text-xs font-normal text-content-subtle">
                 {t("filters.toDate")}
               </label>
-              <input
-                type="date"
+              <LanproDatePicker
                 value={listFilterEndDate}
-                onChange={(e) => setListFilterEndDate(e.target.value)}
-                className="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-md px-2.5 h-[32px] focus:border-indigo-500 outline-none"
+                onChange={setListFilterEndDate}
+                minDate={listFilterStartDate || undefined}
+                buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-md px-2.5 h-[32px]"
               />
             </div>
 
