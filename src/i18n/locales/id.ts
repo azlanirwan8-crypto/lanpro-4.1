@@ -2193,6 +2193,7 @@ export const id = {
     deleteTestCase: "Hapus Test Case",
   },
   whatsapp: {
+    providerFonnte: "Fonnte (terpasang)",
     providerLocal: "Local Open-Source (WAHA/Localhost)",
     apiToken: "API Token / Auth Key",
     deviceIdOptional: "Device ID (Opsional)",

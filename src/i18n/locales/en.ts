@@ -2175,6 +2175,7 @@ export const en = {
     deleteTestCase: "Delete Test Case",
   },
   whatsapp: {
+    providerFonnte: "Fonnte (active)",
     providerLocal: "Local Open-Source (WAHA/Localhost)",
     apiToken: "API Token / Auth Key",
     deviceIdOptional: "Device ID (Optional)",

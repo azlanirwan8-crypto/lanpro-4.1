@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 import { TestTube, Loader2, Save, FileEdit } from "lucide-react";
 import { toast } from "sonner";
 import { PasswordInput } from "./PasswordInput";
+import { StyledDropdown } from "../../../components/ui/CommonComponents";
+import { LanproTimePicker } from "../../../components/ui/LanproTimePicker";
 import { TemplateEditorModal } from "./TemplateEditorModal";
 import {
   fetchUsers,
@@ -189,15 +191,17 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
       <div className="space-y-3">
         <div className="space-y-1">
           <label className="text-xs font-medium text-content-body">{t("whatsapp.provider")}</label>
-          <select
+          <StyledDropdown
             value={formData.provider}
-            onChange={(e) => setFormData({ ...formData, provider: e.target.value })}
-            className={inputStyle}
-          >
-            <option>{t("whatsapp.providerLocal")}</option>
-            <option>FlowKirim</option>
-            <option>{t("whatsapp.customHttp")}</option>
-          </select>
+            onChange={(val) => setFormData({ ...formData, provider: val })}
+            options={[
+              { id: "fonnte", label: t("whatsapp.providerFonnte") },
+              { id: "local", label: t("whatsapp.providerLocal") },
+              { id: "flowkirim", label: "FlowKirim" },
+              { id: "custom-http", label: t("whatsapp.customHttp") },
+            ]}
+            buttonClassName="w-full px-3 py-1.5 border border-border-subtle rounded-md text-xs text-left font-medium bg-surface text-content-strong shadow-2xs"
+          />
         </div>
 
         <div className="space-y-1">
@@ -274,11 +278,10 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
 
         <div className="space-y-1">
           <label className="text-xs text-content-muted">{t("whatsapp.scheduleTime")}</label>
-          <input
-            type="time"
+          <LanproTimePicker
             value={scheduleTime}
-            onChange={(e) => setFormData({ ...formData, scheduleTime: e.target.value })}
-            className={`${inputStyle} w-32`}
+            onChange={(val) => setFormData({ ...formData, scheduleTime: val })}
+            buttonClassName="w-32 px-3 py-1.5 border border-border-subtle rounded-md text-xs text-left font-medium bg-surface text-content-strong shadow-2xs"
           />
         </div>
       </div>
