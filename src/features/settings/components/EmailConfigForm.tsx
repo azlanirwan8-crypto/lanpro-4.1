@@ -446,32 +446,15 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
         </p>
       </div>
 
-      {/* Template Notifikasi Assignment */}
-      <div className="space-y-3 pt-1">
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-content-body">
-            {t("emailCfg.defaultEmailSubjectTaskAssignment")}
-          </label>
-          <input
-            value={formData.subjectTemplate || ""}
-            onChange={(e) => setFormData({ ...formData, subjectTemplate: e.target.value })}
-            placeholder={t("emailCfg.subjectPlaceholder")}
-            className={inputStyle}
-          />
-        </div>
+      {/*
+        Subjek dan templat email PINDAH ke tab Broadcast Task (#299).
 
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-content-body">
-            {t("emailCfg.bodyTemplate")}
-          </label>
-          <textarea
-            rows={3}
-            value={formData.bodyTemplate || ""}
-            onChange={(e) => setFormData({ ...formData, bodyTemplate: e.target.value })}
-            className={`${inputStyle} resize-none font-mono text-[11px]`}
-          />
-        </div>
-      </div>
+        Tab ini menyimpan kredensial dan koneksi; templat menentukan isi
+        kiriman, dan isi kiriman hidup di tempat jadwal serta penerimanya
+        diatur. Nilainya tetap disimpan lewat berkas ini (`handleSaveConfig`
+        masih mengirim keduanya), sehingga sumber datanya tidak terpecah --
+        yang berpindah hanya tempat mengubahnya.
+      */}
 
       {/* Tombol Aksi */}
       <div className="flex flex-wrap gap-2.5 items-center mt-4 pt-3 border-t border-border-faint">

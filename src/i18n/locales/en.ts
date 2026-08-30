@@ -2206,6 +2206,12 @@ export const en = {
     judul: "Email a task summary on a schedule",
     penjelasan:
       "On the days and time you pick, each recipient gets one email listing the tasks assigned to them. Recipients with no active tasks are not emailed at all.",
+    subjek: "Email subject",
+    subjekPlaceholder: "Leave empty to use the built-in subject",
+    templat: "Opening message template",
+    templatPlaceholder: "Hi {{user_name}}, here is your task summary.",
+    templatBantuan:
+      "Available placeholders: {{user_name}}, {{username}}, {{total_tugas}}, {{tugas_terlambat}}, {{tugas_prioritas_tinggi}}, {{tanggal}}, {{app_url}}. Leave empty to use the built-in text. The task table is always appended below this opening.",
     hari: "Days to send",
     jam: "Time to send",
     jamWib: "Uses Western Indonesia Time (WIB).",

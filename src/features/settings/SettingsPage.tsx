@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
-import { Mail, MessageSquare, Shield, CalendarClock } from "lucide-react";
+import { Mail, MessageSquare, CalendarClock } from "lucide-react";
 import { EmailConfigForm } from "./components/EmailConfigForm";
 import { WhatsAppConfigForm } from "./components/WhatsAppConfigForm";
 import { BroadcastMonitor } from "./components/BroadcastMonitor";
@@ -9,8 +9,19 @@ import { TaskBroadcastForm } from "./components/TaskBroadcastForm";
 
 export const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<"email" | "whatsapp" | "taskBroadcast" | "system">(
-    "email"
+  /**
+   * Tiga tab, bukan empat (#299).
+   *
+   * Tab "Sistem & Keamanan" dilebur ke "Konfigurasi" atas permintaan pemilik
+   * proyek: keduanya sama-sama pengaturan koneksi dan kredensial, dan
+   * memisahkannya membuat admin harus menebak yang mana isinya di mana.
+   *
+   * Subjek dan templat email pindah dari sini ke tab Broadcast Task, sebab
+   * di sanalah ia benar-benar dipakai -- lihat langkah 1 di #299 yang
+   * menyambungkannya ke `kirimEmailTaskDigest()`.
+   */
+  const [activeTab, setActiveTab] = useState<"konfigurasi" | "whatsapp" | "taskBroadcast">(
+    "konfigurasi"
   );
 
   const [emailConfig, setEmailConfig] = useState({
@@ -50,9 +61,9 @@ export const SettingsPage: React.FC = () => {
           {/* Tabs */}
           <div className="flex border-b border-border-subtle/80 px-5 bg-surface">
             <button
-              onClick={() => setActiveTab("email")}
+              onClick={() => setActiveTab("konfigurasi")}
               className={`flex items-center gap-2 px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer ${
-                activeTab === "email"
+                activeTab === "konfigurasi"
                   ? "text-emerald-600 border-emerald-500 bg-emerald-500/10"
                   : "text-content-muted border-transparent hover:text-content-body"
               }`}
@@ -82,38 +93,32 @@ export const SettingsPage: React.FC = () => {
               <CalendarClock size={15} />
               {t("taskBroadcast.tab")}
             </button>
-            <button
-              onClick={() => setActiveTab("system")}
-              className={`flex items-center gap-2 px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer ${
-                activeTab === "system"
-                  ? "text-emerald-600 border-emerald-500 bg-emerald-500/10"
-                  : "text-content-muted border-transparent hover:text-content-body"
-              }`}
-            >
-              <Shield size={15} />
-              {t("settings.systemOperational", "Sistem & Keamanan")}
-            </button>
           </div>
 
           {/* Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 p-5">
-            <div
-              className={
-                activeTab === "system" || activeTab === "taskBroadcast"
-                  ? "lg:col-span-8"
-                  : "lg:col-span-5"
-              }
-            >
-              {activeTab === "email" && (
-                <EmailConfigForm formData={emailConfig} setFormData={setEmailConfig} />
+            <div className={activeTab === "konfigurasi" ? "lg:col-span-8" : "lg:col-span-5"}>
+              {activeTab === "konfigurasi" && (
+                <div className="space-y-6">
+                  <EmailConfigForm formData={emailConfig} setFormData={setEmailConfig} />
+                  <div className="pt-6 border-t border-border-subtle/80">
+                    <SystemConfigForm />
+                  </div>
+                </div>
               )}
               {activeTab === "whatsapp" && (
                 <WhatsAppConfigForm formData={waConfig} setFormData={setWaConfig} />
               )}
               {activeTab === "taskBroadcast" && <TaskBroadcastForm />}
-              {activeTab === "system" && <SystemConfigForm />}
             </div>
-            {activeTab !== "system" && activeTab !== "taskBroadcast" && (
+
+            {/*
+              Monitoring pengiriman menemani tab yang BENAR-BENAR mengirim
+              (#299): WhatsApp dan Broadcast Task. Tab Konfigurasi tidak
+              mengirim apa pun -- ia hanya menyimpan kredensial -- jadi
+              menempelkan monitor di sana hanya mengisi ruang.
+            */}
+            {activeTab !== "konfigurasi" && (
               <div className="lg:col-span-7 border-l border-border-subtle/80 pl-5">
                 <BroadcastMonitor
                   emailTemplate={{

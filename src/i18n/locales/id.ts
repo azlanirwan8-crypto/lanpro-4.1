@@ -2224,6 +2224,12 @@ export const id = {
     judul: "Kirim ringkasan task lewat email",
     penjelasan:
       "Pada hari dan jam yang Anda pilih, tiap penerima mendapat satu email berisi task yang ditugaskan kepadanya. Penerima yang tidak punya task aktif tidak dikirimi apa pun.",
+    subjek: "Judul / Subjek email",
+    subjekPlaceholder: "Kosongkan untuk memakai judul bawaan",
+    templat: "Templat pesan pembuka",
+    templatPlaceholder: "Halo {{user_name}}, berikut ringkasan tugas Anda.",
+    templatBantuan:
+      "Placeholder tersedia: {{user_name}}, {{username}}, {{total_tugas}}, {{tugas_terlambat}}, {{tugas_prioritas_tinggi}}, {{tanggal}}, {{app_url}}. Kosongkan untuk memakai teks bawaan. Tabel tugas selalu ditambahkan otomatis di bawah pembuka ini.",
     hari: "Hari pengiriman",
     jam: "Jam pengiriman",
     jamWib: "Mengikuti waktu Indonesia Barat (WIB).",

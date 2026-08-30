@@ -21,6 +21,8 @@ import {
   fetchEmailBroadcastConfig,
   saveEmailBroadcastConfig,
   kirimBroadcastEmailSekarang,
+  fetchEmailConfig,
+  saveEmailConfig,
 } from "../services/settings.service";
 
 const DAY_OPTIONS: { value: string; labelKey: string }[] = [
@@ -50,15 +52,33 @@ export const TaskBroadcastForm: React.FC = () => {
   const [menyimpan, setMenyimpan] = useState(false);
   const [mengirim, setMengirim] = useState(false);
 
+  /**
+   * Subjek dan isi templat (#299).
+   *
+   * Disimpan di `IntegrationSettings`, BUKAN di `BroadcastConfig` -- kolomnya
+   * memang sudah di sana, dan `BroadcastConfig.messageTemplate` adalah kolom
+   * berbeda milik WhatsApp yang hanya menampung satu string, sedangkan email
+   * butuh dua. Yang berpindah di #299 adalah tempat mengubahnya, bukan tempat
+   * menyimpannya.
+   */
+  const [subjek, setSubjek] = useState("");
+  const [isiTemplat, setIsiTemplat] = useState("");
+
   useEffect(() => {
     let dibatalkan = false;
     (async () => {
       try {
-        const [cfgRes, userRes] = await Promise.all([
+        const [cfgRes, userRes, emailRes] = await Promise.all([
           fetchEmailBroadcastConfig().catch(() => null),
           fetchUsers().catch(() => null),
+          fetchEmailConfig().catch(() => null),
         ]);
         if (dibatalkan) return;
+
+        if (emailRes?.status === "success" && emailRes.data) {
+          setSubjek((emailRes.data as any).subjectTemplate || "");
+          setIsiTemplat((emailRes.data as any).bodyTemplate || "");
+        }
 
         if (cfgRes?.status === "success" && cfgRes.data) {
           const cfg = cfgRes.data;
@@ -97,13 +117,21 @@ export const TaskBroadcastForm: React.FC = () => {
     }
     setMenyimpan(true);
     try {
-      const res = await saveEmailBroadcastConfig({
-        scheduleDays: hari,
-        scheduleTime: jam,
-        recipientIds: penerima,
-      });
-      if (res?.status === "success") toast.success(t("taskBroadcast.tersimpan"));
-      else toast.error(res?.message || t("taskBroadcast.gagalSimpan"));
+      // Jadwal dan templat disimpan berbarengan supaya admin tidak perlu
+      // menekan dua tombol Simpan untuk satu layar yang terasa satu kesatuan.
+      const [res, resTemplat] = await Promise.all([
+        saveEmailBroadcastConfig({
+          scheduleDays: hari,
+          scheduleTime: jam,
+          recipientIds: penerima,
+        }),
+        saveEmailConfig({ subjectTemplate: subjek, bodyTemplate: isiTemplat } as any),
+      ]);
+      if (res?.status === "success" && resTemplat?.status === "success") {
+        toast.success(t("taskBroadcast.tersimpan"));
+      } else {
+        toast.error(res?.message || resTemplat?.message || t("taskBroadcast.gagalSimpan"));
+      }
     } catch (e: any) {
       toast.error(e?.message || t("taskBroadcast.gagalSimpan"));
     } finally {
@@ -152,6 +180,30 @@ export const TaskBroadcastForm: React.FC = () => {
             {t("taskBroadcast.penjelasan")}
           </p>
         </div>
+      </div>
+
+      <div className="space-y-1.5 pt-3 border-t border-border-faint">
+        <label className="text-xs text-content-muted">{t("taskBroadcast.subjek")}</label>
+        <input
+          value={subjek}
+          onChange={(e) => setSubjek(e.target.value)}
+          placeholder={t("taskBroadcast.subjekPlaceholder")}
+          className="w-full px-3 py-2 bg-surface border border-border-subtle rounded-md text-xs font-medium text-content-strong outline-none shadow-2xs"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="text-xs text-content-muted">{t("taskBroadcast.templat")}</label>
+        <textarea
+          rows={4}
+          value={isiTemplat}
+          onChange={(e) => setIsiTemplat(e.target.value)}
+          placeholder={t("taskBroadcast.templatPlaceholder")}
+          className="w-full px-3 py-2 bg-surface border border-border-subtle rounded-md text-[11px] font-mono text-content-strong outline-none shadow-2xs resize-none"
+        />
+        <p className="text-[11px] text-content-subtle leading-relaxed">
+          {t("taskBroadcast.templatBantuan")}
+        </p>
       </div>
 
       <div className="space-y-2 pt-3 border-t border-border-faint">
