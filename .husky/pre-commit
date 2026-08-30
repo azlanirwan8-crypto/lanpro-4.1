@@ -23,6 +23,10 @@ npm run audit:kelas || exit 1
 # AppRoutes. `switch`-nya berakhir `default: return null`, jadi tujuan yang
 # salah ketik merender LAYAR KOSONG tanpa melempar apa pun.
 npm run audit:navigasi || exit 1
+# Item #291 — menangkap export bernama yang tidak diimpor siapa pun (dead
+# exports). `tsc` dan eslint tidak melihatnya karena keduanya bekerja per
+# berkas. Mekanisme ratchet: jumlah hanya boleh turun, tidak boleh naik.
+npm run audit:logika || exit 1
 
 # CATATAN. Ketiga gerbang di atas TIDAK membuktikan aplikasinya benar.
 # `npm test` dan `npm run build` sengaja TIDAK dijalankan di sini agar commit

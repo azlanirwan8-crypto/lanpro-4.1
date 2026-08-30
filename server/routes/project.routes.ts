@@ -24,13 +24,11 @@ router.get("/api/projects", authenticateJWT, async (req: AuthenticatedRequest, r
     res.json({ status: "success", data: projects });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/projects error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -57,13 +55,11 @@ router.get("/api/projects/:id", jagaProyek("dashboard", "R"), async (req, res) =
     }
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/projects/:id error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -94,13 +90,11 @@ router.post(
       });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: POST /api/projects error:", error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -123,13 +117,11 @@ router.put(
         "LOG ANOMALI CRITICAL: PUT /api/projects/:projectId/dashboard-layout error:",
         error
       );
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -179,13 +171,11 @@ router.put(
       res.json({ status: "success", code: "srv.project_updated", message: "Project updated" });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: PUT /api/projects error:", error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
     }
   }
 );
@@ -202,13 +192,11 @@ router.post(
       const userId = req.user?.id || req.user?.uid || req.headers["x-user-id"] || "guest";
 
       if (!methodology) {
-        return res
-          .status(400)
-          .json({
-            status: "error",
-            code: "srv.metodologi_harus_ditentukan",
-            message: "Metodologi harus ditentukan.",
-          });
+        return res.status(400).json({
+          status: "error",
+          code: "srv.metodologi_harus_ditentukan",
+          message: "Metodologi harus ditentukan.",
+        });
       }
 
       const normalizedMethodology = methodology.toString().toUpperCase();
@@ -288,13 +276,11 @@ router.put("/api/projects/:id/members", authenticateJWT, verifyGlobalAdmin, asyn
     res.json({ status: "success", code: "srv.members_updated", message: "Members updated" });
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: PUT /api/projects/:id/members error:", error);
-    res
-      .status(500)
-      .json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+    res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server",
+      message: "Terjadi kesalahan internal server",
+    });
   }
 });
 
@@ -313,34 +299,35 @@ router.delete(
       });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: DELETE /api/projects/:id/members/:userId error:", error);
-      res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.terjadi_kesalahan_internal_server",
-          message: "Terjadi kesalahan internal server",
-        });
-    }
-  }
-);
-
-router.put("/api/projects/:id/invites", jagaProyek("access", "U"), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { emailToInvite } = req.body;
-
-    await projectRepository.addInvite(id, emailToInvite);
-    res.json({ status: "success", code: "srv.invite_added", message: "Invite added" });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: PUT /api/projects/:id/invites error:", error);
-    res
-      .status(500)
-      .json({
+      res.status(500).json({
         status: "error",
         code: "srv.terjadi_kesalahan_internal_server",
         message: "Terjadi kesalahan internal server",
       });
+    }
   }
-});
+);
+
+router.put(
+  "/api/projects/:id/invites",
+  jagaProyek("access", "U"),
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id } = req.params;
+      const { emailToInvite } = req.body;
+      const inviterId = req.user?.id || req.user?.uid;
+
+      await projectRepository.addInvite(id, emailToInvite, inviterId);
+      res.json({ status: "success", code: "srv.invite_added", message: "Invite added" });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: PUT /api/projects/:id/invites error:", error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
+  }
+);
 
 export default router;

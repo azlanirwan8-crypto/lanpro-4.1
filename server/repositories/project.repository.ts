@@ -69,7 +69,10 @@ export class ProjectRepository {
           [projectIds]
         );
 
-        const membersByProject = new Map<string, { list: string[]; roles: Record<string, string> }>();
+        const membersByProject = new Map<
+          string,
+          { list: string[]; roles: Record<string, string> }
+        >();
 
         for (const row of allMemberRows) {
           if (!membersByProject.has(row.projectId)) {
@@ -141,10 +144,10 @@ export class ProjectRepository {
     const connection = await db.getConnection();
     try {
       let resolvedOwnerId = project.ownerId;
-      const [uRows]: any = await connection.query(
-        "SELECT id FROM Users WHERE id = ? OR uid = ?",
-        [project.ownerId, project.ownerId]
-      );
+      const [uRows]: any = await connection.query("SELECT id FROM Users WHERE id = ? OR uid = ?", [
+        project.ownerId,
+        project.ownerId,
+      ]);
       if (uRows.length > 0) {
         resolvedOwnerId = uRows[0].id;
       }
@@ -237,7 +240,9 @@ export class ProjectRepository {
       }
       if (updates.dashboardLayout !== undefined) {
         sqlUpdates.push("dashboardLayout = ?");
-        values.push(updates.dashboardLayout !== null ? JSON.stringify(updates.dashboardLayout) : null);
+        values.push(
+          updates.dashboardLayout !== null ? JSON.stringify(updates.dashboardLayout) : null
+        );
       }
 
       if (sqlUpdates.length > 0) {
@@ -471,12 +476,12 @@ export class ProjectRepository {
     }
   }
 
-  async addInvite(projectId: string, email: string): Promise<void> {
+  async addInvite(projectId: string, email: string, invitedBy?: string): Promise<void> {
     const connection = await db.getConnection();
     try {
       await connection.query(
-        "INSERT INTO ProjectInvites (id, projectId, email) VALUES (?, ?, ?)",
-        [crypto.randomUUID(), projectId, email]
+        'INSERT INTO "ProjectInvites" (id, "projectId", email, "invitedBy") VALUES (?, ?, ?, ?)',
+        [crypto.randomUUID(), projectId, email, invitedBy || null]
       );
     } finally {
       connection.release();
