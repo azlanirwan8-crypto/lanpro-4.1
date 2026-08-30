@@ -178,6 +178,21 @@ function kumpulkanImport(daftarBerkas) {
      * lalu properti yang diakses darinya — jadi ia tidak asal mencocokkan
      * `sesuatu.Nama` di mana pun di berkas.
      */
+    /**
+     * IMPOR DINAMIS BENTUK KEDUA — `const { A, B } = await import("...")`.
+     *
+     * Bentuk ini tidak tertangkap pola `.then(...)` di bawah, sehingga simbol
+     * yang HANYA diimpor begini tetap dilaporkan mati. Ditemukan saat #299
+     * memakai `const { getEmailIntegrationConfig, DEFAULT_EMAIL_CONFIG } =
+     * await import(...)` untuk memutus impor melingkar antar service.
+     */
+    for (const m of isi.matchAll(/{([^}]+)}\s*=\s*await\s+import\s*\(/g)) {
+      for (const bagian of m[1].split(",")) {
+        const nama = bagian.trim().split(/[:\s]+as[:\s]+|\s*:\s*/)[0].trim();
+        if (nama) diimpor.add(nama);
+      }
+    }
+
     for (const m of isi.matchAll(
       /import\s*\([^)]*\)\s*\.then\(\s*\(?\s*(\w+)\s*\)?\s*=>([\s\S]{0,200}?)\)/g
     )) {
