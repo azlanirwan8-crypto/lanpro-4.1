@@ -18,6 +18,7 @@ import {
 import { format, formatDistanceToNow } from "date-fns";
 import { cn, ensureDate } from "../../../../lib/utils";
 import { StyledDropdown, UncontrolledInput } from "../../../../components/ui/CommonComponents";
+import { LanproDatePicker } from "../../../../components/ui/LanproDatePicker";
 import { RenderIcon } from "../../../../components/RenderIcon";
 import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
 import { styles } from "../../styles";
@@ -614,12 +615,11 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
               case "dueDate":
                 const dateVal = task[col.id as keyof Task];
                 content = (
-                  <UncontrolledInput
-                    type="date"
+                  <LanproDatePicker
                     disabled={!isEditable}
-                    initialValue={dateVal ? format(ensureDate(dateVal), "yyyy-MM-dd") : ""}
-                    onSave={(val: any) => updateTaskField(task.id, col.id, val)}
-                    className="bg-transparent border-none text-xs sm:text-[10px] font-medium text-content-muted focus:ring-0 active:ring-0 outline-none w-full"
+                    value={dateVal ? format(ensureDate(dateVal), "yyyy-MM-dd") : ""}
+                    onChange={(val) => updateTaskField(task.id, col.id, val)}
+                    buttonClassName="bg-transparent border-none text-xs sm:text-[10px] font-medium text-content-muted w-full px-0"
                   />
                 );
                 break;
