@@ -120,6 +120,30 @@ export function statusEmailService() {
 /**
  * Mengirim email transaksional via SMTP hosting (Nodemailer) atau Resend REST API.
  */
+/**
+ * URL aplikasi untuk tautan di dalam email (item #278).
+ *
+ * Dulu keempat template membaca `process.env.APP_URL` langsung, sehingga
+ * pergantian domain menuntut ubah env var lalu deploy ulang — dan sampai itu
+ * dilakukan, setiap email menunjuk domain lama tanpa gejala apa pun.
+ *
+ * Urutan sumber, dari yang paling berhak: nilai di basis data (diatur admin
+ * lewat UI Settings), lalu `APP_URL` sebagai warisan, lalu localhost. Env var
+ * sengaja DIPERTAHANKAN sebagai cadangan supaya pemasangan lama tidak patah,
+ * tetapi begitu admin mengisi kolomnya di UI, basis data yang menang.
+ */
+export async function ambilAppUrl(): Promise<string> {
+  let dariDb = "";
+  try {
+    const config = await getEmailIntegrationConfig();
+    dariDb = (config.appUrl || "").trim();
+  } catch {
+    // Basis data tidak terbaca — jatuh ke env var di bawah.
+  }
+  const nilai = dariDb || process.env.APP_URL || "http://localhost:3000";
+  return nilai.replace(/\/+$/, "");
+}
+
 export async function kirimEmail(input: KirimEmailInput): Promise<KirimEmailResult> {
   const { to, subject, html, text, from } = input;
 
@@ -298,7 +322,7 @@ export interface WelcomeEmailData {
 export async function kirimEmailSelamatDatang(data: WelcomeEmailData): Promise<KirimEmailResult> {
   const { email, nama, username } = data;
   const namaPanggilan = (nama || username || "").trim();
-  const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+  const appUrl = await ambilAppUrl();
 
   const subject = "Selamat Datang di LanPro - Akun Anda Telah Terdaftar";
   const html = `
@@ -356,7 +380,7 @@ export interface ActivationEmailData {
 export async function kirimEmailAktivasiAkun(data: ActivationEmailData): Promise<KirimEmailResult> {
   const { email, nama, username } = data;
   const namaPanggilan = (nama || username || "").trim();
-  const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+  const appUrl = await ambilAppUrl();
 
   const subject = "[LanPro] Akun Anda Telah Diaktifkan";
   const html = `
@@ -421,7 +445,7 @@ export interface TaskDigestEmailData {
 export async function kirimEmailTaskDigest(data: TaskDigestEmailData): Promise<KirimEmailResult> {
   const { email, nama, username, tasks, tanggal } = data;
   const namaPanggilan = (nama || username || "").trim();
-  const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+  const appUrl = await ambilAppUrl();
   const tanggalFormatted =
     tanggal ||
     new Date().toLocaleDateString("id-ID", {
@@ -577,7 +601,7 @@ export async function kirimEmailPasswordBaru(data: {
 }): Promise<KirimEmailResult> {
   const { email, nama, username, temporaryPassword } = data;
   const namaPanggilan = (nama || username || "").trim();
-  const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+  const appUrl = await ambilAppUrl();
 
   const subject = "[LanPro] Kata Sandi Baru Akun Anda";
 

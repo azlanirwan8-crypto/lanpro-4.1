@@ -112,6 +112,7 @@ router.get("/api/settings/email/config", verifyGlobalAdmin, async (req, res) => 
         hasApiKey: Boolean(config.apiKey),
         subjectTemplate: config.subjectTemplate,
         bodyTemplate: config.bodyTemplate,
+        appUrl: config.appUrl,
         updatedAt: config.updatedAt,
       },
     });
@@ -172,6 +173,7 @@ router.post(
           hasApiKey: Boolean(updated.apiKey),
           subjectTemplate: updated.subjectTemplate,
           bodyTemplate: updated.bodyTemplate,
+          appUrl: updated.appUrl,
           updatedAt: updated.updatedAt,
         },
       });

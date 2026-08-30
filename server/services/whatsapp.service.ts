@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import dbPool from "../../src/lib/db";
 import { getBroadcastConfig } from "./broadcastConfig.service";
+import { ambilAppUrl } from "./email.service";
 
 const WA_API_URL = "https://api.fonnte.com/send";
 
@@ -124,6 +125,10 @@ export async function sendDailyTaskDigest(
     }
     const [users]: any = await connection.query(query, params);
 
+    // Item #278: dibaca sekali per digest, bukan per pesan — sumbernya
+    // basis data (UI Settings), dengan env APP_URL sebagai cadangan.
+    const appUrlAktif = await ambilAppUrl();
+
     for (const user of users) {
       const [tasks]: any = await connection.query(
         `
@@ -138,7 +143,7 @@ export async function sendDailyTaskDigest(
       );
 
       if (tasks.length > 0) {
-        const message = formatMessage(user.displayName, tasks, messageTemplate);
+        const message = formatMessage(user.displayName, tasks, messageTemplate, appUrlAktif);
         await sendToWhatsApp(user.phone, message);
       }
     }
@@ -202,11 +207,22 @@ function isTemplateLegacy(template: string): boolean {
  * admin) dibuang, bukan dikirim mentah — pesan WhatsApp sungguhan tidak
  * boleh pernah menampilkan `{{...}}` literal.
  */
-export function formatMessage(name: string, tasks: any[], messageTemplate?: string | null) {
+// Item #278: `appUrl` diterima sebagai parameter, bukan dibaca dari env di
+// dalam fungsi ini, supaya sumber URL aplikasi tunggal (basis data) dan
+// fungsi ini tetap murni serta mudah diuji.
+export function formatMessage(
+  name: string,
+  tasks: any[],
+  messageTemplate?: string | null,
+  appUrlOverride?: string
+) {
   const projectNames = Array.from(new Set(tasks.map((t) => t.projectName || "Tanpa Project")));
   const headerProject = projectNames.length === 1 ? ` - ${projectNames[0]}` : "";
   const projectNameUntukTemplate = projectNames.length === 1 ? projectNames[0] : "beberapa project";
-  const appUrl = (process.env.APP_URL || "http://localhost:3000").replace(/\/$/, "");
+  const appUrl = (appUrlOverride || process.env.APP_URL || "http://localhost:3000").replace(
+    /\/+$/,
+    ""
+  );
 
   const templateBersih =
     messageTemplate && messageTemplate.trim() && !isTemplateLegacy(messageTemplate)

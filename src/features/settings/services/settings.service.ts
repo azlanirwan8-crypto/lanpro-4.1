@@ -41,6 +41,8 @@ export interface EmailConfigData {
   hasApiKey?: boolean;
   subjectTemplate?: string;
   bodyTemplate?: string;
+  /** Item #278: URL aplikasi untuk tautan di dalam email. Kosong = pakai env APP_URL. */
+  appUrl?: string;
   updatedAt?: string;
 }
 

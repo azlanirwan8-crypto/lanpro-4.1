@@ -27,6 +27,15 @@ export const emailIntegrationConfigSchema = z.object({
   apiKey: z.string().optional(),
   subjectTemplate: z.string().optional(),
   bodyTemplate: z.string().optional(),
+  // Item #278: URL aplikasi untuk tautan di dalam email. Boleh kosong —
+  // artinya pakai env APP_URL. Divalidasi sebagai URL absolut bila diisi.
+  appUrl: z
+    .string()
+    .max(255)
+    .refine((v) => v === "" || /^https?:\/\/.+/.test(v), {
+      message: "URL aplikasi harus diawali http:// atau https://",
+    })
+    .optional(),
 });
 
 /**

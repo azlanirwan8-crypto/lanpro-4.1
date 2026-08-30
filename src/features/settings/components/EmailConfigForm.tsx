@@ -53,6 +53,8 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
   const [senderEmail, setSenderEmail] = useState("admin@lanpro.my.id");
   const [apiKey, setApiKey] = useState("");
   const [hasApiKey, setHasApiKey] = useState(false);
+  // Item #278: URL aplikasi, dipakai untuk tautan di dalam email.
+  const [appUrl, setAppUrl] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -81,6 +83,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
           setSenderName(d.senderName || "LanPro System");
           setSenderEmail(d.senderEmail || "admin@lanpro.my.id");
           setHasApiKey(Boolean(d.hasApiKey));
+          setAppUrl(d.appUrl || "");
 
           if (d.subjectTemplate) {
             setFormData((prev: any) => ({ ...prev, subjectTemplate: d.subjectTemplate }));
@@ -156,6 +159,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
         apiKey: apiKey.trim() ? apiKey : undefined,
         subjectTemplate: formData.subjectTemplate,
         bodyTemplate: formData.bodyTemplate,
+        appUrl: appUrl.trim(),
       };
 
       const res = await saveEmailConfig(payload);
@@ -423,6 +427,23 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
             </div>
           </div>
         )}
+      </div>
+
+      {/* URL Aplikasi (Item #278) — di luar cabang provider, sebab tautan di
+          dalam email dipakai oleh jalur SMTP maupun Resend. */}
+      <div className="space-y-1 pt-1">
+        <label className="text-xs font-medium text-content-body">URL Aplikasi</label>
+        <input
+          value={appUrl}
+          onChange={(e) => setAppUrl(e.target.value)}
+          placeholder="https://lanpro.my.id"
+          className={inputStyle}
+        />
+        <p className="text-xs sm:text-[11px] text-content-muted">
+          Dipakai untuk tautan di dalam email (tombol "Buka LanPro", tautan reset kata sandi). Ganti
+          di sini bila domain berpindah — tidak perlu mengubah berkas di server. Kosongkan untuk
+          memakai nilai bawaan dari lingkungan server.
+        </p>
       </div>
 
       {/* Template Notifikasi Assignment */}

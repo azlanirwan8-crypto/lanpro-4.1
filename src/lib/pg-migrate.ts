@@ -790,6 +790,9 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "updatedAt"       TIMESTAMP DEFAULT NOW()
       );
       ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS provider VARCHAR(50) DEFAULT 'smtp';
+      -- Item #278: URL aplikasi dipindah dari env var APP_URL ke basis data,
+      -- supaya pergantian domain tidak lagi menuntut deploy ulang.
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "appUrl" VARCHAR(255);
       ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "smtpHost" VARCHAR(255);
       ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "smtpPort" INT DEFAULT 465;
       ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "smtpUser" VARCHAR(255);

@@ -21,6 +21,8 @@ export interface EmailIntegrationConfig {
   apiKey?: string;
   subjectTemplate: string | null;
   bodyTemplate: string | null;
+  /** Item #278: URL aplikasi untuk tautan di dalam email. Kosong = pakai env APP_URL. */
+  appUrl: string;
   updatedAt?: string;
 }
 
@@ -37,6 +39,7 @@ const DEFAULT_EMAIL_CONFIG: EmailIntegrationConfig = {
   apiKey: "",
   subjectTemplate: "[LanPro] Pemberitahuan Sistem",
   bodyTemplate: "Halo {{user_name}},\n\nPemberitahuan penting dari sistem LanPro.",
+  appUrl: "",
 };
 
 function toEmailConfigRow(data: any): EmailIntegrationConfig {
@@ -54,6 +57,7 @@ function toEmailConfigRow(data: any): EmailIntegrationConfig {
     apiKey: data.apiKey || "",
     subjectTemplate: data.subjectTemplate ?? DEFAULT_EMAIL_CONFIG.subjectTemplate,
     bodyTemplate: data.bodyTemplate ?? DEFAULT_EMAIL_CONFIG.bodyTemplate,
+    appUrl: data.appUrl || "",
     updatedAt: data.updatedAt,
   };
 }
@@ -86,8 +90,8 @@ export async function getEmailIntegrationConfig(): Promise<EmailIntegrationConfi
     await connection.query(
       `INSERT INTO "IntegrationSettings" (
         channel, provider, "smtpHost", "smtpPort", "smtpUser", "smtpPass", "smtpSecure",
-        "senderEmail", "senderName", "apiKey", "subjectTemplate", "bodyTemplate", "updatedAt"
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        "senderEmail", "senderName", "apiKey", "subjectTemplate", "bodyTemplate", "appUrl", "updatedAt"
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
       ON CONFLICT (channel) DO NOTHING`,
       [
         "email",
@@ -102,6 +106,7 @@ export async function getEmailIntegrationConfig(): Promise<EmailIntegrationConfi
         DEFAULT_EMAIL_CONFIG.apiKey || "",
         DEFAULT_EMAIL_CONFIG.subjectTemplate,
         DEFAULT_EMAIL_CONFIG.bodyTemplate,
+        DEFAULT_EMAIL_CONFIG.appUrl,
       ]
     );
 
@@ -143,13 +148,17 @@ export async function saveEmailIntegrationConfig(
       input.subjectTemplate !== undefined ? input.subjectTemplate : current.subjectTemplate;
     const bodyTemplate =
       input.bodyTemplate !== undefined ? input.bodyTemplate : current.bodyTemplate;
+    // Item #278: dinormalkan di sini supaya tautan email tidak pernah berakhir
+    // dengan garis miring ganda, apa pun yang diketik admin di UI.
+    const appUrl =
+      input.appUrl !== undefined ? String(input.appUrl).trim().replace(/\/+$/, "") : current.appUrl;
 
     await connection.query(
       `
       INSERT INTO "IntegrationSettings" (
         channel, provider, "smtpHost", "smtpPort", "smtpUser", "smtpPass", "smtpSecure",
-        "senderEmail", "senderName", "apiKey", "subjectTemplate", "bodyTemplate", "updatedAt"
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        "senderEmail", "senderName", "apiKey", "subjectTemplate", "bodyTemplate", "appUrl", "updatedAt"
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
       ON CONFLICT (channel) DO UPDATE SET
         provider = EXCLUDED.provider,
         "smtpHost" = EXCLUDED."smtpHost",
@@ -162,6 +171,7 @@ export async function saveEmailIntegrationConfig(
         "apiKey" = EXCLUDED."apiKey",
         "subjectTemplate" = EXCLUDED."subjectTemplate",
         "bodyTemplate" = EXCLUDED."bodyTemplate",
+        "appUrl" = EXCLUDED."appUrl",
         "updatedAt" = NOW()
       `,
       [
@@ -177,6 +187,7 @@ export async function saveEmailIntegrationConfig(
         apiKey,
         subjectTemplate,
         bodyTemplate,
+        appUrl,
       ]
     );
 
