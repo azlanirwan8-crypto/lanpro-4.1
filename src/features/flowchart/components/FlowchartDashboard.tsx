@@ -37,6 +37,13 @@ interface FlowchartDashboardProps {
   handleSelectFlowchart: (id: string, listToUse?: FlowchartData[]) => void;
   setIsEditorActive: (value: boolean) => void;
   canModifyFlowchart: (fw: FlowchartData) => boolean;
+  /**
+   * Membuka form ubah metadata (nama, kategori, epic, deskripsi, tautan).
+   * Ikon Edit dulu memanggil `handleSelectFlowchart` — persis sama dengan
+   * ikon Lihat — sehingga keduanya membuka kanvas dan tidak ada cara sama
+   * sekali mengubah metadata dari daftar.
+   */
+  openEditModal: (flow: FlowchartData, e: React.MouseEvent) => void;
   handleDeleteFlowchart: (id: string, e: React.MouseEvent) => void;
 }
 
@@ -55,6 +62,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
   handleSelectFlowchart,
   setIsEditorActive,
   canModifyFlowchart,
+  openEditModal,
   handleDeleteFlowchart,
 }) => {
   const { t } = useTranslation();
@@ -235,10 +243,8 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                             {canModifyFlowchart(fw) && (
                               <>
                                 <button
-                                  onClick={() => {
-                                    handleSelectFlowchart(fw.id);
-                                    setIsEditorActive(true);
-                                  }}
+                                  type="button"
+                                  onClick={(e) => openEditModal(fw, e)}
                                   className="p-1.5 text-content-muted hover:text-primary hover:bg-primary-surface/10 rounded-md transition-all cursor-pointer"
                                   title={t("flowchart.editFlowchart")}
                                 >

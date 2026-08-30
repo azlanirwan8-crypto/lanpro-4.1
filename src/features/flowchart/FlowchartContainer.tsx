@@ -2482,6 +2482,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           handleSelectFlowchart={handleSelectFlowchart}
           setIsEditorActive={setIsEditorActive}
           canModifyFlowchart={canModifyFlowchart}
+          openEditModal={openEditModal}
           handleDeleteFlowchart={handleDeleteFlowchart}
         />
       ) : (

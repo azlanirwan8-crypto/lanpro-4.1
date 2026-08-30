@@ -261,6 +261,7 @@ export const StyledDropdown = ({
         </div>
       ) : (
         <button
+          type="button"
           ref={buttonRef as any}
           onClick={(e) => {
             e.stopPropagation();
@@ -366,6 +367,7 @@ export const StyledDropdown = ({
                   const isActive = opt.id === value;
                   return (
                     <button
+                      type="button"
                       key={opt.id ? `opt-${opt.id}-${optIdx}` : `opt-idx-${optIdx}`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -486,6 +488,7 @@ export const TableStatusBadge = ({
   return (
     <div className="relative">
       <button
+        type="button"
         ref={buttonRef}
         onClick={(e) => {
           e.stopPropagation();
@@ -530,6 +533,7 @@ export const TableStatusBadge = ({
             >
               {(statuses || []).map((s, index) => (
                 <button
+                  type="button"
                   key={`${s.id || s.label}-${index}`}
                   onClick={(e) => {
                     e.stopPropagation();
