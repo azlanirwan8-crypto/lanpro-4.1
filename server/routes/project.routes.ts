@@ -261,33 +261,53 @@ router.delete("/api/projects/:projectId", jagaHapusProyek(), async (req, res) =>
 });
 
 // Project Members & Invites API
-router.put("/api/projects/:id/members", authenticateJWT, verifyGlobalAdmin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { memberRoles, newMemberId, newMemberRole, teamMemberIds } = req.body;
 
-    await projectRepository.updateMembers(
-      id,
-      memberRoles,
-      newMemberId,
-      newMemberRole,
-      teamMemberIds
-    );
-    res.json({ status: "success", code: "srv.members_updated", message: "Members updated" });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: PUT /api/projects/:id/members error:", error);
-    res.status(500).json({
-      status: "error",
-      code: "srv.terjadi_kesalahan_internal_server",
-      message: "Terjadi kesalahan internal server",
-    });
+/**
+ * Item #298 — penjaganya CEKLIST IZIN, bukan `verifyGlobalAdmin`.
+ *
+ * Sebelumnya kedua rute anggota menuntut `req.user.role === "admin"` global,
+ * sehingga model izinnya berbeda sama sekali dari yang dipakai klien DAN dari
+ * yang disepakati (#202: ceklist atau kepemilikan; hanya Global Admin penuh).
+ * Akibatnya UI menawarkan tombol yang server pasti tolak 403, dan yang
+ * terlihat pengguna adalah aplikasi rusak, bukan izin ditolak.
+ *
+ * `jagaProyek` sudah memuat Global Admin sebagai jalur penuh, jadi kemampuan
+ * admin tidak berkurang -- yang bertambah adalah anggota proyek yang memang
+ * diberi ceklist. Perhatikan pemisahannya: mengubah peran memakai "U",
+ * mengeluarkan anggota memakai "D".
+ */
+router.put(
+  "/api/projects/:id/members",
+  authenticateJWT,
+  jagaProyek("access", "U"),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { memberRoles, newMemberId, newMemberRole, teamMemberIds } = req.body;
+
+      await projectRepository.updateMembers(
+        id,
+        memberRoles,
+        newMemberId,
+        newMemberRole,
+        teamMemberIds
+      );
+      res.json({ status: "success", code: "srv.members_updated", message: "Members updated" });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: PUT /api/projects/:id/members error:", error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
   }
-});
+);
 
 router.delete(
   "/api/projects/:id/members/:userId",
   authenticateJWT,
-  verifyGlobalAdmin,
+  jagaProyek("access", "D"),
   async (req, res) => {
     try {
       const { id, userId } = req.params;
