@@ -146,6 +146,32 @@ function kumpulkanImport(daftarBerkas) {
         if (nama) diimpor.add(nama);
       }
     }
+
+    /**
+     * IMPOR DINAMIS — `import("...").then((m) => ({ default: m.Nama }))`.
+     *
+     * KENAPA WAJIB IKUT DIHITUNG. Tanpa ini, gerbang menganggap komponen yang
+     * dimuat MALAS sebagai ekspor mati, sebab tidak ada lagi yang mengimpornya
+     * secara statis. Akibatnya gerbang ini menghukum tepat perbaikan yang
+     * paling diinginkan: memindahkan tampilan besar keluar dari potongan
+     * masuk. Ditemukan saat #293 memindahkan lima tampilan ke pemuatan malas —
+     * TaskDetailModal, MasterDataPanel, dan UserSessionsPanel seketika
+     * dilaporkan "dead export" padahal justru baru saja diperbaiki.
+     *
+     * Pola ini menangkap nama parameternya lebih dulu (`m`, `mod`, apa pun),
+     * lalu properti yang diakses darinya — jadi ia tidak asal mencocokkan
+     * `sesuatu.Nama` di mana pun di berkas.
+     */
+    for (const m of isi.matchAll(
+      /import\s*\([^)]*\)\s*\.then\(\s*\(?\s*(\w+)\s*\)?\s*=>([\s\S]{0,200}?)\)/g
+    )) {
+      const param = m[1];
+      const tubuh = m[2];
+      const polaAkses = new RegExp("\\b" + param + "\\.(\\w+)", "g");
+      for (const akses of tubuh.matchAll(polaAkses)) {
+        diimpor.add(akses[1]);
+      }
+    }
   }
 
   return diimpor;
