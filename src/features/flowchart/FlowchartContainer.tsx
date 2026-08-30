@@ -3358,32 +3358,33 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <Layers className="w-3.5 h-3.5 text-violet-600" />
                                 <span>{t("flowchart.changeShapeType")}</span>
                               </label>
-                              <select
+                              <StyledDropdown
                                 value={nodes.find((n) => n.id === selectedNodeId)?.type || "rect"}
-                                onChange={(e) => {
-                                  const newType = e.target.value as FlowNode["type"];
+                                onChange={(val) => {
+                                  const newType = val as FlowNode["type"];
                                   handleUpdateActiveNode({ type: newType });
                                   toast.success(
                                     `Mengubah bentuk komponen alur menjadi: ${newType.toUpperCase()}`
                                   );
                                 }}
-                                className="w-full text-xs bg-surface-sunken border border-border-subtle rounded-lg p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 font-medium transition-all"
-                              >
-                                <option value="rect">{t("shapes.shRect")}</option>
-                                <option value="decision">{t("shapes.shDecision")}</option>
-                                <option value="predefined">{t("shapes.shPredefined")}</option>
-                                <option value="database">{t("shapes.shDatabase")}</option>
-                                <option value="oval">{t("shapes.shOval")}</option>
-                                <option value="circle">{t("shapes.shCircle")}</option>
-                                <option value="sticky">{t("shapes.shSticky")}</option>
-                                <option value="cloud">{t("shapes.shCloud")}</option>
-                                <option value="parallelogram">{t("shapes.shParallelogram")}</option>
-                                <option value="document">{t("shapes.shDocument")}</option>
-                                <option value="actor">{t("shapes.shActor")}</option>
-                                <option value="folder">{t("shapes.shFolder")}</option>
-                                <option value="card">{t("shapes.shCard")}</option>
-                                <option value="text">{t("shapes.shText")}</option>
-                              </select>
+                                options={[
+                                  { id: "rect", label: t("shapes.shRect") },
+                                  { id: "decision", label: t("shapes.shDecision") },
+                                  { id: "predefined", label: t("shapes.shPredefined") },
+                                  { id: "database", label: t("shapes.shDatabase") },
+                                  { id: "oval", label: t("shapes.shOval") },
+                                  { id: "circle", label: t("shapes.shCircle") },
+                                  { id: "sticky", label: t("shapes.shSticky") },
+                                  { id: "cloud", label: t("shapes.shCloud") },
+                                  { id: "parallelogram", label: t("shapes.shParallelogram") },
+                                  { id: "document", label: t("shapes.shDocument") },
+                                  { id: "actor", label: t("shapes.shActor") },
+                                  { id: "folder", label: t("shapes.shFolder") },
+                                  { id: "card", label: t("shapes.shCard") },
+                                  { id: "text", label: t("shapes.shText") },
+                                ]}
+                                buttonClassName="w-full text-xs bg-surface-sunken border border-border-subtle rounded-lg p-2 text-left text-content font-medium"
+                              />
                             </div>
 
                             {/* Edit inline message */}
@@ -3515,20 +3516,20 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 {t("flowchart.linkTheShapeToThe")}
                               </p>
 
-                              <select
+                              <StyledDropdown
                                 value={nodes.find((n) => n.id === selectedNodeId)?.taskId || ""}
-                                onChange={(e) =>
-                                  handleUpdateActiveNode({ taskId: e.target.value || undefined })
+                                onChange={(val) =>
+                                  handleUpdateActiveNode({ taskId: val || undefined })
                                 }
-                                className="w-full text-xs bg-surface-sunken border border-border-subtle rounded p-1.5 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-medium"
-                              >
-                                <option value="">{t("flowchart.connectTask")}</option>
-                                {tasks.map((t) => (
-                                  <option key={t.id} value={t.id}>
-                                    [{t.key}] {t.title} ({t.status})
-                                  </option>
-                                ))}
-                              </select>
+                                options={[
+                                  { id: "", label: t("flowchart.connectTask") },
+                                  ...tasks.map((task) => ({
+                                    id: task.id,
+                                    label: `[${task.key}] ${task.title} (${task.status})`,
+                                  })),
+                                ]}
+                                buttonClassName="w-full text-xs bg-surface-sunken border border-border-subtle rounded p-1.5 text-left text-content font-medium"
+                              />
                             </div>
                           </div>
                         ) : selectedEdgeId ? (
@@ -3687,18 +3688,18 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 <label className="text-xs sm:text-[11px] font-medium text-content-body flex items-center gap-1.5">
                   <Workflow className="w-3.5 h-3.5 text-primary" /> {t("flowchart.linkedEpicLabel")}
                 </label>
-                <select
+                <StyledDropdown
                   value={flowEpicId}
-                  onChange={(e) => setFlowEpicId(e.target.value)}
-                  className="w-full text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
-                >
-                  <option value="">{t("flowchart.connectWithEpic")}</option>
-                  {availableEpics.map((epic) => (
-                    <option key={epic.id} value={epic.id}>
-                      [{epic.key}] {epic.title}
-                    </option>
-                  ))}
-                </select>
+                  onChange={setFlowEpicId}
+                  options={[
+                    { id: "", label: t("flowchart.connectWithEpic") },
+                    ...availableEpics.map((epic) => ({
+                      id: epic.id,
+                      label: `[${epic.key}] ${epic.title}`,
+                    })),
+                  ]}
+                  buttonClassName="w-full text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-left text-content-strong"
+                />
                 <p className="text-xs sm:text-[10px] text-content-subtle leading-relaxed">
                   {t("flowchart.linkedEpicHint")}
                 </p>
