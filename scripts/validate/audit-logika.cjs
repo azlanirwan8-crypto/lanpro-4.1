@@ -50,6 +50,22 @@ const warna = {
 
 const AKAR = path.resolve(__dirname, "..", "..");
 const DIPINDAI = [path.join(AKAR, "src"), path.join(AKAR, "server")];
+
+/**
+ * Berkas di AKAR yang mengimpor kode dari `src/`/`server/` tetapi tidak berada
+ * di dalam keduanya.
+ *
+ * KENAPA PERLU. `server.ts` adalah entrypoint backend dan satu-satunya
+ * pemanggil beberapa service (penjadwal, misalnya). Karena ia di luar
+ * `DIPINDAI`, impor-impornya tidak terhitung, sehingga service yang HANYA
+ * dipakai olehnya dilaporkan sebagai ekspor mati -- padahal ia justru yang
+ * menjalankan aplikasi. Ditemukan saat #297 menambahkan penjadwal broadcast
+ * email; `whatsapp.service.ts` sudah lama menanggung enam laporan palsu yang
+ * sama, terkubur di dalam garis dasar.
+ *
+ * Berkas ini dipakai HANYA sebagai sumber impor, bukan diperiksa ekspornya.
+ */
+const SUMBER_IMPOR_TAMBAHAN = [path.join(AKAR, "server.ts")];
 const GARIS_DASAR = path.join(__dirname, "logika-baseline.json");
 
 // Berkas yang sengaja tidak diperiksa — alasannya tertulis.
@@ -189,7 +205,11 @@ function main() {
   }
 
   const eksporPerBerkas = kumpulkanExport(semuaBerkas);
-  const diimpor = kumpulkanImport(semuaBerkas);
+  const berkasUntukImpor = [
+    ...semuaBerkas,
+    ...SUMBER_IMPOR_TAMBAHAN.filter((f) => fs.existsSync(f)),
+  ];
+  const diimpor = kumpulkanImport(berkasUntukImpor);
 
   // Hitung dead exports per berkas
   const matiPerBerkas = {};
