@@ -177,15 +177,26 @@ export const LanproTimePicker: React.FC<LanproTimePickerProps> = ({
 
               {/* Time columns */}
               {/*
-                `overflow-hidden` di sini adalah jaring kedua (#294). Jaring
-                pertamanya `min-h-0` pada kedua kolom di bawah: tanpa itu,
-                `flex-1` (= `flex: 1 1 0%`) tetap punya `min-height: auto`,
-                sehingga 24 tombol jam MEMAKSA tinggi kolomnya melewati 176 px
-                dan daftarnya tergambar keluar dari kartu ini.
+                TIGA hal menahan tinggi di sini, dan ketiganya perlu (#294).
+                Percobaan pertama hanya memasang `min-h-0` pada daftar di dalam
+                kolom, dan itu TIDAK cukup — diukur di peramban: grid-nya 143 px
+                sementara kolomnya tetap 557 px, sehingga `overflow-hidden`
+                hanya MEMOTONG daftarnya, bukan membuatnya bisa digulir.
+                Gejalanya justru lebih membingungkan daripada sebelum
+                diperbaiki: daftar terlihat rapi tapi separuh isinya tidak bisa
+                dijangkau sama sekali.
+
+                Penyebab sesungguhnya ada di lapisan grid: tanpa baris yang
+                ditetapkan, baris implisitnya ber-ukuran AUTO dan tumbuh
+                mengikuti isi, jadi `h-44` pada grid tidak pernah sampai ke
+                anaknya. `grid-rows-[minmax(0,1fr)]` memaksa barisnya mengisi
+                tinggi grid dan boleh menyusut sampai nol; `min-h-0` pada kolom
+                membuat kolom flex mau menyusut; `min-h-0` pada daftar membuat
+                daftarnya yang menerima sisa tinggi dan memunculkan gulir.
               */}
-              <div className="grid grid-cols-2 gap-2 h-44 overflow-hidden">
+              <div className="grid grid-cols-2 grid-rows-[minmax(0,1fr)] gap-2 h-44 overflow-hidden">
                 {/* Hours column */}
-                <div className="flex flex-col">
+                <div className="flex flex-col min-h-0">
                   <span className="text-[10px] font-medium text-content-subtle text-center mb-1">
                     {isId ? "Jam" : "Hour"}
                   </span>
@@ -212,7 +223,7 @@ export const LanproTimePicker: React.FC<LanproTimePickerProps> = ({
                 </div>
 
                 {/* Minutes column */}
-                <div className="flex flex-col">
+                <div className="flex flex-col min-h-0">
                   <span className="text-[10px] font-medium text-content-subtle text-center mb-1">
                     {isId ? "Menit" : "Minute"}
                   </span>
