@@ -2821,6 +2821,10 @@ export const en = {
     noOptions: "No options available",
     errorTitle: "A System Error Occurred",
     reloadPage: "Reload Page",
+    viewCrashTitle: "This module failed to load",
+    viewCrashBody:
+      "The rest of the app still works. Try opening this module again, or switch to another menu.",
+    viewCrashRetry: "Try again",
     oops: "Oops! An error occurred",
     refreshPage: "Refresh Page",
     descPlaceholder: "Add descriptive details here... (Markdown supported)",

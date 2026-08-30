@@ -4,6 +4,7 @@ import { ShieldAlert, FolderKanban } from "lucide-react";
 import type { PeranEfektif } from "../types/roles";
 import type { Project, Sprint, Task, User } from "../types";
 import { useAppStore } from "../store/useAppStore";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 import { useProjectStore } from "../store";
 
 /**
@@ -498,9 +499,32 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
  * Pembungkus resmi. Seluruh tampilan dimuat malas, jadi Suspense dipasang di
  * satu tempat saja alih-alih di tiap cabang `switch` — satu fallback yang
  * mustahil terlewat lebih aman daripada tujuh belas yang harus diingat.
+ *
+ * BATAS GALAT PER TAMPILAN (#286). Sebelum ini satu-satunya `ErrorBoundary`
+ * ada di akar (`main.tsx`), sehingga galat render di SATU modul — misalnya
+ * Flowchart — menaikkan dirinya sampai ke akar dan mengosongkan seluruh
+ * layar: sidebar, navigasi, dan konteks pengguna ikut hilang. Laporan yang
+ * sampai ke pemilik proyek lalu berbunyi "aplikasinya blank", yang hampir
+ * tidak bisa ditelusuri.
+ *
+ * Batas di sini menahan galat itu di dalam area tampilan saja. Kerangka
+ * aplikasi tetap hidup, dan laporannya berubah jadi "modul X gagal dimuat" —
+ * yang bisa langsung dikerjakan. Batas di akar TETAP ada dan tidak diganggu:
+ * ia menangkap kegagalan yang terjadi di luar area tampilan, termasuk saat
+ * aplikasi gagal boot sebelum i18n siap.
+ *
+ * `resetKey` diisi nama tampilan aktif supaya berpindah menu memulihkan
+ * sendiri; tanpa itu layar galatnya menetap walau penggunanya sudah pergi.
  */
-export const AppRoutes: React.FC<AppRoutesProps> = (props) => (
-  <Suspense fallback={<MemuatTampilan />}>
-    <TampilanTerpilih {...props} />
-  </Suspense>
-);
+export const AppRoutes: React.FC<AppRoutesProps> = (props) => {
+  const store = useAppStore();
+  const tampilanAktif = props.currentView ?? store.currentView;
+
+  return (
+    <ErrorBoundary resetKey={tampilanAktif}>
+      <Suspense fallback={<MemuatTampilan />}>
+        <TampilanTerpilih {...props} />
+      </Suspense>
+    </ErrorBoundary>
+  );
+};

@@ -2844,6 +2844,10 @@ export const id = {
     noOptions: "Tidak ada pilihan tersedia",
     errorTitle: "Terjadi Kesalahan Sistem",
     reloadPage: "Muat Ulang Halaman",
+    viewCrashTitle: "Modul ini gagal dimuat",
+    viewCrashBody:
+      "Bagian lain aplikasi tetap bisa dipakai. Coba buka lagi modul ini, atau pindah ke menu lain.",
+    viewCrashRetry: "Coba lagi",
     oops: "Ups! Terjadi kesalahan",
     refreshPage: "Segarkan Halaman",
     descPlaceholder: "Tambahkan detail deskriptif di sini... (Mendukung Markdown)",
