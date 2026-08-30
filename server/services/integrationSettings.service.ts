@@ -26,7 +26,7 @@ export interface EmailIntegrationConfig {
   updatedAt?: string;
 }
 
-const DEFAULT_EMAIL_CONFIG: EmailIntegrationConfig = {
+export const DEFAULT_EMAIL_CONFIG: EmailIntegrationConfig = {
   channel: "email",
   provider: "smtp",
   smtpHost: "mail.lanpro.my.id",

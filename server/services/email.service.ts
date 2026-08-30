@@ -538,11 +538,31 @@ async function ambilTemplatEmail(): Promise<{
   bodyTemplate: string | null;
 }> {
   try {
-    const { getEmailIntegrationConfig } = await import("./integrationSettings.service");
+    const { getEmailIntegrationConfig, DEFAULT_EMAIL_CONFIG } =
+      await import("./integrationSettings.service");
     const cfg = await getEmailIntegrationConfig();
+
+    /**
+     * Nilai BAWAAN dianggap "belum diatur", bukan "sengaja dipilih".
+     *
+     * `DEFAULT_EMAIL_CONFIG` menyemai subjek generik "[LanPro] Pemberitahuan
+     * Sistem". Tanpa perbandingan ini, subjek digest yang informatif
+     * ("Ringkasan Tugas Tertunda: 2 Tugas") tergantikan yang generik pada
+     * SETIAP pemasangan baru — padahal tidak ada admin yang pernah memilihnya.
+     * Ditangkap tes #28 yang sudah ada, bukan ditemukan belakangan.
+     *
+     * Perbandingan dilakukan terhadap konstantanya, bukan string harfiah, agar
+     * mengubah bawaan di satu tempat tetap konsisten di sini.
+     */
+    const bukanBawaan = (nilai: string | null | undefined, bawaan: string | null) => {
+      const bersih = (nilai || "").trim();
+      if (!bersih) return null;
+      return bersih === (bawaan || "").trim() ? null : bersih;
+    };
+
     return {
-      subjectTemplate: (cfg.subjectTemplate || "").trim() || null,
-      bodyTemplate: (cfg.bodyTemplate || "").trim() || null,
+      subjectTemplate: bukanBawaan(cfg.subjectTemplate, DEFAULT_EMAIL_CONFIG.subjectTemplate),
+      bodyTemplate: bukanBawaan(cfg.bodyTemplate, DEFAULT_EMAIL_CONFIG.bodyTemplate),
     };
   } catch (err: any) {
     console.warn("[EMAIL] Templat kustom tidak terbaca, memakai bawaan:", err?.message);
