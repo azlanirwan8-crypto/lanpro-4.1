@@ -375,7 +375,15 @@ export const StyledDropdown = ({
               }}
               className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden ring-1 ring-black/5 flex flex-col max-h-[300px]"
             >
-              <div className="overflow-y-auto p-1.5 custom-scrollbar">
+              {/*
+                `min-h-0` wajib (#294). Induknya `flex flex-col max-h-[300px]`
+                dengan `overflow-hidden`, dan anak flex punya `min-height: auto`
+                bawaan — tanpa `min-h-0` ia MENOLAK menyusut di bawah tinggi
+                isinya, sehingga daftar yang lebih panjang dari 300px terpotong
+                induknya DAN tidak bisa digulir sama sekali. Paling terasa di
+                pemilih bentuk flowchart yang punya 27 opsi (~810px).
+              */}
+              <div className="min-h-0 overflow-y-auto p-1.5 custom-scrollbar">
                 {safeOptions.map((opt, optIdx) => {
                   const isActive = opt.id === value;
                   return (
