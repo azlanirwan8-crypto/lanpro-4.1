@@ -373,7 +373,7 @@ export const StyledDropdown = ({
                 width: dropdownPos.width,
                 zIndex: 10000,
               }}
-              className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden ring-1 ring-black/5 flex flex-col max-h-[300px]"
+              className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden ring-1 ring-black/5 flex flex-col max-h-[300px] animate-dropdown"
             >
               {/*
                 `min-h-0` wajib (#294). Induknya `flex flex-col max-h-[300px]`
@@ -563,7 +563,7 @@ export const TableStatusBadge = ({
                 left: dropdownPos.left,
                 zIndex: 10000,
               }}
-              className="bg-surface rounded-lg shadow-xl border border-border-subtle p-1 min-w-[140px]"
+              className="bg-surface rounded-lg shadow-xl border border-border-subtle p-1 min-w-[140px] animate-dropdown"
             >
               {(statuses || []).map((s, index) => (
                 <button

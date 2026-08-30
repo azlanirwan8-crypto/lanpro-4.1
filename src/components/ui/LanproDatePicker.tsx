@@ -275,7 +275,7 @@ export const LanproDatePicker: React.FC<LanproDatePickerProps> = ({
                 width: dropdownPos.width,
                 zIndex: 10000,
               }}
-              className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-border-subtle p-3 text-content select-none animate-in fade-in zoom-in-95 duration-100"
+              className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-border-subtle p-3 text-content select-none animate-dropdown"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header: Month Year + Prev/Next */}
