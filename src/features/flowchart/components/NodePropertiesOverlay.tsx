@@ -12,6 +12,7 @@
  * return di sini, sehingga kondisi tampil-tidaknya menjadi urusan komponen ini.
  */
 import { useTranslation } from "react-i18next";
+import { StyledDropdown } from "../../../components/ui/CommonComponents";
 import React from "react";
 import { AlignLeft, AlignCenter, AlignRight, Square, Copy, ArrowRight, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -48,43 +49,45 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
       onMouseDown={(e) => e.stopPropagation()}
     >
       {/* Shape Converter Selector */}
-      <select
-        value={node.type}
-        onChange={(e) => {
-          handleUpdateActiveNode({ type: e.target.value as FlowNode["type"] });
-          toast.success(t("toast.shapeChanged", { bentuk: e.target.value.toUpperCase() }));
-        }}
-        className="bg-surface-sunken border border-border-subtle text-xs sm:text-[10px] font-medium text-content-body outline-none p-1 rounded-lg cursor-pointer hover:bg-surface-muted max-w-[120px]"
-        title={t("shapes.changeShapeType")}
-      >
-        <option value="rect">{t("shapes.rectangle")}</option>
-        <option value="oval">{t("flowNode.shapeOval")}</option>
-        <option value="diamond">{t("flowNode.shapeDecision")}</option>
-        <option value="triangle">{t("shapes.triangle")}</option>
-        <option value="pentagon">{t("shapes.pentagon")}</option>
-        <option value="hexagon">{t("shapes.hexagon")}</option>
-        <option value="octagon">{t("shapes.octagon")}</option>
-        <option value="star">{t("shapes.star")}</option>
-        <option value="arrowRight">{t("shapes.arrowRight")}</option>
-        <option value="arrowLeft">{t("shapes.arrowLeft")}</option>
-        <option value="arrowLeftRight">{t("shapes.arrowLeftRight")}</option>
-        <option value="trapezoid">{t("shapes.trapezoid")}</option>
-        <option value="cross">{t("shapes.crossPlus")}</option>
-        <option value="chevron">{t("shapes.chevron")}</option>
-        <option value="delay">{t("flowNode.shapeDelay")}</option>
-        <option value="callout">{t("shapes.calloutBubble")}</option>
-        <option value="cylinder">{t("shapes.databaseServer")}</option>
-        <option value="sticky">{t("shapes.stickyNote")}</option>
-        <option value="cloud">{t("shapes.cloudApi")}</option>
-        <option value="circle">{t("shapes.circle")}</option>
-        <option value="card">{t("shapes.cardItem")}</option>
-        <option value="document">{t("shapes.docPage")}</option>
-        <option value="subprocess">{t("shapes.subprocess")}</option>
-        <option value="actor">{t("shapes.actorIcon")}</option>
-        <option value="folder">{t("shapes.folderBlock")}</option>
-        <option value="curlyLeft">{`Curly Left {`}</option>
-        <option value="curlyRight">{`Curly Right }`}</option>
-      </select>
+      <span title={t("shapes.changeShapeType")} className="contents">
+        <StyledDropdown
+          value={node.type}
+          onChange={(val) => {
+            handleUpdateActiveNode({ type: val as FlowNode["type"] });
+            toast.success(t("toast.shapeChanged", { bentuk: val.toUpperCase() }));
+          }}
+          options={[
+            { id: "rect", label: t("shapes.rectangle") },
+            { id: "oval", label: t("flowNode.shapeOval") },
+            { id: "diamond", label: t("flowNode.shapeDecision") },
+            { id: "triangle", label: t("shapes.triangle") },
+            { id: "pentagon", label: t("shapes.pentagon") },
+            { id: "hexagon", label: t("shapes.hexagon") },
+            { id: "octagon", label: t("shapes.octagon") },
+            { id: "star", label: t("shapes.star") },
+            { id: "arrowRight", label: t("shapes.arrowRight") },
+            { id: "arrowLeft", label: t("shapes.arrowLeft") },
+            { id: "arrowLeftRight", label: t("shapes.arrowLeftRight") },
+            { id: "trapezoid", label: t("shapes.trapezoid") },
+            { id: "cross", label: t("shapes.crossPlus") },
+            { id: "chevron", label: t("shapes.chevron") },
+            { id: "delay", label: t("flowNode.shapeDelay") },
+            { id: "callout", label: t("shapes.calloutBubble") },
+            { id: "cylinder", label: t("shapes.databaseServer") },
+            { id: "sticky", label: t("shapes.stickyNote") },
+            { id: "cloud", label: t("shapes.cloudApi") },
+            { id: "circle", label: t("shapes.circle") },
+            { id: "card", label: t("shapes.cardItem") },
+            { id: "document", label: t("shapes.docPage") },
+            { id: "subprocess", label: t("shapes.subprocess") },
+            { id: "actor", label: t("shapes.actorIcon") },
+            { id: "folder", label: t("shapes.folderBlock") },
+            { id: "curlyLeft", label: `Curly Left {` },
+            { id: "curlyRight", label: `Curly Right }` },
+          ]}
+          buttonClassName="bg-surface-sunken border border-border-subtle text-xs sm:text-[10px] text-left font-medium text-content-body p-1 rounded-lg hover:bg-surface-muted max-w-[120px]"
+        />
+      </span>
 
       <div className="h-4 w-px bg-surface-strong" />
 
