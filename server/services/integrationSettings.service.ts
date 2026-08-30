@@ -26,15 +26,25 @@ export interface EmailIntegrationConfig {
   updatedAt?: string;
 }
 
+/**
+ * Item #300: host, pengguna, dan alamat pengirim sengaja KOSONG.
+ *
+ * Versi sebelumnya menyemai `mail.lanpro.my.id` dan `admin@lanpro.my.id`, dan
+ * itu membuat pemasangan yang belum pernah disentuh admin tampak sudah
+ * terkonfigurasi: `statusEmailServiceAsync()` melaporkan host yang tidak
+ * pernah dipilih siapa pun, dan kegagalan kirim terbaca seperti salah sandi
+ * alih-alih seperti "memang belum diatur". Port 465 dan `smtpSecure`
+ * dipertahankan sebab keduanya bawaan yang benar begitu host diisi.
+ */
 export const DEFAULT_EMAIL_CONFIG: EmailIntegrationConfig = {
   channel: "email",
   provider: "smtp",
-  smtpHost: "mail.lanpro.my.id",
+  smtpHost: "",
   smtpPort: 465,
-  smtpUser: "admin@lanpro.my.id",
+  smtpUser: "",
   smtpPass: "",
   smtpSecure: true,
-  senderEmail: "admin@lanpro.my.id",
+  senderEmail: "",
   senderName: "LanPro System",
   apiKey: "",
   subjectTemplate: "[LanPro] Pemberitahuan Sistem",

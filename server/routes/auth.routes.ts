@@ -490,7 +490,9 @@ router.post("/api/auth/register", async (req, res) => {
       }
     }
 
-    kirimEmailLatarBelakang(
+    // Item #300: DITUNGGU, bukan dilepas. Respons yang dikirim lebih dulu
+    // membekukan lambda dan memutus soket ke Resend di tengah jalan.
+    await kirimEmailLatarBelakang(
       kirimEmailSelamatDatang({
         email,
         nama: fullName || insertDisplayName,
@@ -581,7 +583,7 @@ router.post("/api/auth/forgot-password", async (req, res) => {
       activeUserSessions.delete(user.uid);
     }
 
-    kirimEmailLatarBelakang(
+    await kirimEmailLatarBelakang(
       kirimEmailPasswordBaru({
         email: user.email,
         nama: user.displayName || user.nama_lengkap || user.username,

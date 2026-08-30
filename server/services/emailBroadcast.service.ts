@@ -90,6 +90,9 @@ export async function kirimBroadcastTaskEmail(recipientIds?: string[]): Promise<
 
     const [users]: any = await connection.query(query, params);
     let dikirim = 0;
+    // Item #300: promise pengiriman dikumpulkan di sini, ditunggu bersama
+    // sesudah perulangan selesai.
+    const pengiriman: Promise<void>[] = [];
 
     for (const user of users || []) {
       const [rows]: any = await connection.query(
@@ -116,17 +119,28 @@ export async function kirimBroadcastTaskEmail(recipientIds?: string[]): Promise<
       // Lewat helper #277, BUKAN kirimEmail() langsung: kirimEmail
       // mengembalikan kegagalan sebagai NILAI, bukan lemparan, sehingga
       // pemanggil yang memakai .catch() tidak pernah tahu ia gagal.
-      kirimEmailLatarBelakang(
-        kirimEmailTaskDigest({
-          email: user.email,
-          nama: user.displayName || user.nama_lengkap || user.username,
-          username: user.username || user.email,
-          tasks,
-        }),
-        `Ringkasan task untuk ${user.email}`
+      // Item #300: dikumpulkan lalu ditunggu bersama di luar perulangan.
+      // Menunggu satu per satu di sini menjumlahkan N penerima secara seri dan
+      // menembus `maxDuration: 30`; melepasnya begitu saja mengulang cacat yang
+      // sama seperti pendaftaran.
+      pengiriman.push(
+        kirimEmailLatarBelakang(
+          kirimEmailTaskDigest({
+            email: user.email,
+            nama: user.displayName || user.nama_lengkap || user.username,
+            username: user.username || user.email,
+            tasks,
+          }),
+          `Ringkasan task untuk ${user.email}`
+        )
       );
       dikirim += 1;
     }
+
+    // Item #300: ditunggu SEBELUM fungsi kembali. kirimEmailLatarBelakang()
+    // tidak pernah menolak, jadi Promise.all di sini aman: satu penerima yang
+    // gagal dicatat sendiri dan tidak membatalkan kiriman penerima lain.
+    await Promise.all(pengiriman);
 
     return { penerimaDiperiksa: (users || []).length, emailDikirim: dikirim };
   } finally {

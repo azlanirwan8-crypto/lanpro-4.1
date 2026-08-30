@@ -40,12 +40,24 @@ export interface KirimEmailResult {
  *
  * Menangani KEDUA bentuk kegagalan: promise yang ditolak, dan hasil resolved
  * yang `success`-nya false.
+ *
+ * NAMANYA MENYESATKAN DI SERVERLESS (item #300). "Latar belakang" hanya nyata
+ * di proses Node yang hidup terus. Di lambda Vercel, respons yang dikirim
+ * lebih dulu membekukan instance-nya, soket ke Resend mati di tengah jalan,
+ * dan `fetch` gagal tanpa sempat melapor. Terbukti 31 Agu 2026: `fetch failed`
+ * tercatat 56 detik sesudah pendaftarannya, satu milidetik sebelum request
+ * BERIKUTNYA — yaitu saat instance yang sama kebetulan dihidupkan lagi.
+ *
+ * Karena itu fungsi ini mengembalikan Promise, dan SEMUA pemanggil menunggunya
+ * sebelum mengirim respons. Promise-nya tidak pernah menolak: kegagalan kirim
+ * dicatat, bukan dilemparkan, sebab email yang gagal tidak boleh membatalkan
+ * pendaftaran yang sudah tersimpan di basis data.
  */
 export function kirimEmailLatarBelakang(
   pengiriman: Promise<KirimEmailResult>,
   konteks: string
-): void {
-  pengiriman
+): Promise<void> {
+  return pengiriman
     .then((hasil) => {
       if (!hasil?.success) {
         console.error(
@@ -59,6 +71,13 @@ export function kirimEmailLatarBelakang(
 }
 
 const RESEND_API_URL = "https://api.resend.com/emails";
+
+/**
+ * Item #300: batas waktu satu upaya kirim. Dipilih 8 detik supaya kegagalan
+ * masih sempat dicatat dan dibalas di bawah `maxDuration: 30` Vercel, dengan
+ * ruang tersisa untuk sisa penanganan request.
+ */
+const BATAS_WAKTU_KIRIM_MS = 8000;
 
 export function validasiFormatEmail(email: string): boolean {
   if (!email || typeof email !== "string") return false;
@@ -205,6 +224,12 @@ export async function kirimEmail(input: KirimEmailInput): Promise<KirimEmailResu
         tls: {
           rejectUnauthorized: process.env.NODE_ENV === "production",
         },
+        // Item #300: tanpa batas eksplisit, host SMTP yang tak terjangkau
+        // menggantung sampai `maxDuration: 30` Vercel habis dan seluruh
+        // request ikut mati. Gagal cepat lebih berguna daripada gagal lambat.
+        connectionTimeout: BATAS_WAKTU_KIRIM_MS,
+        greetingTimeout: BATAS_WAKTU_KIRIM_MS,
+        socketTimeout: BATAS_WAKTU_KIRIM_MS,
       });
 
       const info = await transporter.sendMail({
@@ -276,6 +301,9 @@ export async function kirimEmail(input: KirimEmailInput): Promise<KirimEmailResu
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
+      // Item #300: sepadan dengan batas SMTP di atas. AbortSignal.timeout
+      // tersedia sejak Node 17.3 dan dipakai runtime Vercel maupun lokal.
+      signal: AbortSignal.timeout(BATAS_WAKTU_KIRIM_MS),
     });
 
     const data: any =
@@ -302,11 +330,14 @@ export async function kirimEmail(input: KirimEmailInput): Promise<KirimEmailResu
       messageId: data?.id || `resend-${Date.now()}`,
     };
   } catch (err: any) {
-    console.error("[EMAIL] Galat koneksi saat menghubungi Resend API:", err?.message || err);
-    return {
-      success: false,
-      error: err?.message || "Gagal menghubungi layanan email",
-    };
+    // Item #300: bedakan habis waktu dari galat jaringan lain. "fetch failed"
+    // sendirian tidak memberi tahu apa pun kepada yang membaca log jam 2 pagi.
+    const habisWaktu = err?.name === "TimeoutError" || err?.name === "AbortError";
+    const pesan = habisWaktu
+      ? `Resend API tidak merespons dalam ${BATAS_WAKTU_KIRIM_MS / 1000} detik`
+      : err?.message || "Gagal menghubungi layanan email";
+    console.error("[EMAIL] Galat koneksi saat menghubungi Resend API:", pesan);
+    return { success: false, error: pesan };
   }
 }
 

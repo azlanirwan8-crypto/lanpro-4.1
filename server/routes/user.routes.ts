@@ -537,7 +537,7 @@ router.put(
           displayName || oldUser.displayName || oldUser.nama_lengkap || targetUsername;
 
         if (targetEmail) {
-          kirimEmailLatarBelakang(
+          await kirimEmailLatarBelakang(
             kirimEmailAktivasiAkun({
               email: targetEmail,
               username: targetUsername,

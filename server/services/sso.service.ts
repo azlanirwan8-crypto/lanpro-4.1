@@ -267,8 +267,10 @@ export async function buatAkunDariSso(
 
     await connection.commit();
 
-    // #26 (F6.3) Pengiriman email selamat datang pendaftaran SSO secara non-blocking
-    kirimEmailLatarBelakang(
+    // #26 (F6.3) Email selamat datang pendaftaran SSO.
+    // Item #300: DITUNGGU. Inilah jalur yang terbukti gagal di Vercel —
+    // akun tercipta, respons terkirim, lambda beku, `fetch failed`.
+    await kirimEmailLatarBelakang(
       kirimEmailSelamatDatang({
         email: identitas.email,
         nama: identitas.nama,
