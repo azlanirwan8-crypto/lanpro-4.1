@@ -37,6 +37,11 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "coverUrl"        TEXT,
         permissions       TEXT,
         "currentSessionToken" TEXT,
+        -- Item #296 — kata sandi sementara dari alur lupa-password.
+        -- Kolom tempPasswordExpiresAt bernilai NULL berarti kata sandi tetap,
+        -- sehingga baris lama otomatis benar tanpa migrasi data.
+        "tempPasswordExpiresAt" TIMESTAMP,
+        "mustChangePassword"    BOOLEAN NOT NULL DEFAULT false,
         "createdAt"       TIMESTAMP DEFAULT NOW(),
         "updatedAt"       TIMESTAMP DEFAULT NOW()
       );
@@ -56,6 +61,9 @@ export async function runMigrations(pool: Pool): Promise<void> {
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "position" VARCHAR(255)',
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "nama_lengkap" VARCHAR(255)',
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "displayName" VARCHAR(255)',
+      // Item #296 — lihat komentar di CREATE TABLE di atas.
+      'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "tempPasswordExpiresAt" TIMESTAMP',
+      'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "mustChangePassword" BOOLEAN NOT NULL DEFAULT false',
     ];
     for (const stmt of userAlters) {
       try {

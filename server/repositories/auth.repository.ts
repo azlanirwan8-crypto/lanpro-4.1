@@ -171,8 +171,41 @@ export class AuthRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        'UPDATE "Users" SET "passwordHash" = ?, password = ? WHERE id = ? OR uid = ? RETURNING id',
+        `UPDATE "Users"
+            SET "passwordHash" = ?, password = ?,
+                "tempPasswordExpiresAt" = NULL, "mustChangePassword" = false
+          WHERE id = ? OR uid = ? RETURNING id`,
         [passwordHash, passwordHash, userId, userId]
+      );
+      return Array.isArray(rows) && rows.length > 0;
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * Menetapkan kata sandi SEMENTARA beserta masa berlakunya (#296).
+   *
+   * Dipisahkan dari `updateUserPassword` dengan sengaja: yang itu dipakai saat
+   * pengguna menetapkan kata sandi tetap, dan justru harus MENGOSONGKAN kedua
+   * kolom ini. Menggabungkan keduanya ke satu fungsi berparameter akan membuat
+   * pemanggil yang lupa mengoper parameter diam-diam memperpanjang masa
+   * berlaku kata sandi sementara -- kegagalan yang tidak akan terlihat sampai
+   * ada yang memakai kata sandi lama berbulan-bulan kemudian.
+   */
+  async setTemporaryPassword(
+    userId: string,
+    passwordHash: string,
+    expiresAt: Date
+  ): Promise<boolean> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        `UPDATE "Users"
+            SET "passwordHash" = ?, password = ?,
+                "tempPasswordExpiresAt" = ?, "mustChangePassword" = true
+          WHERE id = ? OR uid = ? RETURNING id`,
+        [passwordHash, passwordHash, expiresAt, userId, userId]
       );
       return Array.isArray(rows) && rows.length > 0;
     } finally {

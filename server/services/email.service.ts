@@ -667,10 +667,28 @@ export async function kirimEmailPasswordBaru(data: {
   nama?: string;
   username: string;
   temporaryPassword: string;
+  /** Item #296 — kapan kata sandi sementara ini berhenti berlaku. */
+  berlakuSampai?: Date;
 }): Promise<KirimEmailResult> {
-  const { email, nama, username, temporaryPassword } = data;
+  const { email, nama, username, temporaryPassword, berlakuSampai } = data;
   const namaPanggilan = (nama || username || "").trim();
   const appUrl = await ambilAppUrl();
+
+  /**
+   * Waktu kedaluwarsa ditulis dalam zona waktu Asia/Jakarta dan disebut
+   * lengkap dengan tanggalnya (#296).
+   *
+   * Menulis "berlaku 2 jam" saja tidak cukup: penerima tidak tahu 2 jam
+   * dihitung sejak kapan, dan email bisa saja baru dibuka setengah jam
+   * kemudian. Menyebut jam pastinya menghapus tebakan itu.
+   */
+  const kedaluwarsaTeks = berlakuSampai
+    ? new Intl.DateTimeFormat("id-ID", {
+        dateStyle: "long",
+        timeStyle: "short",
+        timeZone: "Asia/Jakarta",
+      }).format(berlakuSampai) + " WIB"
+    : null;
 
   const subject = "[LanPro] Kata Sandi Baru Akun Anda";
 
@@ -698,6 +716,16 @@ export async function kirimEmailPasswordBaru(data: {
         </div>
       </div>
 
+      ${
+        kedaluwarsaTeks
+          ? `<div style="background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 6px; padding: 12px 14px; margin: 0 0 20px 0;">
+        <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #9a3412;">
+          Kata sandi sementara ini <strong>berlaku sampai ${kedaluwarsaTeks}</strong>. Lewat waktu itu Anda perlu meminta lupa kata sandi sekali lagi.
+        </p>
+      </div>`
+          : ""
+      }
+
       <div style="text-align: center; margin: 24px 0;">
         <a href="${appUrl}" style="display: inline-block; background-color: #405189; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 12px 28px; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">Masuk ke LanPro</a>
       </div>
@@ -705,7 +733,7 @@ export async function kirimEmailPasswordBaru(data: {
       <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; margin-bottom: 20px;">
         <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 600; color: #334155;">Catatan Keamanan:</p>
         <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #64748b; line-height: 1.5;">
-          <li>Setelah masuk, Anda disarankan untuk segera mengubah kata sandi ini melalui menu Pengaturan Profil akun Anda.</li>
+          <li>Setelah masuk, LanPro akan <strong>meminta Anda membuat kata sandi baru</strong> sebelum dapat melanjutkan.</li>
           <li>Jangan berikan kata sandi ini kepada siapa pun demi keamanan akun Anda.</li>
         </ul>
       </div>
@@ -716,7 +744,9 @@ export async function kirimEmailPasswordBaru(data: {
     </div>
   `;
 
-  const text = `Halo ${namaPanggilan},\n\nKata sandi akun LanPro Anda (${username}) telah diatur ulang.\n\nKata Sandi Sementara: ${temporaryPassword}\n\nKunjungi aplikasi: ${appUrl}\n\nSetelah berhasil masuk, Anda dapat mengubah kata sandi ini melalui menu profil Anda.`;
+  const text = `Halo ${namaPanggilan},\n\nKata sandi akun LanPro Anda (${username}) telah diatur ulang.\n\nKata Sandi Sementara: ${temporaryPassword}${
+    kedaluwarsaTeks ? `\nBerlaku sampai: ${kedaluwarsaTeks}` : ""
+  }\n\nKunjungi aplikasi: ${appUrl}\n\nSetelah berhasil masuk, LanPro akan meminta Anda membuat kata sandi baru sebelum dapat melanjutkan.`;
 
   return kirimEmail({
     to: email,

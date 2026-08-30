@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { getJwtSecret } from "../helpers/jwtSecret";
 import { UAParser } from "ua-parser-js";
 import { authenticateJWT, activeUserSessions, generateToken } from "../middleware/auth";
-import { hashPassword } from "../helpers/hash";
+import { hashPassword, verifyPassword } from "../helpers/hash";
 import { adalahDuplikat } from "../helpers/pgErrors";
 import { roomPengguna, sidikToken } from "../middleware/socketAuth";
 import { z } from "zod";
@@ -515,6 +515,32 @@ router.post("/api/auth/register", async (req, res) => {
   }
 });
 
+/**
+ * Masa berlaku kata sandi sementara (#296), diminta pemilik proyek: 2 jam.
+ *
+ * Ditulis sebagai konstanta bernama, bukan angka di tengah kode, supaya
+ * jelas ia keputusan kebijakan -- bukan detail teknis yang boleh diubah
+ * siapa saja sambil lewat.
+ */
+const MASA_BERLAKU_KATA_SANDI_SEMENTARA_MS = 2 * 60 * 60 * 1000;
+
+/**
+ * Syarat kata sandi baru, dipakai bersama oleh reset-password (bertoken) dan
+ * change-password (#296).
+ *
+ * Diangkat jadi konstanta karena dua jalur yang menetapkan kata sandi harus
+ * menuntut hal yang sama. Menyalinnya ke tiap rute adalah cara paling umum
+ * dua jalur diam-diam berbeda syarat, dan yang longgar akan jadi pintu
+ * belakang bagi yang ketat.
+ */
+const SKEMA_KATA_SANDI = z
+  .string()
+  .min(8, "Password minimal 8 karakter")
+  .regex(/[A-Z]/, "Password harus mengandung minimal 1 huruf besar (A-Z)")
+  .regex(/[a-z]/, "Password harus mengandung minimal 1 huruf kecil (a-z)")
+  .regex(/[0-9]/, "Password harus mengandung minimal 1 angka (0-9)")
+  .regex(/[@$!%*?&]/, "Password harus mengandung minimal 1 simbol khusus (@$!%*?&)");
+
 router.post("/api/auth/forgot-password", async (req, res) => {
   try {
     const { email } = req.body || {};
@@ -539,11 +565,13 @@ router.post("/api/auth/forgot-password", async (req, res) => {
     }
 
     // Item #262 — Buat password acak sementara, hash ke DB, dan kirim via email
+    // Item #296 — kata sandi itu kini punya masa berlaku dan wajib diganti.
     const userId = user.id || user.uid;
     const temporaryPassword = generateRandomPassword(10);
     const newPasswordHash = hashPassword(temporaryPassword);
+    const berlakuSampai = new Date(Date.now() + MASA_BERLAKU_KATA_SANDI_SEMENTARA_MS);
 
-    await authRepository.updateUserPassword(userId, newPasswordHash);
+    await authRepository.setTemporaryPassword(userId, newPasswordHash, berlakuSampai);
 
     // Cabut sesi aktif lama
     if (user.id) {
@@ -559,6 +587,7 @@ router.post("/api/auth/forgot-password", async (req, res) => {
         nama: user.displayName || user.nama_lengkap || user.username,
         username: user.username || user.email,
         temporaryPassword,
+        berlakuSampai,
       }),
       `Kata sandi sementara untuk ${user.email}`
     );
@@ -566,6 +595,86 @@ router.post("/api/auth/forgot-password", async (req, res) => {
     return res.json(balasanNetral);
   } catch (error: any) {
     console.error("LOG ANOMALI: forgot-password error:", error);
+    return res.status(500).json({
+      status: "error",
+      code: "srv.terjadi_kesalahan_internal_server_2",
+      message: "Terjadi kesalahan internal server.",
+    });
+  }
+});
+
+/**
+ * Ganti kata sandi saat sudah masuk (#296).
+ *
+ * Inilah jalur yang dipakai pengguna sesudah masuk memakai kata sandi
+ * sementara dari email. Ia menuntut kata sandi lama, jadi token sesi yang
+ * dicuri saja tidak cukup untuk mengunci akun orang lain.
+ *
+ * Menetapkan kata sandi tetap lewat `updateUserPassword`, yang MENGOSONGKAN
+ * `tempPasswordExpiresAt` dan `mustChangePassword` -- itu yang mengakhiri
+ * keadaan "wajib ganti", bukan penanda terpisah yang bisa lupa dibersihkan.
+ */
+router.post("/api/auth/change-password", authenticateJWT, async (req: any, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body || {};
+    const userId = req.user?.id || req.user?.uid;
+
+    if (!userId) {
+      return res.status(401).json({
+        status: "error",
+        code: "srv.sesi_tidak_valid",
+        message: "Sesi tidak valid.",
+      });
+    }
+
+    const validasi = SKEMA_KATA_SANDI.safeParse(newPassword);
+    if (!validasi.success) {
+      return res.status(400).json({
+        status: "error",
+        message:
+          validasi.error.issues[0]?.message ||
+          "Format kata sandi baru tidak memenuhi syarat keamanan.",
+      });
+    }
+
+    const user = await authRepository.findUserByIdOrUid(String(userId));
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        code: "srv.pengguna_tidak_ditemukan",
+        message: "Pengguna tidak ditemukan.",
+      });
+    }
+
+    const cocok = await verifyPassword(String(currentPassword || ""), user.passwordHash);
+    if (!cocok) {
+      return res.status(401).json({
+        status: "error",
+        code: "srv.kata_sandi_saat_ini_salah",
+        message: "Kata sandi saat ini salah.",
+      });
+    }
+
+    // Kata sandi baru tidak boleh sama dengan yang sementara -- kalau boleh,
+    // seluruh alur "wajib ganti" jadi tidak berarti apa-apa.
+    const samaDenganLama = await verifyPassword(String(newPassword), user.passwordHash);
+    if (samaDenganLama) {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.kata_sandi_baru_sama",
+        message: "Kata sandi baru tidak boleh sama dengan kata sandi saat ini.",
+      });
+    }
+
+    await authRepository.updateUserPassword(String(userId), hashPassword(String(newPassword)));
+
+    return res.json({
+      status: "success",
+      code: "srv.kata_sandi_berhasil_diubah",
+      message: "Kata sandi berhasil diubah.",
+    });
+  } catch (error: any) {
+    console.error("LOG ANOMALI: change-password error:", error);
     return res.status(500).json({
       status: "error",
       code: "srv.terjadi_kesalahan_internal_server_2",
@@ -587,15 +696,7 @@ router.post("/api/auth/reset-password", async (req, res) => {
       });
     }
 
-    const passwordSchema = z
-      .string()
-      .min(8, "Password minimal 8 karakter")
-      .regex(/[A-Z]/, "Password harus mengandung minimal 1 huruf besar (A-Z)")
-      .regex(/[a-z]/, "Password harus mengandung minimal 1 huruf kecil (a-z)")
-      .regex(/[0-9]/, "Password harus mengandung minimal 1 angka (0-9)")
-      .regex(/[@$!%*?&]/, "Password harus mengandung minimal 1 simbol khusus (@$!%*?&)");
-
-    const validationResult = passwordSchema.safeParse(effectivePassword);
+    const validationResult = SKEMA_KATA_SANDI.safeParse(effectivePassword);
     if (!validationResult.success) {
       return res.status(400).json({
         status: "error",
