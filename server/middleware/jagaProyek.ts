@@ -184,7 +184,8 @@ export const jagaProyek = (modul: ModulProyek, aksi: Aksi, lewat?: LewatEntitas)
   return async (req: any, res: any, next: any) => {
     let connection;
     try {
-      let targetProjectId = req.params?.projectId || req.params?.id;
+      let targetProjectId =
+        req.params?.projectId || req.params?.id || req.body?.projectId || req.body?.project_id;
 
       const userIdMentah = identitasPemanggil(req);
       if (!userIdMentah) return tolak(res);
@@ -243,13 +244,11 @@ export const jagaProyek = (modul: ModulProyek, aksi: Aksi, lewat?: LewatEntitas)
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: jagaProyek error:", error);
       // Galat TIDAK boleh berarti "izinkan". §19.6 aturan 3.
-      return res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.gagal_memverifikasi_hak_akses",
-          message: "Gagal memverifikasi hak akses.",
-        });
+      return res.status(500).json({
+        status: "error",
+        code: "srv.gagal_memverifikasi_hak_akses",
+        message: "Gagal memverifikasi hak akses.",
+      });
     } finally {
       if (connection) connection.release();
     }
@@ -301,13 +300,11 @@ export const jagaHapusProyek = () => {
       return tolak(res);
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: jagaHapusProyek error:", error);
-      return res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.gagal_memverifikasi_hak_akses",
-          message: "Gagal memverifikasi hak akses.",
-        });
+      return res.status(500).json({
+        status: "error",
+        code: "srv.gagal_memverifikasi_hak_akses",
+        message: "Gagal memverifikasi hak akses.",
+      });
     } finally {
       if (connection) connection.release();
     }
@@ -370,13 +367,11 @@ export const jagaSetelanProyek = (lewat?: LewatEntitas) => {
       return bolehUbahSetelanProyek(peranProyekEfektif(member[0].role)) ? next() : tolak(res);
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: jagaSetelanProyek error:", error);
-      return res
-        .status(500)
-        .json({
-          status: "error",
-          code: "srv.gagal_memverifikasi_hak_akses",
-          message: "Gagal memverifikasi hak akses.",
-        });
+      return res.status(500).json({
+        status: "error",
+        code: "srv.gagal_memverifikasi_hak_akses",
+        message: "Gagal memverifikasi hak akses.",
+      });
     } finally {
       if (connection) connection.release();
     }
