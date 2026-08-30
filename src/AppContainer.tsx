@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./i18n/LanguageSwitcher";
 import { safeLocalStorage, safeSessionStorage } from "./lib/safeStorage";
-import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import io from "socket.io-client";
