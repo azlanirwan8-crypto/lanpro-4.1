@@ -60,21 +60,22 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
             <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-wider">
               {t("bulkActions.perPage")}
             </span>
-            <select
-              value={itemsPerPage}
-              onChange={(e) => {
-                setItemsPerPage(Number(e.target.value));
+            <StyledDropdown
+              value={String(itemsPerPage)}
+              onChange={(val) => {
+                setItemsPerPage(Number(val));
                 setListPage(1);
               }}
-              className="text-xs sm:text-[10px] font-normal bg-surface border border-border-subtle rounded-lg px-2 py-0.5 text-content-body outline-none focus:border-indigo-500 cursor-pointer shadow-soft"
-            >
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={30}>30</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-              <option value={9999}>{t("bulkActions.all")}</option>
-            </select>
+              options={[
+                { id: "10", label: "10" },
+                { id: "20", label: "20" },
+                { id: "30", label: "30" },
+                { id: "50", label: "50" },
+                { id: "100", label: "100" },
+                { id: "9999", label: t("bulkActions.all") },
+              ]}
+              buttonClassName="text-xs sm:text-[10px] font-normal bg-surface border border-border-subtle rounded-lg px-2 py-0.5 text-left text-content-body shadow-soft"
+            />
           </div>
         </div>
 
@@ -168,28 +169,31 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
               <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-wider">
                 {t("bulkActions.assignee")}
               </span>
-              <select
-                onChange={(e) => {
-                  const val = e.target.value;
+              <StyledDropdown
+                value=""
+                onChange={(val) => {
+                  // Dropdown aksi, bukan dropdown nilai: nilainya sengaja dikunci ""
+                  // supaya selalu kembali ke placeholder sesudah dipakai, persis
+                  // seperti <select defaultValue=""> yang digantikannya. Penjaga di
+                  // bawah menggantikan atribut `disabled` pada opsi placeholder --
+                  // tanpa itu, memilih placeholder akan MENGOSONGKAN assignee.
+                  if (!val) return;
                   const effectiveAssignee = val === "unassigned" ? null : val;
                   const ids = Array.from(selectedTaskIds);
                   ids.forEach((id) => updateTaskField(id, "assigneeId", effectiveAssignee));
                   toast.success(t("toast.bulkAssigneeUpdated", { count: ids.length }));
                   setSelectedTaskIds(new Set());
                 }}
-                defaultValue=""
-                className="bg-surface-inverse border border-border-inverse text-content-inverse rounded-xl px-2.5 py-1.5 text-xs outline-none focus:border-indigo-500 cursor-pointer font-medium"
-              >
-                <option value="" disabled>
-                  {t("bulkActions.pickAssignee")}
-                </option>
-                <option value="unassigned">{t("bulkActions.unassignedClear")}</option>
-                {projectMembers.map((m) => (
-                  <option key={m.uid} value={m.uid}>
-                    {m.displayName || m.email || "Unknown"}
-                  </option>
-                ))}
-              </select>
+                options={[
+                  { id: "", label: t("bulkActions.pickAssignee") },
+                  { id: "unassigned", label: t("bulkActions.unassignedClear") },
+                  ...projectMembers.map((m) => ({
+                    id: m.uid,
+                    label: m.displayName || m.email || "Unknown",
+                  })),
+                ]}
+                buttonClassName="bg-surface-inverse border border-border-inverse text-content-inverse rounded-xl px-2.5 py-1.5 text-xs text-left font-medium"
+              />
             </div>
 
             {/* Bulk Delete */}
