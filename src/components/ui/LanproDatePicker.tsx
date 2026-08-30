@@ -64,6 +64,28 @@ export const LanproDatePicker: React.FC<LanproDatePickerProps> = ({
   }, [parsedValueDate]);
 
   /**
+   * Lebar panel MENGIKUTI lebar pemicunya (#294).
+   *
+   * Sebelumnya lebar dipaku 280 px dan lebar pemicu diabaikan sama sekali.
+   * Diukur di peramban: field tanggal 183 px, panel 280 px, sehingga panel
+   * menjulur 97 px ke kanan dan menutupi kolom di sebelahnya. Pemilik
+   * proyek menggambarkannya "datang dari kiri ke kanan, bukan dari tempat
+   * saya klik" -- dan itu tepat, sebab yang terlihat memang kotak yang mulai
+   * di field lalu melebar ke samping.
+   *
+   * `StyledDropdown` sudah lama mengikuti pemicunya; hanya kedua pemilih ini
+   * yang tidak, sehingga dropdown terasa menempel sedangkan tanggal dan jam
+   * terasa melayang.
+   *
+   * Grid isinya fluid (`grid-cols-7 gap-1` tanpa lebar sel tetap), jadi sel
+   * tanggal menyusut sendiri mengikuti panel -- keputusan pemilik proyek 30
+   * Agu 2026, memilih panel yang selalu sejajar field daripada sel yang
+   * selalu lega. Batas bawah 160 px tetap ada sebagai penjaga: di bawah itu
+   * tujuh kolom tidak lagi bisa dirender masuk akal, dan itu bukan pertukaran
+   * yang dipilih siapa pun -- hanya jaring pengaman untuk pemicu yang sangat
+   * sempit.
+   */
+  /**
    * `useLayoutEffect`, BUKAN `useEffect` (#294).
    *
    * Posisi panel diukur dari `getBoundingClientRect()` pemicunya, jadi ia baru
@@ -79,6 +101,7 @@ export const LanproDatePicker: React.FC<LanproDatePickerProps> = ({
   useLayoutEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
+      const lebarPanel = Math.max(rect.width, 160);
       const viewportHeight = window.innerHeight;
       const dropdownHeight = 320;
       const spaceBelow = viewportHeight - rect.bottom;
@@ -86,15 +109,15 @@ export const LanproDatePicker: React.FC<LanproDatePickerProps> = ({
       if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
         setDropdownPos({
           bottom: viewportHeight - rect.top + 4,
-          left: Math.max(10, Math.min(rect.left, window.innerWidth - 290)),
-          width: 280,
+          left: Math.max(10, Math.min(rect.left, window.innerWidth - lebarPanel - 10)),
+          width: lebarPanel,
           placement: "top",
         });
       } else {
         setDropdownPos({
           top: rect.bottom + 4,
-          left: Math.max(10, Math.min(rect.left, window.innerWidth - 290)),
-          width: 280,
+          left: Math.max(10, Math.min(rect.left, window.innerWidth - lebarPanel - 10)),
+          width: lebarPanel,
           placement: "bottom",
         });
       }
@@ -249,7 +272,7 @@ export const LanproDatePicker: React.FC<LanproDatePickerProps> = ({
                 top: dropdownPos.placement === "bottom" ? dropdownPos.top : undefined,
                 bottom: dropdownPos.placement === "top" ? dropdownPos.bottom : undefined,
                 left: dropdownPos.left,
-                width: 280,
+                width: dropdownPos.width,
                 zIndex: 10000,
               }}
               className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-border-subtle p-3 text-content select-none animate-in fade-in zoom-in-95 duration-100"
