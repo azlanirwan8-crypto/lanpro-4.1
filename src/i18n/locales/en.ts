@@ -66,6 +66,8 @@ export const en = {
     "srv.id_meeting_meetingid_diperlukan": "The meeting ID (meetingId) is required.",
     "srv.kunci_api_gemini_tidak": "The Gemini API key is not configured.",
     "srv.transkrip_tidak_boleh_kosong": "The transcript cannot be empty.",
+    "srv.judul_task_wajib": "A task title is required to request a suggestion.",
+    "srv.balasan_ai_tidak_valid": "The AI response could not be read. Please try again.",
     "srv.kunci_api_gemini_tidak_2": "The Gemini API key is not configured on the server.",
     "srv.meeting_not_found": "Meeting not found",
     "srv.meeting_updated": "Meeting updated",

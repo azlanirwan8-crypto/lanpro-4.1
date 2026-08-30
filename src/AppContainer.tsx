@@ -2272,25 +2272,36 @@ function AppContainer() {
 
     const toastId = toast.loading(t("toast.aiCalculating"));
     try {
-      const { GoogleGenAI } = await import("@google/genai");
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+      /**
+       * Item #292 — permintaan ini dikirim ke SERVER, bukan langsung ke Gemini.
+       *
+       * Sebelumnya blok ini memanggil `new GoogleGenAI({ apiKey:
+       * process.env.GEMINI_API_KEY })` dari peramban. `vite.config.ts`
+       * mengganti rujukan itu dengan nilai harfiahnya saat build, sehingga
+       * kunci API ikut terpanggang ke JavaScript publik dan bisa dibaca siapa
+       * pun yang membuka aplikasi. Dibuktikan dengan mencari nilai kuncinya di
+       * `dist/assets/*.js` dan menemukannya.
+       *
+       * Sekarang kuncinya tidak pernah meninggalkan server, dan rutenya
+       * dijaga izin proyek — bukan sekadar "punya akun".
+       */
+      const balasan = await apiRequest(
+        `/api/projects/${selectedProject!.id}/tasks/${task.id}/saran-story-point`,
+        {
+          method: "POST",
+          body: {
+            judul: task.title,
+            deskripsi: task.description,
+            tipe: task.type,
+          },
+        }
+      );
 
-      const prompt = `Analyze this task and suggest story points (Fibonacci: 1, 2, 3, 5, 8, 13).
-Task Title: ${task.title}
-Description: ${task.description}
-Type: ${task.type}
+      if (balasan?.status !== "success") {
+        throw new Error(balasan?.message || t("appShell.aiInvalidResponse"));
+      }
 
-Respond ONLY with a single JSON object: {"points": number, "reasoning": "string"}`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-        },
-      });
-
-      const result = JSON.parse(response.text || "{}");
+      const result = balasan.data;
       if (result.points) {
         toast.success(
           t("toast.aiSuggestion", { points: result.points, reasoning: result.reasoning }),

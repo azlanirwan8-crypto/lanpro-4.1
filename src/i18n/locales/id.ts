@@ -67,6 +67,8 @@ export const id = {
     "srv.id_meeting_meetingid_diperlukan": "ID rapat (meetingId) diperlukan.",
     "srv.kunci_api_gemini_tidak": "Kunci API Gemini belum dikonfigurasi.",
     "srv.transkrip_tidak_boleh_kosong": "Transkrip tidak boleh kosong.",
+    "srv.judul_task_wajib": "Judul task wajib diisi untuk meminta saran.",
+    "srv.balasan_ai_tidak_valid": "Balasan AI tidak dapat dibaca. Silakan coba lagi.",
     "srv.kunci_api_gemini_tidak_2": "Kunci API Gemini belum dikonfigurasi di server.",
     "srv.meeting_not_found": "Rapat tidak ditemukan",
     "srv.meeting_updated": "Rapat diperbarui",

@@ -245,6 +245,97 @@ router.post(
   }
 );
 
+/**
+ * Saran story point dari AI (Item #292).
+ *
+ * KENAPA RUTE INI ADA. Sebelumnya panggilan Gemini dilakukan LANGSUNG DARI
+ * PERAMBAN di `AppContainer.tsx`, memakai `process.env.GEMINI_API_KEY`. Karena
+ * `vite.config.ts` mengganti rujukan itu dengan nilai harfiahnya saat build,
+ * kunci API ikut terpanggang ke dalam berkas JavaScript publik — siapa pun
+ * yang membuka aplikasi bisa membacanya. Dibuktikan dengan mencari nilai kunci
+ * di `dist/assets/*.js` dan menemukannya.
+ *
+ * Ini satu-satunya pemanggil Gemini di sisi klien; tujuh pemanggil lain sudah
+ * benar di sisi server. Rute ini menutup yang terakhir, sehingga blok `define`
+ * di `vite.config.ts` bisa dihapus dan kuncinya tidak pernah meninggalkan
+ * server.
+ *
+ * Dijaga `jagaProyek("list", "U")`: menyarankan story point mengubah task,
+ * jadi izinnya sama dengan mengubah task — bukan sekadar membaca. Tanpa
+ * penjaga, siapa pun yang punya akun bisa menghabiskan kuota Gemini atas nama
+ * proyek mana pun (pelajaran #281).
+ */
+router.post(
+  "/api/projects/:projectId/tasks/:taskId/saran-story-point",
+  authenticateJWT,
+  jagaProyek("list", "U"),
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { judul, deskripsi, tipe } = req.body || {};
+
+      if (!judul || typeof judul !== "string") {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.judul_task_wajib",
+          message: "Judul task wajib diisi untuk meminta saran.",
+        });
+      }
+
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        return res.status(400).json({
+          status: "error",
+          code: "srv.kunci_api_gemini_tidak_2",
+          message: "Kunci API Gemini tidak dikonfigurasi pada server.",
+        });
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
+
+      const response = await generateContentWithFallback(ai, {
+        model: "gemini-flash-latest",
+        contents: `Analisis task berikut dan sarankan story point (Fibonacci: 1, 2, 3, 5, 8, 13).
+Judul: ${judul}
+Deskripsi: ${deskripsi || "-"}
+Tipe: ${tipe || "-"}
+
+Jawab HANYA dengan satu objek JSON: {"points": number, "reasoning": "string"}`,
+        config: { responseMimeType: "application/json" },
+      });
+
+      let hasil: any = {};
+      try {
+        hasil = JSON.parse(response.text || "{}");
+      } catch {
+        // Model kadang membalas dengan teks di luar JSON. Dianggap gagal
+        // dengan pesan yang jelas, BUKAN dilempar sebagai galat 500 -- ini
+        // kegagalan yang diharapkan, bukan kerusakan server.
+        hasil = {};
+      }
+
+      if (typeof hasil.points !== "number") {
+        return res.status(422).json({
+          status: "error",
+          code: "srv.balasan_ai_tidak_valid",
+          message: "Balasan AI tidak dapat dibaca. Silakan coba lagi.",
+        });
+      }
+
+      return res.json({
+        status: "success",
+        data: { points: hasil.points, reasoning: String(hasil.reasoning || "") },
+      });
+    } catch (error: any) {
+      console.error("LOG ANOMALI: saran story point gagal:", error?.message);
+      return res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server_2",
+        message: "Terjadi kesalahan internal server.",
+      });
+    }
+  }
+);
+
 router.put(
   "/api/projects/:projectId/tasks/reorder",
   authenticateJWT,

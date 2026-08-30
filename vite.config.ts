@@ -1,15 +1,29 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig, loadEnv} from 'vite';
+import {defineConfig} from 'vite';
 
-export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, '.', '');
+export default defineConfig(() => {
+  // `loadEnv` sengaja TIDAK dipakai lagi (#292). Ia membaca SELURUH variabel
+  // lingkungan (prefix kosong), dan satu-satunya pemakainya dulu adalah blok
+  // `define` yang membocorkan kunci API. Membiarkannya di sini hanya
+  // mengundang pemakaian berikutnya yang sama berbahayanya.
   return {
     plugins: [react(), tailwindcss()],
-    define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-    },
+    /**
+     * TIDAK ADA BLOK `define` DI SINI, dan itu disengaja (#292).
+     *
+     * Dulu berisi `'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)`,
+     * yang mengganti rujukan itu dengan NILAI HARFIAHNYA saat build sehingga
+     * kunci API ikut terpanggang ke berkas JavaScript publik. Dibuktikan: nilai
+     * kunci dicari di `dist/assets/*.js` dan ketemu -- termasuk ketika kunci
+     * hanya datang dari variabel lingkungan proses, yaitu persis cara Vercel
+     * menyuntikkannya.
+     *
+     * Seluruh panggilan Gemini kini di sisi server. Jangan menambahkan kembali
+     * `define` untuk rahasia apa pun: apa yang masuk ke bundel klien adalah
+     * publik, tanpa kecuali.
+     */
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
