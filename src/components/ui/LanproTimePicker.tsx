@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { Clock, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -40,7 +40,20 @@ export const LanproTimePicker: React.FC<LanproTimePickerProps> = ({
     return [parts[0] || "", parts[1] || ""];
   }, [value]);
 
-  useEffect(() => {
+  /**
+   * `useLayoutEffect`, BUKAN `useEffect` (#294).
+   *
+   * Posisi panel diukur dari `getBoundingClientRect()` pemicunya, jadi ia baru
+   * bisa dihitung sesudah panel ada di DOM. Dengan `useEffect`, pengukuran itu
+   * berjalan SESUDAH browser melukis — dan karena nilai awal state-nya
+   * `left: 0` tanpa `top`, bingkai pertama benar-benar tergambar di sudut
+   * kiri-atas layar sebelum melompat ke tempatnya. Digabung animasi masuk,
+   * gerakannya terbaca sebagai panel yang meluncur dari sudut.
+   *
+   * `useLayoutEffect` berjalan sesudah DOM berubah tapi SEBELUM paint, jadi
+   * bingkai salah posisi itu tidak pernah sampai ke mata.
+   */
+  useLayoutEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
@@ -163,13 +176,20 @@ export const LanproTimePicker: React.FC<LanproTimePickerProps> = ({
               </div>
 
               {/* Time columns */}
-              <div className="grid grid-cols-2 gap-2 h-44">
+              {/*
+                `overflow-hidden` di sini adalah jaring kedua (#294). Jaring
+                pertamanya `min-h-0` pada kedua kolom di bawah: tanpa itu,
+                `flex-1` (= `flex: 1 1 0%`) tetap punya `min-height: auto`,
+                sehingga 24 tombol jam MEMAKSA tinggi kolomnya melewati 176 px
+                dan daftarnya tergambar keluar dari kartu ini.
+              */}
+              <div className="grid grid-cols-2 gap-2 h-44 overflow-hidden">
                 {/* Hours column */}
                 <div className="flex flex-col">
                   <span className="text-[10px] font-medium text-content-subtle text-center mb-1">
                     {isId ? "Jam" : "Hour"}
                   </span>
-                  <div className="flex-1 overflow-y-auto space-y-0.5 pr-1 custom-scrollbar">
+                  <div className="flex-1 min-h-0 overflow-y-auto space-y-0.5 pr-1 custom-scrollbar">
                     {hours.map((h) => {
                       const isSelected = h === selectedHour;
                       return (
@@ -196,7 +216,7 @@ export const LanproTimePicker: React.FC<LanproTimePickerProps> = ({
                   <span className="text-[10px] font-medium text-content-subtle text-center mb-1">
                     {isId ? "Menit" : "Minute"}
                   </span>
-                  <div className="flex-1 overflow-y-auto space-y-0.5 pr-1 custom-scrollbar">
+                  <div className="flex-1 min-h-0 overflow-y-auto space-y-0.5 pr-1 custom-scrollbar">
                     {minutes.map((m) => {
                       const isSelected = m === selectedMinute;
                       return (

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect, useMemo, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -63,7 +63,20 @@ export const LanproDatePicker: React.FC<LanproDatePickerProps> = ({
     }
   }, [parsedValueDate]);
 
-  useEffect(() => {
+  /**
+   * `useLayoutEffect`, BUKAN `useEffect` (#294).
+   *
+   * Posisi panel diukur dari `getBoundingClientRect()` pemicunya, jadi ia baru
+   * bisa dihitung sesudah panel ada di DOM. Dengan `useEffect`, pengukuran itu
+   * berjalan SESUDAH browser melukis — dan karena nilai awal state-nya
+   * `left: 0` tanpa `top`, bingkai pertama benar-benar tergambar di sudut
+   * kiri-atas layar sebelum melompat ke tempatnya. Digabung animasi masuk,
+   * gerakannya terbaca sebagai panel yang meluncur dari sudut.
+   *
+   * `useLayoutEffect` berjalan sesudah DOM berubah tapi SEBELUM paint, jadi
+   * bingkai salah posisi itu tidak pernah sampai ke mata.
+   */
+  useLayoutEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;

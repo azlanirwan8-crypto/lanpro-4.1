@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import i18n from "../../i18n";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronDown,
@@ -218,7 +218,20 @@ export const StyledDropdown = ({
   const safeOptions = Array.from(new Map((options || []).map((o) => [o.id, o])).values());
   const selected = safeOptions.find((o) => o.id === value);
 
-  useEffect(() => {
+  /**
+   * `useLayoutEffect`, BUKAN `useEffect` (#294).
+   *
+   * Posisi panel diukur dari `getBoundingClientRect()` pemicunya, jadi ia baru
+   * bisa dihitung sesudah panel ada di DOM. Dengan `useEffect`, pengukuran itu
+   * berjalan SESUDAH browser melukis — dan karena nilai awal state-nya
+   * `left: 0` tanpa `top`, bingkai pertama benar-benar tergambar di sudut
+   * kiri-atas layar sebelum melompat ke tempatnya. Digabung animasi masuk,
+   * gerakannya terbaca sebagai panel yang meluncur dari sudut.
+   *
+   * `useLayoutEffect` berjalan sesudah DOM berubah tapi SEBELUM paint, jadi
+   * bingkai salah posisi itu tidak pernah sampai ke mata.
+   */
+  useLayoutEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
@@ -462,7 +475,20 @@ export const TableStatusBadge = ({
   }>({ left: 0, placement: "bottom" });
   const current = (statuses || []).find((s) => s.label === value);
 
-  useEffect(() => {
+  /**
+   * `useLayoutEffect`, BUKAN `useEffect` (#294).
+   *
+   * Posisi panel diukur dari `getBoundingClientRect()` pemicunya, jadi ia baru
+   * bisa dihitung sesudah panel ada di DOM. Dengan `useEffect`, pengukuran itu
+   * berjalan SESUDAH browser melukis — dan karena nilai awal state-nya
+   * `left: 0` tanpa `top`, bingkai pertama benar-benar tergambar di sudut
+   * kiri-atas layar sebelum melompat ke tempatnya. Digabung animasi masuk,
+   * gerakannya terbaca sebagai panel yang meluncur dari sudut.
+   *
+   * `useLayoutEffect` berjalan sesudah DOM berubah tapi SEBELUM paint, jadi
+   * bingkai salah posisi itu tidak pernah sampai ke mata.
+   */
+  useLayoutEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
