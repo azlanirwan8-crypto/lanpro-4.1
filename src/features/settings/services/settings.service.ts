@@ -110,3 +110,73 @@ export async function saveWhatsAppBroadcastConfig(
     body: JSON.stringify(config),
   });
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Item #279: Konfigurasi Sistem Operasional & Koneksi WhatsApp
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface SystemConfigData {
+  ssoAllowedDomains: string;
+  slackWebhookUrl: string;
+  allowedOrigins: string;
+  appUrl: string;
+  effectiveSsoDomains?: string[];
+  effectiveOrigins?: string[];
+  sources?: {
+    ssoAllowedDomains: string;
+    slackWebhookUrl: string;
+    allowedOrigins: string;
+    appUrl: string;
+  };
+  updatedAt?: string;
+}
+
+export interface WhatsAppConnectionConfigData {
+  provider: string;
+  endpoint: string;
+  token?: string;
+  tokenMasked?: string;
+  hasToken?: boolean;
+  senderNumber: string;
+  deviceId: string;
+  source?: string;
+  updatedAt?: string;
+}
+
+/** Mengambil konfigurasi sistem operasional (SSO Domains, CORS, Slack Webhook) (Item #279). */
+export async function fetchSystemConfig(): Promise<SettingsApiResponse<SystemConfigData>> {
+  return apiRequest("/api/settings/system/config");
+}
+
+/** Menyimpan konfigurasi sistem operasional ke basis data (Item #279). */
+export async function saveSystemConfig(
+  config: Partial<SystemConfigData>
+): Promise<SettingsApiResponse<SystemConfigData>> {
+  return apiRequest("/api/settings/system/config", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(config),
+  });
+}
+
+/** Mengambil konfigurasi koneksi WhatsApp dari database (Item #263, #279). */
+export async function fetchWhatsAppConnectionConfig(): Promise<
+  SettingsApiResponse<WhatsAppConnectionConfigData>
+> {
+  return apiRequest("/api/settings/whatsapp/config");
+}
+
+/** Menyimpan konfigurasi koneksi WhatsApp ke database (Item #263, #279). */
+export async function saveWhatsAppConnectionConfig(
+  config: Partial<WhatsAppConnectionConfigData>
+): Promise<SettingsApiResponse<WhatsAppConnectionConfigData>> {
+  return apiRequest("/api/settings/whatsapp/config", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(config),
+  });
+}

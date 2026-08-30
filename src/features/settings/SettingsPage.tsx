@@ -1,13 +1,14 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
-import { Mail, MessageSquare } from "lucide-react";
+import { Mail, MessageSquare, Shield } from "lucide-react";
 import { EmailConfigForm } from "./components/EmailConfigForm";
 import { WhatsAppConfigForm } from "./components/WhatsAppConfigForm";
 import { BroadcastMonitor } from "./components/BroadcastMonitor";
+import { SystemConfigForm } from "./components/SystemConfigForm";
 
 export const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<"email" | "whatsapp">("email");
+  const [activeTab, setActiveTab] = useState<"email" | "whatsapp" | "system">("email");
 
   const [emailConfig, setEmailConfig] = useState({
     host: "",
@@ -67,26 +68,41 @@ export const SettingsPage: React.FC = () => {
               <MessageSquare size={15} />
               {t("settings.whatsappGateway")}
             </button>
+            <button
+              onClick={() => setActiveTab("system")}
+              className={`flex items-center gap-2 px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer ${
+                activeTab === "system"
+                  ? "text-emerald-600 border-emerald-500 bg-emerald-500/10"
+                  : "text-content-muted border-transparent hover:text-content-body"
+              }`}
+            >
+              <Shield size={15} />
+              {t("settings.systemOperational", "Sistem & Keamanan")}
+            </button>
           </div>
 
           {/* Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 p-5">
-            <div className="lg:col-span-5">
-              {activeTab === "email" ? (
+            <div className={activeTab === "system" ? "lg:col-span-8" : "lg:col-span-5"}>
+              {activeTab === "email" && (
                 <EmailConfigForm formData={emailConfig} setFormData={setEmailConfig} />
-              ) : (
+              )}
+              {activeTab === "whatsapp" && (
                 <WhatsAppConfigForm formData={waConfig} setFormData={setWaConfig} />
               )}
+              {activeTab === "system" && <SystemConfigForm />}
             </div>
-            <div className="lg:col-span-7 border-l border-border-subtle/80 pl-5">
-              <BroadcastMonitor
-                emailTemplate={{
-                  subject: emailConfig.subjectTemplate,
-                  body: emailConfig.bodyTemplate,
-                }}
-                waTemplate={waConfig.messageTemplate}
-              />
-            </div>
+            {activeTab !== "system" && (
+              <div className="lg:col-span-7 border-l border-border-subtle/80 pl-5">
+                <BroadcastMonitor
+                  emailTemplate={{
+                    subject: emailConfig.subjectTemplate,
+                    body: emailConfig.bodyTemplate,
+                  }}
+                  waTemplate={waConfig.messageTemplate}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

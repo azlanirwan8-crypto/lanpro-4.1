@@ -39,6 +39,43 @@ export const emailIntegrationConfigSchema = z.object({
 });
 
 /**
+ * Item #279: Skema konfigurasi sistem operasional (SSO Domains, Slack Webhook, CORS Origins)
+ */
+export const systemIntegrationConfigSchema = z.object({
+  ssoAllowedDomains: z.string().optional(),
+  slackWebhookUrl: z
+    .string()
+    .refine((v) => v === "" || /^https?:\/\/.+/.test(v), {
+      message: "Slack Webhook URL harus diawali http:// atau https://",
+    })
+    .optional(),
+  allowedOrigins: z.string().optional(),
+  appUrl: z
+    .string()
+    .max(255)
+    .refine((v) => v === "" || /^https?:\/\/.+/.test(v), {
+      message: "URL aplikasi harus diawali http:// atau https://",
+    })
+    .optional(),
+});
+
+/**
+ * Item #263, #279: Skema koneksi WhatsApp
+ */
+export const whatsappConnectionConfigSchema = z.object({
+  provider: z.string().max(50).optional(),
+  endpoint: z
+    .string()
+    .refine((v) => v === "" || /^https?:\/\/.+/.test(v), {
+      message: "Endpoint WhatsApp harus diawali http:// atau https://",
+    })
+    .optional(),
+  token: z.string().optional(),
+  senderNumber: z.string().max(50).optional(),
+  deviceId: z.string().max(100).optional(),
+});
+
+/**
  * Item #259 — batas panjang ditambahkan; skema aslinya (#247) tidak
  * membatasi panjang `query` sama sekali. Pemeriksa SQL di
  * `db-admin.routes.ts` (satu statement, awalan SELECT/SHOW/DESCRIBE, tanpa

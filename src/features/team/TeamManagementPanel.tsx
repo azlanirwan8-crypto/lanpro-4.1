@@ -13,9 +13,11 @@ import {
   X,
   Star,
   Briefcase,
+  Trash2,
 } from "lucide-react";
 import { UserProfile, Project, Task, AppRole, PeranEfektif, MasterData } from "../../types";
 import { UserAvatar } from "../../components/ui/UserAvatar";
+import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
 import { toast } from "sonner";
 // Diberi alias: komponen sudah punya fungsi lokal bernama fetchTeamTasks yang
 // membungkus state loading dan penanganan unmount.
@@ -28,14 +30,20 @@ export const TeamManagementPanel = ({
   projectMembers: propMembers,
   selectedProject,
   tasks: propTasks,
+  currentUserProfile,
+  userRole,
+  hasPermission,
+  updateProjectRole,
+  removeProjectMember,
   masterData: propMaster,
+  onRefreshProjects,
 }: {
   projectMembers: UserProfile[];
   selectedProject: Project | null;
   tasks: Task[];
-  currentUserProfile: UserProfile | null;
-  userRole: PeranEfektif | null;
-  hasPermission: (...args: any[]) => boolean;
+  currentUserProfile?: UserProfile | null;
+  userRole?: PeranEfektif | null;
+  hasPermission?: (...args: any[]) => boolean;
   StyledDropdown?: any;
   updateProjectRole?: (uid: string, role: string) => void;
   removeProjectMember?: (uid: string) => Promise<void>;
@@ -49,6 +57,45 @@ export const TeamManagementPanel = ({
   const [selectedProfileUser, setSelectedProfileUser] = useState<any | null>(null);
   const [teamTasks, setTeamTasks] = useState<Task[]>([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<any | null>(null);
+  const [isRemoving, setIsRemoving] = useState(false);
+
+  const isGlobalAdmin =
+    currentUserProfile?.role === "admin" || (currentUserProfile as any)?.systemRole === "admin";
+  const normalizedUserRole = String(userRole || "").toLowerCase();
+  const canManageTeam =
+    isGlobalAdmin ||
+    normalizedUserRole === "owner" ||
+    normalizedUserRole === "admin" ||
+    (typeof hasPermission === "function" && hasPermission("access", "U"));
+
+  const handleConfirmRemove = async () => {
+    if (!memberToRemove || !removeProjectMember) return;
+    const targetUid = memberToRemove.uid || memberToRemove.id;
+    if (!targetUid) return;
+    setIsRemoving(true);
+    try {
+      await removeProjectMember(targetUid);
+      setMemberToRemove(null);
+      if (onRefreshProjects) onRefreshProjects();
+    } catch (e: any) {
+      console.error("Error removing member:", e);
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+
+  const handleRoleChange = async (member: any, newRole: string) => {
+    if (!updateProjectRole) return;
+    const targetUid = member.uid || member.id;
+    if (!targetUid) return;
+    try {
+      await updateProjectRole(targetUid, newRole);
+      if (onRefreshProjects) onRefreshProjects();
+    } catch (e: any) {
+      console.error("Error updating member role:", e);
+    }
+  };
 
   useEffect(() => {
     if (!selectedProject?.id) {
@@ -99,6 +146,20 @@ export const TeamManagementPanel = ({
     }));
     return [allOpt, ...list];
   }, [peranProyek, t]);
+
+  const memberRoleDropdownOptions = React.useMemo(() => {
+    return peranProyek.map((p) => ({
+      id: p.code,
+      label: p.label,
+      icon:
+        p.code === "pm" || p.code === "owner"
+          ? "Crown"
+          : p.code === "lead"
+            ? "ShieldCheck"
+            : "UserCheck",
+      color: p.code === "pm" || p.code === "owner" ? "#F59E0B" : "#3B82F6",
+    }));
+  }, [peranProyek]);
 
   const getUserTasks = (person: any) => {
     if (!person) return [];
@@ -452,9 +513,27 @@ export const TeamManagementPanel = ({
                       <h3 className="font-medium text-content-strong text-sm leading-snug truncate group-hover:text-indigo-600 transition-colors">
                         {name}
                       </h3>
-                      <p className="text-xs font-medium text-content-muted capitalize mt-0.5 truncate">
-                        {isOwner ? "Project Owner & Manager" : roleName}
-                      </p>
+                      {canManageTeam && !isOwner ? (
+                        <div className="mt-1 flex justify-center w-full max-w-[140px] mx-auto">
+                          <CommonStyledDropdown
+                            value={
+                              selectedProject?.memberRoles?.[person.uid] ||
+                              selectedProject?.memberRoles?.[person.id] ||
+                              person?.role ||
+                              "developer"
+                            }
+                            onChange={(val: string) => handleRoleChange(person, val)}
+                            options={memberRoleDropdownOptions}
+                            masterData={masterData}
+                            className="w-full"
+                            buttonClassName="h-7 bg-surface-sunken rounded border border-border-subtle hover:border-border-subtle px-2 text-xs font-medium text-content-body"
+                          />
+                        </div>
+                      ) : (
+                        <p className="text-xs font-medium text-content-muted capitalize mt-0.5 truncate">
+                          {isOwner ? "Project Owner & Manager" : roleName}
+                        </p>
+                      )}
                     </div>
 
                     <div className="border-t border-border-faint my-3 pt-3 grid grid-cols-2 gap-2 text-center">
@@ -476,13 +555,27 @@ export const TeamManagementPanel = ({
                       </div>
                     </div>
 
-                    {/* View Profile Button Only */}
-                    <button
-                      onClick={() => setSelectedProfileUser(person)}
-                      className="w-full py-2 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
-                    >
-                      {t("team.viewProfile")}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setSelectedProfileUser(person)}
+                        className="flex-1 py-2 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
+                      >
+                        {t("team.viewProfile")}
+                      </button>
+                      {canManageTeam &&
+                        !isOwner &&
+                        person.uid !== currentUserProfile?.uid &&
+                        person.id !== currentUserProfile?.id && (
+                          <button
+                            onClick={() => setMemberToRemove(person)}
+                            title={t("team.removeMember")}
+                            aria-label={t("team.removeMember")}
+                            className="p-2 bg-surface-muted hover:bg-rose-500/10 hover:text-rose-600 text-content-muted text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                    </div>
                   </div>
                 </div>
               );
@@ -553,9 +646,27 @@ export const TeamManagementPanel = ({
                           </div>
                         </td>
                         <td className="px-5 py-3.5">
-                          <span className="inline-flex px-2.5 py-[3px] rounded-md text-xs font-medium bg-indigo-500/10 text-indigo-700 border border-indigo-500/30 capitalize">
-                            {isOwner ? "Project Owner" : roleName}
-                          </span>
+                          {canManageTeam && !isOwner ? (
+                            <div className="w-[140px]">
+                              <CommonStyledDropdown
+                                value={
+                                  selectedProject?.memberRoles?.[person.uid] ||
+                                  selectedProject?.memberRoles?.[person.id] ||
+                                  person?.role ||
+                                  "developer"
+                                }
+                                onChange={(val: string) => handleRoleChange(person, val)}
+                                options={memberRoleDropdownOptions}
+                                masterData={masterData}
+                                className="w-full"
+                                buttonClassName="h-7 bg-surface-sunken rounded border border-border-subtle hover:border-border-subtle px-2 text-xs font-medium text-content-body"
+                              />
+                            </div>
+                          ) : (
+                            <span className="inline-flex px-2.5 py-[3px] rounded-md text-xs font-medium bg-indigo-500/10 text-indigo-700 border border-indigo-500/30 capitalize">
+                              {isOwner ? "Project Owner" : roleName}
+                            </span>
+                          )}
                         </td>
                         <td className="px-5 py-3.5 text-center font-medium text-content-strong text-xs">
                           {userAssignedTasks.length}
@@ -578,12 +689,27 @@ export const TeamManagementPanel = ({
                           </span>
                         </td>
                         <td className="px-5 py-3.5 text-right">
-                          <button
-                            onClick={() => setSelectedProfileUser(person)}
-                            className="px-3 py-1 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
-                          >
-                            {t("teamPanel.viewProfile")}
-                          </button>
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => setSelectedProfileUser(person)}
+                              className="px-3 py-1 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
+                            >
+                              {t("teamPanel.viewProfile")}
+                            </button>
+                            {canManageTeam &&
+                              !isOwner &&
+                              person.uid !== currentUserProfile?.uid &&
+                              person.id !== currentUserProfile?.id && (
+                                <button
+                                  onClick={() => setMemberToRemove(person)}
+                                  title={t("team.removeMember")}
+                                  aria-label={t("team.removeMember")}
+                                  className="p-1.5 bg-surface-muted hover:bg-rose-500/10 hover:text-rose-600 text-content-muted text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                          </div>
                         </td>
                       </tr>
                     );
@@ -711,6 +837,23 @@ export const TeamManagementPanel = ({
             </div>
           );
         })()}
+
+      {/* Confirmation Modal for Member Removal */}
+      {memberToRemove && (
+        <ConfirmationModal
+          isOpen={!!memberToRemove}
+          onClose={() => setMemberToRemove(null)}
+          onConfirm={handleConfirmRemove}
+          title={t("team.removeMemberTitle")}
+          message={t("team.confirmRemoveMember", {
+            name: memberToRemove?.displayName || memberToRemove?.email || "anggota ini",
+          })}
+          confirmText={t("team.removeMember")}
+          cancelText={t("users.cancel")}
+          variant="danger"
+          isLoading={isRemoving}
+        />
+      )}
     </div>
   );
 };

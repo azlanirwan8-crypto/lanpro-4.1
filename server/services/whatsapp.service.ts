@@ -2,24 +2,19 @@ import cron from "node-cron";
 import dbPool from "../../src/lib/db";
 import { getBroadcastConfig } from "./broadcastConfig.service";
 import { ambilAppUrl } from "./email.service";
+import { ambilWhatsappToken } from "./integrationSettings.service";
 
 const WA_API_URL = "https://api.fonnte.com/send";
 
 /**
- * Token dibaca TANPA nilai fallback.
- *
- * Sebelumnya baris ini berbunyi `process.env.WHATSAPP_API_TOKEN ||
- * 'TOKEN_ANDA_DISINI'`. Nilai contoh itu membuat konfigurasi yang hilang
- * terlihat seolah ada: permintaan tetap dikirim, hanya saja dengan token
- * karangan, lalu gagal dengan pesan dari pihak ketiga yang tidak menjelaskan
- * apa pun. Konfigurasi yang hilang harus terlihat sebagai hilang
- * (ARCHITECTURE.md §3.2).
+ * Token dibaca dari database IntegrationSettings (channel whatsapp),
+ * dengan fallback ke process.env.WHATSAPP_API_TOKEN (Item #279).
  */
-function ambilToken(): string {
-  return process.env.WHATSAPP_API_TOKEN || "";
+export async function ambilToken(): Promise<string> {
+  return ambilWhatsappToken();
 }
 
-export const terkonfigurasi = (): boolean => ambilToken() !== "";
+export const terkonfigurasi = (): boolean => (process.env.WHATSAPP_API_TOKEN || "") !== "";
 
 /** Hari ISO (1=Senin..7=Minggu) & jam "HH:MM" saat ini di zona Asia/Jakarta. */
 function jadwalSekarangWIB(): { day: string; time: string } {
@@ -81,6 +76,9 @@ export const initWhatsAppScheduler = () => {
 
   cron.schedule("* * * * *", async () => {
     try {
+      const token = await ambilToken();
+      if (!token) return;
+
       const { day, time } = jadwalSekarangWIB();
       const config = await getBroadcastConfig("whatsapp");
 
@@ -103,7 +101,7 @@ export const initWhatsAppScheduler = () => {
   });
 
   console.log(
-    "[WHATSAPP] Penjadwal broadcast dinamis aktif (dicek tiap menit dari BroadcastConfig)."
+    "[WHATSAPP] Penjadwal broadcast dinamis aktif (dicek tiap menit dari BroadcastConfig & DB Settings)."
   );
 };
 
@@ -264,7 +262,7 @@ export function formatMessage(
 }
 
 async function sendToWhatsApp(phone: string, message: string) {
-  const token = ambilToken();
+  const token = await ambilToken();
   if (!token) {
     throw new Error("[WHATSAPP] WHATSAPP_API_TOKEN belum diisi. Pesan tidak dikirim.");
   }

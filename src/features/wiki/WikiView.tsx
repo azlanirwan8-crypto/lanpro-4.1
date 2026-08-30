@@ -1539,8 +1539,8 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 {/* Dropdowns & Links Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Type drop-down selection */}
-                  <div className="space-y-1">
-                    <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider block">
+                  <div className="space-y-1.5">
+                    <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider block min-h-[16px]">
                       {t("wiki.categoryType")}
                     </label>
                     <StyledDropdown
@@ -1554,8 +1554,8 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   </div>
 
                   {/* External URL Link */}
-                  <div className="space-y-1">
-                    <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider block">
+                  <div className="space-y-1.5">
+                    <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider block min-h-[16px]">
                       {t("wiki.googleLink")}
                     </label>
                     <input
@@ -1563,7 +1563,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       value={editLink}
                       onChange={(e) => setEditLink(e.target.value)}
                       placeholder={t("wiki.googleLinkPlaceholder")}
-                      className="w-full bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 py-2 rounded-md text-xs font-normal text-content-body outline-none transition-all placeholder:text-content-subtle font-mono shadow-2xs"
+                      className="w-full h-[38px] bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 px-3 rounded-md text-xs font-normal text-content-body outline-none transition-all placeholder:text-content-subtle font-mono shadow-2xs"
                     />
                   </div>
                 </div>

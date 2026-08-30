@@ -326,35 +326,104 @@ export async function kirimEmailSelamatDatang(data: WelcomeEmailData): Promise<K
 
   const subject = "Selamat Datang di LanPro - Akun Anda Telah Terdaftar";
   const html = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1e293b; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
-      <div style="margin-bottom: 24px; text-align: center;">
-        <h1 style="color: #0f172a; font-size: 24px; margin: 0 0 8px 0; font-weight: 700;">Selamat Datang di LanPro</h1>
-        <p style="color: #64748b; font-size: 14px; margin: 0;">Sistem Manajemen Proyek & Kolaborasi Tim</p>
-      </div>
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px 12px; background-color: #f8fafc; color: #1e293b;">
+      <!-- Main White Card -->
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); overflow: hidden;">
+        <tr>
+          <td style="padding: 32px 28px;">
+            <!-- Card Top Hero -->
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td width="64" style="vertical-align: middle;">
+                  <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 56px; height: 56px; background-color: #eef2ff; border-radius: 50%; text-align: center;">
+                    <tr>
+                      <td align="center" valign="middle">
+                        <span style="font-size: 24px;">✉️</span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+                <td style="vertical-align: middle; padding-left: 12px;">
+                  <h1 style="color: #0f172a; font-size: 22px; margin: 0 0 4px 0; font-weight: 700; line-height: 1.2;">Selamat Datang di LanPro!</h1>
+                  <p style="color: #64748b; font-size: 13px; margin: 0; font-weight: 500;">Sistem Manajemen Proyek &amp; Kolaborasi Tim</p>
+                </td>
+              </tr>
+            </table>
 
-      <div style="background-color: #f8fafc; border-radius: 6px; padding: 16px; margin-bottom: 20px;">
-        <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">Halo, ${namaPanggilan}!</p>
-        <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #334155;">
-          Akun Anda telah berhasil dibuat dengan informasi sebagai berikut:
-        </p>
-        <ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 13px; color: #334155; line-height: 1.6;">
-          <li><strong>Username:</strong> ${username}</li>
-          <li><strong>Email:</strong> ${email}</li>
-          <li><strong>Status:</strong> Menunggu Persetujuan Admin (Pending)</li>
-        </ul>
-      </div>
+            <!-- Middle Info Card (Blueish) -->
+            <div style="background-color: #f0f5ff; border-radius: 12px; padding: 20px 22px; margin-top: 24px;">
+              <p style="margin: 0 0 6px 0; font-size: 15px; font-weight: 700; color: #0f172a;">👋 Halo, ${namaPanggilan}!</p>
+              <p style="margin: 0 0 16px 0; font-size: 13px; line-height: 1.4; color: #475569;">
+                Akun Anda telah berhasil dibuat dengan informasi sebagai berikut:
+              </p>
 
-      <p style="font-size: 13px; line-height: 1.6; color: #475569; margin-bottom: 20px;">
-        Akun Anda saat ini berstatus <strong>Pending</strong>. Administrator sistem akan meninjau dan mengaktifkan akun Anda sebelum Anda dapat masuk ke sistem.
-      </p>
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="border-collapse: separate; border-spacing: 0 10px;">
+                <tr>
+                  <td width="36" style="vertical-align: middle;">
+                    <div style="width: 28px; height: 28px; border-radius: 50%; background-color: #dbe4ff; text-align: center; line-height: 28px; font-size: 14px;">👤</div>
+                  </td>
+                  <td width="90" style="vertical-align: middle; font-size: 13px; color: #64748b; font-weight: 500;">Username</td>
+                  <td style="vertical-align: middle; font-size: 13px; font-weight: 700; color: #0f172a;">${username}</td>
+                </tr>
+                <tr>
+                  <td width="36" style="vertical-align: middle;">
+                    <div style="width: 28px; height: 28px; border-radius: 50%; background-color: #dbe4ff; text-align: center; line-height: 28px; font-size: 14px;">✉️</div>
+                  </td>
+                  <td width="90" style="vertical-align: middle; font-size: 13px; color: #64748b; font-weight: 500;">Email</td>
+                  <td style="vertical-align: middle; font-size: 13px;">
+                    <a href="mailto:${email}" style="color: #2563eb; text-decoration: underline; font-weight: 600;">${email}</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td width="36" style="vertical-align: middle;">
+                    <div style="width: 28px; height: 28px; border-radius: 50%; background-color: #dbe4ff; text-align: center; line-height: 28px; font-size: 14px;">💼</div>
+                  </td>
+                  <td width="90" style="vertical-align: middle; font-size: 13px; color: #64748b; font-weight: 500;">Status</td>
+                  <td style="vertical-align: middle;">
+                    <span style="display: inline-block; background-color: #dcfce7; color: #15803d; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 9999px; border: 1px solid #bbf7d0;">
+                      <span style="display: inline-block; width: 7px; height: 7px; background-color: #16a34a; border-radius: 50%; margin-right: 6px; vertical-align: middle;"></span>
+                      Menunggu Persetujuan Admin (Pending)
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </div>
 
-      <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #f1f5f9;">
-        <a href="${appUrl}" style="display: inline-block; background-color: #405189; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 600; padding: 10px 20px; border-radius: 6px;">Buka LanPro</a>
-      </div>
+            <!-- Next Steps Info Box (Greenish) -->
+            <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px 18px; margin-top: 20px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                  <td width="36" style="vertical-align: top; padding-top: 2px;">
+                    <div style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid #16a34a; color: #16a34a; text-align: center; line-height: 22px; font-size: 13px; font-weight: 700;">ⓘ</div>
+                  </td>
+                  <td style="vertical-align: top; padding-left: 6px;">
+                    <p style="font-size: 13px; font-weight: 700; color: #166534; margin: 0 0 4px 0;">Apa yang terjadi selanjutnya?</p>
+                    <p style="font-size: 12px; color: #15803d; line-height: 1.5; margin: 0;">
+                      Akun Anda akan segera ditinjau dan disetujui oleh Administrator sistem. Setelah disetujui, Anda akan dapat masuk ke dalam sistem dan mulai menggunakannya.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </div>
 
-      <p style="font-size: 11px; color: #94a3b8; text-align: center; margin-top: 24px;">
-        Email ini dikirim secara otomatis oleh sistem LanPro. Jangan membalas email ini.
-      </p>
+            <!-- Action Button (CTA) -->
+            <div style="text-align: center; margin-top: 28px;">
+              <a href="${appUrl}" style="display: inline-block; background-color: #3b52d4; color: #ffffff; font-size: 14px; font-weight: 700; padding: 12px 32px; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 12px rgba(59, 82, 212, 0.25);">
+                🚀 &nbsp;Buka LanPro &nbsp;&rarr;
+              </a>
+            </div>
+
+            <!-- Footer Note inside Card -->
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f1f5f9; border-radius: 8px; margin-top: 28px;">
+              <tr>
+                <td align="center" style="padding: 10px 16px; font-size: 11px; color: #64748b; line-height: 1.4;">
+                  ⓘ &nbsp;Email ini dikirim secara otomatis oleh sistem LanPro. Jangan membalas email ini.
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
     </div>
   `;
 

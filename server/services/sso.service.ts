@@ -26,6 +26,7 @@ import { authRepository } from "../repositories/auth.repository";
 import type { IdentitasOidc } from "./oidc.service";
 import { kirimEmailSelamatDatang, kirimEmailLatarBelakang } from "./email.service";
 import { domainDiizinkan } from "./oidc.service";
+import { ambilSsoAllowedDomains } from "./integrationSettings.service";
 
 /** Alasan penolakan. Dipakai UI untuk memilih pesan yang tepat. */
 export type AlasanTolak =
@@ -98,7 +99,8 @@ export async function putuskanKebijakan(
 ): Promise<HasilKebijakan> {
   // 1. Domain. Berlaku untuk KEDUA tombol — termasuk login, supaya akun lama
   //    yang domainnya sudah tidak diizinkan tidak bisa masuk lewat jalur SSO.
-  if (!domainDiizinkan(identitas.email)) {
+  const domainSah = await ambilSsoAllowedDomains();
+  if (!domainDiizinkan(identitas.email, domainSah)) {
     return { aksi: "tolak", alasan: "domain_tidak_diizinkan" };
   }
 
@@ -225,7 +227,8 @@ export async function buatAkunDariSso(
   username: string
 ): Promise<HasilBuatAkun> {
   if (!usernameSah(username)) return { hasil: "gagal", alasan: "username_tidak_sah" };
-  if (!domainDiizinkan(identitas.email))
+  const domainSah = await ambilSsoAllowedDomains();
+  if (!domainDiizinkan(identitas.email, domainSah))
     return { hasil: "gagal", alasan: "domain_tidak_diizinkan" };
   if (!identitas.emailTerverifikasi) return { hasil: "gagal", alasan: "email_belum_terverifikasi" };
 

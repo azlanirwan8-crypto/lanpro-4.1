@@ -65,7 +65,7 @@ describe("#166 hitung mundur layar sukses bisa dihentikan", () => {
   });
 
   afterEach(() => {
-    jest.runOnlyPendingTimers();
+    jest.clearAllTimers();
     jest.useRealTimers();
     jest.clearAllMocks();
   });

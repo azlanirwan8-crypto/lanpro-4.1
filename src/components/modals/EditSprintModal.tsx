@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { StyledDropdown } from "../ui/CommonComponents";
+import { LanproDatePicker } from "../ui/LanproDatePicker";
 import { useMasterOptionItems } from "../../hooks/useMasterOptions";
 import React from "react";
 import { format } from "date-fns";
@@ -79,8 +80,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
               <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
                 {t("editSprint.startDate")}
               </label>
-              <input
-                type="date"
+              <LanproDatePicker
                 value={
                   editingSprint.startDate
                     ? typeof editingSprint.startDate === "string"
@@ -88,21 +88,19 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
                       : format(ensureDate(editingSprint.startDate), "yyyy-MM-dd")
                     : ""
                 }
-                onChange={(e: any) =>
+                onChange={(val) =>
                   setEditingSprint({
                     ...editingSprint,
-                    startDate: e.target.value,
+                    startDate: val,
                   })
                 }
-                className="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm"
               />
             </div>
             <div>
               <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
                 {t("editSprint.endDate")}
               </label>
-              <input
-                type="date"
+              <LanproDatePicker
                 value={
                   editingSprint.endDate
                     ? typeof editingSprint.endDate === "string"
@@ -110,13 +108,12 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
                       : format(ensureDate(editingSprint.endDate), "yyyy-MM-dd")
                     : ""
                 }
-                onChange={(e: any) =>
+                onChange={(val) =>
                   setEditingSprint({
                     ...editingSprint,
-                    endDate: e.target.value,
+                    endDate: val,
                   })
                 }
-                className="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm"
               />
             </div>
           </div>

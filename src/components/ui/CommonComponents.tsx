@@ -196,7 +196,7 @@ export const StyledDropdown = ({
   onChange: (val: string) => void;
   options: { id: string; label: string; color?: string; icon?: string }[];
   type?: string;
-  masterData: MasterData[];
+  masterData?: MasterData[];
   className?: string;
   buttonClassName?: string;
   disabled?: boolean;

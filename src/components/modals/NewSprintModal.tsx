@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import React from "react";
 import { Modal } from "../ui/Modal";
 import { Input, Textarea, Button } from "../ui/CoreUI";
+import { LanproDatePicker } from "../ui/LanproDatePicker";
 
 interface NewSprintModalProps {
   isOpen: boolean;
@@ -61,22 +62,18 @@ export const NewSprintModal: React.FC<NewSprintModalProps> = ({
             <label className="block text-xs font-normal text-content-body mb-1">
               {t("newSprint.startDate")}
             </label>
-            <input
-              type="date"
+            <LanproDatePicker
               value={newSprintStartDate}
-              onChange={(e: any) => setNewSprintStartDate(e.target.value)}
-              className="w-full px-3 py-2 border border-border-subtle rounded-md text-xs font-normal text-content-body focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none"
+              onChange={(val) => setNewSprintStartDate(val)}
             />
           </div>
           <div>
             <label className="block text-xs font-normal text-content-body mb-1">
               {t("newSprint.endDate")}
             </label>
-            <input
-              type="date"
+            <LanproDatePicker
               value={newSprintEndDate}
-              onChange={(e: any) => setNewSprintEndDate(e.target.value)}
-              className="w-full px-3 py-2 border border-border-subtle rounded-md text-xs font-normal text-content-body focus:border-primary focus:ring-1 focus:ring-primary/20 outline-none"
+              onChange={(val) => setNewSprintEndDate(val)}
             />
           </div>
         </div>

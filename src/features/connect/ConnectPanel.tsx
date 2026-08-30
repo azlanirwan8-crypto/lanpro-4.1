@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { CheckCircle2, Wifi, Loader2, Database, Save, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { fetchDbConfig, testDbConfig, saveDbConfig } from "./services/connect.service";
+import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
 
 export const ConnectPanel = () => {
   const { t } = useTranslation();
@@ -15,6 +16,7 @@ export const ConnectPanel = () => {
   });
   const [loading, setLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [testResult, setTestResult] = useState<{
     status: "idle" | "success" | "error";
     message: string;
@@ -66,7 +68,7 @@ export const ConnectPanel = () => {
     }
   };
 
-  const handleSaveConnection = async () => {
+  const executeSaveConnection = async () => {
     setSaveLoading(true);
     setTestResult({ status: "idle", message: "" });
 
@@ -79,6 +81,7 @@ export const ConnectPanel = () => {
           message: "Konfigurasi database berhasil disimpan & diubah secara Live!",
         });
         toast.success(t("toast.dbCredsSaved"));
+        setIsConfirmOpen(false);
       } else {
         throw new Error(data.message || "Gagal menyimpan konfigurasi.");
       }
@@ -231,7 +234,7 @@ export const ConnectPanel = () => {
 
               <button
                 type="button"
-                onClick={handleSaveConnection}
+                onClick={() => setIsConfirmOpen(true)}
                 disabled={loading || saveLoading}
                 className="bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium py-2 px-5 rounded-md shadow-2xs active:scale-95 transition-all flex items-center justify-center text-xs cursor-pointer disabled:opacity-50"
               >
@@ -248,6 +251,20 @@ export const ConnectPanel = () => {
           </form>
         </div>
       </div>
+
+      {isConfirmOpen && (
+        <ConfirmationModal
+          isOpen={isConfirmOpen}
+          onClose={() => setIsConfirmOpen(false)}
+          onConfirm={executeSaveConnection}
+          title={t("connect.confirmSaveTitle")}
+          message={t("connect.confirmSaveMessage")}
+          confirmText={t("connect.confirmSaveAction")}
+          cancelText={t("users.cancel")}
+          variant="danger"
+          isLoading={saveLoading}
+        />
+      )}
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Modal } from "../ui/Modal";
 import { Input, Button } from "../ui/CoreUI";
 import { StyledDropdown } from "../ui/CommonComponents";
+import { LanproDatePicker } from "../ui/LanproDatePicker";
 import { validateFileClient } from "../../lib/fileSecurity";
 import { MasterData, Sprint, Task, UserProfile, Project } from "../../types";
 
@@ -157,7 +158,43 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
         color: t.type === "epic" ? "#8B5CF6" : "#3B82F6",
       }));
     return [emptyOpt, ...parentList];
-  }, [tasks]);
+  }, [tasks, t]);
+
+  const memberOptions = React.useMemo(
+    () => [
+      { id: "", label: t("newTask.unassigned") },
+      ...projectMembers.map((m) => ({
+        id: m?.uid || "",
+        label: m?.displayName || m?.email || "Anggota Tim",
+      })),
+      ...(selectedProject?.pendingInvites || []).map((email) => ({
+        id: email,
+        label: `${email} (Pending)`,
+      })),
+    ],
+    [projectMembers, selectedProject?.pendingInvites, t]
+  );
+
+  const businessValueOptions = React.useMemo(
+    () => [
+      { id: "", label: t("newTask.notSet") },
+      { id: "critical", label: t("newTask.critical") },
+      { id: "high", label: t("newTask.high") },
+      { id: "medium", label: t("newTask.medium") },
+      { id: "low", label: t("newTask.low") },
+    ],
+    [t]
+  );
+
+  const riskOptions = React.useMemo(
+    () => [
+      { id: "", label: t("newTask.notSet") },
+      { id: "high", label: t("newTask.highRisk") },
+      { id: "medium", label: t("newTask.mediumRisk") },
+      { id: "low", label: t("newTask.lowRisk") },
+    ],
+    [t]
+  );
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t("newTask.title")} maxWidth="max-w-3xl">
@@ -278,23 +315,16 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
           <label className="block text-sm font-medium text-content-body mb-1">
             {t("newTask.assignee")}
           </label>
-          <select
+          <StyledDropdown
             value={newTaskAssigneeId}
-            onChange={(e: any) => setNewTaskAssigneeId(e.target.value)}
-            className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-          >
-            <option value="">{t("newTask.unassigned")}</option>
-            {projectMembers.map((m, idx) => (
-              <option key={m?.uid ? `pm-${m.uid}-${idx}` : `pm-${idx}`} value={m?.uid}>
-                {m?.displayName || m?.email || "Anggota Tim"}
-              </option>
-            ))}
-            {selectedProject?.pendingInvites?.map((email, idx) => (
-              <option key={email ? `pi-${email}-${idx}` : `pi-${idx}`} value={email}>
-                {email} (Pending)
-              </option>
-            ))}
-          </select>
+            onChange={(val) => setNewTaskAssigneeId(val)}
+            options={memberOptions}
+            type="member"
+            members={projectMembers}
+            masterData={masterData}
+            className="w-full"
+            buttonClassName="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-normal bg-surface"
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-content-body mb-1">
@@ -341,32 +371,25 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             <label className="block text-sm font-medium text-content-body mb-1">
               {t("newTask.businessValue")}
             </label>
-            <select
+            <StyledDropdown
               value={newTaskBusinessValue}
-              onChange={(e: any) => setNewTaskBusinessValue(e.target.value)}
-              className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-            >
-              <option value="">{t("newTask.notSet")}</option>
-              <option value="critical">{t("newTask.critical")}</option>
-              <option value="high">{t("newTask.high")}</option>
-              <option value="medium">{t("newTask.medium")}</option>
-              <option value="low">{t("newTask.low")}</option>
-            </select>
+              onChange={(val) => setNewTaskBusinessValue(val)}
+              options={businessValueOptions}
+              className="w-full"
+              buttonClassName="w-full px-3 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-normal bg-surface"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-content-body mb-1">
               {t("newTask.systemRisk")}
             </label>
-            <select
+            <StyledDropdown
               value={newTaskProjectRisk}
-              onChange={(e: any) => setNewTaskProjectRisk(e.target.value)}
-              className="w-full px-4 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-            >
-              <option value="">{t("newTask.notSet")}</option>
-              <option value="high">{t("newTask.highRisk")}</option>
-              <option value="medium">{t("newTask.mediumRisk")}</option>
-              <option value="low">{t("newTask.lowRisk")}</option>
-            </select>
+              onChange={(val) => setNewTaskProjectRisk(val)}
+              options={riskOptions}
+              className="w-full"
+              buttonClassName="w-full px-3 py-2 border border-border-subtle rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm font-normal bg-surface"
+            />
           </div>
         </div>
         <div>
@@ -450,31 +473,22 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             <label className="block text-sm font-medium text-content-body mb-1">
               {t("newTask.startDate")}
             </label>
-            <Input
-              type="date"
+            <LanproDatePicker
               value={newTaskStartDate}
-              onChange={(e: any) => setNewTaskStartDate(e.target.value)}
+              onChange={(val) => setNewTaskStartDate(val)}
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-content-body mb-1">
               {t("newTask.endDate")}
             </label>
-            <Input
-              type="date"
-              value={newTaskEndDate}
-              onChange={(e: any) => setNewTaskEndDate(e.target.value)}
-            />
+            <LanproDatePicker value={newTaskEndDate} onChange={(val) => setNewTaskEndDate(val)} />
           </div>
           <div>
             <label className="block text-sm font-medium text-content-body mb-1">
               {t("newTask.dueDate")}
             </label>
-            <Input
-              type="date"
-              value={newTaskDueDate}
-              onChange={(e: any) => setNewTaskDueDate(e.target.value)}
-            />
+            <LanproDatePicker value={newTaskDueDate} onChange={(val) => setNewTaskDueDate(val)} />
           </div>
         </div>
         <Button onClick={onSubmit} disabled={isSubmitting} className="w-full justify-center">

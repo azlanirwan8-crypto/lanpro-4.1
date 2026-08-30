@@ -258,6 +258,18 @@ describe("email.service - F6.2 Fondasi Layanan Email", () => {
       expect(res.messageId).toMatch(/^mock-/);
     });
 
+    it("mengirim email selamat datang dengan template kartu modern (Item #280)", async () => {
+      delete process.env.RESEND_API_KEY;
+
+      const res = await kirimEmailSelamatDatang({
+        email: "azlanirwan8@gmail.com",
+        nama: "alan Ir",
+        username: "azlanirwanm",
+      });
+
+      expect(res.success).toBe(true);
+    });
+
     it("menggunakan username bila nama tidak diisi", async () => {
       delete process.env.RESEND_API_KEY;
 

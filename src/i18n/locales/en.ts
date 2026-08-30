@@ -5,6 +5,10 @@
  */
 export const en = {
   serverErr: {
+    "srv.gagal_mengambil_konfigurasi_sistem": "Failed to fetch operational system configuration",
+    "srv.gagal_menyimpan_konfigurasi_sistem": "Failed to save operational system configuration",
+    "srv.gagal_mengambil_konfigurasi_whatsapp": "Failed to fetch WhatsApp connection configuration",
+    "srv.gagal_menyimpan_konfigurasi_whatsapp": "Failed to save WhatsApp connection configuration",
     "srv.akses_ditolak_hanya_global": "Access denied: only a global admin has permission.",
     "srv.akses_ditolak": "Access denied",
     "srv.gagal_memverifikasi_hak_akses": "Failed to verify access rights.",
@@ -870,6 +874,10 @@ export const en = {
     exportCsv: "Export CSV",
     completed: "Completed",
     action: "Action",
+    removeMember: "Remove from Team",
+    removeMemberTitle: "Remove Team Member",
+    confirmRemoveMember: "Are you sure you want to remove {{name}} from this project?",
+    changeRole: "Change Role",
     csvUidEmail: "UID/Email",
     csvFullName: "Full Name",
     csvUsername: "Username",
@@ -2532,6 +2540,10 @@ export const en = {
     passwordDb_password: "Password (DB_PASSWORD)",
     importantFixResolvingUnknownDatabase:
       '⚠️ Important fix: resolving "Unknown database" / ER_BAD_DB_ERROR',
+    confirmSaveTitle: "Confirm Database Connection Change",
+    confirmSaveMessage:
+      "Are you sure you want to apply this database configuration? This will immediately replace the active connection pool and may disrupt live database connections across the application.",
+    confirmSaveAction: "Yes, Apply Connection",
   },
   welcome: {
     greeting: "Welcome to LanPro",
@@ -2800,6 +2812,7 @@ export const en = {
     placeholder: "What needs to be done? Type and press Enter to save...",
   },
   ui: {
+    loading: "Loading...",
     close: "Close",
     cancel: "Cancel",
     yesDelete: "Yes, Delete",
@@ -2932,6 +2945,24 @@ export const en = {
     subject: "Subject:",
     emailConfiguration: "Email configuration",
     whatsappGateway: "WhatsApp gateway",
+    systemOperational: "System & Security",
+    operationalConfigTitle: "Operational & Security Settings",
+    operationalConfigDesc:
+      "Manage SSO allowed domains, CORS origins, and webhook integrations directly from the UI without redeploying.",
+    ssoAllowedDomains: "SSO Allowed Email Domains",
+    ssoAllowedDomainsHelp:
+      "Separate multiple domains with commas. Leave empty to use system default.",
+    allowedOrigins: "Additional CORS Origins (ALLOWED_ORIGINS)",
+    allowedOriginsHelp:
+      "Allowed origin URLs for cross-domain requests and Socket.IO. Separate with commas.",
+    slackWebhookUrl: "Slack Webhook URL (Notifications)",
+    slackWebhookUrlHelp: "Slack webhook URL for receiving system alerts and notifications.",
+    appUrl: "Application URL (APP_URL)",
+    appUrlHelp:
+      "Main application URL used for email links, OIDC SSO redirect, and system notifications.",
+    saveConfiguration: "Save Configuration",
+    systemSaveSuccess: "System operational configuration saved successfully.",
+    systemSaveFailed: "Failed to save system configuration.",
     insertVar: "Insert {{nama}}",
   },
   auth: {

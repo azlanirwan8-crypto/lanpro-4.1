@@ -331,11 +331,14 @@ export async function verifikasiIdToken(
  * dikonfigurasi, dan itu diperlakukan sebagai MENOLAK SEMUA — bukan
  * mengizinkan semua.
  */
-export function domainDiizinkan(email: string): boolean {
-  const daftar = (process.env.SSO_ALLOWED_DOMAINS || "")
-    .split(",")
-    .map((d) => d.trim().toLowerCase())
-    .filter(Boolean);
+export function domainDiizinkan(email: string, daftarKhusus?: string[]): boolean {
+  const daftar =
+    daftarKhusus !== undefined
+      ? daftarKhusus
+      : (process.env.SSO_ALLOWED_DOMAINS || "")
+          .split(",")
+          .map((d) => d.trim().toLowerCase())
+          .filter(Boolean);
 
   if (daftar.length === 0) return false;
 

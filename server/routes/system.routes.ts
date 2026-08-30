@@ -12,6 +12,12 @@ import {
 import {
   getEmailIntegrationConfig,
   saveEmailIntegrationConfig,
+  getSystemIntegrationConfig,
+  saveSystemIntegrationConfig,
+  getWhatsAppIntegrationConfig,
+  saveWhatsAppIntegrationConfig,
+  ambilSsoAllowedDomains,
+  ambilAllowedOrigins,
 } from "../services/integrationSettings.service";
 import { systemRepository } from "../repositories/system.repository";
 import { getBroadcastConfig, saveBroadcastConfig } from "../services/broadcastConfig.service";
@@ -20,6 +26,8 @@ import {
   testEmailSchema,
   whatsappBroadcastConfigSchema,
   emailIntegrationConfigSchema,
+  systemIntegrationConfigSchema,
+  whatsappConnectionConfigSchema,
 } from "../schemas/system.schema";
 import { createAuditLog } from "../services/audit.service";
 
@@ -309,6 +317,183 @@ router.post(
         status: "error",
         code: "srv.gagal_menyimpan_konfigurasi_broadcast",
         message: "Gagal menyimpan konfigurasi broadcast",
+      });
+    }
+  }
+);
+
+/**
+ * Item #279: Mengambil konfigurasi sistem operasional (SSO Domains, CORS Origins, Slack Webhook)
+ */
+router.get("/api/settings/system/config", verifyGlobalAdmin, async (req, res) => {
+  try {
+    const config = await getSystemIntegrationConfig();
+    const effectiveSsoDomains = await ambilSsoAllowedDomains();
+    const effectiveOrigins = await ambilAllowedOrigins();
+
+    res.json({
+      status: "success",
+      data: {
+        ssoAllowedDomains: config.ssoAllowedDomains,
+        slackWebhookUrl: config.slackWebhookUrl,
+        allowedOrigins: config.allowedOrigins,
+        appUrl: config.appUrl,
+        effectiveSsoDomains,
+        effectiveOrigins,
+        sources: {
+          ssoAllowedDomains: config.ssoAllowedDomains ? "database" : "environment",
+          slackWebhookUrl: config.slackWebhookUrl ? "database" : "environment",
+          allowedOrigins: config.allowedOrigins ? "database" : "environment",
+          appUrl: config.appUrl ? "database" : "environment",
+        },
+        updatedAt: config.updatedAt,
+      },
+    });
+  } catch (error: any) {
+    console.error("[SETTINGS] Gagal mengambil konfigurasi sistem operasional:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_mengambil_konfigurasi_sistem",
+      message: "Gagal mengambil konfigurasi sistem operasional",
+    });
+  }
+});
+
+/**
+ * Item #279: Menyimpan konfigurasi sistem operasional ke basis data (Khusus Global Admin)
+ */
+router.post(
+  "/api/settings/system/config",
+  verifyGlobalAdmin,
+  validasiBody(systemIntegrationConfigSchema),
+  async (req: any, res) => {
+    try {
+      const currentUserId = req.user?.id || req.user?.uid;
+      const updated = await saveSystemIntegrationConfig(req.body);
+
+      createAuditLog({
+        userId: currentUserId,
+        projectId: null,
+        actionType: "UPDATE",
+        entityName: "SystemIntegrationSettings",
+        entityId: "system",
+        details: {
+          ssoAllowedDomains: updated.ssoAllowedDomains,
+          slackWebhookUrl: updated.slackWebhookUrl,
+          allowedOrigins: updated.allowedOrigins,
+          appUrl: updated.appUrl,
+        },
+      });
+
+      const effectiveSsoDomains = await ambilSsoAllowedDomains();
+      const effectiveOrigins = await ambilAllowedOrigins();
+
+      res.json({
+        status: "success",
+        message: "Konfigurasi operasional sistem berhasil disimpan ke basis data.",
+        data: {
+          ssoAllowedDomains: updated.ssoAllowedDomains,
+          slackWebhookUrl: updated.slackWebhookUrl,
+          allowedOrigins: updated.allowedOrigins,
+          appUrl: updated.appUrl,
+          effectiveSsoDomains,
+          effectiveOrigins,
+          sources: {
+            ssoAllowedDomains: updated.ssoAllowedDomains ? "database" : "environment",
+            slackWebhookUrl: updated.slackWebhookUrl ? "database" : "environment",
+            allowedOrigins: updated.allowedOrigins ? "database" : "environment",
+            appUrl: updated.appUrl ? "database" : "environment",
+          },
+          updatedAt: updated.updatedAt,
+        },
+      });
+    } catch (error: any) {
+      console.error("[SETTINGS] Gagal menyimpan konfigurasi sistem operasional:", error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.gagal_menyimpan_konfigurasi_sistem",
+        message: "Gagal menyimpan konfigurasi sistem operasional",
+      });
+    }
+  }
+);
+
+/**
+ * Item #263, #279: Mengambil konfigurasi koneksi WhatsApp (Khusus Global Admin)
+ */
+router.get("/api/settings/whatsapp/config", verifyGlobalAdmin, async (req, res) => {
+  try {
+    const config = await getWhatsAppIntegrationConfig();
+    res.json({
+      status: "success",
+      data: {
+        provider: config.provider,
+        endpoint: config.endpoint,
+        tokenMasked: config.token ? "••••••••" + config.token.slice(-4) : "",
+        hasToken: Boolean(config.token),
+        senderNumber: config.senderNumber,
+        deviceId: config.deviceId,
+        source: config.token ? "database" : "environment",
+        updatedAt: config.updatedAt,
+      },
+    });
+  } catch (error: any) {
+    console.error("[SETTINGS] Gagal mengambil konfigurasi koneksi WhatsApp:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_mengambil_konfigurasi_whatsapp",
+      message: "Gagal mengambil konfigurasi koneksi WhatsApp",
+    });
+  }
+});
+
+/**
+ * Item #263, #279: Menyimpan konfigurasi koneksi WhatsApp ke basis data (Khusus Global Admin)
+ */
+router.post(
+  "/api/settings/whatsapp/config",
+  verifyGlobalAdmin,
+  validasiBody(whatsappConnectionConfigSchema),
+  async (req: any, res) => {
+    try {
+      const currentUserId = req.user?.id || req.user?.uid;
+      const updated = await saveWhatsAppIntegrationConfig(req.body);
+
+      createAuditLog({
+        userId: currentUserId,
+        projectId: null,
+        actionType: "UPDATE",
+        entityName: "WhatsAppIntegrationSettings",
+        entityId: "whatsapp",
+        details: {
+          provider: updated.provider,
+          endpoint: updated.endpoint,
+          hasToken: Boolean(updated.token),
+          senderNumber: updated.senderNumber,
+          deviceId: updated.deviceId,
+        },
+      });
+
+      res.json({
+        status: "success",
+        message: "Konfigurasi koneksi WhatsApp berhasil disimpan ke basis data.",
+        data: {
+          provider: updated.provider,
+          endpoint: updated.endpoint,
+          tokenMasked: updated.token ? "••••••••" + updated.token.slice(-4) : "",
+          hasToken: Boolean(updated.token),
+          senderNumber: updated.senderNumber,
+          deviceId: updated.deviceId,
+          source: updated.token ? "database" : "environment",
+          updatedAt: updated.updatedAt,
+        },
+      });
+    } catch (error: any) {
+      console.error("[SETTINGS] Gagal menyimpan konfigurasi koneksi WhatsApp:", error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.gagal_menyimpan_konfigurasi_whatsapp",
+        message: "Gagal menyimpan konfigurasi koneksi WhatsApp",
       });
     }
   }

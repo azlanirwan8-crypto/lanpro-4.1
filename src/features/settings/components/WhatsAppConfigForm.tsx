@@ -8,6 +8,8 @@ import {
   fetchUsers,
   fetchWhatsAppBroadcastConfig,
   saveWhatsAppBroadcastConfig,
+  fetchWhatsAppConnectionConfig,
+  saveWhatsAppConnectionConfig,
 } from "../services/settings.service";
 
 interface WhatsAppConfigFormProps {
@@ -47,9 +49,10 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
   useEffect(() => {
     const loadAll = async () => {
       try {
-        const [usersRes, configRes] = await Promise.all([
+        const [usersRes, configRes, connRes] = await Promise.all([
           fetchUsers(),
           fetchWhatsAppBroadcastConfig(),
+          fetchWhatsAppConnectionConfig(),
         ]);
 
         if (usersRes.status === "success" && Array.isArray(usersRes.data)) {
@@ -73,8 +76,20 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
             messageTemplate: cfg.messageTemplate || prev.messageTemplate,
           }));
         }
+
+        if (connRes.status === "success" && connRes.data) {
+          const conn = connRes.data;
+          setFormData((prev: any) => ({
+            ...prev,
+            provider: conn.provider || prev.provider || "fonnte",
+            endpoint: conn.endpoint || prev.endpoint || "https://api.fonnte.com/send",
+            token: conn.tokenMasked || prev.token || "",
+            senderNumber: conn.senderNumber || prev.senderNumber || "",
+            deviceId: conn.deviceId || prev.deviceId || "",
+          }));
+        }
       } catch (err) {
-        console.error("Failed to load WhatsApp broadcast config", err);
+        console.error("Failed to load WhatsApp config", err);
       }
     };
 
@@ -137,19 +152,29 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
 
     setIsSaving(true);
     try {
-      const res = await saveWhatsAppBroadcastConfig({
-        scheduleDays,
-        scheduleTime,
-        recipientIds: sendToAll ? [] : recipientIds,
-        messageTemplate: formData.messageTemplate || "",
-      });
-      if (res.status === "success") {
+      const [broadcastRes, connRes] = await Promise.all([
+        saveWhatsAppBroadcastConfig({
+          scheduleDays,
+          scheduleTime,
+          recipientIds: sendToAll ? [] : recipientIds,
+          messageTemplate: formData.messageTemplate || "",
+        }),
+        saveWhatsAppConnectionConfig({
+          provider: formData.provider,
+          endpoint: formData.endpoint,
+          token: formData.token,
+          senderNumber: formData.senderNumber,
+          deviceId: formData.deviceId,
+        }),
+      ]);
+
+      if (broadcastRes.status === "success" && connRes.status === "success") {
         toast.success(t("whatsapp.saveSuccess"));
       } else {
-        toast.error(res.message || t("whatsapp.saveFailed"));
+        toast.error(broadcastRes.message || connRes.message || t("whatsapp.saveFailed"));
       }
     } catch (err) {
-      console.error("Failed to save WhatsApp broadcast config", err);
+      console.error("Failed to save WhatsApp config", err);
       toast.error(t("whatsapp.saveFailed"));
     } finally {
       setIsSaving(false);

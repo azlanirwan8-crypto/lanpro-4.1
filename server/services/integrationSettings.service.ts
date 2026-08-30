@@ -196,3 +196,331 @@ export async function saveEmailIntegrationConfig(
     connection.release();
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Item #279: Konfigurasi Sistem Operasional (SSO Domains, CORS, Slack Webhook)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface SystemIntegrationConfig {
+  channel: "system";
+  ssoAllowedDomains: string;
+  slackWebhookUrl: string;
+  allowedOrigins: string;
+  appUrl: string;
+  updatedAt?: string;
+}
+
+const DEFAULT_SYSTEM_CONFIG: SystemIntegrationConfig = {
+  channel: "system",
+  ssoAllowedDomains: "",
+  slackWebhookUrl: "",
+  allowedOrigins: "",
+  appUrl: "",
+};
+
+function toSystemConfigRow(data: any): SystemIntegrationConfig {
+  if (!data) return DEFAULT_SYSTEM_CONFIG;
+  return {
+    channel: "system",
+    ssoAllowedDomains: data.ssoAllowedDomains || "",
+    slackWebhookUrl: data.slackWebhookUrl || "",
+    allowedOrigins: data.allowedOrigins || "",
+    appUrl: data.appUrl || "",
+    updatedAt: data.updatedAt,
+  };
+}
+
+export async function getSystemIntegrationConfig(): Promise<SystemIntegrationConfig> {
+  if (
+    (process.env.JEST_WORKER_ID !== undefined || process.env.NODE_ENV === "test") &&
+    !process.env.TEST_WITH_REAL_DB
+  ) {
+    return {
+      ...DEFAULT_SYSTEM_CONFIG,
+      ssoAllowedDomains: process.env.SSO_ALLOWED_DOMAINS || "",
+      slackWebhookUrl: process.env.SLACK_WEBHOOK_URL || "",
+      allowedOrigins: process.env.ALLOWED_ORIGINS || "",
+      appUrl: process.env.APP_URL || "",
+    };
+  }
+
+  const connection = await dbPool.getConnection();
+  try {
+    const [rows]: any = await connection.query(
+      `SELECT * FROM "IntegrationSettings" WHERE channel = 'system'`
+    );
+    const existing = Array.isArray(rows) ? rows[0] : null;
+    if (existing) return toSystemConfigRow(existing);
+
+    await connection.query(
+      `INSERT INTO "IntegrationSettings" (
+        channel, "ssoAllowedDomains", "slackWebhookUrl", "allowedOrigins", "appUrl", "updatedAt"
+      ) VALUES (?, ?, ?, ?, ?, NOW())
+      ON CONFLICT (channel) DO NOTHING`,
+      [
+        "system",
+        DEFAULT_SYSTEM_CONFIG.ssoAllowedDomains,
+        DEFAULT_SYSTEM_CONFIG.slackWebhookUrl,
+        DEFAULT_SYSTEM_CONFIG.allowedOrigins,
+        DEFAULT_SYSTEM_CONFIG.appUrl,
+      ]
+    );
+
+    const [created]: any = await connection.query(
+      `SELECT * FROM "IntegrationSettings" WHERE channel = 'system'`
+    );
+    return toSystemConfigRow(created && created[0] ? created[0] : DEFAULT_SYSTEM_CONFIG);
+  } catch (err) {
+    console.error("[INTEGRATION] Gagal membaca konfigurasi sistem dari DB:", err);
+    throw err;
+  } finally {
+    connection.release();
+  }
+}
+
+export async function saveSystemIntegrationConfig(
+  input: Partial<SystemIntegrationConfig>
+): Promise<SystemIntegrationConfig> {
+  const connection = await dbPool.getConnection();
+  try {
+    const current = await getSystemIntegrationConfig();
+
+    const ssoAllowedDomains =
+      input.ssoAllowedDomains !== undefined
+        ? input.ssoAllowedDomains.trim()
+        : current.ssoAllowedDomains;
+    const slackWebhookUrl =
+      input.slackWebhookUrl !== undefined ? input.slackWebhookUrl.trim() : current.slackWebhookUrl;
+    const allowedOrigins =
+      input.allowedOrigins !== undefined ? input.allowedOrigins.trim() : current.allowedOrigins;
+    const appUrl =
+      input.appUrl !== undefined ? String(input.appUrl).trim().replace(/\/+$/, "") : current.appUrl;
+
+    await connection.query(
+      `
+      INSERT INTO "IntegrationSettings" (
+        channel, "ssoAllowedDomains", "slackWebhookUrl", "allowedOrigins", "appUrl", "updatedAt"
+      ) VALUES (?, ?, ?, ?, ?, NOW())
+      ON CONFLICT (channel) DO UPDATE SET
+        "ssoAllowedDomains" = EXCLUDED."ssoAllowedDomains",
+        "slackWebhookUrl" = EXCLUDED."slackWebhookUrl",
+        "allowedOrigins" = EXCLUDED."allowedOrigins",
+        "appUrl" = EXCLUDED."appUrl",
+        "updatedAt" = NOW()
+      `,
+      ["system", ssoAllowedDomains, slackWebhookUrl, allowedOrigins, appUrl]
+    );
+
+    return getSystemIntegrationConfig();
+  } finally {
+    connection.release();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Item #263, #279: Konfigurasi Koneksi WhatsApp (DB-backed)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface WhatsAppIntegrationConfig {
+  channel: "whatsapp";
+  provider: string;
+  endpoint: string;
+  token: string;
+  senderNumber: string;
+  deviceId: string;
+  updatedAt?: string;
+}
+
+const DEFAULT_WHATSAPP_CONFIG: WhatsAppIntegrationConfig = {
+  channel: "whatsapp",
+  provider: "fonnte",
+  endpoint: "https://api.fonnte.com/send",
+  token: "",
+  senderNumber: "",
+  deviceId: "",
+};
+
+function toWhatsAppConfigRow(data: any): WhatsAppIntegrationConfig {
+  if (!data) return DEFAULT_WHATSAPP_CONFIG;
+  return {
+    channel: "whatsapp",
+    provider: data.provider || DEFAULT_WHATSAPP_CONFIG.provider,
+    endpoint: data.endpoint || DEFAULT_WHATSAPP_CONFIG.endpoint,
+    token: data.apiKey || "",
+    senderNumber: data.senderNumber || "",
+    deviceId: data.deviceId || "",
+    updatedAt: data.updatedAt,
+  };
+}
+
+export async function getWhatsAppIntegrationConfig(): Promise<WhatsAppIntegrationConfig> {
+  if (
+    (process.env.JEST_WORKER_ID !== undefined || process.env.NODE_ENV === "test") &&
+    !process.env.TEST_WITH_REAL_DB
+  ) {
+    return {
+      ...DEFAULT_WHATSAPP_CONFIG,
+      token: process.env.WHATSAPP_API_TOKEN || "",
+    };
+  }
+
+  const connection = await dbPool.getConnection();
+  try {
+    const [rows]: any = await connection.query(
+      `SELECT * FROM "IntegrationSettings" WHERE channel = 'whatsapp'`
+    );
+    const existing = Array.isArray(rows) ? rows[0] : null;
+    if (existing) return toWhatsAppConfigRow(existing);
+
+    await connection.query(
+      `INSERT INTO "IntegrationSettings" (
+        channel, provider, endpoint, "apiKey", "senderNumber", "deviceId", "updatedAt"
+      ) VALUES (?, ?, ?, ?, ?, ?, NOW())
+      ON CONFLICT (channel) DO NOTHING`,
+      [
+        "whatsapp",
+        DEFAULT_WHATSAPP_CONFIG.provider,
+        DEFAULT_WHATSAPP_CONFIG.endpoint,
+        DEFAULT_WHATSAPP_CONFIG.token,
+        DEFAULT_WHATSAPP_CONFIG.senderNumber,
+        DEFAULT_WHATSAPP_CONFIG.deviceId,
+      ]
+    );
+
+    const [created]: any = await connection.query(
+      `SELECT * FROM "IntegrationSettings" WHERE channel = 'whatsapp'`
+    );
+    return toWhatsAppConfigRow(created && created[0] ? created[0] : DEFAULT_WHATSAPP_CONFIG);
+  } catch (err) {
+    console.error("[INTEGRATION] Gagal membaca konfigurasi WhatsApp dari DB:", err);
+    throw err;
+  } finally {
+    connection.release();
+  }
+}
+
+export async function saveWhatsAppIntegrationConfig(
+  input: Partial<WhatsAppIntegrationConfig>
+): Promise<WhatsAppIntegrationConfig> {
+  const connection = await dbPool.getConnection();
+  try {
+    const current = await getWhatsAppIntegrationConfig();
+
+    const provider = input.provider || current.provider || "fonnte";
+    const endpoint = input.endpoint !== undefined ? input.endpoint.trim() : current.endpoint;
+    const token = input.token && !input.token.includes("••••") ? input.token.trim() : current.token;
+    const senderNumber =
+      input.senderNumber !== undefined ? input.senderNumber.trim() : current.senderNumber;
+    const deviceId = input.deviceId !== undefined ? input.deviceId.trim() : current.deviceId;
+
+    await connection.query(
+      `
+      INSERT INTO "IntegrationSettings" (
+        channel, provider, endpoint, "apiKey", "senderNumber", "deviceId", "updatedAt"
+      ) VALUES (?, ?, ?, ?, ?, ?, NOW())
+      ON CONFLICT (channel) DO UPDATE SET
+        provider = EXCLUDED.provider,
+        endpoint = EXCLUDED.endpoint,
+        "apiKey" = EXCLUDED."apiKey",
+        "senderNumber" = EXCLUDED."senderNumber",
+        "deviceId" = EXCLUDED."deviceId",
+        "updatedAt" = NOW()
+      `,
+      ["whatsapp", provider, endpoint, token, senderNumber, deviceId]
+    );
+
+    return getWhatsAppIntegrationConfig();
+  } finally {
+    connection.release();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Item #279: Resolusi Hierarkis (Database → Environment Variable → Default)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Mengambil daftar domain email yang diizinkan untuk SSO.
+ * Urutan: DB (ssoAllowedDomains) -> env SSO_ALLOWED_DOMAINS -> default.
+ */
+export async function ambilSsoAllowedDomains(): Promise<string[]> {
+  try {
+    const sys = await getSystemIntegrationConfig();
+    if (sys.ssoAllowedDomains && sys.ssoAllowedDomains.trim() !== "") {
+      return sys.ssoAllowedDomains
+        .split(",")
+        .map((d) => d.trim().toLowerCase())
+        .filter(Boolean);
+    }
+  } catch {
+    // Database tidak terbaca, jatuh ke env
+  }
+
+  const envDomains = process.env.SSO_ALLOWED_DOMAINS || "";
+  if (envDomains.trim() !== "") {
+    return envDomains
+      .split(",")
+      .map((d) => d.trim().toLowerCase())
+      .filter(Boolean);
+  }
+
+  return ["rajonet.com", "bni.co.id", "gmail.com", "outlook.com"];
+}
+
+/**
+ * Mengambil daftar origin CORS tambahan yang diizinkan.
+ * Urutan: DB (allowedOrigins) -> env ALLOWED_ORIGINS -> env APP_URL -> [].
+ */
+export async function ambilAllowedOrigins(): Promise<string[]> {
+  try {
+    const sys = await getSystemIntegrationConfig();
+    if (sys.allowedOrigins && sys.allowedOrigins.trim() !== "") {
+      return sys.allowedOrigins
+        .split(",")
+        .map((o) => o.trim().replace(/\/+$/, ""))
+        .filter(Boolean);
+    }
+  } catch {
+    // Database tidak terbaca, jatuh ke env
+  }
+
+  const envOrigins = process.env.ALLOWED_ORIGINS || process.env.APP_URL || "";
+  return envOrigins
+    .split(",")
+    .map((o) => o.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+}
+
+/**
+ * Mengambil URL Slack Webhook.
+ * Urutan: DB (slackWebhookUrl) -> env SLACK_WEBHOOK_URL -> "".
+ */
+export async function ambilSlackWebhookUrl(): Promise<string> {
+  try {
+    const sys = await getSystemIntegrationConfig();
+    if (sys.slackWebhookUrl && sys.slackWebhookUrl.trim() !== "") {
+      return sys.slackWebhookUrl.trim();
+    }
+  } catch {
+    // Database tidak terbaca, jatuh ke env
+  }
+
+  return (process.env.SLACK_WEBHOOK_URL || "").trim();
+}
+
+/**
+ * Mengambil token API WhatsApp.
+ * Urutan: DB (token di channel whatsapp) -> env WHATSAPP_API_TOKEN -> "".
+ */
+export async function ambilWhatsappToken(): Promise<string> {
+  try {
+    const wa = await getWhatsAppIntegrationConfig();
+    if (wa.token && wa.token.trim() !== "") {
+      return wa.token.trim();
+    }
+  } catch {
+    // Database tidak terbaca, jatuh ke env
+  }
+
+  return (process.env.WHATSAPP_API_TOKEN || "").trim();
+}

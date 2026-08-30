@@ -9,6 +9,7 @@ import { useAppStore } from "../../store/useAppStore";
 import { cn } from "../../lib/utils";
 import { Layers } from "lucide-react";
 import { UserAvatar } from "../../components/ui/UserAvatar";
+import { StyledDropdown } from "../../components/ui/CommonComponents";
 
 const getStatusStyle = (label: string) => {
   const lower = label.toLowerCase();
@@ -203,14 +204,16 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                 </label>
               </div>
               <div className="relative shrink-0">
-                <select
+                <StyledDropdown
                   value={groupBy}
-                  onChange={(e) => setGroupBy(e.target.value as any)}
-                  className="bg-primary-surface/10 text-primary border border-primary/20 rounded-md text-[10px] leading-none font-medium px-2 py-1 cursor-pointer outline-none focus:ring-1 focus:ring-primary/30 max-w-[110px]"
-                >
-                  <option value="epic">{t("kanban.byEpic")}</option>
-                  <option value="assignee">{t("kanban.byAssignee")}</option>
-                </select>
+                  onChange={(val: string) => setGroupBy(val as "epic" | "assignee")}
+                  options={[
+                    { id: "epic", label: t("kanban.byEpic") },
+                    { id: "assignee", label: t("kanban.byAssignee") },
+                  ]}
+                  className="w-auto"
+                  buttonClassName="bg-primary-surface/10 text-primary border border-primary/20 rounded-md text-[10px] leading-none font-medium px-2 py-1 cursor-pointer outline-none hover:bg-primary-surface/20 transition-all"
+                />
               </div>
             </div>
           </div>

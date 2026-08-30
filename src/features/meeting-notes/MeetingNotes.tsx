@@ -34,9 +34,11 @@ import {
 } from "../../types";
 import { DiscussionPointsTable } from "./DiscussionPointsTable";
 import { UserAvatar } from "../../components/ui/UserAvatar";
-import { hasPermission } from "../../lib/permissions";
 import { downloadMeetingFile, resolveUserId } from "./services/meeting.service";
+import { hasPermission } from "../../lib/permissions";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
+import { LanproDatePicker } from "../../components/ui/LanproDatePicker";
+import { LanproTimePicker } from "../../components/ui/LanproTimePicker";
 
 interface MeetingNotesProps {
   projectId: string;
@@ -790,12 +792,10 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     <Calendar className="w-3.5 h-3.5 text-content-subtle" />
                     {t("meetings.meetingDate")}
                   </label>
-                  <input
-                    type="date"
+                  <LanproDatePicker
                     disabled={!canModify}
-                    className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all shadow-2xs cursor-pointer"
                     value={newMeetingDate}
-                    onChange={(e) => setNewMeetingDate(e.target.value)}
+                    onChange={(val) => setNewMeetingDate(val)}
                   />
                 </div>
 
@@ -804,12 +804,10 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                     <Clock className="w-3.5 h-3.5 text-content-subtle" />
                     {t("meetings.meetingTime")}
                   </label>
-                  <input
-                    type="time"
+                  <LanproTimePicker
                     disabled={!canModify}
-                    className="w-full px-3.5 py-2 bg-surface disabled:bg-surface-sunken disabled:text-content-muted border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none transition-all shadow-2xs cursor-pointer"
                     value={newMeetingTime}
-                    onChange={(e) => setNewMeetingTime(e.target.value)}
+                    onChange={(val) => setNewMeetingTime(val)}
                   />
                 </div>
               </div>

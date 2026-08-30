@@ -6,6 +6,10 @@
  */
 export const id = {
   serverErr: {
+    "srv.gagal_mengambil_konfigurasi_sistem": "Gagal mengambil konfigurasi sistem operasional",
+    "srv.gagal_menyimpan_konfigurasi_sistem": "Gagal menyimpan konfigurasi sistem operasional",
+    "srv.gagal_mengambil_konfigurasi_whatsapp": "Gagal mengambil konfigurasi koneksi WhatsApp",
+    "srv.gagal_menyimpan_konfigurasi_whatsapp": "Gagal menyimpan konfigurasi koneksi WhatsApp",
     "srv.akses_ditolak_hanya_global": "Akses ditolak: hanya Global Admin yang memiliki izin.",
     "srv.akses_ditolak": "Akses ditolak",
     "srv.gagal_memverifikasi_hak_akses": "Gagal memverifikasi hak akses.",
@@ -880,6 +884,10 @@ export const id = {
     exportCsv: "Ekspor CSV",
     completed: "Selesai",
     action: "Aksi",
+    removeMember: "Keluarkan dari Tim",
+    removeMemberTitle: "Keluarkan Anggota Tim",
+    confirmRemoveMember: "Apakah Anda yakin ingin mengeluarkan {{name}} dari proyek ini?",
+    changeRole: "Ubah Peran",
     csvUidEmail: "UID/Email",
     csvFullName: "Nama Lengkap",
     csvUsername: "Username",
@@ -2553,6 +2561,10 @@ export const id = {
     passwordDb_password: "Kata Sandi (DB_PASSWORD)",
     importantFixResolvingUnknownDatabase:
       '⚠️ Solusi Penting: Mengatasi "Unknown database" / ER_BAD_DB_ERROR',
+    confirmSaveTitle: "Konfirmasi Ganti Koneksi Database",
+    confirmSaveMessage:
+      "Apakah Anda yakin ingin menerapkan konfigurasi database ini? Aksi ini akan langsung mengganti connection pool aktif dan dapat memutus koneksi live seluruh aplikasi.",
+    confirmSaveAction: "Ya, Terapkan Koneksi",
   },
   welcome: {
     greeting: "Selamat datang di LanPro",
@@ -2823,6 +2835,7 @@ export const id = {
     placeholder: "Apa yang perlu dikerjakan? Ketik lalu tekan Enter untuk menyimpan...",
   },
   ui: {
+    loading: "Memuat...",
     close: "Tutup",
     cancel: "Batal",
     yesDelete: "Ya, Hapus",
@@ -2955,6 +2968,24 @@ export const id = {
     subject: "Subjek:",
     emailConfiguration: "Konfigurasi Email",
     whatsappGateway: "Gerbang WhatsApp",
+    systemOperational: "Sistem & Keamanan",
+    operationalConfigTitle: "Pengaturan Operasional & Keamanan",
+    operationalConfigDesc:
+      "Kelola domain yang diizinkan untuk login SSO, origin CORS, dan integrasi webhook langsung dari antarmuka tanpa perlu redeploy.",
+    ssoAllowedDomains: "Domain Email SSO yang Diizinkan",
+    ssoAllowedDomainsHelp:
+      "Pisahkan beberapa domain dengan koma. Kosongkan jika ingin menggunakan nilai bawaan sistem.",
+    allowedOrigins: "Origin CORS Tambahan (ALLOWED_ORIGINS)",
+    allowedOriginsHelp:
+      "Origin URL yang diizinkan untuk request lintas domain dan Socket.IO. Pisahkan dengan tanda koma.",
+    slackWebhookUrl: "Slack Webhook URL (Notifikasi)",
+    slackWebhookUrlHelp: "URL Webhook Slack untuk menerima alert dan pemberitahuan sistem.",
+    appUrl: "URL Aplikasi (APP_URL)",
+    appUrlHelp:
+      "URL utama aplikasi yang dipakai untuk tautan email, redirect OIDC SSO, dan pemberitahuan sistem.",
+    saveConfiguration: "Simpan Konfigurasi",
+    systemSaveSuccess: "Konfigurasi operasional sistem berhasil disimpan.",
+    systemSaveFailed: "Gagal menyimpan konfigurasi sistem.",
     insertVar: "Sisipkan {{nama}}",
   },
   auth: {

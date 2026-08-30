@@ -803,6 +803,13 @@ export async function runMigrations(pool: Pool): Promise<void> {
       ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "apiKey" TEXT;
       ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "subjectTemplate" TEXT;
       ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "bodyTemplate" TEXT;
+      -- Item #279: Sisa konfigurasi operasional (SSO allowed domains, Slack webhook, CORS allowed origins, WhatsApp connection)
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "ssoAllowedDomains" TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "slackWebhookUrl" TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "allowedOrigins" TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS endpoint TEXT;
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "senderNumber" VARCHAR(50);
+      ALTER TABLE "IntegrationSettings" ADD COLUMN IF NOT EXISTS "deviceId" VARCHAR(100);
     `);
 
     // ── PENYETARAAN SCHEMA (item #79) ─────────────────────────────────────────
