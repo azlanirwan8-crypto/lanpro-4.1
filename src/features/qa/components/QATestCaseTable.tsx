@@ -326,7 +326,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
       {/* FLOATING BULK ACTIONS TOOLBAR FOR ADMIN / PROJECT ADMIN */}
       {selectedCaseIds.length > 0 && (canUpdate || isAdminRole) && (
-        <div className="bg-gradient-to-r from-primary to-indigo-900 text-content-inverse p-3 rounded-md shadow-xl flex flex-wrap items-center justify-between gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="bg-gradient-to-r from-primary to-indigo-900 text-content-inverse p-3 rounded-md shadow-xl flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="p-1.5 bg-surface/10 rounded-md">
               <CheckSquare className="w-4 h-4 text-emerald-400" />

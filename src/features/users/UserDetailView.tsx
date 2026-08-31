@@ -1483,7 +1483,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
   return (
     <div className="flex-1 flex flex-col h-full bg-surface-sunken overflow-y-auto p-3 md:p-6 pb-24 md:pb-32">
-      <div className="flex flex-col space-y-5 min-h-full animate-in fade-in duration-700">
+      <div className="flex flex-col space-y-5 min-h-full">
         {/* Main Content Area */}
         <div className="w-full space-y-5 flex-1">
           {/* Item #208 — cover kini tersimpan di server (kolom "coverUrl"),
@@ -3371,7 +3371,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                               {/* Tasks in project (Collapsable via Dropdown icon) */}
                               {projectTasks.length > 0 && isExpanded && (
-                                <div className="pt-2 border-t border-border-subtle/60 space-y-1.5 animate-in fade-in duration-150">
+                                <div className="pt-2 border-t border-border-subtle/60 space-y-1.5">
                                   <div className="flex items-center justify-between text-xs sm:text-[10px] text-content-subtle font-normal uppercase tracking-wider">
                                     <span>Tugas Terdelegasi ({projectTasks.length}):</span>
                                   </div>

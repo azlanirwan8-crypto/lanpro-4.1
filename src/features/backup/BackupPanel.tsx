@@ -193,7 +193,7 @@ export const BackupPanel = (_props: {
   };
 
   return (
-    <div className="flex-1 overflow-auto p-4 md:p-5 bg-surface-sunken/60 animate-in fade-in duration-300 custom-scrollbar w-full space-y-4">
+    <div className="flex-1 overflow-auto p-4 md:p-5 bg-surface-sunken/60 custom-scrollbar w-full space-y-4">
       {/* Top Cards: Export & Restore */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Export Box */}

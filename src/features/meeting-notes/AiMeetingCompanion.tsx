@@ -1010,7 +1010,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     </div>
 
                     {isEditingTranscript ? (
-                      <div className="space-y-4 text-left animate-fade-in">
+                      <div className="space-y-4 text-left">
                         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-xs text-amber-800 leading-relaxed flex items-start gap-2.5">
                           <Sparkles className="w-4.5 h-4.5 text-amber-600 shrink-0 mt-0.5 animate-pulse" />
                           <div>

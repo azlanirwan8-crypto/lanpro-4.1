@@ -72,7 +72,7 @@ export const ActivityLogPanel = ({
   });
 
   return (
-    <div className="flex-1 overflow-auto p-6 md:p-8 bg-surface-sunken animate-in fade-in duration-700 custom-scrollbar">
+    <div className="flex-1 overflow-auto p-6 md:p-8 bg-surface-sunken custom-scrollbar">
       <div className="space-y-6 w-full">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-border-subtle pb-6 mb-2">
           <div className="flex gap-4 items-center">

@@ -337,7 +337,7 @@ export const TeamManagementPanel = ({
   };
 
   return (
-    <div className="p-4 md:p-6 w-full h-[calc(100vh-80px)] flex flex-col overflow-hidden animate-in fade-in duration-300 text-left">
+    <div className="p-4 md:p-6 w-full h-[calc(100vh-80px)] flex flex-col overflow-hidden text-left">
       {/* Fixed Top Section Wrapper */}
       <div className="shrink-0 space-y-5 pb-1">
         {/* Header Title */}

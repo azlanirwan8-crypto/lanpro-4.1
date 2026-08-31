@@ -93,7 +93,7 @@ export const DbExplorerPanel: React.FC<any> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-surface-muted p-4 md:p-5 gap-4 text-left animate-in fade-in duration-300">
+    <div className="flex-1 flex flex-col min-h-0 bg-surface-muted p-4 md:p-5 gap-4 text-left">
       {/* Header & Tabs */}
       <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
         <div>

@@ -1068,7 +1068,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
         </div>
       ) : (
         <div className="w-full flex-1 flex flex-col min-h-0 bg-surface-sunken text-left font-sans">
-          <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4 animate-in fade-in duration-300">
+          <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4">
             {activeDoc ? (
               <>
                 {/* Panel 1: Top Actions */}

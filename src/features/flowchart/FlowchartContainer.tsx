@@ -2486,7 +2486,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           handleDeleteFlowchart={handleDeleteFlowchart}
         />
       ) : (
-        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto bg-surface-sunken p-4 md:p-6 space-y-4 animate-in fade-in duration-500 font-sans">
+        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto bg-surface-sunken p-4 md:p-6 space-y-4 font-sans">
           {/* VIEW-PORT UTAMA (DASHBOARD DENGAN EMBED VIEWER & TOGGLE KANVAS) */}
           <div className="flex-1 flex flex-col min-h-[600px] bg-transparent relative mb-8">
             {!selectedFlowId ? (

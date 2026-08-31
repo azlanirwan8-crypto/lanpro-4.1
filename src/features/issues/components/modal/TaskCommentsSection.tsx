@@ -90,7 +90,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
       </div>
 
       {activeTab === "comments" && (
-        <div className="space-y-8 animate-in fade-in slide-in-from-top-2">
+        <div className="space-y-8">
           {/* Add Comment */}
           <div className="flex gap-4 p-2">
             <UserAvatar
@@ -255,7 +255,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
       )}
 
       {activeTab === "history" && (
-        <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+        <div className="space-y-4">
           {filteredLogs.map((log, i) => {
             const actor = (projectMembers || []).find((m) => m?.uid === log.userId) || {
               displayName: "System",

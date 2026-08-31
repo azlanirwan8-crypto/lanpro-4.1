@@ -560,7 +560,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-surface-sunken w-full h-full">
-      <div className="flex-1 overflow-y-auto p-3 md:p-6 w-full animate-in fade-in duration-700">
+      <div className="flex-1 overflow-y-auto p-3 md:p-6 w-full">
         <div className="flex flex-col space-y-6 min-h-full">
           {/* Header & Controls */}
           <div className="bg-surface rounded-lg shadow-soft border border-border-subtle/80 p-4 shrink-0">
@@ -678,7 +678,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           {/* User List */}
           <div className="bg-surface rounded-xl shadow-soft border border-border-subtle/50 overflow-hidden flex-1 flex flex-col">
             {selectedUserIds.length > 0 && (
-              <div className="bg-indigo-500/10 border-b border-indigo-500/30 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-top duration-300">
+              <div className="bg-indigo-500/10 border-b border-indigo-500/30 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
                   <span className="w-6 h-6 rounded-full bg-indigo-600 text-content-inverse text-xs font-medium flex items-center justify-center">
                     {selectedUserIds.length}

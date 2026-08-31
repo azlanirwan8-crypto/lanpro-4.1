@@ -67,7 +67,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div className="flex-1 flex flex-col p-3 md:p-6 font-sans overflow-y-auto w-full bg-surface-muted animate-in fade-in duration-700">
+    <div className="flex-1 flex flex-col p-3 md:p-6 font-sans overflow-y-auto w-full bg-surface-muted">
       <div className="flex-1 flex flex-col bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
         {/* Dashboard Header matching Meeting Notes */}
         <div className="p-6 md:p-7 border-b border-border-subtle/80 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">

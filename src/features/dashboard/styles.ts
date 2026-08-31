@@ -1,6 +1,5 @@
 export const styles = {
-  container:
-    "flex-1 overflow-auto p-3 md:p-6 pb-20 md:pb-28 bg-surface-sunken animate-in fade-in duration-700 custom-scrollbar",
+  container: "flex-1 overflow-auto p-3 md:p-6 pb-20 md:pb-28 bg-surface-sunken custom-scrollbar",
   wrapper: "space-y-8 w-full pb-16 md:pb-24",
   header:
     "flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-border-subtle pb-6 mb-2",

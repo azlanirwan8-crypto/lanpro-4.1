@@ -636,7 +636,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
           /* DETAIL VIEW */
           <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken/50 w-full">
             {activeMeeting ? (
-              <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4 animate-in fade-in duration-300">
+              <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4">
                 {/* Panel 1: Top Actions */}
                 <div className="bg-surface border border-border-subtle/80 rounded-lg p-4 flex items-center justify-between shadow-2xs shrink-0">
                   <button

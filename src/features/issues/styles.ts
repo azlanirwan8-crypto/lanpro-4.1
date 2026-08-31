@@ -21,7 +21,7 @@ export const styles = {
     "group hover:bg-slate-50/70 dark:hover:bg-slate-800/50 transition-all duration-150 cursor-default border-b border-border-faint dark:border-border-inverse",
   selectedTableRow: "bg-primary-surface/5 dark:bg-primary-surface/20",
   inlineAddRow:
-    "bg-surface dark:bg-surface-inverse-strong group/inline-add animate-in fade-in slide-in-from-top-1 duration-200 relative overflow-visible",
+    "bg-surface dark:bg-surface-inverse-strong group/inline-add relative overflow-visible",
   inlineAddBorderedCell:
     "p-0 border-r border-slate-100/50 dark:border-border-inverse relative border-y-2 border-primary",
   inlineAddInput:
