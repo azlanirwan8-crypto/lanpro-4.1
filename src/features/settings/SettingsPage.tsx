@@ -96,21 +96,43 @@ export const SettingsPage: React.FC = () => {
           </div>
 
           {/* Grid Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 p-5">
-            <div className={activeTab === "konfigurasi" ? "lg:col-span-8" : "lg:col-span-5"}>
-              {activeTab === "konfigurasi" && (
-                <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 p-5 items-start">
+            {activeTab === "konfigurasi" ? (
+              /*
+                #303: tab Konfigurasi dibagi dua kolom atas permintaan pemilik
+                proyek -- Pengaturan Operasional di KIRI, blok Email di KANAN.
+
+                Sebelumnya keduanya bertumpuk di satu kolom `lg:col-span-8`,
+                jadi separuh kanan halaman kosong melompong dan pengaturan
+                operasional terdorong jauh ke bawah lipatan.
+
+                `order` DIPAKAI SENGAJA, bukan urutan DOM: di layar sempit
+                grid runtuh jadi satu kolom dan yang tampil lebih dulu adalah
+                yang duluan di DOM. Tab ini bernama "Konfigurasi Email", jadi
+                blok Email harus yang pertama terbaca di ponsel -- sementara di
+                desktop `lg:order-2` memindahkannya ke kanan sesuai permintaan.
+                Menukar urutan DOM-nya akan memenuhi permintaan desktop dengan
+                mengorbankan ponsel.
+
+                `items-start` supaya kedua kolom rata atas dan kolom yang lebih
+                pendek tidak ikut meregang mengikuti tetangganya.
+              */
+              <>
+                <div className="lg:col-span-7 lg:order-2">
                   <EmailConfigForm formData={emailConfig} setFormData={setEmailConfig} />
-                  <div className="pt-6 border-t border-border-subtle/80">
-                    <SystemConfigForm />
-                  </div>
                 </div>
-              )}
-              {activeTab === "whatsapp" && (
-                <WhatsAppConfigForm formData={waConfig} setFormData={setWaConfig} />
-              )}
-              {activeTab === "taskBroadcast" && <TaskBroadcastForm />}
-            </div>
+                <div className="lg:col-span-5 lg:order-1">
+                  <SystemConfigForm />
+                </div>
+              </>
+            ) : (
+              <div className="lg:col-span-5">
+                {activeTab === "whatsapp" && (
+                  <WhatsAppConfigForm formData={waConfig} setFormData={setWaConfig} />
+                )}
+                {activeTab === "taskBroadcast" && <TaskBroadcastForm />}
+              </div>
+            )}
 
             {/*
               Monitoring pengiriman menemani tab yang BENAR-BENAR mengirim
