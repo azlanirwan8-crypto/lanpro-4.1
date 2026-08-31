@@ -1435,7 +1435,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       {/* Senior Portal-Style Hover Tooltip overlay */}
       {hoveredTooltip && (
         <div
-          className="fixed z-9999 pointer-events-none bg-overlay/95 backdrop-blur-md border border-slate-700/80 text-content-inverse text-xs font-medium rounded-xl px-3.5 py-2.5 max-w-xs shadow-2xl transition-all duration-100 ease-out animate-in fade-in zoom-in-95"
+          className="fixed z-9999 pointer-events-none bg-overlay/95 backdrop-blur-md border border-slate-700/80 text-content-inverse text-xs font-medium rounded-xl px-3.5 py-2.5 max-w-xs shadow-2xl transition-all duration-100 ease-out animate-dropdown"
           style={{
             left: `${hoveredTooltip.x + 14}px`,
             top: `${hoveredTooltip.y + 14}px`,

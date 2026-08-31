@@ -354,7 +354,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     className="fixed inset-0 z-40"
                     onClick={() => setIsBulkPicDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 top-full mt-1.5 w-60 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 top-full mt-1.5 w-60 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
                     <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-wider text-primary border-b border-border-faint mb-1">
                       {t("rakit.assignPicToTasks", { count: selectedCaseIds.length })}
                     </div>
@@ -413,7 +413,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     className="fixed inset-0 z-40"
                     onClick={() => setIsBulkStatusDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 top-full mt-1.5 w-44 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 top-full mt-1.5 w-44 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
                     {["Passed", "Failed", "Blocked", "Retest", "Pending"].map((st) => (
                       <button
                         key={st}
@@ -633,7 +633,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                     setActiveCasePicDropdownId(null);
                                   }}
                                 />
-                                <div className="absolute right-0 top-full mt-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                                <div className="absolute right-0 top-full mt-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
                                   <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-wider text-primary border-b border-border-faint mb-1">
                                     {t("qa.assignPicTask")}
                                   </div>

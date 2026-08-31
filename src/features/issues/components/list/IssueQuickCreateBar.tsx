@@ -75,7 +75,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
               <ChevronDown className="w-3 h-3 text-content-subtle ml-0.5" />
             </button>
             {isInlineTypeOpen === "global" && (
-              <div className="absolute left-0 bottom-full mb-2 w-48 bg-surface border border-border-subtle rounded-lg shadow-xl z-[100] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
+              <div className="absolute left-0 bottom-full mb-2 w-48 bg-surface border border-border-subtle rounded-lg shadow-xl z-[100] overflow-hidden animate-dropdown">
                 {mArr
                   .filter((m) => m.type === "issue_type")
                   .map((t) => (
