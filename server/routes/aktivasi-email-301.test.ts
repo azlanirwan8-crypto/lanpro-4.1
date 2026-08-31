@@ -68,6 +68,11 @@ jest.mock("../../src/lib/db", () => ({
 jest.mock("../services/email.service", () => ({
   __esModule: true,
   kirimEmailAktivasiAkun: jest.fn().mockResolvedValue({ success: true }),
+  // #301(b) — rute yang sama kini juga memanggil pengirim penolakan. Tanpa
+  // baris ini ia `undefined`, dan `TypeError`-nya muncul sebagai 500 pada
+  // kasus "penolakan tidak memicu email aktivasi" — terlihat seperti rutenya
+  // rusak, padahal mock-nya yang tertinggal.
+  kirimEmailPenolakanAkun: jest.fn().mockResolvedValue({ success: true }),
   kirimEmailLatarBelakang: jest.fn().mockResolvedValue(undefined),
 }));
 

@@ -19,7 +19,11 @@ import { AuthenticatedRequest } from "../types/express";
 import { userRepository } from "../repositories/user.repository";
 import { matchesCaller } from "../services/task.service";
 import { createAuditLog } from "../services/audit.service";
-import { kirimEmailAktivasiAkun, kirimEmailLatarBelakang } from "../services/email.service";
+import {
+  kirimEmailAktivasiAkun,
+  kirimEmailPenolakanAkun,
+  kirimEmailLatarBelakang,
+} from "../services/email.service";
 export { sanitizeAvatarValue };
 
 // Item #210 — dulu memakai `sanitizeAvatarValue` (yang sengaja menolak URL
@@ -67,6 +71,19 @@ function statusBerartiAktif(s: unknown): boolean {
   if (!s) return false;
   const lower = String(s).toLowerCase().trim();
   return lower === "active" || lower === "approved";
+}
+
+/**
+ * Apakah sebuah nilai status berarti akun DITOLAK atau DINONAKTIFKAN (#301(b)).
+ *
+ * Berdiri sendiri, bukan sekadar kebalikan `statusBerartiAktif()`: `pending`
+ * juga bukan aktif, tetapi ia menunggu keputusan — bukan hasil keputusan.
+ * Menyamakan keduanya akan mengirimi setiap pendaftar baru email penolakan
+ * pada detik ia mendaftar.
+ */
+function statusBerartiDitolak(s: unknown): boolean {
+  if (!s) return false;
+  return String(s).toLowerCase().trim() === "rejected";
 }
 
 const router = express.Router();
@@ -569,6 +586,44 @@ router.put(
               nama: targetName,
             }),
             `Email aktivasi akun untuk ${targetEmail}`
+          );
+        }
+      }
+
+      // #301(b) — penolakan senyap. Status `rejected` memblokir login di
+      // `middleware/auth.ts:102`, tetapi sebelum ini tidak ada apa pun yang
+      // memberi tahu orangnya: dari sisi pengguna akunnya sekadar berhenti
+      // bekerja tanpa penjelasan.
+      //
+      // Syarat "sebelumnya BUKAN rejected" bukan hiasan: tanpanya, tiap kali
+      // admin menyunting nama atau departemen akun yang memang sudah ditolak,
+      // orangnya dikirimi ulang kabar buruk yang sama.
+      const isBeingRejected =
+        Boolean(oldUser) && !statusBerartiDitolak(oldUser?.status) && statusBerartiDitolak(status);
+
+      if (isBeingRejected && oldUser) {
+        const targetEmail = email || oldUser.email;
+        const targetUsername = username || oldUser.username || targetEmail;
+        const targetName =
+          displayName || oldUser.displayName || oldUser.nama_lengkap || targetUsername;
+
+        // Satu status, dua arti. Yang membedakan adalah status SEBELUMNYA:
+        // yang tadinya aktif sedang DINONAKTIFKAN, yang tadinya `pending`
+        // pendaftarannya DITOLAK. Mengirimi karyawan lama "pendaftaran Anda
+        // ditolak" terbaca sebagai pesan salah alamat.
+        const jenis = statusBerartiAktif(oldUser?.status)
+          ? "akun_dinonaktifkan"
+          : "pendaftaran_ditolak";
+
+        if (targetEmail) {
+          await kirimEmailLatarBelakang(
+            kirimEmailPenolakanAkun({
+              email: targetEmail,
+              username: targetUsername,
+              nama: targetName,
+              jenis,
+            }),
+            `Email ${jenis === "akun_dinonaktifkan" ? "penonaktifan" : "penolakan"} akun untuk ${targetEmail}`
           );
         }
       }

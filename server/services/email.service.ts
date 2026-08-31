@@ -520,6 +520,103 @@ export async function kirimEmailAktivasiAkun(data: ActivationEmailData): Promise
   });
 }
 
+export interface RejectionEmailData {
+  email: string;
+  nama?: string;
+  username: string;
+  /**
+   * Satu status `rejected` di database menampung DUA peristiwa yang berbeda
+   * bagi penerimanya, dan dropdown adminnya pun berlabel
+   * "Ditangguhkan / Ditolak" (`UserDetailView.tsx:2648`). Yang membedakan
+   * bukan status barunya melainkan status SEBELUMNYA, dan pemanggil yang tahu
+   * status itu wajib menyebutkannya di sini.
+   */
+  jenis: "pendaftaran_ditolak" | "akun_dinonaktifkan";
+}
+
+/**
+ * Mengirim email pemberitahuan penolakan pendaftaran atau penonaktifan akun
+ * (Item #301(b)).
+ *
+ * **Kenapa fitur ini ada.** Status `rejected` memblokir login di
+ * `middleware/auth.ts:102`, tetapi sebelum ini tidak ada apa pun yang memberi
+ * tahu orangnya. Dari sisi pengguna, akunnya sekadar berhenti bekerja tanpa
+ * penjelasan — dan orang yang tidak tahu apa yang terjadi akan mengira
+ * sistemnya rusak, lalu mencoba berkali-kali.
+ *
+ * **Kenapa dua teks, bukan satu.** Mengirimi karyawan yang akunnya baru
+ * dinonaktifkan kalimat "pendaftaran Anda ditolak" terbaca sebagai pesan salah
+ * alamat: ia sudah berbulan-bulan memakai akun itu. Sebaliknya, mengirimi
+ * pendaftar baru "akun Anda dinonaktifkan" menyiratkan akses yang tidak pernah
+ * ia punya. Pembedaannya tidak menuntut data baru — `oldUser.status` sudah ada
+ * di tangan pemanggil.
+ *
+ * **Alasan penolakan sengaja TIDAK disebut.** Tidak ada satu kolom pun yang
+ * menyimpannya, jadi kalimat apa pun tentang alasan hanya bisa mengarang. Yang
+ * ditawarkan sebagai gantinya adalah jalan bertanya: hubungi administrator.
+ */
+export async function kirimEmailPenolakanAkun(data: RejectionEmailData): Promise<KirimEmailResult> {
+  const { email, nama, username, jenis } = data;
+  const namaPanggilan = (nama || username || "").trim();
+  const appUrl = await ambilAppUrl();
+
+  const pendaftaran = jenis === "pendaftaran_ditolak";
+
+  const subject = pendaftaran
+    ? "[LanPro] Pendaftaran Akun Anda Tidak Dapat Dilanjutkan"
+    : "[LanPro] Akun Anda Telah Dinonaktifkan";
+  const judul = pendaftaran ? "Pendaftaran Tidak Dilanjutkan" : "Akun Dinonaktifkan";
+  const kalimatUtama = pendaftaran
+    ? `Terima kasih telah mendaftar di LanPro. Setelah ditinjau Administrator, pendaftaran dengan username <strong>${username}</strong> belum dapat kami lanjutkan.`
+    : `Akun LanPro Anda dengan username <strong>${username}</strong> telah dinonaktifkan oleh Administrator, sehingga untuk sementara Anda tidak dapat masuk ke sistem.`;
+
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #1e293b; background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+      <div style="margin-bottom: 24px; text-align: center;">
+        <h1 style="color: #b45309; font-size: 22px; margin: 0 0 8px 0; font-weight: 700;">${judul}</h1>
+        <p style="color: #64748b; font-size: 14px; margin: 0;">LanPro Project Management System</p>
+      </div>
+
+      <div style="background-color: #f8fafc; border-radius: 6px; padding: 16px; margin-bottom: 20px;">
+        <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600;">Halo, ${namaPanggilan}.</p>
+        <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #334155;">
+          ${kalimatUtama}
+        </p>
+        <p style="margin: 8px 0 0 0; font-size: 13px; line-height: 1.5; color: #334155;">
+          Bila Anda merasa ini keliru atau ingin menanyakan langkah selanjutnya, silakan hubungi Administrator LanPro di organisasi Anda.
+        </p>
+      </div>
+
+      <p style="font-size: 11px; color: #94a3b8; text-align: center; margin-top: 24px;">
+        Email ini dikirim secara otomatis oleh sistem LanPro. Jangan membalas email ini.
+      </p>
+    </div>
+  `;
+
+  const text = pendaftaran
+    ? `Halo ${namaPanggilan},
+
+Pendaftaran akun LanPro Anda (${username}) belum dapat dilanjutkan.
+
+Bila Anda merasa ini keliru, silakan hubungi Administrator LanPro di organisasi Anda.
+
+Aplikasi: ${appUrl}`
+    : `Halo ${namaPanggilan},
+
+Akun LanPro Anda (${username}) telah dinonaktifkan oleh Administrator.
+
+Bila Anda merasa ini keliru, silakan hubungi Administrator LanPro di organisasi Anda.
+
+Aplikasi: ${appUrl}`;
+
+  return kirimEmail({
+    to: email,
+    subject,
+    html,
+    text,
+  });
+}
+
 export interface TaskDigestItem {
   id: string;
   key?: string;
