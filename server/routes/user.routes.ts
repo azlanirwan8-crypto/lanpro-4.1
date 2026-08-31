@@ -49,6 +49,26 @@ const isRedisConnected = false;
 const pubClient: any = null;
 const globalPresence = new Map<string, any>();
 
+/**
+ * #301(a) — Mengembalikan `true` bila `s` berarti "akun sudah aktif/disetujui".
+ *
+ * Ada DUA ejaan yang hidup berdampingan di basis data ini dan KEDUANYA sah:
+ * - `"approved"` — yang dikirim UI sejak awal (dropdown `UserDetailView.tsx`)
+ * - `"active"`   — ejaan lama yang masih tersimpan di baris-baris database lama
+ *
+ * `middleware/auth.ts:102` sudah lama menerima keduanya, tapi kondisi email
+ * aktivasi dulu hanya mengenal `"active"` — itulah sebabnya email itu tidak
+ * pernah terkirim sekali pun sejak fiturnya dibangun di #261.
+ *
+ * Perbandingan ini sengaja CASE-INSENSITIVE karena nilai di database tidak
+ * punya jaminan huruf besar/kecil yang seragam.
+ */
+function statusBerartiAktif(s: unknown): boolean {
+  if (!s) return false;
+  const lower = String(s).toLowerCase().trim();
+  return lower === "active" || lower === "approved";
+}
+
 const router = express.Router();
 
 router.post("/api/users/heartbeat", async (req, res) => {
@@ -524,13 +544,18 @@ router.put(
         newValues: { role, status, department, position, displayName, username, email, phone },
       });
 
-      // Item #261 — Kirim email notifikasi aktivasi akun bila status berubah menjadi ACTIVE
+      // Item #261 — Kirim email notifikasi aktivasi akun bila status berubah
+      // menjadi aktif.
+      //
+      // #301(a) — dulu baris ini menuntut persis `"active"`, dan karena itu
+      // TIDAK PERNAH menyala pada jalur yang benar-benar dipakai manusia:
+      // admin yang menyetujui lewat UI mengirim `"approved"`, dan tidak ada
+      // pemetaan di mana pun antara keduanya. Emailnya sudah dibangun sejak
+      // #261 tapi tidak pernah terkirim sekali pun.
       const isBeingActivated =
-        oldUser &&
-        String(oldUser.status || "").toLowerCase() !== "active" &&
-        String(status || "").toLowerCase() === "active";
+        Boolean(oldUser) && !statusBerartiAktif(oldUser?.status) && statusBerartiAktif(status);
 
-      if (isBeingActivated) {
+      if (isBeingActivated && oldUser) {
         const targetEmail = email || oldUser.email;
         const targetUsername = username || oldUser.username || targetEmail;
         const targetName =
