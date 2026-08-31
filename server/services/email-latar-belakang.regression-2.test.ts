@@ -123,11 +123,18 @@ describe("setiap pemanggil menunggu pengirimannya (regresi #300)", () => {
     expect(isi).toContain("await Promise.all(pengiriman)");
   });
 
-  it("menemukan lima pemanggil — penjagaan ini tidak boleh kosong", () => {
+  // Angka ini SENGAJA harfiah. Tujuannya bukan mencatat berapa pemanggil yang
+  // ada, melainkan memastikan pemindai di atas benar-benar menemukan sesuatu:
+  // regex yang rusak membuat seluruh kasus "tidak memanggilnya tanpa await"
+  // hijau tanpa memeriksa apa pun. Naik jadi 6 pada #301(b), saat pengirim
+  // email penolakan akun ditambahkan di `user.routes.ts`. Bila angka ini
+  // meleset, periksa dulu apakah ADA pemanggil baru yang sah — jangan
+  // langsung menyesuaikan angkanya.
+  it("menemukan enam pemanggil — penjagaan ini tidak boleh kosong", () => {
     const total = berkas.reduce((n, relatif) => {
       const isi = fs.readFileSync(path.join(akar, relatif), "utf8");
       return n + panggilan(isi).length;
     }, 0);
-    expect(total).toBe(5);
+    expect(total).toBe(6);
   });
 });
