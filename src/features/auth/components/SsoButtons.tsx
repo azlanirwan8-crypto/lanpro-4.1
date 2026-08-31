@@ -65,11 +65,25 @@ export const SsoButtons = ({ mode }: SsoButtonsProps) => {
     let dibatalkan = false;
     ambilProviderSso().then((hasil) => {
       if (!dibatalkan) {
-        // Item #197 — SSO Microsoft dilaporkan backend sebagai terkonfigurasi
-        // tapi alurnya belum berfungsi ("belum bisa sign dengan microsoft"),
-        // jadi tombolnya disembunyikan sengaja di sini sampai OIDC-nya siap.
-        // Konfigurasi backend TIDAK disentuh — hanya tampilan tombolnya.
-        setProviders(hasil.filter((p) => p !== "microsoft"));
+        // Item #305 — penyaring `p !== "microsoft"` dari #197 DIHAPUS di sini.
+        //
+        // #197 memasangnya karena backend melaporkan microsoft terkonfigurasi
+        // sementara alur OIDC-nya belum siap: tombolnya ada, kliknya gagal.
+        // Adaptor OIDC-nya kini lengkap dan generik (`oidc.service.ts` sudah
+        // menyusun discovery Entra ID beserta tenant-nya), jadi penyaring itu
+        // sudah tidak menjaga apa pun — ia justru menyembunyikan provider yang
+        // sah bila kredensialnya suatu saat diisi.
+        //
+        // Penjaganya sekarang ada di tempat yang benar, yaitu BACKEND:
+        // `providerTersedia()` hanya memulangkan provider yang client id dan
+        // secret-nya benar-benar terisi. Selama `OIDC_MICROSOFT_CLIENT_ID` dan
+        // `_CLIENT_SECRET` kosong, daftar ini tidak memuat "microsoft" dan
+        // tombolnya tetap tidak tampil — tanpa perlu penyaring di sini.
+        //
+        // Jadi baris ini TIDAK memunculkan tombol Microsoft dengan sendirinya.
+        // Ia memulihkan aturan aslinya: tombol tampil bila, dan hanya bila,
+        // providernya benar-benar bisa dipakai.
+        setProviders(hasil);
         setMemuat(false);
       }
     });
