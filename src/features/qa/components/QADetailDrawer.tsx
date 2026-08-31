@@ -56,12 +56,12 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
   return (
     /* BACKDROP OVERLAY WITH AUTO-CLOSE ON CLICK OUTSIDE */
     <div
-      className="fixed inset-0 bg-overlay/50 backdrop-blur-xs z-50 flex justify-end cursor-pointer animate-in fade-in duration-150"
+      className="fixed inset-0 bg-overlay/50 backdrop-blur-xs z-50 flex justify-end cursor-pointer"
       onClick={() => setSelectedTestCase(null)}
     >
       {/* INNER DRAWER CONTAINER (PREVENT CLICK PROPAGATION & COMPACT SLIM VELZON LOOK) */}
       <div
-        className="w-full max-w-lg bg-surface h-full shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-200 border-l border-border-subtle cursor-default"
+        className="w-full max-w-lg bg-surface h-full shadow-2xl flex flex-col justify-between border-l border-border-subtle cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Velzon Offcanvas Header - COMPACT INTEGRATED HEADER & STATUS */}

@@ -411,8 +411,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
       {/* Edit Modal Popup (When clicking edit icon on a row) */}
       {editingId !== null && (
-        <div className="fixed inset-0 bg-overlay/40 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200">
-          <div className="bg-surface rounded-lg w-full max-w-2xl shadow-xl border border-border-subtle animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] overflow-hidden">
+        <div className="fixed inset-0 bg-overlay/40 backdrop-blur-xs flex items-center justify-center p-4 z-[9999]">
+          <div className="bg-surface rounded-lg w-full max-w-2xl shadow-xl border border-border-subtle flex flex-col max-h-[90vh] overflow-hidden">
             <div className="px-5 py-4 border-b border-border-faint flex items-center justify-between bg-surface-sunken/50 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-md bg-indigo-500/10 flex items-center justify-center border border-indigo-500/30 text-primary">
@@ -900,9 +900,9 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
       {/* THREAD DISCUSSIONS SLIDE-OVER SHEET */}
       {activeThreadPoint && (
-        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-[9999] flex justify-end animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-[9999] flex justify-end">
           <div className="absolute inset-0" onClick={() => setActiveThreadPoint(null)} />
-          <div className="relative bg-surface w-full max-w-lg h-full shadow-2xl border-l border-border-subtle flex flex-col animate-in slide-in-from-right duration-250 text-left">
+          <div className="relative bg-surface w-full max-w-lg h-full shadow-2xl border-l border-border-subtle flex flex-col text-left">
             <div className="p-5 border-b border-border-faint flex items-center justify-between bg-surface-sunken/80 shrink-0">
               <div className="flex items-center gap-3 pr-4">
                 <div className="w-10 h-10 rounded-xl bg-indigo-500/15 text-indigo-600 flex items-center justify-center border border-indigo-500/30 shrink-0">

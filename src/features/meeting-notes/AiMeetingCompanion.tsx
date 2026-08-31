@@ -1796,7 +1796,7 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
       {/* Continuous Learning Loop Feedback Modal */}
       {showFeedbackModal && (
-        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
+        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-surface rounded-lg max-w-lg w-full overflow-hidden shadow-xl border border-border-subtle transform transition-all scale-100">
             {/* Modal Header */}
             <div className="p-6 bg-gradient-to-r from-slate-900 to-indigo-950 text-content-inverse flex items-center justify-between">

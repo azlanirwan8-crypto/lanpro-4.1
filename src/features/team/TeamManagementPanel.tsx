@@ -758,7 +758,7 @@ export const TeamManagementPanel = ({
           const selectedUid = selectedProfileUser.uid || selectedProfileUser.id || "";
           const modalCover = safeLocalStorage.getItem(`user_cover_${selectedUid}`);
           return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/40 backdrop-blur-xs animate-in fade-in">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/40 backdrop-blur-xs">
               <div className="bg-surface rounded-xl border border-border-subtle shadow-xl max-w-md w-full overflow-hidden text-left">
                 {/* Modal Cover */}
                 <div
