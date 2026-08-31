@@ -139,7 +139,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
               {isDropdownOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-surface border border-border-subtle rounded-md shadow-2xl p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-surface border border-border-subtle rounded-md shadow-2xl p-2 z-50 animate-dropdown">
                     <div className="relative mb-2">
                       <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-content-subtle" />
                       <input

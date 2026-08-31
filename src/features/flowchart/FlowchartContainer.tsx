@@ -2486,7 +2486,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           handleDeleteFlowchart={handleDeleteFlowchart}
         />
       ) : (
-        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto bg-surface-sunken p-4 md:p-6 space-y-4 animate-in fade-in duration-500 font-sans">
+        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto bg-surface-sunken p-4 md:p-6 space-y-4 font-sans">
           {/* VIEW-PORT UTAMA (DASHBOARD DENGAN EMBED VIEWER & TOGGLE KANVAS) */}
           <div className="flex-1 flex flex-col min-h-[600px] bg-transparent relative mb-8">
             {!selectedFlowId ? (
@@ -3612,7 +3612,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
       {/* DETAILED POPUP DIALOG: TAMBAH DATA / ADD DATA / EDIT INFO DESCRIPTION */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fade-in">
+        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-surface border border-border-subtle w-full max-w-md rounded-xl shadow-xl overflow-hidden text-content-strong">
             {/* Modal Head */}
             <div className="px-5 py-4 bg-surface border-b border-border-subtle flex justify-between items-center">
@@ -3784,8 +3784,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
       {/* Upload Document Modal */}
       {isUploadDocModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-          <div className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col border border-border-subtle animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay/60 backdrop-blur-xs p-4">
+          <div className="bg-surface rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col border border-border-subtle">
             <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-surface">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-md bg-primary-surface/10 text-primary flex items-center justify-center">

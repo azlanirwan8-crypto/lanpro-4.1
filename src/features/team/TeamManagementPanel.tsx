@@ -337,7 +337,7 @@ export const TeamManagementPanel = ({
   };
 
   return (
-    <div className="p-4 md:p-6 w-full h-[calc(100vh-80px)] flex flex-col overflow-hidden animate-in fade-in duration-300 text-left">
+    <div className="p-4 md:p-6 w-full h-[calc(100vh-80px)] flex flex-col overflow-hidden text-left">
       {/* Fixed Top Section Wrapper */}
       <div className="shrink-0 space-y-5 pb-1">
         {/* Header Title */}
@@ -758,7 +758,7 @@ export const TeamManagementPanel = ({
           const selectedUid = selectedProfileUser.uid || selectedProfileUser.id || "";
           const modalCover = safeLocalStorage.getItem(`user_cover_${selectedUid}`);
           return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/40 backdrop-blur-xs animate-in fade-in">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/40 backdrop-blur-xs">
               <div className="bg-surface rounded-xl border border-border-subtle shadow-xl max-w-md w-full overflow-hidden text-left">
                 {/* Modal Cover */}
                 <div

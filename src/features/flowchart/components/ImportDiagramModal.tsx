@@ -59,7 +59,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 select-none">
-      <div className="bg-surface border border-border-subtle w-full max-w-xl rounded-xl shadow-xl overflow-hidden flex flex-col text-content-strong animate-in fade-in zoom-in-95 duration-150 max-h-[90vh]">
+      <div className="bg-surface border border-border-subtle w-full max-w-xl rounded-xl shadow-xl overflow-hidden flex flex-col text-content-strong max-h-[90vh]">
         {/* Modal Head */}
         <div className="px-5 py-4 bg-surface border-b border-border-subtle flex justify-between items-center shrink-0">
           <div className="flex items-center gap-2">
@@ -251,7 +251,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
 
           {/* Analytical preview result of parser */}
           {parsedImportData && (
-            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 space-y-2 text-[10px] leading-none animate-fade-in text-emerald-900 leading-relaxed font-sans font-medium">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 space-y-2 text-[10px] leading-none text-emerald-900 leading-relaxed font-sans font-medium">
               <span className="font-normal uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-emerald-800 flex items-center gap-1.5 shadow-soft bg-surface p-1 px-2.5 w-fit rounded-full border border-emerald-500/30">
                 {t("importDiagram.diagramReadinessReview")}
               </span>

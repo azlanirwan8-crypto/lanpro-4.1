@@ -90,7 +90,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
       </div>
 
       {activeTab === "comments" && (
-        <div className="space-y-8 animate-in fade-in slide-in-from-top-2">
+        <div className="space-y-8">
           {/* Add Comment */}
           <div className="flex gap-4 p-2">
             <UserAvatar
@@ -149,7 +149,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
               </div>
 
               {mentionState.active && (
-                <div className="absolute z-50 w-72 bg-surface rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden transform bottom-[110%] left-0 animate-in fade-in slide-in-from-bottom-2">
+                <div className="absolute z-50 w-72 bg-surface rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden transform bottom-[110%] left-0 animate-dropdown">
                   <div className="p-3 bg-surface-sunken border-b border-border-faint text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest">
                     {t("comments.suggestedPeople")}
                   </div>
@@ -255,7 +255,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
       )}
 
       {activeTab === "history" && (
-        <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+        <div className="space-y-4">
           {filteredLogs.map((log, i) => {
             const actor = (projectMembers || []).find((m) => m?.uid === log.userId) || {
               displayName: "System",

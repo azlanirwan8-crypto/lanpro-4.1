@@ -678,7 +678,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
 
       {/* Velzon Activity & Audit Log Viewer Modal */}
       {selectedUserForActivity && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/60 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/60 backdrop-blur-xs">
           <div className="bg-surface border border-border-subtle rounded-2xl shadow-xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden">
             {/* Modal Header */}
             <div className="p-5 border-b border-border-subtle bg-surface flex items-center justify-between">

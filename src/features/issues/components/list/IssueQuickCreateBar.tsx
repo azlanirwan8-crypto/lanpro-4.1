@@ -48,7 +48,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
   const mArr = masterData || [];
 
   return (
-    <div className="p-2 bg-surface border-t border-border-subtle shrink-0 shadow-[0_-2px_4px_-1px_rgba(0,0,0,0.03)] z-20 animate-in slide-in-from-bottom-2 duration-200">
+    <div className="p-2 bg-surface border-t border-border-subtle shrink-0 shadow-[0_-2px_4px_-1px_rgba(0,0,0,0.03)] z-20">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 border border-border-subtle rounded-xl bg-surface-sunken shadow-soft p-1.5 sm:p-1">
         <div className="flex items-center gap-2 w-full sm:w-auto flex-1 min-w-0">
           <div className="relative pl-1 shrink-0">
@@ -75,7 +75,7 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
               <ChevronDown className="w-3 h-3 text-content-subtle ml-0.5" />
             </button>
             {isInlineTypeOpen === "global" && (
-              <div className="absolute left-0 bottom-full mb-2 w-48 bg-surface border border-border-subtle rounded-lg shadow-xl z-[100] overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150">
+              <div className="absolute left-0 bottom-full mb-2 w-48 bg-surface border border-border-subtle rounded-lg shadow-xl z-[100] overflow-hidden animate-dropdown">
                 {mArr
                   .filter((m) => m.type === "issue_type")
                   .map((t) => (

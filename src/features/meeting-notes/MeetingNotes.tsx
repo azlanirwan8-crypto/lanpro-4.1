@@ -636,7 +636,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
           /* DETAIL VIEW */
           <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken/50 w-full">
             {activeMeeting ? (
-              <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4 animate-in fade-in duration-300">
+              <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4">
                 {/* Panel 1: Top Actions */}
                 <div className="bg-surface border border-border-subtle/80 rounded-lg p-4 flex items-center justify-between shadow-2xs shrink-0">
                   <button
@@ -742,7 +742,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
       {/* POPUP MODAL: Add / Edit Meeting */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-overlay/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
+        <div className="fixed inset-0 bg-overlay/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-surface p-5 sm:p-6 rounded-lg shadow-xl w-full max-w-lg border border-border-subtle text-left relative">
             <button
               onClick={() => {

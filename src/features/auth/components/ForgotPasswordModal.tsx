@@ -55,7 +55,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/60 backdrop-blur-xs">
       <div className="relative w-full max-w-md bg-surface border border-border-subtle rounded-xl shadow-2xl p-6 overflow-hidden">
         <button
           type="button"

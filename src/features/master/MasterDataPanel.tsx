@@ -498,7 +498,7 @@ export const MasterDataPanel = ({
   };
 
   return (
-    <div className="flex-1 overflow-hidden bg-surface-muted flex flex-col w-full h-full animate-in fade-in duration-300 text-left">
+    <div className="flex-1 overflow-hidden bg-surface-muted flex flex-col w-full h-full text-left">
       <div className="flex flex-1 gap-4 w-full h-full p-4 md:p-5">
         {/* Sidebar for Master Data Types */}
         <div className="w-[260px] shrink-0 flex flex-col h-full bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">
