@@ -474,7 +474,21 @@ export async function ambilSsoAllowedDomains(): Promise<string[]> {
       .filter(Boolean);
   }
 
-  return ["rajonet.com", "bni.co.id", "gmail.com", "outlook.com"];
+  // #305 opsi A. Dua perubahan, masing-masing punya alasannya sendiri:
+  //
+  //   - `rajonet.com` DIBUANG. Domain itu sudah di luar kendali proyek (#290),
+  //     jadi membiarkannya di sini berarti mempercayai direktori milik orang
+  //     lain sebagai gerbang masuk.
+  //   - `hq.bni.co.id` DITAMBAHKAN. Akun BNI sungguhan berbentuk
+  //     `100783@hq.bni.co.id`, dan `domainDiizinkan()` mencocokkan domain
+  //     PERSIS — `bni.co.id` tidak pernah mencakup subdomainnya. Tanpa baris
+  //     ini, login tamu tetap ditolak sesudah undangan Azure beres, dan
+  //     gejalanya akan terlihat seperti undangannya yang gagal.
+  //
+  // Sengaja tidak diubah jadi pencocokan sufiks: `bni.co.id` sebagai sufiks
+  // ikut menerima domain apa pun yang berakhiran sama, termasuk yang tidak
+  // dimiliki BNI. Subdomain yang sah didaftarkan satu per satu.
+  return ["bni.co.id", "hq.bni.co.id", "gmail.com", "outlook.com"];
 }
 
 /**

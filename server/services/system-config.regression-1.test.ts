@@ -37,10 +37,14 @@ describe("Konfigurasi Sistem Operasional (Regresi #279)", () => {
       expect(domains).toEqual(["perusahaan.com", "cabang.co.id"]);
     });
 
+    // #305 opsi A: `rajonet.com` dibuang (domainnya sudah di luar kendali
+    // proyek, lihat #290) dan `hq.bni.co.id` ditambahkan — subdomain itulah
+    // yang dipakai akun BNI sungguhan (`100783@hq.bni.co.id`), dan pencocokan
+    // domain bersifat PERSIS sehingga `bni.co.id` tidak mencakupnya.
     it("memakai default bila env dan DB kosong", async () => {
       delete process.env.SSO_ALLOWED_DOMAINS;
       const domains = await ambilSsoAllowedDomains();
-      expect(domains).toEqual(["rajonet.com", "bni.co.id", "gmail.com", "outlook.com"]);
+      expect(domains).toEqual(["bni.co.id", "hq.bni.co.id", "gmail.com", "outlook.com"]);
     });
   });
 
