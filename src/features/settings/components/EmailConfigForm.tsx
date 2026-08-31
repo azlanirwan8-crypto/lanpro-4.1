@@ -13,6 +13,7 @@ import {
   Eye,
   EyeOff,
   Lock,
+  Globe,
 } from "lucide-react";
 import { toast } from "sonner";
 import { TemplateEditorModal } from "./TemplateEditorModal";
@@ -430,20 +431,35 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
       </div>
 
       {/* URL Aplikasi (Item #278) — di luar cabang provider, sebab tautan di
-          dalam email dipakai oleh jalur SMTP maupun Resend. */}
-      <div className="space-y-1 pt-1">
-        <label className="text-xs font-medium text-content-body">URL Aplikasi</label>
-        <input
-          value={appUrl}
-          onChange={(e) => setAppUrl(e.target.value)}
-          placeholder="https://lanpro.my.id"
-          className={inputStyle}
-        />
-        <p className="text-xs sm:text-[11px] text-content-muted">
-          Dipakai untuk tautan di dalam email (tombol "Buka LanPro", tautan reset kata sandi). Ganti
-          di sini bila domain berpindah — tidak perlu mengubah berkas di server. Kosongkan untuk
-          memakai nilai bawaan dari lingkungan server.
-        </p>
+          dalam email dipakai oleh jalur SMTP maupun Resend.
+
+          #302: dibungkus kartu seperti blok lain di halaman ini. Sebelumnya ia
+          satu-satunya field yang mengambang tanpa kartu, terjepit di antara dua
+          blok berkartu, dan itu membuatnya terbaca seperti sisa tempelan.
+
+          Ini juga SATU-SATUNYA field URL Aplikasi yang benar-benar berlaku:
+          `ambilAppUrl()` membaca baris database milik email. Field kembarannya
+          di Pengaturan Operasional sudah dihapus di #302(a) karena tidak pernah
+          dibaca siapa pun. */}
+      <div className="space-y-3.5 border border-border-subtle/80 bg-surface rounded-lg p-3.5 shadow-2xs">
+        <div className="flex items-center gap-2 pb-2 border-b border-border-subtle/60">
+          <Globe size={15} className="text-content-body" />
+          <span className="text-xs font-semibold text-content-strong">Tautan di Dalam Email</span>
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-content-body">URL Aplikasi</label>
+          <input
+            value={appUrl}
+            onChange={(e) => setAppUrl(e.target.value)}
+            placeholder="https://lanpro.my.id"
+            className={inputStyle}
+          />
+          <p className="text-xs sm:text-[11px] text-content-muted">
+            Dipakai untuk tautan di dalam email (tombol "Buka LanPro", tautan reset kata sandi).
+            Ganti di sini bila domain berpindah — tidak perlu mengubah berkas di server. Kosongkan
+            untuk memakai nilai bawaan dari lingkungan server.
+          </p>
+        </div>
       </div>
 
       {/*
@@ -461,7 +477,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
         <button
           type="button"
           onClick={() => setIsTemplateModalOpen(true)}
-          className="flex items-center gap-1.5 border border-indigo-500/30 bg-indigo-500/10 text-indigo-700 hover:bg-indigo-500/15 px-3 py-1.5 rounded-md text-xs font-medium transition mr-auto shadow-2xs cursor-pointer active:scale-95"
+          className="flex items-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-1.5 rounded-md text-xs font-medium transition mr-auto shadow-2xs cursor-pointer active:scale-95"
         >
           <FileEdit size={14} />
           {t("emailCfg.advancedEditor")}
@@ -481,10 +497,10 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
           type="button"
           onClick={handleSaveConfig}
           disabled={isSaving}
-          className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse px-3.5 py-1.5 rounded-md text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50"
+          className="flex items-center gap-1.5 bg-success-surface hover:bg-success-surface/90 text-content-inverse px-3.5 py-1.5 rounded-md text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50"
         >
           {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-          Simpan Konfigurasi
+          Simpan Konfigurasi Email
         </button>
       </div>
 

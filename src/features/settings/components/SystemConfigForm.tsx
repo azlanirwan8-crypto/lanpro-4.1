@@ -73,15 +73,24 @@ export const SystemConfigForm: React.FC = () => {
   }
 
   return (
-    <div className="space-y-5 text-left">
-      <div className="space-y-1">
+    /*
+      #302: kartu ini SENGAJA berbentuk sama persis dengan kartu di
+      `EmailConfigForm` -- `border border-border-subtle/80 bg-surface
+      rounded-lg p-3.5 shadow-2xs`, judul di baris atas dengan garis pemisah.
+
+      Sebelumnya blok ini polos tanpa kartu sementara blok email bertingkat,
+      sehingga separuh halaman terlihat berlapis dan separuhnya rata. Itu yang
+      dilaporkan pemilik proyek sebagai "kurang rapi".
+    */
+    <div className="space-y-3.5 text-left border border-border-subtle/80 bg-surface rounded-lg p-3.5 shadow-2xs">
+      <div className="space-y-1 pb-2 border-b border-border-subtle/60">
         <div className="flex items-center gap-2">
-          <Shield className="w-4 h-4 text-primary" />
-          <h2 className="text-xs font-normal uppercase tracking-wide text-content-strong">
+          <Shield size={15} className="text-content-body" />
+          <span className="text-xs font-semibold text-content-strong">
             {t("settings.operationalConfigTitle", "Pengaturan Operasional & Keamanan")}
-          </h2>
+          </span>
         </div>
-        <p className="text-xs text-content-muted">
+        <p className="text-[11px] text-content-muted">
           {t(
             "settings.operationalConfigDesc",
             "Kelola domain yang diizinkan untuk login SSO, origin CORS, dan integrasi webhook langsung dari antarmuka tanpa perlu redeploy."
@@ -89,7 +98,7 @@ export const SystemConfigForm: React.FC = () => {
         </p>
       </div>
 
-      <div className="space-y-4 pt-2">
+      <div className="space-y-4">
         {/* SSO Allowed Domains */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
@@ -209,19 +218,29 @@ export const SystemConfigForm: React.FC = () => {
         */}
       </div>
 
-      <div className="pt-3 border-t border-border-subtle flex justify-end">
+      {/*
+        #302: label tombol menyebut BAGIAN yang disimpannya, bukan "Simpan
+        Konfigurasi" polos. Sebelumnya ada dua tombol berbunyi sama persis di
+        satu tab -- yang satu hijau, yang satu biru -- dan tidak ada cara
+        mengetahui mana menyimpan apa selain mencobanya.
+
+        Gayanya kini identik dengan tombol simpan di `EmailConfigForm`, memakai
+        token `success-surface` (bukan warna keras): satu aksi utama per kartu,
+        rupa yang sama untuk peran yang sama.
+      */}
+      <div className="pt-3 border-t border-border-subtle/60 flex justify-end">
         <button
           type="button"
           onClick={handleSave}
           disabled={isSaving}
-          className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover active:bg-primary-active text-primary-content rounded-md text-xs font-medium transition-all shadow-2xs disabled:opacity-50 cursor-pointer"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 bg-success-surface hover:bg-success-surface/90 text-content-inverse rounded-md text-xs font-medium transition shadow-2xs disabled:opacity-50 cursor-pointer active:scale-95"
         >
           {isSaving ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
           ) : (
             <Save className="w-3.5 h-3.5" />
           )}
-          <span>{t("settings.saveConfiguration", "Simpan Konfigurasi")}</span>
+          <span>{t("settings.saveOperationalConfiguration", "Simpan Pengaturan Operasional")}</span>
         </button>
       </div>
     </div>

@@ -2306,7 +2306,7 @@ export const id = {
     integrationStatus: "Status Integrasi Email",
     checking: "Memeriksa...",
     providerBackend: "Penyedia Backend",
-    defaultSender: "Alamat Pengirim Default",
+    defaultSender: "Pengirim Aktif",
     senderNotSet: "Belum disetel (EMAIL_FROM kosong)",
     statusActive:
       "Layanan email transaksional aktif dan terhubung ke Resend REST API. Pastikan domain pengirim sudah terverifikasi di dasbor Resend.",
@@ -3043,6 +3043,7 @@ export const id = {
     appUrlHelp:
       "URL utama aplikasi yang dipakai untuk tautan email, redirect OIDC SSO, dan pemberitahuan sistem.",
     saveConfiguration: "Simpan Konfigurasi",
+    saveOperationalConfiguration: "Simpan Pengaturan Operasional",
     systemSaveSuccess: "Konfigurasi operasional sistem berhasil disimpan.",
     systemSaveFailed: "Gagal menyimpan konfigurasi sistem.",
     insertVar: "Sisipkan {{nama}}",

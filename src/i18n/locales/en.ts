@@ -2288,7 +2288,7 @@ export const en = {
     integrationStatus: "Email Integration Status",
     checking: "Checking...",
     providerBackend: "Provider Backend",
-    defaultSender: "Default Sender Address",
+    defaultSender: "Active Sender",
     senderNotSet: "Not set (EMAIL_FROM is empty)",
     statusActive:
       "Transactional email service is active and connected to the Resend REST API. Make sure the sender domain is verified in the Resend dashboard.",
@@ -3020,6 +3020,7 @@ export const en = {
     appUrlHelp:
       "Main application URL used for email links, OIDC SSO redirect, and system notifications.",
     saveConfiguration: "Save Configuration",
+    saveOperationalConfiguration: "Save Operational Settings",
     systemSaveSuccess: "System operational configuration saved successfully.",
     systemSaveFailed: "Failed to save system configuration.",
     insertVar: "Insert {{nama}}",
