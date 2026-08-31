@@ -187,33 +187,26 @@ export const SystemConfigForm: React.FC = () => {
           </p>
         </div>
 
-        {/* App URL */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-content-body flex items-center gap-1.5">
-              <Globe className="w-3.5 h-3.5 text-content-subtle" />
-              {t("settings.appUrl", "URL Aplikasi (APP_URL)")}
-            </label>
-            {config.sources?.appUrl && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-sunken text-content-muted border border-border-subtle">
-                {config.sources.appUrl === "database" ? "Database" : "Env Var"}
-              </span>
-            )}
-          </div>
-          <input
-            type="url"
-            value={config.appUrl}
-            onChange={(e) => setConfig({ ...config, appUrl: e.target.value })}
-            placeholder="http://localhost:3000 atau https://lanpro.example.com"
-            className={inputStyle}
-          />
-          <p className="text-[11px] text-content-subtle">
-            {t(
-              "settings.appUrlHelp",
-              "URL utama aplikasi yang dipakai untuk tautan email, redirect OIDC SSO, dan pemberitahuan sistem."
-            )}
-          </p>
-        </div>
+        {/*
+          URL Aplikasi SENGAJA TIDAK ADA DI SINI (#302).
+
+          Dulu blok ini memuat field "URL Aplikasi (APP_URL)", dan field itu
+          TIDAK PERNAH DIBACA siapa pun. Ia menulis ke baris database
+          `channel=system`, sementara satu-satunya pembacanya --
+          `ambilAppUrl()` di `server/services/email.service.ts` -- membaca
+          baris `channel=email`. Tiga helper lain memang membaca baris system
+          (`ambilSsoAllowedDomains`, `ambilAllowedOrigins`,
+          `ambilSlackWebhookUrl`), tetapi tidak ada satu pun yang membaca
+          `system.appUrl`.
+
+          Yang berlaku adalah field "URL Aplikasi" di `EmailConfigForm`.
+          Jangan menambahkan field kedua di sini lagi: dua kotak berlabel sama
+          di satu halaman, yang satu tanpa efek sama sekali, adalah cara
+          tercepat membuat admin mengira konfigurasinya sudah benar.
+
+          `config.appUrl` tetap ikut dikirim `handleSave()` apa adanya --
+          nilai yang dimuat dibalikkan utuh, jadi tidak ada data yang hilang.
+        */}
       </div>
 
       <div className="pt-3 border-t border-border-subtle flex justify-end">
