@@ -39,6 +39,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
 import { WikiMobileCardView } from "./components/WikiMobileCardView";
+import { hasPermission } from "../../lib/permissions";
 
 import type { DocumentModel, WikiViewProps } from "./types";
 import {
@@ -54,6 +55,8 @@ export const WikiView: React.FC<WikiViewProps> = ({
   projectId,
   users,
   currentUser,
+  userRole = "viewer",
+  permissions,
   masterData = [],
 }) => {
   const { t } = useTranslation();
@@ -96,10 +99,6 @@ export const WikiView: React.FC<WikiViewProps> = ({
         return null;
       }
     })();
-  const currentUserId = effectiveUser?.id || effectiveUser?.uid || effectiveUser?.userId;
-  const userRoleStr = effectiveUser?.role || effectiveUser?.system_role || "user";
-  const isAdmin = ["admin", "sadm", "admn"].includes(String(userRoleStr).toLowerCase());
-
   const isAuthor = (doc: DocumentModel) => {
     if (!doc || !effectiveUser) return false;
     const author = String(doc.createdBy || "")
@@ -133,19 +132,13 @@ export const WikiView: React.FC<WikiViewProps> = ({
         author === curDisplay)
     );
   };
-  const canModifyDoc = (doc: DocumentModel) => isAuthor(doc) || isAdmin;
-
-  const canCreate = useMemo(() => {
-    return true;
-  }, [currentUser]);
-
-  const canUpdate = useMemo(() => {
-    return true;
-  }, [currentUser]);
-
-  const canDelete = useMemo(() => {
-    return true;
-  }, [currentUser]);
+  const canCreate = hasPermission(userRole, "wiki", "create", false, permissions);
+  const canUpdate = hasPermission(userRole, "wiki", "update", false, permissions);
+  const canDelete = hasPermission(userRole, "wiki", "delete", false, permissions);
+  const canModifyDoc = (doc: DocumentModel) => {
+    const isOwner = isAuthor(doc);
+    return hasPermission(userRole, "wiki", "update", isOwner, permissions);
+  };
 
   // Split-Pane & Preview Interactive States
   const [isFullscreenPreview, setIsFullscreenPreview] = useState(false);
@@ -598,6 +591,16 @@ export const WikiView: React.FC<WikiViewProps> = ({
   const handleSave = async () => {
     if (!editTitle.trim()) {
       toast.error(t("toast.docTitleRequired"));
+      return;
+    }
+    if (isNew && !canCreate) {
+      toast.error(t("toast.noPermAddDoc") || "Anda tidak memiliki izin untuk membuat dokumen.");
+      return;
+    }
+    if (!isNew && editingDoc && !canModifyDoc(editingDoc)) {
+      toast.error(
+        t("toast.noPermEditDoc") || "Anda tidak memiliki izin untuk mengedit dokumen ini."
+      );
       return;
     }
     setLoading(true);

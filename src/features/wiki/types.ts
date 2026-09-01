@@ -1,11 +1,5 @@
-/**
- * Tipe domain Wiki / Dokumentasi.
- *
- * Diekstrak dari index.tsx (Fase 3 — Anti-God-Object).
- * Tipe murni: tanpa React, tanpa efek samping, tanpa dependensi runtime.
- */
-
-import type { UserProfile, MasterData } from '../../types';
+import type { UserProfile, MasterData, UserPermissions } from "../../types";
+import type { PeranEfektif } from "../../types/roles";
 
 /** Satu baris pada tabel Documents. */
 export interface DocumentModel {
@@ -27,5 +21,7 @@ export interface WikiViewProps {
   projectId: string;
   users: UserProfile[];
   currentUser: UserProfile | null;
+  userRole?: PeranEfektif;
+  permissions?: Partial<UserPermissions>;
   masterData?: MasterData[];
 }

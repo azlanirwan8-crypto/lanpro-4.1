@@ -717,6 +717,8 @@ export const id = {
     attachmentsDisabled: "Lampiran berkas dinonaktifkan untuk backend MySQL.",
     taskUnblocked: "Tugas {{key}} kini tidak terhalang karena {{selesai}} selesai",
     noPermEditTask: "Gagal: Anda tidak memiliki izin untuk menyunting tugas ini.",
+    noPermAddDoc: "Gagal: Anda tidak memiliki izin untuk membuat dokumen di proyek ini.",
+    noPermEditDoc: "Gagal: Anda tidak memiliki izin untuk menyunting dokumen ini.",
     relationNeedTask: "Gagal menambahkan relasi, pastikan sebuah tugas dipilih.",
     relationSelf: "Tidak bisa membuat relasi ke tugas ini sendiri.",
     relationExists: "Relasi ini sudah ada.",

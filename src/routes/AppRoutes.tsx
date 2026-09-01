@@ -263,6 +263,8 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
             projectId={selectedProject?.id || ""}
             users={allUsers}
             currentUser={currentUserProfile || currentUser}
+            userRole={effectiveRole}
+            permissions={currentUserProfile?.permissions}
             masterData={masterData}
           />
         </div>
