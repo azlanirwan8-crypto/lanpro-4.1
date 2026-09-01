@@ -4,7 +4,7 @@
  * Diekstrak dari EnterpriseAuditDashboard.tsx (Fase 3 — Anti-God-Object).
  */
 
-import { apiRequest } from '../../../lib/api';
+import { apiRequest } from "../../../lib/api";
 
 /** Bentuk respons standar backend. */
 export interface AuditApiResponse {
@@ -16,6 +16,7 @@ export interface AuditApiResponse {
 /** Filter yang tersedia untuk pengambilan log audit. */
 export interface AuditLogFilter {
   limit: number;
+  page?: number;
   projectId?: string;
   /** Nama entitas; 'All' berarti tanpa filter dan tidak dikirim ke backend. */
   entityName?: string;
@@ -30,9 +31,10 @@ export interface AuditLogFilter {
  */
 export async function fetchAuditLogs(filter: AuditLogFilter): Promise<AuditApiResponse> {
   const params = new URLSearchParams({ limit: String(filter.limit) });
-  if (filter.projectId) params.set('projectId', filter.projectId);
-  if (filter.entityName && filter.entityName !== 'All') {
-    params.set('entityName', filter.entityName);
+  if (filter.page) params.set("page", String(filter.page));
+  if (filter.projectId) params.set("projectId", filter.projectId);
+  if (filter.entityName && filter.entityName !== "All") {
+    params.set("entityName", filter.entityName);
   }
   return apiRequest(`/api/audit-logs?${params.toString()}`);
 }

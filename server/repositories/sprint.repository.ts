@@ -1,4 +1,5 @@
 import db from "../../src/lib/db";
+import { BATAS_DAFTAR_TANPA_PAGINATION, type PaginationParams } from "../lib/pagination";
 
 export interface SprintEntity {
   id: string;
@@ -15,7 +16,7 @@ export class SprintRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        "SELECT * FROM Sprints WHERE projectId = ? ORDER BY startDate ASC",
+        `SELECT * FROM Sprints WHERE projectId = ? ORDER BY startDate ASC LIMIT ${BATAS_DAFTAR_TANPA_PAGINATION}`,
         [projectId]
       );
       return rows || [];
@@ -24,13 +25,31 @@ export class SprintRepository {
     }
   }
 
+  async findByProjectIdPaged(
+    projectId: string,
+    pagination: PaginationParams
+  ): Promise<{ items: SprintEntity[]; total: number }> {
+    const connection = await db.getConnection();
+    try {
+      const [countRows]: any = await connection.query(
+        "SELECT COUNT(*)::int AS total FROM Sprints WHERE projectId = ?",
+        [projectId]
+      );
+      const total = countRows?.[0]?.total ?? 0;
+      const [rows]: any = await connection.query(
+        "SELECT * FROM Sprints WHERE projectId = ? ORDER BY startDate ASC LIMIT ? OFFSET ?",
+        [projectId, pagination.limit, pagination.offset]
+      );
+      return { items: rows || [], total };
+    } finally {
+      connection.release();
+    }
+  }
+
   async findById(id: string): Promise<SprintEntity | null> {
     const connection = await db.getConnection();
     try {
-      const [rows]: any = await connection.query(
-        "SELECT * FROM Sprints WHERE id = ?",
-        [id]
-      );
+      const [rows]: any = await connection.query("SELECT * FROM Sprints WHERE id = ?", [id]);
       return rows && rows.length > 0 ? rows[0] : null;
     } finally {
       connection.release();
@@ -80,10 +99,7 @@ export class SprintRepository {
   async delete(id: string, projectId: string): Promise<void> {
     const connection = await db.getConnection();
     try {
-      await connection.query("DELETE FROM Sprints WHERE id = ? AND projectId = ?", [
-        id,
-        projectId,
-      ]);
+      await connection.query("DELETE FROM Sprints WHERE id = ? AND projectId = ?", [id, projectId]);
     } finally {
       connection.release();
     }

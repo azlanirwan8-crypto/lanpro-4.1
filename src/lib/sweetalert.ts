@@ -89,6 +89,63 @@ export const confirmDeleteAlert = async (title?: string, text?: string): Promise
   return result.isConfirmed;
 };
 
+export type OpsiTutupSprint = "backlog" | "next" | "leave";
+
+/**
+ * #313 — dialog tutup sprint: backlog / sprint berikutnya / biarkan.
+ * Mengembalikan null bila dibatalkan.
+ */
+export const confirmCompleteSprintAlert = async (
+  title: string,
+  text: string,
+  opsiSprintBerikutnya?: { id: string; name: string } | null
+): Promise<OpsiTutupSprint | null> => {
+  const punyaNext = !!opsiSprintBerikutnya;
+  const result = await Swal.fire({
+    ...velzonPopupConfig,
+    title,
+    html: `
+      <p class="velzon-swal-text mx-4 mb-3">${text}</p>
+      <div class="text-left mx-4 space-y-2" style="text-align:left">
+        <label class="flex items-start gap-2 cursor-pointer">
+          <input type="radio" name="tutup-sprint" value="backlog" checked />
+          <span>${i18n.t("alerts.sprintUndoneToBacklog")}</span>
+        </label>
+        <label class="flex items-start gap-2 cursor-pointer ${punyaNext ? "" : "opacity-50"}">
+          <input type="radio" name="tutup-sprint" value="next" ${punyaNext ? "" : "disabled"} />
+          <span>${
+            punyaNext
+              ? i18n.t("alerts.sprintUndoneToNext", { name: opsiSprintBerikutnya!.name })
+              : i18n.t("alerts.sprintNoNext")
+          }</span>
+        </label>
+        <label class="flex items-start gap-2 cursor-pointer">
+          <input type="radio" name="tutup-sprint" value="leave" />
+          <span>${i18n.t("alerts.sprintUndoneLeave")}</span>
+        </label>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: i18n.t("alerts.yesCompleteSprint"),
+    cancelButtonText: i18n.t("alerts.cancel"),
+    customClass: {
+      ...velzonPopupConfig.customClass,
+      confirmButton: `${VELZON_BTN.primary} me-2 mb-1`,
+      cancelButton: `${VELZON_BTN.danger} mb-1`,
+    },
+    focusConfirm: false,
+    preConfirm: () => {
+      const picked = document.querySelector(
+        'input[name="tutup-sprint"]:checked'
+      ) as HTMLInputElement | null;
+      return (picked?.value as OpsiTutupSprint) || "backlog";
+    },
+  });
+
+  if (!result.isConfirmed) return null;
+  return (result.value as OpsiTutupSprint) || "backlog";
+};
+
 export const showSuccessAlert = (title?: string, text?: string) => {
   Swal.fire({
     ...velzonPopupConfig,

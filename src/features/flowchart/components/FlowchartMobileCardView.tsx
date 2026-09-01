@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Workflow, Calendar, Edit3, Trash2, ArrowRight, Layers } from "lucide-react";
 import type { FlowchartData } from "../types";
 import type { Task } from "../../../types";
+import { tampilanNamaPembuat } from "../lib/authorIdentity";
 
 interface FlowchartMobileCardViewProps {
   flowcharts: FlowchartData[];
@@ -70,7 +71,7 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
       {flowcharts.map((flow, index) => {
         const canModify = canModifyFlowchart(flow);
         const epicName = getLinkedEpicName(flow.epicTaskId);
-        const author = flow.createdByName || flow.createdBy || getResolvedAuthor();
+        const author = tampilanNamaPembuat(flow, getResolvedAuthor());
 
         return (
           <div

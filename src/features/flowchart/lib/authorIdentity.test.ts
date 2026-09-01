@@ -9,7 +9,7 @@
  * dan Hapus hilang, dan kanvas terbuka baca-saja — yang terbaca sebagai "klik
  * edit malah ke detail".
  */
-import { apakahPembuat } from "./authorIdentity";
+import { apakahPembuat, tampilanNamaPembuat, terlihatSepertiIdAuth } from "./authorIdentity";
 
 const pengguna = {
   id: "u-123",
@@ -67,5 +67,30 @@ describe("apakahPembuat", () => {
   it("menolak dokumen null tanpa melempar", () => {
     expect(apakahPembuat(null, pengguna)).toBe(false);
     expect(apakahPembuat(undefined, pengguna)).toBe(false);
+  });
+});
+
+describe("tampilanNamaPembuat", () => {
+  it("mengutamakan createdByName", () => {
+    expect(tampilanNamaPembuat({ createdBy: "u-123", createdByName: "Azlan Irwan" })).toBe(
+      "Azlan Irwan"
+    );
+  });
+
+  it("tidak menampilkan UUID mentah", () => {
+    expect(tampilanNamaPembuat({ createdBy: "a1b2c3d4-e5f6-7890-abcd-ef1234567890" })).toBe("—");
+  });
+
+  it("memakai createdBy legacy bila berupa nama", () => {
+    expect(tampilanNamaPembuat({ createdBy: "Budi Santoso" })).toBe("Budi Santoso");
+  });
+
+  it("memakai cadangan bila id mentah", () => {
+    expect(tampilanNamaPembuat({ createdBy: "u-123" }, "Administrator")).toBe("Administrator");
+  });
+
+  it("mengenali pola id auth", () => {
+    expect(terlihatSepertiIdAuth("uid-999")).toBe(true);
+    expect(terlihatSepertiIdAuth("Azlan Irwan")).toBe(false);
   });
 });

@@ -517,6 +517,14 @@ summary {
     0 2px 4px rgb(15 23 42 / 0.04),
     0 12px 32px rgb(15 23 42 / 0.08);
 }
+
+/* #310 — safe area & ruang nav bawah HP */
+@utility safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@utility mobile-nav-pb {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
 html.dark .shadow-soft {
   box-shadow:
     0 1px 2px rgb(0 0 0 / 0.3),

@@ -1,7 +1,18 @@
 import { useTranslation } from "react-i18next";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
 import React from "react";
-import { Settings, Plus, Trash2, Edit, Search, Layers, GripVertical, Tag } from "lucide-react";
+import {
+  Settings,
+  Plus,
+  Trash2,
+  Edit,
+  Search,
+  Layers,
+  GripVertical,
+  Tag,
+  Menu,
+  X,
+} from "lucide-react";
 import {
   DragDropContext,
   Droppable as _Droppable,
@@ -116,6 +127,7 @@ export const MasterDataPanel = ({
   const [newMasterShortCode, setNewMasterShortCode] = React.useState("");
   const [newMasterHierarchy, setNewMasterHierarchy] = React.useState("Standard");
   const [newMasterStatusGroup, setNewMasterStatusGroup] = React.useState("To Do");
+  const [newMasterIsTerminal, setNewMasterIsTerminal] = React.useState(false);
   const [newMasterBaseUrl, setNewMasterBaseUrl] = React.useState("");
   const [newMasterRoleType, setNewMasterRoleType] = React.useState<"PROJECT" | "SYSTEM">("PROJECT");
   const [roleTabFilter, setRoleTabFilter] = React.useState<"ALL" | "PROJECT" | "SYSTEM">("ALL");
@@ -147,6 +159,8 @@ export const MasterDataPanel = ({
   const [editingModuleProjectId, setEditingModuleProjectId] = React.useState("");
   const [editingModuleNamaModul, setEditingModuleNamaModul] = React.useState("");
   const [editingModuleKeterangan, setEditingModuleKeterangan] = React.useState("");
+  /** #309 — laci kategori di bawah md; desktop tetap sidebar 260px. */
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   const fetchProjectModules = async () => {
     setLoadingModules(true);
@@ -395,6 +409,7 @@ export const MasterDataPanel = ({
         order: nextOrder,
         description,
         role_type: newMasterType === "project_role" ? newMasterRoleType : null,
+        isTerminal: newMasterType === "status" ? newMasterIsTerminal : false,
         createdBy: currentUserProfile?.uid || "system",
       };
 
@@ -406,6 +421,7 @@ export const MasterDataPanel = ({
       setNewMasterLabel("");
       setNewMasterShortCode("");
       setNewMasterBaseUrl("");
+      setNewMasterIsTerminal(false);
       onRefresh();
     } catch (e: any) {
       console.error(e);
@@ -450,6 +466,7 @@ export const MasterDataPanel = ({
         color: editingMaster.color,
         icon: editingMaster.icon,
         description: editingMaster.description,
+        isTerminal: !!editingMaster.isTerminal,
         role_type:
           editingMaster.type === "project_role"
             ? editingMaster.roleType || editingMaster.role_type || "PROJECT"
@@ -499,9 +516,26 @@ export const MasterDataPanel = ({
 
   return (
     <div className="flex-1 overflow-hidden bg-surface-muted flex flex-col w-full h-full text-left">
-      <div className="flex flex-1 gap-4 w-full h-full p-4 md:p-5">
-        {/* Sidebar for Master Data Types */}
-        <div className="w-[260px] shrink-0 flex flex-col h-full bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">
+      <div className="flex flex-1 gap-4 w-full h-full p-4 md:p-5 relative">
+        {/* #309 — overlay laci kategori (hanya < md) */}
+        {sidebarOpen && (
+          <button
+            type="button"
+            aria-label={t("master.closeCategories", "Tutup kategori")}
+            className="fixed inset-0 z-40 bg-overlay/50 md:hidden cursor-pointer"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+
+        {/* Sidebar for Master Data Types — laci di bawah md */}
+        <div
+          className={cn(
+            "w-[260px] shrink-0 flex flex-col h-full bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs",
+            "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:rounded-none max-md:border-y-0 max-md:border-l-0",
+            "max-md:transition-transform max-md:duration-200",
+            sidebarOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
+          )}
+        >
           <div className="p-3.5 border-b border-border-faint flex items-center justify-between bg-surface-sunken/50">
             <div>
               <h3 className="font-normal text-content-strong text-xs uppercase tracking-wider">
@@ -511,8 +545,18 @@ export const MasterDataPanel = ({
                 {t("master.systemConfiguration")}
               </p>
             </div>
-            <div className="w-7 h-7 rounded-md bg-indigo-500/10 flex items-center justify-center text-indigo-600">
-              <Settings className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1">
+              <div className="w-7 h-7 rounded-md bg-indigo-500/10 flex items-center justify-center text-indigo-600">
+                <Settings className="w-3.5 h-3.5" />
+              </div>
+              <button
+                type="button"
+                className="md:hidden p-1.5 rounded-md text-content-muted hover:bg-surface-muted cursor-pointer"
+                onClick={() => setSidebarOpen(false)}
+                aria-label={t("master.closeCategories", "Tutup kategori")}
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           </div>
           <div className="flex-1 py-2 flex flex-col gap-1 px-2.5 overflow-y-auto relative custom-scrollbar">
@@ -525,7 +569,10 @@ export const MasterDataPanel = ({
               return (
                 <button
                   key={t.type}
-                  onClick={() => setSelectedType(t.type)}
+                  onClick={() => {
+                    setSelectedType(t.type);
+                    setSidebarOpen(false);
+                  }}
                   className={cn(
                     "w-full text-left px-3 py-2 rounded-md text-xs transition-all flex items-center justify-between group relative cursor-pointer select-none",
                     isActive
@@ -559,7 +606,20 @@ export const MasterDataPanel = ({
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+          {/* #309 — pemicu laci di HP/tablet */}
+          <button
+            type="button"
+            onClick={() => setSidebarOpen(true)}
+            className="md:hidden mb-3 flex items-center gap-2 px-3 py-2.5 bg-surface border border-border-subtle/80 rounded-lg text-xs font-medium text-content-strong shadow-2xs cursor-pointer"
+          >
+            <Menu className="w-4 h-4 text-indigo-600 shrink-0" />
+            <span className="truncate">
+              {masterDataTypes.find((x) => x.type === selectedType)?.label ||
+                t("master.openCategories", "Kategori master")}
+            </span>
+          </button>
+
           {/* Header */}
           <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 mb-4 flex justify-between items-center shadow-2xs shrink-0">
             <div>
@@ -1157,20 +1217,34 @@ export const MasterDataPanel = ({
             )}
 
             {selectedType === "status" && (
-              <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
-                  {t("master.statusGroup")}
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+                    {t("master.statusGroup")}
+                  </label>
+                  <StyledDropdown
+                    value={newMasterStatusGroup}
+                    onChange={(val) => {
+                      setNewMasterStatusGroup(val);
+                      if (val === "Done") setNewMasterIsTerminal(true);
+                    }}
+                    options={[
+                      { id: "To Do", label: "To Do" },
+                      { id: "In Progress", label: "In Progress" },
+                      { id: "Done", label: "Done" },
+                    ]}
+                    buttonClassName="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
+                  />
+                </div>
+                <label className="flex items-center gap-2 ml-1 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newMasterIsTerminal}
+                    onChange={(e) => setNewMasterIsTerminal(e.target.checked)}
+                    className="rounded border-border-subtle"
+                  />
+                  <span className="text-sm text-content-body">{t("master.isTerminal")}</span>
                 </label>
-                <StyledDropdown
-                  value={newMasterStatusGroup}
-                  onChange={setNewMasterStatusGroup}
-                  options={[
-                    { id: "To Do", label: "To Do" },
-                    { id: "In Progress", label: "In Progress" },
-                    { id: "Done", label: "Done" },
-                  ]}
-                  buttonClassName="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm text-left font-normal text-content-strong"
-                />
               </div>
             )}
 
@@ -1442,6 +1516,20 @@ export const MasterDataPanel = ({
                 ))}
               </div>
             </div>
+
+            {editingMaster.type === "status" && (
+              <label className="flex items-center gap-2 ml-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={!!editingMaster.isTerminal}
+                  onChange={(e) =>
+                    setEditingMaster({ ...editingMaster, isTerminal: e.target.checked })
+                  }
+                  className="rounded border-border-subtle"
+                />
+                <span className="text-sm text-content-body">{t("master.isTerminal")}</span>
+              </label>
+            )}
 
             <div>
               <div className="flex items-center justify-between mb-1.5 ml-1">

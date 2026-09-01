@@ -18,7 +18,9 @@ import { runAIPipeline } from "../services/meeting.service";
 import { MULTIMODAL_ANALYSIS_SCHEMA } from "../services/meeting-ai.schema";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { meetingRepository } from "../repositories/meeting.repository";
-import { validasiBody } from "../middleware/validate";
+import { validasiBody, validasiQuery } from "../middleware/validate";
+import { listSearchQuerySchema } from "../schemas/pagination.schema";
+import { respondWithProjectList } from "../lib/listResponse";
 import {
   createMeetingSchema,
   updateMeetingSchema,
@@ -1051,11 +1053,17 @@ ATURAN KETAT (ANTI-HALUSINASI):
 router.get(
   "/api/projects/:projectId/meetings",
   jagaProyek("meetingNotes", "R"),
+  validasiQuery(listSearchQuerySchema),
   async (req, res) => {
     try {
       const { projectId } = req.params;
-      const rows = await meetingRepository.findByProjectId(projectId);
-      res.json({ status: "success", data: rows });
+      const search = req.query.search as string | undefined;
+      await respondWithProjectList(
+        res,
+        req.query as Record<string, unknown>,
+        () => meetingRepository.findByProjectId(projectId, search),
+        (pagination) => meetingRepository.findByProjectIdPaged(projectId, pagination, search)
+      );
     } catch (error: any) {
       console.error(error);
       res.status(500).json({

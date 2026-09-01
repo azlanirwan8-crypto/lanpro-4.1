@@ -1,12 +1,15 @@
 import i18n from "../../i18n";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Task } from "../../types";
 import { IssueListViewProps } from "./types";
 import { toast } from "sonner";
 import { createTask } from "./services/issues.service";
+import { useAppStore } from "../../store/useAppStore";
+import { suppressTaskDataRefresh } from "../../lib/taskRefreshControl";
 
 export const useIssueList = (props: IssueListViewProps) => {
   const { tasks, roots, selectedProject, user, masterData, userRole } = props;
+  const setTasks = useAppStore((s) => s.setTasks);
 
   // UI state
   const [listFilterStatus, setListFilterStatus] = useState("All");
@@ -64,6 +67,7 @@ export const useIssueList = (props: IssueListViewProps) => {
   const [inlineAddRelease, setInlineAddRelease] = useState("");
   const [isInlineTypeOpen, setIsInlineTypeOpen] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const createInFlightRef = useRef(false);
 
   const currentUserId =
     props.currentUserProfile?.uid ||
@@ -250,7 +254,7 @@ export const useIssueList = (props: IssueListViewProps) => {
   };
 
   const handleInlineAdd = async (parentId: string | null = null, customTitle?: string) => {
-    if (isCreating) return;
+    if (createInFlightRef.current) return;
     const activeUid = user?.uid;
     const titleToUse = customTitle !== undefined ? customTitle : inlineAddTitle;
     if (!selectedProject || !titleToUse.trim() || !activeUid) {
@@ -262,13 +266,48 @@ export const useIssueList = (props: IssueListViewProps) => {
       return;
     }
 
+    createInFlightRef.current = true;
     setIsCreating(true);
     const effectiveUserId = user?.uid || "guest";
+    const tempId = `temp-${crypto.randomUUID()}`;
+    const placeholder: Task = {
+      id: tempId,
+      projectId: selectedProject.id,
+      title: titleToUse,
+      status: inlineAddStatus || "To Do",
+      type: (parentId ? "subtask" : inlineAddType.toLowerCase()) as Task["type"],
+      parentId: parentId || undefined,
+      priority: inlineAddPriority || "Medium",
+      assigneeId: inlineAddAssigneeId || undefined,
+      reporterId: inlineAddReporterId || activeUid,
+      key: "…",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (parentId && !expandedTasks.has(parentId)) {
+      setExpandedTasks((prev) => {
+        const next = new Set(prev);
+        next.add(parentId);
+        return next;
+      });
+    }
+
+    setTasks((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
+
+    // Tahan refetch socket sebelum POST — data_changed terbit saat res.finish, bukan setelah await.
+    suppressTaskDataRefresh(8000);
+    createInFlightRef.current = false;
+    setIsCreating(false);
+    toast.success(i18n.t("toast.taskAdded"));
+
+    const taskType = parentId ? "subtask" : inlineAddType.toLowerCase();
+
     try {
-      await createTask(selectedProject.id, effectiveUserId, {
+      const response = await createTask(selectedProject.id, effectiveUserId, {
         title: titleToUse,
         status: inlineAddStatus || "To Do",
-        type: inlineAddType.toLowerCase(),
+        type: taskType,
         parentId: parentId,
         priority: inlineAddPriority || "Medium",
         release: inlineAddRelease || "",
@@ -277,6 +316,17 @@ export const useIssueList = (props: IssueListViewProps) => {
         category: inlineAddCategory || null,
         dueDate: inlineAddDueDate || null,
       });
+
+      if (response.status !== "success" || !response.data) {
+        throw new Error(response.message || "Create failed");
+      }
+
+      const created = response.data as Task;
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === tempId ? { ...created, parentId: parentId || created.parentId } : t
+        )
+      );
 
       if (customTitle === undefined) {
         setInlineAddTitle("");
@@ -290,24 +340,12 @@ export const useIssueList = (props: IssueListViewProps) => {
       setInlineAddDueDate("");
       setInlineAddRelease("");
       setInlineAddingTaskId(null);
-      // Automatically expand parent if it was not
-      if (parentId && !expandedTasks.has(parentId)) {
-        setExpandedTasks((prev) => {
-          const next = new Set(prev);
-          next.add(parentId);
-          return next;
-        });
-      }
-      toast.success(i18n.t("toast.taskAdded"));
-
-      // OPTIMISTIC UPDATE / RE-FETCH DATA
-      if (props.fetchTasks) {
-        props.fetchTasks();
-      }
     } catch (error) {
+      setTasks((prev) => prev.filter((t) => t.id !== tempId));
       console.error(error);
       toast.error(i18n.t("toast.subtaskAddFailed"));
     } finally {
+      createInFlightRef.current = false;
       setIsCreating(false);
     }
   };

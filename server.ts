@@ -36,6 +36,7 @@ import { penjagaSocket, idPemilikSocket, profilAman, roomPengguna } from './serv
 import healthRoutes from "./server/routes/health.routes";
 import systemRoutes from "./server/routes/system.routes";
 import auditRoutes from "./server/routes/audit.routes";
+import cronRoutes from "./server/routes/cron.routes";
 import authRoutes from "./server/routes/auth.routes";
 import authOidcRoutes from "./server/routes/auth-oidc.routes";
 import setupQARoutes from "./server/routes/qa.routes";
@@ -479,6 +480,9 @@ async function startServer() {
     "/api/auth/oidc/providers",
     "/api/auth/oidc/callback",
     "/api/auth/oidc/lengkapi-pendaftaran",
+    // #304 — Vercel Cron / pemicu luar memakai CRON_SECRET, bukan JWT.
+    "/api/cron/tick",
+    "/api/cron/task-digest",
   ]);
 
   /**
@@ -529,6 +533,7 @@ async function startServer() {
   app.use(healthRoutes);
   app.use(systemRoutes);
   app.use(auditRoutes);
+  app.use(cronRoutes);
 
   const { default: dbAdminRoutes } = await import('./server/routes/db-admin.routes.ts');
   app.use(dbAdminRoutes);
@@ -573,61 +578,8 @@ async function startServer() {
   // ==========================================
 // WILAYAH III: Core API Engine (Seluruh rute API dengan prefix /api/ disatukan di sini)
 // ==========================================
-  app.get("/api/audit-logs", authenticateJWT, async (req: any, res) => {
-    console.log(`[AUDIT] Request diterima: ${JSON.stringify(req.query)}`);
-    let connection;
-    try {
-      const { projectId, entityName, entityId, limit } = req.query;
-      connection = await db.getConnection();
-
-      // Non-admin users may only pull audit logs scoped to a project they belong to —
-      // never a system-wide dump, and never another project's log by guessing its id.
-      const requesterId = req.user?.id || req.user?.uid;
-      const [requesterRows]: any = await connection.query("SELECT id, role FROM Users WHERE id = ? OR uid = ?", [requesterId, requesterId]);
-      const requesterRole = requesterRows[0]?.role;
-      const resolvedRequesterId = requesterRows[0]?.id || requesterId;
-
-      if (requesterRole !== 'admin') {
-        if (!projectId) {
-          connection.release();
-          return res.status(403).json({ status: "error", message: "Akses ditolak: projectId wajib disertakan." });
-        }
-        const [proj]: any = await connection.query("SELECT ownerId FROM Projects WHERE id = ?", [projectId]);
-        const isOwner = proj.length > 0 && proj[0].ownerId === resolvedRequesterId;
-        if (!isOwner) {
-          const [member]: any = await connection.query(
-            "SELECT role FROM ProjectMembers WHERE projectId = ? AND userId = ?",
-            [projectId, resolvedRequesterId]
-          );
-          if (member.length === 0) {
-            connection.release();
-            return res.status(403).json({ status: "error", message: "Akses ditolak: Anda bukan anggota project ini." });
-          }
-        }
-      }
-
-      let sql = "SELECT a.*, u.displayName as userName FROM AuditLogs a JOIN Users u ON a.userId = u.id";
-      const params: any[] = [];
-      const filters = [];
-
-      if (projectId) { filters.push("a.projectId = ?"); params.push(projectId); }
-      if (entityName) { filters.push("a.entityName = ?"); params.push(entityName); }
-      if (entityId) { filters.push("a.entityId = ?"); params.push(entityId); }
-
-      if (filters.length > 0) sql += " WHERE " + filters.join(" AND ");
-      
-      sql += " ORDER BY a.createdAt DESC LIMIT ?";
-      params.push(parseInt(limit as string) || 50);
-
-      const [rows] = await connection.query(sql, params);
-      res.json({ status: "success", data: rows });
-    } catch (error: any) {
-      console.error("[AUDIT] Error:", error);
-      res.status(500).json({ status: "error", message: "Terjadi kesalahan internal server" });
-    } finally {
-      if (connection) connection.release();
-    }
-  });
+  // GET /api/audit-logs — dipindahkan ke server/routes/audit.routes.ts (#314).
+  // Handler inline lama dihapus agar tidak menimpa penjaga di router.
 
   // Endpoint publik. Sengaja hanya memuat STATUS migrasi, tanpa pesan
   // galatnya — pesan galat database bisa memuat detail koneksi, dan endpoint

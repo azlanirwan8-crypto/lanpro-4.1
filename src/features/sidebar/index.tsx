@@ -8,6 +8,9 @@ import { useSidebar } from "./hooks";
 import { styles } from "./styles";
 import { sidebarSections } from "./config";
 import { getUserPermissions, normalizeModuleKey } from "../../lib/permissions";
+import { prefetchView } from "../../lib/prefetchViews";
+import { prefetchModuleDataForView } from "../../lib/moduleDataCache";
+import { adalahWaterfall } from "../../lib/methodology";
 
 export const Sidebar: React.FC<SidebarProps> = (props) => {
   const { t } = useTranslation();
@@ -29,6 +32,18 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
 
   const { canCreateProject } = useSidebar(props);
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+
+  const prefetchNav = (viewId: string) => {
+    prefetchView(viewId);
+    if (selectedProject?.id) {
+      const uid =
+        currentUser?.uid ||
+        (currentUser as { id?: string })?.id ||
+        currentUserProfile?.uid ||
+        "guest";
+      prefetchModuleDataForView(viewId, selectedProject.id, uid);
+    }
+  };
 
   const toggleExpand = (itemId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -240,7 +255,13 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
           const itemTampil =
             projects.length === 0
               ? permittedItems.filter((item) => !item.butuhProyek || item.tetapTampil)
-              : permittedItems;
+              : permittedItems.filter((item) => {
+                  // #311 — Waterfall tidak memakai Sprint; jangan tampilkan menu.
+                  if (item.id === "sprints" && adalahWaterfall(selectedProject?.category)) {
+                    return false;
+                  }
+                  return true;
+                });
 
           /* Judul seksi ikut hilang begitu isinya habis. Tanpa ini "KOLABORASI"
              dan "MANAJEMEN PROYEK" tertinggal sebagai judul melayang. */
@@ -265,7 +286,9 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                     <motion.button
                       whileHover={{ x: 2 }}
                       whileTap={{ scale: 0.98 }}
+                      onMouseEnter={() => prefetchNav(item.id)}
                       onClick={() => {
+                        prefetchNav(item.id);
                         setCurrentView(item.id as any);
                       }}
                       className={cn(
@@ -312,7 +335,11 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                           return (
                             <button
                               key={subItem.id}
-                              onClick={() => setCurrentView(subItem.id as any)}
+                              onMouseEnter={() => prefetchNav(subItem.id)}
+                              onClick={() => {
+                                prefetchNav(subItem.id);
+                                setCurrentView(subItem.id as any);
+                              }}
                               className={cn(
                                 "w-full flex items-center gap-2 py-2 px-2 min-h-11 rounded text-xs transition-colors text-left",
                                 isSubActive

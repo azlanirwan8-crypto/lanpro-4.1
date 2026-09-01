@@ -28,8 +28,12 @@ import {
   ListTodo,
   Target,
   Calendar,
+  Menu,
+  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { MilestonePanel } from "./MilestonePanel";
+import { can } from "../../lib/permissions";
 
 interface TimelineProps {
   tasks: Task[];
@@ -37,6 +41,7 @@ interface TimelineProps {
   updateTaskField: (taskId: string, field: string, value: any) => Promise<void>;
   setSelectedTaskForDetail: (task: Task) => void;
   setIsTaskDetailModalOpen: (open: boolean) => void;
+  currentUser?: any;
 }
 
 // Provide default helpers for mapping status and priorities to Tailwind colors
@@ -118,8 +123,13 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
   updateTaskField,
   setSelectedTaskForDetail,
   setIsTaskDetailModalOpen,
+  currentUser,
 }) => {
   const { t } = useTranslation();
+  const canWriteMilestone = can("C", "timeline", {
+    user: currentUser,
+    project: selectedProject,
+  });
   const [pixelsPerDay, setPixelsPerDay] = useState<number>(24);
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const [timelineInteraction, setTimelineInteraction] = useState<{
@@ -202,6 +212,8 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
   }, [tasks, expandedEpics]);
 
   const [isDraggingToPan, setIsDraggingToPan] = useState(false);
+  /** #309 gelombang 2 — hierarki jadi laci di bawah md agar Gantt punya lebar penuh. */
+  const [hierarchyOpen, setHierarchyOpen] = useState(false);
   const dragPanStartRef = useRef({ x: 0, scrollLeft: 0 });
   const touchStartRef = useRef<{
     x1: number;
@@ -583,6 +595,9 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-surface-muted p-4 md:p-5 gap-4 text-left">
+      {selectedProject?.id && (
+        <MilestonePanel projectId={selectedProject.id} canWrite={canWriteMilestone} />
+      )}
       {/* Timeline Controls Header */}
       <div className="bg-surface px-5 py-3.5 rounded-md border border-border-subtle/80 shadow-2xs flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
@@ -697,16 +712,50 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden flex min-h-0">
+      <div className="flex-1 overflow-hidden flex flex-col min-h-0 gap-2">
+        {/* #309 — pemicu hierarki di HP/tablet */}
+        <button
+          type="button"
+          onClick={() => setHierarchyOpen(true)}
+          className="md:hidden flex items-center gap-2 px-3 py-2.5 bg-surface border border-border-subtle/80 rounded-lg text-xs font-medium text-content-strong shadow-2xs cursor-pointer shrink-0"
+        >
+          <Menu className="w-4 h-4 text-indigo-600 shrink-0" />
+          <span>{t("roadmap.itemHierarchy")}</span>
+        </button>
+
         <div
           ref={timelineContainerRef}
-          className="print-roadmap-container flex flex-1 w-full relative bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden select-none"
+          className="print-roadmap-container flex flex-1 w-full relative bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden select-none min-h-0"
         >
-          <div className="w-64 md:w-80 shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative">
+          {hierarchyOpen && (
+            <button
+              type="button"
+              aria-label={t("roadmap.closeHierarchy", "Tutup hierarki")}
+              className="fixed inset-0 z-40 bg-overlay/50 md:hidden cursor-pointer"
+              onClick={() => setHierarchyOpen(false)}
+            />
+          )}
+
+          <div
+            className={cn(
+              "w-64 md:w-80 shrink-0 border-r border-border-subtle/80 flex flex-col z-20 bg-surface relative",
+              "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-[min(80vw,20rem)] max-md:shadow-xl max-md:border-y-0 max-md:border-l-0",
+              "max-md:transition-transform max-md:duration-200",
+              hierarchyOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
+            )}
+          >
             <div className="sticky top-0 z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-subtle px-5 flex items-center justify-between">
               <span className="font-normal text-xs sm:text-[11px] text-content-muted uppercase tracking-widest">
                 {t("roadmap.itemHierarchy")}
               </span>
+              <button
+                type="button"
+                className="md:hidden p-1.5 rounded-md text-content-muted hover:bg-surface-muted cursor-pointer"
+                onClick={() => setHierarchyOpen(false)}
+                aria-label={t("roadmap.closeHierarchy", "Tutup hierarki")}
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
             <div
               className="flex-1 overflow-y-auto no-scrollbar pb-10 pt-4 border-t border-border-subtle"
@@ -844,7 +893,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             </div>
           </div>
           <div
-            className={`flex-1 flex flex-col overflow-auto relative bg-surface ${isDraggingToPan ? "cursor-grabbing" : "cursor-grab"}`}
+            className={`flex-1 flex flex-col overflow-auto relative bg-surface min-w-0 touch-pan-x ${isDraggingToPan ? "cursor-grabbing" : "cursor-grab"}`}
             ref={timelineMainRef}
             onScroll={handleTimelineVerticalScroll}
             onMouseDown={handleDragPanMouseDown}

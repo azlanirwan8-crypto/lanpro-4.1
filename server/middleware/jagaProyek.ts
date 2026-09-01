@@ -192,13 +192,22 @@ export const jagaProyek = (modul: ModulProyek, aksi: Aksi, lewat?: LewatEntitas)
 
       connection = await db.getConnection();
 
-      const [uRows]: any = await connection.query(
-        "SELECT id, role FROM Users WHERE id = ? OR uid = ?",
-        [userIdMentah, userIdMentah]
-      );
-      if (uRows.length === 0) return tolak(res);
+      let userId: string;
+      let peranSistem: string;
 
-      const userId = uRows[0].id;
+      // authenticateJWT sudah memuat id + role dari DB — hindari kueri Users duplikat (#317).
+      if (req.user?.id && req.user?.role !== undefined) {
+        userId = String(req.user.id);
+        peranSistem = String(req.user.role);
+      } else {
+        const [uRows]: any = await connection.query(
+          "SELECT id, role FROM Users WHERE id = ? OR uid = ?",
+          [userIdMentah, userIdMentah]
+        );
+        if (uRows.length === 0) return tolak(res);
+        userId = uRows[0].id;
+        peranSistem = uRows[0].role;
+      }
 
       if (lewat) {
         // Nama parameternya berbeda per jenis entitas. Memakai satu daftar
@@ -215,7 +224,7 @@ export const jagaProyek = (modul: ModulProyek, aksi: Aksi, lewat?: LewatEntitas)
       }
 
       // §19.6 langkah 3b — God Mode, HANYA Administrator sistem.
-      if (punyaGodMode(uRows[0].role)) {
+      if (punyaGodMode(peranSistem)) {
         catatGodMode(String(userId), String(targetProjectId || "-"), modul, aksi);
         return next();
       }

@@ -1,4 +1,5 @@
 import db from "../../src/lib/db";
+import { BATAS_DAFTAR_TANPA_PAGINATION, type PaginationParams } from "../lib/pagination";
 
 export interface DocumentEntity {
   id: string;
@@ -24,14 +25,62 @@ export interface DocumentEntity {
 }
 
 export class DocumentRepository {
-  async findByProjectId(projectId: string): Promise<DocumentEntity[]> {
+  private documentListSelect =
+    'id, projectId, title, description, type, link, fileName, fileType, canvasData, category, createdBy, "createdByName", downloadCount, createdAt, updatedAt';
+
+  private buildDocumentWhere(projectId: string, search?: string, type?: string) {
+    const params: unknown[] = [projectId];
+    let where = "projectId = ?";
+    if (type?.trim() && type.trim() !== "Semua") {
+      where += " AND type = ?";
+      params.push(type.trim());
+    }
+    if (search?.trim()) {
+      where +=
+        " AND (LOWER(title) LIKE ? OR LOWER(COALESCE(category, '')) LIKE ? OR LOWER(COALESCE(description, '')) LIKE ?)";
+      const term = `%${search.trim().toLowerCase()}%`;
+      params.push(term, term, term);
+    }
+    return { where, params };
+  }
+
+  async findByProjectId(
+    projectId: string,
+    search?: string,
+    type?: string
+  ): Promise<DocumentEntity[]> {
     const connection = await db.getConnection();
     try {
+      const { where, params } = this.buildDocumentWhere(projectId, search, type);
       const [rows]: any = await connection.query(
-        "SELECT id, projectId, title, description, type, link, fileName, fileType, canvasData, category, createdBy, createdByName, downloadCount, createdAt, updatedAt FROM Documents WHERE projectId = ? ORDER BY createdAt DESC",
-        [projectId]
+        `SELECT ${this.documentListSelect} FROM Documents WHERE ${where} ORDER BY createdAt DESC LIMIT ${BATAS_DAFTAR_TANPA_PAGINATION}`,
+        params
       );
       return rows || [];
+    } finally {
+      connection.release();
+    }
+  }
+
+  async findByProjectIdPaged(
+    projectId: string,
+    pagination: PaginationParams,
+    search?: string,
+    type?: string
+  ): Promise<{ items: DocumentEntity[]; total: number }> {
+    const connection = await db.getConnection();
+    try {
+      const { where, params } = this.buildDocumentWhere(projectId, search, type);
+      const [countRows]: any = await connection.query(
+        `SELECT COUNT(*)::int AS total FROM Documents WHERE ${where}`,
+        params
+      );
+      const total = countRows?.[0]?.total ?? 0;
+      const [rows]: any = await connection.query(
+        `SELECT ${this.documentListSelect} FROM Documents WHERE ${where} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+        [...params, pagination.limit, pagination.offset]
+      );
+      return { items: rows || [], total };
     } finally {
       connection.release();
     }
@@ -73,7 +122,7 @@ export class DocumentRepository {
     const connection = await db.getConnection();
     try {
       await connection.query(
-        "INSERT INTO Documents (id, projectId, title, description, type, link, fileData, fileName, fileType, canvasData, category, createdBy, createdByName) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        'INSERT INTO Documents (id, projectId, title, description, type, link, fileData, fileName, fileType, canvasData, category, createdBy, "createdByName") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [
           doc.id,
           doc.projectId,

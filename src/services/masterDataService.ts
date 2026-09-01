@@ -5,12 +5,12 @@ import { toast } from "sonner";
 export const masterDataService = {
   restore: async () => {
     const statuses = [
-      { type: "status", label: "Backlog", color: "#6B7280", order: 0 },
-      { type: "status", label: "To Do", color: "#3B82F6", order: 1 },
-      { type: "status", label: "In Progress", color: "#F59E0B", order: 2 },
-      { type: "status", label: "Code Review", color: "#8B5CF6", order: 3 },
-      { type: "status", label: "UAT", color: "#EC4899", order: 4 },
-      { type: "status", label: "Done", color: "#10B981", order: 5 },
+      { type: "status", label: "Backlog", color: "#6B7280", order: 0, isTerminal: false },
+      { type: "status", label: "To Do", color: "#3B82F6", order: 1, isTerminal: false },
+      { type: "status", label: "In Progress", color: "#F59E0B", order: 2, isTerminal: false },
+      { type: "status", label: "Code Review", color: "#8B5CF6", order: 3, isTerminal: false },
+      { type: "status", label: "UAT", color: "#EC4899", order: 4, isTerminal: true },
+      { type: "status", label: "Done", color: "#10B981", order: 5, isTerminal: true },
     ];
     const priorities = [
       {

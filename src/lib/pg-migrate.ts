@@ -99,7 +99,24 @@ export async function runMigrations(pool: Pool): Promise<void> {
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS "fieldType" VARCHAR(50);
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS "dropdownOptions" JSONB;
       ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS role_type VARCHAR(20);
+      -- #313 — status terminal (Done/UAT/…) tanpa hardcode string di aplikasi
+      ALTER TABLE "MasterData" ADD COLUMN IF NOT EXISTS "isTerminal" BOOLEAN DEFAULT FALSE;
     `);
+
+    // Seed flag terminal untuk status yang sudah ada (UAT = terminal, keputusan #313)
+    try {
+      await client.query(`
+        UPDATE "MasterData"
+        SET "isTerminal" = TRUE
+        WHERE type = 'status'
+          AND (
+            LOWER(COALESCE(code, '')) IN ('done','selesai','uat','completed','resolved','closed')
+            OR LOWER(label) IN ('done','selesai','uat','completed','resolved','closed')
+          )
+      `);
+    } catch (e: any) {
+      console.warn("[PG-MIGRATE] isTerminal seed warning:", e.message);
+    }
 
     // ── Projects ────────────────────────────────────────────────────────────
     await client.query(`
@@ -117,6 +134,13 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "updatedAt"       TIMESTAMP DEFAULT NOW()
       );
       ALTER TABLE "Projects" ADD COLUMN IF NOT EXISTS category VARCHAR(50) DEFAULT 'Agile';
+    `);
+    // #311 — satukan casing metodologi lama (Waterfall → WATERFALL) di baris yang sudah ada.
+    await client.query(`
+      UPDATE "Projects"
+         SET category = UPPER(TRIM(category))
+       WHERE category IS NOT NULL
+         AND category <> UPPER(TRIM(category));
     `);
 
     // ── ProjectMembers ──────────────────────────────────────────────────────
@@ -773,6 +797,11 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "messageTemplate"  TEXT,
         "updatedAt"        TIMESTAMP DEFAULT NOW()
       );
+    `);
+    // #304 — penahan dobel di DB (bukan memori proses serverless).
+    await client.query(`
+      ALTER TABLE "BroadcastConfig"
+        ADD COLUMN IF NOT EXISTS "lastFiredKey" VARCHAR(32);
     `);
 
     // ── IntegrationSettings (item #264, #270) ─────────────────────────────────

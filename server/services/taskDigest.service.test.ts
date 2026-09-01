@@ -143,6 +143,12 @@ describe("taskDigest.service - F6.4 Rekapitulasi Tugas Pending (Item #28)", () =
 
       const mockQuery = jest.fn();
       mockQuery.mockResolvedValueOnce([mockUsers]); // User query
+      mockQuery.mockResolvedValueOnce([
+        [
+          { type: "status", code: "done", label: "Done", isTerminal: true },
+          { type: "status", code: "todo", label: "To Do", isTerminal: false },
+        ],
+      ]); // MasterData terminal (#313)
       mockQuery.mockResolvedValueOnce([mockTasksDb]); // Tasks query for usr-1
 
       (db.getConnection as jest.Mock).mockResolvedValueOnce({
@@ -185,6 +191,9 @@ describe("taskDigest.service - F6.4 Rekapitulasi Tugas Pending (Item #28)", () =
 
       const mockQuery = jest.fn();
       mockQuery.mockResolvedValueOnce([mockUsers]);
+      mockQuery.mockResolvedValueOnce([
+        [{ type: "status", code: "done", label: "Done", isTerminal: true }],
+      ]);
       mockQuery.mockResolvedValueOnce([mockTasksDb]);
 
       (db.getConnection as jest.Mock).mockResolvedValueOnce({

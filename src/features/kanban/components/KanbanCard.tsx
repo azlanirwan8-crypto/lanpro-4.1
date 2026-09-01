@@ -6,6 +6,7 @@ import { cn, ensureDate } from "../../../lib/utils";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { RenderIcon } from "../../../components/RenderIcon";
 import { useAppStore } from "../../../store/useAppStore";
+import { statusSelesai } from "../../../lib/statusSelesai";
 import { AlertTriangle, ChevronDown, ChevronUp, CheckSquare, Square } from "lucide-react";
 
 interface KanbanCardProps {
@@ -33,13 +34,19 @@ export const KanbanCard = React.memo<KanbanCardProps>(
     const isCompact = density === "compact";
 
     const subtasks = task.subtasks || [];
-    const hasUnfinishedSubtasks = subtasks.some((st: any) => st.status !== "Done");
+    const hasUnfinishedSubtasks = subtasks.some((st: any) => !statusSelesai(st.status, mArr));
     const totalCount = subtasks.length;
-    const completedCount = subtasks.filter((st: any) => st.status === "Done").length;
+    const completedCount = subtasks.filter((st: any) => statusSelesai(st.status, mArr)).length;
     const percentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
     const handleToggleSubtask = (subtask: any) => {
-      const newStatus = subtask.status === "Done" ? "TODO" : "Done";
+      const terminal =
+        mArr.find((m) => m.type === "status" && (m.isTerminal === true || m.isTerminal === 1))
+          ?.label || "Done";
+      const todo =
+        mArr.find((m) => m.type === "status" && !(m.isTerminal === true || m.isTerminal === 1))
+          ?.label || "TODO";
+      const newStatus = statusSelesai(subtask.status, mArr) ? todo : terminal;
       const updatedSubtasks = subtasks.map((st: any) =>
         st.id === subtask.id ? { ...st, status: newStatus } : st
       );
@@ -322,13 +329,15 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                       handleToggleSubtask(st);
                     }}
                   >
-                    {st.status === "Done" ? (
+                    {statusSelesai(st.status, mArr) ? (
                       <CheckSquare className="w-3 h-3 text-success-text" />
                     ) : (
                       <Square className="w-3 h-3 text-content-subtle" />
                     )}
                     <span
-                      className={st.status === "Done" ? "line-through text-content-subtle" : ""}
+                      className={
+                        statusSelesai(st.status, mArr) ? "line-through text-content-subtle" : ""
+                      }
                     >
                       {st.title}
                     </span>

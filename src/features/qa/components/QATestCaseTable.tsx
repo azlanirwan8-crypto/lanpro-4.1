@@ -70,6 +70,10 @@ interface QATestCaseTableProps {
   handleBulkAssignPic: (assignedTo: string) => void;
   handleBulkChangeStatus: (status: "Passed" | "Failed" | "Blocked" | "Retest" | "Pending") => void;
   handleBulkDeleteCases: () => void;
+  casesPage?: number;
+  setCasesPage?: (page: number) => void;
+  casesTotal?: number;
+  casesPerPage?: number;
 }
 
 /** Dipakai hanya bila MasterData belum memuat tipe qa_status. */
@@ -119,6 +123,10 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   handleBulkAssignPic,
   handleBulkChangeStatus,
   handleBulkDeleteCases,
+  casesPage = 1,
+  setCasesPage,
+  casesTotal = 0,
+  casesPerPage = 20,
 }) => {
   const { t } = useTranslation();
   const opsiStatusQa = useMasterOptionItems("qa_status", CADANGAN_STATUS_QA);
@@ -127,7 +135,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
 
   if (!activeSuite) {
     return (
-      <div className="lg:col-span-9 bg-surface border border-border-subtle/80 p-10 rounded-md text-center shadow-xs">
+      <div className="md:col-span-9 bg-surface border border-border-subtle/80 p-10 rounded-md text-center shadow-xs">
         <div className="w-10 h-10 bg-primary-surface/10 text-primary rounded-md flex items-center justify-center mx-auto mb-2.5">
           <FileSpreadsheet className="w-5 h-5" />
         </div>
@@ -151,22 +159,13 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   const passedPercent =
     totalCasesCount > 0 ? Math.round((passedCasesCount / totalCasesCount) * 100) : 0;
 
-  // Filter cases with search term
-  const searchedCases = filteredCases.filter((tc) => {
-    if (!searchTerm.trim()) return true;
-    const q = searchTerm.toLowerCase();
-    return (
-      tc.title?.toLowerCase().includes(q) ||
-      tc.steps?.toLowerCase().includes(q) ||
-      tc.expectedResult?.toLowerCase().includes(q) ||
-      (tc.linkedBugKey && tc.linkedBugKey.toLowerCase().includes(q))
-    );
-  });
-
+  // Search ditangani server (#318); status filter tetap di halaman aktif
+  const searchedCases = filteredCases;
+  const totalPages = Math.max(1, Math.ceil((casesTotal || filteredCases.length) / casesPerPage));
   const isAllSelected = searchedCases.length > 0 && selectedCaseIds.length === searchedCases.length;
 
   return (
-    <div className="lg:col-span-9 space-y-3.5 lg:sticky lg:top-4">
+    <div className="md:col-span-9 space-y-3.5 md:sticky md:top-4">
       {/* Velzon Header & Micro Stats Box */}
       <div className="bg-surface border border-border-subtle/80 p-4 rounded-md shadow-xs space-y-3">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
@@ -776,6 +775,36 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             onCreateBug={(tc) => handleOpenCreateBugModal(tc)}
           />
         </div>
+
+        {setCasesPage && (
+          <div className="px-4 py-3 border-t border-border-subtle flex items-center justify-between text-[11px] text-content-subtle">
+            <div>
+              {(casesPage - 1) * casesPerPage + (searchedCases.length ? 1 : 0)}–
+              {Math.min(casesPage * casesPerPage, casesTotal)} / {casesTotal}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setCasesPage(Math.max(1, casesPage - 1))}
+                disabled={casesPage <= 1}
+                className="px-2 py-1 rounded border border-border-subtle disabled:opacity-40"
+              >
+                ‹
+              </button>
+              <span>
+                {casesPage}/{totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => setCasesPage(Math.min(totalPages, casesPage + 1))}
+                disabled={casesPage >= totalPages}
+                className="px-2 py-1 rounded border border-border-subtle disabled:opacity-40"
+              >
+                ›
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,12 +2,14 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { LayoutDashboard, KanbanSquare, CheckSquare, Users, Plus } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { useMobileAction } from "../../contexts/MobileActionContext";
 
 export interface MobileBottomNavProps {
   currentView: string;
   setCurrentView: (view: any) => void;
   onOpenNewTask?: () => void;
   unreadChatCount?: number;
+  canCreateTask?: boolean;
 }
 
 export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
@@ -15,8 +17,19 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   setCurrentView,
   onOpenNewTask,
   unreadChatCount = 0,
+  canCreateTask = true,
 }) => {
   const { t } = useTranslation();
+  const { activeAction } = useMobileAction();
+
+  // FAB (+): aksi modul terdaftar, atau fallback buat tugas HANYA di list/board (#310).
+  const taskViews = currentView === "list" || currentView === "board" || currentView === "table";
+  const actionLabel = activeAction?.label || t("navigation.mobileAdd");
+  const actionClick = activeAction?.onClick || (taskViews ? onOpenNewTask : undefined);
+  const actionIcon = activeAction?.icon || Plus;
+  const showActionButton = activeAction
+    ? activeAction.canCreate
+    : taskViews && canCreateTask && !!onOpenNewTask;
 
   interface NavItem {
     id: string;
@@ -43,13 +56,19 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       active: currentView === "board",
       onClick: () => setCurrentView("board"),
     },
-    {
+  ];
+
+  if (showActionButton) {
+    navItems.push({
       id: "create",
-      label: t("navigation.mobileAdd"),
-      icon: Plus,
+      label: actionLabel,
+      icon: actionIcon,
       isAction: true,
-      onClick: onOpenNewTask,
-    },
+      onClick: actionClick,
+    });
+  }
+
+  navItems.push(
     {
       id: "list",
       label: t("navigation.mobileTasks"),
@@ -64,8 +83,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       active: currentView === "team" || currentView === "access",
       onClick: () => setCurrentView("team"),
       badge: unreadChatCount > 0 ? unreadChatCount : undefined,
-    },
-  ];
+    }
+  );
 
   return (
     <nav
@@ -84,13 +103,21 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                 type="button"
                 data-testid="mobile-nav-add"
                 onClick={item.onClick}
-                className="flex flex-col items-center justify-center -mt-5 group focus:outline-none"
-                aria-label="Tambah Tugas Cepat"
+                className="flex flex-col items-center justify-center -mt-5 group focus:outline-none shrink-0"
+                aria-label={item.label}
               >
                 <div className="w-12 h-12 rounded-full bg-primary text-content-inverse flex items-center justify-center shadow-lg shadow-primary/30 group-active:scale-95 transition-transform">
-                  <Icon className="w-6 h-6 stroke-[2.5]" />
+                  {React.isValidElement(Icon) ? (
+                    Icon
+                  ) : Icon ? (
+                    React.createElement(Icon as React.ComponentType<{ className?: string }>, {
+                      className: "w-6 h-6 stroke-[2.5]",
+                    })
+                  ) : (
+                    <Plus className="w-6 h-6 stroke-[2.5]" />
+                  )}
                 </div>
-                <span className="text-[10px] font-medium text-content-muted mt-1 group-active:text-primary">
+                <span className="text-[10px] font-medium text-content-muted mt-1 group-active:text-primary max-w-[64px] truncate">
                   {item.label}
                 </span>
               </button>

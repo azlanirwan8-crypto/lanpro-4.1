@@ -15,7 +15,9 @@ import React from "react";
 import { Workflow, Search, Plus, Eye, Edit3, Trash2 } from "lucide-react";
 import { ResponsiveTable } from "../../../components/ResponsiveTable";
 import { getInitials } from "../lib/nodeTheme";
+import { tampilanNamaPembuat } from "../lib/authorIdentity";
 import { FlowchartMobileCardView } from "./FlowchartMobileCardView";
+import { useMobileAction } from "../../../contexts/MobileActionContext";
 import type { FlowchartData } from "../types";
 import type { Task } from "../../../types";
 
@@ -67,6 +69,17 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
   handleDeleteFlowchart,
 }) => {
   const { t } = useTranslation();
+  const { registerAction, unregisterAction } = useMobileAction();
+
+  React.useEffect(() => {
+    registerAction({
+      id: "flowchart-add-new",
+      label: t("flowchart.addModalTitle") || "Buat Diagram Baru",
+      onClick: openCreateModal,
+      canCreate: true,
+    });
+    return () => unregisterAction("flowchart-add-new");
+  }, [openCreateModal, registerAction, unregisterAction, t]);
   return (
     <div className="flex-1 flex flex-col p-3 md:p-6 font-sans overflow-y-auto w-full bg-surface-muted">
       <div className="flex-1 flex flex-col bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
@@ -155,9 +168,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                   currentItems.map((fw, index) => {
                     const srNo = (currentPage - 1) * itemsPerPage + index + 1;
                     const activeAuthor = getResolvedAuthor();
-                    const rawAuthor = fw.createdBy;
-                    const createdBy =
-                      !rawAuthor || rawAuthor === "Azlan Irwan" ? activeAuthor : rawAuthor;
+                    const createdBy = tampilanNamaPembuat(fw, activeAuthor);
                     const formatDateSafe = (dateVal?: string) => {
                       if (!dateVal) return "-";
                       if (dateVal.includes(",") || dateVal.includes("/")) return dateVal;

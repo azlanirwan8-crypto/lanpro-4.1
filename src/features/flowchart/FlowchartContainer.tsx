@@ -58,7 +58,7 @@ import { NodeContextMenu } from "./components/NodeContextMenu";
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
 import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData } from "./types";
 import { parseDrawIoXML, parseMiroContent } from "./lib/importers";
-import { apakahPembuat } from "./lib/authorIdentity";
+import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
 import { colorPalettes } from "./constants";
 // Diberi akhiran Api karena useFlowchartList() juga mengekspos updateFlowchart
 // dan deleteFlowchart untuk state daftar lokal. Nama berbeda mencegah salah
@@ -1235,7 +1235,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setFlowEpicId(flow.epicTaskId || "");
     setFlowDescription(flow.description || "");
     setFlowCategory(flow.category || "Panduan");
-    setFlowCreator(flow.createdBy || getResolvedAuthor());
+    setFlowCreator(tampilanNamaPembuat(flow, getResolvedAuthor()));
     setFlowExternalUrl(flow.externalUrl || "");
     setIsModalOpen(true);
   };
@@ -1382,12 +1382,18 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setIsModalOpen(false);
       toast.success(t("toast.flowCreated", { nama: flowName }));
 
-      // Async sync with backend API
+      // Async sync with backend API — ganti id lokal dengan UUID server (#317).
       if (selectedProject?.id) {
         try {
-          await createFlowchartApi(selectedProject.id, newFlow);
+          const serverId = await createFlowchartApi(selectedProject.id, newFlow);
+          if (serverId) {
+            const reconciled = updated.map((f) => (f.id === newId ? { ...f, id: serverId } : f));
+            setFlowcharts(reconciled);
+            safeLocalStorage.setItem(listKey, JSON.stringify(reconciled));
+          }
         } catch (apiErr) {
           console.warn("API sync error (saved locally):", apiErr);
+          toast.error(t("toast.syncFailed") + (apiErr instanceof Error ? apiErr.message : ""));
         }
       }
     } else {
@@ -2602,7 +2608,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     <span className="text-xs text-content-muted font-medium flex items-center gap-1">
                       <User className="w-3 h-3" /> {t("flowchart.by")}{" "}
                       <strong className="text-content-strong">
-                        {currentFlowMetadata?.createdBy || "Azlan Irwan"}
+                        {tampilanNamaPembuat(currentFlowMetadata, getResolvedAuthor())}
                       </strong>
                     </span>
 
@@ -3045,12 +3051,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         {/* FLOATING ACTION FLAPS OVERLAYS FOR ZERO-CLICK SIDEBAR EXPANSION */}
                         {/* Left sidebar flap toggle deleted as requested by user to make canvas full */}
 
-                        {/* Right sidebar flap toggle */}
+                        {/* Right sidebar flap toggle — #309: di atas lembar bawah saat HP */}
                         <button
                           onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
                           className={cn(
-                            "absolute bottom-4 z-30 p-2 bg-surface/70 backdrop-blur hover:bg-surface/85 border border-border-subtle/40 text-content-body hover:text-violet-600 shadow-soft-lg rounded-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 text-xs font-medium transition-all duration-300",
-                            isRightSidebarOpen ? "right-[356px]" : "right-4"
+                            "absolute z-30 p-2 bg-surface/70 backdrop-blur hover:bg-surface/85 border border-border-subtle/40 text-content-body hover:text-violet-600 shadow-soft-lg rounded-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 text-xs font-medium duration-300",
+                            isRightSidebarOpen
+                              ? "right-4 bottom-[min(56vh,28rem)] md:bottom-4 md:right-[356px]"
+                              : "right-4 bottom-4"
                           )}
                           title={t("flowchart.togglePropertiesPanel")}
                         >
@@ -3058,7 +3066,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           <span className="text-xs sm:text-[10px] uppercase tracking-wider">
                             {t("flowchart.propertiesEditor")}
                           </span>
-                          <span>{isRightSidebarOpen ? "▶" : "◀"}</span>
+                          <span className="hidden md:inline">{isRightSidebarOpen ? "▶" : "◀"}</span>
+                          <span className="md:hidden">{isRightSidebarOpen ? "▼" : "▲"}</span>
                         </button>
 
                         {/* FLOATING CANVAS ACTION RIBBON (CENTER DOCK) */}
@@ -3323,13 +3332,20 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         )}
                       </div>
 
-                      {/* RIGHT EDIT ATTRIBUTES PANEL - SHAPES DETAILS EDITOR (FLOATING SHEET OVERLAY) */}
+                      {/* RIGHT EDIT ATTRIBUTES PANEL — #309: lembar bawah di HP, panel kanan di md+ */}
                       <div
                         className={cn(
-                          "absolute right-4 top-4 bottom-4 w-80 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 rounded-xl py-4 px-4 space-y-4 shrink-0 overflow-y-auto z-20 text-xs shadow-[0_12px_40px_rgba(0,0,0,0.08)] transition-all duration-300 flex flex-col",
+                          "absolute z-20 bg-surface/95 md:bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 py-4 px-4 space-y-4 shrink-0 overflow-y-auto text-xs shadow-[0_12px_40px_rgba(0,0,0,0.08)] flex flex-col transition-all duration-300",
+                          // Desktop: panel kanan
+                          "md:right-4 md:top-4 md:bottom-4 md:w-80 md:rounded-xl",
                           isRightSidebarOpen
-                            ? "translate-x-0 opacity-100 pointer-events-auto"
-                            : "translate-x-[360px] opacity-0 pointer-events-none"
+                            ? "md:translate-x-0 md:opacity-100 md:pointer-events-auto"
+                            : "md:translate-x-[360px] md:opacity-0 md:pointer-events-none",
+                          // Mobile: lembar bawah
+                          "max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:w-full max-md:max-h-[55vh] max-md:rounded-t-2xl max-md:border-b-0 safe-area-pb",
+                          isRightSidebarOpen
+                            ? "max-md:translate-y-0 max-md:opacity-100 max-md:pointer-events-auto"
+                            : "max-md:translate-y-full max-md:opacity-0 max-md:pointer-events-none"
                         )}
                       >
                         {selectedNodeId ? (

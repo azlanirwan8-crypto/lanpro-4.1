@@ -62,6 +62,31 @@ export async function getBroadcastConfig(channel: string): Promise<BroadcastConf
   }
 }
 
+/**
+ * Klaim slot kirim untuk hari+jam ini (#304).
+ * Atomik lewat UPDATE … RETURNING supaya dua tick serverless tidak dobel kirim.
+ * @returns true bila slot berhasil diklaim (boleh kirim); false bila sudah terpakai.
+ */
+export async function claimBroadcastFire(channel: string, kunci: string): Promise<boolean> {
+  await getBroadcastConfig(channel);
+  const connection = await dbPool.getConnection();
+  try {
+    const [rows]: any = await connection.query(
+      `
+      UPDATE "BroadcastConfig"
+         SET "lastFiredKey" = ?, "updatedAt" = NOW()
+       WHERE channel = ?
+         AND ("lastFiredKey" IS NULL OR "lastFiredKey" <> ?)
+   RETURNING channel
+      `,
+      [kunci, channel, kunci]
+    );
+    return Array.isArray(rows) && rows.length > 0;
+  } finally {
+    connection.release();
+  }
+}
+
 /** Menyimpan (upsert) config channel tertentu. */
 export async function saveBroadcastConfig(
   channel: string,

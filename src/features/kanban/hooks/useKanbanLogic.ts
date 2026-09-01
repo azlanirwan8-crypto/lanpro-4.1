@@ -2,13 +2,17 @@ import i18n from "../../../i18n";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { KanbanBoardProps } from "../types";
-import { TERMINAL_STATUSES } from "../../../lib/constants";
+import { statusSelesai } from "../../../lib/statusSelesai";
 import { updateTask, resolveUserId } from "../services/kanban.service";
+import { suppressTaskDataRefresh } from "../../../lib/taskRefreshControl";
 
-const checkTaskBlockers = (tasks: any[], taskId: string, targetStatus: string) => {
-  const isTerminalStatus =
-    targetStatus.toLowerCase().includes("done") || targetStatus.toLowerCase().includes("completed");
-  if (!isTerminalStatus) return true;
+const checkTaskBlockers = (
+  tasks: any[],
+  taskId: string,
+  targetStatus: string,
+  masterData: any[]
+) => {
+  if (!statusSelesai(targetStatus, masterData)) return true;
 
   const task = tasks.find((t) => t.id === taskId);
   if (!task || !task.linkedTasks) return true;
@@ -17,11 +21,7 @@ const checkTaskBlockers = (tasks: any[], taskId: string, targetStatus: string) =
 
   for (const blocker of blockers) {
     const blockingTask = tasks.find((t) => t.id === blocker.targetTaskId);
-    if (
-      blockingTask &&
-      !blockingTask.status.toLowerCase().includes("done") &&
-      !blockingTask.status.toLowerCase().includes("completed")
-    ) {
+    if (blockingTask && !statusSelesai(blockingTask.status, masterData)) {
       toast.error(
         i18n.t("toast.cannotCompleteBlocked", {
           kunci: task.key,
@@ -66,7 +66,7 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
 
     tArr.forEach((task) => {
       const isEpic = (task.type || "").toLowerCase() === "epic";
-      const isSubtask = task.parentId && !epicIds.has(task.parentId); // Assuming subtasks point to non-epic tasks
+      const isSubtask = task.parentId && !epicIds.has(task.parentId);
 
       if (isEpic || isSubtask) return;
 
@@ -107,26 +107,12 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
     const parts = destination.droppableId.split(":");
     const newStatus = parts.length > 1 ? parts.slice(1).join(":") : destination.droppableId;
 
-    // Check for unfinished subtasks when moving to DONE / UAT / Completed
-    const isTerminalStatus = (status: string) => {
-      if (!status) return false;
-      const s = status.toLowerCase().trim();
-      return (
-        s.includes("done") ||
-        s.includes("completed") ||
-        s.includes("uat") ||
-        s.includes("closed") ||
-        s.includes("finish") ||
-        TERMINAL_STATUSES.includes(s)
-      );
-    };
-
-    if (taskToMove && isTerminalStatus(newStatus)) {
+    if (taskToMove && statusSelesai(newStatus, mArr)) {
       const inlineUnfinished = (taskToMove.subtasks || []).filter(
-        (st: any) => !isTerminalStatus(st.status)
+        (st: any) => !statusSelesai(st.status, mArr)
       );
       const childUnfinished = tArr.filter(
-        (t: any) => t.parentId === taskToMove.id && !isTerminalStatus(t.status)
+        (t: any) => t.parentId === taskToMove.id && !statusSelesai(t.status, mArr)
       );
 
       if (inlineUnfinished.length > 0 || childUnfinished.length > 0) {
@@ -135,19 +121,18 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
         toast.error(i18n.t("toast.subtaskBlocker"), {
           duration: 5000,
         });
-        if (props.refreshTasks) props.refreshTasks(); // Revert position
+        if (props.refreshTasks) props.refreshTasks();
         return;
       }
     }
 
-    // Check for blocking dependencies
     if (taskToMove && taskToMove.linkedTasks) {
       const blockers = taskToMove.linkedTasks.filter(
         (l: any) => l.relationType === "is_blocked_by"
       );
       for (const blocker of blockers) {
         const blockingTask = tArr.find((t) => t.id === blocker.targetTaskId);
-        if (blockingTask && blockingTask.status !== "Done" && blockingTask.status !== "Completed") {
+        if (blockingTask && !statusSelesai(blockingTask.status, mArr)) {
           toast.error(
             i18n.t("toast.cannotMoveBlocked", {
               judul: taskToMove.title,
@@ -177,9 +162,10 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
 
     const destLaneId = parts.length > 1 ? parts[0] : null;
 
-    if (!checkTaskBlockers(tArr, draggableId, newStatus)) return;
+    if (!checkTaskBlockers(tArr, draggableId, newStatus, mArr)) return;
 
     if (props.setTasks && taskToMove) {
+      suppressTaskDataRefresh(8000);
       const newTasks = tArr.map((t) => {
         if (t.id === draggableId) {
           const updated = { ...t, status: newStatus };
@@ -213,16 +199,13 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
         }
       }
 
+      suppressTaskDataRefresh(8000);
       await updateTask(selectedProject.id, draggableId, resolveUserId(user), updates);
-
-      if (props.refreshTasks) {
-        props.refreshTasks();
-      }
     } catch (e: any) {
       console.error("Failed to update task status", e);
       toast.error(e.message || "Gagal memindahkan task.");
       if (props.refreshTasks) {
-        props.refreshTasks(); // Revert on failure
+        props.refreshTasks();
       }
     }
   };

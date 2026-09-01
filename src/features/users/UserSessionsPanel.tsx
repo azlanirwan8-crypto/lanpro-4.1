@@ -420,8 +420,8 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           </div>
         </div>
 
-        {/* Table Body */}
-        <div className="overflow-x-auto min-h-[350px]">
+        {/* Table Body — desktop; kartu di HP (#309) */}
+        <div className="hidden sm:block overflow-x-auto min-h-[350px]">
           <table className="w-full text-left border-collapse table-fixed">
             <thead>
               <tr className="bg-surface-sunken/70 border-b border-border-subtle text-[11px] font-normal uppercase tracking-wider text-content-subtle">
@@ -639,6 +639,136 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* #309 — kartu sesi di bawah sm */}
+        <div className="sm:hidden divide-y divide-border-subtle/60 min-h-[350px]">
+          {loading ? (
+            <div className="py-12 text-center text-content-subtle">
+              <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
+              <span>{t("sessionMonitor.loading", "Memuat data sesi pengguna...")}</span>
+            </div>
+          ) : sessions.length === 0 ? (
+            <div className="py-12 text-center text-content-subtle px-4">
+              <ShieldAlert className="w-8 h-8 mx-auto mb-2 text-content-subtle opacity-50" />
+              <p className="font-medium text-content-strong">
+                {t("sessionMonitor.noData", "Tidak ada sesi pengguna ditemukan")}
+              </p>
+            </div>
+          ) : (
+            sessions.map((session) => {
+              const isActive = session.status === "ACTIVE";
+              const isMobile = isMobileDevice(session.device, session.os);
+              const ip = (session.ipAddress || "").replace(/^::ffff:/, "").trim();
+              const isLocal =
+                !ip ||
+                ip === "127.0.0.1" ||
+                ip === "::1" ||
+                ip === "localhost" ||
+                ip.startsWith("192.168.") ||
+                ip.startsWith("10.") ||
+                ip.startsWith("172.16.");
+              const locationLabel = isLocal
+                ? session.location || "Local Network"
+                : session.location ||
+                  (session.city && session.country
+                    ? `${session.city}, ${session.country}`
+                    : session.city || session.country || "Jakarta, ID");
+
+              return (
+                <div key={session.id} className="p-3.5 flex flex-col gap-2.5 bg-surface">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <UserAvatar
+                        name={session.displayName || session.username || "User"}
+                        src={session.avatar || undefined}
+                        size="md"
+                      />
+                      <div className="min-w-0">
+                        <span className="font-semibold text-content-strong text-sm block truncate">
+                          {session.displayName ||
+                            session.username ||
+                            t("sessionMonitor.unnamed", "Tanpa Nama")}
+                        </span>
+                        <span className="text-xs text-content-subtle block truncate">
+                          {session.email || session.username || "-"}
+                        </span>
+                      </div>
+                    </div>
+                    {isActive ? (
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        {t("sessionMonitor.statusActive", "Sesi Aktif")}
+                      </span>
+                    ) : session.status === "FORCE_LOGOUT" || session.status === "TERMINATED" ? (
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-danger/10 text-danger border border-danger/20">
+                        {t("sessionMonitor.statusForceLogout", "Diputus Admin")}
+                      </span>
+                    ) : (
+                      <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-sunken text-content-muted border border-border-subtle">
+                        {t("sessionMonitor.statusLoggedOut", "Sudah Keluar")}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-content-muted">
+                    <span className="inline-flex items-center gap-1 font-mono text-content-strong">
+                      <Globe className="w-3 h-3 text-primary" />
+                      {session.ipAddress || "127.0.0.1"}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {locationLabel}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      {isMobile ? (
+                        <Smartphone className="w-3 h-3 text-info" />
+                      ) : (
+                        <Laptop className="w-3 h-3 text-primary" />
+                      )}
+                      {session.browser || "Unknown"}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {formatDate(session.loginAt)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleOpenActivityModal({
+                          id: session.userId,
+                          name: session.displayName || session.username || "User",
+                          email: session.email || "",
+                          role: session.role,
+                          avatar: session.avatar,
+                        })
+                      }
+                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-primary bg-primary/5 border border-primary/20 rounded-lg cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      {t("sessionMonitor.viewActivities", "Lihat Log Aktivitas")}
+                    </button>
+                    {isActive && (
+                      <button
+                        type="button"
+                        onClick={() => handleTerminateSession(session)}
+                        disabled={terminatingId === session.id}
+                        className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-danger bg-danger/5 border border-danger/20 rounded-lg disabled:opacity-50 cursor-pointer"
+                      >
+                        <LogOut
+                          className={`w-3.5 h-3.5 ${terminatingId === session.id ? "animate-spin" : ""}`}
+                        />
+                        {t("sessionMonitor.terminateBtn", "Putuskan")}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
         {/* Card Footer Pagination */}

@@ -32,8 +32,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { validateFileClient } from "../../lib/fileSecurity";
+import { suppressTaskDataRefresh } from "../../lib/taskRefreshControl";
+import { useAppStore } from "../../store/useAppStore";
 import { createDiscussionPoint } from "../../services/meetingService";
-import { type Meeting, type UserProfile, type DiscussionPoint } from "../../types";
+import { type Meeting, type UserProfile, type DiscussionPoint, type Task } from "../../types";
 import ReactMarkdown from "react-markdown";
 import type { AiMeetingCompanionProps, ActionItem, AiSummaryStructure } from "./types";
 import { mapToActiveMeetingData } from "./lib/mapping";
@@ -47,6 +49,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   onPointsImported,
 }) => {
   const { t } = useTranslation();
+  const setTasks = useAppStore((s) => s.setTasks);
   const [transcript, setTranscript] = useState("");
   const [meetingLink, setMeetingLink] = useState("");
   const [loading, setLoading] = useState(false);
@@ -662,10 +665,31 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
     setConvertingTaskIds((prev) => [...prev, index]);
 
+    const tempId = `temp-${crypto.randomUUID()}`;
+    const title = `[Action Item] ${item.concern_masalah?.substring(0, 50)}...`;
+    const description = `**Concern:**\n${item.concern_masalah}\n\n**Solusi Disepakati:**\n${item.solusi_disepakati}`;
+    const placeholder: Task = {
+      id: tempId,
+      projectId,
+      title,
+      description,
+      status: "To Do",
+      priority: "High",
+      type: "task",
+      reporterId: currentUser.uid || currentUser.id || "guest",
+      key: "…",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    suppressTaskDataRefresh(8000);
+    setTasks((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
+    toast.success(t("alerts.taskCreated"));
+
     try {
       const payload = {
-        title: `[Action Item] ${item.concern_masalah?.substring(0, 50)}...`,
-        description: `**Concern:**\n${item.concern_masalah}\n\n**Solusi Disepakati:**\n${item.solusi_disepakati}`,
+        title,
+        description,
         status: "To Do",
         priority: "High",
         type: "task",
@@ -675,16 +699,19 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
       const data = await createTaskFromMeeting(projectId, payload);
 
-      if (data.status === "success") {
-        showSuccessAlert(t("alerts.successTitle"), t("alerts.taskCreated"));
-        // No refresh callback needed if websocket is active
-        // if (onRefreshTasks) {
-        //   onRefreshTasks();
-        // }
+      if (data.status === "success" && data.data) {
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.id === tempId
+              ? { ...data.data, key: data.data.key || data.data.taskKey, projectId }
+              : t
+          )
+        );
       } else {
-        toast.error(data.message || "Gagal membuat task.");
+        throw new Error(data.message || "Gagal membuat task.");
       }
     } catch (err: any) {
+      setTasks((prev) => prev.filter((t) => t.id !== tempId));
       console.error("Failed to convert to task", err);
       toast.error(err.message || "Gagal membuat task.");
     } finally {

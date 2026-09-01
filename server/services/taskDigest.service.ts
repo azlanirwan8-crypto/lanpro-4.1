@@ -61,6 +61,12 @@ export async function kumpulkanPendingTasksPerUser(
     const now = new Date();
     const todayStr = now.toISOString().split("T")[0];
 
+    const { muatKunciTerminal, sqlStatusBukanTerminal } = await import("../lib/statusSelesai");
+    const kunciTerminal = await muatKunciTerminal(connection);
+    // archived tetap dikecualikan meski bukan status MasterData terminal
+    const kunciDigest = Array.from(new Set([...kunciTerminal, "archived"]));
+    const predikatBuka = sqlStatusBukanTerminal("t.status", kunciDigest);
+
     const results: UserTaskDigestPayload[] = [];
 
     for (const user of userList) {
@@ -81,7 +87,7 @@ export async function kumpulkanPendingTasksPerUser(
         FROM "Tasks" t
         LEFT JOIN "Projects" p ON t."projectId" = p.id
         WHERE t."assigneeId" = ?
-          AND LOWER(t.status) NOT IN ('done', 'closed', 'selesai', 'archived')
+          AND ${predikatBuka}
         ORDER BY 
           CASE 
             WHEN t."dueDate" IS NOT NULL AND t."dueDate" < ? THEN 1

@@ -3,8 +3,11 @@ import crypto from "crypto";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { sprintRepository } from "../repositories/sprint.repository";
 import { projectRepository } from "../repositories/project.repository";
-import { validasiBody } from "../middleware/validate";
+import { validasiBody, validasiQuery } from "../middleware/validate";
+import { paginationQuerySchema } from "../schemas/pagination.schema";
+import { respondWithProjectList } from "../lib/listResponse";
 import { createSprintSchema, updateSprintSchema } from "../schemas/sprint.schema";
+import { adalahWaterfall } from "../lib/methodology";
 
 export function setupSprintsRoutes(
   app: Express,
@@ -19,20 +22,29 @@ export function setupSprintsRoutes(
   ) => Promise<any>
 ) {
   // GET: List Sprints for a project
-  app.get("/api/projects/:projectId/sprints", jagaProyek("sprints", "R"), async (req, res) => {
-    try {
-      const { projectId } = req.params;
-      const rows = await sprintRepository.findByProjectId(projectId);
-      res.json({ status: "success", data: rows });
-    } catch (error: any) {
-      console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/sprints error:", error);
-      res.status(500).json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+  app.get(
+    "/api/projects/:projectId/sprints",
+    jagaProyek("sprints", "R"),
+    validasiQuery(paginationQuerySchema),
+    async (req, res) => {
+      try {
+        const { projectId } = req.params;
+        await respondWithProjectList(
+          res,
+          req.query as Record<string, unknown>,
+          () => sprintRepository.findByProjectId(projectId),
+          (pagination) => sprintRepository.findByProjectIdPaged(projectId, pagination)
+        );
+      } catch (error: any) {
+        console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/sprints error:", error);
+        res.status(500).json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
+      }
     }
-  });
+  );
 
   // POST: Create Sprint
   app.post(
@@ -45,7 +57,7 @@ export function setupSprintsRoutes(
         const { name, goal, startDate, endDate, status } = req.body;
 
         const category = await projectRepository.getCategory(projectId);
-        if (category === "Waterfall") {
+        if (adalahWaterfall(category)) {
           return res.status(400).json({
             status: "error",
             code: "srv.metodologi_waterfall_tidak_mendukung",
@@ -66,7 +78,13 @@ export function setupSprintsRoutes(
         });
 
         const userIdStr = req.headers["x-user-id"] || "guest";
-        await createAuditLog(
+
+        res.json({
+          status: "success",
+          data: created,
+        });
+
+        void createAuditLog(
           userIdStr as string,
           projectId,
           "CREATE",
@@ -74,12 +92,7 @@ export function setupSprintsRoutes(
           newId,
           null,
           req.body
-        );
-
-        res.json({
-          status: "success",
-          data: created,
-        });
+        ).catch((err) => console.error("[SPRINT CREATE] audit log gagal:", err));
       } catch (error: any) {
         console.error("LOG ANOMALI CRITICAL: POST /api/projects/:projectId/sprints error:", error);
         res.status(500).json({

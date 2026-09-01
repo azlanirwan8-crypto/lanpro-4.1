@@ -14,6 +14,8 @@ export interface MasterDataEntity {
   dropdownOptions?: string | any;
   role_type?: string | null;
   is_system_default?: boolean | number;
+  /** #313 — status terminal (burndown, tutup sprint, gerbang fase). */
+  isTerminal?: boolean | number | null;
 }
 
 export class MasterDataRepository {
@@ -61,8 +63,8 @@ export class MasterDataRepository {
     const connection = await db.getConnection();
     try {
       await connection.query(
-        `INSERT INTO MasterData (id, type, label, code, color, icon, \`order\`, description, fieldType, dropdownOptions, role_type)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO MasterData (id, type, label, code, color, icon, \`order\`, description, fieldType, dropdownOptions, role_type, "isTerminal")
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           item.id,
           item.type || "general",
@@ -79,6 +81,7 @@ export class MasterDataRepository {
               : JSON.stringify(item.dropdownOptions)
             : null,
           item.role_type || null,
+          item.isTerminal === true || item.isTerminal === 1 ? true : false,
         ]
       );
       return item;
@@ -90,21 +93,43 @@ export class MasterDataRepository {
   async update(id: string, updates: Partial<MasterDataEntity>): Promise<void> {
     const connection = await db.getConnection();
     try {
+      const existing = await this.findById(id);
+      const label =
+        updates.label !== undefined ? updates.label || "Item" : existing?.label || "Item";
+      const color = updates.color !== undefined ? updates.color : existing?.color || null;
+      const icon = updates.icon !== undefined ? updates.icon : existing?.icon || null;
+      const order = updates.order !== undefined ? updates.order || 0 : existing?.order || 0;
+      const description =
+        updates.description !== undefined ? updates.description : existing?.description || null;
+      const fieldType =
+        updates.fieldType !== undefined ? updates.fieldType : existing?.fieldType || null;
+      const dropdownOptions =
+        updates.dropdownOptions !== undefined
+          ? updates.dropdownOptions
+          : existing?.dropdownOptions || null;
+      const role_type =
+        updates.role_type !== undefined ? updates.role_type : existing?.role_type || null;
+      const isTerminal =
+        updates.isTerminal !== undefined
+          ? updates.isTerminal === true || updates.isTerminal === 1
+          : existing?.isTerminal === true || existing?.isTerminal === 1;
+
       await connection.query(
-        `UPDATE MasterData SET label=?, color=?, icon=?, \`order\`=?, description=?, fieldType=?, dropdownOptions=?, role_type=? WHERE id=?`,
+        `UPDATE MasterData SET label=?, color=?, icon=?, \`order\`=?, description=?, fieldType=?, dropdownOptions=?, role_type=?, "isTerminal"=? WHERE id=?`,
         [
-          updates.label || "Item",
-          updates.color || null,
-          updates.icon || null,
-          updates.order || 0,
-          updates.description || null,
-          updates.fieldType || null,
-          updates.dropdownOptions
-            ? typeof updates.dropdownOptions === "string"
-              ? updates.dropdownOptions
-              : JSON.stringify(updates.dropdownOptions)
+          label,
+          color || null,
+          icon || null,
+          order || 0,
+          description || null,
+          fieldType || null,
+          dropdownOptions
+            ? typeof dropdownOptions === "string"
+              ? dropdownOptions
+              : JSON.stringify(dropdownOptions)
             : null,
-          updates.role_type || null,
+          role_type || null,
+          !!isTerminal,
           id,
         ]
       );

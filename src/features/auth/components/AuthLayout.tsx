@@ -67,8 +67,13 @@ const AuthLayoutSplit = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
     {/* Sisi visual (desktop) — tetap diam saat login/register bertukar. */}
     <AuthHeroPanel />
 
-    {/* Sisi form. */}
-    <div className="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-12 bg-surface-muted relative overflow-y-auto min-h-screen">
+    {/*
+      Sisi form. #309 — form sempat terbaca menempel di tepi kanan panel gelap
+      karena setengah-kanan viewport tanpa pembatas lebar yang jelas. Kartu
+      dibatasi max-w-md dan dipusatkan di kolom terang; padding kiri md+
+      memberi napas dari lengkung clip-path hero.
+    */}
+    <div className="w-full md:w-1/2 flex items-center justify-center px-6 py-10 sm:px-10 md:pl-14 md:pr-10 lg:pl-20 lg:pr-14 bg-surface-muted relative overflow-y-auto min-h-screen">
       {/*
         #231 — "watermark" sisi terang, sesuai gambar acuan pemilik proyek:
         BUKAN motif batik/kanban (itu ditolak), melainkan kartu placeholder
@@ -80,10 +85,10 @@ const AuthLayoutSplit = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
 
       <PemilihBahasaAuth className="absolute top-4 right-4 z-20" />
 
-      {children}
+      <div className="relative z-10 w-full max-w-md mx-auto">{children}</div>
 
       {/* Logo mikro untuk layar sempit (<1024px). */}
-      <div className="absolute top-6 left-6 lg:hidden flex items-center gap-2">
+      <div className="absolute top-6 left-6 lg:hidden flex items-center gap-2 z-20">
         <div className="w-7 h-7 bg-primary-surface rounded-lg flex items-center justify-center shadow-md shadow-primary/20">
           <ShieldCheck className="text-content-inverse w-4 h-4" />
         </div>

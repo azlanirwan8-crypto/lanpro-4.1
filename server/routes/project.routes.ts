@@ -12,6 +12,7 @@ import {
 } from "../schemas/project.schema";
 import { AuthenticatedRequest } from "../types/express";
 import { projectRepository } from "../repositories/project.repository";
+import { normalisasiMetodologi } from "../lib/methodology";
 
 const router = express.Router();
 
@@ -81,7 +82,7 @@ router.post(
         description: description || "",
         ownerId,
         status: status || "Active",
-        category: category || "Agile",
+        category: normalisasiMetodologi(category) || "AGILE",
       });
 
       res.json({
@@ -150,9 +151,11 @@ router.put(
       if (status !== undefined) changedFields.status = status;
       if (projectKey !== undefined) changedFields.projectKey = projectKey;
       if (ownerId !== undefined) changedFields.ownerId = ownerId;
-      if (category !== undefined) changedFields.category = category;
+      if (category !== undefined) changedFields.category = normalisasiMetodologi(category);
       if (taskCounter !== undefined) changedFields.taskCounter = taskCounter;
       if (dashboardLayout !== undefined) changedFields.dashboardLayout = dashboardLayout;
+
+      const categoryNorm = category !== undefined ? normalisasiMetodologi(category) : undefined;
 
       await projectRepository.update(id, {
         name,
@@ -160,7 +163,7 @@ router.put(
         status,
         projectKey,
         ownerId,
-        category,
+        category: categoryNorm,
         taskCounter,
         dashboardLayout,
       });
@@ -199,7 +202,7 @@ router.post(
         });
       }
 
-      const normalizedMethodology = methodology.toString().toUpperCase();
+      const normalizedMethodology = normalisasiMetodologi(methodology);
       const oldMethod = await projectRepository.updateMethodology(projectId, normalizedMethodology);
 
       const auditNewValues = {

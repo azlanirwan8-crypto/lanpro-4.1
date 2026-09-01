@@ -10,7 +10,9 @@ import {
   QA_SCENARIO_REFINEMENT_SCHEMA,
   QA_TEST_CASE_SUGGESTION_SCHEMA,
 } from "../services/qa-ai.schema";
-import { validasiBody } from "../middleware/validate";
+import { validasiBody, validasiQuery } from "../middleware/validate";
+import { listSearchQuerySchema, qaCaseListQuerySchema } from "../schemas/pagination.schema";
+import { respondWithProjectList } from "../lib/listResponse";
 import {
   createQATestCaseSchema,
   updateQATestCaseSchema,
@@ -287,20 +289,32 @@ export function setupQARoutes(
   );
 
   // GET: List QA Test Cases
-  app.get("/api/projects/:projectId/qa-test-cases", jagaProyek("qa", "R"), async (req, res) => {
-    try {
-      const { projectId } = req.params;
-      const cases = await qaRepository.findTestCasesByProjectId(projectId);
-      res.json({ status: "success", data: cases });
-    } catch (error: any) {
-      console.error("GET /api/projects/:projectId/qa-test-cases error:", error);
-      res.status(500).json({
-        status: "error",
-        code: "srv.terjadi_kesalahan_internal_server",
-        message: "Terjadi kesalahan internal server",
-      });
+  app.get(
+    "/api/projects/:projectId/qa-test-cases",
+    jagaProyek("qa", "R"),
+    validasiQuery(qaCaseListQuerySchema),
+    async (req, res) => {
+      try {
+        const { projectId } = req.params;
+        const search = req.query.search as string | undefined;
+        const suiteId = req.query.suiteId as string | undefined;
+        await respondWithProjectList(
+          res,
+          req.query as Record<string, unknown>,
+          () => qaRepository.findTestCasesByProjectId(projectId, search, suiteId),
+          (pagination) =>
+            qaRepository.findTestCasesByProjectIdPaged(projectId, pagination, search, suiteId)
+        );
+      } catch (error: any) {
+        console.error("GET /api/projects/:projectId/qa-test-cases error:", error);
+        res.status(500).json({
+          status: "error",
+          code: "srv.terjadi_kesalahan_internal_server",
+          message: "Terjadi kesalahan internal server",
+        });
+      }
     }
-  });
+  );
 
   // POST: Create QA Test Case
   app.post(

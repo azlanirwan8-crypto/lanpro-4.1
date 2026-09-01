@@ -98,15 +98,15 @@ export async function fetchFlowcharts(projectId: string): Promise<FlowchartData[
   return res.data.filter((doc: DocumentRow) => doc.type === "flowchart").map(toFlowchartData);
 }
 
-/** Membuat flowchart baru di backend. */
+/** Membuat flowchart baru di backend. Mengembalikan id server bila sukses. */
 export async function createFlowchart(
   projectId: string,
   flow: Pick<
     FlowchartData,
     "name" | "nodes" | "edges" | "externalUrl" | "createdBy" | "description" | "category"
   >
-): Promise<void> {
-  await apiRequest(`/api/projects/${projectId}/documents`, {
+): Promise<string | null> {
+  const res: any = await apiRequest(`/api/projects/${projectId}/documents`, {
     method: "POST",
     body: {
       title: flow.name,
@@ -118,6 +118,7 @@ export async function createFlowchart(
       createdBy: flow.createdBy,
     },
   });
+  return res?.status === "success" && res?.data?.id ? String(res.data.id) : null;
 }
 
 /** Memperbarui metadata dan isi flowchart yang sudah ada. */

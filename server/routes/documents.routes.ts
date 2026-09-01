@@ -7,25 +7,38 @@ import { Router } from "express";
 import crypto from "crypto";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { documentRepository } from "../repositories/document.repository";
-import { validasiBody } from "../middleware/validate";
+import { validasiBody, validasiQuery } from "../middleware/validate";
 import { createDocumentSchema, updateDocumentSchema } from "../schemas/document.schema";
+import { documentListQuerySchema } from "../schemas/pagination.schema";
+import { respondWithProjectList } from "../lib/listResponse";
 
 const router = Router();
 
-router.get("/api/projects/:projectId/documents", jagaProyek("wiki", "R"), async (req, res) => {
-  try {
-    const { projectId } = req.params;
-    const rows = await documentRepository.findByProjectId(projectId);
-    res.json({ status: "success", data: rows });
-  } catch (error: any) {
-    console.error(error);
-    res.status(500).json({
-      status: "error",
-      code: "srv.terjadi_kesalahan_internal_server",
-      message: "Terjadi kesalahan internal server",
-    });
+router.get(
+  "/api/projects/:projectId/documents",
+  jagaProyek("wiki", "R"),
+  validasiQuery(documentListQuerySchema),
+  async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      const search = req.query.search as string | undefined;
+      const type = req.query.type as string | undefined;
+      await respondWithProjectList(
+        res,
+        req.query as Record<string, unknown>,
+        () => documentRepository.findByProjectId(projectId, search, type),
+        (pagination) => documentRepository.findByProjectIdPaged(projectId, pagination, search, type)
+      );
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
   }
-});
+);
 
 router.get(
   "/api/projects/:projectId/documents/:id/download",

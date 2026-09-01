@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Activity,
   User,
@@ -12,6 +12,7 @@ import {
   Clock,
   LineChart,
   Trash2,
+  Flag,
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn, ensureDate } from "../../../../lib/utils";
@@ -20,6 +21,7 @@ import { UncontrolledInput } from "./TaskDetailPrimitives";
 import { LanproDatePicker } from "../../../../components/ui/LanproDatePicker";
 import { confirmDeleteAlert, showSuccessAlert } from "../../../../lib/sweetalert";
 import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
+import { fetchMilestones, type Milestone } from "../../../timeline/milestone.service";
 
 interface TaskDetailSidebarProps {
   task: Task;
@@ -62,6 +64,26 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
   safeFormat,
 }) => {
   const { t } = useTranslation();
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
+
+  useEffect(() => {
+    if (!task.projectId) {
+      setMilestones([]);
+      return;
+    }
+    let cancelled = false;
+    void fetchMilestones(task.projectId)
+      .then((data) => {
+        if (!cancelled) setMilestones(data);
+      })
+      .catch(() => {
+        if (!cancelled) setMilestones([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [task.projectId]);
+
   return (
     <div
       className={cn(
@@ -261,7 +283,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           />
         </div>
 
-        {/* Release / Milestone */}
+        {/* Release (MasterData) — terpisah dari Milestone tabel */}
         <div className="space-y-1">
           <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
             <Tag className="w-3 h-3 text-content-subtle" />
@@ -281,6 +303,31 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
                 })),
             ]}
             type="release"
+            masterData={masterData}
+            disabled={!isEditable || blockMember}
+            className={cn("w-full", blockMember && "pointer-events-none opacity-80")}
+            buttonClassName="h-[32px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-2.5 text-xs font-normal text-content-body"
+          />
+        </div>
+
+        {/* Milestone (tabel Milestones / #312) */}
+        <div className="space-y-1">
+          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+            <Flag className="w-3 h-3 text-content-subtle" />
+            {t("issueDetail.milestone")}
+          </label>
+          <StyledDropdown
+            value={task.milestoneId || ""}
+            onChange={(val) => updateTaskField(task.id, "milestoneId", val || null)}
+            options={[
+              { id: "", label: t("issueDetail.selectMilestone"), icon: "Flag" },
+              ...milestones.map((m) => ({
+                id: m.id,
+                label: m.name,
+                icon: "Flag",
+              })),
+            ]}
+            type="milestone"
             masterData={masterData}
             disabled={!isEditable || blockMember}
             className={cn("w-full", blockMember && "pointer-events-none opacity-80")}

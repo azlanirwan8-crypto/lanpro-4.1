@@ -1,4 +1,4 @@
-import { Task, Sprint, UserProfile, ActivityLog, Project } from "../../types";
+import { Task, Sprint, UserProfile, ActivityLog, Project, MasterData } from "../../types";
 
 export interface DashboardViewProps {
   tasks: Task[];
@@ -12,4 +12,5 @@ export interface DashboardViewProps {
   userRole?: string | null;
   currentUser?: UserProfile | null;
   fetchTasks?: () => Promise<void>;
+  masterData?: MasterData[];
 }

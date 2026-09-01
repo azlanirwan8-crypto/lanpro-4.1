@@ -52,6 +52,7 @@ export const updateTaskSchema = z.object({
   // memperluas allowlist rute saja tidak cukup.
   resolution: z.string().optional().nullable(),
   release: z.string().optional().nullable(),
+  milestoneId: z.string().max(64).optional().nullable(),
   category: z.string().optional().nullable(),
   environment: z.string().optional().nullable(),
   projectRisk: z.string().optional().nullable(),

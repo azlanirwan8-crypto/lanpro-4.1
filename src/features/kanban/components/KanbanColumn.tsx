@@ -5,7 +5,7 @@ import { cn } from "../../../lib/utils";
 import { RenderIcon } from "../../../components/RenderIcon";
 import { KanbanCard } from "./KanbanCard";
 import { useAppStore } from "../../../store/useAppStore";
-import { TERMINAL_STATUSES } from "../../../lib/constants";
+import { statusSelesai } from "../../../lib/statusSelesai";
 
 interface KanbanColumnProps {
   status: any;
@@ -69,7 +69,7 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                   "flex flex-col rounded-md min-h-[100px] h-full transition-all duration-200 flex-1",
                   isCompact ? "gap-1.5" : "gap-2",
                   snapshot.isDraggingOver &&
-                    (TERMINAL_STATUSES.some((s) => status.label.toLowerCase().includes(s))
+                    (statusSelesai(status.label, mArr) || statusSelesai(status.code, mArr)
                       ? "bg-red-500/10 border-2 border-dashed border-red-400 cursor-not-allowed"
                       : "bg-primary-surface/10 border-2 border-dashed border-primary")
                 )}
