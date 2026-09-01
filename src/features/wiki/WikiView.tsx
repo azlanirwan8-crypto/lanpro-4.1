@@ -212,6 +212,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
   const [editLink, setEditLink] = useState("");
   const [editFile, setEditFile] = useState<File | null>(null);
   const [shouldRemoveFile, setShouldRemoveFile] = useState(false);
+  const [mobileDetailTab, setMobileDetailTab] = useState<"preview" | "notes">("preview");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editingDoc = useMemo(() => {
@@ -1185,10 +1186,45 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   </h2>
                 </div>
 
+                {/* Mobile Tab Switcher (< 768px) */}
+                <div className="md:hidden flex items-center bg-surface border border-border-subtle rounded-lg p-1 shadow-2xs shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setMobileDetailTab("preview")}
+                    className={cn(
+                      "flex-1 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5",
+                      mobileDetailTab === "preview"
+                        ? "bg-primary-surface text-content-inverse shadow-xs font-semibold"
+                        : "text-content-muted hover:text-content-strong"
+                    )}
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>{t("wiki.mainPreview")}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMobileDetailTab("notes")}
+                    className={cn(
+                      "flex-1 py-1.5 text-xs font-medium rounded-md transition-all flex items-center justify-center gap-1.5",
+                      mobileDetailTab === "notes"
+                        ? "bg-primary-surface text-content-inverse shadow-xs font-semibold"
+                        : "text-content-muted hover:text-content-strong"
+                    )}
+                  >
+                    <MessageSquare className="w-3.5 h-3.5" />
+                    <span>{t("wiki.notesComments")}</span>
+                  </button>
+                </div>
+
                 {/* Panel 3: Split-Pane Dual Workspace Layout */}
-                <div className="bg-surface border border-border-subtle rounded-lg shadow-2xs flex-1 flex flex-col md:flex-row min-h-[600px] overflow-hidden p-3 gap-3">
+                <div className="bg-surface border border-border-subtle rounded-lg shadow-2xs flex-1 flex flex-col md:flex-row min-h-[500px] md:min-h-[600px] overflow-hidden p-3 gap-3">
                   {/* LEFT PANE / MAIN VIEW (DOCUMENT VIEWER) */}
-                  <div className="flex-1 bg-surface border border-border-subtle/80 rounded-lg flex flex-col min-h-0 overflow-hidden relative shadow-2xs">
+                  <div
+                    className={cn(
+                      "flex-1 bg-surface border border-border-subtle/80 rounded-lg flex flex-col min-h-0 overflow-hidden relative shadow-2xs",
+                      mobileDetailTab !== "preview" && "hidden md:flex"
+                    )}
+                  >
                     {/* Title Bar Left Pane */}
                     <div className="px-4 py-2.5 bg-surface-sunken border-b border-border-subtle/80 flex items-center justify-between shrink-0 select-none">
                       <span className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider flex items-center gap-1.5">
@@ -1336,7 +1372,8 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   <div
                     className={cn(
                       "w-full md:w-[350px] lg:w-[400px] shrink-0 bg-surface border border-border-subtle/80 rounded-lg flex flex-col min-h-0 overflow-hidden shadow-2xs transition-all duration-300",
-                      isFullscreenPreview ? "hidden md:hidden" : "flex"
+                      isFullscreenPreview ? "hidden md:hidden" : "flex",
+                      mobileDetailTab !== "notes" && "hidden md:flex"
                     )}
                   >
                     {/* Side Pane Header */}

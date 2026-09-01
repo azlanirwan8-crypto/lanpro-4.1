@@ -44,6 +44,7 @@ import {
 import { toast } from "sonner";
 import { hasPermission } from "../../lib/permissions";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
+import { DiscussionPointMobileCardView } from "./components/DiscussionPointMobileCardView";
 
 interface DiscussionPointsTableProps {
   projectId: string;
@@ -560,7 +561,54 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
         </div>
       ) : (
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="overflow-x-auto flex-1">
+          {/* Mobile Card List View (< 640px) */}
+          <div className="sm:hidden flex-1 overflow-y-auto p-4 space-y-3">
+            {paginatedPoints.length === 0 ? (
+              <div className="text-center py-12 text-content-subtle">
+                <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
+                  <MessageSquare className="w-5 h-5" />
+                </div>
+                <p className="font-normal text-content-strong text-xs">
+                  {t("meetings.emptyTitle")}
+                </p>
+                <p className="text-[11px] text-content-subtle mt-0.5">{t("meetings.emptyHint")}</p>
+              </div>
+            ) : (
+              <DiscussionPointMobileCardView
+                points={paginatedPoints}
+                projectMembers={projectMembers}
+                masterData={masterData}
+                commentsMap={commentsMap}
+                onOpenThread={(point) => handleOpenThreadDrawer(point)}
+                onEditPoint={(point) => startEdit(point)}
+                onDeletePoint={(id) => handleDelete(id)}
+                onToggleStatus={(point) => handleToggleStatus(point)}
+                canEdit={(point) =>
+                  hasPermission(
+                    userRole,
+                    "meetingNotes",
+                    "update",
+                    point.authorId === (currentUser?.uid || ""),
+                    permissions
+                  )
+                }
+                canDelete={(point) =>
+                  hasPermission(
+                    userRole,
+                    "meetingNotes",
+                    "delete",
+                    point.authorId === (currentUser?.uid || ""),
+                    permissions
+                  )
+                }
+                canToggleStatus={canAdd}
+                currentUserId={currentUser?.uid}
+              />
+            )}
+          </div>
+
+          {/* Desktop Table Container (>= 640px) */}
+          <div className="hidden sm:block overflow-x-auto flex-1">
             <ResponsiveTable className="w-full border-collapse text-left text-xs">
               <thead>
                 <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap">
@@ -638,45 +686,50 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
                         {/* Context / Fitur Tag */}
                         <td className="py-3 px-4 align-middle">
-                          <div className="flex flex-wrap gap-1">
+                          <div className="flex flex-wrap gap-1 items-center">
                             {p.fitur ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-normal bg-indigo-500/10 text-primary border border-indigo-500/30">
-                                {p.fitur}
+                              <span className="px-2 py-0.5 rounded-md text-[10px] leading-none font-normal bg-indigo-500/10 text-primary border border-indigo-500/30">
+                                {(() => {
+                                  const meta = masterData.find(
+                                    (m) =>
+                                      m.type === "fitur" &&
+                                      (m.label?.toLowerCase() === p.fitur?.toLowerCase() ||
+                                        m.id === p.fitur)
+                                  );
+                                  return meta?.label || p.fitur;
+                                })()}
                               </span>
                             ) : (
-                              <span className="text-content-subtle text-xs italic">-</span>
+                              <span className="text-content-subtle italic text-[11px]">-</span>
                             )}
                           </div>
                         </td>
 
-                        {/* PIC */}
-                        <td className="py-3 px-4 align-middle">
-                          <div className="text-xs font-normal text-content-strong">
-                            {assigneeName}
+                        {/* PIC (Assignee) */}
+                        <td className="py-3 px-4 align-middle text-content-body font-normal">
+                          <div className="flex items-center gap-1.5">
+                            <span className="truncate max-w-[120px]">{assigneeName}</span>
                           </div>
                         </td>
 
                         {/* Target Date */}
-                        <td className="py-3 px-4 align-middle">
-                          {p.targetDate || p.target_date ? (
-                            <div className="flex items-center gap-1 text-xs text-content-secondary font-normal">
-                              <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
-                              <span>{p.targetDate || p.target_date}</span>
+                        <td className="py-3 px-4 align-middle text-content-muted font-normal whitespace-nowrap">
+                          {p.targetDate ? (
+                            <div className="flex items-center gap-1 text-[11px]">
+                              <Calendar className="w-3.5 h-3.5 text-content-subtle" />
+                              <span>{p.targetDate}</span>
                             </div>
                           ) : (
-                            <span className="text-content-subtle text-xs italic">-</span>
+                            <span className="text-content-subtle italic text-[11px]">-</span>
                           )}
                         </td>
 
-                        {/* Thread Icon Button */}
+                        {/* Thread Comments */}
                         <td className="py-3 px-4 text-center align-middle">
                           {(() => {
-                            const commentsList = p.id ? commentsMap[p.id] || [] : [];
-                            const count = commentsList.length;
-
+                            const count = (p.id && commentsMap[p.id]?.length) || 0;
                             return (
                               <button
-                                type="button"
                                 onClick={() => handleOpenThreadDrawer(p)}
                                 className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95 ${
                                   count > 0
@@ -798,15 +851,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                         onChange={(val) => setQuickFitur(val)}
                         options={masterData
                           .filter((m) => m.type?.toLowerCase() === "fitur")
-                          .map((m) => ({
-                            id: m.label,
-                            label: m.label,
-                            color: m.color,
-                            icon: m.icon,
-                          }))}
-                        type="fitur"
-                        masterData={masterData}
-                        buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-normal shadow-2xs"
+                          .map((m) => ({ id: m.label, label: m.label }))}
+                        className="text-xs"
                       />
                     </td>
 
@@ -816,26 +862,27 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                         value={quickAssignTo}
                         onChange={(val) => setQuickAssignTo(val)}
                         options={[
-                          { id: "Unassigned", label: t("discussion.assignPic") },
-                          ...userOptions,
+                          { id: "Unassigned", label: t("newTask.unassigned") },
+                          ...projectMembers.map((m) => ({
+                            id: m.uid || m.id || "",
+                            label: m.displayName || m.username || m.name || "",
+                          })),
                         ]}
-                        members={projectMembers}
-                        type="member"
-                        masterData={masterData}
-                        buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left text-content-body rounded-md font-normal shadow-2xs"
+                        className="text-xs"
                       />
                     </td>
 
                     {/* Target Date */}
                     <td className="py-2.5 px-4 align-middle">
-                      <LanproDatePicker
+                      <input
+                        type="date"
                         value={quickTargetDate}
-                        onChange={setQuickTargetDate}
-                        buttonClassName="w-full h-8 px-2.5 bg-surface border border-border-subtle text-xs text-left font-normal text-content-body rounded-md shadow-2xs"
+                        onChange={(e) => setQuickTargetDate(e.target.value)}
+                        className="w-full px-2 py-1 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none shadow-2xs"
                       />
                     </td>
 
-                    {/* Thread */}
+                    {/* Thread Placeholder */}
                     <td className="py-2.5 px-4 text-center align-middle text-content-subtle text-xs">
                       -
                     </td>

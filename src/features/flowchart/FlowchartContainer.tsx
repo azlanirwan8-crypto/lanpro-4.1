@@ -39,6 +39,7 @@ import {
   Upload,
   Image as ImageIcon,
   CheckCircle,
+  ChevronLeft,
 } from "lucide-react";
 import { toJpeg } from "html-to-image";
 import { Task, Project } from "../../types";
@@ -2510,26 +2511,26 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             ) : (
               <div className="flex-1 flex flex-col min-h-0 relative space-y-4">
                 {/* Panel 1: Top Actions */}
-                <div className="bg-surface border border-border-subtle rounded-md p-4 flex items-center justify-between shadow-xs shrink-0">
+                <div className="bg-surface border border-border-subtle rounded-lg p-3.5 md:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-2xs shrink-0">
                   <button
                     onClick={() => {
                       setIsEditorActive(false);
                       setSelectedFlowId(null);
                       setCurrentPage(1);
                     }}
-                    className="flex items-center gap-1.5 text-xs font-medium text-primary bg-primary-surface/10 hover:bg-primary-surface/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
+                    className="flex items-center justify-center gap-1.5 text-xs font-medium text-primary bg-primary-surface/10 hover:bg-primary-surface/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
                   >
-                    {t("flowchart.backToList")}
+                    <ChevronLeft className="w-4 h-4" /> {t("flowchart.backToList")}
                   </button>
 
                   {/* Action Buttons & View Mode Toggle */}
-                  <div className="flex items-center flex-wrap gap-3 shrink-0">
+                  <div className="flex items-center justify-between sm:justify-end flex-wrap gap-2 shrink-0">
                     {/* View Mode Segmented Control Toggle */}
                     <div className="bg-surface-muted p-1 rounded-md flex items-center border border-border-subtle/60 shadow-inner">
                       <button
                         onClick={() => setRightViewMode("embed")}
                         className={cn(
-                          "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
+                          "px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
                           rightViewMode === "embed"
                             ? "bg-surface text-content shadow-2xs font-semibold"
                             : "text-content-muted hover:text-content-strong"
@@ -2540,7 +2541,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       <button
                         onClick={() => setRightViewMode("canvas")}
                         className={cn(
-                          "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
+                          "px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
                           rightViewMode === "canvas"
                             ? "bg-surface text-content shadow-2xs font-semibold"
                             : "text-content-muted hover:text-content-strong"
@@ -2552,7 +2553,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                     {/* Edit & Delete Action Buttons */}
                     {currentFlowMetadata && canModifyFlowchart(currentFlowMetadata) && (
-                      <div className="flex items-center gap-1.5 bg-surface-muted p-1 rounded-md border border-border-subtle/60">
+                      <div className="flex items-center gap-1 bg-surface-muted p-1 rounded-md border border-border-subtle/60">
                         <button
                           onClick={(e) => openEditModal(currentFlowMetadata, e)}
                           className="p-1.5 bg-surface hover:bg-surface-sunken text-content-secondary hover:text-primary rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"
