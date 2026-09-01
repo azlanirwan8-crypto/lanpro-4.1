@@ -3013,6 +3013,13 @@ export const id = {
     fieldBio: "Bio Profil",
     noDiffRecorded: "Perubahan tersimpan dengan sukses.",
   },
+  navigation: {
+    mobileDashboard: "Beranda",
+    mobileBoard: "Papan",
+    mobileTasks: "Tugas",
+    mobileTeam: "Tim",
+    mobileAdd: "Tambah",
+  },
   issues: {
     cancel: "Batal",
     addLink: "+ Tambah Tautan",

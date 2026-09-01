@@ -16,6 +16,7 @@ import { IssueAdvancedFiltersPanel } from "./components/list/IssueAdvancedFilter
 import { IssueTableRow } from "./components/list/IssueTableRow";
 import { IssueQuickCreateBar } from "./components/list/IssueQuickCreateBar";
 import { IssueBulkActionsBar } from "./components/list/IssueBulkActionsBar";
+import { IssueMobileCardView } from "./components/list/IssueMobileCardView";
 import {
   isUserReporter as isUserReporterFn,
   canDeleteIssue as canDeleteIssueFn,
@@ -291,8 +292,26 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           setIsConfigureColumnsOpen={setIsConfigureColumnsOpen}
         />
 
-        {/* Table Content Area */}
-        <div className="overflow-x-auto w-full flex-1 flex flex-col min-h-0">
+        {/* Mobile View: Card List (< 640px) */}
+        <IssueMobileCardView
+          tasks={displayRoots.slice((listPage - 1) * itemsPerPage, listPage * itemsPerPage)}
+          masterData={mArr}
+          projectMembers={projectMembers}
+          sprints={sprints}
+          isUserReporter={isUserReporter}
+          canDeleteIssue={canDeleteIssue}
+          canEditIssue={canEditIssue}
+          canManageIssue={canManageIssue}
+          deleteTask={deleteTask}
+          setSelectedTaskForDetail={setSelectedTaskForDetail}
+          setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+          updateTaskField={updateTaskField}
+          selectedTaskIds={selectedTaskIds}
+          handleToggleSelectOne={handleToggleSelectOne}
+        />
+
+        {/* Desktop Table Content Area (>= 640px) */}
+        <div className="hidden sm:flex overflow-x-auto w-full flex-1 flex-col min-h-0">
           <div className={cn(styles.tableWrapper, "flex-1")}>
             <DragDropContext onDragEnd={handleDragEnd}>
               <div className="min-w-max flex flex-col">

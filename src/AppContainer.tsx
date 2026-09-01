@@ -72,6 +72,7 @@ import { LiveChatWidget } from "./components/LiveChatWidget";
 import { PresenceProvider } from "./contexts/PresenceContext";
 import { HeaderAvatarGroup } from "./components/HeaderAvatarGroup";
 import { UserProfileDropdown } from "./components/UserProfileDropdown";
+import { MobileBottomNav } from "./components/navigation/MobileBottomNav";
 import { SingleLoginCollisionModal } from "./components/SingleLoginCollisionModal";
 import { apiRequest, getAuthToken, isNetworkOrAuthError } from "./lib/api";
 import { WajibGantiKataSandiModal } from "./features/auth/components/WajibGantiKataSandiModal";
@@ -4276,6 +4277,13 @@ function AppContainer() {
                 );
               }
             }}
+          />
+
+          {/* Mobile Bottom Navigation Bar (< 768px) */}
+          <MobileBottomNav
+            currentView={currentView}
+            setCurrentView={setCurrentView}
+            onOpenNewTask={() => setIsNewTaskModalOpen(true)}
           />
         </div>
       </div>

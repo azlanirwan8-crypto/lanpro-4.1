@@ -2990,6 +2990,13 @@ export const en = {
     fieldBio: "Profile Bio",
     noDiffRecorded: "Changes saved successfully.",
   },
+  navigation: {
+    mobileDashboard: "Home",
+    mobileBoard: "Board",
+    mobileTasks: "Tasks",
+    mobileTeam: "Team",
+    mobileAdd: "Add",
+  },
   issues: {
     cancel: "Cancel",
     addLink: "+ Add link",
