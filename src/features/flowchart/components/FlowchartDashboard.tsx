@@ -15,6 +15,7 @@ import React from "react";
 import { Workflow, Search, Plus, Eye, Edit3, Trash2 } from "lucide-react";
 import { ResponsiveTable } from "../../../components/ResponsiveTable";
 import { getInitials } from "../lib/nodeTheme";
+import { FlowchartMobileCardView } from "./FlowchartMobileCardView";
 import type { FlowchartData } from "../types";
 import type { Task } from "../../../types";
 
@@ -110,8 +111,8 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
         </div>
 
         <div className="flex-1 flex flex-col min-h-0 bg-surface">
-          {/* Data Table */}
-          <div className="flex-1 overflow-x-auto overflow-y-auto m-6 bg-surface rounded-md border border-border-subtle/60 shadow-xs">
+          {/* Data Table (Desktop sm+) */}
+          <div className="hidden sm:block flex-1 overflow-x-auto overflow-y-auto m-6 bg-surface rounded-md border border-border-subtle/60 shadow-xs">
             <ResponsiveTable className="w-full text-left border-collapse min-w-[880px]">
               <thead>
                 <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-normal text-primary uppercase tracking-wider whitespace-nowrap">
@@ -267,6 +268,23 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                 )}
               </tbody>
             </ResponsiveTable>
+          </div>
+
+          {/* Mobile Card List View (< 640px) */}
+          <div className="sm:hidden flex-1 overflow-y-auto p-4 space-y-3">
+            <FlowchartMobileCardView
+              flowcharts={currentItems}
+              tasks={tasks}
+              onSelectFlowchart={(id) => {
+                handleSelectFlowchart(id);
+                setIsEditorActive(true);
+              }}
+              onEditFlowchart={(flow, e) => openEditModal(flow, e)}
+              onDeleteFlowchart={(id, e) => handleDeleteFlowchart(id, e)}
+              canModifyFlowchart={canModifyFlowchart}
+              getResolvedAuthor={getResolvedAuthor}
+              onOpenCreate={openCreateModal}
+            />
           </div>
 
           {/* Pagination Footer */}

@@ -23,6 +23,7 @@ import { QATestCase, QATestSuite } from "../types";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { ResponsiveTable } from "../../../components/ResponsiveTable";
 import { StyledDropdown } from "../../../components/ui/CommonComponents";
+import { QATestCaseMobileCardView } from "./QATestCaseMobileCardView";
 
 interface QATestCaseTableProps {
   activeSuite: QATestSuite | undefined;
@@ -445,9 +446,9 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         </div>
       )}
 
-      {/* ULTRA-SLEEK 5-COLUMN ENTERPRISE QA TABLE MATRIX */}
+      {/* ULTRA-SLEEK 5-COLUMN ENTERPRISE QA TABLE MATRIX (Desktop sm+) */}
       <div className="bg-surface border border-border-subtle/80 rounded-md shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="hidden sm:block overflow-x-auto">
           <ResponsiveTable className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-primary-surface/5 border-b border-primary/15 text-[10px] font-normal uppercase tracking-wider text-content-subtle">
@@ -749,6 +750,31 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               )}
             </tbody>
           </ResponsiveTable>
+        </div>
+
+        {/* Mobile Card List View (< 640px) */}
+        <div className="sm:hidden p-4 space-y-3">
+          <QATestCaseMobileCardView
+            cases={searchedCases}
+            selectedCaseIds={selectedCaseIds}
+            projectMembers={projectMembers}
+            canUpdate={canUpdate}
+            canDelete={canDelete}
+            isAdminRole={isAdminRole}
+            onSelectCase={(tc) => setSelectedTestCase(tc)}
+            onToggleCheckCase={(caseId) => handleToggleSelectCase(caseId)}
+            onStatusChange={(caseId, status) => handleStatusChange(caseId, status)}
+            onEditCase={(tc) => {
+              setCaseToEditInfo(tc);
+              setCaseEditTitle(tc.title);
+              setCaseEditSteps(tc.steps);
+              setCaseEditExpected(tc.expectedResult);
+              setCaseEditPriority(tc.priority || "Medium");
+              setCaseEditAssignedTo(tc.assignedTo || "");
+            }}
+            onDeleteCase={(tc) => handleDeleteTestCase(tc)}
+            onCreateBug={(tc) => handleOpenCreateBugModal(tc)}
+          />
         </div>
       </div>
     </div>

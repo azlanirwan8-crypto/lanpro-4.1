@@ -39,6 +39,7 @@ import { hasPermission } from "../../lib/permissions";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { LanproDatePicker } from "../../components/ui/LanproDatePicker";
 import { LanproTimePicker } from "../../components/ui/LanproTimePicker";
+import { MeetingMobileCardView } from "./components/MeetingMobileCardView";
 
 interface MeetingNotesProps {
   projectId: string;
@@ -440,8 +441,8 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
               </div>
             </div>
 
-            {/* DataTable Container */}
-            <div className="flex-1 overflow-x-auto overflow-y-auto m-4 md:m-6 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs">
+            {/* DataTable Container (Desktop sm+) */}
+            <div className="hidden sm:block flex-1 overflow-x-auto overflow-y-auto m-4 md:m-6 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs">
               <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
                   <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap">
@@ -598,6 +599,28 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                   )}
                 </tbody>
               </ResponsiveTable>
+            </div>
+
+            {/* Mobile Card List View (< 640px) */}
+            <div className="sm:hidden flex-1 overflow-y-auto p-4 space-y-3">
+              <MeetingMobileCardView
+                meetings={paginatedMeetings}
+                users={users}
+                projectMembers={projectMembers}
+                onSelectMeeting={(id) => {
+                  setActiveMeetingId(id);
+                  setMobileViewMode("detail");
+                }}
+                onEditMeeting={(meeting) => startEdit(meeting)}
+                onDeleteMeeting={(meeting) => handleDeleteMeeting(meeting.id!)}
+                onDownloadAttachment={(meetingId, fileName) =>
+                  handleDownloadMeeting(meetingId, fileName)
+                }
+                canEdit={canAdd}
+                canDelete={true}
+                isMeetingAuthor={isMeetingAuthor}
+                isAdmin={isUserAdmin}
+              />
             </div>
 
             {/* Table Footer / Pagination */}

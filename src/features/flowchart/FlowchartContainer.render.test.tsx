@@ -139,8 +139,8 @@ describe("FlowchartView", () => {
     const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
     renderView();
 
-    const baris = await screen.findByText("Alur Onboarding");
-    fireEvent.click(baris);
+    const barisList = await screen.findAllByText("Alur Onboarding");
+    fireEvent.click(barisList[0]);
 
     // Kerangka editor: hanya ada setelah sebuah flowchart dibuka.
     await waitFor(() =>

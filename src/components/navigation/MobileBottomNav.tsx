@@ -18,7 +18,17 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const navItems = [
+  interface NavItem {
+    id: string;
+    label: string;
+    icon: any;
+    active?: boolean;
+    onClick?: () => void;
+    isAction?: boolean;
+    badge?: number;
+  }
+
+  const navItems: NavItem[] = [
     {
       id: "dashboard",
       label: t("navigation.mobileDashboard"),
@@ -53,6 +63,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       icon: Users,
       active: currentView === "team" || currentView === "access",
       onClick: () => setCurrentView("team"),
+      badge: unreadChatCount > 0 ? unreadChatCount : undefined,
     },
   ];
 

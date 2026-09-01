@@ -1001,6 +1001,13 @@ export const en = {
     next: "Next",
     previous: "Previous",
     existing: "(Existing)",
+    unassigned: "Unassigned",
+    emptyStateTitle: "No Meeting Notes Yet",
+    emptyStateSubtitle:
+      "Create a new meeting note to document agenda, datetime, and discussion points.",
+    viewDetail: "View Meeting Detail",
+    joinMeeting: "Join Meeting",
+    attachment: "Attachment",
   },
   master: {
     tambahJenis: "Add {{jenis}}",
@@ -1322,7 +1329,8 @@ export const en = {
     theQaTestingModuleNeeds:
       "The QA testing module needs an active project to upload test scripts, manage execution status, and link bug tickets.",
     noModuleSelected: "No module selected",
-    chooseExcel: "Choose Excel file",
+    chooseExcel: "Choose Excel File",
+    unassigned: "Unassigned",
   },
   kanban: {
     blockedCardHint: "Card blocked: finish all subtasks before moving it to Done",
@@ -1346,6 +1354,8 @@ export const en = {
     emptyTitle: "No flowcharts found",
     emptyHint: "Create a new flowchart or adjust your search keyword.",
     editorTitle: "Flowchart Editor",
+    editDiagram: "Edit Flowchart",
+    deleteDiagram: "Delete Flowchart",
     thCategory: "Category",
     thLinkedEpic: "Linked Epic",
     thAuthor: "Author",
@@ -1577,6 +1587,8 @@ export const en = {
     viewDetail: "View document detail",
     deleteDocument: "Delete document",
     editDocument: "Edit document",
+    editDoc: "Edit Document",
+    openLink: "Open Link",
     pickADocumentInThe:
       "Pick a document in the left panel, or click the add button to create a new one.",
     fullscreenPreview: "Full-screen preview",
@@ -2178,6 +2190,9 @@ export const en = {
     emptyFilter: "No test case matches the filter or search keyword.",
     viewScenario: "View scenario detail & test steps",
     createBugTicket: "Create Bug Ticket",
+    createBug: "Create Bug",
+    editCase: "Edit Test Case",
+    deleteCase: "Delete Test Case",
     deleteTestCase: "Delete Test Case",
   },
   gantiSandi: {

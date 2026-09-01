@@ -1011,6 +1011,13 @@ export const id = {
     next: "Berikutnya",
     previous: "Sebelumnya",
     existing: "(Yang Ada)",
+    unassigned: "Belum Ditugaskan",
+    emptyStateTitle: "Belum Ada Catatan Rapat",
+    emptyStateSubtitle:
+      "Buat catatan rapat baru untuk mencatat agenda, datetime, dan poin diskusi.",
+    viewDetail: "Lihat Rincian Rapat",
+    joinMeeting: "Gabung Rapat",
+    attachment: "Lampiran",
   },
   master: {
     tambahJenis: "Tambah {{jenis}}",
@@ -1333,6 +1340,7 @@ export const id = {
       "Modul Pengujian QA membutuhkan proyek aktif untuk mengunggah skrip uji, mengelola status eksekusi, dan menghubungkannya dengan tiket bug.",
     noModuleSelected: "Belum ada modul terpilih",
     chooseExcel: "Pilih Berkas Excel",
+    unassigned: "Belum Ditugaskan",
   },
   kanban: {
     blockedCardHint: "Kartu terbelenggu: Selesaikan semua subtask sebelum memindahkan ke Done",
@@ -1356,6 +1364,8 @@ export const id = {
     emptyTitle: "Diagram alur tidak ditemukan",
     emptyHint: "Buat diagram alur baru atau ubah kata kunci pencarian Anda.",
     editorTitle: "Editor Diagram Alur",
+    editDiagram: "Ubah Diagram Alur",
+    deleteDiagram: "Hapus Diagram Alur",
     thCategory: "Kategori",
     thLinkedEpic: "Epic Terkait",
     thAuthor: "Pembuat",
@@ -1588,6 +1598,8 @@ export const id = {
     viewDetail: "Lihat detail dokumen",
     deleteDocument: "Hapus dokumen",
     editDocument: "Ubah dokumen",
+    editDoc: "Ubah Dokumen",
+    openLink: "Buka Tautan",
     pickADocumentInThe:
       "Pilih salah satu dokumen di panel kiri atau klik tombol tambah untuk membuat dokumen baru.",
     fullscreenPreview: "Pratinjau Layar Penuh",
@@ -2196,6 +2208,9 @@ export const id = {
     emptyFilter: "Tidak ada test case yang sesuai dengan saringan atau kata kunci pencarian.",
     viewScenario: "Lihat Detail Skenario & Langkah Pengujian",
     createBugTicket: "Buat Tiket Bug",
+    createBug: "Buat Bug",
+    editCase: "Ubah Kasus Uji",
+    deleteCase: "Hapus Kasus Uji",
     deleteTestCase: "Hapus Test Case",
   },
   gantiSandi: {

@@ -38,6 +38,7 @@ import { cn } from "../../lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
+import { WikiMobileCardView } from "./components/WikiMobileCardView";
 
 import type { DocumentModel, WikiViewProps } from "./types";
 import {
@@ -668,7 +669,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
   };
 
   // Download logic for attached files
-  const handleDownload = async (docId: string, fName: string) => {
+  const handleDownload = async (docId: string, fName?: string) => {
     toast.info(t("toast.downloadingFile"));
     const effectiveUserId = resolveUserId(currentUser);
     try {
@@ -895,8 +896,8 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 </div>
               </div>
 
-              {/* Datatable Container */}
-              <div className="flex-1 overflow-x-auto overflow-y-auto m-5 bg-surface rounded-md border border-border-subtle/80 shadow-2xs">
+              {/* Datatable Container (Desktop sm+) */}
+              <div className="hidden sm:block flex-1 overflow-x-auto overflow-y-auto m-5 bg-surface rounded-md border border-border-subtle/80 shadow-2xs">
                 <ResponsiveTable className="w-full text-left border-collapse min-w-[880px]">
                   <thead>
                     <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-normal text-primary uppercase tracking-wider whitespace-nowrap">
@@ -948,34 +949,30 @@ export const WikiView: React.FC<WikiViewProps> = ({
                               {String(srNo).padStart(2, "0")}
                             </td>
                             <td className="py-2.5 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[320px]">
-                              <div className="truncate">{doc.title}</div>
-                              {doc.description && (
-                                <div className="text-content-subtle font-normal text-xs sm:text-[11px] truncate mt-0.5">
-                                  {doc.description}
-                                </div>
-                              )}
+                              <div className="line-clamp-1">{doc.title}</div>
                             </td>
-                            <td className="py-2.5 px-4 whitespace-nowrap">
-                              <span className={style.badge}>{doc.type}</span>
+                            <td className="py-2.5 px-4">
+                              <span className={style.badge}>
+                                {doc.type ? doc.type.toUpperCase() : "PRD"}
+                              </span>
                             </td>
-                            <td
-                              className="py-2.5 px-4 whitespace-nowrap"
-                              onClick={(e) => e.stopPropagation()}
-                            >
+                            <td className="py-2.5 px-4" onClick={(e) => e.stopPropagation()}>
                               {doc.fileName ? (
                                 <button
-                                  onClick={() => handleDownload(doc.id, doc.fileName)}
+                                  onClick={() => handleDownload(doc.id, doc.fileName || undefined)}
                                   className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
-                                  title={t("wiki.clickToDownload")}
+                                  title={t("meetings.clickToDownload")}
                                 >
                                   <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
-                                  <span className="truncate max-w-[130px]">{doc.fileName}</span>
+                                  <span className="truncate max-w-[130px]">
+                                    {doc.fileName || t("wiki.attachment")}
+                                  </span>
                                 </button>
                               ) : (
                                 <span className="text-content-subtle italic text-xs">—</span>
                               )}
                             </td>
-                            <td className="py-2.5 px-4 text-content-body font-medium whitespace-nowrap">
+                            <td className="py-2.5 px-4 text-content-body font-medium">
                               <div className="flex items-center gap-2">
                                 <UserAvatar
                                   uid={doc.createdBy}
@@ -986,7 +983,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                 <span className="truncate max-w-[130px]">{creatorName}</span>
                               </div>
                             </td>
-                            <td className="py-2.5 px-4 text-content-muted font-medium whitespace-nowrap">
+                            <td className="py-2.5 px-4 text-content-muted font-medium">
                               {lastEdited}
                             </td>
                             <td
@@ -1030,6 +1027,24 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     )}
                   </tbody>
                 </ResponsiveTable>
+              </div>
+
+              {/* Mobile Card List View (< 640px) */}
+              <div className="sm:hidden flex-1 overflow-y-auto p-4 space-y-3">
+                <WikiMobileCardView
+                  documents={currentDocs}
+                  onSelectDoc={(id) => {
+                    setActiveDocId(id);
+                    setMobileActiveView("detail");
+                  }}
+                  onEditDoc={(doc, e) => handleEditClick(doc, e)}
+                  onDeleteDoc={(doc, e) => handleDeleteClick(doc, e)}
+                  onDownloadDoc={(id, fileName) => handleDownload(id, fileName || undefined)}
+                  getUserName={getUserName}
+                  canModifyDoc={canModifyDoc}
+                  canCreate={canCreate}
+                  onOpenCreate={handleCreateNew}
+                />
               </div>
 
               {/* Table Footer / Pagination */}
