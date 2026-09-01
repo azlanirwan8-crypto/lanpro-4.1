@@ -93,14 +93,25 @@ export const PresenceProvider: React.FC<{
     }
   };
 
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const reconnectPresence = async () => {
     const activeUser = currentUserRef.current;
     // Emit socket join if possible
     if (socket && socket.connected && activeUser) {
       socket.emit("join_presence", activeUser);
     }
-    // Pull from Redis sync endpoint first, fallback to fallback ping
-    await syncPresenceRedis();
+    // Debounce agar klik/focus beruntun tidak memicu banyak /presence/sync (#317).
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+    }
+    return new Promise<void>((resolve) => {
+      reconnectTimerRef.current = setTimeout(async () => {
+        reconnectTimerRef.current = null;
+        await syncPresenceRedis();
+        resolve();
+      }, 400);
+    });
   };
 
   // Socket connection listeners

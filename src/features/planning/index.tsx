@@ -19,6 +19,7 @@ import { usePlanning } from "./hooks";
 import { useAppStore } from "../../store/useAppStore";
 import { BacklogSection } from "./BacklogSection";
 import { SprintSection } from "./SprintSection";
+import { useMobileAction } from "../../contexts/MobileActionContext";
 
 export const PlanningView: React.FC<PlanningViewProps> = (props) => {
   const { t } = useTranslation();
@@ -43,6 +44,22 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
   } = props;
 
   const { canEditPlanning, priorityColorMap } = usePlanning(props);
+
+  const { registerAction, unregisterAction } = useMobileAction();
+
+  React.useEffect(() => {
+    if (canEditPlanning && setIsNewSprintModalOpen) {
+      registerAction({
+        id: "sprint-add-new",
+        label: t("planning.createSprint") || "Buat Sprint Baru",
+        onClick: () => setIsNewSprintModalOpen(true),
+        canCreate: canEditPlanning,
+      });
+    } else {
+      unregisterAction("sprint-add-new");
+    }
+    return () => unregisterAction("sprint-add-new");
+  }, [canEditPlanning, setIsNewSprintModalOpen, registerAction, unregisterAction, t]);
 
   const isUserMatch = (fieldVal: string | null | undefined) => {
     if (!fieldVal) return false;
@@ -213,10 +230,10 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto lg:overflow-hidden bg-surface-muted flex flex-col p-2 sm:p-4 md:p-5 h-[calc(100vh-64px)] text-left">
+    <div className="flex-1 overflow-y-auto md:overflow-hidden bg-surface-muted flex flex-col p-2 sm:p-4 md:p-5 h-[calc(100vh-64px)] text-left">
       <DragDropContext onDragEnd={handleDragEndPlanning}>
-        <div className="flex flex-col lg:flex-row flex-1 gap-5 w-full h-full min-h-0">
-          <div className="w-full lg:w-[360px] xl:w-[380px] h-[320px] lg:h-full shrink-0 flex flex-col bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">
+        <div className="flex flex-col md:flex-row flex-1 gap-5 w-full h-full min-h-0">
+          <div className="w-full md:w-[320px] lg:w-[360px] xl:w-[380px] h-[280px] md:h-full shrink-0 flex flex-col bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">
             <Droppable droppableId="backlog">
               {(provided: any) => (
                 <div
@@ -260,6 +277,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
             <SprintSection
               sprints={sprints}
               tasks={tasks}
+              masterData={masterData}
               expandedSprintId={expandedSprintId}
               setExpandedSprintId={setExpandedSprintId}
               renderDraggableTask={renderDraggableTask}

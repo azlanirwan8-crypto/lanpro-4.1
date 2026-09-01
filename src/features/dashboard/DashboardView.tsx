@@ -37,7 +37,12 @@ import { useDashboard, COLORS } from "./hooks";
 import { styles } from "./styles";
 import { ensureDate } from "../../lib/utils";
 import { cn } from "../../lib/utils";
-import { fetchMeetings, fetchDocuments } from "./services/dashboard.service";
+import {
+  loadProjectMeetings,
+  loadProjectDocuments,
+  peekProjectMeetings,
+  peekProjectDocuments,
+} from "../../lib/moduleDataCache";
 import { SidebarWidgetsStack } from "./components/SidebarWidgetsStack";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
@@ -270,8 +275,16 @@ export function DashboardView(props: DashboardViewProps) {
     return [allOption, ...list];
   }, [props.sprints, tasks.length, t]);
 
-  const [meetings, setMeetings] = useState<any[]>([]);
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [meetings, setMeetings] = useState<any[]>(() => {
+    if (!selectedProject) return [];
+    const uid = currentUser?.uid || "guest";
+    return peekProjectMeetings(selectedProject.id, uid)?.slice(0, 3) ?? [];
+  });
+  const [documents, setDocuments] = useState<any[]>(() => {
+    if (!selectedProject) return [];
+    const uid = currentUser?.uid || "guest";
+    return peekProjectDocuments(selectedProject.id, uid)?.slice(0, 3) ?? [];
+  });
 
   const [waterfallGates, setWaterfallGates] = useState<
     Record<string, { approved: boolean; approvedBy: boolean | string; approvedAt: string }>
@@ -419,20 +432,20 @@ export function DashboardView(props: DashboardViewProps) {
   useEffect(() => {
     if (!selectedProject) return;
     const effectiveUserId = currentUser?.uid || "guest";
+    const projectId = selectedProject.id;
 
-    fetchMeetings(selectedProject.id, effectiveUserId)
-      .then((data) => {
-        if (data.status === "success") {
-          setMeetings(data.data.slice(0, 3));
-        }
-      })
-      .catch(console.error);
+    const cachedMeetings = peekProjectMeetings(projectId, effectiveUserId);
+    const cachedDocuments = peekProjectDocuments(projectId, effectiveUserId);
+    if (cachedMeetings) setMeetings(cachedMeetings.slice(0, 3));
+    if (cachedDocuments) setDocuments(cachedDocuments.slice(0, 3));
 
-    fetchDocuments(selectedProject.id, effectiveUserId)
-      .then((data) => {
-        if (data.status === "success") {
-          setDocuments(data.data.slice(0, 3));
-        }
+    Promise.all([
+      loadProjectMeetings(projectId, effectiveUserId, { limit: 3 }),
+      loadProjectDocuments(projectId, effectiveUserId, { limit: 3 }),
+    ])
+      .then(([meetingResult, documentResult]) => {
+        setMeetings(meetingResult.data.slice(0, 3));
+        setDocuments(documentResult.data.slice(0, 3));
       })
       .catch(console.error);
   }, [selectedProject, currentUser]);

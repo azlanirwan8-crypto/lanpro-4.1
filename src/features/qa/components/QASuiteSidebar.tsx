@@ -63,7 +63,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
   const { t } = useTranslation();
   const opsiFase = useMasterOptionItems("qa_phase", CADANGAN_FASE);
   return (
-    <div className="lg:col-span-3 space-y-3 lg:max-h-[calc(100vh-140px)] lg:sticky lg:top-4 pr-1 custom-scrollbar">
+    <div className="md:col-span-3 space-y-3 md:max-h-[calc(100vh-140px)] md:sticky md:top-4 pr-1 custom-scrollbar">
       {/* Velzon Ultra-Compact Card Box */}
       <div className="bg-surface border border-border-subtle/80 rounded-md p-3.5 shadow-xs space-y-3">
         {/* Header Title */}

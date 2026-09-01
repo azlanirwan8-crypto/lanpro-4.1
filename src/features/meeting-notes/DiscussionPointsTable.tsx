@@ -43,8 +43,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { hasPermission } from "../../lib/permissions";
+import {
+  suppressDiscussionPointsRefresh,
+  shouldSuppressDiscussionPointsRefresh,
+} from "../../lib/taskRefreshControl";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { DiscussionPointMobileCardView } from "./components/DiscussionPointMobileCardView";
+import { useMobileAction } from "../../contexts/MobileActionContext";
 
 interface DiscussionPointsTableProps {
   projectId: string;
@@ -67,7 +72,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 }) => {
   const { t } = useTranslation();
   const [points, setPoints] = useState<DiscussionPoint[]>([]);
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>(projectMembers);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<DiscussionPoint>>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -82,21 +87,11 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPoints, setTotalPoints] = useState(0);
   const itemsPerPage = 5;
 
-  const filteredPoints = points.filter(
-    (p) =>
-      (p.concern || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.keterangan || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.fitur || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.assignTo || "").toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const totalPages = Math.ceil(filteredPoints.length / itemsPerPage) || 1;
-  const paginatedPoints = filteredPoints.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginatedPoints = points;
+  const totalPages = Math.max(1, Math.ceil(totalPoints / itemsPerPage) || 1);
 
   const handleToggleStatus = async (point: DiscussionPoint) => {
     if (!point.id) return;
@@ -124,9 +119,17 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
   };
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, meetingId, projectId]);
+
+  useEffect(() => {
     fetchPoints();
-    fetchUsers();
-  }, [meetingId, projectId]);
+    if (projectMembers.length > 0) {
+      setUsers(projectMembers);
+    } else {
+      fetchUsers();
+    }
+  }, [meetingId, projectId, projectMembers, currentPage, searchQuery]);
 
   useEffect(() => {
     let socket: any;
@@ -141,6 +144,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
     if (socket) {
       socket.on("data_changed", (event: any) => {
+        if (shouldSuppressDiscussionPointsRefresh()) return;
         if (event.path?.includes("/discussionPoints") || event.path?.includes("/meetings")) {
           fetchPoints();
         }
@@ -165,6 +169,30 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   const canAdd = hasPermission(userRole, "meetingNotes", "create", false, permissions);
 
+  const { registerAction, unregisterAction } = useMobileAction();
+
+  useEffect(() => {
+    if (canAdd) {
+      registerAction({
+        id: "meeting-detail-add-point",
+        label: t("discussion.addPoint") || "Tambah Titik Diskusi",
+        onClick: () => {
+          const el =
+            document.getElementById("quick-add-concern") ||
+            document.getElementById("quick-add-section");
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+            el.focus();
+          }
+        },
+        canCreate: canAdd,
+      });
+    } else {
+      unregisterAction("meeting-detail-add-point");
+    }
+    return () => unregisterAction("meeting-detail-add-point");
+  }, [canAdd, registerAction, unregisterAction, t]);
+
   // Handle Live Inline Quick Add
   const handleLiveQuickAdd = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -182,26 +210,38 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     }
 
     setIsSaving(true);
-    try {
-      const payload: any = {
-        concern: quickConcern.trim(),
-        keterangan: quickCatatan.trim(),
-        assignTo: quickAssignTo === "Unassigned" ? "" : quickAssignTo,
-        fitur: quickFitur || "",
-        targetDate: quickTargetDate || "",
-        status: "pending",
-        authorId: currentUser.uid,
-      };
+    const tempId = `temp-dp-${crypto.randomUUID()}`;
+    const payload: any = {
+      concern: quickConcern.trim(),
+      keterangan: quickCatatan.trim(),
+      assignTo: quickAssignTo === "Unassigned" ? "" : quickAssignTo,
+      fitur: quickFitur || "",
+      targetDate: quickTargetDate || "",
+      status: "pending",
+      authorId: currentUser.uid,
+    };
 
-      await createDiscussionPoint(projectId, meetingId, payload, currentUser.uid);
-      showSuccessAlert(t("alerts.successTitle"), t("alerts.pointAdded"));
-      setQuickConcern("");
-      setQuickCatatan("");
-      setQuickAssignTo("Unassigned");
-      setQuickFitur("");
-      setQuickTargetDate("");
-      fetchPoints();
+    const placeholder: DiscussionPoint = {
+      id: tempId,
+      meetingId,
+      ...payload,
+      createdAt: new Date().toISOString(),
+    };
+
+    suppressDiscussionPointsRefresh(8000);
+    setPoints((prev) => [placeholder, ...prev]);
+    setQuickConcern("");
+    setQuickCatatan("");
+    setQuickAssignTo("Unassigned");
+    setQuickFitur("");
+    setQuickTargetDate("");
+    toast.success(t("alerts.pointAdded"));
+
+    try {
+      const realId = await createDiscussionPoint(projectId, meetingId, payload, currentUser.uid);
+      setPoints((prev) => prev.map((p) => (p.id === tempId ? { ...p, id: realId } : p)));
     } catch (error: any) {
+      setPoints((prev) => prev.filter((p) => p.id !== tempId));
       console.error("Error saving point:", error);
       toast.error(t("toast.pointAddFailed") + error.message);
     } finally {
@@ -291,8 +331,14 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   const fetchPoints = async () => {
     try {
-      const fetchedPoints = await getDiscussionPoints(projectId, meetingId, currentUser?.uid);
+      const result = await getDiscussionPoints(projectId, meetingId, currentUser?.uid, {
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchQuery,
+      });
+      const fetchedPoints = result.data as DiscussionPoint[];
       setPoints(fetchedPoints);
+      setTotalPoints(result.meta?.total ?? fetchedPoints.length);
       fetchedPoints.forEach((p: DiscussionPoint) => {
         if (p.id) fetchCommentsForPoint(p.id);
       });
@@ -309,11 +355,14 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     if (!isConfirmed) return;
 
     setIsSaving(true);
+    suppressDiscussionPointsRefresh(8000);
+    setPoints((prev) => prev.filter((p) => p.id !== pointId));
+    toast.success(t("alerts.pointDeleted"));
+
     try {
       await deleteDiscussionPoint(projectId, meetingId, pointId, currentUser?.uid);
-      showSuccessAlert(t("alerts.successTitle"), t("alerts.pointDeleted"));
-      fetchPoints();
     } catch (error: any) {
+      fetchPoints();
       toast.error(error.message || "Failed to delete point.");
     } finally {
       setIsSaving(false);
@@ -337,13 +386,17 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     }
 
     setIsSaving(true);
+    const snapshot = { ...editForm };
+    suppressDiscussionPointsRefresh(8000);
+    setPoints((prev) => prev.map((p) => (p.id === editingId ? { ...p, ...snapshot } : p)));
+    setEditingId(null);
+    setEditForm({});
+    toast.success(t("alerts.pointSaved"));
+
     try {
-      await updateDiscussionPoint(projectId, meetingId, editingId, editForm, currentUser?.uid);
-      showSuccessAlert(t("alerts.successTitle"), t("alerts.pointSaved"));
-      setEditingId(null);
-      setEditForm({});
-      fetchPoints();
+      await updateDiscussionPoint(projectId, meetingId, editingId, snapshot, currentUser?.uid);
     } catch (error: any) {
+      fetchPoints();
       toast.error(error.message || "Failed to save changes.");
     } finally {
       setIsSaving(false);
@@ -918,8 +971,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             <div>
               {t("discussion.showingPoints", {
                 shown: paginatedPoints.length,
-                filtered: filteredPoints.length,
-                total: points.length,
+                filtered: totalPoints,
+                total: totalPoints,
               })}
             </div>
             <div className="flex items-center gap-2">

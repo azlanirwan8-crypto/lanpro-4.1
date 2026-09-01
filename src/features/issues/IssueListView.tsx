@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, List } from "lucide-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
@@ -24,6 +24,7 @@ import {
   canEditIssue as canEditIssueFn,
   IssuePermissionContext,
 } from "./issuePermissions";
+import { useMobileAction } from "../../contexts/MobileActionContext";
 
 export const IssueListView: React.FC<IssueListViewProps> = (props) => {
   const { t } = useTranslation();
@@ -46,6 +47,11 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
     fetchTasks,
     sprints = [],
     updateTaskField,
+    issueListPage: serverListPage,
+    setIssueListPage: setServerListPage,
+    issueListSearch: serverListSearch,
+    setIssueListSearch: setServerListSearch,
+    issueListMeta,
   } = props;
 
   const isProjectMember = projectRole?.toLowerCase() === "member";
@@ -111,6 +117,31 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
     handleReorderColumns,
   } = useIssueList({ ...props, updateTaskField });
 
+  const useServerPaging = Boolean(issueListMeta);
+  const effectiveListPage = useServerPaging ? serverListPage || 1 : listPage;
+  const effectiveSetListPage = useServerPaging
+    ? (page: number | ((p: number) => number)) => {
+        const next = typeof page === "function" ? page(serverListPage || 1) : page;
+        setServerListPage?.(next);
+      }
+    : setListPage;
+  const effectiveItemsPerPage = useServerPaging ? issueListMeta?.limit || 25 : itemsPerPage;
+  const pageRoots = useServerPaging
+    ? displayRoots
+    : displayRoots.slice(
+        (effectiveListPage - 1) * effectiveItemsPerPage,
+        effectiveListPage * effectiveItemsPerPage
+      );
+
+  useEffect(() => {
+    if (!setServerListSearch) return;
+    const timer = setTimeout(() => {
+      setServerListSearch(issueSearch);
+      setServerListPage?.(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [issueSearch, setServerListSearch, setServerListPage]);
+
   const [inlineAddSprintId, setInlineAddSprintId] = useState("");
 
   // Item #200/#201 — aturan izin (Delete/Assignee/Reporter hanya
@@ -125,6 +156,23 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
   const canDeleteIssue = (issue: Task) => canDeleteIssueFn(issue, permCtx);
   const canManageIssue = (issue: Task) => canManageIssueFn(issue, permCtx);
   const canEditIssue = (issue: Task) => canEditIssueFn(issue, permCtx);
+
+  const canCreateIssue = hasPermission ? hasPermission(userRole, "list", "create") : true;
+  const { registerAction, unregisterAction } = useMobileAction();
+
+  React.useEffect(() => {
+    if (canCreateIssue && props.setIsNewTaskModalOpen) {
+      registerAction({
+        id: "issue-add-new",
+        label: t("navigation.mobileAdd") || "Buat Issue Baru",
+        onClick: () => props.setIsNewTaskModalOpen?.(true),
+        canCreate: canCreateIssue,
+      });
+    } else {
+      unregisterAction("issue-add-new");
+    }
+    return () => unregisterAction("issue-add-new");
+  }, [canCreateIssue, props.setIsNewTaskModalOpen, registerAction, unregisterAction, t]);
 
   const rawTasks = Array.isArray(tasks) ? tasks : [];
   const mArr = Array.isArray(masterData) ? masterData : [];
@@ -141,8 +189,8 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
       toast.error(t("toast.bulkTitleEmpty"));
       return;
     }
-    await handleInlineAdd(parentId, title);
     setInlineTitleMap((prev) => ({ ...prev, [parentId]: "" }));
+    await handleInlineAdd(parentId, title);
   };
 
   const createGlobalIssue = async () => {
@@ -158,7 +206,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
     if (!result.destination) return;
     if (result.destination.index === result.source.index) return;
 
-    const startIndex = (listPage - 1) * itemsPerPage;
+    const startIndex = (effectiveListPage - 1) * effectiveItemsPerPage;
     const absoluteSourceIndex = startIndex + result.source.index;
     const absoluteDestinationIndex = startIndex + result.destination.index;
 
@@ -174,9 +222,6 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
 
       if (response.status === "success") {
         toast.success(t("toast.backlogPrioritized"), { id: toastId });
-        if (fetchTasks) {
-          fetchTasks();
-        }
       } else {
         throw new Error(response.message || "Failed to reorder");
       }
@@ -294,7 +339,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
 
         {/* Mobile View: Card List (< 640px) */}
         <IssueMobileCardView
-          tasks={displayRoots.slice((listPage - 1) * itemsPerPage, listPage * itemsPerPage)}
+          tasks={pageRoots}
           masterData={mArr}
           projectMembers={projectMembers}
           sprints={sprints}
@@ -395,85 +440,83 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                         </tbody>
                       ) : (
                         <AnimatePresence mode="popLayout" initial={false}>
-                          {displayRoots
-                            .slice((listPage - 1) * itemsPerPage, listPage * itemsPerPage)
-                            .map((root: Task, index: number) => (
-                              <Draggable
-                                key={root.id ? `drag-${root.id}-${index}` : `drag-${index}`}
-                                draggableId={root.id || `drag-${index}`}
-                                index={index}
-                                isDragDisabled={!canReorder}
-                              >
-                                {(providedDraggable, snapshot) => (
-                                  <tbody
-                                    ref={providedDraggable.innerRef}
-                                    {...providedDraggable.draggableProps}
-                                    className={cn(
-                                      "divide-y divide-border-faint italic-rows text-xs font-normal",
-                                      snapshot.isDragging &&
-                                        "bg-surface-muted/50 shadow-soft border border-indigo-500/30"
-                                    )}
-                                    style={providedDraggable.draggableProps.style}
-                                  >
-                                    <IssueTableRow
-                                      task={root}
-                                      depth={0}
-                                      dragHandleProps={providedDraggable.dragHandleProps}
-                                      canReorder={canReorder}
-                                      isCompact={isCompact}
-                                      isSelected={selectedTaskIds.has(root.id)}
-                                      handleToggleSelectOne={handleToggleSelectOne}
-                                      issueTableColumns={issueTableColumns}
-                                      expandedTasks={expandedTasks}
-                                      toggleTaskExpansion={toggleTaskExpansion}
-                                      inlineAddingTaskId={inlineAddingTaskId}
-                                      setInlineAddingTaskId={setInlineAddingTaskId}
-                                      inlineTitleMap={inlineTitleMap}
-                                      setInlineTitleMap={setInlineTitleMap}
-                                      inlineAddType={inlineAddType}
-                                      setInlineAddType={setInlineAddType}
-                                      isInlineTypeOpen={isInlineTypeOpen}
-                                      setIsInlineTypeOpen={setIsInlineTypeOpen}
-                                      inlineAddPriority={inlineAddPriority}
-                                      setInlineAddPriority={setInlineAddPriority}
-                                      inlineAddAssigneeId={inlineAddAssigneeId}
-                                      setInlineAddAssigneeId={setInlineAddAssigneeId}
-                                      isCreating={isCreating}
-                                      createSubtask={createSubtask}
-                                      tasks={rawTasks}
-                                      masterData={mArr}
-                                      projectMembers={projectMembers}
-                                      sprints={sprints}
-                                      isUserReporter={isUserReporter}
-                                      canDeleteIssue={canDeleteIssue}
-                                      canEditIssue={canEditIssue}
-                                      canManageIssue={canManageIssue}
-                                      deleteTask={deleteTask}
-                                      setSelectedTaskForDetail={setSelectedTaskForDetail}
-                                      setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-                                      setCurrentView={setCurrentView}
-                                      updateTaskField={updateTaskField}
-                                      activeContextMenuTaskId={activeContextMenuTaskId}
-                                      setActiveContextMenuTaskId={setActiveContextMenuTaskId}
-                                      issueSearch={issueSearch}
-                                      listFilterStatus={listFilterStatus}
-                                      listFilterPriority={listFilterPriority}
-                                      listFilterAssignee={listFilterAssignee}
-                                      listFilterCategory={listFilterCategory}
-                                      listFilterSprint={listFilterSprint}
-                                      listFilterEnvironment={listFilterEnvironment}
-                                      listFilterProjectRisk={listFilterProjectRisk}
-                                      listFilterRelease={listFilterRelease}
-                                      listFilterResolution={listFilterResolution}
-                                      listFilterLabel={listFilterLabel}
-                                      listFilterStartDate={listFilterStartDate}
-                                      listFilterEndDate={listFilterEndDate}
-                                      listFilterDateType={listFilterDateType}
-                                    />
-                                  </tbody>
-                                )}
-                              </Draggable>
-                            ))}
+                          {pageRoots.map((root: Task, index: number) => (
+                            <Draggable
+                              key={root.id ? `drag-${root.id}-${index}` : `drag-${index}`}
+                              draggableId={root.id || `drag-${index}`}
+                              index={index}
+                              isDragDisabled={!canReorder}
+                            >
+                              {(providedDraggable, snapshot) => (
+                                <tbody
+                                  ref={providedDraggable.innerRef}
+                                  {...providedDraggable.draggableProps}
+                                  className={cn(
+                                    "divide-y divide-border-faint italic-rows text-xs font-normal",
+                                    snapshot.isDragging &&
+                                      "bg-surface-muted/50 shadow-soft border border-indigo-500/30"
+                                  )}
+                                  style={providedDraggable.draggableProps.style}
+                                >
+                                  <IssueTableRow
+                                    task={root}
+                                    depth={0}
+                                    dragHandleProps={providedDraggable.dragHandleProps}
+                                    canReorder={canReorder}
+                                    isCompact={isCompact}
+                                    isSelected={selectedTaskIds.has(root.id)}
+                                    handleToggleSelectOne={handleToggleSelectOne}
+                                    issueTableColumns={issueTableColumns}
+                                    expandedTasks={expandedTasks}
+                                    toggleTaskExpansion={toggleTaskExpansion}
+                                    inlineAddingTaskId={inlineAddingTaskId}
+                                    setInlineAddingTaskId={setInlineAddingTaskId}
+                                    inlineTitleMap={inlineTitleMap}
+                                    setInlineTitleMap={setInlineTitleMap}
+                                    inlineAddType={inlineAddType}
+                                    setInlineAddType={setInlineAddType}
+                                    isInlineTypeOpen={isInlineTypeOpen}
+                                    setIsInlineTypeOpen={setIsInlineTypeOpen}
+                                    inlineAddPriority={inlineAddPriority}
+                                    setInlineAddPriority={setInlineAddPriority}
+                                    inlineAddAssigneeId={inlineAddAssigneeId}
+                                    setInlineAddAssigneeId={setInlineAddAssigneeId}
+                                    isCreating={isCreating}
+                                    createSubtask={createSubtask}
+                                    tasks={rawTasks}
+                                    masterData={mArr}
+                                    projectMembers={projectMembers}
+                                    sprints={sprints}
+                                    isUserReporter={isUserReporter}
+                                    canDeleteIssue={canDeleteIssue}
+                                    canEditIssue={canEditIssue}
+                                    canManageIssue={canManageIssue}
+                                    deleteTask={deleteTask}
+                                    setSelectedTaskForDetail={setSelectedTaskForDetail}
+                                    setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+                                    setCurrentView={setCurrentView}
+                                    updateTaskField={updateTaskField}
+                                    activeContextMenuTaskId={activeContextMenuTaskId}
+                                    setActiveContextMenuTaskId={setActiveContextMenuTaskId}
+                                    issueSearch={issueSearch}
+                                    listFilterStatus={listFilterStatus}
+                                    listFilterPriority={listFilterPriority}
+                                    listFilterAssignee={listFilterAssignee}
+                                    listFilterCategory={listFilterCategory}
+                                    listFilterSprint={listFilterSprint}
+                                    listFilterEnvironment={listFilterEnvironment}
+                                    listFilterProjectRisk={listFilterProjectRisk}
+                                    listFilterRelease={listFilterRelease}
+                                    listFilterResolution={listFilterResolution}
+                                    listFilterLabel={listFilterLabel}
+                                    listFilterStartDate={listFilterStartDate}
+                                    listFilterEndDate={listFilterEndDate}
+                                    listFilterDateType={listFilterDateType}
+                                  />
+                                </tbody>
+                              )}
+                            </Draggable>
+                          ))}
                         </AnimatePresence>
                       )}
 
@@ -510,9 +553,9 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
         {/* Pagination & Bulk Action Bar */}
         <IssueBulkActionsBar
           displayRoots={displayRoots}
-          listPage={listPage}
-          setListPage={setListPage}
-          itemsPerPage={itemsPerPage}
+          listPage={effectiveListPage}
+          setListPage={effectiveSetListPage}
+          itemsPerPage={effectiveItemsPerPage}
           setItemsPerPage={setItemsPerPage}
           selectedTaskIds={selectedTaskIds}
           setSelectedTaskIds={setSelectedTaskIds}
@@ -523,6 +566,8 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           deleteTask={deleteTask}
           bulkDeleteTasks={bulkDeleteTasks}
           canDeleteIssue={canDeleteIssue}
+          totalRoots={issueListMeta?.total}
+          serverPaged={useServerPaging}
         />
 
         <ConfigureColumnsModal

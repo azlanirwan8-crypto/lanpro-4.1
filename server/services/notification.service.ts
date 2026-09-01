@@ -37,23 +37,40 @@ export const createAutomatedNotification = async (
   let conn;
   try {
     conn = await db.getConnection();
-    
+
     let resolvedRecipientId = recipientId;
-    const [uCheck]: any = await conn.query("SELECT id, uid FROM Users WHERE id = ? OR uid = ?", [recipientId, recipientId]);
+    const [uCheck]: any = await conn.query("SELECT id, uid FROM Users WHERE id = ? OR uid = ?", [
+      recipientId,
+      recipientId,
+    ]);
     if (uCheck.length > 0) {
       resolvedRecipientId = uCheck[0].uid || uCheck[0].id;
     }
-    
+
     const notificationId = crypto.randomUUID();
     await conn.query(
       "INSERT INTO Notifications (id, recipientId, senderId, title, message, type, relatedId, `read`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-      [notificationId, resolvedRecipientId, senderId || null, title, message, type, relatedId || null, false]
+      [
+        notificationId,
+        resolvedRecipientId,
+        senderId || null,
+        title,
+        message,
+        type,
+        relatedId || null,
+        false,
+      ]
     );
-    
-    console.log(`[AUTOMATED NOTIFICATION] Sent notification of type ${type} to user ${resolvedRecipientId}`);
-    
+
+    console.log(
+      `[AUTOMATED NOTIFICATION] Sent notification of type ${type} to user ${resolvedRecipientId}`
+    );
+
     if (io) {
-      io.emit("data_changed", { path: `/api/users/${resolvedRecipientId}/notifications`, method: "POST" });
+      io.emit("data_changed", {
+        path: `/api/users/${resolvedRecipientId}/notifications`,
+        method: "POST",
+      });
     }
   } catch (err) {
     console.error("Failed to create automated notification:", err);
@@ -98,35 +115,56 @@ export const broadcastProjectNotification = async (
   let conn;
   try {
     conn = await db.getConnection();
-    
+
     const [members]: any = await conn.query(
       "SELECT userId FROM ProjectMembers WHERE projectId = ?",
       [projectId]
     );
-    
-    console.log(`[BROADCAST NOTIFICATION] Broadcasting to ${members.length} members for project ${projectId}`);
-    
+
+    console.log(
+      `[BROADCAST NOTIFICATION] Broadcasting to ${members.length} members for project ${projectId}`
+    );
+
     for (const member of members) {
       const recipientId = member.userId;
-      
+
       let resolvedRecipientId = recipientId;
-      const [uCheck]: any = await conn.query("SELECT id, uid FROM Users WHERE id = ? OR uid = ?", [recipientId, recipientId]);
+      const [uCheck]: any = await conn.query("SELECT id, uid FROM Users WHERE id = ? OR uid = ?", [
+        recipientId,
+        recipientId,
+      ]);
       if (uCheck.length > 0) {
         resolvedRecipientId = uCheck[0].uid || uCheck[0].id;
       }
-      
-      if (senderId && (senderId === resolvedRecipientId || (uCheck.length > 0 && senderId === String(uCheck[0].id)))) {
+
+      if (
+        senderId &&
+        (senderId === resolvedRecipientId ||
+          (uCheck.length > 0 && senderId === String(uCheck[0].id)))
+      ) {
         continue;
       }
-      
+
       const notificationId = crypto.randomUUID();
       await conn.query(
         "INSERT INTO Notifications (id, recipientId, senderId, title, message, type, relatedId, `read`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        [notificationId, resolvedRecipientId, senderId || null, title, message, type, relatedId || null, false]
+        [
+          notificationId,
+          resolvedRecipientId,
+          senderId || null,
+          title,
+          message,
+          type,
+          relatedId || null,
+          false,
+        ]
       );
-      
+
       if (io) {
-        io.emit("data_changed", { path: `/api/users/${resolvedRecipientId}/notifications`, method: "POST" });
+        io.emit("data_changed", {
+          path: `/api/users/${resolvedRecipientId}/notifications`,
+          method: "POST",
+        });
       }
     }
   } catch (err) {
@@ -146,7 +184,7 @@ export const sendProjectActivityNotification = async (
   let io: any = null;
   let projectId: string;
   let triggerUserId: string;
-  let actionType: 'create_task' | 'update_task' | 'comment_task';
+  let actionType: "create_task" | "update_task" | "comment_task";
   let payload: any;
 
   if (arg5 !== undefined) {
@@ -164,43 +202,54 @@ export const sendProjectActivityNotification = async (
   let conn;
   try {
     conn = await db.getConnection();
-    
+
     const [actorRows]: any = await conn.query(
       "SELECT displayName, username FROM Users WHERE id = ? OR uid = ?",
       [triggerUserId, triggerUserId]
     );
-    const actorName = actorRows.length > 0 ? (actorRows[0].displayName || actorRows[0].username) : "Seorang anggota tim";
-    
+    const actorName =
+      actorRows.length > 0
+        ? actorRows[0].displayName || actorRows[0].username
+        : "Seorang anggota tim";
+
     let title = "";
     let message = "";
     const type = "project_activity";
     const relatedId = payload.taskId || null;
-    
+
     let taskInfo = "";
     if (payload.taskId) {
-      const [taskRows]: any = await conn.query(
-        "SELECT taskKey, title FROM Tasks WHERE id = ?",
-        [payload.taskId]
-      );
+      const [taskRows]: any = await conn.query("SELECT taskKey, title FROM Tasks WHERE id = ?", [
+        payload.taskId,
+      ]);
       if (taskRows.length > 0) {
         taskInfo = ` [${taskRows[0].taskKey}: ${taskRows[0].title}]`;
       }
     }
-    
-    const nowString = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + " WIB";
-    
-    if (actionType === 'create_task') {
+
+    const nowString =
+      new Date().toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }) + " WIB";
+
+    if (actionType === "create_task") {
       title = "🆕 Tugas Baru Ditambahkan";
       message = `${actorName} membuat tugas baru${taskInfo} pada ${nowString}.`;
-    } else if (actionType === 'update_task') {
+    } else if (actionType === "update_task") {
       title = "🔄 Update Status Tugas";
       const { field, oldValue, newValue } = payload;
-      if (field === 'status') {
-        message = `${actorName} mengubah status${taskInfo} dari "${oldValue || 'None'}" menjadi "${newValue}" pada ${nowString}.`;
-      } else if (field === 'assigneeId') {
+      if (field === "status") {
+        message = `${actorName} mengubah status${taskInfo} dari "${oldValue || "None"}" menjadi "${newValue}" pada ${nowString}.`;
+      } else if (field === "assigneeId") {
         let assigneeName = "unassigned";
         if (newValue) {
-          const [assRows]: any = await conn.query("SELECT displayName, username FROM Users WHERE id = ? OR uid = ?", [newValue, newValue]);
+          const [assRows]: any = await conn.query(
+            "SELECT displayName, username FROM Users WHERE id = ? OR uid = ?",
+            [newValue, newValue]
+          );
           if (assRows.length > 0) {
             assigneeName = assRows[0].displayName || assRows[0].username;
           }
@@ -209,43 +258,59 @@ export const sendProjectActivityNotification = async (
       } else {
         message = `${actorName} memperbarui field "${field}" pada${taskInfo} menjadi "${newValue}" pada ${nowString}.`;
       }
-    } else if (actionType === 'comment_task') {
+    } else if (actionType === "comment_task") {
       title = "💬 Komentar Baru";
       message = `${actorName} mengomentari tugas${taskInfo}: "${payload.commentContent}" pada ${nowString}.`;
     }
-    
+
     const [members]: any = await conn.query(
       "SELECT userId FROM ProjectMembers WHERE projectId = ?",
       [projectId]
     );
-    
+
     console.log(`[BROADCAST ACTIVITY] ${title} - to ${members.length} project members`);
-    
+
     for (const member of members) {
       const recipientId = member.userId;
-      
+
       let resolvedRecipientId = recipientId;
-      const [uCheck]: any = await conn.query("SELECT id, uid FROM Users WHERE id = ? OR uid = ?", [recipientId, recipientId]);
+      const [uCheck]: any = await conn.query("SELECT id, uid FROM Users WHERE id = ? OR uid = ?", [
+        recipientId,
+        recipientId,
+      ]);
       if (uCheck.length > 0) {
         resolvedRecipientId = uCheck[0].uid || uCheck[0].id;
       }
-      
-      const isActor = (triggerUserId === resolvedRecipientId) || 
-                      (uCheck.length > 0 && triggerUserId === String(uCheck[0].id)) ||
-                      (uCheck.length > 0 && triggerUserId === String(uCheck[0].uid));
-                      
+
+      const isActor =
+        triggerUserId === resolvedRecipientId ||
+        (uCheck.length > 0 && triggerUserId === String(uCheck[0].id)) ||
+        (uCheck.length > 0 && triggerUserId === String(uCheck[0].uid));
+
       if (isActor) {
         continue;
       }
-      
+
       const notificationId = crypto.randomUUID();
       await conn.query(
         "INSERT INTO Notifications (id, recipientId, senderId, title, message, type, relatedId, `read`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        [notificationId, resolvedRecipientId, triggerUserId || null, title, message, type, relatedId, false]
+        [
+          notificationId,
+          resolvedRecipientId,
+          triggerUserId || null,
+          title,
+          message,
+          type,
+          relatedId,
+          false,
+        ]
       );
-      
+
       if (io) {
-        io.emit("data_changed", { path: `/api/users/${resolvedRecipientId}/notifications`, method: "POST" });
+        io.emit("data_changed", {
+          path: `/api/users/${resolvedRecipientId}/notifications`,
+          method: "POST",
+        });
       }
     }
   } catch (err) {
@@ -259,36 +324,54 @@ export const checkUpcomingDueDates = async (io: any = null) => {
   let connection;
   try {
     connection = await db.getConnection();
-    
+    const { muatKunciTerminal, statusSelesai } = await import("../lib/statusSelesai");
+    const kunci = await muatKunciTerminal();
+    // Bentuk master palsu agar statusSelesai memakai kunci DB
+    const masterPalsu = kunci.map((k) => ({
+      type: "status",
+      code: k,
+      label: k,
+      isTerminal: true,
+    }));
+
     const [tasks]: any = await connection.query(
-      "SELECT * FROM Tasks WHERE dueDate IS NOT NULL AND status != 'Done' AND assigneeId IS NOT NULL"
+      "SELECT * FROM Tasks WHERE dueDate IS NOT NULL AND assigneeId IS NOT NULL"
     );
-    
+
     const now = new Date();
     const twentyFourHoursLater = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    
+
     for (const task of tasks) {
       try {
+        if (statusSelesai(task.status, masterPalsu)) continue;
         const taskDueDate = new Date(task.dueDate);
         if (isNaN(taskDueDate.getTime())) continue;
-        
+
         if (taskDueDate >= oneHourAgo && taskDueDate <= twentyFourHoursLater) {
           const assigneeId = task.assigneeId;
-          
+
           const [existingNotify]: any = await connection.query(
             "SELECT id FROM Notifications WHERE recipientId = ? AND relatedId = ? AND type = 'deadline'",
             [assigneeId, task.id]
           );
-          
+
           if (existingNotify.length === 0) {
             const taskKey = task.taskKey || task.key || task.id;
             const taskTitle = task.title || "Tugas";
-            
+
             const title = "⏰ Batas Waktu Tugas Mendekat (24 Jam)";
-            const message = `Tugas "${taskTitle}" (${taskKey}) akan segera jatuh tempo dalam waktu kurang dari 24 jam (${taskDueDate.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}).`;
-            
-            await createAutomatedNotification(io, assigneeId, null, title, message, 'deadline', task.id);
+            const message = `Tugas "${taskTitle}" (${taskKey}) akan segera jatuh tempo dalam waktu kurang dari 24 jam (${taskDueDate.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}).`;
+
+            await createAutomatedNotification(
+              io,
+              assigneeId,
+              null,
+              title,
+              message,
+              "deadline",
+              task.id
+            );
           }
         }
       } catch (taskErr) {
@@ -313,7 +396,7 @@ export const createNotification = async (
   let conn;
   try {
     conn = await db.getConnection();
-    
+
     // 1. Fetch Task and Parent Epic details
     const [taskRows]: any = await conn.query(
       "SELECT id, assigneeId, reporterId, parentId, taskKey, title FROM Tasks WHERE id = ?",
@@ -321,31 +404,29 @@ export const createNotification = async (
     );
     if (taskRows.length === 0) return;
     const task = taskRows[0];
-    
+
     let parentEpicReporterId: string | null = null;
     if (task.parentId) {
-      const [parentRows]: any = await conn.query(
-        "SELECT reporterId FROM Tasks WHERE id = ?",
-        [task.parentId]
-      );
+      const [parentRows]: any = await conn.query("SELECT reporterId FROM Tasks WHERE id = ?", [
+        task.parentId,
+      ]);
       if (parentRows.length > 0) {
         parentEpicReporterId = parentRows[0].reporterId;
       }
     }
-    
+
     // 2. Identify potential notification recipients
-    const rawRecipients = [
-      task.assigneeId,
-      task.reporterId,
-      parentEpicReporterId
-    ].filter(Boolean);
-    
+    const rawRecipients = [task.assigneeId, task.reporterId, parentEpicReporterId].filter(Boolean);
+
     // 3. Resolve the actual recipient user IDs / firebase UIDs
     const uniqueRawRecipients = Array.from(new Set(rawRecipients));
     const resolvedRecipients: string[] = [];
-    
+
     for (const rId of uniqueRawRecipients) {
-      const [uCheck]: any = await conn.query("SELECT id, uid FROM Users WHERE id = ? OR uid = ?", [rId, rId]);
+      const [uCheck]: any = await conn.query("SELECT id, uid FROM Users WHERE id = ? OR uid = ?", [
+        rId,
+        rId,
+      ]);
       if (uCheck.length > 0) {
         const resolved = uCheck[0].uid || uCheck[0].id;
         resolvedRecipients.push(resolved);
@@ -353,77 +434,98 @@ export const createNotification = async (
         resolvedRecipients.push(rId);
       }
     }
-    
+
     let finalRecipients = Array.from(new Set(resolvedRecipients));
-    
+
     // 4. Exclude the user who is performing the update
-    const [actorCheck]: any = await conn.query("SELECT id, uid FROM Users WHERE id = ? OR uid = ?", [triggerUserId, triggerUserId]);
-    const actorIds = actorCheck.length > 0 ? [actorCheck[0].id, actorCheck[0].uid].filter(Boolean) : [triggerUserId];
-    
-    finalRecipients = finalRecipients.filter(r => !actorIds.includes(r));
-    
+    const [actorCheck]: any = await conn.query(
+      "SELECT id, uid FROM Users WHERE id = ? OR uid = ?",
+      [triggerUserId, triggerUserId]
+    );
+    const actorIds =
+      actorCheck.length > 0
+        ? [actorCheck[0].id, actorCheck[0].uid].filter(Boolean)
+        : [triggerUserId];
+
+    finalRecipients = finalRecipients.filter((r) => !actorIds.includes(r));
+
     if (finalRecipients.length === 0) return;
-    
+
     // 5. Build localized notification details
     const [actorRows]: any = await conn.query(
       "SELECT displayName, username FROM Users WHERE id = ? OR uid = ?",
       [triggerUserId, triggerUserId]
     );
-    const actorName = actorRows.length > 0 ? (actorRows[0].displayName || actorRows[0].username) : "Seorang anggota tim";
-    
+    const actorName =
+      actorRows.length > 0
+        ? actorRows[0].displayName || actorRows[0].username
+        : "Seorang anggota tim";
+
     const taskInfo = ` [${task.taskKey || task.id}: ${task.title}]`;
-    const nowString = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', hour: '2-digit', minute: '2-digit', second: '2-digit' }) + " WIB";
-    
+    const nowString =
+      new Date().toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }) + " WIB";
+
     let title = "🔄 Update Tugas";
     let message = `${actorName} melakukan update pada task${taskInfo} pada ${nowString}.`;
-    
+
     const { field, oldValue, newValue } = payload;
-    if (field === 'status') {
+    if (field === "status") {
       title = "🔄 Update Status Tugas";
-      message = `${actorName} mengubah status${taskInfo} dari "${oldValue || 'None'}" menjadi "${newValue}" pada ${nowString}.`;
-    } else if (field === 'assigneeId') {
+      message = `${actorName} mengubah status${taskInfo} dari "${oldValue || "None"}" menjadi "${newValue}" pada ${nowString}.`;
+    } else if (field === "assigneeId") {
       title = "👤 Update Assignee Tugas";
       let assigneeName = "unassigned";
       if (newValue) {
-        const [assRows]: any = await conn.query("SELECT displayName, username FROM Users WHERE id = ? OR uid = ?", [newValue, newValue]);
+        const [assRows]: any = await conn.query(
+          "SELECT displayName, username FROM Users WHERE id = ? OR uid = ?",
+          [newValue, newValue]
+        );
         if (assRows.length > 0) {
           assigneeName = assRows[0].displayName || assRows[0].username;
         }
       }
       message = `${actorName} menugaskan${taskInfo} ke "${assigneeName}" pada ${nowString}.`;
-    } else if (field === 'deskripsi' || field === 'description') {
+    } else if (field === "deskripsi" || field === "description") {
       title = "✏️ Deskripsi Tugas Diperbarui";
       message = `${actorName} memperbarui deskripsi pada${taskInfo} pada ${nowString}.`;
-    } else if (field === 'acceptanceCriteria') {
+    } else if (field === "acceptanceCriteria") {
       title = "📋 Kriteria Penerimaan Diperbarui";
       message = `${actorName} memperbarui kriteria penerimaan pada${taskInfo} pada ${nowString}.`;
     }
-    
+
     // 6. Safe Bulk Insert using Parameter Binding
     const queryValues: any[] = [];
     const rowPlaceholders: string[] = [];
-    
+
     for (const recipient of finalRecipients) {
       const notifId = crypto.randomUUID();
       rowPlaceholders.push("(?, ?, ?, ?, ?, ?, ?, false)");
-      queryValues.push(notifId, recipient, triggerUserId || null, title, message, 'task', taskId);
+      queryValues.push(notifId, recipient, triggerUserId || null, title, message, "task", taskId);
     }
-    
+
     const bulkInsertSql = `
       INSERT INTO Notifications (id, recipientId, senderId, title, message, type, relatedId, \`read\`)
       VALUES ${rowPlaceholders.join(", ")}
     `;
-    
+
     await conn.query(bulkInsertSql, queryValues);
-    
+
     // 7. Emit WebSocket event to refresh notification count on client-side
     if (io) {
       for (const recipient of finalRecipients) {
         io.emit("data_changed", { path: `/api/users/${recipient}/notifications`, method: "POST" });
       }
     }
-    
-    console.log(`[createNotification] Successfully created notifications for task ${taskId} to ${finalRecipients.length} recipients:`, finalRecipients);
+
+    console.log(
+      `[createNotification] Successfully created notifications for task ${taskId} to ${finalRecipients.length} recipients:`,
+      finalRecipients
+    );
   } catch (err) {
     console.error("[createNotification error]", err);
   } finally {

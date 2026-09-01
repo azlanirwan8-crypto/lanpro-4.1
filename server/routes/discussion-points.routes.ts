@@ -8,7 +8,9 @@ import crypto from "crypto";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { discussionPointsRepository } from "../repositories/discussion-points.repository";
 import { matchesCaller } from "../services/task.service";
-import { validasiBody } from "../middleware/validate";
+import { validasiBody, validasiQuery } from "../middleware/validate";
+import { listSearchQuerySchema } from "../schemas/pagination.schema";
+import { respondWithProjectList } from "../lib/listResponse";
 import {
   createDiscussionPointSchema,
   updateDiscussionPointSchema,
@@ -34,11 +36,17 @@ const penulisDari = (req: any) => ({
 router.get(
   "/api/projects/:projectId/meetings/:id/discussionPoints",
   jagaProyek("meetingNotes", "R"),
+  validasiQuery(listSearchQuerySchema),
   async (req, res) => {
     try {
       const { id } = req.params;
-      const rows = await discussionPointsRepository.findByMeetingId(id);
-      res.json({ status: "success", data: rows });
+      const search = req.query.search as string | undefined;
+      await respondWithProjectList(
+        res,
+        req.query as Record<string, unknown>,
+        () => discussionPointsRepository.findByMeetingId(id, search),
+        (pagination) => discussionPointsRepository.findByMeetingIdPaged(id, pagination, search)
+      );
     } catch (error: any) {
       console.error(error);
       res.status(500).json({

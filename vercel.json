@@ -2,6 +2,12 @@
   "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "crons": [
+    {
+      "path": "/api/cron/task-digest",
+      "schedule": "0 0 * * *"
+    }
+  ],
   "functions": {
     "api/index.ts": {
       "includeFiles": "dist/**",

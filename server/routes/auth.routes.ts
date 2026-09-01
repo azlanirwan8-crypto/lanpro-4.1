@@ -501,7 +501,7 @@ router.post("/api/auth/register", async (req, res) => {
       `Email selamat datang pendaftaran untuk ${email}`
     );
 
-    return res.status(201).json({
+    res.status(201).json({
       status: "success",
       code: "srv.akun_anda_sudah_berhasil",
       message:

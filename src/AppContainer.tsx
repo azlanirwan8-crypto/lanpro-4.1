@@ -1,8 +1,15 @@
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./i18n/LanguageSwitcher";
+import {
+  shouldSuppressSprintDataRefresh,
+  shouldSuppressTaskDataRefresh,
+  shouldSuppressUsersRefresh,
+  suppressSprintDataRefresh,
+  suppressTaskDataRefresh,
+} from "./lib/taskRefreshControl";
 import { safeLocalStorage, safeSessionStorage } from "./lib/safeStorage";
 import remarkGfm from "remark-gfm";
-import React, { useState, useEffect, useRef, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback, Suspense } from "react";
 import { lazyWithRetry } from "./lib/lazyWithRetry";
 import io from "socket.io-client";
 
@@ -19,8 +26,15 @@ import {
   PeranEfektif,
 } from "./types";
 import { hasPermission, resolveProjectRole } from "./lib/permissions";
+import { adalahWaterfall } from "./lib/methodology";
 import { validateFileClient } from "./lib/fileSecurity";
-import { confirmDeleteAlert, showSuccessAlert, showErrorAlert } from "./lib/sweetalert";
+import {
+  confirmDeleteAlert,
+  confirmCompleteSprintAlert,
+  showSuccessAlert,
+  showErrorAlert,
+} from "./lib/sweetalert";
+import { statusSelesai } from "./lib/statusSelesai";
 import { useAppStore } from "./store/useAppStore";
 import { CacheManager } from "./lib/cache";
 import { useMasterData } from "./hooks/useMasterData";
@@ -206,6 +220,16 @@ function AppContainer() {
     density,
     setDensity,
   } = useAppStore();
+
+  const [issueListPage, setIssueListPage] = useState(1);
+  const [issueListSearch, setIssueListSearch] = useState("");
+  const [issueListMeta, setIssueListMeta] = useState<{
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  } | null>(null);
+  const ISSUE_LIST_PAGE_SIZE = 25;
   const { handleAuthApiResponse, triggerNotification } = useAuthNotification();
   useAppNavigation();
 
@@ -336,6 +360,13 @@ function AppContainer() {
     const sisa = bersihkanQuerySso(window.location.search);
     window.history.replaceState({}, "", window.location.pathname + sisa);
   }, [hasilSso]);
+
+  // #311 — jangan biarkan view Sprint terbuka pada proyek Waterfall.
+  useEffect(() => {
+    if (currentView === "sprints" && adalahWaterfall(selectedProject?.category)) {
+      setCurrentView("timeline");
+    }
+  }, [currentView, selectedProject?.category, setCurrentView]);
 
   // Modal & Detail Panel Management
   const {
@@ -1090,7 +1121,12 @@ function AppContainer() {
     return () => clearTimeout(timer);
   }, [currentUser?.uid, isLoggedIn]);
 
-  const fetchTasks = async () => {
+  const fetchTasks = async (opts?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    rootsOnly?: boolean;
+  }) => {
     const proyekSaatBerangkat = selectedProject?.id;
     if (!getAuthToken()) return;
     if (!selectedProject) {
@@ -1106,32 +1142,33 @@ function AppContainer() {
     );
     const effectiveUserId = currentUser?.uid || user?.uid;
 
+    const useIssueListPage =
+      opts?.rootsOnly === true || (currentView === "list" && opts?.rootsOnly !== false);
+
     try {
-      const data = await fetchTasksApi(selectedProject.id);
+      const data = await fetchTasksApi(
+        selectedProject.id,
+        useIssueListPage
+          ? {
+              page: opts?.page ?? issueListPage,
+              limit: opts?.limit ?? ISSUE_LIST_PAGE_SIZE,
+              search: opts?.search ?? issueListSearch,
+              rootsOnly: true,
+            }
+          : undefined
+      );
       if (data.status === "success") {
         const allTasks = data.data as Task[];
         const uniqueAllTasks = Array.from(
           new Map((allTasks || []).filter((t) => t && t.id).map((t) => [t.id, t])).values()
         );
-        setAllProjectTasksForStats(uniqueAllTasks);
 
-        const effectiveUsername = currentUser?.username || currentUserProfile?.username;
-        const effectiveEmail = currentUser?.email || currentUserProfile?.email;
-        const effectiveDisplayName = currentUser?.displayName || currentUserProfile?.displayName;
-        const effectiveNamaLengkap =
-          (currentUser as any)?.nama_lengkap || (currentUserProfile as any)?.nama_lengkap;
-
-        const validIdentifiers = [
-          effectiveUserId,
-          currentUser?.uid,
-          currentUser?.id,
-          currentUserProfile?.uid,
-          currentUserProfile?.id,
-          effectiveUsername,
-          effectiveEmail,
-          effectiveDisplayName,
-          effectiveNamaLengkap,
-        ].filter(Boolean);
+        if (!useIssueListPage) {
+          setAllProjectTasksForStats(uniqueAllTasks);
+          setIssueListMeta(null);
+        } else if (data.meta) {
+          setIssueListMeta(data.meta);
+        }
 
         if (!masihProyekSama(proyekSaatBerangkat)) return;
         setTasks(uniqueAllTasks);
@@ -1148,12 +1185,61 @@ function AppContainer() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      fetchTasks();
+      if (currentView === "list") {
+        fetchTasks({
+          rootsOnly: true,
+          page: issueListPage,
+          limit: ISSUE_LIST_PAGE_SIZE,
+          search: issueListSearch,
+        });
+      } else {
+        fetchTasks({ rootsOnly: false });
+      }
     }, 300);
     return () => clearTimeout(timer);
-  }, [selectedProject?.id, userRole, currentUser?.uid]);
+  }, [
+    selectedProject?.id,
+    userRole,
+    currentUser?.uid,
+    currentView,
+    issueListPage,
+    issueListSearch,
+  ]);
 
   const realTimeRefs = useRef<any>({});
+  const taskDataRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activityLogsRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const scheduleTaskDataRefresh = useCallback(() => {
+    if (shouldSuppressTaskDataRefresh()) {
+      return;
+    }
+    if (taskDataRefreshTimerRef.current) {
+      clearTimeout(taskDataRefreshTimerRef.current);
+    }
+    taskDataRefreshTimerRef.current = setTimeout(() => {
+      taskDataRefreshTimerRef.current = null;
+      const refs = realTimeRefs.current;
+      if (refs.selectedProject) {
+        refs.fetchTasks();
+        refs.fetchSprints();
+        refs.fetchActivityLogs();
+      }
+    }, 400);
+  }, []);
+
+  const scheduleActivityLogsRefresh = useCallback(() => {
+    if (activityLogsRefreshTimerRef.current) {
+      clearTimeout(activityLogsRefreshTimerRef.current);
+    }
+    activityLogsRefreshTimerRef.current = setTimeout(() => {
+      activityLogsRefreshTimerRef.current = null;
+      const refs = realTimeRefs.current;
+      if (refs.selectedProject) {
+        refs.fetchActivityLogs();
+      }
+    }, 400);
+  }, []);
 
   useEffect(() => {
     realTimeRefs.current = {
@@ -1165,6 +1251,9 @@ function AppContainer() {
       fetchActivityLogs,
       fetchComments,
       fetchNotifications,
+      scheduleTaskDataRefresh,
+      scheduleActivityLogsRefresh,
+      setTasks,
       selectedProject,
       currentUser,
     };
@@ -1299,8 +1388,21 @@ function AppContainer() {
     socket.on("project_updated", (event: any) => {
       const refs = realTimeRefs.current;
       if (event && event.projectId === refs.selectedProject?.id) {
-        refs.fetchTasks();
+        refs.scheduleTaskDataRefresh?.();
       }
+    });
+
+    socket.on("task_updated", (event: any) => {
+      const refs = realTimeRefs.current;
+      if (!event || event.projectId !== refs.selectedProject?.id) return;
+      const { taskId, changes } = event;
+      if (taskId && changes && typeof refs.setTasks === "function") {
+        refs.setTasks((prev: Task[]) =>
+          prev.map((t) => (t.id === taskId ? { ...t, ...changes } : t))
+        );
+        return;
+      }
+      refs.scheduleTaskDataRefresh?.();
     });
 
     socket.on("data_changed", (event: any) => {
@@ -1309,30 +1411,30 @@ function AppContainer() {
 
       if (path.includes("/tasks") || path.includes("/sprint-tasks")) {
         if (refs.selectedProject) {
-          refs.fetchTasks();
-          refs.fetchSprints();
-          refs.fetchActivityLogs();
+          refs.scheduleTaskDataRefresh?.();
         }
       }
       if (path.includes("/activity")) {
-        if (refs.selectedProject) refs.fetchActivityLogs();
+        if (refs.selectedProject) refs.scheduleActivityLogsRefresh?.();
       }
       if (path.includes("/comments")) {
         if (refs.selectedProject) {
           refs.fetchComments();
-          refs.fetchActivityLogs();
+          refs.scheduleActivityLogsRefresh?.();
         }
       }
       if (path.includes("/projects") && !path.includes("/tasks") && !path.includes("/sprints")) {
         refs.fetchProjects();
       }
       if (path.includes("/users") || path.includes("/project-members")) {
-        refs.fetchAllUsers();
+        if (!shouldSuppressUsersRefresh()) {
+          refs.fetchAllUsers();
+        }
       }
       if (path.includes("/sprints")) {
-        if (refs.selectedProject) {
+        if (refs.selectedProject && !shouldSuppressSprintDataRefresh()) {
           refs.fetchSprints();
-          refs.fetchActivityLogs();
+          refs.scheduleActivityLogsRefresh?.();
         }
       }
       if (path.includes("/master-data")) {
@@ -1367,9 +1469,7 @@ function AppContainer() {
         }
 
         if (refs.selectedProject) {
-          refs.fetchTasks();
-          refs.fetchSprints();
-          refs.fetchActivityLogs();
+          refs.scheduleTaskDataRefresh?.();
           refs.fetchComments();
         }
 
@@ -1672,6 +1772,27 @@ function AppContainer() {
       }
     }
 
+    const tempId = `temp-sprint-${crypto.randomUUID()}`;
+    const backlogIds = Array.from(selectedSprintBacklog as Set<string>);
+    const placeholder: Sprint = {
+      id: tempId,
+      projectId: selectedProject.id,
+      name: finalSprintName,
+      goal: newSprintGoal,
+      startDate: newSprintStartDate || null,
+      endDate: newSprintEndDate || null,
+      status: "planned",
+      createdAt: new Date().toISOString(),
+    };
+
+    suppressSprintDataRefresh(8000);
+    suppressTaskDataRefresh(8000);
+    setSprints((prev) => [placeholder, ...prev.filter((s) => s.id !== tempId)]);
+    resetNewSprintForm();
+    setSelectedSprintBacklog(new Set());
+    setIsNewSprintModalOpen(false);
+    toast.success(t("toast.sprintCreated"));
+
     try {
       const data = await createSprint(selectedProject.id, {
         name: finalSprintName,
@@ -1682,31 +1803,23 @@ function AppContainer() {
       });
 
       const sprintId = data.data.id;
+      setSprints((prev) => prev.map((s) => (s.id === tempId ? { ...data.data, id: sprintId } : s)));
 
-      // Assign selected backlog items
-
-      // Sprint backlog assignment
-      if (selectedSprintBacklog.size > 0) {
-        const promises = Array.from(selectedSprintBacklog as Set<string>).map((taskId) =>
-          updateTask(selectedProject.id, taskId, { sprintId })
-            .then(() => {
-              /* task updated */
-            })
-            .catch((err) => console.error("Failed to update task:", taskId, err))
-        );
-        await Promise.all(promises);
-
-        setTasks((prevTasks) =>
-          prevTasks.map((t) => (selectedSprintBacklog.has(t.id) ? { ...t, sprintId } : t))
-        );
+      if (backlogIds.length > 0) {
+        void Promise.all(
+          backlogIds.map((taskId) =>
+            updateTask(selectedProject.id, taskId, { sprintId }).catch((err) =>
+              console.error("Failed to update task:", taskId, err)
+            )
+          )
+        ).then(() => {
+          setTasks((prevTasks) =>
+            prevTasks.map((t) => (backlogIds.includes(t.id) ? { ...t, sprintId } : t))
+          );
+        });
       }
-
-      resetNewSprintForm();
-      setSelectedSprintBacklog(new Set());
-      setIsNewSprintModalOpen(false);
-      fetchSprints();
-      toast.success(t("toast.sprintCreated"));
     } catch (e: any) {
+      setSprints((prev) => prev.filter((s) => s.id !== tempId));
       console.error(e);
       toast.error(e.message || "Failed to create sprint");
     }
@@ -1730,20 +1843,24 @@ function AppContainer() {
     }
 
     try {
-      const data = await updateSprint(selectedProject.id, editingSprint.id, {
-        name: editingSprint.name,
-        goal: editingSprint.goal,
-        startDate: editingSprint.startDate,
-        endDate: editingSprint.endDate,
-        status: editingSprint.status,
-      });
-      if (data.status !== "success") throw new Error(data.message);
-
-      fetchSprints();
-
+      const sprintSnapshot = editingSprint;
+      suppressSprintDataRefresh(8000);
+      setSprints((prev) =>
+        prev.map((s) => (s.id === sprintSnapshot.id ? { ...s, ...sprintSnapshot } : s))
+      );
       setIsEditSprintModalOpen(false);
       toast.success(t("toast.sprintUpdated"));
+
+      const data = await updateSprint(selectedProject.id, sprintSnapshot.id, {
+        name: sprintSnapshot.name,
+        goal: sprintSnapshot.goal,
+        startDate: sprintSnapshot.startDate,
+        endDate: sprintSnapshot.endDate,
+        status: sprintSnapshot.status,
+      });
+      if (data.status !== "success") throw new Error(data.message);
     } catch (e: any) {
+      fetchSprints();
       console.error(e);
       toast.error(t("toast.sprintUpdateFailed") + (e.message || e));
     }
@@ -1764,13 +1881,17 @@ function AppContainer() {
       return;
     }
 
+    suppressSprintDataRefresh(8000);
+    setSprints((prev) =>
+      prev.map((s) => (s.id === sprintId ? { ...s, status: "active" as const } : s))
+    );
+    toast.success(t("toast.sprintStarted"));
+
     try {
       const data = await updateSprint(selectedProject.id, sprintId, { status: "active" });
-      if (data.status === "success") {
-        fetchSprints();
-        toast.success(t("toast.sprintStarted"));
-      }
+      if (data.status !== "success") throw new Error(data.message || "Failed");
     } catch (e: any) {
+      fetchSprints();
       console.error(e);
       toast.error(e.message || "Failed to start sprint");
     }
@@ -1794,42 +1915,64 @@ function AppContainer() {
     const sprintToComplete = sprints.find((s) => s.id === sprintId);
     if (!sprintToComplete) return;
 
-    const isConfirmed = await confirmDeleteAlert(
+    const nextSprint =
+      sprints
+        .filter(
+          (s) =>
+            s.id !== sprintId && (s.status === "planned" || s.status === "active") && s.startDate
+        )
+        .sort((a, b) => String(a.startDate).localeCompare(String(b.startDate)))[0] ||
+      sprints.find((s) => s.id !== sprintId && (s.status === "planned" || s.status === "active")) ||
+      null;
+
+    const pilihan = await confirmCompleteSprintAlert(
       t("alerts.completeSprintTitle"),
-      t("alerts.completeSprintText", { name: sprintToComplete.name })
+      t("alerts.completeSprintText", { name: sprintToComplete.name }),
+      nextSprint ? { id: nextSprint.id, name: nextSprint.name } : null
     );
 
-    if (!isConfirmed) return;
+    if (!pilihan) return;
+
+    const sprintTasks = tasks.filter((t) => t.sprintId === sprintId);
+    const undoneTasks = sprintTasks.filter((t) => !statusSelesai(t.status, masterData));
+
+    const targetSprintId =
+      pilihan === "backlog" ? null : pilihan === "next" && nextSprint ? nextSprint.id : undefined;
+
+    suppressSprintDataRefresh(8000);
+    suppressTaskDataRefresh(8000);
+    setSprints((prev) =>
+      prev.map((s) => (s.id === sprintId ? { ...s, status: "completed" as const } : s))
+    );
+    if (undoneTasks.length > 0 && targetSprintId !== undefined) {
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.sprintId === sprintId && !statusSelesai(t.status, masterData)
+            ? { ...t, sprintId: targetSprintId }
+            : t
+        )
+      );
+    }
+    toast.success(t("alerts.sprintCompleted", { name: sprintToComplete.name }));
 
     const loadingToast = toast.loading(t("toast.completingSprint"));
 
     try {
-      const sprintTasks = tasks.filter((t) => t.sprintId === sprintId);
-      const undoneTasks = sprintTasks.filter(
-        (t) =>
-          !t.status.toLowerCase().includes("done") && !t.status.toLowerCase().includes("completed")
-      );
-
-      if (undoneTasks.length > 0) {
+      if (undoneTasks.length > 0 && targetSprintId !== undefined) {
         const promises = undoneTasks.map((t) =>
-          updateTask(selectedProject.id, t.id, { sprintId: null })
+          updateTask(selectedProject.id, t.id, { sprintId: targetSprintId })
         );
         await Promise.all(promises);
-        await fetchTasks();
       }
 
       const data = await updateSprint(selectedProject.id, sprintId, { status: "completed" });
 
-      if (data.status === "success") {
-        fetchSprints();
+      if (data.status !== "success") throw new Error(data.message || "Failed");
 
-        await logActivity("sprint_completed", `Fase ${sprintToComplete.name} telah diselesaikan.`);
-        showSuccessAlert(
-          t("alerts.successTitle"),
-          t("alerts.sprintCompleted", { name: sprintToComplete.name })
-        );
-      }
+      void logActivity("sprint_completed", `Fase ${sprintToComplete.name} telah diselesaikan.`);
     } catch (e: any) {
+      fetchSprints();
+      fetchTasks();
       console.error(e);
       toast.error(e.message || "Gagal menyelesaikan fase");
     } finally {
@@ -1855,23 +1998,23 @@ function AppContainer() {
 
     if (!isConfirmed) return;
 
+    suppressSprintDataRefresh(8000);
+    suppressTaskDataRefresh(8000);
+    setSprints((prev) => prev.filter((s) => s.id !== sprintId));
+    setTasks((prev) => prev.map((t) => (t.sprintId === sprintId ? { ...t, sprintId: null } : t)));
+    toast.success(t("alerts.sprintDeleted"));
+
     const loadingToast = toast.loading(t("toast.deletingSprint"));
 
     try {
-      // 1. Move tasks back to backlog
       const promises = sprintTasks.map((t) =>
         updateTask(selectedProject.id, t.id, { sprintId: null })
       );
       await Promise.all(promises);
-
-      // 2. Delete the sprint
       await deleteSprint(selectedProject.id, sprintId);
-
-      await fetchTasks();
-      fetchSprints();
-
-      showSuccessAlert(t("alerts.successTitle"), t("alerts.sprintDeleted"));
     } catch (e: any) {
+      fetchSprints();
+      fetchTasks();
       console.error(e);
       toast.error(e.message || "Gagal menghapus fase");
     } finally {
@@ -2057,7 +2200,7 @@ function AppContainer() {
         updateTask(selectedProject.id, taskId, { sprintId })
       );
       await Promise.all(promises);
-      await fetchTasks();
+      setTasks((prev) => prev.map((t) => (taskIds.includes(t.id) ? { ...t, sprintId } : t)));
       toast.success(t("toast.tasksMoved", { count: taskIds.length }));
       setSelectedTaskIds(new Set());
     } catch (e: any) {
@@ -2179,45 +2322,94 @@ function AppContainer() {
       }
     }
 
+    const tempId = `temp-${crypto.randomUUID()}`;
+    suppressTaskDataRefresh(8000);
+
+    const payload = {
+      title: newTaskTitle,
+      description: newTaskDescription,
+      acceptanceCriteria: newTaskAcceptanceCriteria,
+      storyPoints: newTaskStoryPoints,
+      projectRisk: newTaskProjectRisk,
+      status: newTaskStatus || "todo",
+      type: newTaskType,
+      parentId: newTaskParentId || null,
+      sprintId: newTaskSprintId || null,
+      assigneeId: newTaskAssigneeId,
+      priority: newTaskPriority || "medium",
+      startDate: newTaskStartDate || null,
+      endDate: newTaskEndDate || null,
+    };
+
+    const placeholder: Task = {
+      id: tempId,
+      projectId: selectedProject.id,
+      title: payload.title,
+      description: payload.description,
+      acceptanceCriteria: payload.acceptanceCriteria,
+      storyPoints: payload.storyPoints,
+      projectRisk: payload.projectRisk,
+      status: payload.status,
+      type: (payload.type || "task") as Task["type"],
+      parentId: payload.parentId || undefined,
+      sprintId: payload.sprintId || undefined,
+      assigneeId:
+        payload.assigneeId && !payload.assigneeId.includes("@") ? payload.assigneeId : undefined,
+      reporterId: activeUid,
+      priority: payload.priority,
+      startDate: payload.startDate || undefined,
+      endDate: payload.endDate || undefined,
+      key: "…",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    setTasks((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
+    setAllProjectTasksForStats((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
+    resetNewTaskForm();
+    setIsNewTaskModalOpen(false);
+    toast.success(t("toast.dataAdded"));
+
     try {
-      const assigneeIsEmail = newTaskAssigneeId.includes("@");
+      const assigneeIsEmail = payload.assigneeId.includes("@");
 
       const data = await createTask(selectedProject.id, {
-        title: newTaskTitle,
-        description: newTaskDescription,
-        acceptanceCriteria: newTaskAcceptanceCriteria,
-        storyPoints: newTaskStoryPoints,
-        projectRisk: newTaskProjectRisk,
-        status: newTaskStatus || "todo",
-        type: newTaskType,
-        parentId: newTaskParentId || null,
-        sprintId: newTaskSprintId || null,
-        assigneeId: assigneeIsEmail ? null : newTaskAssigneeId || null,
+        title: payload.title,
+        description: payload.description,
+        acceptanceCriteria: payload.acceptanceCriteria,
+        storyPoints: payload.storyPoints,
+        projectRisk: payload.projectRisk,
+        status: payload.status,
+        type: payload.type,
+        parentId: payload.parentId,
+        sprintId: payload.sprintId,
+        assigneeId: assigneeIsEmail ? null : payload.assigneeId || null,
         reporterId: activeUid,
-        priority: newTaskPriority || "medium",
-        startDate: newTaskStartDate || null,
-        endDate: newTaskEndDate || null,
+        priority: payload.priority,
+        startDate: payload.startDate,
+        endDate: payload.endDate,
       });
 
       const createdTaskKey = data.data.taskKey;
 
       if (data && data.data) {
         const createdTask = data.data;
-        setTasks((prev) => [createdTask, ...prev.filter((t) => t.id !== createdTask.id)]);
-        setAllProjectTasksForStats((prev) => [
-          createdTask,
-          ...prev.filter((t) => t.id !== createdTask.id),
-        ]);
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.id === tempId ? { ...createdTask, key: createdTask.key || createdTask.taskKey } : t
+          )
+        );
+        setAllProjectTasksForStats((prev) =>
+          prev.map((t) =>
+            t.id === tempId ? { ...createdTask, key: createdTask.key || createdTask.taskKey } : t
+          )
+        );
       }
 
-      await logActivity("task_created", `Created task ${createdTaskKey}: ${newTaskTitle}`);
-
-      await fetchTasks(); // Refresh list
-
-      resetNewTaskForm();
-      setIsNewTaskModalOpen(false);
-      toast.success(t("toast.dataAdded"));
+      void logActivity("task_created", `Created task ${createdTaskKey}: ${payload.title}`);
     } catch (e: any) {
+      setTasks((prev) => prev.filter((t) => t.id !== tempId));
+      setAllProjectTasksForStats((prev) => prev.filter((t) => t.id !== tempId));
       console.error(e, "error", `projects/${selectedProject.id}/tasks`);
       const errMessage = e?.message || "";
       const errCode = e?.data?.code || "";
@@ -2242,11 +2434,31 @@ function AppContainer() {
   const handleQuickCreate = async (title: string, type?: string) => {
     const activeUid = currentUser?.uid || user?.uid;
     if (!selectedProject || !title.trim() || !activeUid) return;
+    const tempId = `temp-${crypto.randomUUID()}`;
+    const taskType = ((type as Task["type"]) || "task") as Task["type"];
+    const placeholder: Task = {
+      id: tempId,
+      projectId: selectedProject.id,
+      title,
+      status: "To Do",
+      type: taskType,
+      reporterId: activeUid,
+      priority: "Medium",
+      key: "…",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    suppressTaskDataRefresh(8000);
+    setTasks((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
+    setAllProjectTasksForStats((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
+    toast.success(t("toast.taskCreated", { key: "…" }));
+
     try {
       const data = await createTask(selectedProject.id, {
         title: title,
         status: "To Do",
-        type: (type as any) || "task",
+        type: taskType,
         assigneeId: null,
         priority: "Medium",
         reporterId: activeUid,
@@ -2254,12 +2466,20 @@ function AppContainer() {
 
       if (data.status === "success" && data.data) {
         const newTask = data.data;
-        setTasks((prev) => [newTask, ...prev.filter((t) => t.id !== newTask.id)]);
-        setAllProjectTasksForStats((prev) => [newTask, ...prev.filter((t) => t.id !== newTask.id)]);
-        await fetchTasks();
-        toast.success(t("toast.taskCreated", { key: data.data.taskKey }));
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.id === tempId ? { ...newTask, key: newTask.key || newTask.taskKey } : t
+          )
+        );
+        setAllProjectTasksForStats((prev) =>
+          prev.map((t) =>
+            t.id === tempId ? { ...newTask, key: newTask.key || newTask.taskKey } : t
+          )
+        );
       }
     } catch (e: any) {
+      setTasks((prev) => prev.filter((t) => t.id !== tempId));
+      setAllProjectTasksForStats((prev) => prev.filter((t) => t.id !== tempId));
       console.error(e);
       toast.error(e.message || "Failed to create task");
     }
@@ -2319,7 +2539,9 @@ function AppContainer() {
         // dihapus bersama modalnya.
         const effectiveUserId = currentUser?.uid || user?.uid || "guest";
         await updateTask(selectedProject!.id, task.id, { storyPoints: result.points });
-        await fetchTasks();
+        setTasks((prev) =>
+          prev.map((t) => (t.id === task.id ? { ...t, storyPoints: result.points } : t))
+        );
       } else {
         throw new Error(t("appShell.aiInvalidResponse"));
       }
@@ -2476,7 +2698,7 @@ function AppContainer() {
         details,
         taskId: taskId || null,
       });
-      fetchActivityLogs();
+      scheduleActivityLogsRefresh();
     } catch (e) {
       console.error("Failed to log activity", e);
     }
@@ -2913,6 +3135,7 @@ function AppContainer() {
 
       const previousTasks = tasks;
       // Optimistic UI update
+      suppressTaskDataRefresh(8000);
       setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, ...updateData } : t)));
 
       setIsUpdatingTask((prev) => ({ ...prev, [taskId]: true }));
@@ -3046,7 +3269,7 @@ function AppContainer() {
         relationType: mapInverseRelation(taskLinkRelation),
       });
 
-      await fetchTasks();
+      scheduleTaskDataRefresh();
 
       setSelectedTaskForDetail((prev) =>
         prev
@@ -3088,8 +3311,6 @@ function AppContainer() {
       const data = await deleteTaskLink(selectedProject.id, sourceId, linkIdToRemove);
       if (data.status !== "success") throw new Error(data.message);
 
-      await fetchTasks();
-
       const newSourceLinks = selectedTaskForDetail.linkedTasks!.filter(
         (t) => t.id !== linkIdToRemove
       );
@@ -3123,8 +3344,10 @@ function AppContainer() {
         reporterId: activeUid,
       });
 
-      if (data.status === "success") {
-        await await fetchTasks();
+      if (data.status === "success" && data.data) {
+        const created = data.data;
+        suppressTaskDataRefresh(8000);
+        setTasks((prev) => [created, ...prev.filter((t) => t.id !== created.id)]);
       }
     } catch (e: any) {
       console.error(e);
@@ -3133,25 +3356,16 @@ function AppContainer() {
   };
 
   const checkTaskBlockers = (taskId: string, targetStatus: string) => {
-    // Only block if moving to "Done" (or similar terminal status)
-    const isTerminalStatus =
-      targetStatus.toLowerCase().includes("done") ||
-      targetStatus.toLowerCase().includes("completed");
-    if (!isTerminalStatus) return true;
+    if (!statusSelesai(targetStatus, masterData)) return true;
 
     const task = tasks.find((t) => t.id === taskId);
     if (!task || !task.linkedTasks) return true;
 
-    // Find links where this task "is blocked by" someone
     const blockers = task.linkedTasks.filter((l) => l.relationType === "is_blocked_by");
 
     for (const blocker of blockers) {
       const blockingTask = tasks.find((t) => t.id === blocker.targetTaskId);
-      if (
-        blockingTask &&
-        !blockingTask.status.toLowerCase().includes("done") &&
-        !blockingTask.status.toLowerCase().includes("completed")
-      ) {
+      if (blockingTask && !statusSelesai(blockingTask.status, masterData)) {
         toast.error(
           `Tidak dapat menyelesaikan ${task.key}: tugas ini terblokir oleh ${blockingTask.key} (${blockingTask.status}).`
         );
@@ -3170,12 +3384,20 @@ function AppContainer() {
       if (taskToUpdate) {
         statusToSave = await triggerBugDoneFlow(taskToUpdate, newStatus);
       }
+      suppressTaskDataRefresh(8000);
+      setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, status: statusToSave } : t)));
       const effectiveUserId = currentUser?.uid || user?.uid || "guest";
       const data = await updateTaskAsUser(selectedProject.id, taskId, effectiveUserId, {
         status: statusToSave,
       });
-      if (data.status !== "success") throw new Error(data.message);
-      await fetchTasks();
+      if (data.status !== "success") {
+        if (taskToUpdate) {
+          setTasks((prev) =>
+            prev.map((t) => (t.id === taskId ? { ...t, status: taskToUpdate.status } : t))
+          );
+        }
+        throw new Error(data.message);
+      }
     } catch (e: any) {
       console.error(e);
       toast.error(t("toast.statusUpdateFailed") + (e.message || e));
@@ -3337,6 +3559,10 @@ function AppContainer() {
 
     if (!isConfirmed) return;
 
+    suppressTaskDataRefresh(8000);
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    setAllProjectTasksForStats((prev) => prev.filter((t) => t.id !== taskId));
+
     const loadingToast = toast.loading(t("toast.deletingTask"));
 
     try {
@@ -3344,14 +3570,16 @@ function AppContainer() {
       const data = await deleteTaskApi(selectedProject.id, taskId, effectiveUserId);
       if (data.status !== "success") throw new Error(data.message);
 
-      setTasks((prev) => prev.filter((t) => t.id !== taskId));
-      await fetchTasks(); // Refresh explicitly
-
-      showSuccessAlert(
-        t("alerts.successTitle"),
-        t("alerts.taskDeleted", { title: taskToDelete.title })
-      );
+      toast.success(t("alerts.taskDeleted", { title: taskToDelete.title }));
     } catch (e: any) {
+      setTasks((prev) => {
+        if (prev.some((t) => t.id === taskId)) return prev;
+        return [taskToDelete, ...prev];
+      });
+      setAllProjectTasksForStats((prev) => {
+        if (prev.some((t) => t.id === taskId)) return prev;
+        return [taskToDelete, ...prev];
+      });
       console.error(e);
       toast.error(t("toast.taskDeleteFailed") + (e.message || e));
     } finally {
@@ -3373,6 +3601,13 @@ function AppContainer() {
 
     if (!isConfirmed) return;
 
+    suppressTaskDataRefresh(8000);
+    const previousTasks = tasks;
+    const previousStats = allProjectTasksForStats;
+    const deletedSetPreview = new Set(taskIds);
+    setTasks((prev) => prev.filter((t) => !deletedSetPreview.has(t.id)));
+    setAllProjectTasksForStats((prev) => prev.filter((t) => !deletedSetPreview.has(t.id)));
+
     const loadingToast = toast.loading(t("toast.deletingTasks", { count: taskIds.length }));
 
     try {
@@ -3382,15 +3617,10 @@ function AppContainer() {
       if (data.status !== "success") throw new Error(data.message);
 
       const deletedSet = new Set(data.deletedIds || taskIds);
-      setTasks((prev) => prev.filter((t) => !deletedSet.has(t.id)));
-      setAllProjectTasksForStats((prev) => prev.filter((t) => !deletedSet.has(t.id)));
-      await fetchTasks();
-
-      showSuccessAlert(
-        t("alerts.successTitle"),
-        `Berhasil menghapus ${deletedSet.size} tugas terpilih.`
-      );
+      toast.success(`Berhasil menghapus ${deletedSet.size} tugas terpilih.`);
     } catch (e: any) {
+      setTasks(previousTasks);
+      setAllProjectTasksForStats(previousStats);
       console.error(e);
       toast.error(t("toast.tasksDeleteFailed") + (e.message || e));
     } finally {
@@ -3829,7 +4059,7 @@ function AppContainer() {
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.22, ease: "easeOut" }}
+                    transition={{ duration: 0.12, ease: "easeOut" }}
                     className="flex-1 flex flex-col min-h-0 bg-surface-sunken transition-colors duration-200"
                   >
                     {currentView === "issueDetail" && (
@@ -3947,6 +4177,11 @@ function AppContainer() {
                       deleteTask={deleteTask}
                       bulkDeleteTasks={bulkDeleteTasks}
                       fetchTasks={fetchTasks}
+                      issueListPage={issueListPage}
+                      setIssueListPage={setIssueListPage}
+                      issueListSearch={issueListSearch}
+                      setIssueListSearch={setIssueListSearch}
+                      issueListMeta={issueListMeta}
                       setExpandedSprintId={setExpandedSprintId}
                       setIsNewSprintModalOpen={setIsNewSprintModalOpen}
                       setIsEditSprintModalOpen={setIsEditSprintModalOpen}

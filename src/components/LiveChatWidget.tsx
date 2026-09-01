@@ -637,7 +637,10 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   });
 
   return (
-    <div id="lanpro-live-chat-widget" className="fixed bottom-6 right-6 z-50 select-none">
+    <div
+      id="lanpro-live-chat-widget"
+      className="fixed bottom-20 md:bottom-6 right-6 z-50 select-none"
+    >
       {/* 1. FLOATING TOGGLE BUTTON */}
       <motion.button
         id="chat-floating-toggle"

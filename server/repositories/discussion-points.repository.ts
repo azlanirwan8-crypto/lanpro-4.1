@@ -1,4 +1,5 @@
 import db from "../../src/lib/db";
+import { BATAS_DAFTAR_TANPA_PAGINATION, type PaginationParams } from "../lib/pagination";
 
 export interface DiscussionPointEntity {
   id: string;
@@ -29,17 +30,53 @@ export interface DiscussionPointCommentEntity {
 }
 
 export class DiscussionPointsRepository {
-  async findByMeetingId(meetingId: string): Promise<DiscussionPointEntity[]> {
+  async findByMeetingId(meetingId: string, search?: string): Promise<DiscussionPointEntity[]> {
     const connection = await db.getConnection();
     try {
+      const { where, params } = this.buildPointWhere(meetingId, search);
       const [rows]: any = await connection.query(
-        "SELECT * FROM DiscussionPoints WHERE meetingId = ? ORDER BY createdAt ASC",
-        [meetingId]
+        `SELECT * FROM DiscussionPoints WHERE ${where} ORDER BY createdAt ASC LIMIT ${BATAS_DAFTAR_TANPA_PAGINATION}`,
+        params
       );
       return rows || [];
     } finally {
       connection.release();
     }
+  }
+
+  async findByMeetingIdPaged(
+    meetingId: string,
+    pagination: PaginationParams,
+    search?: string
+  ): Promise<{ items: DiscussionPointEntity[]; total: number }> {
+    const connection = await db.getConnection();
+    try {
+      const { where, params } = this.buildPointWhere(meetingId, search);
+      const [countRows]: any = await connection.query(
+        `SELECT COUNT(*)::int AS total FROM DiscussionPoints WHERE ${where}`,
+        params
+      );
+      const total = countRows?.[0]?.total ?? 0;
+      const [rows]: any = await connection.query(
+        `SELECT * FROM DiscussionPoints WHERE ${where} ORDER BY createdAt ASC LIMIT ? OFFSET ?`,
+        [...params, pagination.limit, pagination.offset]
+      );
+      return { items: rows || [], total };
+    } finally {
+      connection.release();
+    }
+  }
+
+  private buildPointWhere(meetingId: string, search?: string) {
+    const params: unknown[] = [meetingId];
+    let where = "meetingId = ?";
+    if (search?.trim()) {
+      where +=
+        " AND (LOWER(COALESCE(concern, '')) LIKE ? OR LOWER(COALESCE(keterangan, '')) LIKE ? OR LOWER(COALESCE(fitur, '')) LIKE ?)";
+      const term = `%${search.trim().toLowerCase()}%`;
+      params.push(term, term, term);
+    }
+    return { where, params };
   }
 
   async createPoint(point: DiscussionPointEntity): Promise<DiscussionPointEntity> {

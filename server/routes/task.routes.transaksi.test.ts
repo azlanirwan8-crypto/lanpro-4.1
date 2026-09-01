@@ -76,6 +76,9 @@ const jawabQuery = (opsi: { gagalPada?: RegExp } = {}) => {
     if (opsi.gagalPada && opsi.gagalPada.test(sql)) {
       throw new Error("kegagalan disengaja untuk menguji rollback");
     }
+    if (/UPDATE Projects SET taskCounter/i.test(sql)) {
+      return [[{ id: "proyek-A", projectKey: "PRJ", taskCounter: 5 }]];
+    }
     if (/FROM Projects/i.test(sql)) {
       return [[{ id: "proyek-A", projectKey: "PRJ", taskCounter: 4, ownerId: "user-1" }]];
     }
@@ -147,17 +150,15 @@ describe("#60 POST tasks — transaksi tidak boleh terbawa ke pool", () => {
     expect(koneksiTiruan.release).toHaveBeenCalled();
   });
 
-  it("tidak me-rollback koneksi yang transaksinya sudah ditutup", async () => {
-    // Galat pada pengambilan data reporter, yang berlangsung SETELAH commit.
-    // Tidak ada transaksi terbuka pada saat itu, jadi rollback tidak boleh
-    // dipanggil: koneksinya bisa jadi sudah dipakai permintaan lain.
-    jawabQuery({ gagalPada: /SELECT id, uid, displayName/i });
+  it("sukses create tanpa query reporter pasca-commit (#317)", async () => {
+    jawabQuery();
 
     const res = await request(buatApp())
       .post("/api/projects/proyek-A/tasks")
-      .send({ title: "Task uji" });
+      .send({ title: "Task uji", reporterId: "user-1" });
 
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(200);
+    expect(res.body?.data?.taskKey || res.body?.data?.key).toBeTruthy();
     expect(koneksiTiruan.commit).toHaveBeenCalled();
     expect(koneksiTiruan.rollback).not.toHaveBeenCalled();
     expect(koneksiTiruan.release).toHaveBeenCalled();

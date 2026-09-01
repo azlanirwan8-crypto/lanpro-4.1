@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
-import { Play, Database, Table as TableIcon, HardDrive, Wifi, Code } from "lucide-react";
+import { Play, Database, Table as TableIcon, HardDrive, Wifi, Code, Menu, X } from "lucide-react";
 import { BackupPanel } from "../backup/BackupPanel";
 import { ConnectPanel } from "../connect/ConnectPanel";
 import { cn } from "../../lib/utils";
@@ -36,6 +36,8 @@ export const DbExplorerPanel: React.FC<any> = ({
   // toggle antar mode database tidak punya alasan untuk ada.
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  /** #309 — laci daftar tabel di bawah md. */
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetchSchema();
@@ -206,11 +208,36 @@ export const DbExplorerPanel: React.FC<any> = ({
             </div>
           </div>
 
-          <div className="flex-1 flex overflow-hidden">
-            {/* Sidebar: Table List */}
-            <div className="w-[240px] bg-surface-sunken/50 border-r border-border-subtle/80 flex flex-col overflow-y-auto shrink-0 custom-scrollbar">
+          <div className="flex-1 flex overflow-hidden relative">
+            {/* #309 — overlay laci tabel */}
+            {sidebarOpen && (
+              <button
+                type="button"
+                aria-label={t("dbExplorer.closeTables", "Tutup daftar tabel")}
+                className="fixed inset-0 z-40 bg-overlay/50 md:hidden cursor-pointer"
+                onClick={() => setSidebarOpen(false)}
+              />
+            )}
+
+            {/* Sidebar: Table List — laci di bawah md */}
+            <div
+              className={cn(
+                "w-[240px] bg-surface-sunken/50 border-r border-border-subtle/80 flex flex-col overflow-y-auto shrink-0 custom-scrollbar",
+                "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:bg-surface max-md:shadow-xl",
+                "max-md:transition-transform max-md:duration-200",
+                sidebarOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
+              )}
+            >
               <div className="px-3.5 py-2.5 text-xs sm:text-[11px] font-normal text-content-muted uppercase tracking-wider sticky top-0 bg-surface-sunken border-b border-border-subtle/80 flex justify-between items-center z-10">
-                {t("dbExplorer.tables")}
+                <span>{t("dbExplorer.tables")}</span>
+                <button
+                  type="button"
+                  className="md:hidden p-1 rounded-md text-content-muted hover:bg-surface-muted cursor-pointer"
+                  onClick={() => setSidebarOpen(false)}
+                  aria-label={t("dbExplorer.closeTables", "Tutup daftar tabel")}
+                >
+                  <X className="w-4 h-4" />
+                </button>
               </div>
               <div className="p-2 flex flex-col gap-1">
                 {schema &&
@@ -219,7 +246,10 @@ export const DbExplorerPanel: React.FC<any> = ({
                     return (
                       <button
                         key={tableName}
-                        onClick={() => loadTable(tableName)}
+                        onClick={() => {
+                          loadTable(tableName);
+                          setSidebarOpen(false);
+                        }}
                         className={`flex items-center justify-between gap-2 px-3 py-1.5 text-xs rounded-md transition-colors cursor-pointer ${activeTable === tableName ? "bg-indigo-500/10 text-indigo-700 font-medium border border-indigo-500/30" : "text-content-secondary hover:bg-surface-muted font-medium"}`}
                       >
                         <div className="flex items-center gap-2 truncate">
@@ -244,6 +274,18 @@ export const DbExplorerPanel: React.FC<any> = ({
 
             {/* Main Content: Query Editor and Results */}
             <div className="flex-1 flex flex-col min-w-0">
+              <div className="md:hidden px-3 pt-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setSidebarOpen(true)}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 bg-surface-sunken border border-border-subtle rounded-lg text-xs font-medium text-content-strong cursor-pointer"
+                >
+                  <Menu className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <span className="truncate">
+                    {activeTable || t("dbExplorer.openTables", "Pilih tabel")}
+                  </span>
+                </button>
+              </div>
               {/* Query Editor */}
               <div className="p-3.5 border-b border-border-subtle/80 bg-surface-sunken/50 shrink-0">
                 <div className="relative">

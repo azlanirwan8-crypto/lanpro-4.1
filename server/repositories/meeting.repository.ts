@@ -1,4 +1,5 @@
 import db from "../../src/lib/db";
+import { BATAS_DAFTAR_TANPA_PAGINATION, type PaginationParams } from "../lib/pagination";
 
 export interface MeetingEntity {
   id: string;
@@ -21,14 +22,51 @@ export interface MeetingEntity {
 }
 
 export class MeetingRepository {
-  async findByProjectId(projectId: string): Promise<MeetingEntity[]> {
+  private meetingListSelect =
+    "id, projectId, title, description, meetingLink, authorId, createdAt, updatedAt, fileName, fileType, file_size";
+
+  private buildMeetingWhere(projectId: string, search?: string) {
+    const params: unknown[] = [projectId];
+    let where = "projectId = ?";
+    if (search?.trim()) {
+      where += " AND LOWER(title) LIKE ?";
+      params.push(`%${search.trim().toLowerCase()}%`);
+    }
+    return { where, params };
+  }
+
+  async findByProjectId(projectId: string, search?: string): Promise<MeetingEntity[]> {
     const connection = await db.getConnection();
     try {
+      const { where, params } = this.buildMeetingWhere(projectId, search);
       const [rows]: any = await connection.query(
-        "SELECT id, projectId, title, description, meetingLink, authorId, createdAt, updatedAt, fileName, fileType, file_size FROM Meetings WHERE projectId = ? ORDER BY createdAt DESC",
-        [projectId]
+        `SELECT ${this.meetingListSelect} FROM Meetings WHERE ${where} ORDER BY createdAt DESC LIMIT ${BATAS_DAFTAR_TANPA_PAGINATION}`,
+        params
       );
       return rows || [];
+    } finally {
+      connection.release();
+    }
+  }
+
+  async findByProjectIdPaged(
+    projectId: string,
+    pagination: PaginationParams,
+    search?: string
+  ): Promise<{ items: MeetingEntity[]; total: number }> {
+    const connection = await db.getConnection();
+    try {
+      const { where, params } = this.buildMeetingWhere(projectId, search);
+      const [countRows]: any = await connection.query(
+        `SELECT COUNT(*)::int AS total FROM Meetings WHERE ${where}`,
+        params
+      );
+      const total = countRows?.[0]?.total ?? 0;
+      const [rows]: any = await connection.query(
+        `SELECT ${this.meetingListSelect} FROM Meetings WHERE ${where} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+        [...params, pagination.limit, pagination.offset]
+      );
+      return { items: rows || [], total };
     } finally {
       connection.release();
     }

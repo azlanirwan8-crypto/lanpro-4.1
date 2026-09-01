@@ -22,6 +22,10 @@ interface IssueBulkActionsBarProps {
   deleteTask?: (id: string) => void;
   bulkDeleteTasks?: (taskIds: string[]) => void;
   canDeleteIssue: (task: Task) => boolean;
+  /** Total root server-side (#318). Bila ada, pagination memakai angka ini. */
+  totalRoots?: number;
+  /** Bila true, displayRoots sudah satu halaman dari server — jangan di-slice lagi. */
+  serverPaged?: boolean;
 }
 
 export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
@@ -39,11 +43,18 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
   deleteTask,
   bulkDeleteTasks,
   canDeleteIssue,
+  totalRoots,
+  serverPaged = false,
 }) => {
   const { t } = useTranslation();
   const mArr = masterData || [];
   const tArr = tasks || [];
-  const totalPages = Math.ceil(displayRoots.length / itemsPerPage);
+  const totalCount = totalRoots ?? displayRoots.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage) || 1);
+  const rangeStart = totalCount === 0 ? 0 : (listPage - 1) * itemsPerPage + 1;
+  const rangeEnd = serverPaged
+    ? Math.min(listPage * itemsPerPage, totalCount)
+    : Math.min(listPage * itemsPerPage, totalCount);
 
   return (
     <>
@@ -51,10 +62,8 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2 border-t border-border-subtle bg-surface-sunken shrink-0">
         <div className="flex items-center gap-3">
           <span className="text-xs sm:text-[10px] font-normal text-content-muted">
-            {t("common.showing")}{" "}
-            {displayRoots.length === 0 ? 0 : (listPage - 1) * itemsPerPage + 1} {t("common.to")}{" "}
-            {Math.min(listPage * itemsPerPage, displayRoots.length)} {t("common.of")}{" "}
-            {displayRoots.length} {t("common.entries")}
+            {t("common.showing")} {rangeStart} {t("common.to")} {rangeEnd} {t("common.of")}{" "}
+            {totalCount} {t("common.entries")}
           </span>
           <div className="flex items-center gap-1.5 pl-2 border-l border-border-subtle">
             <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-wider">

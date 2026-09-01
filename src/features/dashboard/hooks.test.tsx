@@ -50,6 +50,13 @@ describe("Audit Logika: useDashboard & Metric Calculations (Item #16 / Fase F2)"
     setCurrentView: jest.fn(),
     setSelectedTaskForDetail: jest.fn(),
     setIsTaskDetailModalOpen: jest.fn(),
+    masterData: [
+      { id: "s1", type: "status", label: "Done", code: "done", order: 5, isTerminal: true },
+      { id: "s2", type: "status", label: "Selesai", code: "selesai", order: 6, isTerminal: true },
+      { id: "s3", type: "status", label: "UAT", code: "uat", order: 4, isTerminal: true },
+      { id: "s4", type: "status", label: "To Do", code: "todo", order: 1, isTerminal: false },
+      { id: "s5", type: "status", label: "Backlog", code: "backlog", order: 0, isTerminal: false },
+    ],
   };
 
   describe("1. Kalkulasi Progress Proyek & Persentase Penyelesaian", () => {
@@ -97,9 +104,7 @@ describe("Audit Logika: useDashboard & Metric Calculations (Item #16 / Fase F2)"
         },
       ];
 
-      const { result } = renderHook(() =>
-        useDashboard({ ...defaultProps, tasks })
-      );
+      const { result } = renderHook(() => useDashboard({ ...defaultProps, tasks }));
 
       // Total non-epic tasks = 2 (t1 dan t2)
       expect(result.current.totalTasks).toBe(2);
@@ -134,9 +139,7 @@ describe("Audit Logika: useDashboard & Metric Calculations (Item #16 / Fase F2)"
         },
       ];
 
-      const { result } = renderHook(() =>
-        useDashboard({ ...defaultProps, tasks })
-      );
+      const { result } = renderHook(() => useDashboard({ ...defaultProps, tasks }));
 
       expect(result.current.totalTasks).toBe(2);
       expect(result.current.completedTasks.length).toBe(2);
@@ -188,9 +191,7 @@ describe("Audit Logika: useDashboard & Metric Calculations (Item #16 / Fase F2)"
         },
       ];
 
-      const { result } = renderHook(() =>
-        useDashboard({ ...defaultProps, sprints, tasks })
-      );
+      const { result } = renderHook(() => useDashboard({ ...defaultProps, sprints, tasks }));
 
       expect(result.current.activeSprint?.id).toBe("sprint-1");
       expect(result.current.sprintTotalTasks).toBe(2);
@@ -240,9 +241,7 @@ describe("Audit Logika: useDashboard & Metric Calculations (Item #16 / Fase F2)"
         },
       ];
 
-      const { result } = renderHook(() =>
-        useDashboard({ ...defaultProps, tasks })
-      );
+      const { result } = renderHook(() => useDashboard({ ...defaultProps, tasks }));
 
       const userBudi = result.current.workloadData.find((w) => w.name === "Budi Santoso");
       expect(userBudi).toBeDefined();
@@ -314,9 +313,7 @@ describe("Audit Logika: useDashboard & Metric Calculations (Item #16 / Fase F2)"
         },
       ];
 
-      const { result } = renderHook(() =>
-        useDashboard({ ...defaultProps, tasks })
-      );
+      const { result } = renderHook(() => useDashboard({ ...defaultProps, tasks }));
 
       expect(result.current.overdueTasks.map((t) => t.id)).toContain("t1");
       expect(result.current.dueSoonTasks.map((t) => t.id)).toContain("t2");
@@ -369,9 +366,7 @@ describe("Audit Logika: useDashboard & Metric Calculations (Item #16 / Fase F2)"
         },
       ];
 
-      const { result } = renderHook(() =>
-        useDashboard({ ...defaultProps, sprints, tasks })
-      );
+      const { result } = renderHook(() => useDashboard({ ...defaultProps, sprints, tasks }));
 
       expect(result.current.burndownData.length).toBeGreaterThan(0);
       const firstPoint = result.current.burndownData[0]; // Day 0 (start date, 2 hari lalu)

@@ -1,4 +1,5 @@
 import db from "../../src/lib/db";
+import { BATAS_DAFTAR_TANPA_PAGINATION, type PaginationParams } from "../lib/pagination";
 import crypto from "crypto";
 import { validateTimelineBoundaries } from "../services/task.service";
 
@@ -28,7 +29,10 @@ export interface TaskEntity {
 }
 
 export class TaskRepository {
-  async findTasksWithRelations(projectId: string, allowedTaskIds: Set<string> | null = null): Promise<any[]> {
+  async findTasksWithRelations(
+    projectId: string,
+    allowedTaskIds: Set<string> | null = null
+  ): Promise<any[]> {
     const connection = await db.getConnection();
     try {
       const [tasksRows]: any = await connection.query(
@@ -63,9 +67,25 @@ export class TaskRepository {
         }
       });
 
-      const [userRows]: any = await connection.query(
-        "SELECT id, uid, displayName, nama_lengkap, username, email, photoURL FROM Users"
-      );
+      const userIds = new Set<string>();
+      (filteredTasks || []).forEach((t: any) => {
+        if (t.reporterId) userIds.add(String(t.reporterId));
+        if (t.assigneeId) userIds.add(String(t.assigneeId));
+      });
+
+      const [userRows]: any =
+        userIds.size > 0
+          ? await connection.query(
+              `SELECT id, uid, displayName, nama_lengkap, username, email, photoURL FROM Users WHERE id IN (${Array.from(
+                userIds
+              )
+                .map(() => "?")
+                .join(",")}) OR uid IN (${Array.from(userIds)
+                .map(() => "?")
+                .join(",")})`,
+              [...Array.from(userIds), ...Array.from(userIds)]
+            )
+          : [[]];
       const usersMap = new Map<string, any>();
       (userRows || []).forEach((u: any) => {
         const uObj = {
@@ -94,6 +114,64 @@ export class TaskRepository {
     } finally {
       connection.release();
     }
+  }
+
+  /**
+   * Halaman root Issue List + seluruh keturunan root pada halaman itu (#318).
+   * Board/Kanban tetap memakai findTasksWithRelations penuh.
+   */
+  async findIssueListPage(
+    projectId: string,
+    pagination: PaginationParams,
+    search?: string
+  ): Promise<{ items: any[]; total: number }> {
+    const connection = await db.getConnection();
+    let total = 0;
+    let allowedIds = new Set<string>();
+    try {
+      const params: unknown[] = [projectId];
+      let rootWhere = "projectId = ? AND (parentId IS NULL OR parentId = '')";
+      if (search?.trim()) {
+        rootWhere +=
+          " AND (LOWER(COALESCE(title, '')) LIKE ? OR LOWER(COALESCE(taskKey, '')) LIKE ?)";
+        const term = `%${search.trim().toLowerCase()}%`;
+        params.push(term, term);
+      }
+
+      const [countRows]: any = await connection.query(
+        `SELECT COUNT(*)::int AS total FROM Tasks WHERE ${rootWhere}`,
+        params
+      );
+      total = countRows?.[0]?.total ?? 0;
+
+      const [rootRows]: any = await connection.query(
+        `SELECT id FROM Tasks WHERE ${rootWhere} ORDER BY orderIndex ASC, createdAt DESC LIMIT ? OFFSET ?`,
+        [...params, pagination.limit, pagination.offset]
+      );
+      const rootIds: string[] = (rootRows || []).map((r: any) => r.id).filter(Boolean);
+      if (rootIds.length === 0) {
+        return { items: [], total };
+      }
+
+      const [treeRows]: any = await connection.query(
+        `WITH RECURSIVE tree AS (
+           SELECT id FROM Tasks WHERE id IN (${rootIds.map(() => "?").join(",")})
+           UNION ALL
+           SELECT c.id FROM Tasks c INNER JOIN tree p ON c.parentId = p.id
+         )
+         SELECT id FROM tree`,
+        rootIds
+      );
+      allowedIds = new Set<string>((treeRows || []).map((r: any) => r.id));
+    } finally {
+      connection.release();
+    }
+
+    if (allowedIds.size === 0) {
+      return { items: [], total };
+    }
+    const items = await this.findTasksWithRelations(projectId, allowedIds);
+    return { items, total };
   }
 
   async findRawProjectTasks(projectId: string): Promise<any[]> {
@@ -158,24 +236,25 @@ export class TaskRepository {
       await connection.beginTransaction();
       transaksiTerbuka = true;
 
-      const [lockRows]: any = await connection.query(
-        "SELECT id, projectKey, taskCounter FROM Projects WHERE id = ? FOR UPDATE",
+      const [counterRows]: any = await connection.query(
+        `UPDATE Projects SET taskCounter = COALESCE(taskCounter, 0) + 1 WHERE id = ? RETURNING id, projectKey, taskCounter`,
         [projectId]
       );
 
       let taskKey = "TASK-1";
-      if (lockRows && lockRows.length > 0) {
-        const proj = lockRows[0];
-        const newCounter = (proj.taskCounter || 0) + 1;
-        await connection.query("UPDATE Projects SET taskCounter = ? WHERE id = ?", [
-          newCounter,
-          projectId,
-        ]);
-        taskKey = `${proj.projectKey}-${newCounter}`;
+      if (counterRows && counterRows.length > 0) {
+        const proj = counterRows[0];
+        const newCounter = proj.taskCounter || 1;
+        const prefix = proj.projectKey || "TASK";
+        taskKey = `${prefix}-${newCounter}`;
       }
 
       let resolvedReporterId = taskData.reporterId;
-      if (!resolvedReporterId || resolvedReporterId === "guest" || resolvedReporterId === "Unknown") {
+      if (
+        !resolvedReporterId ||
+        resolvedReporterId === "guest" ||
+        resolvedReporterId === "Unknown"
+      ) {
         if (authenticatedUserStr && authenticatedUserStr !== "guest") {
           const [uCheck]: any = await connection.query(
             "SELECT id, uid FROM Users WHERE id = ? OR uid = ?",
@@ -189,7 +268,11 @@ export class TaskRepository {
         }
       }
 
-      if (!resolvedReporterId || resolvedReporterId === "guest" || resolvedReporterId === "Unknown") {
+      if (
+        !resolvedReporterId ||
+        resolvedReporterId === "guest" ||
+        resolvedReporterId === "Unknown"
+      ) {
         const [projOwner]: any = await connection.query(
           "SELECT ownerId FROM Projects WHERE id = ?",
           [projectId]
@@ -249,7 +332,11 @@ export class TaskRepository {
         ]
       );
 
-      if (taskData.attachments && Array.isArray(taskData.attachments) && taskData.attachments.length > 0) {
+      if (
+        taskData.attachments &&
+        Array.isArray(taskData.attachments) &&
+        taskData.attachments.length > 0
+      ) {
         for (const att of taskData.attachments) {
           const urlLampiran = att.url || "";
           const namaTersimpan =
@@ -274,27 +361,7 @@ export class TaskRepository {
       await connection.commit();
       transaksiTerbuka = false;
 
-      let reporterObj: any = null;
-      if (resolvedReporterId) {
-        const [rRows]: any = await connection.query(
-          "SELECT id, uid, displayName, nama_lengkap, username, email, photoURL FROM Users WHERE id = ? OR uid = ?",
-          [resolvedReporterId, resolvedReporterId]
-        );
-        if (rRows && rRows.length > 0) {
-          const r = rRows[0];
-          reporterObj = {
-            id: r.id,
-            uid: r.uid,
-            name: r.displayName || r.nama_lengkap || r.username || r.email,
-            displayName: r.displayName || r.nama_lengkap || r.username || r.email,
-            avatar: r.photoURL || "",
-            photoURL: r.photoURL || "",
-            email: r.email || "",
-          };
-        }
-      }
-
-      return { id: newId, taskKey, reporterId: resolvedReporterId || null, reporterObj };
+      return { id: newId, taskKey, reporterId: resolvedReporterId || null, reporterObj: null };
     } catch (err) {
       if (transaksiTerbuka) {
         try {
@@ -376,8 +443,11 @@ export class TaskRepository {
   async getUnfinishedSubtasks(id: string): Promise<any[]> {
     const connection = await db.getConnection();
     try {
+      const { muatKunciTerminal, sqlStatusBukanTerminal } = await import("../lib/statusSelesai");
+      const kunci = await muatKunciTerminal();
+      const predikat = sqlStatusBukanTerminal("status", kunci);
       const [subtasks]: any = await connection.query(
-        "SELECT id, taskKey, title, status FROM Tasks WHERE parentId = ? AND status != 'Done'",
+        `SELECT id, taskKey, title, status FROM Tasks WHERE parentId = ? AND ${predikat}`,
         [id]
       );
       return subtasks || [];
@@ -458,10 +528,10 @@ export class TaskRepository {
       await connection.beginTransaction();
       await connection.query("DELETE FROM Comments WHERE taskId = ?", [id]);
       await connection.query("DELETE FROM Attachments WHERE taskId = ?", [id]);
-      await connection.query(
-        "DELETE FROM LinkedTasks WHERE sourceTaskId = ? OR targetTaskId = ?",
-        [id, id]
-      );
+      await connection.query("DELETE FROM LinkedTasks WHERE sourceTaskId = ? OR targetTaskId = ?", [
+        id,
+        id,
+      ]);
       await connection.query("DELETE FROM TaskCustomFields WHERE taskId = ?", [id]);
       await connection.query("DELETE FROM Tasks WHERE id = ? AND projectId = ?", [id, projectId]);
       await connection.commit();
@@ -486,7 +556,12 @@ export class TaskRepository {
     }
   }
 
-  async createComment(comment: { id: string; taskId: string; userId: string; content: string }): Promise<void> {
+  async createComment(comment: {
+    id: string;
+    taskId: string;
+    userId: string;
+    content: string;
+  }): Promise<void> {
     const connection = await db.getConnection();
     try {
       await connection.query(
@@ -502,7 +577,7 @@ export class TaskRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        "SELECT * FROM ActivityLogs WHERE projectId = ? ORDER BY createdAt DESC LIMIT 50",
+        `SELECT * FROM ActivityLogs WHERE projectId = ? ORDER BY createdAt DESC LIMIT ${BATAS_DAFTAR_TANPA_PAGINATION}`,
         [projectId]
       );
       return rows || [];
@@ -511,13 +586,46 @@ export class TaskRepository {
     }
   }
 
-  async createActivityLog(activity: { id: string; projectId: string; userId?: string | null; action: string; details?: string }): Promise<void> {
+  async findActivityLogsPaged(
+    projectId: string,
+    pagination: PaginationParams
+  ): Promise<{ items: any[]; total: number }> {
+    const connection = await db.getConnection();
+    try {
+      const [countRows]: any = await connection.query(
+        "SELECT COUNT(*)::int AS total FROM ActivityLogs WHERE projectId = ?",
+        [projectId]
+      );
+      const total = countRows?.[0]?.total ?? 0;
+      const [rows]: any = await connection.query(
+        "SELECT * FROM ActivityLogs WHERE projectId = ? ORDER BY createdAt DESC LIMIT ? OFFSET ?",
+        [projectId, pagination.limit, pagination.offset]
+      );
+      return { items: rows || [], total };
+    } finally {
+      connection.release();
+    }
+  }
+
+  async createActivityLog(activity: {
+    id: string;
+    projectId: string;
+    userId?: string | null;
+    action: string;
+    details?: string;
+  }): Promise<void> {
     const connection = await db.getConnection();
     try {
       await connection.query(
         `INSERT INTO ActivityLogs (id, projectId, userId, action, details)
          VALUES (?, ?, ?, ?, ?)`,
-        [activity.id, activity.projectId, activity.userId || null, activity.action, activity.details || ""]
+        [
+          activity.id,
+          activity.projectId,
+          activity.userId || null,
+          activity.action,
+          activity.details || "",
+        ]
       );
     } finally {
       connection.release();
@@ -552,7 +660,12 @@ export class TaskRepository {
     }
   }
 
-  async createLink(link: { id: string; sourceTaskId: string; targetTaskId: string; relationType: string }): Promise<void> {
+  async createLink(link: {
+    id: string;
+    sourceTaskId: string;
+    targetTaskId: string;
+    relationType: string;
+  }): Promise<void> {
     const connection = await db.getConnection();
     try {
       await connection.query(
@@ -567,7 +680,9 @@ export class TaskRepository {
   async deleteLink(linkId: string): Promise<void> {
     const connection = await db.getConnection();
     try {
-      const [linkRows]: any = await connection.query("SELECT * FROM LinkedTasks WHERE id = ?", [linkId]);
+      const [linkRows]: any = await connection.query("SELECT * FROM LinkedTasks WHERE id = ?", [
+        linkId,
+      ]);
       if (linkRows && linkRows.length > 0) {
         const link = linkRows[0];
         await connection.query("DELETE FROM LinkedTasks WHERE id = ?", [linkId]);

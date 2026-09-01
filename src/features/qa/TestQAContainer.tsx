@@ -19,6 +19,7 @@ import {
 } from "./services/qa.service";
 import { hasPermission } from "../../lib/permissions";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
+import { useMobileAction } from "../../contexts/MobileActionContext";
 import { QAComment, QATestCase, QATestSuite, TestQAPanelProps } from "./types";
 import { QATopBar } from "./components/QATopBar";
 import { QASuiteSidebar } from "./components/QASuiteSidebar";
@@ -61,6 +62,9 @@ export function TestQAPanel({
     "ALL" | "Passed" | "Failed" | "Blocked" | "Retest" | "Pending"
   >(initialStatusFilter || "ALL");
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [casesPage, setCasesPage] = useState(1);
+  const [casesTotal, setCasesTotal] = useState(0);
+  const casesPerPage = 20;
   const [selectedCaseIds, setSelectedCaseIds] = useState<string[]>([]);
 
   const [activeSuitePicDropdownId, setActiveSuitePicDropdownId] = useState<string | null>(null);
@@ -144,42 +148,33 @@ export function TestQAPanel({
   const canDelete =
     isAdminRole || hasPermission(currentUserRole, "qaTesting", "delete", false, user?.permissions);
 
-  // Load Data
+  const { registerAction, unregisterAction } = useMobileAction();
+
+  useEffect(() => {
+    if (canCreate) {
+      registerAction({
+        id: "qa-add-testcase",
+        label: t("qa.addNewTestCase") || "Buat Test Case Baru",
+        onClick: () => setIsAddCaseOpen(true),
+        canCreate: canCreate,
+      });
+    } else {
+      unregisterAction("qa-add-testcase");
+    }
+    return () => unregisterAction("qa-add-testcase");
+  }, [canCreate, registerAction, unregisterAction, t]);
+
+  // Load suites (tanpa seluruh cases) + cases halaman aktif suite (#318)
   const loadSuitesFromBackend = async () => {
     try {
       const suitesRes = await fetchSuites(selectedProject.id);
-      const casesRes = await fetchCases(selectedProject.id);
-
-      if (suitesRes.ok && casesRes.ok) {
+      if (suitesRes.ok) {
         const suitesData = await suitesRes.json();
-        const casesData = await casesRes.json();
-
-        if (suitesData.status === "success" && casesData.status === "success") {
-          const dbCases = casesData.data || [];
-          const mergedSuites: QATestSuite[] = (suitesData.data || []).map((suite: any) => {
-            const suiteCases = dbCases.filter(
-              (tc: any) => tc.suiteId === suite.id || tc.modulId === suite.id
-            );
-            return {
-              ...suite,
-              cases: suiteCases.map((tc: any) => ({
-                ...tc,
-                status: tc.status && tc.status !== "untested" ? tc.status : "Pending",
-                expectedResult: tc.expected || tc.expectedResult || "",
-                title: tc.judul || tc.title || "",
-                steps: typeof tc.steps === "string" ? JSON.parse(tc.steps) : tc.steps || [],
-                priority: tc.prioritas || tc.priority || "Medium",
-                assignedTo: tc.assignedTo || undefined,
-                commentsList:
-                  typeof tc.commentsList === "string"
-                    ? JSON.parse(tc.commentsList)
-                    : tc.commentsList || [],
-                evidences:
-                  typeof tc.evidences === "string" ? JSON.parse(tc.evidences) : tc.evidences || [],
-              })),
-            };
-          });
-
+        if (suitesData.status === "success") {
+          const mergedSuites: QATestSuite[] = (suitesData.data || []).map((suite: any) => ({
+            ...suite,
+            cases: suite.cases || [],
+          }));
           setSuites(mergedSuites);
           if (mergedSuites.length > 0 && !selectedSuiteId) {
             setSelectedSuiteId(mergedSuites[0].id);
@@ -191,11 +186,54 @@ export function TestQAPanel({
     }
   };
 
+  const mapCaseRow = (tc: any): QATestCase => ({
+    ...tc,
+    status: tc.status && tc.status !== "untested" ? tc.status : "Pending",
+    expectedResult: tc.expected || tc.expectedResult || "",
+    title: tc.judul || tc.title || "",
+    steps: typeof tc.steps === "string" ? JSON.parse(tc.steps) : tc.steps || [],
+    priority: tc.prioritas || tc.priority || "Medium",
+    assignedTo: tc.assignedTo || undefined,
+    commentsList:
+      typeof tc.commentsList === "string" ? JSON.parse(tc.commentsList) : tc.commentsList || [],
+    evidences: typeof tc.evidences === "string" ? JSON.parse(tc.evidences) : tc.evidences || [],
+  });
+
+  const loadCasesForActiveSuite = async (suiteId: string) => {
+    if (!selectedProject?.id || !suiteId) return;
+    try {
+      const casesRes = await fetchCases(selectedProject.id, {
+        page: casesPage,
+        limit: casesPerPage,
+        search: searchTerm,
+        suiteId,
+      });
+      if (!casesRes.ok) return;
+      const casesData = await casesRes.json();
+      if (casesData.status !== "success") return;
+      const dbCases = (casesData.data || []).map(mapCaseRow);
+      setCasesTotal(casesData.meta?.total ?? dbCases.length);
+      setSuites((prev) => prev.map((s) => (s.id === suiteId ? { ...s, cases: dbCases } : s)));
+    } catch (e) {
+      console.warn("Failed to load QA cases page:", e);
+    }
+  };
+
   useEffect(() => {
     if (selectedProject?.id) {
       loadSuitesFromBackend();
     }
   }, [selectedProject?.id]);
+
+  useEffect(() => {
+    setCasesPage(1);
+  }, [selectedSuiteId, searchTerm, statusFilter]);
+
+  useEffect(() => {
+    if (selectedSuiteId) {
+      void loadCasesForActiveSuite(selectedSuiteId);
+    }
+  }, [selectedProject?.id, selectedSuiteId, casesPage, searchTerm]);
 
   // Save state helper
   const saveSuitesToStorage = (updatedSuites: QATestSuite[]) => {
@@ -706,7 +744,7 @@ export function TestQAPanel({
       />
 
       {/* OPTIMIZED RESPONSIVE GRID (3 : 9 RATIO) - 75% WIDTH FOR TABLE */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
         <QASuiteSidebar
           suitesForFilter={suitesForFilter}
           selectedSuiteId={selectedSuiteId}
@@ -767,6 +805,10 @@ export function TestQAPanel({
           handleBulkAssignPic={handleBulkAssignPic}
           handleBulkChangeStatus={handleBulkChangeStatus}
           handleBulkDeleteCases={handleBulkDeleteCases}
+          casesPage={casesPage}
+          setCasesPage={setCasesPage}
+          casesTotal={casesTotal}
+          casesPerPage={casesPerPage}
         />
       </div>
 

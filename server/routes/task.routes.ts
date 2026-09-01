@@ -15,22 +15,34 @@ import xss from "xss";
 import { generateContentWithFallback } from "../services/ai.service";
 import { matchesCaller, checkUserPermissionBackend } from "../services/task.service";
 import { jagaProyek } from "../middleware/jagaProyek";
-import { validasiBody } from "../middleware/validate";
+import { validasiBody, validasiQuery } from "../middleware/validate";
+import { paginationQuerySchema, taskListQuerySchema } from "../schemas/pagination.schema";
+import { respondWithProjectList } from "../lib/listResponse";
+import { listSuccessPayload, parsePaginationQuery } from "../lib/pagination";
 import { createTaskSchema, updateTaskSchema, reorderTaskIdsSchema } from "../schemas/task.schema";
 import { AuthenticatedRequest } from "../types/express";
 import { taskRepository } from "../repositories/task.repository";
 import { userRepository } from "../repositories/user.repository";
 import { qaRepository } from "../repositories/qa.repository";
+import { adalahWaterfall } from "../lib/methodology";
+import { statusSelesai } from "../lib/statusSelesai";
+import { masterDataRepository } from "../repositories/master-data.repository";
 
 const router = express.Router();
 
 router.get(
   "/api/projects/:projectId/tasks",
   jagaProyek("list", "R"),
+  validasiQuery(taskListQuerySchema),
   async (req: AuthenticatedRequest, res) => {
     try {
       const { projectId } = req.params;
       const userId = req.user?.id || req.user?.uid;
+      const search = req.query.search as string | undefined;
+      const rootsOnlyRaw = String(req.query.rootsOnly || "");
+      const rootsOnly = rootsOnlyRaw === "1" || rootsOnlyRaw === "true";
+      const pagination = parsePaginationQuery(req.query as Record<string, unknown>);
+
       const rawIdentifiers: (string | null | undefined)[] = [
         userId,
         req.user?.uid,
@@ -58,8 +70,44 @@ router.get(
       const uRole = req.user?.role || "viewer";
       const isAdminOrManager = ["admin", "manager", "head"].includes(uRole.toLowerCase());
 
+      // Issue List: page root + keturunan. Board tanpa page/limit → penuh.
+      if (rootsOnly && pagination && isAdminOrManager) {
+        const { items, total } = await taskRepository.findIssueListPage(
+          projectId,
+          pagination,
+          search
+        );
+        return res.json(listSuccessPayload(items, pagination, total));
+      }
+
       if (isAdminOrManager) {
         const tasks = await taskRepository.findTasksWithRelations(projectId, null);
+        if (rootsOnly && pagination) {
+          const roots = tasks.filter(
+            (t: any) => !t.parentId || !tasks.some((p: any) => p.id === t.parentId)
+          );
+          const filtered = search?.trim()
+            ? roots.filter(
+                (t: any) =>
+                  (t.title || "").toLowerCase().includes(search.toLowerCase()) ||
+                  (t.key || t.taskKey || "").toLowerCase().includes(search.toLowerCase())
+              )
+            : roots;
+          const pageRoots = filtered.slice(pagination.offset, pagination.offset + pagination.limit);
+          const rootIdSet = new Set(pageRoots.map((r: any) => r.id));
+          const include = new Set<string>(rootIdSet);
+          const addChildren = (parentId: string) => {
+            tasks.forEach((t: any) => {
+              if (t.parentId === parentId && !include.has(t.id)) {
+                include.add(t.id);
+                addChildren(t.id);
+              }
+            });
+          };
+          rootIdSet.forEach((id) => addChildren(id));
+          const pageTasks = tasks.filter((t: any) => include.has(t.id));
+          return res.json(listSuccessPayload(pageTasks, pagination, filtered.length));
+        }
         return res.json({ status: "success", data: tasks });
       }
 
@@ -108,6 +156,34 @@ router.get(
       });
 
       const tasks = await taskRepository.findTasksWithRelations(projectId, allowedIds);
+
+      if (rootsOnly && pagination) {
+        const roots = tasks.filter(
+          (t: any) => !t.parentId || !tasks.some((p: any) => p.id === t.parentId)
+        );
+        const filtered = search?.trim()
+          ? roots.filter(
+              (t: any) =>
+                (t.title || "").toLowerCase().includes(search.toLowerCase()) ||
+                (t.key || t.taskKey || "").toLowerCase().includes(search.toLowerCase())
+            )
+          : roots;
+        const pageRoots = filtered.slice(pagination.offset, pagination.offset + pagination.limit);
+        const rootIdSet = new Set(pageRoots.map((r: any) => r.id));
+        const include = new Set<string>(rootIdSet);
+        const addChildren = (parentId: string) => {
+          tasks.forEach((t: any) => {
+            if (t.parentId === parentId && !include.has(t.id)) {
+              include.add(t.id);
+              addChildren(t.id);
+            }
+          });
+        };
+        rootIdSet.forEach((id) => addChildren(id));
+        const pageTasks = tasks.filter((t: any) => include.has(t.id));
+        return res.json(listSuccessPayload(pageTasks, pagination, filtered.length));
+      }
+
       res.json({ status: "success", data: tasks });
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/tasks error:", error);
@@ -192,19 +268,6 @@ router.post(
       });
 
       const userIdStr = authenticatedUserStr || resolvedReporterId || "guest";
-      await createAuditLog(
-        userIdStr as string,
-        projectId,
-        "CREATE",
-        "Tasks",
-        newId,
-        null,
-        req.body
-      );
-
-      await sendProjectActivityNotification(projectId, userIdStr, "create_task", {
-        taskId: newId,
-      }).catch((err) => console.error("Create task notification broadcast failed:", err));
 
       res.json({
         status: "success",
@@ -227,6 +290,21 @@ router.post(
           endDate: endDate || null,
         },
       });
+
+      // Audit & notifikasi tidak menahan respons create — sub-issue harus tampil cepat (#317).
+      void createAuditLog(
+        userIdStr as string,
+        projectId,
+        "CREATE",
+        "Tasks",
+        newId,
+        null,
+        req.body
+      ).catch((err) => console.error("[TASK CREATE] audit log gagal:", err));
+
+      void sendProjectActivityNotification(projectId, userIdStr, "create_task", {
+        taskId: newId,
+      }).catch((err) => console.error("Create task notification broadcast failed:", err));
     } catch (error: any) {
       if (error?.isValidationError) {
         return res.status(400).json({
@@ -398,6 +476,7 @@ router.put(
         // satu pun pesan galat.
         resolution,
         release,
+        milestoneId,
         category,
         environment,
         projectRisk,
@@ -528,7 +607,7 @@ router.put(
         }
       }
 
-      const isWaterfall = oldTask.projectCategory === "WATERFALL";
+      const isWaterfall = adalahWaterfall(oldTask.projectCategory);
 
       if (version !== undefined && oldTask.version !== version) {
         optimisticLockingConflicts.inc();
@@ -548,9 +627,15 @@ router.put(
         });
       }
 
-      if (isWaterfall && status === "Done" && oldTask.status !== "Done") {
+      const masterStatus = await masterDataRepository.findAll();
+      const menujuTerminal =
+        !!status &&
+        statusSelesai(status, masterStatus) &&
+        !statusSelesai(oldTask.status, masterStatus);
+
+      if (isWaterfall && menujuTerminal) {
         const deps = await taskRepository.getLinkedDependencies(id);
-        const unfinishedDeps = deps.filter((d: any) => d.status !== "Done");
+        const unfinishedDeps = deps.filter((d: any) => !statusSelesai(d.status, masterStatus));
 
         if (unfinishedDeps.length > 0) {
           await createAuditLog(
@@ -560,7 +645,7 @@ router.put(
             "Tasks",
             id,
             { status: oldTask.status },
-            { status: "Done", constraintFailure: "WATERFALL_PHASE_GATE_VIOLATION" }
+            { status: status, constraintFailure: "WATERFALL_PHASE_GATE_VIOLATION" }
           );
 
           return res.status(403).json({
@@ -572,7 +657,7 @@ router.put(
         }
       }
 
-      if (status === "Done" && oldTask.status !== "Done") {
+      if (menujuTerminal) {
         const subtasks = await taskRepository.getUnfinishedSubtasks(id);
         if (subtasks.length > 0) {
           const unfinishedKeys = subtasks.map((s: any) => s.taskKey || s.title || s.id).join(", ");
@@ -583,7 +668,7 @@ router.put(
             "Tasks",
             id,
             { status: oldTask.status },
-            { status: "Done", constraintFailure: "SUBTASK_INTEGRITY_VIOLATION" }
+            { status: status, constraintFailure: "SUBTASK_INTEGRITY_VIOLATION" }
           );
 
           return res.status(400).json({
@@ -623,6 +708,7 @@ router.put(
       checkUpdate("acceptanceCriteria", acceptanceCriteria);
       checkUpdate("resolution", resolution);
       checkUpdate("release", release);
+      checkUpdate("milestoneId", milestoneId);
       checkUpdate("category", category);
       checkUpdate("environment", environment);
       checkUpdate("projectRisk", projectRisk);
@@ -1060,20 +1146,29 @@ router.post(
 );
 
 // ActivityLogs API
-router.get("/api/projects/:projectId/activity", jagaProyek("list", "R"), async (req, res) => {
-  try {
-    const { projectId } = req.params;
-    const rows = await taskRepository.findActivityLogs(projectId);
-    res.json({ status: "success", data: rows });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/activity error:", error);
-    res.status(500).json({
-      status: "error",
-      code: "srv.terjadi_kesalahan_internal_server",
-      message: "Terjadi kesalahan internal server",
-    });
+router.get(
+  "/api/projects/:projectId/activity",
+  jagaProyek("list", "R"),
+  validasiQuery(paginationQuerySchema),
+  async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      await respondWithProjectList(
+        res,
+        req.query as Record<string, unknown>,
+        () => taskRepository.findActivityLogs(projectId),
+        (pagination) => taskRepository.findActivityLogsPaged(projectId, pagination)
+      );
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: GET /api/projects/:projectId/activity error:", error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
   }
-});
+);
 
 router.post("/api/projects/:projectId/activity", jagaProyek("list", "U"), async (req, res) => {
   try {

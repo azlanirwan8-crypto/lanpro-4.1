@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn, ensureDate } from "../../../lib/utils";
-import { Task, Sprint } from "../../../types";
+import { Task, Sprint, MasterData } from "../../../types";
+import { statusSelesai } from "../../../lib/statusSelesai";
 import { Droppable as _Droppable } from "@hello-pangea/dnd";
 
 const Droppable = _Droppable as any;
@@ -24,6 +25,7 @@ const Droppable = _Droppable as any;
 interface SprintSectionProps {
   sprints: Sprint[];
   tasks: Task[];
+  masterData?: MasterData[];
   expandedSprintId: string | null;
   setExpandedSprintId: (id: string) => void;
   renderDraggableTask: (task: Task, index: number, variant: "card" | "row") => React.ReactNode;
@@ -38,6 +40,7 @@ interface SprintSectionProps {
 export const SprintSection: React.FC<SprintSectionProps> = ({
   sprints,
   tasks,
+  masterData = [],
   expandedSprintId,
   setExpandedSprintId,
   renderDraggableTask,
@@ -60,14 +63,17 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
             (t) => t.sprintId === sprint.id && (t.type || "").toLowerCase() !== "epic"
           );
           const totalTasks = sprintTasks.length;
-          const doneTasks = sprintTasks.filter(
-            (t) =>
-              t.status.toLowerCase() === "done" ||
-              t.status.toLowerCase().includes("done") ||
-              t.status.toLowerCase().includes("completed")
-          ).length;
+          const doneTaskList = sprintTasks.filter((t) => statusSelesai(t.status, masterData));
+          const doneTasks = doneTaskList.length;
+          const totalPoints = sprintTasks.reduce((acc, t) => acc + (t.storyPoints || 0), 0);
+          const donePoints = doneTaskList.reduce((acc, t) => acc + (t.storyPoints || 0), 0);
+          // #313 — samakan metrik: pakai poin bila ada, else hitungan tugas
           const completionPercentage =
-            totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+            totalPoints > 0
+              ? Math.round((donePoints / totalPoints) * 100)
+              : totalTasks > 0
+                ? Math.round((doneTasks / totalTasks) * 100)
+                : 0;
 
           const isExpanded =
             expandedSprintId === sprint.id ||
@@ -151,7 +157,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                   </div>
 
                   {/* Sisi Tengah: Sprint Goal (Pemisah Garis Vertikal - Tanpa Ikon Pensil) */}
-                  <div className="hidden lg:flex flex-col min-w-0 flex-1 border-l border-border-subtle/80 pl-5 my-0.5 max-w-md">
+                  <div className="hidden md:flex flex-col min-w-0 flex-1 border-l border-border-subtle/80 pl-5 my-0.5 max-w-md">
                     <div className="text-xs font-normal text-indigo-600">Sprint Goal</div>
                     <p className="text-xs text-content-body font-normal leading-relaxed line-clamp-2 mt-0.5">
                       {sprint.goal ||
@@ -283,6 +289,9 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                       </div>
                       <div className="text-[11px] font-normal text-content-subtle mt-0.5">
                         {t("planning.progress", "Progress")}
+                        {totalPoints > 0
+                          ? ` · ${donePoints}/${totalPoints} pts`
+                          : ` · ${doneTasks}/${totalTasks}`}
                       </div>
                     </div>
                   </div>

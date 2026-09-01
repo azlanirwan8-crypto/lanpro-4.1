@@ -66,7 +66,8 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
     const dari = (masterData || [])
       .filter((m) => m.type === tipe && m.label)
       .map((m) => ({
-        id: m.label as string,
+        // #311 — simpan code bila ada; server menormalisasi ke UPPERCASE.
+        id: String((m as { code?: string }).code || m.label),
         label: m.label as string,
         icon: (m as { icon?: string }).icon,
         color: (m as { color?: string }).color,

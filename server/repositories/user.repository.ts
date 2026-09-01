@@ -1,4 +1,5 @@
 import db from "../../src/lib/db";
+import type { PaginationParams } from "../lib/pagination";
 
 /**
  * Batas atas daftar pengguna yang dimuat sekaligus (#284).
@@ -82,6 +83,70 @@ export class UserRepository {
     } finally {
       connection.release();
     }
+  }
+
+  async findAllPaged(
+    pagination: PaginationParams,
+    search?: string
+  ): Promise<{ items: UserEntity[]; total: number }> {
+    const connection = await db.getConnection();
+    try {
+      const { where, params } = this.buildUserWhere(search);
+      const [countRows]: any = await connection.query(
+        `SELECT COUNT(*)::int AS total FROM Users WHERE ${where}`,
+        params
+      );
+      const total = countRows?.[0]?.total ?? 0;
+      const [rows]: any = await connection.query(
+        `SELECT id, uid, username, nama_lengkap, email, displayName, role, status, permissions, phone, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, "coverUrl", createdAt, lastSeen FROM Users WHERE ${where} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+        [...params, pagination.limit, pagination.offset]
+      );
+      return {
+        items: (rows || []).map((u: any) => {
+          try {
+            if (u.permissions && typeof u.permissions === "string") {
+              u.permissions = JSON.parse(u.permissions);
+            }
+          } catch (e) {}
+          return u;
+        }),
+        total,
+      };
+    } finally {
+      connection.release();
+    }
+  }
+
+  async findAllRingkasPaged(
+    pagination: PaginationParams,
+    search?: string
+  ): Promise<{ items: UserEntity[]; total: number }> {
+    const connection = await db.getConnection();
+    try {
+      const { where, params } = this.buildUserWhere(search);
+      const [countRows]: any = await connection.query(
+        `SELECT COUNT(*)::int AS total FROM Users WHERE ${where}`,
+        params
+      );
+      const total = countRows?.[0]?.total ?? 0;
+      const [rows]: any = await connection.query(
+        `SELECT id, uid, username, nama_lengkap, displayName, role, status, department, position, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar_url, COALESCE(avatar_url, photoURL, avatarUrl) AS photoURL, COALESCE(avatar_url, photoURL, avatarUrl) AS avatar, "coverUrl", createdAt, lastSeen FROM Users WHERE ${where} ORDER BY createdAt DESC LIMIT ? OFFSET ?`,
+        [...params, pagination.limit, pagination.offset]
+      );
+      return { items: rows || [], total };
+    } finally {
+      connection.release();
+    }
+  }
+
+  private buildUserWhere(search?: string) {
+    if (!search?.trim()) return { where: "1=1", params: [] as unknown[] };
+    const term = `%${search.trim().toLowerCase()}%`;
+    return {
+      where:
+        "(LOWER(COALESCE(displayName, '')) LIKE ? OR LOWER(COALESCE(username, '')) LIKE ? OR LOWER(COALESCE(email, '')) LIKE ?)",
+      params: [term, term, term],
+    };
   }
 
   /**

@@ -42,6 +42,39 @@ export interface JejakPembuat {
 const rapikan = (nilai: unknown): string =>
   typeof nilai === "string" ? nilai.trim().toLowerCase() : "";
 
+/**
+ * Apakah string ini tampak seperti id otorisasi (bukan nama tampilan)?
+ * Dipakai agar UI tidak menampilkan UUID / token id di kolom Pembuat (#319).
+ */
+export function terlihatSepertiIdAuth(nilai: string | null | undefined): boolean {
+  const s = typeof nilai === "string" ? nilai.trim() : "";
+  if (!s) return false;
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)) {
+    return true;
+  }
+  if (/^u(id)?-[a-z0-9_-]+$/i.test(s)) return true;
+  // Id sesi panjang tanpa spasi (bukan nama orang).
+  if (s.length >= 20 && !/\s/.test(s) && /^[a-z0-9_-]+$/i.test(s)) return true;
+  return false;
+}
+
+/**
+ * Nama yang aman ditampilkan di UI untuk pembuat flowchart (#319).
+ * Urutan: createdByName → createdBy legacy (bila bukan id) → cadangan → em dash.
+ */
+export function tampilanNamaPembuat(
+  dokumen: JejakPembuat | null | undefined,
+  cadangan?: string | null
+): string {
+  const nama = typeof dokumen?.createdByName === "string" ? dokumen.createdByName.trim() : "";
+  if (nama) return nama;
+  const raw = typeof dokumen?.createdBy === "string" ? dokumen.createdBy.trim() : "";
+  if (raw && !terlihatSepertiIdAuth(raw)) return raw;
+  const fallback = typeof cadangan === "string" ? cadangan.trim() : "";
+  if (fallback && !terlihatSepertiIdAuth(fallback)) return fallback;
+  return "—";
+}
+
 /** Seluruh id yang sah mewakili satu pengguna di sesi ini. */
 const idPengguna = (pengguna: IdentitasPengguna): string[] =>
   [pengguna.id, pengguna.uid, pengguna.userId].map(rapikan).filter((v) => v !== "");

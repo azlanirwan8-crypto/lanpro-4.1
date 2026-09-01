@@ -59,6 +59,7 @@ router.post(
         dropdownOptions,
         role_type,
         roleType,
+        isTerminal,
       } = req.body;
       const rType = role_type || roleType || null;
 
@@ -121,6 +122,13 @@ router.post(
         fieldType: fieldType || null,
         dropdownOptions: dropdownOptions || null,
         role_type: rType,
+        isTerminal:
+          typeof isTerminal === "boolean"
+            ? isTerminal
+            : tipeFinal === "status" &&
+              ["done", "selesai", "uat", "completed", "resolved", "closed"].includes(
+                String(kodeFinal || itemLabel).toLowerCase()
+              ),
       });
 
       res.json({ status: "success", data: created });
@@ -158,6 +166,7 @@ router.put(
         role_type,
         roleType,
         type,
+        isTerminal,
       } = req.body;
       const rType = role_type || roleType || null;
 
@@ -215,6 +224,7 @@ router.put(
         fieldType: fieldType || null,
         dropdownOptions: dropdownOptions || null,
         role_type: rType,
+        ...(typeof isTerminal === "boolean" ? { isTerminal } : {}),
       });
 
       res.json({

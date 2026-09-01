@@ -21,8 +21,8 @@
  * URL, header, dan token terpusat di satu tempat.
  */
 
-import { safeLocalStorage } from '../../../lib/safeStorage';
-import { apiRequest, getAuthToken } from '../../../lib/api';
+import { safeLocalStorage } from "../../../lib/safeStorage";
+import { apiRequest, getAuthToken } from "../../../lib/api";
 
 /**
  * Transport mentah dengan token terlampir.
@@ -33,7 +33,7 @@ async function qaFetch(url: string, options: any = {}): Promise<Response> {
   const token = getAuthToken();
   const headers = new Headers(options.headers || {});
   if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
+    headers.set("Authorization", `Bearer ${token}`);
   }
   return fetch(url, { ...options, headers });
 }
@@ -42,7 +42,7 @@ async function qaFetch(url: string, options: any = {}): Promise<Response> {
 function jsonBody(method: string, payload: unknown) {
   return {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   };
 }
@@ -56,42 +56,47 @@ export function fetchSuites(projectId: string): Promise<Response> {
 
 /** Membuat suite baru. */
 export function createSuite(projectId: string, suite: unknown): Promise<Response> {
-  return qaFetch(`/api/projects/${projectId}/qa-test-suites`, jsonBody('POST', suite));
+  return qaFetch(`/api/projects/${projectId}/qa-test-suites`, jsonBody("POST", suite));
 }
 
 /** Memperbarui suite. Dipakai baik untuk ubah metadata maupun ganti PIC. */
-export function updateSuite(
-  projectId: string,
-  suiteId: string,
-  suite: unknown,
-): Promise<Response> {
-  return qaFetch(`/api/projects/${projectId}/qa-test-suites/${suiteId}`, jsonBody('PUT', suite));
+export function updateSuite(projectId: string, suiteId: string, suite: unknown): Promise<Response> {
+  return qaFetch(`/api/projects/${projectId}/qa-test-suites/${suiteId}`, jsonBody("PUT", suite));
 }
 
 /** Menghapus suite. */
 export function deleteSuite(projectId: string, suiteId: string): Promise<Response> {
-  return qaFetch(`/api/projects/${projectId}/qa-test-suites/${suiteId}`, { method: 'DELETE' });
+  return qaFetch(`/api/projects/${projectId}/qa-test-suites/${suiteId}`, { method: "DELETE" });
 }
 
 // ── Test Cases ────────────────────────────────────────────────────
 
 /** Mengambil daftar test case. Mengembalikan Response mentah. */
-export function fetchCases(projectId: string): Promise<Response> {
-  return qaFetch(`/api/projects/${projectId}/qa-test-cases`);
+export function fetchCases(
+  projectId: string,
+  options?: { page?: number; limit?: number; search?: string; suiteId?: string }
+): Promise<Response> {
+  const params = new URLSearchParams();
+  if (options?.page !== undefined) params.set("page", String(options.page));
+  if (options?.limit !== undefined) params.set("limit", String(options.limit));
+  if (options?.search?.trim()) params.set("search", options.search.trim());
+  if (options?.suiteId?.trim()) params.set("suiteId", options.suiteId.trim());
+  const qs = params.toString();
+  return qaFetch(`/api/projects/${projectId}/qa-test-cases${qs ? `?${qs}` : ""}`);
 }
 
 /** Memperbarui test case. Dipakai untuk ubah isi maupun ganti PIC. */
 export function updateCase(
   projectId: string,
   caseId: string,
-  testCase: unknown,
+  testCase: unknown
 ): Promise<Response> {
-  return qaFetch(`/api/projects/${projectId}/qa-test-cases/${caseId}`, jsonBody('PUT', testCase));
+  return qaFetch(`/api/projects/${projectId}/qa-test-cases/${caseId}`, jsonBody("PUT", testCase));
 }
 
 /** Menghapus test case. */
 export function deleteCase(projectId: string, caseId: string): Promise<Response> {
-  return qaFetch(`/api/projects/${projectId}/qa-test-cases/${caseId}`, { method: 'DELETE' });
+  return qaFetch(`/api/projects/${projectId}/qa-test-cases/${caseId}`, { method: "DELETE" });
 }
 
 /** Mengambil riwayat eksekusi sebuah test case. */
@@ -106,8 +111,8 @@ export function fetchCaseHistory(projectId: string, caseId: string): Promise<Res
  * menentukannya sendiri agar boundary multipart-nya benar.
  */
 export function bulkUploadCases(formData: FormData): Promise<Response> {
-  return qaFetch('/api/v1/qa/test-case/bulk-upload', {
-    method: 'POST',
+  return qaFetch("/api/v1/qa/test-case/bulk-upload", {
+    method: "POST",
     body: formData,
   });
 }
@@ -123,10 +128,10 @@ export function bulkUploadCases(formData: FormData): Promise<Response> {
 export async function updateCaseStatus(
   projectId: string,
   caseId: string,
-  payload: unknown,
+  payload: unknown
 ): Promise<any> {
   return apiRequest(`/api/projects/${projectId}/qa-test-cases/${caseId}/status`, {
-    method: 'PATCH',
+    method: "PATCH",
     body: payload,
   });
 }
@@ -134,7 +139,7 @@ export async function updateCaseStatus(
 /** Membuat test case baru. */
 export async function createCase(projectId: string, payload: unknown): Promise<any> {
   return apiRequest(`/api/projects/${projectId}/qa-test-cases`, {
-    method: 'POST',
+    method: "POST",
     body: payload,
   });
 }
@@ -142,7 +147,7 @@ export async function createCase(projectId: string, payload: unknown): Promise<a
 /** Membuat task dari temuan QA (mis. bug yang perlu ditindaklanjuti). */
 export async function createTaskFromQA(projectId: string, payload: unknown): Promise<any> {
   return apiRequest(`/api/projects/${projectId}/tasks`, {
-    method: 'POST',
+    method: "POST",
     body: payload,
   });
 }

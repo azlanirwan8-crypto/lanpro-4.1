@@ -1,4 +1,5 @@
 import i18n from "../../i18n";
+import { suppressUsersRefresh } from "../../lib/taskRefreshControl";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { UserProfile, UserPermissions } from "../../types";
@@ -48,8 +49,8 @@ export const useAdminUsers = () => {
   const [sortField, setSortField] = useState<"name" | "department" | "role" | "status">("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  const fetchUsers = async () => {
-    setLoading(true);
+  const fetchUsers = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const data = await fetchUsersApi();
       if (data.status === "success") {
@@ -79,40 +80,55 @@ export const useAdminUsers = () => {
 
   const handleUpdateUser = async () => {
     if (!selectedUser) return;
+
+    const payload: any = {
+      role: editForm.role,
+      status: editForm.status,
+      permissions: cleanUserPermissions(editForm.permissions),
+      department: editForm.department,
+      position: editForm.position,
+      displayName: editForm.fullName,
+      email: editForm.email,
+      phone: editForm.phone,
+    };
+
+    if (editForm.password.trim()) {
+      payload.passwordHash = editForm.password.trim();
+    }
+
     setSaving(true);
+    suppressUsersRefresh(8000);
+    const userSnapshot = { ...selectedUser };
+    const payloadSnapshot = { ...payload };
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === userSnapshot.id
+          ? {
+              ...u,
+              ...payloadSnapshot,
+              permissions: payloadSnapshot.permissions,
+            }
+          : u
+      )
+    );
+    setIsEditModalOpen(false);
+    setSelectedUser(null);
+
     try {
-      const payload: any = {
-        role: editForm.role,
-        status: editForm.status,
-        permissions: cleanUserPermissions(editForm.permissions),
-        department: editForm.department,
-        position: editForm.position,
-        displayName: editForm.fullName,
-        email: editForm.email,
-        phone: editForm.phone,
-      };
-
-      if (editForm.password.trim()) {
-        payload.passwordHash = editForm.password.trim();
-      }
-
-      const data = await updateUser(selectedUser.id, payload);
+      const data = await updateUser(userSnapshot.id, payloadSnapshot);
       if (data.status !== "success") throw new Error(data.message);
 
       toast.success(i18n.t("toast.userUpdated"));
-      setIsEditModalOpen(false);
 
       const updatedProfile = {
-        ...selectedUser,
-        ...payload,
-        id: selectedUser.id,
-        uid: selectedUser.uid || selectedUser.id,
+        ...userSnapshot,
+        ...payloadSnapshot,
+        id: userSnapshot.id,
+        uid: userSnapshot.uid || userSnapshot.id,
       };
       window.dispatchEvent(new CustomEvent("user_profile_updated", { detail: updatedProfile }));
-
-      setSelectedUser(null);
-      fetchUsers(); // Refresh
     } catch (error: any) {
+      void fetchUsers(true);
       toast.error(error.message || "Failed to update user");
       console.error(error);
     } finally {
@@ -131,14 +147,16 @@ export const useAdminUsers = () => {
     );
     if (!isConfirmed) return;
 
+    suppressUsersRefresh(8000);
+    setUsers((prev) => prev.filter((u) => u.id !== user.id));
+    toast.success("Pengguna berhasil dihapus.");
+
     setSaving(true);
     try {
       const data = await deleteUserApi(user.id);
       if (data.status !== "success") throw new Error(data.message);
-
-      showSuccessAlert("Berhasil!", "Pengguna berhasil dihapus.");
-      fetchUsers(); // Refresh
     } catch (error: any) {
+      void fetchUsers(true);
       toast.error(error.message || "Gagal menghapus pengguna");
       console.error(error);
     } finally {

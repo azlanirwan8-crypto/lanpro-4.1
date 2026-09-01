@@ -128,7 +128,22 @@ export interface AppRoutesProps {
   setIsNewTaskModalOpen?: (open: boolean) => void;
   deleteTask?: (id: string) => void;
   bulkDeleteTasks?: (ids: string[]) => void;
-  fetchTasks?: () => Promise<void>;
+  fetchTasks?: (opts?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    rootsOnly?: boolean;
+  }) => Promise<void>;
+  issueListPage?: number;
+  setIssueListPage?: (page: number) => void;
+  issueListSearch?: string;
+  setIssueListSearch?: (search: string) => void;
+  issueListMeta?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  } | null;
   setExpandedSprintId?: (id: string | null) => void;
   setIsNewSprintModalOpen?: (open: boolean) => void;
   setIsEditSprintModalOpen?: (open: boolean) => void;
@@ -185,6 +200,11 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
     deleteTask = (_id: string) => {},
     bulkDeleteTasks = (_ids: string[]) => {},
     fetchTasks = async () => {},
+    issueListPage = 1,
+    setIssueListPage = () => {},
+    issueListSearch = "",
+    setIssueListSearch = () => {},
+    issueListMeta = null,
     expandedSprintId = null,
     setExpandedSprintId = (_id: string | null) => {},
     setIsNewSprintModalOpen = (_open: boolean) => {},
@@ -225,7 +245,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
   switch (currentView) {
     case "dashboard":
       return (
-        <div className="flex-1 flex flex-col overflow-auto bg-surface-sunken min-h-screen pb-16 transition-colors duration-200">
+        <div className="flex-1 flex flex-col overflow-auto bg-surface-sunken min-h-screen mobile-nav-pb md:pb-0 transition-colors duration-200">
           <DashboardView
             tasks={tasks || []}
             sprints={sprints || []}
@@ -238,6 +258,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
             userRole={effectiveRole}
             currentUser={currentUser}
             fetchTasks={fetchTasks}
+            masterData={masterData || []}
           />
         </div>
       );
@@ -299,6 +320,11 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
           bulkDeleteTasks={bulkDeleteTasks}
           selectedProject={selectedProject}
           fetchTasks={fetchTasks}
+          issueListPage={issueListPage}
+          setIssueListPage={setIssueListPage}
+          issueListSearch={issueListSearch}
+          setIssueListSearch={setIssueListSearch}
+          issueListMeta={issueListMeta}
         />
       );
 
@@ -345,7 +371,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
 
     case "qa":
       return (
-        <div className="flex-1 overflow-auto bg-surface-sunken relative custom-scrollbar p-6">
+        <div className="flex-1 overflow-auto bg-surface-sunken relative custom-scrollbar p-6 mobile-nav-pb md:pb-6">
           <TestQAPanel
             tasks={tasks || []}
             projectMembers={projectMembers || []}
@@ -369,6 +395,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
           updateTaskField={updateTaskField}
           setSelectedTaskForDetail={setSelectedTaskForDetail}
           setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+          currentUser={currentUserProfile || currentUser}
         />
       );
 

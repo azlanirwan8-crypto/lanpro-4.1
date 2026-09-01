@@ -17,7 +17,7 @@ export interface Attachment {
 export interface LinkedTask {
   id: string;
   targetTaskId: string;
-  relationType: 'blocks' | 'is_blocked_by' | 'relates_to' | 'clones' | 'is_cloned_by';
+  relationType: "blocks" | "is_blocked_by" | "relates_to" | "clones" | "is_cloned_by";
   createdAt: any;
 }
 
@@ -37,7 +37,7 @@ export interface Task {
   attachments?: Attachment[];
   linkedTasks?: LinkedTask[];
   status: string;
-  type: 'epic' | 'task' | 'subtask' | 'bug' | 'meeting' | 'document' | 'approval';
+  type: "epic" | "task" | "subtask" | "bug" | "meeting" | "document" | "approval";
   parentId?: string; // ID of the parent task/epic (Epic Link)
   assigneeId?: string;
   assignees?: string[];
@@ -46,6 +46,8 @@ export interface Task {
   priority: string; // Now dynamic from master data
   category?: string;
   release?: string;
+  /** FK ke tabel Milestones — terpisah dari MasterData `release`. */
+  milestoneId?: string | null;
   resolution?: string;
   businessValue?: string;
   projectRisk?: string;
@@ -84,7 +86,7 @@ export interface AuditLog {
   id: string;
   userId: string;
   projectId: string | null;
-  actionType: 'CREATE' | 'UPDATE' | 'DELETE';
+  actionType: "CREATE" | "UPDATE" | "DELETE";
   entityName: string;
   entityId: string;
   oldValues: any;

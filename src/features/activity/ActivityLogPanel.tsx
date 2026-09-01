@@ -168,155 +168,197 @@ export const ActivityLogPanel = ({
               {t("activityLog.empty")}
             </div>
           ) : (
-            <div className="overflow-x-auto min-h-[500px]">
-              <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
-                <thead className="bg-surface">
-                  <tr>
-                    <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle whitespace-nowrap">
-                      {t("activityLog.timestamp")}
-                    </th>
-                    <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle">
-                      {t("activityLog.eventSignature")}
-                    </th>
-                    <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle">
-                      {t("activityLog.subjectActor")}
-                    </th>
-                    <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle text-right">
-                      {t("activityLog.auditTrailId")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border-faint">
-                  {filteredLogs.map((log) => {
-                    const actor = getActor(log);
-                    return (
-                      <tr
-                        key={log.id}
-                        className="hover:bg-surface-sunken border-b border-border-faint transition-colors group cursor-default"
-                      >
-                        <td className="px-8 py-5 whitespace-nowrap align-top">
-                          <div className="text-sm font-medium text-content-strong tabular-nums tracking-tight">
-                            {safeFormat(log.createdAt, "MMM dd, yyyy")}
-                          </div>
-                          <div className="text-xs sm:text-[10px] font-normal text-content-subtle tabular-nums uppercase mt-1 tracking-widest">
-                            {safeFormat(log.createdAt, "HH:mm:ss.SSS")}
-                          </div>
-                        </td>
-                        <td className="px-8 py-5 w-[45%]">
-                          <div className="flex items-start gap-4">
-                            {(() => {
-                              const a = (log.action || "").toLowerCase();
-                              let Icon = Activity;
-                              let colorClass =
-                                "text-content-muted bg-surface-sunken border-border-subtle group-hover:bg-surface-muted group-hover:text-content-body group-hover:border-border-subtle";
-                              let badgeClass =
-                                "bg-surface-muted text-content-secondary border border-border-subtle";
-                              if (a.includes("create") || a.includes("add")) {
-                                Icon = PlusSquare;
-                                colorClass =
-                                  "text-blue-600 bg-blue-500/10 border-blue-500/30 group-hover:bg-blue-500/15 group-hover:text-blue-700";
-                                badgeClass = "bg-blue-500/15 text-blue-700 border-blue-500/30";
-                              } else if (a.includes("delete") || a.includes("remove")) {
-                                Icon = Trash2;
-                                colorClass =
-                                  "text-rose-600 bg-rose-500/10 border-rose-500/30 group-hover:bg-rose-500/15 group-hover:text-rose-700";
-                                badgeClass = "bg-rose-500/15 text-rose-700 border-rose-500/30";
-                              } else if (a.includes("update") || a.includes("edit")) {
-                                Icon = Edit3;
-                                colorClass =
-                                  "text-amber-600 bg-amber-500/10 border-amber-500/30 group-hover:bg-amber-500/15 group-hover:text-amber-700";
-                                badgeClass = "bg-amber-500/15 text-amber-700 border-amber-500/30";
-                              } else if (
-                                a.includes("invite") ||
-                                a.includes("team") ||
-                                a.includes("user")
-                              ) {
-                                Icon = Users;
-                                colorClass =
-                                  "text-emerald-600 bg-emerald-500/10 border-emerald-500/30 group-hover:bg-emerald-500/15 group-hover:text-emerald-700";
-                                badgeClass =
-                                  "bg-emerald-500/15 text-emerald-700 border-emerald-500/30";
-                              } else {
-                                Icon = Zap;
-                                colorClass =
-                                  "text-indigo-600 bg-indigo-500/10 border-indigo-500/30 group-hover:bg-indigo-500/15 group-hover:text-indigo-700";
-                                badgeClass =
-                                  "bg-indigo-500/15 text-indigo-700 border-indigo-500/30";
-                              }
+            <>
+              <div className="hidden sm:block overflow-x-auto min-h-[500px]">
+                <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
+                  <thead className="bg-surface">
+                    <tr>
+                      <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle whitespace-nowrap">
+                        {t("activityLog.timestamp")}
+                      </th>
+                      <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle">
+                        {t("activityLog.eventSignature")}
+                      </th>
+                      <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle">
+                        {t("activityLog.subjectActor")}
+                      </th>
+                      <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle text-right">
+                        {t("activityLog.auditTrailId")}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-faint">
+                    {filteredLogs.map((log) => {
+                      const actor = getActor(log);
+                      return (
+                        <tr
+                          key={log.id}
+                          className="hover:bg-surface-sunken border-b border-border-faint transition-colors group cursor-default"
+                        >
+                          <td className="px-8 py-5 whitespace-nowrap align-top">
+                            <div className="text-sm font-medium text-content-strong tabular-nums tracking-tight">
+                              {safeFormat(log.createdAt, "MMM dd, yyyy")}
+                            </div>
+                            <div className="text-xs sm:text-[10px] font-normal text-content-subtle tabular-nums uppercase mt-1 tracking-widest">
+                              {safeFormat(log.createdAt, "HH:mm:ss.SSS")}
+                            </div>
+                          </td>
+                          <td className="px-8 py-5 w-[45%]">
+                            <div className="flex items-start gap-4">
+                              {(() => {
+                                const a = (log.action || "").toLowerCase();
+                                let Icon = Activity;
+                                let colorClass =
+                                  "text-content-muted bg-surface-sunken border-border-subtle group-hover:bg-surface-muted group-hover:text-content-body group-hover:border-border-subtle";
+                                let badgeClass =
+                                  "bg-surface-muted text-content-secondary border border-border-subtle";
+                                if (a.includes("create") || a.includes("add")) {
+                                  Icon = PlusSquare;
+                                  colorClass =
+                                    "text-blue-600 bg-blue-500/10 border-blue-500/30 group-hover:bg-blue-500/15 group-hover:text-blue-700";
+                                  badgeClass = "bg-blue-500/15 text-blue-700 border-blue-500/30";
+                                } else if (a.includes("delete") || a.includes("remove")) {
+                                  Icon = Trash2;
+                                  colorClass =
+                                    "text-rose-600 bg-rose-500/10 border-rose-500/30 group-hover:bg-rose-500/15 group-hover:text-rose-700";
+                                  badgeClass = "bg-rose-500/15 text-rose-700 border-rose-500/30";
+                                } else if (a.includes("update") || a.includes("edit")) {
+                                  Icon = Edit3;
+                                  colorClass =
+                                    "text-amber-600 bg-amber-500/10 border-amber-500/30 group-hover:bg-amber-500/15 group-hover:text-amber-700";
+                                  badgeClass = "bg-amber-500/15 text-amber-700 border-amber-500/30";
+                                } else if (
+                                  a.includes("invite") ||
+                                  a.includes("team") ||
+                                  a.includes("user")
+                                ) {
+                                  Icon = Users;
+                                  colorClass =
+                                    "text-emerald-600 bg-emerald-500/10 border-emerald-500/30 group-hover:bg-emerald-500/15 group-hover:text-emerald-700";
+                                  badgeClass =
+                                    "bg-emerald-500/15 text-emerald-700 border-emerald-500/30";
+                                } else {
+                                  Icon = Zap;
+                                  colorClass =
+                                    "text-indigo-600 bg-indigo-500/10 border-indigo-500/30 group-hover:bg-indigo-500/15 group-hover:text-indigo-700";
+                                  badgeClass =
+                                    "bg-indigo-500/15 text-indigo-700 border-indigo-500/30";
+                                }
 
-                              return (
-                                <>
-                                  <div
-                                    className={`mt-0.5 w-10 h-10 rounded-[12px] border flex items-center justify-center shrink-0 transition-all ${colorClass}`}
-                                  >
-                                    <Icon className="w-4 h-4" />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 flex-wrap mb-2">
-                                      <span
-                                        className={`text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-[0.15em] uppercase px-2 py-0.5 rounded shadow-soft ${badgeClass}`}
-                                      >
-                                        {log.action?.replace(/_/g, " ") || "ACTION_EXECUTED"}
-                                      </span>
-                                      <span className="text-xs sm:text-[10px] font-medium text-content-subtle capitalize px-1 ring-1 ring-border-subtle rounded-sm bg-surface-sunken">
-                                        {t("activityLog.sourceUi")}
-                                      </span>
+                                return (
+                                  <>
+                                    <div
+                                      className={`mt-0.5 w-10 h-10 rounded-[12px] border flex items-center justify-center shrink-0 transition-all ${colorClass}`}
+                                    >
+                                      <Icon className="w-4 h-4" />
                                     </div>
-                                    <div className="font-mono text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle p-2.5 rounded-lg shadow-inner whitespace-pre-wrap word-break">
-                                      <span className="text-content-subtle select-none mr-2">
-                                        {">"}
-                                      </span>
-                                      {log.details || "No payload details provided."}
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2 flex-wrap mb-2">
+                                        <span
+                                          className={`text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-[0.15em] uppercase px-2 py-0.5 rounded shadow-soft ${badgeClass}`}
+                                        >
+                                          {log.action?.replace(/_/g, " ") || "ACTION_EXECUTED"}
+                                        </span>
+                                        <span className="text-xs sm:text-[10px] font-medium text-content-subtle capitalize px-1 ring-1 ring-border-subtle rounded-sm bg-surface-sunken">
+                                          {t("activityLog.sourceUi")}
+                                        </span>
+                                      </div>
+                                      <div className="font-mono text-xs font-medium text-content-body bg-surface-sunken border border-border-subtle p-2.5 rounded-lg shadow-inner whitespace-pre-wrap word-break">
+                                        <span className="text-content-subtle select-none mr-2">
+                                          {">"}
+                                        </span>
+                                        {log.details || "No payload details provided."}
+                                      </div>
                                     </div>
-                                  </div>
-                                </>
-                              );
-                            })()}
-                          </div>
-                        </td>
-                        <td className="px-8 py-5 min-w-[200px]">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 shrink-0 shadow-inner border-2 border-surface rounded-full bg-surface-muted flex items-center justify-center relative ring-1 ring-border-subtle">
-                              <UserAvatar
-                                uid={log.userId}
-                                members={projectMembers}
-                                className="w-full h-full text-xs font-medium"
-                              />
-                              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-surface rounded-full"></div>
+                                  </>
+                                );
+                              })()}
                             </div>
-                            <div className="flex flex-col min-w-0">
-                              <span className="text-[13px] font-medium text-content-strong truncate">
-                                {actor?.displayName}
-                              </span>
-                              <span className="text-xs sm:text-[10px] font-medium text-content-muted truncate tracking-wide">
-                                {actor?.email}
-                              </span>
+                          </td>
+                          <td className="px-8 py-5 min-w-[200px]">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 shrink-0 shadow-inner border-2 border-surface rounded-full bg-surface-muted flex items-center justify-center relative ring-1 ring-border-subtle">
+                                <UserAvatar
+                                  uid={log.userId}
+                                  members={projectMembers}
+                                  className="w-full h-full text-xs font-medium"
+                                />
+                                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-surface rounded-full"></div>
+                              </div>
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-[13px] font-medium text-content-strong truncate">
+                                  {actor?.displayName}
+                                </span>
+                                <span className="text-xs sm:text-[10px] font-medium text-content-muted truncate tracking-wide">
+                                  {actor?.email}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-8 py-5 text-right w-48 align-middle">
-                          <div className="flex flex-col items-end gap-1.5">
-                            <div
-                              className="font-mono text-xs sm:text-[11px] sm:text-[9px] bg-surface-muted text-content-muted px-2 py-1 rounded border border-border-subtle uppercase font-normal tracking-widest select-all opacity-70 group-hover:opacity-100 transition-opacity"
-                              title={log.id}
-                            >
-                              ...{log.id?.substring((log.id?.length || 0) - 8)}
+                          </td>
+                          <td className="px-8 py-5 text-right w-48 align-middle">
+                            <div className="flex flex-col items-end gap-1.5">
+                              <div
+                                className="font-mono text-xs sm:text-[11px] sm:text-[9px] bg-surface-muted text-content-muted px-2 py-1 rounded border border-border-subtle uppercase font-normal tracking-widest select-all opacity-70 group-hover:opacity-100 transition-opacity"
+                                title={log.id}
+                              >
+                                ...{log.id?.substring((log.id?.length || 0) - 8)}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => setInspectedLog(log)}
+                                className="text-xs sm:text-[10px] font-normal text-indigo-600 hover:text-indigo-800 uppercase tracking-widest flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                              >
+                                {t("activityLog.inspect")} <ChevronRight className="w-3 h-3" />
+                              </button>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => setInspectedLog(log)}
-                              className="text-xs sm:text-[10px] font-normal text-indigo-600 hover:text-indigo-800 uppercase tracking-widest flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
-                            >
-                              {t("activityLog.inspect")} <ChevronRight className="w-3 h-3" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </ResponsiveTable>
-            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </ResponsiveTable>
+              </div>
+
+              {/* #309 — kartu log di bawah sm */}
+              <div className="sm:hidden divide-y divide-border-subtle/60 min-h-[200px]">
+                {filteredLogs.map((log) => {
+                  const actor = getActor(log);
+                  return (
+                    <button
+                      type="button"
+                      key={log.id}
+                      onClick={() => setInspectedLog(log)}
+                      className="w-full text-left p-3.5 flex flex-col gap-2 bg-surface hover:bg-surface-sunken/60 active:bg-surface-sunken cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] font-medium tracking-wider uppercase px-2 py-0.5 rounded bg-surface-muted text-content-secondary border border-border-subtle truncate max-w-[70%]">
+                          {log.action?.replace(/_/g, " ") || "ACTION"}
+                        </span>
+                        <span className="text-[10px] text-content-subtle tabular-nums shrink-0">
+                          {safeFormat(log.createdAt, "MMM dd HH:mm")}
+                        </span>
+                      </div>
+                      <p className="text-xs text-content-body line-clamp-2 font-mono">
+                        {log.details || "—"}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 shrink-0 rounded-full bg-surface-muted overflow-hidden ring-1 ring-border-subtle">
+                          <UserAvatar
+                            uid={log.userId}
+                            members={projectMembers}
+                            className="w-full h-full text-[10px] font-medium"
+                          />
+                        </div>
+                        <span className="text-xs font-medium text-content-strong truncate">
+                          {actor?.displayName}
+                        </span>
+                        <ChevronRight className="w-3.5 h-3.5 text-content-subtle ml-auto shrink-0" />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       </div>

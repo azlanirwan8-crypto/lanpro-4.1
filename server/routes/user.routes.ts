@@ -13,7 +13,9 @@ import {
   extractStoredFilename,
   AVATAR_ALLOWED_EXT,
 } from "../helpers/avatarValue";
-import { validasiBody } from "../middleware/validate";
+import { validasiBody, validasiQuery } from "../middleware/validate";
+import { listSearchQuerySchema } from "../schemas/pagination.schema";
+import { respondWithProjectList } from "../lib/listResponse";
 import { updateUserSchema, updateProfileSchema } from "../schemas/user.schema";
 import { AuthenticatedRequest } from "../types/express";
 import { userRepository } from "../repositories/user.repository";
@@ -222,20 +224,19 @@ router.get("/api/presence/sync", authenticateJWT, async (req: any, res) => {
 });
 
 // Users API
-router.get("/api/users", async (req: any, res) => {
+router.get("/api/users", validasiQuery(listSearchQuerySchema), async (req: any, res) => {
   try {
-    // Item #162 — `email`, `phone`, dan `permissions` hanya untuk Global
-    // Admin. Pemeriksaannya SAMA PERSIS dengan `verifyGlobalAdmin`
-    // (`req.user.role === "admin"`, diisi `authenticateJWT` dari JWT yang
-    // ditandatangani, jadi tidak bisa dipalsukan klien) supaya tidak lahir
-    // kosakata otorisasi kedua di repo ini. Middleware-nya sendiri tidak
-    // bisa dipakai di sini: ia MENOLAK non-admin dengan 403, sedangkan rute
-    // ini memang harus tetap melayani mereka — cuma dengan isi lebih sedikit.
-    const rows =
-      req.user?.role === "admin"
-        ? await userRepository.findAll()
-        : await userRepository.findAllRingkas();
-    res.json({ status: "success", data: rows });
+    const search = req.query.search as string | undefined;
+    const isAdmin = req.user?.role === "admin";
+    await respondWithProjectList(
+      res,
+      req.query as Record<string, unknown>,
+      () => (isAdmin ? userRepository.findAll() : userRepository.findAllRingkas()),
+      (pagination) =>
+        isAdmin
+          ? userRepository.findAllPaged(pagination, search)
+          : userRepository.findAllRingkasPaged(pagination, search)
+    );
   } catch (error: any) {
     console.error("LOG ANOMALI CRITICAL: GET /api/users error:", error);
     res.status(500).json({

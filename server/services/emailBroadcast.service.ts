@@ -22,7 +22,7 @@
 
 import cron from "node-cron";
 import dbPool from "../../src/lib/db";
-import { getBroadcastConfig } from "./broadcastConfig.service";
+import { getBroadcastConfig, claimBroadcastFire } from "./broadcastConfig.service";
 import { kirimEmailTaskDigest, kirimEmailLatarBelakang } from "./email.service";
 import type { TaskDigestItem } from "./email.service";
 
@@ -149,36 +149,39 @@ export async function kirimBroadcastTaskEmail(recipientIds?: string[]): Promise<
 }
 
 /**
- * Kunci hari+jam terakhir yang sudah dipicu.
- *
- * Cron bisa terpicu lebih dari sekali pada menit yang sama di beberapa
- * runtime; tanpa kunci ini penerima bisa mendapat email dobel, dan email
- * dobel adalah alasan orang berhenti memercayai kiriman otomatis.
+ * Kunci hari+jam terakhir — digantikan claimBroadcastFire di DB (#304).
+ * Dipertahankan hanya sebagai cadangan cepat di proses lokal node-cron.
  */
 let kunciTerakhir: string | null = null;
+
+/** Satu tick penjadwal — dipanggil node-cron lokal atau Vercel Cron (#304). */
+export async function tickEmailBroadcastScheduler(): Promise<void> {
+  const config = await getBroadcastConfig("email");
+
+  if (!config.recipientIds || config.recipientIds.length === 0) return;
+
+  const { day, time } = jadwalSekarangWIB();
+  if (!config.scheduleDays.includes(day) || config.scheduleTime !== time) return;
+
+  const kunci = `${day}-${time}`;
+  if (kunciTerakhir === kunci) return;
+
+  const claimed = await claimBroadcastFire("email", kunci);
+  if (!claimed) return;
+  kunciTerakhir = kunci;
+
+  console.log(`[EMAIL-BROADCAST] Menjalankan broadcast task (hari ${day}, ${time} WIB)...`);
+  const hasil = await kirimBroadcastTaskEmail(config.recipientIds);
+  console.log(
+    `[EMAIL-BROADCAST] ${hasil.emailDikirim} email dikirim dari ${hasil.penerimaDiperiksa} penerima diperiksa.`
+  );
+}
 
 export const initEmailBroadcastScheduler = () => {
   cron.schedule("* * * * *", async () => {
     try {
-      const config = await getBroadcastConfig("email");
-
-      // Belum ada penerima dipilih berarti fitur ini belum dinyalakan dari UI.
-      if (!config.recipientIds || config.recipientIds.length === 0) return;
-
-      const { day, time } = jadwalSekarangWIB();
-      if (!config.scheduleDays.includes(day) || config.scheduleTime !== time) return;
-
-      const kunci = `${day}-${time}`;
-      if (kunciTerakhir === kunci) return;
-      kunciTerakhir = kunci;
-
-      console.log(`[EMAIL-BROADCAST] Menjalankan broadcast task (hari ${day}, ${time} WIB)...`);
-      const hasil = await kirimBroadcastTaskEmail(config.recipientIds);
-      console.log(
-        `[EMAIL-BROADCAST] ${hasil.emailDikirim} email dikirim dari ${hasil.penerimaDiperiksa} penerima diperiksa.`
-      );
+      await tickEmailBroadcastScheduler();
     } catch (err: any) {
-      // Kegagalan satu jadwal tidak boleh mematikan jadwal berikutnya.
       console.error("[EMAIL-BROADCAST] Broadcast terjadwal gagal:", err?.message);
     }
   });

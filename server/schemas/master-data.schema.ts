@@ -13,6 +13,7 @@ export const createMasterDataSchema = z.object({
   role_type: z.string().max(100).optional().nullable(),
   roleType: z.string().max(100).optional().nullable(),
   id: z.string().max(100).optional(),
+  isTerminal: z.boolean().optional().nullable(),
 });
 
 export const updateMasterDataSchema = z.object({
@@ -26,4 +27,5 @@ export const updateMasterDataSchema = z.object({
   dropdownOptions: z.any().optional(),
   role_type: z.string().max(100).optional().nullable(),
   roleType: z.string().max(100).optional().nullable(),
+  isTerminal: z.boolean().optional().nullable(),
 });

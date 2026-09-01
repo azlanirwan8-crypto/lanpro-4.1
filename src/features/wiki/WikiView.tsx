@@ -40,11 +40,12 @@ import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
 import { WikiMobileCardView } from "./components/WikiMobileCardView";
 import { hasPermission } from "../../lib/permissions";
+import { useMobileAction } from "../../contexts/MobileActionContext";
+import { loadProjectDocuments, peekProjectDocuments } from "../../lib/moduleDataCache";
 
 import type { DocumentModel, WikiViewProps } from "./types";
 import {
   resolveUserId,
-  fetchDocuments as fetchDocumentsApi,
   createDocument as createDocumentApi,
   updateDocument as updateDocumentApi,
   deleteDocument as deleteDocumentApi,
@@ -61,7 +62,11 @@ export const WikiView: React.FC<WikiViewProps> = ({
 }) => {
   const { t } = useTranslation();
   // Core states for storing documents and loading feedback
-  const [documents, setDocuments] = useState<DocumentModel[]>([]);
+  const [documents, setDocuments] = useState<DocumentModel[]>(() => {
+    const effectiveUserId = resolveUserId(currentUser);
+    return peekProjectDocuments<DocumentModel>(projectId, effectiveUserId) ?? [];
+  });
+  const [totalDocuments, setTotalDocuments] = useState(0);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
@@ -139,6 +144,8 @@ export const WikiView: React.FC<WikiViewProps> = ({
     const isOwner = isAuthor(doc);
     return hasPermission(userRole, "wiki", "update", isOwner, permissions);
   };
+
+  const { registerAction, unregisterAction } = useMobileAction();
 
   // Split-Pane & Preview Interactive States
   const [isFullscreenPreview, setIsFullscreenPreview] = useState(false);
@@ -240,7 +247,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
       const data = await updateDocumentApi(projectId, effectiveUserId, activeDocObj.id, payload);
       if (data.status === "success") {
         showSuccessAlert(t("alerts.successTitle"), t("alerts.specUploaded"));
-        await fetchDocuments();
+        await fetchDocuments({ force: true, silent: true });
       } else {
         toast.error(data.message || "Gagal mengunggah berkas");
       }
@@ -373,7 +380,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
       const data = await updateDocumentApi(projectId, effectiveUserId, activeDoc.id, payload);
       if (data.status === "success") {
         showSuccessAlert(t("alerts.successTitle"), t("alerts.noteSaved"));
-        await fetchDocuments();
+        await fetchDocuments({ force: true, silent: true });
         setIsEditingNotes(false);
       } else {
         toast.error(data.message || "Gagal menyimpan catatan");
@@ -386,25 +393,51 @@ export const WikiView: React.FC<WikiViewProps> = ({
   };
 
   // Fetch documents from database
-  const fetchDocuments = async () => {
+  const fetchDocuments = async (opts?: { force?: boolean; silent?: boolean }) => {
     const effectiveUserId = resolveUserId(currentUser);
+    const listOpts = {
+      page: currentPage,
+      limit: itemsPerPage,
+      search,
+      type: selectedCategory !== "Semua" ? selectedCategory : undefined,
+    };
+    const cached = peekProjectDocuments<DocumentModel>(projectId, effectiveUserId);
+    if (cached && !opts?.force && currentPage === 1 && !search && selectedCategory === "Semua") {
+      setDocuments(cached);
+    }
+
     try {
-      const data = await fetchDocumentsApi(projectId, effectiveUserId);
-      if (data.status === "success") {
-        setDocuments(data.data);
-      }
+      const result = await loadProjectDocuments(projectId, effectiveUserId, {
+        ...listOpts,
+        force: opts?.force,
+      });
+      setDocuments(result.data as DocumentModel[]);
+      setTotalDocuments(result.meta?.total ?? result.data.length);
     } catch (e: any) {
       console.error("Gagal memuat dokumen:", e);
+      if (!cached && !opts?.silent) {
+        toast.error(e.message || "Gagal memuat dokumen");
+      }
     }
   };
 
   useEffect(() => {
-    fetchDocuments();
-    // Reset selection states on project switch
-    setActiveDocId(null);
-    setShowFormModal(false);
-    setMobileActiveView("list");
-  }, [projectId]);
+    setCurrentPage(1);
+  }, [search, selectedCategory, projectId]);
+
+  useEffect(() => {
+    const effectiveUserId = resolveUserId(currentUser);
+    const cached = peekProjectDocuments<DocumentModel>(projectId, effectiveUserId);
+    if (cached && currentPage === 1 && !search && selectedCategory === "Semua") {
+      setDocuments(cached);
+    }
+    fetchDocuments({ silent: true });
+    if (currentPage === 1 && !search) {
+      setActiveDocId(null);
+      setShowFormModal(false);
+      setMobileActiveView("list");
+    }
+  }, [projectId, currentPage, itemsPerPage, search, selectedCategory]);
 
   // Grid layout catalog defaults to showing all documents at once
 
@@ -497,22 +530,11 @@ export const WikiView: React.FC<WikiViewProps> = ({
     return Array.from(set);
   }, [documentTypes]);
 
-  // Filter documents based on search keyword & selected category
-  const filteredDocs = useMemo(() => {
-    return documents.filter((d) => {
-      const matchSearch =
-        d.title.toLowerCase().includes(search.toLowerCase()) ||
-        (d.description && d.description.toLowerCase().includes(search.toLowerCase()));
-      const matchCategory = selectedCategory === "Semua" || d.type === selectedCategory;
-      return matchSearch && matchCategory;
-    });
-  }, [documents, search, selectedCategory]);
-
-  const totalItems = filteredDocs.length;
+  // Server sudah memfilter search + type; tampilkan halaman apa adanya
+  const filteredDocs = documents;
+  const totalItems = totalDocuments || documents.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentDocs = filteredDocs.slice(indexOfFirstItem, indexOfLastItem);
+  const currentDocs = filteredDocs;
 
   // Active viewed document computed object
   const activeDoc = useMemo(() => {
@@ -531,6 +553,20 @@ export const WikiView: React.FC<WikiViewProps> = ({
     setShouldRemoveFile(false);
     setShowFormModal(true);
   };
+
+  useEffect(() => {
+    if (canCreate) {
+      registerAction({
+        id: "wiki-add-doc",
+        label: t("wiki.addDocument"),
+        onClick: handleCreateNew,
+        canCreate: canCreate,
+      });
+    } else {
+      unregisterAction("wiki-add-doc");
+    }
+    return () => unregisterAction("wiki-add-doc");
+  }, [canCreate, handleCreateNew, registerAction, unregisterAction, t]);
 
   // Trigger modal for Editing existing documentation (Pre-filled)
   const handleEditClick = (doc: DocumentModel, e: React.MouseEvent) => {
@@ -555,25 +591,25 @@ export const WikiView: React.FC<WikiViewProps> = ({
     );
     if (!isConfirmed) return;
 
-    setLoading(true);
+    if (!isConfirmed) return;
+
     const effectiveUserId = resolveUserId(currentUser);
+    setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+    if (activeDocId === doc.id) {
+      const remaining = documents.filter((d) => d.id !== doc.id);
+      setActiveDocId(remaining.length > 0 ? remaining[0].id : null);
+      setMobileActiveView("list");
+    }
+    toast.success(t("alerts.docDeleted"));
+
     try {
       const data = await deleteDocumentApi(projectId, effectiveUserId, doc.id);
-      if (data.status === "success") {
-        showSuccessAlert(t("alerts.successTitle"), t("alerts.docDeleted"));
-        if (activeDocId === doc.id) {
-          const remaining = documents.filter((d) => d.id !== doc.id);
-          setActiveDocId(remaining.length > 0 ? remaining[0].id : null);
-          setMobileActiveView("list");
-        }
-        await fetchDocuments();
-      } else {
-        toast.error(data.message || "Gagal menghapus dokumen");
+      if (data.status !== "success") {
+        throw new Error(data.message || "Gagal menghapus dokumen");
       }
     } catch (error: any) {
+      await fetchDocuments({ force: true, silent: true });
       toast.error(error.message || "Terjadi kesalahan saat menghapus");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -643,27 +679,71 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
       const effectiveUserId = resolveUserId(currentUser);
       if (isNew) {
-        const data = await createDocumentApi(projectId, effectiveUserId, payload);
-        if (data.status === "success") {
-          showSuccessAlert(t("alerts.successTitle"), t("alerts.docCreated"));
-          setShowFormModal(false);
-          setActiveDocId(null);
-          setCurrentPage(1);
-          await fetchDocuments();
-        } else {
-          toast.error(data.message || "Gagal menyimpan dokumen");
+        const tempId = `temp-doc-${crypto.randomUUID()}`;
+        const optimistic: DocumentModel = {
+          id: tempId,
+          projectId,
+          title: editTitle.trim(),
+          description: editDescription.trim(),
+          type: editType,
+          link: editLink.trim(),
+          createdBy: payload.createdBy,
+          fileName: fileName || "",
+          fileType: fileTypeStr || "",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        setDocuments((prev) => [optimistic, ...prev]);
+        setShowFormModal(false);
+        setActiveDocId(null);
+        setCurrentPage(1);
+        setLoading(false);
+        toast.success(t("alerts.docCreated"));
+
+        try {
+          const data = await createDocumentApi(projectId, effectiveUserId, payload);
+          if (data.status === "success" && data.data?.id) {
+            setDocuments((prev) =>
+              prev.map((d) => (d.id === tempId ? { ...d, ...data.data, id: data.data.id } : d))
+            );
+          } else if (data.status !== "success") {
+            throw new Error(data.message || "Gagal menyimpan dokumen");
+          }
+        } catch (e: any) {
+          setDocuments((prev) => prev.filter((d) => d.id !== tempId));
+          toast.error(e.message || "Terjadi kesalahan sistem saat menyimpan");
         }
+        return;
       } else if (editId) {
-        const data = await updateDocumentApi(projectId, effectiveUserId, editId, payload);
-        if (data.status === "success") {
-          showSuccessAlert(t("alerts.successTitle"), t("alerts.docUpdated"));
-          setShowFormModal(false);
-          setActiveDocId(null);
-          setCurrentPage(1);
-          await fetchDocuments();
-        } else {
-          toast.error(data.message || "Gagal mengupdate dokumen");
+        const patch = {
+          title: editTitle.trim(),
+          description: editDescription.trim(),
+          type: editType,
+          link: editLink.trim(),
+          ...(editFile ? { fileName, fileType: fileTypeStr } : {}),
+        };
+        setDocuments((prev) =>
+          prev.map((d) =>
+            d.id === editId ? { ...d, ...patch, updatedAt: new Date().toISOString() } : d
+          )
+        );
+        setShowFormModal(false);
+        setActiveDocId(null);
+        setCurrentPage(1);
+        setLoading(false);
+        toast.success(t("alerts.docUpdated"));
+
+        try {
+          const data = await updateDocumentApi(projectId, effectiveUserId, editId, payload);
+          if (data.status !== "success") {
+            throw new Error(data.message || "Gagal mengupdate dokumen");
+          }
+        } catch (e: any) {
+          await fetchDocuments({ force: true, silent: true });
+          toast.error(e.message || "Terjadi kesalahan sistem saat menyimpan");
         }
+        return;
       }
     } catch (e: any) {
       toast.error(e.message || "Terjadi kesalahan sistem saat menyimpan");
@@ -683,7 +763,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
         link.href = data.data.fileData;
         link.download = fName || "Document";
         link.click();
-        fetchDocuments(); // Update download statistics
+        fetchDocuments({ force: true, silent: true }); // Update download statistics
       } else {
         toast.error(t("toast.fileNotFoundServer"));
       }

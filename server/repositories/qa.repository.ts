@@ -1,5 +1,6 @@
 import db from "../../src/lib/db";
 import crypto from "crypto";
+import { type PaginationParams } from "../lib/pagination";
 
 /**
  * Batas atas test case yang dimuat sekaligus (#284).
@@ -218,57 +219,105 @@ export class QaRepository {
     }
   }
 
-  async findTestCasesByProjectId(projectId: string): Promise<any[]> {
+  async findTestCasesByProjectId(
+    projectId: string,
+    search?: string,
+    suiteId?: string
+  ): Promise<any[]> {
     const connection = await db.getConnection();
     try {
+      const { where, params } = this.buildTestCaseWhere(projectId, search, suiteId);
       const [rows]: any = await connection.query(
-        `SELECT * FROM QATestCases WHERE projectId = ?
+        `SELECT * FROM QATestCases WHERE ${where}
           ORDER BY rowNum ASC, id ASC LIMIT ${BATAS_TEST_CASE}`,
-        [projectId]
+        params
       );
-
-      const safeParse = (str: any, fallback = []) => {
-        if (typeof str !== "string") return str || fallback;
-        try {
-          return JSON.parse(str);
-        } catch {
-          return fallback;
-        }
-      };
-
-      return (rows || []).map((row: any) => ({
-        id: row.id,
-        projectId: row.projectId,
-        title: row.judul,
-        judul: row.judul,
-        steps: safeParse(row.steps, []),
-        expectedResult: row.expected,
-        expected: row.expected,
-        status: row.status,
-        priority: row.prioritas,
-        prioritas: row.prioritas,
-        phase: row.tipeTesting,
-        tipeTesting: row.tipeTesting,
-        suiteId: row.suiteId,
-        rowNum: row.rowNum,
-        modulId: row.modulId,
-        history: safeParse(row.history, []),
-        comment: row.comment,
-        evidenceUrl: row.evidenceUrl,
-        evidenceType: row.evidenceType,
-        evidenceName: row.evidenceName,
-        linkedBugKey: row.linkedBugKey,
-        commentsList: safeParse(row.commentsList, []),
-        evidences: safeParse(row.evidences, []),
-        assignedTo: row.assignedTo,
-        activeTesterId: row.activeTesterId,
-        activeTesterName: row.activeTesterName,
-        lockedAt: row.lockedAt,
-        createdAt: row.createdAt,
-      }));
+      return this.mapTestCaseRows(rows);
     } finally {
       connection.release();
     }
+  }
+
+  async findTestCasesByProjectIdPaged(
+    projectId: string,
+    pagination: PaginationParams,
+    search?: string,
+    suiteId?: string
+  ): Promise<{ items: any[]; total: number }> {
+    const connection = await db.getConnection();
+    try {
+      const { where, params } = this.buildTestCaseWhere(projectId, search, suiteId);
+      const [countRows]: any = await connection.query(
+        `SELECT COUNT(*)::int AS total FROM QATestCases WHERE ${where}`,
+        params
+      );
+      const total = countRows?.[0]?.total ?? 0;
+      const [rows]: any = await connection.query(
+        `SELECT * FROM QATestCases WHERE ${where}
+          ORDER BY rowNum ASC, id ASC LIMIT ? OFFSET ?`,
+        [...params, pagination.limit, pagination.offset]
+      );
+      return { items: this.mapTestCaseRows(rows), total };
+    } finally {
+      connection.release();
+    }
+  }
+
+  private buildTestCaseWhere(projectId: string, search?: string, suiteId?: string) {
+    const params: unknown[] = [projectId];
+    let where = "projectId = ?";
+    if (suiteId?.trim()) {
+      where += " AND (suiteId = ? OR modulId = ?)";
+      params.push(suiteId.trim(), suiteId.trim());
+    }
+    if (search?.trim()) {
+      where += " AND (LOWER(COALESCE(judul, '')) LIKE ? OR LOWER(COALESCE(caseId, '')) LIKE ?)";
+      const term = `%${search.trim().toLowerCase()}%`;
+      params.push(term, term);
+    }
+    return { where, params };
+  }
+
+  private mapTestCaseRows(rows: any[]): any[] {
+    const safeParse = (str: any, fallback = []) => {
+      if (typeof str !== "string") return str || fallback;
+      try {
+        return JSON.parse(str);
+      } catch {
+        return fallback;
+      }
+    };
+
+    return (rows || []).map((row: any) => ({
+      id: row.id,
+      projectId: row.projectId,
+      title: row.judul,
+      judul: row.judul,
+      steps: safeParse(row.steps, []),
+      expectedResult: row.expected,
+      expected: row.expected,
+      status: row.status,
+      priority: row.prioritas,
+      prioritas: row.prioritas,
+      phase: row.tipeTesting,
+      tipeTesting: row.tipeTesting,
+      suiteId: row.suiteId,
+      rowNum: row.rowNum,
+      modulId: row.modulId,
+      history: safeParse(row.history, []),
+      comment: row.comment,
+      evidenceUrl: row.evidenceUrl,
+      evidenceType: row.evidenceType,
+      evidenceName: row.evidenceName,
+      linkedBugKey: row.linkedBugKey,
+      commentsList: safeParse(row.commentsList, []),
+      evidences: safeParse(row.evidences, []),
+      assignedTo: row.assignedTo,
+      activeTesterId: row.activeTesterId,
+      activeTesterName: row.activeTesterName,
+      lockedAt: row.lockedAt,
+      createdAt: row.createdAt,
+    }));
   }
 
   async createTestCase(tc: QATestCaseEntity): Promise<void> {
@@ -800,6 +849,9 @@ export class QaRepository {
   }> {
     const connection = await db.getConnection();
     try {
+      const { muatKunciTerminal, sqlStatusBukanTerminal } = await import("../lib/statusSelesai");
+      const kunci = await muatKunciTerminal();
+      const predikat = sqlStatusBukanTerminal("status", kunci);
       const [meetingsPromise, documentsPromise, tasksPromise]: any = await Promise.all([
         connection.query("SELECT * FROM Meetings WHERE projectId = ? ORDER BY createdAt DESC", [
           projectId,
@@ -808,7 +860,7 @@ export class QaRepository {
           projectId,
         ]),
         connection.query(
-          "SELECT * FROM Tasks WHERE projectId = ? AND LOWER(status) NOT IN ('done', 'completed', 'closed') ORDER BY createdAt DESC",
+          `SELECT * FROM Tasks WHERE projectId = ? AND ${predikat} ORDER BY createdAt DESC`,
           [projectId]
         ),
       ]);

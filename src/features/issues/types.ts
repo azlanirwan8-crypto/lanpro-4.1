@@ -20,7 +20,22 @@ export interface IssueListViewProps {
   setIsTaskDetailModalOpen: (open: boolean) => void;
   setIsNewTaskModalOpen?: (open: boolean) => void;
   selectedProject: any;
-  fetchTasks?: () => void;
+  fetchTasks?: (opts?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    rootsOnly?: boolean;
+  }) => void | Promise<void>;
+  issueListPage?: number;
+  setIssueListPage?: (page: number) => void;
+  issueListSearch?: string;
+  setIssueListSearch?: (search: string) => void;
+  issueListMeta?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  } | null;
 }
 
 export interface TaskDetailModalProps {

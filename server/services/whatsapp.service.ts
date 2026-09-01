@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import dbPool from "../../src/lib/db";
-import { getBroadcastConfig } from "./broadcastConfig.service";
+import { getBroadcastConfig, claimBroadcastFire } from "./broadcastConfig.service";
 import { ambilAppUrl } from "./email.service";
 import { ambilWhatsappToken } from "./integrationSettings.service";
 
@@ -48,23 +48,27 @@ function jadwalSekarangWIB(): { day: string; time: string } {
 
 let lastTriggeredKey = "";
 
-/**
- * Menyalakan penjadwal digest broadcast WhatsApp (Item #193).
- *
- * Fungsi ini sebelumnya di-import di `server.ts` tetapi TIDAK PERNAH DIPANGGIL,
- * sehingga digest harian belum pernah menyala sekali pun sejak ditulis. Hanya
- * pemicu manual yang berfungsi.
- *
- * Jadwal (hari + jam) dan daftar penerima TIDAK LAGI hardcode — keduanya
- * dibaca dari `BroadcastConfig` (diatur lewat panel Settings → WhatsApp
- * gateway) setiap menit. Cron sendiri berjalan tiap menit hanya untuk
- * MENGECEK apakah waktu saat ini cocok dengan konfigurasi; ini memungkinkan
- * jadwal diubah dari UI tanpa perlu restart server.
- *
- * Bila token belum dikonfigurasi, penjadwal sengaja TIDAK didaftarkan sama
- * sekali. Mendaftarkannya hanya akan menghasilkan kegagalan setiap pagi tanpa
- * ada yang bisa diperbuat — lebih baik satu pesan jelas saat boot.
- */
+/** Satu tick penjadwal — dipanggil node-cron lokal atau Vercel Cron (#304). */
+export async function tickWhatsAppScheduler(): Promise<void> {
+  const token = await ambilToken();
+  if (!token) return;
+
+  const { day, time } = jadwalSekarangWIB();
+  const config = await getBroadcastConfig("whatsapp");
+
+  if (!config.scheduleDays.includes(day) || config.scheduleTime !== time) return;
+
+  const key = `${day}-${time}`;
+  if (lastTriggeredKey === key) return;
+
+  const claimed = await claimBroadcastFire("whatsapp", key);
+  if (!claimed) return;
+  lastTriggeredKey = key;
+
+  console.log(`[WHATSAPP] Menjalankan broadcast terjadwal (hari ${day}, ${time} WIB)...`);
+  await sendDailyTaskDigest(undefined, config.recipientIds, config.messageTemplate);
+}
+
 export const initWhatsAppScheduler = () => {
   if (!terkonfigurasi()) {
     console.warn(
@@ -76,26 +80,8 @@ export const initWhatsAppScheduler = () => {
 
   cron.schedule("* * * * *", async () => {
     try {
-      const token = await ambilToken();
-      if (!token) return;
-
-      const { day, time } = jadwalSekarangWIB();
-      const config = await getBroadcastConfig("whatsapp");
-
-      if (!config.scheduleDays.includes(day) || config.scheduleTime !== time) return;
-
-      // Cron bisa terpicu lebih dari sekali pada menit yang sama di beberapa
-      // runtime; kunci hari+jam mencegah broadcast terkirim dobel.
-      const key = `${day}-${time}`;
-      if (lastTriggeredKey === key) return;
-      lastTriggeredKey = key;
-
-      console.log(`[WHATSAPP] Menjalankan broadcast terjadwal (hari ${day}, ${time} WIB)...`);
-      await sendDailyTaskDigest(undefined, config.recipientIds, config.messageTemplate);
+      await tickWhatsAppScheduler();
     } catch (err: any) {
-      // Kegagalan satu jadwal tidak boleh mematikan penjadwal untuk jadwal
-      // berikutnya. Tanpa penangkap ini, satu galat menghentikan seluruh
-      // pengiriman berikutnya secara senyap.
       console.error("[WHATSAPP] Broadcast terjadwal gagal:", err?.message);
     }
   });

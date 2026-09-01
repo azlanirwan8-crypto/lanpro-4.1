@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  getMeetings,
   createMeeting,
   updateMeeting,
   deleteMeeting,
@@ -40,6 +39,13 @@ import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { LanproDatePicker } from "../../components/ui/LanproDatePicker";
 import { LanproTimePicker } from "../../components/ui/LanproTimePicker";
 import { MeetingMobileCardView } from "./components/MeetingMobileCardView";
+import { useMobileAction } from "../../contexts/MobileActionContext";
+import {
+  loadProjectMeetings,
+  peekProjectMeetings,
+  writeProjectMeetings,
+  invalidateProjectMeetings,
+} from "../../lib/moduleDataCache";
 
 interface MeetingNotesProps {
   projectId: string;
@@ -59,8 +65,16 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   masterData = [],
 }) => {
   const { t } = useTranslation();
-  const [meetings, setMeetings] = useState<Meeting[]>([]);
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const effectiveUserId = currentUser?.uid || "guest";
+
+  const syncMeetingsCache = (next: Meeting[]) => {
+    writeProjectMeetings(projectId, effectiveUserId, next);
+  };
+
+  const [meetings, setMeetings] = useState<Meeting[]>(() => {
+    return peekProjectMeetings<Meeting>(projectId, effectiveUserId) ?? [];
+  });
+  const [users, setUsers] = useState<UserProfile[]>(projectMembers);
   const [loading, setLoading] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
@@ -151,6 +165,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [totalMeetings, setTotalMeetings] = useState(0);
   const itemsPerPage = 8; // adjusted for side-by-side list density
 
   const currentUserProfile = users.find((u) => u.uid === currentUser?.uid) || currentUser;
@@ -165,20 +180,37 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
   const canAdd = hasPermission(userRole, "meetingNotes", "create", false, permissions);
 
-  const filteredMeetings = meetings.filter((m) =>
-    m.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const { registerAction, unregisterAction } = useMobileAction();
 
-  const totalPages = Math.ceil(filteredMeetings.length / itemsPerPage);
-  const paginatedMeetings = filteredMeetings.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  useEffect(() => {
+    if (!activeMeetingId && canAdd) {
+      registerAction({
+        id: "meeting-add-new",
+        label: t("meetings.addMeeting") || "Buat Notula Baru",
+        onClick: startAddMeeting,
+        canCreate: canAdd,
+      });
+    } else if (!activeMeetingId) {
+      unregisterAction("meeting-add-new");
+    }
+    return () => unregisterAction("meeting-add-new");
+  }, [canAdd, activeMeetingId, registerAction, unregisterAction, t]);
+
+  const totalPages = Math.max(1, Math.ceil(totalMeetings / itemsPerPage) || 1);
+  const paginatedMeetings = meetings;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, projectId]);
 
   useEffect(() => {
     fetchMeetings();
-    fetchUsers();
-  }, [projectId]);
+    if (projectMembers.length > 0) {
+      setUsers(projectMembers);
+    } else {
+      fetchUsers();
+    }
+  }, [projectId, projectMembers, currentPage, searchQuery]);
 
   useEffect(() => {
     setWorkspaceTab("manual");
@@ -194,16 +226,29 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
     }
   };
 
-  const fetchMeetings = async () => {
-    setLoading(true);
+  const fetchMeetings = async (opts?: { force?: boolean; silent?: boolean }) => {
+    const userId = currentUser?.uid || "guest";
+    const listOpts = { page: currentPage, limit: itemsPerPage, search: searchQuery };
+    const cached = peekProjectMeetings<Meeting>(projectId, userId);
+    if (cached && !opts?.force && currentPage === 1 && !searchQuery) {
+      setMeetings(cached);
+      if (!opts?.silent) setLoading(false);
+    } else if (!opts?.silent && !cached) {
+      setLoading(true);
+    }
+
     try {
-      const fetchedMeetings = await getMeetings(projectId, currentUser?.uid);
-      setMeetings(fetchedMeetings);
+      const result = await loadProjectMeetings(projectId, userId, {
+        ...listOpts,
+        force: opts?.force,
+      });
+      setMeetings(result.data as Meeting[]);
+      setTotalMeetings(result.meta?.total ?? result.data.length);
     } catch (error: any) {
       console.error("Failed to fetch meetings:", error);
-      toast.error(error.message || "Failed to load meetings");
+      if (!cached) toast.error(error.message || "Failed to load meetings");
     } finally {
-      setLoading(false);
+      if (!opts?.silent) setLoading(false);
     }
   };
 
@@ -261,6 +306,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
       }
 
       if (editingMeeting) {
+        const meetingId = editingMeeting.id!;
         const payload: Partial<Meeting> = {
           title: trimmedTitle,
           description: newDescription.trim(),
@@ -276,9 +322,32 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
           payload.fileType = "";
         }
 
-        await updateMeeting(projectId, editingMeeting.id!, payload, currentUser.uid);
-        showSuccessAlert(t("alerts.successTitle"), t("alerts.meetingUpdated"));
+        setMeetings((prev) => {
+          const next = prev.map((m) => (m.id === meetingId ? { ...m, ...payload } : m));
+          syncMeetingsCache(next);
+          return next;
+        });
+        setNewTitle("");
+        setNewDescription("");
+        setNewMeetingLink("");
+        setNewMeetingFile(null);
+        setShouldRemoveMeetingFile(false);
+        setIsModalOpen(false);
+        setEditingMeeting(null);
+        setLoading(false);
+        toast.success(t("alerts.meetingUpdated"));
+
+        try {
+          await updateMeeting(projectId, meetingId, payload, currentUser.uid);
+        } catch (error) {
+          invalidateProjectMeetings(projectId, effectiveUserId);
+          fetchMeetings({ force: true, silent: true });
+          console.error("Failed to save meeting:", error);
+          toast.error(t("toast.meetingSaveFailed") + (error as Error).message);
+        }
+        return;
       } else {
+        const tempId = `temp-meeting-${crypto.randomUUID()}`;
         const payload: Partial<Meeting> = {
           projectId,
           title: trimmedTitle,
@@ -291,8 +360,56 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
           payload.fileName = fileName;
           payload.fileType = fileTypeStr;
         }
-        await createMeeting(projectId, trimmedTitle, currentUser.uid, payload, currentUser.uid);
-        showSuccessAlert(t("alerts.successTitle"), t("alerts.meetingAdded"));
+
+        const optimistic: Meeting = {
+          id: tempId,
+          projectId,
+          title: trimmedTitle,
+          description: newDescription.trim(),
+          meetingLink: newMeetingLink.trim(),
+          authorId: currentUser.uid,
+          createdAt: new Date().toISOString(),
+          ...(newMeetingFile ? { fileName, fileType: fileTypeStr } : {}),
+        };
+
+        setMeetings((prev) => {
+          const next = [optimistic, ...prev];
+          syncMeetingsCache(next);
+          return next;
+        });
+        setNewTitle("");
+        setNewDescription("");
+        setNewMeetingLink("");
+        setNewMeetingFile(null);
+        setShouldRemoveMeetingFile(false);
+        setIsModalOpen(false);
+        setEditingMeeting(null);
+        setLoading(false);
+        toast.success(t("alerts.meetingAdded"));
+
+        try {
+          const realId = await createMeeting(
+            projectId,
+            trimmedTitle,
+            currentUser.uid,
+            payload,
+            currentUser.uid
+          );
+          setMeetings((prev) => {
+            const next = prev.map((m) => (m.id === tempId ? { ...m, id: realId } : m));
+            syncMeetingsCache(next);
+            return next;
+          });
+        } catch (error) {
+          setMeetings((prev) => {
+            const next = prev.filter((m) => m.id !== tempId);
+            syncMeetingsCache(next);
+            return next;
+          });
+          console.error("Failed to save meeting:", error);
+          toast.error(t("toast.meetingSaveFailed") + (error as Error).message);
+        }
+        return;
       }
       setNewTitle("");
       setNewDescription("");
@@ -337,16 +454,21 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
     );
     if (!isConfirmed) return;
 
-    setLoading(true);
+    setMeetings((prev) => {
+      const next = prev.filter((m) => m.id !== meetingId);
+      syncMeetingsCache(next);
+      return next;
+    });
+    if (activeMeetingId === meetingId) {
+      setActiveMeetingId(null);
+    }
+    toast.success(t("alerts.meetingDeleted"));
+
     try {
       await deleteMeeting(projectId, meetingId, currentUser?.uid);
-      setMeetings((prev) => prev.filter((m) => m.id !== meetingId));
-      if (activeMeetingId === meetingId) {
-        setActiveMeetingId(null);
-      }
-      showSuccessAlert(t("alerts.successTitle"), t("alerts.meetingDeleted"));
-      fetchMeetings();
     } catch (error: any) {
+      invalidateProjectMeetings(projectId, effectiveUserId);
+      fetchMeetings({ force: true, silent: true });
       toast.error(error.message || "Failed to delete meeting.");
     } finally {
       setLoading(false);
@@ -627,9 +749,9 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
             <div className="px-6 py-3.5 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
               <div className="text-[11px] text-content-subtle font-normal">
                 {t("common.showing")}{" "}
-                {filteredMeetings.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
-                {t("common.to")} {Math.min(currentPage * itemsPerPage, filteredMeetings.length)}{" "}
-                {t("common.of")} {filteredMeetings.length} {t("common.entries")}
+                {totalMeetings === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} {t("common.to")}{" "}
+                {Math.min(currentPage * itemsPerPage, totalMeetings)} {t("common.of")}{" "}
+                {totalMeetings} {t("common.entries")}
               </div>
 
               {totalPages > 1 && (

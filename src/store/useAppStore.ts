@@ -140,7 +140,7 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => {
       const nextVal = typeof tasks === "function" ? (tasks as any)(state.tasks) : tasks;
       if (state.selectedProject) {
-        CacheManager.save(`tasks_${state.selectedProject.id}`, nextVal);
+        CacheManager.saveDebounced(`tasks_${state.selectedProject.id}`, nextVal);
       }
       return { tasks: nextVal };
     }),
@@ -149,7 +149,7 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => {
       const nextTasks = state.tasks.map((t) => (t.id === taskId ? { ...t, ...updatedTask } : t));
       if (state.selectedProject) {
-        CacheManager.save(`tasks_${state.selectedProject.id}`, nextTasks);
+        CacheManager.saveDebounced(`tasks_${state.selectedProject.id}`, nextTasks);
       }
       return { tasks: nextTasks };
     }),

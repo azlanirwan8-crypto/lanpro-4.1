@@ -8,26 +8,37 @@ import crypto from "crypto";
 import { createAuditLog } from "../services/audit.service";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { milestoneRepository } from "../repositories/milestone.repository";
-import { validasiBody } from "../middleware/validate";
+import { validasiBody, validasiQuery } from "../middleware/validate";
+import { paginationQuerySchema } from "../schemas/pagination.schema";
+import { respondWithProjectList } from "../lib/listResponse";
 import { createMilestoneSchema, updateMilestoneSchema } from "../schemas/milestone.schema";
 
 const router = Router();
 
 // Milestones API (Hybrid Value-Added)
-router.get("/api/projects/:projectId/milestones", jagaProyek("timeline", "R"), async (req, res) => {
-  try {
-    const { projectId } = req.params;
-    const milestones = await milestoneRepository.findByProjectId(projectId);
-    res.json({ status: "success", data: milestones });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: GET milestones error:", error);
-    res.status(500).json({
-      status: "error",
-      code: "srv.gagal_mengambil_milestone",
-      message: "Gagal mengambil Milestone.",
-    });
+router.get(
+  "/api/projects/:projectId/milestones",
+  jagaProyek("timeline", "R"),
+  validasiQuery(paginationQuerySchema),
+  async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      await respondWithProjectList(
+        res,
+        req.query as Record<string, unknown>,
+        () => milestoneRepository.findByProjectId(projectId),
+        (pagination) => milestoneRepository.findByProjectIdPaged(projectId, pagination)
+      );
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: GET milestones error:", error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.gagal_mengambil_milestone",
+        message: "Gagal mengambil Milestone.",
+      });
+    }
   }
-});
+);
 
 router.post(
   "/api/projects/:projectId/milestones",
