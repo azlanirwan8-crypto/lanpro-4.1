@@ -83,17 +83,17 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
   return (
     <div className="flex-1 flex flex-col p-3 md:p-6 font-sans overflow-y-auto w-full bg-surface-muted">
       <div className="flex-1 flex flex-col bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
-        {/* Dashboard Header matching Meeting Notes */}
-        <div className="p-6 md:p-7 border-b border-border-subtle/80 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
-          <div className="flex items-center gap-3.5">
-            <div className="p-3 bg-primary-surface/10 border border-primary/20 rounded-md text-primary shadow-2xs">
+        {/* Dashboard Header — #369 */}
+        <div className="p-3 md:p-7 border-b border-border-subtle/80 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="p-2.5 sm:p-3 bg-primary-surface/10 border border-primary/20 rounded-md text-primary shadow-2xs shrink-0">
               <Workflow className="w-5 h-5" />
             </div>
-            <div>
-              <h3 className="text-base font-medium text-content tracking-tight">
+            <div className="min-w-0">
+              <h3 className="text-sm sm:text-base font-medium text-content tracking-tight truncate">
                 {t("flowchart.editorTitle")}
               </h3>
-              <p className="text-xs font-medium text-content-muted mt-0.5">
+              <p className="text-xs font-medium text-content-muted mt-0.5 hidden sm:block">
                 {t("flowchart.subtitle")}
               </p>
             </div>
@@ -116,9 +116,11 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
 
             <button
               onClick={openCreateModal}
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs shadow-primary/20 cursor-pointer shrink-0 whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs shadow-primary/20 cursor-pointer shrink-0 whitespace-nowrap"
+              title={t("flowchart.addFlowchart")}
             >
-              <Plus className="w-4 h-4" /> {t("flowchart.addFlowchart")}
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">{t("flowchart.addFlowchart")}</span>
             </button>
           </div>
         </div>

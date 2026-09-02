@@ -194,59 +194,63 @@ export const BackupPanel = (_props: {
 
   return (
     <div className="flex-1 overflow-auto p-4 md:p-5 bg-surface-sunken/60 custom-scrollbar w-full space-y-4">
-      {/* Top Cards: Export & Restore */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Top Cards: Export & Restore — #370: 2 kolom di HP */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         {/* Export Box */}
-        <div className="bg-surface border border-border-subtle/80 rounded-lg p-5 flex flex-col justify-between shadow-2xs">
+        <div className="bg-surface border border-border-subtle/80 rounded-lg p-3 sm:p-5 flex flex-col justify-between shadow-2xs">
           <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 bg-blue-500/10 text-blue-600 rounded-md flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-500/10 text-blue-600 rounded-md flex items-center justify-center shrink-0">
                 <Download className="w-4 h-4" />
               </div>
-              <div>
-                <h2 className="text-xs font-normal text-content-strong uppercase tracking-wide">
+              <div className="min-w-0">
+                <h2 className="text-[10px] sm:text-xs font-normal text-content-strong uppercase tracking-wide truncate">
                   {t("backup.exportDatabase")}
                 </h2>
-                <p className="text-xs text-content-muted mt-0.5">{t("backupPanel.exportHint")}</p>
+                <p className="text-[10px] sm:text-xs text-content-muted mt-0.5 line-clamp-2">
+                  {t("backupPanel.exportHint")}
+                </p>
               </div>
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-border-faint flex justify-end">
+          <div className="mt-3 sm:mt-4 pt-3 border-t border-border-faint flex justify-end">
             <button
               onClick={exportProjectBackup}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-content-inverse rounded-md font-medium text-xs transition-all shadow-2xs active:scale-95 flex items-center gap-1.5 cursor-pointer"
+              className="px-2.5 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-content-inverse rounded-md font-medium text-xs transition-all shadow-2xs active:scale-95 flex items-center gap-1.5 cursor-pointer"
+              title={t("backup.exportProject")}
             >
               <Download className="w-3.5 h-3.5" />
-              <span>{t("backup.exportProject")}</span>
+              <span className="hidden sm:inline">{t("backup.exportProject")}</span>
             </button>
           </div>
         </div>
 
         {/* Restore Box */}
-        <div className="bg-surface border border-border-subtle/80 rounded-lg p-5 flex flex-col justify-between shadow-2xs">
+        <div className="bg-surface border border-border-subtle/80 rounded-lg p-3 sm:p-5 flex flex-col justify-between shadow-2xs">
           <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 bg-rose-500/10 text-rose-600 rounded-md flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 mb-3">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-rose-500/10 text-rose-600 rounded-md flex items-center justify-center shrink-0">
                 <Upload className="w-4 h-4" />
               </div>
-              <div>
-                <h2 className="text-xs font-normal text-content-strong uppercase tracking-wide">
+              <div className="min-w-0">
+                <h2 className="text-[10px] sm:text-xs font-normal text-content-strong uppercase tracking-wide truncate">
                   {t("backupPanel.restoreTitle")}
                 </h2>
-                <p className="text-xs text-content-muted flex items-center gap-1 mt-0.5">
+                <p className="text-[10px] sm:text-xs text-content-muted flex items-center gap-1 mt-0.5">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                  <span>{t("backup.overwriteWarning")}</span>
+                  <span className="line-clamp-2">{t("backup.overwriteWarning")}</span>
                 </p>
               </div>
             </div>
           </div>
-          <div className="mt-4 pt-3 border-t border-border-faint flex justify-end">
+          <div className="mt-3 sm:mt-4 pt-3 border-t border-border-faint flex justify-end">
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-700 hover:bg-rose-500/15 rounded-md font-medium text-xs transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+              className="px-2.5 sm:px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-700 hover:bg-rose-500/15 rounded-md font-medium text-xs transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+              title={t("backup.uploadBackupFile")}
             >
               <Upload className="w-3.5 h-3.5" />
-              <span>{t("backup.uploadBackupFile")}</span>
+              <span className="hidden sm:inline">{t("backup.uploadBackupFile")}</span>
             </button>
             <input
               type="file"

@@ -184,18 +184,19 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             </p>
           </div>
 
-          {/* Action Buttons Header */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          {/* Action Buttons Header — #367: icon-only di HP, nowrap */}
+          <div className="flex flex-nowrap items-center gap-1.5 overflow-x-auto max-w-full">
             {canCreate && (
               <button
                 onClick={() => {
                   setIsAddCaseOpen(true);
                   setActiveAddTab("single");
                 }}
-                className="btn-animation waves-effect waves-light btn-primary h-8 px-3 rounded-lg text-xs font-medium flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
+                className="btn-animation waves-effect waves-light btn-primary h-8 px-2.5 sm:px-3 rounded-lg text-xs font-medium flex items-center gap-1 cursor-pointer shrink-0 shadow-xs"
+                title={t("qa.addTask")}
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>{t("qa.addTask")}</span>
+                <span className="hidden sm:inline">{t("qa.addTask")}</span>
               </button>
             )}
 
@@ -203,21 +204,23 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               <button
                 onClick={handleGenerateWithAi}
                 disabled={isGeneratingAi}
-                className="px-3 py-1.5 bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-700 hover:to-indigo-800 disabled:opacity-50 text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+                className="px-2.5 sm:px-3 py-1.5 bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-700 hover:to-indigo-800 disabled:opacity-50 text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95 shrink-0"
                 title={t("qaTable.generateAi")}
               >
                 <Sparkles className={`w-3.5 h-3.5 ${isGeneratingAi ? "animate-spin" : ""}`} />
-                <span>{isGeneratingAi ? "Menganalisis..." : "Generate AI"}</span>
+                <span className="hidden sm:inline">
+                  {isGeneratingAi ? "Menganalisis..." : "Generate AI"}
+                </span>
               </button>
             )}
 
             <button
               onClick={handleExportQAReport}
-              className="px-2.5 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body font-medium rounded-md text-xs flex items-center gap-1 transition-all cursor-pointer"
+              className="px-2.5 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body font-medium rounded-md text-xs flex items-center gap-1 transition-all cursor-pointer shrink-0"
               title={t("qa.exportReport")}
             >
               <Download className="w-3.5 h-3.5 text-primary" />
-              <span>{t("qa.export")}</span>
+              <span className="hidden sm:inline">{t("qa.export")}</span>
             </button>
 
             {passedPercent === 100 &&
@@ -226,10 +229,13 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
               canUpdate && (
                 <button
                   onClick={handleMigrateSuitePhase}
-                  className="px-3 py-1.5 bg-success-surface hover:bg-success-hover text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95"
+                  className="px-2.5 sm:px-3 py-1.5 bg-success-surface hover:bg-success-hover text-content-inverse font-medium rounded-md text-xs flex items-center gap-1 shadow-2xs transition-all cursor-pointer active:scale-95 shrink-0"
+                  title={activeSuite.phase === "SIT" ? "Migrate to UAT" : "Migrate to PTR"}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{activeSuite.phase === "SIT" ? "Migrate to UAT" : "Migrate to PTR"}</span>
+                  <span className="hidden sm:inline">
+                    {activeSuite.phase === "SIT" ? "Migrate to UAT" : "Migrate to PTR"}
+                  </span>
                 </button>
               )}
           </div>

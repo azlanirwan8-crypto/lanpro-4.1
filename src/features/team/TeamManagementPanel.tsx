@@ -456,7 +456,7 @@ export const TeamManagementPanel = ({
             />
           </div>
 
-          <div className="flex items-center gap-2 w-full md:w-auto flex-wrap justify-between md:justify-end">
+          <div className="flex items-center gap-2 w-full md:w-auto flex-nowrap justify-between md:justify-end min-w-0">
             <div className="min-w-0 flex-1 md:flex-none md:min-w-[160px]">
               <CommonStyledDropdown
                 value={roleFilter}
@@ -488,9 +488,11 @@ export const TeamManagementPanel = ({
 
             <button
               onClick={handleExportTeamCSV}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body border border-border-subtle rounded-md text-xs font-medium shadow-2xs transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-surface-muted hover:bg-surface-strong text-content-body border border-border-subtle rounded-md text-xs font-medium shadow-2xs transition-all cursor-pointer shrink-0"
+              title={t("team.exportCsv")}
             >
-              <Download className="w-3.5 h-3.5" /> {t("team.exportCsv")}
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t("team.exportCsv")}</span>
             </button>
           </div>
         </div>

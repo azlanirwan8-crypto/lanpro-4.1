@@ -419,23 +419,25 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
   return (
     <div className="bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden flex-1 flex flex-col min-h-0 font-sans text-left">
-      {/* Header Bar Clean Title */}
-      <div className="px-5 py-3.5 border-b border-border-subtle/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-surface-sunken/40 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-primary shadow-2xs">
+      {/* Header Bar — #369: AI icon-only di HP */}
+      <div className="px-3 sm:px-5 py-3 border-b border-border-subtle/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface-sunken/40 shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-primary shadow-2xs shrink-0">
             <MessageSquare className="w-4 h-4" />
           </div>
-          <div>
-            <h3 className="text-sm font-medium text-content-strong tracking-tight">
+          <div className="min-w-0">
+            <h3 className="text-sm font-medium text-content-strong tracking-tight truncate">
               {t("discussion.heading2")}
             </h3>
-            <p className="text-xs font-normal text-content-subtle">{t("discussion.subheading")}</p>
+            <p className="text-xs font-normal text-content-subtle hidden sm:block">
+              {t("discussion.subheading")}
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
           {!showAiAssistant && (
-            <div className="relative flex-1 sm:w-64">
+            <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none">
               <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -445,7 +447,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-9 pr-3 py-2 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs"
+                className="w-full min-w-0 pl-9 pr-3 py-2 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs"
               />
             </div>
           )}
@@ -453,19 +455,22 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
           <button
             onClick={() => setShowAiAssistant(!showAiAssistant)}
             className={cn(
-              "inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-normal transition-all border shadow-2xs cursor-pointer shrink-0",
+              "inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-md text-xs font-normal transition-all border shadow-2xs cursor-pointer shrink-0",
               showAiAssistant
                 ? "bg-surface-muted hover:bg-surface-strong text-content-body border-border-subtle"
                 : "bg-indigo-500/10 hover:bg-indigo-500/15 text-primary border-indigo-500/30"
             )}
+            title={showAiAssistant ? t("discussion.closeAiAssistant") : t("discussion.aiAssistant")}
           >
             {showAiAssistant ? (
               <>
-                <ArrowLeft className="w-3.5 h-3.5" /> {t("discussion.closeAiAssistant")}
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{t("discussion.closeAiAssistant")}</span>
               </>
             ) : (
               <>
-                <Sparkles className="w-3.5 h-3.5 text-primary" /> {t("discussion.aiAssistant")}
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                <span className="hidden sm:inline">{t("discussion.aiAssistant")}</span>
               </>
             )}
           </button>

@@ -523,17 +523,19 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
         {activeMeetingId === null ? (
           /* DATATABLE VIEW */
           <div className="flex-1 flex flex-col min-h-0 bg-surface">
-            {/* Table Header / Action Bar */}
-            <div className="p-4 md:p-6 border-b border-border-subtle/80 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
-              <div className="flex items-center gap-3.5">
-                <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/30 rounded-lg text-primary shadow-2xs">
+            {/* Table Header / Action Bar — #369: padat HP; Add icon-only */}
+            <div className="p-3 md:p-6 border-b border-border-subtle/80 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
+              <div className="flex items-center gap-3.5 min-w-0">
+                <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/30 rounded-lg text-primary shadow-2xs shrink-0">
                   <FileText className="w-5 h-5" />
                 </div>
-                <div>
-                  <h3 className="text-sm font-medium text-content-strong tracking-tight">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-medium text-content-strong tracking-tight truncate">
                     {t("meetings.title")}
                   </h3>
-                  <p className="text-xs text-content-muted mt-0.5">{t("meetings.subtitle")}</p>
+                  <p className="text-xs text-content-muted mt-0.5 hidden sm:block">
+                    {t("meetings.subtitle")}
+                  </p>
                 </div>
               </div>
 
@@ -555,9 +557,11 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 {canAdd && (
                   <button
                     onClick={startAddMeeting}
-                    className="btn-animation waves-effect waves-light btn-primary h-9 px-3 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
+                    className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
+                    title={t("meetings.addMeeting")}
                   >
-                    <Plus className="w-4 h-4" /> {t("meetings.addMeeting")}
+                    <Plus className="w-4 h-4" />
+                    <span className="hidden sm:inline">{t("meetings.addMeeting")}</span>
                   </button>
                 )}
               </div>

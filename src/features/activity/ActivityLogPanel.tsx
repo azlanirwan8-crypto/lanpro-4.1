@@ -156,19 +156,9 @@ export const ActivityLogPanel = ({
         </div>
 
         <div className="bg-surface border border-border-subtle rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-          <div className="p-3 sm:p-6 bg-surface-sunken border-b border-border-faint flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-4">
-            <div className="relative flex-1 custom-search-bar w-full">
-              <Search className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle" />
-              <input
-                placeholder={t("activityLog.searchEvents")}
-                value={auditLogSearch}
-                onChange={(e) => setAuditLogSearch(e.target.value)}
-                className="w-full pl-10 sm:pl-14 pr-4 sm:pr-6 py-2.5 sm:py-4 bg-surface border border-border-subtle rounded-xl text-[13px] font-normal text-content-body tracking-wide focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:font-normal placeholder:text-content-subtle"
-              />
-            </div>
-          </div>
+          {/* #370 — search hanya di header; baris duplikat di kartu dihapus */}
           {activityLogs.length === 0 ? (
-            <div className="p-20 text-center text-content-subtle font-medium">
+            <div className="p-8 sm:p-20 text-center text-content-subtle font-medium">
               {t("activityLog.empty")}
             </div>
           ) : (

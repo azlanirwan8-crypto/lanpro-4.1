@@ -940,17 +940,17 @@ export const WikiView: React.FC<WikiViewProps> = ({
         <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-surface-muted text-left font-sans">
           <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
             <div className="flex-1 flex flex-col min-h-0 bg-surface">
-              {/* Header / Action Bar */}
-              <div className="p-5 md:p-6 border-b border-border-subtle/80 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/30 rounded-md text-primary shadow-2xs">
+              {/* Header / Action Bar — #369 */}
+              <div className="p-3 md:p-6 border-b border-border-subtle/80 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/30 rounded-md text-primary shadow-2xs shrink-0">
                     <BookOpen className="w-5 h-5" />
                   </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-content tracking-tight">
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-medium text-content tracking-tight truncate">
                       {t("wiki.title")}
                     </h3>
-                    <p className="text-xs font-medium text-content-muted mt-0.5">
+                    <p className="text-xs font-medium text-content-muted mt-0.5 hidden sm:block">
                       {t("wiki.subtitle")}
                     </p>
                   </div>
@@ -974,9 +974,11 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   {canCreate && (
                     <button
                       onClick={handleCreateNew}
-                      className="btn-animation waves-effect waves-light btn-primary h-9 px-3 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
+                      className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
+                      title={t("wiki.addDocument")}
                     >
-                      <Plus className="w-4 h-4" /> {t("wiki.addDocument")}
+                      <Plus className="w-4 h-4" />
+                      <span className="hidden sm:inline">{t("wiki.addDocument")}</span>
                     </button>
                   )}
                 </div>

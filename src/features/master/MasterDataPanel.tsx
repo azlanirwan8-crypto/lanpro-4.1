@@ -704,12 +704,17 @@ export const MasterDataPanel = ({
                     setIsNewMasterModalOpen(true);
                   }
                 }}
-                className="btn-animation waves-effect waves-light btn-primary h-9 px-3 sm:px-4 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-xs w-full sm:w-auto whitespace-nowrap"
-              >
-                <Plus className="w-3.5 h-3.5" />{" "}
-                {t("master.addType", {
+                className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-xs w-auto self-start sm:self-auto whitespace-nowrap"
+                title={t("master.addType", {
                   type: masterDataTypes.find((mt) => mt.type === selectedType)?.label,
                 })}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">
+                  {t("master.addType", {
+                    type: masterDataTypes.find((mt) => mt.type === selectedType)?.label,
+                  })}
+                </span>
               </button>
             )}
           </div>

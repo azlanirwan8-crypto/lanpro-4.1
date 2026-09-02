@@ -58,40 +58,43 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         <div className="flex-1 overflow-auto flex flex-col">
-          {/* Tabs */}
-          <div className="flex border-b border-border-subtle/80 px-5 bg-surface">
+          {/* Tabs — #368: scroll horizontal di HP */}
+          <div className="flex border-b border-border-subtle/80 px-3 sm:px-5 bg-surface overflow-x-auto custom-scrollbar shrink-0">
             <button
               onClick={() => setActiveTab("konfigurasi")}
-              className={`flex items-center gap-2 px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer shrink-0 whitespace-nowrap ${
                 activeTab === "konfigurasi"
                   ? "text-emerald-600 border-emerald-500 bg-emerald-500/10"
                   : "text-content-muted border-transparent hover:text-content-body"
               }`}
             >
-              <Mail size={15} />
-              {t("settings.emailConfiguration")}
+              <Mail size={15} className="shrink-0" />
+              <span className="hidden sm:inline">{t("settings.emailConfiguration")}</span>
+              <span className="sm:hidden">{t("settings.emailShort", "Email")}</span>
             </button>
             <button
               onClick={() => setActiveTab("whatsapp")}
-              className={`flex items-center gap-2 px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer shrink-0 whitespace-nowrap ${
                 activeTab === "whatsapp"
                   ? "text-emerald-600 border-emerald-500 bg-emerald-500/10"
                   : "text-content-muted border-transparent hover:text-content-body"
               }`}
             >
-              <MessageSquare size={15} />
-              {t("settings.whatsappGateway")}
+              <MessageSquare size={15} className="shrink-0" />
+              <span className="hidden sm:inline">{t("settings.whatsappGateway")}</span>
+              <span className="sm:hidden">WhatsApp</span>
             </button>
             <button
               onClick={() => setActiveTab("taskBroadcast")}
-              className={`flex items-center gap-2 px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer ${
+              className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer shrink-0 whitespace-nowrap ${
                 activeTab === "taskBroadcast"
                   ? "text-emerald-600 border-emerald-500 bg-emerald-500/10"
                   : "text-content-muted border-transparent hover:text-content-body"
               }`}
             >
-              <CalendarClock size={15} />
-              {t("taskBroadcast.tab")}
+              <CalendarClock size={15} className="shrink-0" />
+              <span className="hidden sm:inline">{t("taskBroadcast.tab")}</span>
+              <span className="sm:hidden">{t("taskBroadcast.tabShort", "Broadcast")}</span>
             </button>
           </div>
 
