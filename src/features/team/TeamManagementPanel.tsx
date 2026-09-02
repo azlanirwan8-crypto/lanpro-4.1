@@ -87,9 +87,25 @@ export const TeamManagementPanel = ({
    * yang menanyakan izin "U", sehingga akun yang hanya boleh mengubah peran
    * ikut mendapat tombol keluarkan anggota — izin "D" tidak pernah diperiksa
    * di mana pun.
+   *
+   * #331 — `hasPermission` dari `permissions.ts` (dan yang diteruskan
+   * AppContainer) butuh (peran, modul, aksi, …). Memanggil
+   * hasPermission("access", "U") membuat argumen aksi jadi undefined dan
+   * melempar TypeError di toLowerCase — crash modul Tim untuk non-admin.
    */
-  const punyaIzin = (aksi: "U" | "D") =>
-    typeof hasPermission === "function" && hasPermission("access", aksi);
+  const punyaIzin = (aksi: "U" | "D") => {
+    if (typeof hasPermission !== "function") return false;
+    const action = aksi === "U" ? "update" : "delete";
+    return Boolean(
+      hasPermission(
+        userRole as any,
+        "access",
+        action,
+        false,
+        (currentUserProfile as any)?.permissions
+      )
+    );
+  };
 
   const bolehUbahPeran = isGlobalAdmin || punyaIzin("U");
   const bolehKeluarkanAnggota = isGlobalAdmin || punyaIzin("D");

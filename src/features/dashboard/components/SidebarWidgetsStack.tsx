@@ -352,15 +352,28 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
         </h3>
         <div className="space-y-3 max-h-[260px] overflow-y-auto custom-scrollbar pr-1 relative z-10">
           {activityLogs.map((log) => {
+            const actorId = String(log.userId || log.user_id || log.actorId || "").trim();
+            const member = projectMembers.find((m) => {
+              const ids = [m?.uid, m?.id, (m as any)?.userId]
+                .filter(Boolean)
+                .map((x) => String(x).trim().toLowerCase());
+              return actorId && ids.includes(actorId.toLowerCase());
+            });
             const author =
-              projectMembers.find((m) => m?.uid === log.userId)?.displayName || "System";
+              member?.displayName ||
+              member?.name ||
+              member?.username ||
+              log.userName ||
+              log.displayName ||
+              (actorId ? actorId.slice(0, 8) : null) ||
+              "System";
             return (
               <div key={log.id} className="flex gap-2.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
                 <div>
                   <div className="text-xs sm:text-[11px] text-content-subtle font-medium leading-tight">
                     <span className="text-content-inverse font-medium">{author}</span>{" "}
-                    {humanizeActivityAction(log.action)}
+                    {humanizeActivityAction(log.action, log.details)}
                   </div>
                   <div className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle mt-0.5">
                     {formatDistanceToNow(ensureDate(log.createdAt), {

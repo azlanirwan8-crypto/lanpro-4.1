@@ -99,8 +99,8 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="relative flex-1 sm:w-72">
+          <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
+            <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">
               <input
                 type="text"
                 placeholder={t("flowchart.searchPlaceholder")}
@@ -109,14 +109,14 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                   setSearchQuery(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="w-full pl-9 pr-4 py-2 bg-surface-sunken/60 border border-border-subtle/80 rounded-md text-xs placeholder:text-content-subtle outline-none focus:bg-surface focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all text-content-body font-medium shadow-2xs"
+                className="w-full min-w-0 pl-9 pr-4 py-2 bg-surface-sunken/60 border border-border-subtle/80 rounded-md text-xs placeholder:text-content-subtle outline-none focus:bg-surface focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all text-content-body font-medium shadow-2xs"
               />
               <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
             </div>
 
             <button
               onClick={openCreateModal}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs shadow-primary/20 cursor-pointer shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs shadow-primary/20 cursor-pointer shrink-0 whitespace-nowrap"
             >
               <Plus className="w-4 h-4" /> {t("flowchart.addFlowchart")}
             </button>

@@ -255,7 +255,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
             </div>
 
             {/* Bottom mini status bar */}
-            <div className="flex justify-between items-center mt-1 px-1 text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase tracking-wider text-content-subtle">
+            <div className="flex justify-between items-center mt-1 px-1 text-xs sm:text-[10px] font-normal uppercase tracking-wider text-content-subtle">
               <span className="flex items-center gap-1">
                 <Move className="w-2.5 h-2.5 text-indigo-500" />
                 <span>{t("flowNode.dragToPan")}</span>
@@ -270,7 +270,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-2 px-3 py-1.5 rounded-xl border font-normal text-xs sm:text-[11px] sm:text-[9px] uppercase tracking-wider transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.04)] cursor-pointer active:scale-95",
+          "flex items-center gap-2 px-3 py-1.5 rounded-xl border font-normal text-xs sm:text-[11px]  uppercase tracking-wider transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.04)] cursor-pointer active:scale-95",
           isMiro
             ? "bg-surface/80 hover:bg-surface/95 border-border-subtle/40  hover:text-indigo-600"
             : "bg-overlay/80  border-slate-800/60  hover:text-blue-400"

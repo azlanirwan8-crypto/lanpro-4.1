@@ -1409,6 +1409,15 @@ function AppContainer() {
       const path = event.path || "";
       const refs = realTimeRefs.current;
 
+      // #322 — abaikan event proyek lain (server kini mengirim projectId bila ada)
+      if (
+        event?.projectId &&
+        refs.selectedProject?.id &&
+        event.projectId !== refs.selectedProject.id
+      ) {
+        return;
+      }
+
       if (path.includes("/tasks") || path.includes("/sprint-tasks")) {
         if (refs.selectedProject) {
           refs.scheduleTaskDataRefresh?.();

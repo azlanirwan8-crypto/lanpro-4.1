@@ -100,7 +100,7 @@ router.post("/api/auth/refresh", authenticateJWT, async (req: any, res) => {
       return res.status(403).json({
         status: "error",
         code: "srv.akun_anda_masih_dalam",
-        message: "Akun Anda masih dalam status peninjauan.",
+        message: "Akun Anda masih dalam peninjauan.",
       });
     }
 
@@ -141,13 +141,19 @@ router.post("/api/auth/login", validasiBody(loginSchema), async (req, res) => {
     const userId = user.id || user.uid;
 
     if (user.status === "PENDING" || user.status === "pending") {
-      return res
-        .status(403)
-        .json({ error: "Akun Anda sedang menunggu persetujuan Administrator." });
+      return res.status(403).json({
+        status: "error",
+        code: "srv.akun_anda_masih_dalam",
+        message: "Akun Anda masih dalam peninjauan.",
+      });
     }
 
     if (user.status === "REJECTED" || user.status === "rejected") {
-      return res.status(403).json({ error: "Pendaftaran akun Anda ditolak." });
+      return res.status(403).json({
+        status: "error",
+        code: "srv.akun_anda_ditolak_oleh",
+        message: "Akun Anda ditolak oleh admin.",
+      });
     }
 
     // SESSION COLLISION CHECK

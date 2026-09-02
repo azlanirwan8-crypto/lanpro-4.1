@@ -59,7 +59,11 @@ router.post("/api/db-query", verifyGlobalAdmin, validasiBody(dbQuerySchema), asy
   try {
     const { query: sqlString } = req.body;
     if (!sqlString || typeof sqlString !== "string")
-      return res.status(400).json({ error: "Query is required" });
+      return res.status(400).json({
+        status: "error",
+        code: "srv.query_wajib",
+        message: "Query wajib diisi.",
+      });
 
     const trimmed = sqlString.trim().replace(/;+\s*$/, "");
     const isSingleStatement = !trimmed.includes(";");

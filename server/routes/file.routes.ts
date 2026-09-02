@@ -4,6 +4,8 @@ import path from "path";
 import multer from "multer";
 import jwt from "jsonwebtoken";
 import { authenticateJWT, getJwtSecret } from "../middleware/auth";
+import { validasiQuery } from "../middleware/validate";
+import { fileSecureStreamQuerySchema } from "../schemas/file.schema";
 import {
   validateFileBuffer,
   sanitizeFilename,
@@ -99,84 +101,76 @@ router.post(
 );
 
 // 🔒 SECURE STREAM / PRESIGNED URL ENDPOINT
-router.get("/api/v1/files/secure-stream", async (req: any, res: any) => {
-  try {
-    const file = req.query.file as string;
-    const expires = req.query.expires as string;
-    const token = req.query.token as string;
-    const uid = req.query.uid as string;
+router.get(
+  "/api/v1/files/secure-stream",
+  validasiQuery(fileSecureStreamQuerySchema),
+  async (req: any, res: any) => {
+    try {
+      const file = req.query.file as string;
+      const expires = req.query.expires as string;
+      const token = req.query.token as string;
+      const uid = req.query.uid as string;
 
-    if (!file) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          code: "srv.parameter_file_wajib_diisi",
-          message: "Parameter 'file' wajib diisi.",
-        });
-    }
+      // validasiQuery sudah memastikan `file` ada; basename tetap dipakai
+      // untuk menolak traversal.
+      const safeFilename = path.basename(file);
 
-    const safeFilename = path.basename(file);
-
-    // Dibaca lewat lapisan penyimpanan. Pada object storage tidak ada jalur
-    // berkas lokal yang bisa dikirim lewat sendFile, sehingga isinya ditarik
-    // lebih dulu dan dikirim sebagai respons.
-    const isiBerkas = await bacaBerkas(safeFilename);
-    if (!isiBerkas) {
-      return res
-        .status(404)
-        .json({
+      // Dibaca lewat lapisan penyimpanan. Pada object storage tidak ada jalur
+      // berkas lokal yang bisa dikirim lewat sendFile, sehingga isinya ditarik
+      // lebih dulu dan dikirim sebagai respons.
+      const isiBerkas = await bacaBerkas(safeFilename);
+      if (!isiBerkas) {
+        return res.status(404).json({
           status: "error",
           code: "srv.dokumen_tidak_ditemukan",
           message: "Dokumen tidak ditemukan.",
         });
-    }
+      }
 
-    let isAuthorized = false;
-    if (token && expires && uid) {
-      isAuthorized = verifyPresignedToken(safeFilename, uid, expires, token);
-    }
+      let isAuthorized = false;
+      if (token && expires && uid) {
+        isAuthorized = verifyPresignedToken(safeFilename, uid, expires, token);
+      }
 
-    if (!isAuthorized && req.headers?.authorization) {
-      const authHeader = req.headers.authorization;
-      if (authHeader.startsWith("Bearer ")) {
-        const parts = authHeader.split(" ");
-        const jwtToken = parts.length > 1 ? parts[1] : null;
-        if (jwtToken) {
-          try {
-            jwt.verify(jwtToken, getJwtSecret());
-            isAuthorized = true;
-          } catch {}
+      if (!isAuthorized && req.headers?.authorization) {
+        const authHeader = req.headers.authorization;
+        if (authHeader.startsWith("Bearer ")) {
+          const parts = authHeader.split(" ");
+          const jwtToken = parts.length > 1 ? parts[1] : null;
+          if (jwtToken) {
+            try {
+              jwt.verify(jwtToken, getJwtSecret());
+              isAuthorized = true;
+            } catch {}
+          }
         }
       }
-    }
 
-    if (!isAuthorized) {
-      return res.status(403).json({
-        status: "error",
-        code: "srv.akses_ditolak_presigned_url",
-        message: "Akses Ditolak: Presigned URL telah kadaluarsa atau token tidak valid.",
-      });
-    }
+      if (!isAuthorized) {
+        return res.status(403).json({
+          status: "error",
+          code: "srv.akses_ditolak_presigned_url",
+          message: "Akses Ditolak: Presigned URL telah kadaluarsa atau token tidak valid.",
+        });
+      }
 
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader(
-      "Content-Security-Policy",
-      "default-src 'none'; media-src 'self'; image-src 'self' data:; style-src 'unsafe-inline';"
-    );
-    res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
-    res.setHeader("X-Frame-Options", "SAMEORIGIN");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      res.setHeader(
+        "Content-Security-Policy",
+        "default-src 'none'; media-src 'self'; image-src 'self' data:; style-src 'unsafe-inline';"
+      );
+      res.setHeader("Cache-Control", "private, no-cache, no-store, must-revalidate");
+      res.setHeader("X-Frame-Options", "SAMEORIGIN");
 
-    return res.end(isiBerkas);
-  } catch (err: any) {
-    return res
-      .status(500)
-      .json({
+      return res.end(isiBerkas);
+    } catch (err: any) {
+      return res.status(500).json({
         status: "error",
         code: "srv.terjadi_kesalahan_saat_mengunduh",
         message: "Terjadi kesalahan saat mengunduh dokumen.",
       });
+    }
   }
-});
+);
 
 export default router;

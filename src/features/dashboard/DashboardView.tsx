@@ -633,22 +633,22 @@ export function DashboardView(props: DashboardViewProps) {
             </h2>
             <p className="text-xs text-content-muted mt-1">{t("dashboard.subtitle")}</p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto min-w-0">
             {/* Global Filter by Sprint */}
-            <div className="min-w-[220px]">
+            <div className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[240px] min-w-0 flex-1 md:flex-none">
               <StyledDropdown
                 value={selectedSprintFilter}
                 onChange={(val) => setSelectedSprintFilter(val)}
                 options={sprintFilterOptions}
                 masterData={[]}
-                className="w-full"
-                buttonClassName="h-10 bg-surface-muted rounded-lg border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
+                className="w-full min-w-0"
+                buttonClassName="h-10 w-full min-w-0 bg-surface-muted rounded-lg border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
               />
             </div>
 
-            <div className="flex items-center gap-2 bg-info/10 px-3 py-2 rounded-lg border border-info/20 text-xs font-medium text-info-text">
-              <Zap className="w-3.5 h-3.5 text-info-text" />
-              <span>
+            <div className="flex items-center gap-2 bg-info/10 px-3 py-2 rounded-lg border border-info/20 text-xs font-medium text-info-text min-w-0 max-w-full">
+              <Zap className="w-3.5 h-3.5 text-info-text shrink-0" />
+              <span className="truncate">
                 {t("dashboard.activeSprintChip", {
                   name: activeSprint?.name || t("dashboard.noActiveSprint"),
                   days: sprintDaysLeft,
@@ -1485,8 +1485,8 @@ export function DashboardView(props: DashboardViewProps) {
               blockedTasks={blockedTasks}
               overdueTasks={overdueTasks}
               dueSoonTasks={dueSoonTasks}
-              meetings={props.activityLogs || []}
-              documents={[]}
+              meetings={meetings}
+              documents={documents}
               activityLogs={props.activityLogs || []}
               projectMembers={props.projectMembers || []}
               setSelectedTaskForDetail={props.setSelectedTaskForDetail}

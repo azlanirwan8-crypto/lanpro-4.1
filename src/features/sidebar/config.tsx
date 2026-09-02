@@ -16,6 +16,7 @@ import {
   Settings2,
   Sparkles,
   ShieldCheck,
+  Activity,
 } from "lucide-react";
 
 export interface SidebarSubItemConfig {
@@ -173,6 +174,17 @@ export const sidebarSections: SidebarSectionConfig[] = [
         label: "sidebar.userSessions",
         icon: <ShieldCheck className="w-4 h-4" />,
         module: "userManagement",
+      },
+      {
+        // #330 — view `activity` sempat yatim (rute + widget Dashboard ada,
+        // sidebar tidak). Dipulihkan di sini. Modul `dashboard`: siapa yang
+        // boleh baca Dashboard boleh buka Log Aktivitas (widget Dashboard
+        // juga menavigasi ke view yang sama).
+        id: "activity",
+        label: "sidebar.activityLog",
+        icon: <Activity className="w-4 h-4" />,
+        butuhProyek: true,
+        module: "dashboard",
       },
       {
         id: "auditLog",

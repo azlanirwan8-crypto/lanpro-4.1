@@ -71,9 +71,21 @@ const anggota: UserProfile[] = [
   } as any,
 ];
 
-/** Ceklist izin: hanya aksi yang disebut yang diizinkan. */
-const ceklist = (diizinkan: Record<string, string[]>) => (modul: string, aksi: string) =>
-  (diizinkan[modul] || []).includes(aksi);
+/** Ceklist izin: meniru tanda tangan hasPermission sungguhan (peran, modul, aksi). */
+const ceklist =
+  (diizinkan: Record<string, string[]>) => (_peran: unknown, modul: string, aksi: string) => {
+    const huruf =
+      aksi === "update" || aksi === "U"
+        ? "U"
+        : aksi === "delete" || aksi === "D"
+          ? "D"
+          : aksi === "read" || aksi === "R"
+            ? "R"
+            : aksi === "create" || aksi === "C"
+              ? "C"
+              : aksi;
+    return (diizinkan[modul] || []).includes(huruf);
+  };
 
 function renderPanel(props: Record<string, unknown>) {
   return render(

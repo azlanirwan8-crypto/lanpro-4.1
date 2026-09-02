@@ -56,6 +56,8 @@ interface FlowchartNodeProps {
   getLinkedTaskDetails: (taskId?: string) => Task | undefined;
   setSelectedTaskForDetail: (task: Task) => void;
   setIsTaskDetailModalOpen: (isOpen: boolean) => void;
+  /** #321 — sembunyikan overlay node bila panel properti terbuka. */
+  suppressNodeOverlay?: boolean;
 }
 
 export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
@@ -85,6 +87,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
   getLinkedTaskDetails,
   setSelectedTaskForDetail,
   setIsTaskDetailModalOpen,
+  suppressNodeOverlay = false,
 }) => {
   const { t } = useTranslation();
   const isSelected = selectedNodeId === node.id || copiedNodes.some((copy) => copy.id === node.id);
@@ -239,6 +242,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
       <NodePropertiesOverlay
         node={node}
         isSelected={isSelected}
+        suppressOverlay={suppressNodeOverlay}
         handleUpdateActiveNode={handleUpdateActiveNode}
         handleDuplicateNode={handleDuplicateNode}
         setActiveTool={setActiveTool}
@@ -384,7 +388,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
             <div className="mt-1 flex flex-col items-center gap-0.5 w-full">
               <div
                 className={cn(
-                  "flex items-center gap-1 text-xs sm:text-[10px] sm:text-[8.5px] font-normal uppercase tracking-wider px-1.5 py-0.5 rounded border shadow-soft cursor-pointer whitespace-nowrap",
+                  "flex items-center gap-1 text-xs sm:text-[10px]  font-normal uppercase tracking-wider px-1.5 py-0.5 rounded border shadow-soft cursor-pointer whitespace-nowrap",
                   linkedTask.status === "Done" || linkedTask.status === "Selesai"
                     ? "bg-emerald-500/15 text-emerald-800 border-emerald-500/30"
                     : linkedTask.status === "In Progress" || linkedTask.status === "Dikerjakan"

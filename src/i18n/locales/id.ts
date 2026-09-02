@@ -41,6 +41,7 @@ export const id = {
     "srv.koneksi_ke_database_mysql": "Koneksi ke basis data MySQL berhasil!",
     "srv.db_explorer_hanya_mengizinkan":
       "Penjelajah Basis Data hanya mengizinkan satu pernyataan SELECT/SHOW/DESCRIBE baca-saja.",
+    "srv.query_wajib": "Query wajib diisi.",
     "srv.koneksi_postgresql_berhasil": "Koneksi PostgreSQL berhasil!",
     "srv.konfigurasi_postgresql_berhasil_diperbarui": "Konfigurasi PostgreSQL berhasil diperbarui!",
     "srv.point_updated": "Poin diperbarui",
@@ -342,6 +343,7 @@ export const id = {
     actTaskCreated: "membuat task baru",
     actStatusChanged: "mengubah status task",
     actTaskUpdated: "memperbarui detail task",
+    actTaskAssigned: "menugaskan task",
     actCommentAdded: "menambahkan komentar",
     actAvatarUpdated: "memperbarui foto profil",
     actMemberAdded: "menambahkan anggota tim",
@@ -766,6 +768,7 @@ export const id = {
     masterData: "Master Data",
     userManagement: "Manajemen Pengguna",
     userSessions: "Sesi Pengguna",
+    activityLog: "Log Aktivitas",
     enterpriseAudit: "Audit Perusahaan",
     dbExplorer: "Penjelajah Basis Data",
     settingIntegration: "Pengaturan Integrasi",
@@ -1991,6 +1994,19 @@ export const id = {
     stopRecording: "Hentikan Rekaman",
     startRecording: "Mulai Merekam",
     ffmpegFailed: "FFmpeg gagal mengekstrak audio.",
+    recordingRetentionNote:
+      "Rekaman hanya dipakai untuk analisis sementara. Setelah notulen berhasil, berkas audio/video dihapus; hasil analisis tetap disimpan.",
+    processingTitle: "Menyiapkan berkas sementara...",
+    processingTempStore:
+      "Menyimpan berkas sementara untuk analisis (bukan penyimpanan permanen)...",
+    uploadDoneTitle: "Unggah selesai",
+    uploadDoneSubtext: "Memulai analisis transkrip...",
+    completedTitle: "Pemrosesan selesai",
+    completedRetentionSubtext:
+      "Notulen tersimpan. Berkas rekaman telah dihapus sesuai kebijakan retensi.",
+    uploadRecordingCta: "Unggah rekaman rapat",
+    uploadRecordingFormats: "Video / Audio (MP4, AVI, MKV, MOV, MP3, WAV, dll.)",
+    evidenceQuote: "Bukti cuplikan",
   },
   shapes: {
     shRect: "🔲 Proses (Rectangle)",

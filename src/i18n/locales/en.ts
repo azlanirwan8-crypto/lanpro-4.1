@@ -40,6 +40,7 @@ export const en = {
     "srv.koneksi_ke_database_mysql": "Connected to the MySQL database.",
     "srv.db_explorer_hanya_mengizinkan":
       "The database explorer only allows a single read-only SELECT/SHOW/DESCRIBE statement.",
+    "srv.query_wajib": "Query is required.",
     "srv.koneksi_postgresql_berhasil": "PostgreSQL connection succeeded.",
     "srv.konfigurasi_postgresql_berhasil_diperbarui": "PostgreSQL configuration updated.",
     "srv.point_updated": "Point updated",
@@ -333,6 +334,7 @@ export const en = {
     actTaskCreated: "created a new task",
     actStatusChanged: "changed a task status",
     actTaskUpdated: "updated task details",
+    actTaskAssigned: "assigned a task",
     actCommentAdded: "added a comment",
     actAvatarUpdated: "updated their profile photo",
     actMemberAdded: "added a team member",
@@ -756,6 +758,7 @@ export const en = {
     masterData: "Master Data",
     userManagement: "User Management",
     userSessions: "User Sessions",
+    activityLog: "Activity Log",
     enterpriseAudit: "Enterprise Audit",
     dbExplorer: "DB Explorer",
     settingIntegration: "Settings & Integration",
@@ -1973,6 +1976,18 @@ export const en = {
     stopRecording: "Stop recording",
     startRecording: "Start recording",
     ffmpegFailed: "FFmpeg failed to extract audio.",
+    recordingRetentionNote:
+      "Recordings are used for analysis only. After minutes succeed, the audio/video file is deleted; analysis results are kept.",
+    processingTitle: "Preparing temporary file...",
+    processingTempStore: "Storing a temporary file for analysis (not permanent retention)...",
+    uploadDoneTitle: "Upload complete",
+    uploadDoneSubtext: "Starting transcript analysis...",
+    completedTitle: "Processing complete",
+    completedRetentionSubtext:
+      "Minutes saved. The recording file was deleted per retention policy.",
+    uploadRecordingCta: "Upload meeting recording",
+    uploadRecordingFormats: "Video / Audio (MP4, AVI, MKV, MOV, MP3, WAV, etc.)",
+    evidenceQuote: "Evidence quote",
   },
   shapes: {
     shRect: "🔲 Process (Rectangle)",

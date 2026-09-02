@@ -508,11 +508,35 @@ async function startServer() {
   app.use((req: any, res, next) => {
     req.io = io;
     
-    // Intercept response finish to emit event if it was a modification
+    // #322 — data_changed: scope ke room proyek bila projectId diketahui;
+    // entity global (users/master-data/dll) tetap broadcast ke semua.
     res.on("finish", () => {
-      if (["POST", "PUT", "DELETE"].includes(req.method)) {
+      if (["POST", "PUT", "DELETE", "PATCH"].includes(req.method)) {
         if (req.url.startsWith("/api/") && !req.url.startsWith("/api/auth")) {
-           io.emit("data_changed", { path: req.url, method: req.method });
+          const jalur = String(req.url).split("?")[0];
+          const dariParams = req.params?.projectId;
+          const dariBody =
+            req.body && typeof req.body === "object" ? req.body.projectId : undefined;
+          const dariQuery = typeof req.query?.projectId === "string" ? req.query.projectId : undefined;
+          const cocokUrl = jalur.match(/\/projects\/([^/]+)/);
+          const projectId =
+            (typeof dariParams === "string" && dariParams) ||
+            (typeof dariBody === "string" && dariBody) ||
+            (typeof dariQuery === "string" && dariQuery) ||
+            (cocokUrl && cocokUrl[1]) ||
+            null;
+
+          const payload = {
+            path: req.url,
+            method: req.method,
+            ...(projectId ? { projectId } : {}),
+          };
+
+          if (projectId) {
+            io.to(projectId).emit("data_changed", payload);
+          } else {
+            io.emit("data_changed", payload);
+          }
         }
       }
     });

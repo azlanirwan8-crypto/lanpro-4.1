@@ -621,9 +621,9 @@ export const MasterDataPanel = ({
           </button>
 
           {/* Header */}
-          <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 mb-4 flex justify-between items-center shadow-2xs shrink-0">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
+          <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 shadow-2xs shrink-0 min-w-0">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
                   {t("master.systemMaster")}
                 </span>
@@ -666,7 +666,7 @@ export const MasterDataPanel = ({
                     setIsNewMasterModalOpen(true);
                   }
                 }}
-                className="btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
+                className="btn-animation waves-effect waves-light btn-primary h-9 px-3 sm:px-4 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-xs w-full sm:w-auto whitespace-nowrap"
               >
                 <Plus className="w-3.5 h-3.5" />{" "}
                 {t("master.addType", {

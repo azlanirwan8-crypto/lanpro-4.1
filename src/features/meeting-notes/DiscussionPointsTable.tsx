@@ -145,6 +145,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
     if (socket) {
       socket.on("data_changed", (event: any) => {
         if (shouldSuppressDiscussionPointsRefresh()) return;
+        // #322 — abaikan event proyek lain
+        if (event?.projectId && projectId && event.projectId !== projectId) return;
         if (event.path?.includes("/discussionPoints") || event.path?.includes("/meetings")) {
           fetchPoints();
         }
@@ -177,12 +179,19 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
         id: "meeting-detail-add-point",
         label: t("discussion.addPoint") || "Tambah Titik Diskusi",
         onClick: () => {
-          const el =
-            document.getElementById("quick-add-concern") ||
-            document.getElementById("quick-add-section");
+          const candidates = [
+            "quick-add-concern",
+            "quick-add-concern-desktop",
+            "quick-add-section",
+          ];
+          const el = candidates
+            .map((id) => document.getElementById(id))
+            .find((node) => node && (node as HTMLElement).offsetParent !== null);
           if (el) {
             el.scrollIntoView({ behavior: "smooth", block: "center" });
-            el.focus();
+            if ("focus" in el && typeof (el as HTMLElement).focus === "function") {
+              (el as HTMLElement).focus();
+            }
           }
         },
         canCreate: canAdd,
@@ -616,6 +625,74 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
         <div className="flex-1 flex flex-col min-h-0">
           {/* Mobile Card List View (< 640px) */}
           <div className="sm:hidden flex-1 overflow-y-auto p-4 space-y-3">
+            {canAdd && (
+              <div
+                id="quick-add-section"
+                className="rounded-xl border border-primary/25 bg-primary-surface/5 p-3 space-y-2.5 shadow-2xs"
+              >
+                <div className="text-[11px] font-medium text-content-strong">
+                  {t("discussion.addPoint") || "Tambah Titik Diskusi"}
+                </div>
+                <input
+                  id="quick-add-concern"
+                  type="text"
+                  placeholder={t("discussion.newConcernPlaceholder")}
+                  value={quickConcern}
+                  onChange={(e) => setQuickConcern(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleLiveQuickAdd();
+                  }}
+                  className="w-full min-w-0 px-3 py-2.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-strong outline-none shadow-2xs placeholder:text-content-subtle"
+                />
+                <input
+                  type="text"
+                  placeholder={t("discussion.notesPlaceholder")}
+                  value={quickCatatan}
+                  onChange={(e) => setQuickCatatan(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleLiveQuickAdd();
+                  }}
+                  className="w-full min-w-0 px-3 py-2.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none placeholder:text-content-subtle shadow-2xs"
+                />
+                <div className="grid grid-cols-1 gap-2 min-w-0">
+                  <StyledDropdown
+                    value={quickFitur}
+                    onChange={(val) => setQuickFitur(val)}
+                    options={masterData
+                      .filter((m) => m.type?.toLowerCase() === "fitur")
+                      .map((m) => ({ id: m.label, label: m.label }))}
+                    className="text-xs w-full min-w-0"
+                  />
+                  <StyledDropdown
+                    value={quickAssignTo}
+                    onChange={(val) => setQuickAssignTo(val)}
+                    options={[
+                      { id: "Unassigned", label: t("newTask.unassigned") },
+                      ...projectMembers.map((m) => ({
+                        id: m.uid || m.id || "",
+                        label: m.displayName || m.username || m.name || "",
+                      })),
+                    ]}
+                    className="text-xs w-full min-w-0"
+                  />
+                  <input
+                    type="date"
+                    value={quickTargetDate}
+                    onChange={(e) => setQuickTargetDate(e.target.value)}
+                    className="w-full min-w-0 px-3 py-2.5 bg-surface border border-border-subtle focus:border-primary focus:ring-1 focus:ring-primary/20 rounded-md text-xs font-normal text-content-body outline-none shadow-2xs"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleLiveQuickAdd()}
+                  disabled={isSaving || !quickConcern.trim()}
+                  className="w-full min-h-11 px-3 py-2.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active disabled:opacity-40 text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>{t("discussion.add")}</span>
+                </button>
+              </div>
+            )}
             {paginatedPoints.length === 0 ? (
               <div className="text-center py-12 text-content-subtle">
                 <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
@@ -872,6 +949,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                     {/* Concern */}
                     <td className="py-2.5 px-4 align-middle">
                       <input
+                        id="quick-add-concern-desktop"
                         type="text"
                         placeholder={t("discussion.newConcernPlaceholder")}
                         value={quickConcern}

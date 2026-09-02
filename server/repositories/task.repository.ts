@@ -73,17 +73,15 @@ export class TaskRepository {
         if (t.assigneeId) userIds.add(String(t.assigneeId));
       });
 
+      // Pakai IN (?) + array JS agar convertToPostgres → ANY($n) benar.
+      // Bentuk IN (?,?,…) dengan 1 id jadi IN (?) + string → ANY gagal
+      // (malformed array literal) — gejala #329 QA 02 Sep.
+      const ids = Array.from(userIds);
       const [userRows]: any =
-        userIds.size > 0
+        ids.length > 0
           ? await connection.query(
-              `SELECT id, uid, displayName, nama_lengkap, username, email, photoURL FROM Users WHERE id IN (${Array.from(
-                userIds
-              )
-                .map(() => "?")
-                .join(",")}) OR uid IN (${Array.from(userIds)
-                .map(() => "?")
-                .join(",")})`,
-              [...Array.from(userIds), ...Array.from(userIds)]
+              `SELECT id, uid, displayName, nama_lengkap, username, email, photoURL FROM Users WHERE id IN (?) OR uid IN (?)`,
+              [ids, ids]
             )
           : [[]];
       const usersMap = new Map<string, any>();

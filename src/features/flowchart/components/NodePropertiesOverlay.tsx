@@ -23,6 +23,8 @@ interface NodePropertiesOverlayProps {
   /** Node yang sedang dipilih; seluruh kendali di sini bekerja padanya. */
   node: FlowNode;
   isSelected: boolean;
+  /** #321 — sembunyikan bila panel/sheet properti sudah terbuka (hindari chrome ganda). */
+  suppressOverlay?: boolean;
   /** Menerapkan perubahan sebagian pada node yang aktif. */
   handleUpdateActiveNode: (props: Partial<FlowNode>) => void;
   handleDuplicateNode: (node: FlowNode) => void;
@@ -34,6 +36,7 @@ interface NodePropertiesOverlayProps {
 export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
   node,
   isSelected,
+  suppressOverlay = false,
   handleUpdateActiveNode,
   handleDuplicateNode,
   setActiveTool,
@@ -41,11 +44,11 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
   handleDeleteSelected,
 }) => {
   const { t } = useTranslation();
-  if (!isSelected) return null;
+  if (!isSelected || suppressOverlay) return null;
 
   return (
     <div
-      className="absolute -top-16 left-1/2 -translate-x-1/2 bg-surface/95 backdrop-blur-md p-2 px-3 rounded-xl border border-border-subtle/90 shadow-[0_10px_35px_rgba(0,0,0,0.12)] flex items-center gap-2 z-40 select-none pointer-events-auto transition-all"
+      className="absolute -top-16 left-1/2 -translate-x-1/2 bg-surface/95 backdrop-blur-md p-2 px-3 rounded-xl border border-border-subtle/90 shadow-[0_10px_35px_rgba(0,0,0,0.12)] items-center gap-2 z-40 select-none pointer-events-auto transition-all hidden md:flex"
       onMouseDown={(e) => e.stopPropagation()}
     >
       {/* Shape Converter Selector */}

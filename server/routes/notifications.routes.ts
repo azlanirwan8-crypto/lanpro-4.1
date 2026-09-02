@@ -9,6 +9,8 @@ import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { matchesCaller } from "../services/task.service";
 import { notificationRepository } from "../repositories/notification.repository";
 import { userRepository } from "../repositories/user.repository";
+import { validasiQuery } from "../middleware/validate";
+import { notificationsListQuerySchema } from "../schemas/session.schema";
 
 const router = express.Router();
 
@@ -58,137 +60,141 @@ const notifikasiPostLimiter = rateLimit({
  */
 const TIPE_AMAN_PENGIRIM_BUKAN_ADMIN = new Set(["mention", "bug_retest"]);
 
-router.get("/api/users/:userId/notifications", async (req, res) => {
-  try {
-    const activeUser = (req as any).user;
-    if (!activeUser) {
-      return res.status(401).json({
-        status: "error",
-        code: "srv.akses_tidak_sah_sesi",
-        message: "Akses tidak sah: Sesi tidak valid atau belum login.",
-      });
-    }
+router.get(
+  "/api/users/:userId/notifications",
+  validasiQuery(notificationsListQuerySchema),
+  async (req, res) => {
+    try {
+      const activeUser = (req as any).user;
+      if (!activeUser) {
+        return res.status(401).json({
+          status: "error",
+          code: "srv.akses_tidak_sah_sesi",
+          message: "Akses tidak sah: Sesi tidak valid atau belum login.",
+        });
+      }
 
-    const activeUserId = activeUser.id || activeUser.uid;
-    const requesterRole = activeUser.role || "user";
+      const activeUserId = activeUser.id || activeUser.uid;
+      const requesterRole = activeUser.role || "user";
 
-    let targetUserId = activeUserId;
-    if (requesterRole === "admin") {
-      targetUserId = req.params.userId || activeUserId;
-    }
+      let targetUserId = activeUserId;
+      if (requesterRole === "admin") {
+        targetUserId = req.params.userId || activeUserId;
+      }
 
-    const uCheck = await userRepository.findByIdOrUid(targetUserId);
+      const uCheck = await userRepository.findByIdOrUid(targetUserId);
 
-    let userIds = [targetUserId];
-    let dbUserId = targetUserId;
-    let firebaseUid = targetUserId;
-    let userDisplayName = "";
-    let userUsername = "";
-    let globalRole = "user";
+      let userIds = [targetUserId];
+      let dbUserId = targetUserId;
+      let firebaseUid = targetUserId;
+      let userDisplayName = "";
+      let userUsername = "";
+      let globalRole = "user";
 
-    if (uCheck) {
-      userIds = [uCheck.id, uCheck.uid || ""].filter(Boolean);
-      dbUserId = uCheck.id;
-      firebaseUid = uCheck.uid || uCheck.id;
-      userDisplayName = uCheck.displayName || "";
-      userUsername = uCheck.username || "";
-      globalRole = uCheck.role || "user";
-    }
+      if (uCheck) {
+        userIds = [uCheck.id, uCheck.uid || ""].filter(Boolean);
+        dbUserId = uCheck.id;
+        firebaseUid = uCheck.uid || uCheck.id;
+        userDisplayName = uCheck.displayName || "";
+        userUsername = uCheck.username || "";
+        globalRole = uCheck.role || "user";
+      }
 
-    const { projectRoles } = await userRepository.getUserProjectRoles(dbUserId, firebaseUid);
+      const { projectRoles } = await userRepository.getUserProjectRoles(dbUserId, firebaseUid);
 
-    const rows = await notificationRepository.findRawNotificationsForUserIds(userIds);
+      const rows = await notificationRepository.findRawNotificationsForUserIds(userIds);
 
-    const filteredNotifications = rows.filter((row: any) => {
-      const projId = row.taskProjectId || row.meetingProjectId || row.activityProjectId || null;
+      const filteredNotifications = rows.filter((row: any) => {
+        const projId = row.taskProjectId || row.meetingProjectId || row.activityProjectId || null;
 
-      const isAdminGlobally = globalRole === "admin";
-      const roleInProject = projId ? projectRoles[projId] : null;
-      const isProjectAdmin = roleInProject === "admin";
-      const isUserAdmin = isAdminGlobally || isProjectAdmin;
+        const isAdminGlobally = globalRole === "admin";
+        const roleInProject = projId ? projectRoles[projId] : null;
+        const isProjectAdmin = roleInProject === "admin";
+        const isUserAdmin = isAdminGlobally || isProjectAdmin;
 
-      const isAssignee = row.assigneeId === dbUserId || row.assigneeId === firebaseUid;
-      const isCreator = row.reporterId === dbUserId || row.reporterId === firebaseUid;
-      const isParentEpicReporter =
-        row.parentTaskReporterId &&
-        (row.parentTaskReporterId === dbUserId || row.parentTaskReporterId === firebaseUid);
+        const isAssignee = row.assigneeId === dbUserId || row.assigneeId === firebaseUid;
+        const isCreator = row.reporterId === dbUserId || row.reporterId === firebaseUid;
+        const isParentEpicReporter =
+          row.parentTaskReporterId &&
+          (row.parentTaskReporterId === dbUserId || row.parentTaskReporterId === firebaseUid);
 
-      const isTargetAksi =
-        isAssignee ||
-        (userDisplayName && row.message && row.message.includes(userDisplayName)) ||
-        (userUsername && row.message && row.message.includes(userUsername));
+        const isTargetAksi =
+          isAssignee ||
+          (userDisplayName && row.message && row.message.includes(userDisplayName)) ||
+          (userUsername && row.message && row.message.includes(userUsername));
 
-      const isMentioned =
-        (userUsername &&
-          row.message &&
-          row.message.toLowerCase().includes("@" + userUsername.toLowerCase())) ||
-        (userDisplayName &&
-          row.message &&
-          row.message.toLowerCase().includes("@" + userDisplayName.toLowerCase()));
+        const isMentioned =
+          (userUsername &&
+            row.message &&
+            row.message.toLowerCase().includes("@" + userUsername.toLowerCase())) ||
+          (userDisplayName &&
+            row.message &&
+            row.message.toLowerCase().includes("@" + userDisplayName.toLowerCase()));
 
-      const hasDirectContext =
-        isAssignee || isCreator || isParentEpicReporter || isTargetAksi || isMentioned;
+        const hasDirectContext =
+          isAssignee || isCreator || isParentEpicReporter || isTargetAksi || isMentioned;
 
-      if (!projId) {
-        const isProjectOrTaskRelated =
-          row.type === "project_activity" ||
-          row.type === "task" ||
-          row.type === "meeting" ||
-          (row.title &&
-            (row.title.toLowerCase().includes("proyek") ||
-              row.title.toLowerCase().includes("project") ||
-              row.title.toLowerCase().includes("tugas") ||
-              row.title.toLowerCase().includes("task"))) ||
-          (row.message &&
-            (row.message.toLowerCase().includes("proyek") ||
-              row.message.toLowerCase().includes("project") ||
-              row.message.toLowerCase().includes("tugas") ||
-              row.message.toLowerCase().includes("task")));
+        if (!projId) {
+          const isProjectOrTaskRelated =
+            row.type === "project_activity" ||
+            row.type === "task" ||
+            row.type === "meeting" ||
+            (row.title &&
+              (row.title.toLowerCase().includes("proyek") ||
+                row.title.toLowerCase().includes("project") ||
+                row.title.toLowerCase().includes("tugas") ||
+                row.title.toLowerCase().includes("task"))) ||
+            (row.message &&
+              (row.message.toLowerCase().includes("proyek") ||
+                row.message.toLowerCase().includes("project") ||
+                row.message.toLowerCase().includes("tugas") ||
+                row.message.toLowerCase().includes("task")));
 
-        if (isProjectOrTaskRelated) {
-          if (isUserAdmin) {
-            return true;
+          if (isProjectOrTaskRelated) {
+            if (isUserAdmin) {
+              return true;
+            }
+            return hasDirectContext;
           }
-          return hasDirectContext;
+
+          return true;
         }
 
-        return true;
-      }
+        if (isUserAdmin) {
+          return true;
+        }
 
-      if (isUserAdmin) {
-        return true;
-      }
+        if (!roleInProject) {
+          return false;
+        }
 
-      if (!roleInProject) {
-        return false;
-      }
+        if (roleInProject === "viewer") {
+          return isMentioned;
+        }
 
-      if (roleInProject === "viewer") {
-        return isMentioned;
-      }
+        if (roleInProject === "qa") {
+          const isQAStatus =
+            row.taskStatus &&
+            (row.taskStatus.toLowerCase() === "ready for qa" ||
+              row.taskStatus.toLowerCase() === "testing" ||
+              row.taskStatus.toLowerCase() === "uat");
+          return hasDirectContext || isQAStatus;
+        }
 
-      if (roleInProject === "qa") {
-        const isQAStatus =
-          row.taskStatus &&
-          (row.taskStatus.toLowerCase() === "ready for qa" ||
-            row.taskStatus.toLowerCase() === "testing" ||
-            row.taskStatus.toLowerCase() === "uat");
-        return hasDirectContext || isQAStatus;
-      }
+        return hasDirectContext;
+      });
 
-      return hasDirectContext;
-    });
-
-    res.json({ status: "success", data: filteredNotifications.slice(0, 50) });
-  } catch (error: any) {
-    console.error("LOG ANOMALI CRITICAL: GET /api/users/:userId/notifications error:", error);
-    res.status(500).json({
-      status: "error",
-      code: "srv.terjadi_kesalahan_internal_server",
-      message: "Terjadi kesalahan internal server",
-    });
+      res.json({ status: "success", data: filteredNotifications.slice(0, 50) });
+    } catch (error: any) {
+      console.error("LOG ANOMALI CRITICAL: GET /api/users/:userId/notifications error:", error);
+      res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
   }
-});
+);
 
 router.post("/api/users/:userId/notifications", notifikasiPostLimiter, async (req: any, res) => {
   try {

@@ -64,6 +64,13 @@ export const humanizeActivityAction = (action?: string, details?: any): string =
   )
     return i18n.t("aktivitas.actTaskUpdated");
   if (
+    act.includes("task_assigned") ||
+    act.includes("assign_task") ||
+    act.includes("assigntask") ||
+    act.includes("task assigned")
+  )
+    return i18n.t("aktivitas.actTaskAssigned");
+  if (
     act.includes("comment_added") ||
     act.includes("add_comment") ||
     act.includes("addcomment") ||

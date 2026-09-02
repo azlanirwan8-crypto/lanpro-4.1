@@ -537,8 +537,8 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto">
-                <div className="relative flex-1 sm:w-72">
+              <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
+                <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">
                   <input
                     type="text"
                     placeholder={t("meetings.searchPlaceholder")}
@@ -547,7 +547,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                       setSearchQuery(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="w-full pl-9 pr-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium"
+                    className="w-full min-w-0 pl-9 pr-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium"
                   />
                   <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
                 </div>
@@ -555,7 +555,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 {canAdd && (
                   <button
                     onClick={startAddMeeting}
-                    className="btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
+                    className="btn-animation waves-effect waves-light btn-primary h-9 px-3 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
                   >
                     <Plus className="w-4 h-4" /> {t("meetings.addMeeting")}
                   </button>

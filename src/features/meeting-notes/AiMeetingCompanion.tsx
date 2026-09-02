@@ -665,9 +665,12 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
     setConvertingTaskIds((prev) => [...prev, index]);
 
+    const concern = item.concern_masalah || item.concern || "";
+    const solusi = item.solusi_disepakati || item.tindakanLanjut || "";
+    const bukti = item.bukti_cuplikan ? `\n\n**Bukti cuplikan:**\n"${item.bukti_cuplikan}"` : "";
     const tempId = `temp-${crypto.randomUUID()}`;
-    const title = `[Action Item] ${item.concern_masalah?.substring(0, 50)}...`;
-    const description = `**Concern:**\n${item.concern_masalah}\n\n**Solusi Disepakati:**\n${item.solusi_disepakati}`;
+    const title = `[Action Item] ${concern.substring(0, 50)}${concern.length > 50 ? "..." : ""}`;
+    const description = `**Concern:**\n${concern}\n\n**Solusi Disepakati:**\n${solusi}${bukti}`;
     const placeholder: Task = {
       id: tempId,
       projectId,
@@ -737,6 +740,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     for (let i = 0; i < itemsToImport.length; i++) {
       const item = itemsToImport[i];
       try {
+        const buktiNote = item.bukti_cuplikan ? ` Bukti: "${item.bukti_cuplikan}"` : "";
         const payload: Omit<DiscussionPoint, "id" | "meetingId" | "createdAt"> = {
           authorId: currentUser.uid,
           concern: item.concern_masalah || item.concern || "",
@@ -744,7 +748,8 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
           system: item.system || "System",
           surrounding: item.surrounding || "-",
           keterangan:
-            item.keterangan || "Diimpor otomatis dari analisis transkrip rapat oleh AI Companion.",
+            item.keterangan ||
+            `Diimpor otomatis dari analisis transkrip rapat oleh AI Companion.${buktiNote}`,
           tindakanLanjut: item.solusi_disepakati || item.tindakanLanjut || "",
           status: "pending",
           assignTo: undefined,
@@ -776,6 +781,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
     setImportingIds((prev) => [...prev, index]);
     try {
+      const buktiNote = item.bukti_cuplikan ? ` Bukti: "${item.bukti_cuplikan}"` : "";
       const payload: Omit<DiscussionPoint, "id" | "meetingId" | "createdAt"> = {
         authorId: currentUser.uid,
         concern: item.concern_masalah || item.concern || "",
@@ -783,7 +789,8 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
         system: item.system || "System",
         surrounding: item.surrounding || "-",
         keterangan:
-          item.keterangan || "Diimpor otomatis dari analisis transkrip rapat oleh AI Companion.",
+          item.keterangan ||
+          `Diimpor otomatis dari analisis transkrip rapat oleh AI Companion.${buktiNote}`,
         tindakanLanjut: item.solusi_disepakati || item.tindakanLanjut || "",
         status: "pending",
         assignTo: undefined,
@@ -1196,6 +1203,9 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                     <p className="text-xs sm:text-[11px] text-content-subtle">
                       {t("aiMeeting.recordsTheMeetingThroughYour")}
                     </p>
+                    <p className="text-xs sm:text-[11px] text-content-muted">
+                      {t("aiMeeting.recordingRetentionNote")}
+                    </p>
 
                     <div className="flex flex-col items-center justify-center gap-3 w-full py-4">
                       <button
@@ -1232,13 +1242,13 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             icon = <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />;
                             break;
                           case "IS_PROCESSING":
-                            title = "Menyimpan Berkas Rapat...";
-                            subtext = "Menyimpan berkas rekaman secara permanen...";
+                            title = t("aiMeeting.processingTitle");
+                            subtext = t("aiMeeting.processingTempStore");
                             icon = <Loader2 className="w-4 h-4 text-indigo-600 animate-spin" />;
                             break;
                           case "UPLOAD_SUCCESS":
-                            title = "Unggah Selesai!";
-                            subtext = "Selesai! Memulai analisis transkrip...";
+                            title = t("aiMeeting.uploadDoneTitle");
+                            subtext = t("aiMeeting.uploadDoneSubtext");
                             icon = <CheckCircle2 className="w-4 h-4 text-emerald-600" />;
                             pct = Math.max(pct, 5);
                             break;
@@ -1265,8 +1275,8 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                             pct = 90;
                             break;
                           case "COMPLETED":
-                            title = "Pemrosesan Selesai!";
-                            subtext = "Seluruh tahapan berhasil diselesaikan.";
+                            title = t("aiMeeting.completedTitle");
+                            subtext = t("aiMeeting.completedRetentionSubtext");
                             icon = <CheckCircle2 className="w-4 h-4 text-emerald-600" />;
                             pct = 100;
                             break;
@@ -1331,9 +1341,12 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                           className="hidden"
                         />
                         <UploadCloud className="w-8 h-8" />
-                        <p className="text-xs text-center">Unggah Rekaman Rapat</p>
+                        <p className="text-xs text-center">{t("aiMeeting.uploadRecordingCta")}</p>
                         <p className="text-xs sm:text-[10px] text-content-subtle text-center">
-                          Video / Audio (MP4, AVI, MKV, MOV, MP3, WAV, etc.)
+                          {t("aiMeeting.uploadRecordingFormats")}
+                        </p>
+                        <p className="text-xs sm:text-[10px] text-content-muted text-center mt-1">
+                          {t("aiMeeting.recordingRetentionNote")}
                         </p>
                       </div>
                     )}
@@ -1558,8 +1571,11 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                       const legacyMappedItem: ActionItem = {
                         concern: item.concern_masalah,
                         tindakanLanjut: item.solusi_disepakati,
-                        PIC: "TBD",
-                        targetDate: "TBD",
+                        PIC: item.pic || "UNVERIFIED",
+                        targetDate: item.due_date || "UNVERIFIED",
+                        bukti_cuplikan: item.bukti_cuplikan || "",
+                        status_bukti: item.status_bukti || "",
+                        keterangan: item.keterangan || "",
                       };
                       return (
                         <div
@@ -1571,6 +1587,16 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                               <span className="px-2 py-[3px] bg-rose-500/10 text-rose-600 text-[10px] leading-none sm:text-[9px] font-medium uppercase rounded border border-rose-500/30">
                                 {t("rakit.meetingConcernNo", { no: index + 1 })}
                               </span>
+                              {item.pic && (
+                                <span className="px-2 py-[3px] bg-indigo-500/10 text-indigo-700 text-[10px] leading-none font-medium rounded border border-indigo-500/30">
+                                  {t("aiMeeting.personInChargePic")} {item.pic}
+                                </span>
+                              )}
+                              {item.due_date && (
+                                <span className="px-2 py-[3px] bg-surface-sunken text-content-secondary text-[10px] leading-none font-medium rounded border border-border-subtle">
+                                  {t("aiMeeting.target")} {item.due_date}
+                                </span>
+                              )}
                             </div>
 
                             <div>
@@ -1590,11 +1616,17 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                 {item.solusi_disepakati}
                               </p>
                             </div>
+
+                            {item.bukti_cuplikan ? (
+                              <blockquote className="text-xs text-content-muted italic border-l-2 border-border-subtle pl-3">
+                                {t("aiMeeting.evidenceQuote")}: “{item.bukti_cuplikan}”
+                              </blockquote>
+                            ) : null}
                           </div>
 
                           <div className="flex flex-col sm:flex-row gap-2 shrink-0">
                             <button
-                              onClick={() => handleConvertToTask(item, index)}
+                              onClick={() => handleConvertToTask(legacyMappedItem, index)}
                               disabled={convertingTaskIds.includes(index)}
                               title={t("aiMeeting.createBacklogTask")}
                               className="px-3.5 py-2.5 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/30 text-amber-700 disabled:opacity-50 text-xs font-medium rounded-xl transition-all flex items-center gap-1 cursor-pointer shadow-soft"
@@ -1670,6 +1702,11 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
                                 <span className="text-pink-600 font-medium">{item.pic}</span>
                               </div>
                             )}
+                            {item.bukti_cuplikan ? (
+                              <blockquote className="text-xs text-content-muted italic border-l-2 border-border-subtle pl-3">
+                                {t("aiMeeting.evidenceQuote")}: “{item.bukti_cuplikan}”
+                              </blockquote>
+                            ) : null}
                           </div>
                         </div>
                       </div>

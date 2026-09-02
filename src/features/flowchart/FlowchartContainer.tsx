@@ -2740,23 +2740,24 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         setIsRightSidebarOpen={setIsRightSidebarOpen}
                       />
 
-                      {/* FLOATING MIRO TOOLBAR (SISI KIRI CANVAS) */}
+                      {/* FLOATING MIRO TOOLBAR (SISI KIRI) — #321 icon-only rail */}
                       <div
                         className={cn(
-                          "absolute top-28 md:top-24 z-20 flex flex-col gap-2.5 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-2.5 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] shrink-0 select-none items-center transition-all duration-300 left-4"
+                          "absolute top-24 md:top-20 z-20 flex flex-col gap-1.5 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1.5 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] shrink-0 select-none items-center transition-all duration-300 left-3"
                         )}
                       >
                         {/* Active tools selector */}
                         <button
+                          type="button"
                           onClick={() => {
                             setActiveTool("select");
                             setConnectSourceId(null);
                           }}
                           className={cn(
-                            "p-2 rounded-lg transition-all",
+                            "p-2 rounded-lg transition-all w-9 h-9 flex items-center justify-center",
                             activeTool === "select"
-                              ? " text-content-inverse shadow-md scale-105"
-                              : " hover:bg-surface-muted"
+                              ? "bg-violet-600 text-content-inverse shadow-md"
+                              : "hover:bg-surface-muted text-content-body"
                           )}
                           title={t("flowchart.toolPointer")}
                         >
@@ -2764,33 +2765,32 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         </button>
 
                         <button
+                          type="button"
                           onClick={() => {
                             setActiveTool("hand");
                             setConnectSourceId(null);
                           }}
                           className={cn(
-                            "p-2 rounded-lg transition-all",
+                            "p-2 rounded-lg transition-all w-9 h-9 flex items-center justify-center",
                             activeTool === "hand"
-                              ? " text-content-inverse shadow-md scale-105"
-                              : " hover:bg-surface-muted"
+                              ? "bg-violet-600 text-content-inverse shadow-md"
+                              : "hover:bg-surface-muted text-content-body"
                           )}
                           title={t("flowchart.toolHand")}
                         >
                           <Hand className="w-4 h-4" />
                         </button>
 
-                        <div className="w-6 h-px bg-surface-strong" />
+                        <div className="w-5 h-px bg-surface-strong" />
 
                         {/* Quick Sticky Note Adder */}
                         <button
+                          type="button"
                           onClick={() => handleAddNewNode("sticky", "yellow")}
-                          className="p-2 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/30 text-amber-700 rounded-lg transition-all flex flex-col items-center shrink-0 w-10"
+                          className="p-2 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/30 text-amber-700 rounded-lg transition-all flex items-center justify-center shrink-0 w-9 h-9"
                           title={t("flowchart.toolSticky")}
                         >
                           <StickyNote className="w-4 h-4 text-amber-500 fill-amber-300" />
-                          <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-normal uppercase tracking-tight text-amber-600 mt-0.5">
-                            {t("flowchart.sticky")}
-                          </span>
                         </button>
 
                         {/* Shapes COLLECTION TRIGGER */}
@@ -2804,10 +2804,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           expandedGroups={expandedGroups}
                           toggleGroupExpanded={toggleGroupExpanded}
                           handleAddNewNode={handleAddNewNode}
+                          onOpenPalette={() => setIsRightSidebarOpen(false)}
                         />
 
                         {/* Quick Link connection helper */}
                         <button
+                          type="button"
                           onClick={() => {
                             setActiveTool("connect");
                             setConnectSourceId(null);
@@ -2816,43 +2818,39 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             );
                           }}
                           className={cn(
-                            "p-2 rounded-lg transition-all flex flex-col items-center w-10 border border-border-faint",
+                            "p-2 rounded-lg transition-all flex items-center justify-center w-9 h-9 border border-border-faint",
                             activeTool === "connect"
-                              ? " bg-amber-400 text-content"
-                              : " hover:bg-surface-muted"
+                              ? "bg-amber-400 text-content border-amber-400"
+                              : "hover:bg-surface-muted text-content-body"
                           )}
                           title={t("flowchart.toolArrow")}
                         >
                           <ArrowRight className="w-4 h-4" />
-                          <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-normal uppercase tracking-tight mt-0.5">
-                            {t("flowchart.arrow")}
-                          </span>
                         </button>
 
                         <button
+                          type="button"
                           onClick={() => handleAddNewNode("text")}
-                          className="p-2 hover:bg-surface-muted rounded-lg transition-all flex flex-col items-center w-10"
+                          className="p-2 hover:bg-surface-muted rounded-lg transition-all flex items-center justify-center w-9 h-9 text-content-body"
                           title={t("flowchart.toolText")}
                         >
                           <Type className="w-4 h-4" />
-                          <span className="text-xs sm:text-[10px] sm:text-[7.5px] font-normal uppercase tracking-tight mt-0.5">
-                            {t("flowchart.text")}
-                          </span>
                         </button>
 
-                        <div className="w-6 h-px bg-surface-strong" />
+                        <div className="w-5 h-px bg-surface-strong" />
 
-                        {/* Quick tutorial indicator */}
-                        <div className="text-content-subtle hover:text-violet-600 transition-colors cursor-pointer">
-                          <HelpCircle
-                            className="w-4 h-4"
-                            onClick={() =>
-                              toast.info(
-                                "Gunakan menu ini untuk menambahkan komponen ke visual whiteboard. Anda dapat mengubah isi teks dengan mengetik langsung diatas bentuk."
-                              )
-                            }
-                          />
-                        </div>
+                        <button
+                          type="button"
+                          className="p-2 text-content-subtle hover:text-violet-600 transition-colors rounded-lg w-9 h-9 flex items-center justify-center"
+                          title={t("flowchart.helpNav")}
+                          onClick={() =>
+                            toast.info(
+                              "Gunakan menu ini untuk menambahkan komponen ke visual whiteboard. Anda dapat mengubah isi teks dengan mengetik langsung diatas bentuk."
+                            )
+                          }
+                        >
+                          <HelpCircle className="w-4 h-4" />
+                        </button>
                       </div>
 
                       {/* ACTIVE DRAWING SHEET CANVAS (THE BASE BACKGROUND LAYER) */}
@@ -3017,6 +3015,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               getLinkedTaskDetails={getLinkedTaskDetails}
                               setSelectedTaskForDetail={setSelectedTaskForDetail}
                               setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+                              suppressNodeOverlay={isRightSidebarOpen}
                             />
                           ))}
                         </div>
@@ -3040,7 +3039,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             )}>
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs sm:text-[11px] sm:text-[9px] text-emerald-400 font-normal uppercase tracking-wider">{t("flowchart.canvas")}</span>
+                <span className="text-xs sm:text-[11px] text-emerald-400 font-normal uppercase tracking-wider">{t("flowchart.canvas")}</span>
               </span>
               <div className="w-px h-3.5" />
               <span className="font-medium">X: <span className="text-content-inverse-strong">{hoverCoords.x}</span> Y: <span className="text-content-inverse-strong">{hoverCoords.y}</span></span>
@@ -3048,30 +3047,40 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               <span className="text-violet-300 font-medium">{t("rakit.objectsCount", { count: nodes.length })}</span>
             </div> */}
 
-                        {/* FLOATING ACTION FLAPS OVERLAYS FOR ZERO-CLICK SIDEBAR EXPANSION */}
-                        {/* Left sidebar flap toggle deleted as requested by user to make canvas full */}
-
-                        {/* Right sidebar flap toggle — #309: di atas lembar bawah saat HP */}
+                        {/* Right sidebar flap — #321: icon-only di HP */}
                         <button
-                          onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+                          type="button"
+                          onClick={() => {
+                            const next = !isRightSidebarOpen;
+                            setIsRightSidebarOpen(next);
+                            if (next) setIsShapeDropdownOpen(false);
+                          }}
                           className={cn(
                             "absolute z-30 p-2 bg-surface/70 backdrop-blur hover:bg-surface/85 border border-border-subtle/40 text-content-body hover:text-violet-600 shadow-soft-lg rounded-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 text-xs font-medium duration-300",
                             isRightSidebarOpen
-                              ? "right-4 bottom-[min(56vh,28rem)] md:bottom-4 md:right-[356px]"
-                              : "right-4 bottom-4"
+                              ? "right-3 bottom-[min(58vh,30rem)] md:bottom-4 md:right-[304px]"
+                              : "right-3 bottom-4"
                           )}
                           title={t("flowchart.togglePropertiesPanel")}
                         >
                           <Edit3 className="w-3.5 h-3.5 text-current" />
-                          <span className="text-xs sm:text-[10px] uppercase tracking-wider">
+                          <span className="hidden sm:inline text-[11px]">
                             {t("flowchart.propertiesEditor")}
                           </span>
-                          <span className="hidden md:inline">{isRightSidebarOpen ? "▶" : "◀"}</span>
-                          <span className="md:hidden">{isRightSidebarOpen ? "▼" : "▲"}</span>
+                          <span className="hidden md:inline text-content-subtle">
+                            {isRightSidebarOpen ? "▶" : "◀"}
+                          </span>
                         </button>
 
-                        {/* FLOATING CANVAS ACTION RIBBON (CENTER DOCK) */}
-                        <div className="absolute left-1/2 -translate-x-1/2 bottom-4 z-30 flex items-center gap-1.5 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1.5 px-3 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] select-none max-w-[85%] md:max-w-full transition-all duration-300">
+                        {/* FLOATING CANVAS ACTION RIBBON (CENTER DOCK) — #321: naik/sembunyi saat sheet HP */}
+                        <div
+                          className={cn(
+                            "absolute left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1 px-2 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.1)] select-none max-w-[90%] md:max-w-full transition-all duration-300",
+                            isRightSidebarOpen || isShapeDropdownOpen
+                              ? "max-md:opacity-0 max-md:pointer-events-none max-md:translate-y-4 bottom-4"
+                              : "bottom-4 opacity-100"
+                          )}
+                        >
                           {/* Undo Button */}
                           <button
                             onClick={handleUndoClick}
@@ -3254,7 +3263,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         {isKeyboardHelpOpen && (
                           <div className="absolute left-4 right-4 md:left-auto md:right-4 bottom-20 z-40 bg-overlay/95 backdrop-blur text-content-inverse p-4 rounded-xl border shadow-2xl max-w-sm space-y-3 p-4 select-none">
                             <div className="flex justify-between items-center pb-2 border-b border-border-inverse">
-                              <span className="font-normal uppercase tracking-widest text-xs sm:text-[11px] sm:text-[9.5px] text-violet-400">
+                              <span className="font-medium tracking-wide text-xs sm:text-[11px] text-violet-400">
                                 {t("flowchart.shortcutsTitle")}
                               </span>
                               <button
@@ -3269,7 +3278,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   {t("flowchart.undoAction")}
                                 </span>
-                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
                                   Ctrl + Z
                                 </kbd>
                               </div>
@@ -3277,7 +3286,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   {t("flowchart.redoAction")}
                                 </span>
-                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
                                   Ctrl + Y / Ctrl+Shift+Z
                                 </kbd>
                               </div>
@@ -3285,7 +3294,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   {t("flowchart.duplicateShape")}
                                 </span>
-                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
                                   Ctrl + D
                                 </kbd>
                               </div>
@@ -3293,7 +3302,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   {t("flowchart.nudgeFlow")}
                                 </span>
-                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
                                   {t("flowchart.arrowKeys")}
                                 </kbd>
                               </div>
@@ -3301,7 +3310,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans font-sans">
                                   {t("flowchart.moveGroupWide")}
                                 </span>
-                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
                                   {t("flowchart.shiftArrow")}
                                 </kbd>
                               </div>
@@ -3309,7 +3318,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   {t("flowchart.cancelSelection")}
                                 </span>
-                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium">
                                   Esc
                                 </kbd>
                               </div>
@@ -3317,7 +3326,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 <span className="text-content-subtle font-medium font-sans">
                                   {t("flowchart.deleteSelected")}
                                 </span>
-                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] sm:text-[9px] font-medium font-sans">
+                                <kbd className="bg-surface-inverse text-content-inverse-strong border border-border-inverse p-0.5 px-1.5 rounded-md font-mono text-xs sm:text-[11px] font-medium font-sans">
                                   Delete / Backspace
                                 </kbd>
                               </div>
@@ -3332,15 +3341,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         )}
                       </div>
 
-                      {/* RIGHT EDIT ATTRIBUTES PANEL — #309: lembar bawah di HP, panel kanan di md+ */}
+                      {/* RIGHT EDIT ATTRIBUTES PANEL — #321: lebih sempit + lembar HP dengan handle */}
                       <div
                         className={cn(
-                          "absolute z-20 bg-surface/95 md:bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 py-4 px-4 space-y-4 shrink-0 overflow-y-auto text-xs shadow-[0_12px_40px_rgba(0,0,0,0.08)] flex flex-col transition-all duration-300",
-                          // Desktop: panel kanan
-                          "md:right-4 md:top-4 md:bottom-4 md:w-80 md:rounded-xl",
+                          "absolute z-40 bg-surface/95 md:bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 py-3 px-3 space-y-3 shrink-0 overflow-y-auto text-xs shadow-[0_12px_40px_rgba(0,0,0,0.08)] flex flex-col transition-all duration-300",
+                          // Desktop: panel kanan lebih sempit
+                          "md:right-3 md:top-3 md:bottom-3 md:w-72 md:rounded-xl md:z-20",
                           isRightSidebarOpen
                             ? "md:translate-x-0 md:opacity-100 md:pointer-events-auto"
-                            : "md:translate-x-[360px] md:opacity-0 md:pointer-events-none",
+                            : "md:translate-x-[320px] md:opacity-0 md:pointer-events-none",
                           // Mobile: lembar bawah
                           "max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:w-full max-md:max-h-[55vh] max-md:rounded-t-2xl max-md:border-b-0 safe-area-pb",
                           isRightSidebarOpen
@@ -3348,11 +3357,24 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             : "max-md:translate-y-full max-md:opacity-0 max-md:pointer-events-none"
                         )}
                       >
+                        <div className="md:hidden flex items-center justify-between shrink-0 -mt-1 mb-1">
+                          <div className="flex-1 flex justify-center">
+                            <div className="w-10 h-1 rounded-full bg-surface-strong" />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsRightSidebarOpen(false)}
+                            className="p-1.5 text-content-subtle hover:text-content-body hover:bg-surface-muted rounded-lg absolute right-2 top-2"
+                            aria-label={t("flowchart.togglePropertiesPanel")}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
                         {selectedNodeId ? (
-                          <div className="space-y-4">
-                            <div className="flex justify-between items-center bg-surface-sunken p-2.5 rounded-lg border border-border-subtle">
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center bg-surface-sunken p-2 rounded-lg border border-border-subtle">
                               <div>
-                                <span className="text-xs sm:text-[10px] sm:text-[8.5px] font-normal tracking-wider text-content-muted uppercase">
+                                <span className="text-[11px] font-medium text-content-muted">
                                   {t("flowchart.selectedComponent")}
                                 </span>
                                 <div className="text-content font-medium capitalize flex items-center gap-1.5 mt-0.5 text-xs">
@@ -3361,6 +3383,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                 </div>
                               </div>
                               <button
+                                type="button"
                                 onClick={handleDeleteSelected}
                                 className="p-2 bg-rose-500/10 rounded-lg hover:bg-rose-500/15 text-rose-600 transition-all active:scale-95 shadow-soft border"
                                 title={t("flowchart.deleteShape")}
@@ -3371,7 +3394,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             {/* Shape Type Dropper Selector (Miro Dynamic conversion) */}
                             <div className="space-y-1.5">
-                              <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted font-medium flex items-center gap-1">
+                              <label className="text-[11px] font-medium text-content-muted flex items-center gap-1">
                                 <Layers className="w-3.5 h-3.5 text-violet-600" />
                                 <span>{t("flowchart.changeShapeType")}</span>
                               </label>
@@ -3406,7 +3429,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             {/* Edit inline message */}
                             <div className="space-y-1.5">
-                              <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted font-medium">
+                              <label className="text-[11px] font-medium text-content-muted">
                                 {t("flowchart.editText")}
                               </label>
                               <textarea
@@ -3419,7 +3442,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             {/* Shape Theme Colors (Miro aesthetics) */}
                             <div className="space-y-2">
-                              <span className="text-xs sm:text-[10px] uppercase font-medium text-content-muted block font-medium">
+                              <span className="text-[11px] font-medium text-content-muted block">
                                 {t("flowchart.colorPalette")}
                               </span>
                               <div className="grid grid-cols-6 gap-1.5">
@@ -3446,7 +3469,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             {/* Borders parameters styling */}
                             <div className="space-y-1.5">
-                              <span className="text-xs sm:text-[10px] uppercase font-medium text-content-muted block font-medium">
+                              <span className="text-[11px] font-medium text-content-muted block">
                                 {t("flowchart.borderStyle")}
                               </span>
                               <div className="grid grid-cols-3 gap-1">
@@ -3480,12 +3503,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             {/* Dimension adjustments */}
                             <div className="space-y-2">
-                              <span className="text-xs sm:text-[10px] uppercase font-medium text-content-muted block font-medium">
+                              <span className="text-[11px] font-medium text-content-muted block">
                                 {t("flowchart.dimensions")}
                               </span>
                               <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                  <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
+                                  <span className="text-xs sm:text-[11px] text-content-subtle font-medium">
                                     {t("flowchart.widthW")}
                                   </span>
                                   <input
@@ -3502,7 +3525,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                   />
                                 </div>
                                 <div>
-                                  <span className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle font-medium">
+                                  <span className="text-xs sm:text-[11px] text-content-subtle font-medium">
                                     {t("flowchart.heightH")}
                                   </span>
                                   <input
@@ -3525,11 +3548,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                             {/* Integration with Workspace tasks list (LINKING TASKS BACKLOG TO SHAPES) */}
                             <div className="space-y-1.5 pt-2 border-t border-border-subtle">
-                              <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted flex items-center gap-1 font-medium">
+                              <label className="text-[11px] font-medium text-content-muted flex items-center gap-1">
                                 <Workflow className="w-3.5 h-3.5 text-violet-600" />
                                 <span>{t("flowchart.linkTaskBacklog")}</span>
                               </label>
-                              <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-muted mb-2 font-medium">
+                              <p className="text-xs sm:text-[11px] text-content-muted mb-2 font-medium">
                                 {t("flowchart.linkTheShapeToThe")}
                               </p>
 
@@ -3550,9 +3573,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </div>
                           </div>
                         ) : selectedEdgeId ? (
-                          <div className="space-y-4">
+                          <div className="space-y-3">
                             <div className="bg-surface-sunken p-3 rounded-lg border border-border-subtle">
-                              <span className="text-xs sm:text-[10px] sm:text-[8px] font-mono text-content-muted uppercase tracking-widest block font-normal">
+                              <span className="text-[11px] font-medium text-content-muted block">
                                 {t("flowchart.selectedRelation")}
                               </span>
                               <div className="text-content font-medium mt-1 text-xs">
@@ -3561,7 +3584,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </div>
 
                             <div className="space-y-1.5">
-                              <label className="text-xs sm:text-[10px] uppercase font-medium text-content-muted font-medium">
+                              <label className="text-[11px] font-medium text-content-muted">
                                 {t("flowchart.lineLabel")}
                               </label>
                               <input

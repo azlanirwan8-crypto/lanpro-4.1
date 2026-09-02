@@ -57,12 +57,29 @@ export const PresenceProvider: React.FC<{
       if (data.status === "success") {
         const online = data.onlineUsers || [];
         const latestAllUsers = data.allUsers || [];
-        setHttpOnlineUsers(online);
-        setAllUsers(latestAllUsers);
+        setHttpOnlineUsers((prev) => {
+          const prevIds = prev.map((u) => u.uid || u.id).join(",");
+          const nextIds = online.map((u: UserProfile) => u.uid || u.id).join(",");
+          return prevIds === nextIds ? prev : online;
+        });
+        // Jangan timpa store bila identitas daftar sama — setAllUsers tiap ping
+        // memicu re-render massal saat navigasi cepat (#324 / max-depth #289).
+        setAllUsers((prev: UserProfile[]) => {
+          const prevIds = (prev || []).map((u) => u.uid || u.id).join(",");
+          const nextIds = (latestAllUsers || []).map((u: UserProfile) => u.uid || u.id).join(",");
+          if (prevIds === nextIds && (prev || []).length === (latestAllUsers || []).length) {
+            return prev;
+          }
+          return latestAllUsers;
+        });
 
         if (online.length > 0) {
           safeLocalStorage.setItem("lanpro_last_online_users", JSON.stringify(online));
-          setRetainedOnlineUsers(online);
+          setRetainedOnlineUsers((prev) => {
+            const prevIds = prev.map((u) => u.uid || u.id).join(",");
+            const nextIds = online.map((u: UserProfile) => u.uid || u.id).join(",");
+            return prevIds === nextIds ? prev : online;
+          });
         }
       }
     } catch (err) {
@@ -77,11 +94,19 @@ export const PresenceProvider: React.FC<{
       const data = await apiRequest("/api/presence/sync", { method: "GET" });
       if (data.status === "success") {
         const online = data.onlineUsers || [];
-        setHttpOnlineUsers(online);
+        setHttpOnlineUsers((prev) => {
+          const prevIds = prev.map((u) => u.uid || u.id).join(",");
+          const nextIds = online.map((u: UserProfile) => u.uid || u.id).join(",");
+          return prevIds === nextIds ? prev : online;
+        });
 
         if (online.length > 0) {
           safeLocalStorage.setItem("lanpro_last_online_users", JSON.stringify(online));
-          setRetainedOnlineUsers(online);
+          setRetainedOnlineUsers((prev) => {
+            const prevIds = prev.map((u) => u.uid || u.id).join(",");
+            const nextIds = online.map((u: UserProfile) => u.uid || u.id).join(",");
+            return prevIds === nextIds ? prev : online;
+          });
         }
       }
     } catch (err) {
@@ -131,10 +156,18 @@ export const PresenceProvider: React.FC<{
     };
 
     const onPresenceSync = (users: UserProfile[]) => {
-      setSocketOnlineUsers(users);
+      setSocketOnlineUsers((prev) => {
+        const prevIds = prev.map((u) => u.uid || u.id).join(",");
+        const nextIds = users.map((u) => u.uid || u.id).join(",");
+        return prevIds === nextIds ? prev : users;
+      });
       if (users.length > 0) {
         safeLocalStorage.setItem("lanpro_last_online_users", JSON.stringify(users));
-        setRetainedOnlineUsers(users);
+        setRetainedOnlineUsers((prev) => {
+          const prevIds = prev.map((u) => u.uid || u.id).join(",");
+          const nextIds = users.map((u) => u.uid || u.id).join(",");
+          return prevIds === nextIds ? prev : users;
+        });
       }
     };
 

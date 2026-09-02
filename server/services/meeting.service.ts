@@ -29,7 +29,43 @@ import { meetingRepository } from "../repositories/meeting.repository";
  */
 const io = { emit: (event: string, ...args: any[]) => getSocketServer()?.emit(event, ...args) };
 
+/** #322 — batas pekerja AI in-process agar tidak menumpuk job berat tanpa antrian durable. */
+const MAX_AI_PIPELINE_CONCURRENT = Math.max(
+  1,
+  Math.min(4, Number(process.env.AI_PIPELINE_MAX_CONCURRENT || 2) || 2)
+);
+let aiPipelineAktif = 0;
+const aiPipelineAntrian: Array<() => void> = [];
+
+function ambilSlotAiPipeline(): Promise<void> {
+  if (aiPipelineAktif < MAX_AI_PIPELINE_CONCURRENT) {
+    aiPipelineAktif += 1;
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    aiPipelineAntrian.push(() => {
+      aiPipelineAktif += 1;
+      resolve();
+    });
+  });
+}
+
+function lepaskanSlotAiPipeline(): void {
+  aiPipelineAktif = Math.max(0, aiPipelineAktif - 1);
+  const berikutnya = aiPipelineAntrian.shift();
+  if (berikutnya) berikutnya();
+}
+
 export async function runAIPipeline(meetingId: string): Promise<void> {
+  await ambilSlotAiPipeline();
+  try {
+    await jalankanAiPipelineDalamSlot(meetingId);
+  } finally {
+    lepaskanSlotAiPipeline();
+  }
+}
+
+async function jalankanAiPipelineDalamSlot(meetingId: string): Promise<void> {
   console.log(`[AI PIPELINE] Starting background processing for meeting: ${meetingId}`);
   let connection;
   try {
@@ -157,7 +193,7 @@ export async function runAIPipeline(meetingId: string): Promise<void> {
           },
         },
         {
-          text: "Transkripsikan seluruh isi rekaman audio rapat ini secara lengkap 100% dan sangat detail ke dalam Bahasa Indonesia. Pastikan tidak ada kata, kalimat, pembicara, atau alur pembahasan yang terpotong, disingkat, disederhanakan, atau dihilangkan. Berikan transkrip mentah yang utuh dari awal sampai akhir rapat.",
+          text: "Transkripsikan isi rekaman audio rapat ini ke Bahasa Indonesia secara lengkap. Aturan ketat: (1) Jangan mengarang nama orang — jika pembicara terdengar berbeda, label Speker 1/2/3 atau suara yang disebut di audio; (2) Jika ada jeda atau bagian tidak jelas, tulis [tidak jelas]; (3) Jangan meringkas — tulis apa yang diucapkan; (4) Jangan menambah fakta di luar audio.",
         },
       ],
     });
@@ -211,10 +247,26 @@ export async function runAIPipeline(meetingId: string): Promise<void> {
               keputusan_akhir: {
                 type: Type.STRING,
                 description:
-                  "Pernyataan keputusan resmi yang disepakati bersama di akhir pembahasan sub-topik tersebut.",
+                  "Pernyataan keputusan resmi yang disepakati. Kosongkan string bila tidak ada keputusan eksplisit di transkrip.",
+              },
+              bukti_cuplikan: {
+                type: Type.STRING,
+                description:
+                  "Kutipan singkat verbatim dari transkrip yang membuktikan keputusan/argumen. Wajib diisi bila keputusan_akhir terisi; jika tidak ada kutipan, biarkan keputusan kosong.",
+              },
+              status_bukti: {
+                type: Type.STRING,
+                description:
+                  "VERIFIED jika ada kutipan transkrip; UNVERIFIED jika tidak — item UNVERIFIED sebaiknya dikosongkan.",
               },
             },
-            required: ["topik_bahasan", "latar_belakang_argumen", "keputusan_akhir"],
+            required: [
+              "topik_bahasan",
+              "latar_belakang_argumen",
+              "keputusan_akhir",
+              "bukti_cuplikan",
+              "status_bukti",
+            ],
           },
           description:
             "Daftar kronologi bahasan rapat beserta jalannya argumen dan keputusan akhir.",
@@ -237,10 +289,25 @@ export async function runAIPipeline(meetingId: string): Promise<void> {
               solusi_dan_arahan: {
                 type: Type.STRING,
                 description:
-                  "Instruksi langsung, mandat, atau solusi penyelesaian masalah yang disepakati untuk memitigasi kekhawatiran tersebut.",
+                  "Instruksi langsung, mandat, atau solusi penyelesaian yang disepakati di transkrip.",
+              },
+              bukti_cuplikan: {
+                type: Type.STRING,
+                description:
+                  "Kutipan verbatim dari transkrip yang mendukung kekhawatiran/solusi. Wajib jika item diisi.",
+              },
+              status_bukti: {
+                type: Type.STRING,
+                description: "VERIFIED atau UNVERIFIED.",
               },
             },
-            required: ["pembicara", "kekhawatiran_spesifik", "solusi_dan_arahan"],
+            required: [
+              "pembicara",
+              "kekhawatiran_spesifik",
+              "solusi_dan_arahan",
+              "bukti_cuplikan",
+              "status_bukti",
+            ],
           },
           description:
             "Daftar kekhawatiran spesifik dari pembicara beserta arahan/solusi penyelesaiannya.",
@@ -258,15 +325,24 @@ export async function runAIPipeline(meetingId: string): Promise<void> {
               pic: {
                 type: Type.STRING,
                 description:
-                  "Nama orang atau tim yang ditunjuk sebagai penanggung jawab. Jika tidak disebutkan di transkrip, gunakan 'TBD'.",
+                  "Nama orang/tim penanggung jawab HANYA jika disebut di transkrip. Jika tidak disebut, tulis UNVERIFIED (bukan menebak).",
               },
               estimasi_waktu: {
                 type: Type.STRING,
                 description:
-                  "Target tenggat waktu eksplisit dari transkrip. Jika tidak disebutkan, gunakan 'TBD'.",
+                  "Tenggat eksplisit dari transkrip. Jika tidak disebut, tulis UNVERIFIED.",
+              },
+              bukti_cuplikan: {
+                type: Type.STRING,
+                description:
+                  "Kutipan verbatim dari transkrip yang membuktikan action item / penugasan.",
+              },
+              status_bukti: {
+                type: Type.STRING,
+                description: "VERIFIED atau UNVERIFIED.",
               },
             },
-            required: ["action_item", "pic", "estimasi_waktu"],
+            required: ["action_item", "pic", "estimasi_waktu", "bukti_cuplikan", "status_bukti"],
           },
           description: "Roadmap rencana aksi taktis berikutnya.",
         },
@@ -331,46 +407,21 @@ PANDUAN PENINGKATAN KEMAMPUAN ADAPTIF (SELF-IMPROVEMENT):
 - Selalu adaptasikan gaya penulisan notulen Anda agar semakin mendekati ekspektasi spesifik yang diminta oleh user dalam log evaluasi tersebut. Jangan ulangi kesalahan klasifikasi atau reduksi informasi yang sama.
 `;
 
-    const systemInstruction = `Bertindaklah sebagai Senior Business Analyst dan PMO Lead kelas enterprise yang sangat detail dan perfeksionis. Tugas Anda adalah menyusun Notulen Rapat Resmi yang sangat komprehensif, mendalam, detail secara UTUH dari Teks Transkrip Mentah (Raw Transcript) hasil rekaman rapat, dan TANPA meringkas/memotong poin penting.
+    const systemInstruction = `Bertindaklah sebagai Senior Business Analyst / PMO. Susun notulen dari TRANSKRIP saja.
 
-Patuhi instruksi ketat berikut:
-1. JANGAN lakukan enkapsulasi atau generalisasi (jangan meringkas perdebatan menjadi hanya satu kalimat jika di transkrip mereka berdiskusi panjang).
-2. Tuliskan semua studi kasus, nama brand/mitra, angka, estimasi bulan/target, dan istilah teknis secara verbatim (apa adanya sesuai transkrip).
-3. Jika ada perdebatan alur berpikir (misal: salah paham di awal lalu dikoreksi oleh pembicara lain), jabarkan kronologi koreksi tersebut di poin diskusi.
+ATURAN ANTI-HALUSINASI (wajib):
+1. HANYA fakta yang ada di transkrip. Dilarang mengarang nama, tanggal, PIC, tenggat, atau keputusan.
+2. Setiap keputusan/aksi/concern WAJIB punya bukti_cuplikan (kutipan singkat verbatim). Jika tidak ada kutipan → jangan isi klaim itu (biarkan array item tidak dibuat, atau status_bukti=UNVERIFIED dan field klaim dikosongkan).
+3. PIC dan tenggat: hanya jika disebut eksplisit; jika tidak → "UNVERIFIED" (bukan tebakan nama).
+4. Pembicara: pakai nama hanya jika disebut; selain itu Speker N / label dari transkrip.
+5. Output JSON bersih sesuai skema — tanpa blok markdown.
 
-Anda WAJIB mematuhi Aturan Kepatuhan Faktual (Strict Grounding Rules) berikut:
-1. HANYA ambil data yang tertulis atau diucapkan langsung di transkrip. Jangan mengarang fakta, tanggal, atau nama.
-2. Jika nama pembicara (Speaker ID) teridentifikasi di transkrip, sertasikan nama/kode pembicara tersebut pada setiap poin analisis untuk akurasi rekam jejak.
-3. Hasilkan output dalam format JSON terstruktur bersih tanpa bungkus blok markdown (JANGAN gunakan \`\`\`json ... \`\`\`).
-
-Harap isi seluruh field dalam skema JSON terstruktur berikut secara lengkap:
-- 'ringkasan_eksekutif': Notulen Rapat dari transkrip secara UTUH, mendalam, dan TANPA meringkas/memotong poin penting menggunakan struktur formatting Markdown berikut secara ketat:
-  ## NOTULEN RAPAT: [Nama Topik/Agenda Rapat Utama]
-  **Tanggal:** [Isi Tanggal/Bulan/Tahun jika disebutkan]
-  **Topik Utama:** [Tujuan besar rapat ini diadakan]
-
-  ---
-
-  ### **A. DAFTAR HADIR & IDENTIFIKASI PERAN**
-  (Daftar semua pembicara beserta peran, divisi, atau latar belakang mereka berdasarkan isi percakapan).
-
-  ---
-
-  ### **B. KRONOLOGI DISKUSI MENDALAM & DETAIL TEKNIS**
-  (Kupas habis setiap topik yang didebatkan. Bagi menjadi sub-heading (###) berdasarkan topik masalah. Masukkan detail arsitektur sistem, skema database/API/flow data, alasan bisnis di balik sebuah request, serta perbandingan sistem eksisting vs sistem baru yang dibahas).
-
-  ---
-
-  ### **C. BREAKDOWN RENCANA TINDAK LANJUT (ACTION ITEMS)**
-  (Buat daftar tugas konkret yang sifatnya operasional dan siap dieksekusi, sebutkan:
-  - Pihak/Tim Penanggung Jawab.
-  - Detail Tugas (Langkah 1, Langkah 2, dst).
-  - Dampak Teknis/Bisnis jika tugas ini dijalankan).
-
-- 'kronologi_dan_kesimpulan': kronologi jalannya pembahasan rapat terstruktur (topik_bahasan, latar_belakang_argumen, keputusan_akhir). Catat jalannya argumen dan perdebatan secara mendalam.
-- 'tindak_lanjut_dan_concern': daftar kekhawatiran peserta rapat, kendala teknis atau gap sistem yang diungkapkan pembicara, beserta solusi/arahan langsung yang disepakati (pembicara, kekhawatiran_spesifik, solusi_dan_arahan).
-- 'next_plan_roadmap': roadmap rencana aksi taktis hasil rapat yang spesifik dan detail (action_item, pic, estimasi_waktu).
-- 'target_to_be_architecture': analisis skenario arsitektur masa depan yang disepakati (proses_bisnis_as_is, proses_bisnis_to_be, langkah_transisi).
+Isi field:
+- ringkasan_eksekutif: notulen Markdown terstruktur (hadir, kronologi, action) — tetap berbasis transkrip.
+- kronologi_dan_kesimpulan: topik, argumen, keputusan_akhir + bukti_cuplikan + status_bukti.
+- tindak_lanjut_dan_concern: pembicara, kekhawatiran, solusi + bukti_cuplikan + status_bukti.
+- next_plan_roadmap: action_item, pic, estimasi_waktu + bukti_cuplikan + status_bukti.
+- target_to_be_architecture: as-is / to-be / langkah_transisi hanya dari transkrip.
 
 ${learningSection}`;
 
@@ -394,11 +445,25 @@ ${learningSection}`;
       parsedData = {};
     }
 
-    // Synthesize legacy fields from the new corporate format to avoid breaking older meetings
+    const filterVerified = (items: any[], claimKeys: string[]) =>
+      (items || []).filter((item: any) => {
+        const status = String(item.status_bukti || "").toUpperCase();
+        const bukti = String(item.bukti_cuplikan || "").trim();
+        if (status === "UNVERIFIED" && !bukti) return false;
+        const hasClaim = claimKeys.some((k) => String(item[k] || "").trim());
+        return hasClaim;
+      });
+
+    const kronologi_dan_kesimpulan = filterVerified(parsedData.kronologi_dan_kesimpulan || [], [
+      "keputusan_akhir",
+      "topik_bahasan",
+    ]);
+    const tindak_lanjut_dan_concern = filterVerified(parsedData.tindak_lanjut_dan_concern || [], [
+      "kekhawatiran_spesifik",
+      "solusi_dan_arahan",
+    ]);
+    const next_plan_roadmap = filterVerified(parsedData.next_plan_roadmap || [], ["action_item"]);
     const ringkasan_eksekutif = parsedData.ringkasan_eksekutif || "";
-    const kronologi_dan_kesimpulan = parsedData.kronologi_dan_kesimpulan || [];
-    const tindak_lanjut_dan_concern = parsedData.tindak_lanjut_dan_concern || [];
-    const next_plan_roadmap = parsedData.next_plan_roadmap || [];
     const target_to_be_architecture = parsedData.target_to_be_architecture || {
       proses_bisnis_as_is: "",
       proses_bisnis_to_be: "",
@@ -409,12 +474,12 @@ ${learningSection}`;
       .map((item: any) => item.keputusan_akhir)
       .filter(Boolean);
     const saran = tindak_lanjut_dan_concern
-      .map((item: any) => `${item.pembicara || "TBD"}: ${item.solusi_dan_arahan || "TBD"}`)
+      .map((item: any) => `${item.pembicara || "UNVERIFIED"}: ${item.solusi_dan_arahan || ""}`)
       .filter(Boolean);
 
     const notulen_rapat = kronologi_dan_kesimpulan.map((item: any, idx: number) => ({
       topik: item.topik_bahasan || `Topik Bahasan ${idx + 1}`,
-      pembahasan: `Latar Belakang & Argumen:\n${item.latar_belakang_argumen || "Tidak disebutkan."}\n\nKeputusan Akhir:\n${item.keputusan_akhir || "Tidak disebutkan."}`,
+      pembahasan: `Latar Belakang & Argumen:\n${item.latar_belakang_argumen || "Tidak disebutkan."}\n\nKeputusan Akhir:\n${item.keputusan_akhir || "Tidak disebutkan."}${item.bukti_cuplikan ? `\n\nBukti: "${item.bukti_cuplikan}"` : ""}`,
     }));
 
     const meeting_metadata = {
@@ -430,18 +495,23 @@ ${learningSection}`;
     const poin_diskusi_tambahan = tindak_lanjut_dan_concern.map((item: any) => ({
       concern: item.kekhawatiran_spesifik || "",
       tindakanLanjut: item.solusi_dan_arahan || "",
-      PIC: item.pembicara || "TBD",
-      targetDate: "TBD",
+      PIC: item.pembicara || "UNVERIFIED",
+      targetDate: "UNVERIFIED",
       fitur: "",
       system: "",
       surrounding: "",
-      keterangan: "",
+      keterangan: item.bukti_cuplikan ? `Bukti: ${item.bukti_cuplikan}` : "",
+      bukti_cuplikan: item.bukti_cuplikan || "",
+      status_bukti: item.status_bukti || "",
     }));
 
     const next_plan = next_plan_roadmap.map((item: any) => ({
       tahapan: item.action_item || "",
-      deskripsi: `Ditugaskan kepada: ${item.pic || "TBD"}. Rencana Aksi: ${item.action_item}`,
-      estimasi_waktu: item.estimasi_waktu || "Tidak disebutkan",
+      deskripsi: `Ditugaskan kepada: ${item.pic || "UNVERIFIED"}. Rencana Aksi: ${item.action_item}`,
+      estimasi_waktu: item.estimasi_waktu || "UNVERIFIED",
+      pic: item.pic || "UNVERIFIED",
+      bukti_cuplikan: item.bukti_cuplikan || "",
+      status_bukti: item.status_bukti || "",
     }));
 
     const to_be_scenario = {
@@ -470,14 +540,15 @@ ${learningSection}`;
       [finalJson, finalJson, meetingId]
     );
 
-    // #182: notulen sudah tersimpan di aiSummary/analysis_result — rekaman
-    // mentah (dan audio hasil ekstraksi FFmpeg bila video) tidak lagi
-    // dibutuhkan. Dihapus dari disk supaya tidak menumpuk permanen (disk
-    // lokal di serverless bersifat sementara, lihat npm run doctor §6).
+    // #320 — kebijakan pemilik: rekaman HANYA untuk analisis. Setelah notulen
+    // (aiSummary/analysis_result/transcript) tersimpan dan status COMPLETED,
+    // berkas audio/video dihapus dari disk dan recording_url dikosongkan.
+    // Hasil analisis tetap tersimpan. Gagal analisis → berkas dipertahankan agar bisa diulang.
     try {
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       if (audioPath !== filePath && fs.existsSync(audioPath)) fs.unlinkSync(audioPath);
       await meetingRepository.clearRecordingFile(meetingId);
+      console.log(`[AI PIPELINE] Rekaman dihapus pasca-analisis OK (meeting ${meetingId}).`);
     } catch (cleanupErr) {
       console.warn(`[AI PIPELINE] Gagal menghapus berkas rekaman pasca-analisis:`, cleanupErr);
     }
@@ -497,8 +568,8 @@ ${learningSection}`;
       meetingId,
       status: "COMPLETED",
       progress_percentage: 100,
-      aiSummary: parsedData,
-      analysis_result: parsedData,
+      aiSummary: combinedData,
+      analysis_result: combinedData,
       transcript: transcriptText,
     });
   } catch (err: any) {

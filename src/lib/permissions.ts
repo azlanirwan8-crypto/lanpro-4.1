@@ -206,6 +206,8 @@ export const KEY_MAP: Record<string, string> = {
   explorer: "dbExplorer",
   "enterprise-audit": "auditLog",
   auditLogs: "auditLog",
+  activity: "dashboard",
+  activityLogs: "dashboard",
   configuration: "masterData",
   "meeting-notes": "meetingNotes",
 };
@@ -321,9 +323,19 @@ export function hasPermission(
 
   const normModule = (KEY_MAP[module as string] || module) as keyof UserPermissions;
 
-  // Normalize action: map add -> create
+  // Normalize action: map add -> create. #331 — aksi kosong harus gagal aman,
+  // bukan melempar TypeError (pemanggilan salah arity dari UI).
+  if (action == null || typeof action !== "string") {
+    console.warn(`[PERM_MISMATCH] Module: ${module}, Invalid Action: ${action}`);
+    return false;
+  }
   let normalizedAction = action.toLowerCase();
   if (normalizedAction === "add") normalizedAction = "create";
+  // Huruf CRUD singkat (warisan UI #298) → nama penuh
+  if (normalizedAction === "c") normalizedAction = "create";
+  else if (normalizedAction === "r") normalizedAction = "read";
+  else if (normalizedAction === "u") normalizedAction = "update";
+  else if (normalizedAction === "d") normalizedAction = "delete";
 
   // Validate action
   if (!["create", "read", "update", "delete"].includes(normalizedAction)) {

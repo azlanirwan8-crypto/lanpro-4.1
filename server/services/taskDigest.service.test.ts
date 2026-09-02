@@ -120,6 +120,12 @@ describe("taskDigest.service - F6.4 Rekapitulasi Tugas Pending (Item #28)", () =
         },
       ];
 
+      const kemarin = new Date();
+      kemarin.setUTCDate(kemarin.getUTCDate() - 1);
+      const besok = new Date();
+      besok.setUTCDate(besok.getUTCDate() + 1);
+      const ymd = (d: Date) => d.toISOString().slice(0, 10);
+
       const mockTasksDb = [
         {
           id: "t-1",
@@ -127,7 +133,7 @@ describe("taskDigest.service - F6.4 Rekapitulasi Tugas Pending (Item #28)", () =
           title: "Implementasi Task Digest",
           status: "In Progress",
           priority: "High",
-          dueDate: "2026-08-01", // Past date (overdue)
+          dueDate: ymd(kemarin), // Past date (overdue)
           projectName: "LanPro Core",
         },
         {
@@ -136,7 +142,7 @@ describe("taskDigest.service - F6.4 Rekapitulasi Tugas Pending (Item #28)", () =
           title: "Refactor Database Adapter",
           status: "To Do",
           priority: "Medium",
-          dueDate: "2026-09-01", // Future date
+          dueDate: ymd(besok), // Future date
           projectName: "LanPro Core",
         },
       ];

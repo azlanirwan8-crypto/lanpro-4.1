@@ -5,7 +5,7 @@
  * Tipe murni: tanpa React, tanpa efek samping, tanpa dependensi runtime.
  */
 
-import type { Meeting, UserProfile } from '../../types';
+import type { Meeting, UserProfile } from "../../types";
 
 export interface AiMeetingCompanionProps {
   projectId: string;
@@ -29,12 +29,17 @@ export interface ActionItem {
   tindakanLanjut: string;
   PIC?: string;
   targetDate?: string;
+  bukti_cuplikan?: string;
+  status_bukti?: string;
 }
 
 export interface NextPlanItem {
   tahapan: string;
   deskripsi: string;
   estimasi_waktu?: string;
+  pic?: string;
+  bukti_cuplikan?: string;
+  status_bukti?: string;
 }
 
 export interface ToBeScenario {
@@ -47,18 +52,24 @@ export interface KronologiDanKesimpulanItem {
   topik_bahasan: string;
   latar_belakang_argumen: string;
   keputusan_akhir: string;
+  bukti_cuplikan?: string;
+  status_bukti?: string;
 }
 
 export interface TindakLanjutDanConcernItem {
   pembicara: string;
   kekhawatiran_spesifik: string;
   solusi_dan_arahan: string;
+  bukti_cuplikan?: string;
+  status_bukti?: string;
 }
 
 export interface NextPlanRoadmapItem {
   action_item: string;
   pic: string;
   estimasi_waktu: string;
+  bukti_cuplikan?: string;
+  status_bukti?: string;
 }
 
 export interface TargetToBeArchitecture {

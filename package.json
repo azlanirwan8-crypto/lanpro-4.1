@@ -35,7 +35,9 @@
     "audit:tema": "node scripts/validate/audit-tema.cjs",
     "audit:kelas": "node scripts/validate/audit-kelas-token.cjs",
     "audit:navigasi": "node scripts/validate/audit-navigasi.cjs",
-    "audit:logika": "node scripts/validate/audit-logika.cjs"
+    "audit:logika": "node scripts/validate/audit-logika.cjs",
+    "openapi:generate": "tsx scripts/generate-openapi.ts",
+    "test:load": "node scripts/test/load-baseline-322.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1111.0",
@@ -57,7 +59,6 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "docx": "^9.7.1",
-    "dompurify": "^3.4.12",
     "dotenv": "^17.2.3",
     "exceljs": "^4.4.0",
     "express": "^4.21.2",

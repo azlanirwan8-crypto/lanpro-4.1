@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { safeLocalStorage, safeSessionStorage } from "../../lib/safeStorage";
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import {
   Plus,
@@ -542,7 +542,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
   }, [documents, activeDocId]);
 
   // Trigger modal for Creating new documentation
-  const handleCreateNew = () => {
+  const handleCreateNew = useCallback(() => {
     setIsNew(true);
     setEditId(null);
     setEditTitle("");
@@ -552,7 +552,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
     setEditFile(null);
     setShouldRemoveFile(false);
     setShowFormModal(true);
-  };
+  }, [documentTypes]);
 
   useEffect(() => {
     if (canCreate) {
@@ -566,6 +566,8 @@ export const WikiView: React.FC<WikiViewProps> = ({
       unregisterAction("wiki-add-doc");
     }
     return () => unregisterAction("wiki-add-doc");
+    // onClick dipegang ref di MobileActionProvider — jangan ikutkan handler
+    // yang berubah tiap render (#324 max-depth di Dokumentasi).
   }, [canCreate, handleCreateNew, registerAction, unregisterAction, t]);
 
   // Trigger modal for Editing existing documentation (Pre-filled)
@@ -954,8 +956,8 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2.5 w-full sm:w-auto">
-                  <div className="relative flex-1 sm:w-72">
+                <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
+                  <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">
                     <input
                       type="text"
                       placeholder={t("wiki.searchPlaceholder")}
@@ -964,7 +966,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         setSearch(e.target.value);
                         setCurrentPage(1);
                       }}
-                      className="w-full pl-9 pr-3.5 py-1.5 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong font-medium shadow-2xs"
+                      className="w-full min-w-0 pl-9 pr-3.5 py-1.5 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong font-medium shadow-2xs"
                     />
                     <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
                   </div>
@@ -972,7 +974,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                   {canCreate && (
                     <button
                       onClick={handleCreateNew}
-                      className="btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs"
+                      className="btn-animation waves-effect waves-light btn-primary h-9 px-3 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
                     >
                       <Plus className="w-4 h-4" /> {t("wiki.addDocument")}
                     </button>
