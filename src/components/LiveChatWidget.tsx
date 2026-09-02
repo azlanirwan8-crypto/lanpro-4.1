@@ -726,7 +726,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                 </div>
 
                 {/* Users & Channels List */}
-                <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-50">
+                <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-border-faint">
                   {/* Channels / Virtual Bots Section */}
                   {filteredVirtuals.length > 0 && (
                     <div className="bg-surface-sunken/40">
@@ -897,10 +897,10 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
                       {activeChatUser.id !== "group" && activeChatUser.id !== "lanpro-ai" && (
                         <span
-                          className={`absolute bottom-0 right-0 w-2 h-2 rounded-full border border-slate-900 ${
+                          className={`absolute bottom-0 right-0 w-2 h-2 rounded-full border border-border-inverse ${
                             onlineUserIds.includes(activeChatUser.id)
                               ? "bg-emerald-500"
-                              : "bg-slate-400"
+                              : "bg-surface-marker"
                           }`}
                         />
                       )}
@@ -1061,15 +1061,15 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         </span>
                         <span className="flex gap-0.5 items-center justify-center pt-0.5 shrink-0">
                           <span
-                            className="w-1 h-1 bg-slate-400 rounded-full animate-bounce"
+                            className="w-1 h-1 bg-surface-marker rounded-full animate-bounce"
                             style={{ animationDelay: "0ms" }}
                           />
                           <span
-                            className="w-1 h-1 bg-slate-400 rounded-full animate-bounce"
+                            className="w-1 h-1 bg-surface-marker rounded-full animate-bounce"
                             style={{ animationDelay: "150ms" }}
                           />
                           <span
-                            className="w-1 h-1 bg-slate-400 rounded-full animate-bounce"
+                            className="w-1 h-1 bg-surface-marker rounded-full animate-bounce"
                             style={{ animationDelay: "300ms" }}
                           />
                         </span>

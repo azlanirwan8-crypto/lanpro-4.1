@@ -32,6 +32,8 @@ export interface UserEntity {
   passwordHash?: string;
   createdAt?: string;
   lastSeen?: string | null;
+  /** #345 — preferensi reminder due date (default true). */
+  notifDueReminder?: boolean | null;
 }
 
 export class UserRepository {

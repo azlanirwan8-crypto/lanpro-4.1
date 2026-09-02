@@ -95,15 +95,6 @@
     "color-sidebar-item-active#2": "rgba(255, 255, 255, 0.07)",
     "color-sidebar-item-hover#2": "rgba(255, 255, 255, 0.05)"
   },
-  "dark": {
-    "src/features/issues/styles.ts": 20
-  },
-  "silang": {
-    "src/AppContainer.tsx": 1,
-    "src/features/auth/components/SsoButtons.tsx": 2,
-    "src/features/kanban/components/KanbanCard.tsx": 1,
-    "src/features/qa/components/QATopBar.tsx": 1,
-    "src/features/settings/components/TemplateEditorModal.tsx": 2,
-    "src/features/sidebar/index.tsx": 1
-  }
+  "dark": {},
+  "silang": {}
 }

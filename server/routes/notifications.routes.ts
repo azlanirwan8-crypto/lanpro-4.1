@@ -11,6 +11,8 @@ import { notificationRepository } from "../repositories/notification.repository"
 import { userRepository } from "../repositories/user.repository";
 import { validasiQuery } from "../middleware/validate";
 import { notificationsListQuerySchema } from "../schemas/session.schema";
+import { verifyGlobalAdmin } from "../middleware/auth";
+import db from "../../src/lib/db";
 
 const router = express.Router();
 
@@ -441,6 +443,98 @@ router.delete("/api/users/:userId/notifications/:id", async (req: any, res) => {
       code: "srv.terjadi_kesalahan_internal_server",
       message: "Terjadi kesalahan internal server",
     });
+  }
+});
+
+/** #345 — preferensi notifikasi minimal (due reminder). */
+router.get("/api/profile/notif-prefs", async (req: any, res) => {
+  try {
+    const userId = req.user?.id || req.user?.uid;
+    if (!userId) {
+      return res.status(401).json({
+        status: "error",
+        code: "srv.sesi_tidak_valid",
+        message: "Sesi tidak valid.",
+      });
+    }
+    const user = await userRepository.findByIdOrUid(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        code: "srv.user_not_found",
+        message: "User not found",
+      });
+    }
+    const dueReminder = user.notifDueReminder !== false;
+    res.json({ status: "success", data: { dueReminder } });
+  } catch (error: any) {
+    console.error("GET /api/profile/notif-prefs error:", error);
+    res.status(500).json({
+      status: "error",
+      message: error?.message || "Gagal memuat preferensi notifikasi",
+    });
+  }
+});
+
+router.patch("/api/profile/notif-prefs", async (req: any, res) => {
+  let conn;
+  try {
+    const userId = req.user?.id || req.user?.uid;
+    if (!userId) {
+      return res.status(401).json({
+        status: "error",
+        code: "srv.sesi_tidak_valid",
+        message: "Sesi tidak valid.",
+      });
+    }
+    if (typeof req.body?.dueReminder !== "boolean") {
+      return res.status(400).json({
+        status: "error",
+        message: "dueReminder harus boolean",
+      });
+    }
+    const user = await userRepository.findByIdOrUid(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        code: "srv.user_not_found",
+        message: "User not found",
+      });
+    }
+    conn = await db.getConnection();
+    await conn.query('UPDATE Users SET "notifDueReminder" = ? WHERE id = ?', [
+      req.body.dueReminder,
+      user.id,
+    ]);
+    res.json({ status: "success", data: { dueReminder: req.body.dueReminder } });
+  } catch (error: any) {
+    console.error("PATCH /api/profile/notif-prefs error:", error);
+    res.status(500).json({
+      status: "error",
+      message: error?.message || "Gagal menyimpan preferensi notifikasi",
+    });
+  } finally {
+    if (conn) conn.release();
+  }
+});
+
+/** #345 — inventaris gagal kirim (admin). */
+router.get("/api/admin/notification-failures", verifyGlobalAdmin, async (_req, res) => {
+  let conn;
+  try {
+    conn = await db.getConnection();
+    const [rows]: any = await conn.query(
+      "SELECT id, channel, context, recipient_id, related_id, error_message, created_at FROM NotificationDeliveryFailures ORDER BY created_at DESC LIMIT 50"
+    );
+    res.json({ status: "success", data: rows || [] });
+  } catch (error: any) {
+    console.error("GET /api/admin/notification-failures error:", error);
+    res.status(500).json({
+      status: "error",
+      message: error?.message || "Gagal memuat log gagal notifikasi",
+    });
+  } finally {
+    if (conn) conn.release();
   }
 });
 

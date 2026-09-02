@@ -317,7 +317,7 @@ export const StyledDropdown = ({
                 />
               ) : (
                 <div
-                  className="w-2 h-2 rounded-full shrink-0 shadow-inner border border-black/10"
+                  className="w-2 h-2 rounded-full shrink-0 shadow-inner border border-border-subtle"
                   style={{ backgroundColor: selected?.color || "#cbd5e1" }}
                 />
               )
@@ -373,7 +373,7 @@ export const StyledDropdown = ({
                 width: dropdownPos.width,
                 zIndex: 10000,
               }}
-              className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden ring-1 ring-black/5 flex flex-col max-h-[300px] animate-dropdown"
+              className="bg-surface rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-border-subtle overflow-hidden ring-1 ring-border-faint flex flex-col max-h-[300px] animate-dropdown"
             >
               {/*
                 `min-h-0` wajib (#294). Induknya `flex flex-col max-h-[300px]`
@@ -425,7 +425,7 @@ export const StyledDropdown = ({
                             />
                           ) : (
                             <div
-                              className="w-2.5 h-2.5 rounded-full shrink-0 shadow-inner border border-black/5"
+                              className="w-2.5 h-2.5 rounded-full shrink-0 shadow-inner border border-border-faint"
                               style={{ backgroundColor: opt.color || "#cbd5e1" }}
                             />
                           )

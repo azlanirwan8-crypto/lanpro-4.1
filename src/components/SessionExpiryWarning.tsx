@@ -206,7 +206,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => {}} // Non-dismissible on backdrop click for safety
-              className="absolute inset-0 bg-slate-950/70 backdrop-blur-md"
+              className="absolute inset-0 bg-overlay/70 backdrop-blur-md"
             />
 
             {/* Modal Card */}

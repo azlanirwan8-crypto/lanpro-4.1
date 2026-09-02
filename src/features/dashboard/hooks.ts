@@ -255,6 +255,52 @@ export const useDashboard = (props: DashboardViewProps) => {
   const last7DaysData = [...last7DaysDataRaw];
   const weeklyVelocity = last7DaysData.reduce((acc, curr) => acc + curr.Completed, 0);
 
+  /** #342 — throughput mingguan (tugas terminal per minggu), 8 minggu terakhir. */
+  const throughputWeeklyData = (() => {
+    const weeks = 8;
+    const msWeek = 7 * msInDay;
+    const end = now;
+    const data: { name: string; Completed: number }[] = [];
+    for (let w = weeks - 1; w >= 0; w--) {
+      const weekEnd = new Date(end.getTime() - w * msWeek);
+      const weekStart = new Date(weekEnd.getTime() - msWeek);
+      const completed = nonEpicTasks.filter((t) => {
+        if (!statusSelesai(t.status, masterData) || !t.updatedAt) return false;
+        const td = ensureDate(t.updatedAt).getTime();
+        return td > weekStart.getTime() && td <= weekEnd.getTime();
+      }).length;
+      data.push({
+        name: format(weekEnd, "dd MMM"),
+        Completed: completed,
+      });
+    }
+    return data;
+  })();
+
+  /**
+   * #342 — deret aktivitas/selesai untuk filter rentang (hari).
+   * ALL → 7 (sama last7Days); 1M→30; 6M→26 minggu diganti di UI jadi weekly.
+   */
+  const buildRangeActivity = (dayCount: number) => {
+    const raw: { name: string; Activity: number; Completed: number }[] = [];
+    const capped = Math.min(Math.max(dayCount, 1), 90);
+    for (let i = capped - 1; i >= 0; i--) {
+      const d = new Date(now.getTime() - i * msInDay);
+      const dateStr = format(d, capped > 14 ? "dd/MM" : "dd MMM");
+      const dayActivities = activityLogs.filter((a) => {
+        if (!a.createdAt) return false;
+        const ad = ensureDate(a.createdAt);
+        return isSameDay(ad, d);
+      }).length;
+      const completedThatDay = nonEpicTasks.filter((t) => {
+        if (!statusSelesai(t.status, masterData) || !t.updatedAt) return false;
+        return isSameDay(ensureDate(t.updatedAt), d);
+      }).length;
+      raw.push({ name: dateStr, Activity: dayActivities, Completed: completedThatDay });
+    }
+    return raw;
+  };
+
   // Velocity Data (Story points or task count completed across past sprints)
   const velocityData = sprints
     .slice() // copy array
@@ -375,6 +421,8 @@ export const useDashboard = (props: DashboardViewProps) => {
     burndownData,
     last7DaysData,
     weeklyVelocity,
+    throughputWeeklyData,
+    buildRangeActivity,
     velocityData,
     estimationAccuracyData,
     estimationStats,

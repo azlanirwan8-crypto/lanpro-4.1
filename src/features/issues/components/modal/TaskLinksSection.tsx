@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
-import React from "react";
-import { Trash2 } from "lucide-react";
+import React, { useMemo } from "react";
+import { Trash2, GitBranch } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "./TaskDetailPrimitives";
 import { StyledDropdown } from "../../../../components/ui/CommonComponents";
-import { Task, MasterData } from "../../../../types";
+import { Task, MasterData, LinkedTask } from "../../../../types";
 
 interface TaskLinksSectionProps {
   task: Task;
@@ -23,6 +23,8 @@ interface TaskLinksSectionProps {
   isSubmitting: Record<string, boolean>;
 }
 
+const RELATION_ORDER = ["blocks", "is_blocked_by", "relates_to", "clones", "is_cloned_by"] as const;
+
 export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
   task,
   tasks,
@@ -40,14 +42,47 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
   isSubmitting,
 }) => {
   const { t } = useTranslation();
+
+  /** #344 — kelompokkan daftar dependensi (bukan graph engine). */
+  const grouped = useMemo(() => {
+    const links = (task.linkedTasks || []) as LinkedTask[];
+    const map = new Map<string, LinkedTask[]>();
+    for (const link of links) {
+      const key = link.relationType || (link as any).linkType || "relates_to";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(link);
+    }
+    const ordered: { relation: string; items: LinkedTask[] }[] = RELATION_ORDER.filter((r) =>
+      map.has(r)
+    ).map((r) => ({
+      relation: r,
+      items: map.get(r)!,
+    }));
+    for (const [k, items] of map) {
+      if (!RELATION_ORDER.includes(k as (typeof RELATION_ORDER)[number])) {
+        ordered.push({ relation: k, items });
+      }
+    }
+    return ordered;
+  }, [task.linkedTasks]);
+
+  const relationLabel = (rel: string) => {
+    if (rel === "blocks") return t("issues.relation_blocks", "Blocks");
+    if (rel === "is_blocked_by") return t("issues.relation_is_blocked_by", "Is blocked by");
+    if (rel === "relates_to") return t("issues.relation_relates_to", "Relates to");
+    return rel.replace(/_/g, " ");
+  };
+
   return (
     <div className="space-y-4 pt-4 border-t border-border-faint">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-content-subtle">
-          {t("issues.relatedIssues")}
+        <h4 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-content-subtle flex items-center gap-1.5">
+          <GitBranch className="w-3.5 h-3.5 text-primary" />
+          {t("issues.dependenciesPanel", t("issues.relatedIssues"))}
         </h4>
         {isEditable && (
           <button
+            type="button"
             onClick={() => setIsAddingTaskLinkLocal(!isAddingTaskLinkLocal)}
             className="text-xs sm:text-[10px] font-medium text-indigo-600 hover:underline"
           >
@@ -56,38 +91,50 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
         )}
       </div>
 
-      <div className="space-y-3">
-        {task.linkedTasks?.map((link, linkIdx) => {
-          const target = (tasks || []).find((t) => t.id === link.targetTaskId);
-          if (!target) return null;
-          return (
-            <div
-              key={link.id ? `${link.id}-${linkIdx}` : `link-${linkIdx}`}
-              className="p-3 bg-surface rounded-xl border border-border-faint shadow-soft space-y-2 group/link relative"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] leading-none sm:text-[9px] font-normal uppercase text-indigo-500 bg-indigo-500/10 px-1.5 py-[3px] rounded tracking-widest">
-                  {link.relationType.replace(/_/g, " ")}
-                </span>
-                <button
-                  onClick={() => handleRemoveLinkedTask(task.id, link.id)}
-                  className="text-content-subtle hover:text-red-500 hover:bg-red-500/10 p-1.5 rounded-lg transition-colors opacity-0 group-hover/link:opacity-100"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+      {grouped.length === 0 ? (
+        <p className="text-xs text-content-muted py-2">
+          {t("issues.dependenciesEmpty", "Belum ada dependensi. Tambah tautan isu.")}
+        </p>
+      ) : (
+        <div className="space-y-4">
+          {grouped.map(({ relation, items }) => (
+            <div key={relation} className="space-y-2">
+              <div className="text-[10px] font-medium uppercase tracking-wider text-content-subtle">
+                {relationLabel(relation)}
+                <span className="ml-1 tabular-nums text-content-muted">({items.length})</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs sm:text-[10px] font-mono font-medium text-content-subtle">
-                  {target.key}
-                </span>
-                <span className="text-xs font-medium text-content-body truncate">
-                  {target.title}
-                </span>
-              </div>
+              {items.map((link, linkIdx) => {
+                const target = (tasks || []).find((t) => t.id === link.targetTaskId);
+                if (!target) return null;
+                return (
+                  <div
+                    key={link.id ? `${link.id}-${linkIdx}` : `link-${linkIdx}`}
+                    className="p-3 bg-surface rounded-xl border border-border-faint shadow-soft space-y-2 group/link relative"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs sm:text-[10px] font-mono font-medium text-content-subtle">
+                        {target.key}
+                      </span>
+                      {isEditable && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveLinkedTask(task.id, link.id)}
+                          className="text-content-subtle hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors opacity-0 group-hover/link:opacity-100"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="text-xs font-medium text-content-body truncate">
+                      {target.title}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
 
       {isAddingTaskLinkLocal && (
         <motion.div
@@ -99,9 +146,9 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
             value={taskLinkRelation}
             onChange={(val) => setTaskLinkRelation(val as any)}
             options={[
-              { id: "blocks", label: "Blocks" },
-              { id: "is_blocked_by", label: "Is blocked by" },
-              { id: "relates_to", label: "Relates to" },
+              { id: "blocks", label: relationLabel("blocks") },
+              { id: "is_blocked_by", label: relationLabel("is_blocked_by") },
+              { id: "relates_to", label: relationLabel("relates_to") },
             ]}
             masterData={masterData}
             className="w-full"
@@ -111,7 +158,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
             value={taskLinkTargetId}
             onChange={(val) => setTaskLinkTargetId(val)}
             options={[
-              { id: "", label: "Select task..." },
+              { id: "", label: t("issues.selectTask", "Select task...") },
               ...tasks
                 .filter((t) => t.id !== task.id)
                 .map((t) => ({

@@ -1,5 +1,51 @@
+/**
+ * Inventaris jalur notifikasi (#345 — iris tipis, bukan marketplace):
+ * 1. In-app task update — createNotification (status / assignee / deskripsi / AC)
+ * 2. In-app otomatis — createAutomatedNotification (deadline, broadcast helpers)
+ * 3. Cron due reminder — checkUpcomingDueDates via /api/cron/tick (+ setImmediate on dueDate PUT)
+ * 4. Email digest tugas — taskDigest.service + /api/cron/task-digest
+ * 5. Email broadcast terjadwal — emailBroadcast.service via cron tick
+ * 6. WhatsApp terjadwal — whatsapp.service via cron tick
+ * Preferensi user minimal: Users.notifDueReminder (default true).
+ * Gagal kirim in-app dicatat di NotificationDeliveryFailures.
+ */
 import crypto from "crypto";
 import db from "../../src/lib/db";
+
+/** #345 — persist gagal kirim (jangan biarkan senyap hanya di console). */
+const logNotificationFailure = async (opts: {
+  channel?: string;
+  context: string;
+  recipientId?: string | null;
+  relatedId?: string | null;
+  error: unknown;
+}) => {
+  let conn;
+  try {
+    conn = await db.getConnection();
+    const msg =
+      opts.error instanceof Error
+        ? opts.error.message
+        : typeof opts.error === "string"
+          ? opts.error
+          : JSON.stringify(opts.error);
+    await conn.query(
+      "INSERT INTO NotificationDeliveryFailures (id, channel, context, recipient_id, related_id, error_message) VALUES (?, ?, ?, ?, ?, ?)",
+      [
+        crypto.randomUUID(),
+        opts.channel || "in_app",
+        String(opts.context || "unknown").slice(0, 64),
+        opts.recipientId || null,
+        opts.relatedId || null,
+        String(msg || "unknown").slice(0, 4000),
+      ]
+    );
+  } catch (logErr) {
+    console.error("[logNotificationFailure] secondary failure:", logErr);
+  } finally {
+    if (conn) conn.release();
+  }
+};
 
 export const createAutomatedNotification = async (
   arg1: any,
@@ -74,6 +120,12 @@ export const createAutomatedNotification = async (
     }
   } catch (err) {
     console.error("Failed to create automated notification:", err);
+    await logNotificationFailure({
+      context: `automated:${type || "unknown"}`,
+      recipientId: recipientId || null,
+      relatedId: relatedId || null,
+      error: err,
+    });
   } finally {
     if (conn) conn.release();
   }
@@ -351,6 +403,15 @@ export const checkUpcomingDueDates = async (io: any = null) => {
         if (taskDueDate >= oneHourAgo && taskDueDate <= twentyFourHoursLater) {
           const assigneeId = task.assigneeId;
 
+          // #345 — hormati preferensi reminder due date (default true)
+          const [prefRows]: any = await connection.query(
+            'SELECT "notifDueReminder" FROM Users WHERE id = ? OR uid = ? LIMIT 1',
+            [assigneeId, assigneeId]
+          );
+          if (prefRows.length > 0 && prefRows[0].notifDueReminder === false) {
+            continue;
+          }
+
           const [existingNotify]: any = await connection.query(
             "SELECT id FROM Notifications WHERE recipientId = ? AND relatedId = ? AND type = 'deadline'",
             [assigneeId, task.id]
@@ -528,6 +589,11 @@ export const createNotification = async (
     );
   } catch (err) {
     console.error("[createNotification error]", err);
+    await logNotificationFailure({
+      context: `createNotification:${payload?.field || actionType || "update"}`,
+      relatedId: taskId,
+      error: err,
+    });
   } finally {
     if (conn) conn.release();
   }

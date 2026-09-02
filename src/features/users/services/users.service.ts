@@ -150,3 +150,15 @@ export async function updateProfile(payload: unknown): Promise<UserApiResponse> 
     body: payload,
   });
 }
+
+/** #345 — preferensi pengingat jatuh tempo (lonceng). */
+export async function fetchNotifPrefs(): Promise<UserApiResponse> {
+  return apiRequest("/api/profile/notif-prefs");
+}
+
+export async function patchNotifPrefs(patch: { dueReminder?: boolean }): Promise<UserApiResponse> {
+  return apiRequest("/api/profile/notif-prefs", {
+    method: "PATCH",
+    body: patch,
+  });
+}

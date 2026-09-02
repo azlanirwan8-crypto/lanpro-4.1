@@ -6231,10 +6231,10 @@
     "routeHits": 156,
     "operationsWithZod": 73,
     "componentSchemas": 54,
-    "generatedAt": "2026-09-02T06:25:34.205Z"
+    "generatedAt": "2026-09-02T06:58:51.382Z"
   },
   "x-lanpro-notes": {
     "apiVsV1": "/api adalah kanonik. /api/v1 tersisa di sebagian meetings AI, file stream, QA AI.",
-    "idempotencyKey": "Ditahan — belum dipasang (keputusan pemilik)."
+    "idempotencyKey": "DITAHAN sebagai #332 (bukan bagian #315 yang sudah SELESAI)."
   }
 }

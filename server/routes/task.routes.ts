@@ -867,7 +867,9 @@ router.put(
               newValue: changedFields.status,
             }).catch((err) => console.error("Update status notification failed:", err))
           );
-        } else if (changedFields.assigneeId !== undefined) {
+        }
+        // #341 — jangan else-if: status + assignee dalam satu PUT harus keduanya notifikasi
+        if (changedFields.assigneeId !== undefined) {
           notificationPromises.push(
             createNotification(ioInstance, projectId, id, userId as string, "update_task", {
               field: "assigneeId",
@@ -875,14 +877,16 @@ router.put(
               newValue: changedFields.assigneeId,
             }).catch((err) => console.error("Update assignee notification failed:", err))
           );
-        } else if (changedFields.description !== undefined) {
+        }
+        if (changedFields.description !== undefined) {
           notificationPromises.push(
             createNotification(ioInstance, projectId, id, userId as string, "update_task", {
               field: "deskripsi",
               newValue: "Deskripsi diperbarui",
             }).catch((err) => console.error("Update description notification failed:", err))
           );
-        } else if (changedFields.acceptanceCriteria !== undefined) {
+        }
+        if (changedFields.acceptanceCriteria !== undefined) {
           notificationPromises.push(
             createNotification(ioInstance, projectId, id, userId as string, "update_task", {
               field: "acceptanceCriteria",
@@ -1293,5 +1297,52 @@ router.post("/api/tasks/trigger-digest", verifyGlobalAdmin, async (req, res) => 
       .json({ status: "error", message: error?.message || "Gagal memicu digest email" });
   }
 });
+
+// #343 — work log tipis
+router.get(
+  "/api/projects/:projectId/tasks/:taskId/work-logs",
+  jagaProyek("list", "R"),
+  async (req, res) => {
+    try {
+      const rows = await taskRepository.listWorkLogs(req.params.taskId);
+      res.json({ status: "success", data: rows });
+    } catch (error: any) {
+      console.error("GET work-logs error:", error);
+      res.status(500).json({ status: "error", message: error?.message || "Gagal memuat work log" });
+    }
+  }
+);
+
+router.post(
+  "/api/projects/:projectId/tasks/:taskId/work-logs",
+  jagaProyek("list", "U"),
+  async (req: any, res) => {
+    try {
+      const hours = Number(req.body?.hours);
+      if (!Number.isFinite(hours) || hours <= 0) {
+        return res.status(400).json({ status: "error", message: "hours harus angka > 0" });
+      }
+      const id = crypto.randomUUID();
+      const loggedAt = req.body?.loggedAt
+        ? new Date(req.body.loggedAt).toISOString()
+        : new Date().toISOString();
+      await taskRepository.createWorkLog({
+        id,
+        taskId: req.params.taskId,
+        userId: req.user?.uid || req.user?.id || null,
+        hours,
+        note: String(req.body?.note || "").slice(0, 2000),
+        loggedAt,
+      });
+      const rows = await taskRepository.listWorkLogs(req.params.taskId);
+      res.status(201).json({ status: "success", data: rows });
+    } catch (error: any) {
+      console.error("POST work-logs error:", error);
+      res
+        .status(500)
+        .json({ status: "error", message: error?.message || "Gagal menambah work log" });
+    }
+  }
+);
 
 export default router;

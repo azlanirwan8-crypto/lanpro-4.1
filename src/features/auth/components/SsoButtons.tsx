@@ -98,9 +98,9 @@ export const SsoButtons = ({ mode }: SsoButtonsProps) => {
     <div className="mt-5">
       {/* Pemisah dengan label, supaya jelas ini alternatif dari form di atasnya */}
       <div className="flex items-center gap-3 mb-4">
-        <span className="h-px flex-1 bg-border-subtle" />
+        <span className="h-px flex-1 border-t border-border-subtle" />
         <span className="text-xs text-content-muted">{t("ui.or")}</span>
-        <span className="h-px flex-1 bg-border-subtle" />
+        <span className="h-px flex-1 border-t border-border-subtle" />
       </div>
 
       <div className="flex flex-col gap-2.5">

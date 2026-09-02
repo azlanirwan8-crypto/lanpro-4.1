@@ -199,7 +199,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                   <Underline size={14} />
                 </button>
               )}
-              <div className="w-px h-4 bg-border-subtle mx-1"></div>
+              <div className="w-px h-4 border-l border-border-subtle mx-1"></div>
               {mode === "email" && (
                 <>
                   <button
@@ -223,7 +223,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                   >
                     <AlignRight size={14} />
                   </button>
-                  <div className="w-px h-4 bg-border-subtle mx-1"></div>
+                  <div className="w-px h-4 border-l border-border-subtle mx-1"></div>
                   <button
                     onClick={() => handleFormat("list")}
                     className="p-1 text-content-secondary hover:bg-surface-muted rounded transition-colors"

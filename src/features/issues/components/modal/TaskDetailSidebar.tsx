@@ -22,6 +22,8 @@ import { LanproDatePicker } from "../../../../components/ui/LanproDatePicker";
 import { confirmDeleteAlert, showSuccessAlert } from "../../../../lib/sweetalert";
 import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
 import { fetchMilestones, type Milestone } from "../../../timeline/milestone.service";
+import { fetchTaskWorkLogs, createTaskWorkLog } from "../../../../services/taskService";
+import { toast } from "sonner";
 
 interface TaskDetailSidebarProps {
   task: Task;
@@ -65,10 +67,15 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
 }) => {
   const { t } = useTranslation();
   const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [workLogs, setWorkLogs] = useState<any[]>([]);
+  const [logHours, setLogHours] = useState("");
+  const [logNote, setLogNote] = useState("");
+  const [logSaving, setLogSaving] = useState(false);
 
   useEffect(() => {
     if (!task.projectId) {
       setMilestones([]);
+      setWorkLogs([]);
       return;
     }
     let cancelled = false;
@@ -79,10 +86,40 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
       .catch(() => {
         if (!cancelled) setMilestones([]);
       });
+    void fetchTaskWorkLogs(task.projectId, task.id)
+      .then((res: any) => {
+        if (!cancelled) setWorkLogs(Array.isArray(res?.data) ? res.data : []);
+      })
+      .catch(() => {
+        if (!cancelled) setWorkLogs([]);
+      });
     return () => {
       cancelled = true;
     };
-  }, [task.projectId]);
+  }, [task.projectId, task.id]);
+
+  const submitWorkLog = async () => {
+    const hours = parseFloat(logHours);
+    if (!task.projectId || !Number.isFinite(hours) || hours <= 0 || logSaving) return;
+    setLogSaving(true);
+    try {
+      const res: any = await createTaskWorkLog(task.projectId, task.id, {
+        hours,
+        note: logNote,
+      });
+      const rows = Array.isArray(res?.data) ? res.data : [];
+      setWorkLogs(rows);
+      setLogHours("");
+      setLogNote("");
+      const total = rows.reduce((a: number, r: any) => a + Number(r.hours || 0), 0);
+      void updateTaskField(task.id, "loggedHours", total);
+      toast.success(t("issueDetail.workLogAdded", "Jam kerja dicatat"));
+    } catch (e: any) {
+      toast.error(e?.message || t("issueDetail.workLogFailed", "Gagal mencatat jam"));
+    } finally {
+      setLogSaving(false);
+    }
+  };
 
   return (
     <div
@@ -452,6 +489,58 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             />
           </div>
         </div>
+
+        {/* #343 — entri jam kerja sederhana */}
+        {isEditable && (
+          <div className="mt-3 space-y-2 rounded-md border border-border-subtle/80 bg-surface p-2.5">
+            <div className="text-[10px] font-medium uppercase tracking-wider text-content-subtle">
+              {t("issueDetail.workLogTitle", "Catat jam kerja")}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="number"
+                min="0.25"
+                step="0.25"
+                value={logHours}
+                onChange={(e) => setLogHours(e.target.value)}
+                placeholder="h"
+                className="w-16 h-8 text-xs rounded-md border border-border-subtle bg-surface-muted px-2 text-content"
+              />
+              <input
+                type="text"
+                value={logNote}
+                onChange={(e) => setLogNote(e.target.value)}
+                placeholder={t("issueDetail.workLogNote", "Catatan (opsional)")}
+                className="flex-1 min-w-0 h-8 text-xs rounded-md border border-border-subtle bg-surface-muted px-2 text-content"
+              />
+              <button
+                type="button"
+                disabled={logSaving || !logHours}
+                onClick={() => void submitWorkLog()}
+                className="h-8 px-2.5 text-[10px] font-medium rounded-md bg-primary text-content-inverse disabled:opacity-50 shrink-0"
+              >
+                {t("issueDetail.workLogAdd", "Tambah")}
+              </button>
+            </div>
+            {workLogs.length > 0 && (
+              <ul className="max-h-28 overflow-y-auto space-y-1 pt-1">
+                {workLogs.slice(0, 8).map((w) => (
+                  <li
+                    key={w.id}
+                    className="flex justify-between gap-2 text-[10px] text-content-muted border-t border-border-faint pt-1"
+                  >
+                    <span className="truncate">
+                      {Number(w.hours)}h{w.note ? ` — ${w.note}` : ""}
+                    </span>
+                    <span className="shrink-0 tabular-nums">
+                      {w.logged_at ? String(w.logged_at).slice(0, 10) : ""}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="h-px bg-surface-strong/70 my-1.5" />

@@ -7,12 +7,14 @@
  * di AppContainer karena header dan penghitung lonceng juga membacanya.
  */
 import { useTranslation } from "react-i18next";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { format } from "date-fns";
 import { Mail } from "lucide-react";
 import { formatNotification } from "../utils/notificationFormatter";
 import type { AppNotification, Task } from "../types";
+import { fetchNotifPrefs, patchNotifPrefs } from "../features/users/services/users.service";
+import { toast } from "sonner";
 
 interface NotificationsDropdownProps {
   isNotificationsOpen: boolean;
@@ -46,6 +48,46 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
   tasks,
 }) => {
   const { t } = useTranslation();
+  const [dueReminder, setDueReminder] = useState(true);
+  const [prefSaving, setPrefSaving] = useState(false);
+
+  useEffect(() => {
+    if (!isNotificationsOpen) return;
+    let cancelled = false;
+    void fetchNotifPrefs()
+      .then((res: any) => {
+        if (!cancelled && typeof res?.data?.dueReminder === "boolean") {
+          setDueReminder(res.data.dueReminder);
+        }
+      })
+      .catch(() => {
+        /* default true */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isNotificationsOpen]);
+
+  const toggleDueReminder = async () => {
+    if (prefSaving) return;
+    const next = !dueReminder;
+    setPrefSaving(true);
+    setDueReminder(next);
+    try {
+      await patchNotifPrefs({ dueReminder: next });
+      toast.success(
+        next
+          ? t("notifications.dueReminderOn", "Pengingat jatuh tempo diaktifkan")
+          : t("notifications.dueReminderOff", "Pengingat jatuh tempo dimatikan")
+      );
+    } catch (e: any) {
+      setDueReminder(!next);
+      toast.error(e?.message || t("notifications.prefFailed", "Gagal menyimpan preferensi"));
+    } finally {
+      setPrefSaving(false);
+    }
+  };
+
   return (
     <>
       <AnimatePresence>
@@ -146,7 +188,6 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                               })
                             );
                           } else if (n.relatedId) {
-                            // if it's a task id
                             const t = tasks.find((x) => x.id === n.relatedId);
                             if (t) {
                               setSelectedTaskForDetail(t);
@@ -157,14 +198,12 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                         }}
                         className="py-3.5 px-5 hover:bg-surface-muted transition-all cursor-pointer flex gap-3 items-start relative border-b border-border-subtle last:border-b-0"
                       >
-                        {/* Left Icon - Compact & circular */}
                         <div
                           className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${parsed.iconBgClass || "bg-violet-500/10 text-violet-600"}`}
                         >
                           {parsed.icon}
                         </div>
 
-                        {/* Content Stack */}
                         <div className="flex-1 min-w-0 pr-4">
                           <h4 className="text-sm font-medium text-content leading-snug break-words">
                             {parsed.formattedMessage}
@@ -174,7 +213,6 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                           </span>
                         </div>
 
-                        {/* Unread indicator dot */}
                         {!n.read && (
                           <div className="absolute right-5 top-5 flex h-2 w-2 shrink-0">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
@@ -188,8 +226,18 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
               )}
             </div>
 
-            {/* Dropdown Footer */}
-            <div className="p-4 border-t border-border-subtle bg-surface">
+            {/* Dropdown Footer — #345 preferensi minimal */}
+            <div className="p-4 border-t border-border-subtle bg-surface space-y-3">
+              <label className="flex items-center justify-between gap-3 text-xs text-content-secondary cursor-pointer select-none">
+                <span>{t("notifications.dueReminderPref", "Pengingat jatuh tempo (24 jam)")}</span>
+                <input
+                  type="checkbox"
+                  checked={dueReminder}
+                  disabled={prefSaving}
+                  onChange={() => void toggleDueReminder()}
+                  className="rounded border-border-subtle text-primary focus:ring-primary/30"
+                />
+              </label>
               <button
                 onClick={() => {
                   setIsNotificationsOpen(false);

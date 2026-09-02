@@ -309,7 +309,7 @@ export const KanbanCard = React.memo<KanbanCardProps>(
                 className={cn(
                   "h-full transition-all duration-300",
                   percentage === 0
-                    ? "bg-border-subtle"
+                    ? "bg-surface-marker"
                     : percentage === 100
                       ? "bg-success-surface"
                       : "bg-primary-surface"

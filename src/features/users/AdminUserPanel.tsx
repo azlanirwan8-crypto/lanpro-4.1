@@ -605,16 +605,22 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   />
                 </div>
                 <button
+                  type="button"
                   onClick={handleExportCSV}
-                  className="btn-animation waves-effect waves-light bg-surface border border-border-subtle text-content-strong hover:bg-surface-sunken h-9 px-3.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  title={t("users.exportCsv")}
+                  className="btn-animation waves-effect waves-light bg-surface border border-border-subtle text-content-strong hover:bg-surface-sunken h-9 px-2.5 sm:px-3.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
                 >
-                  <Download className="w-3.5 h-3.5 text-content-muted" /> {t("users.exportCsv")}
+                  <Download className="w-3.5 h-3.5 text-content-muted shrink-0" />
+                  <span className="hidden sm:inline">{t("users.exportCsv")}</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setIsInviteModalOpen(true)}
-                  className="btn-animation waves-effect waves-light btn-primary h-9 px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  title={t("users.addUser")}
+                  className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
                 >
-                  <UserPlus className="w-3.5 h-3.5" /> {t("users.addUser")}
+                  <UserPlus className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden sm:inline">{t("users.addUser")}</span>
                 </button>
               </div>
             </div>

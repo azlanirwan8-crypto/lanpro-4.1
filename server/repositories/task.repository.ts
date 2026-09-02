@@ -693,6 +693,48 @@ export class TaskRepository {
       connection.release();
     }
   }
+
+  /** #343 — daftar entri jam kerja (snake_case kolom). */
+  async listWorkLogs(taskId: string): Promise<any[]> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        "SELECT * FROM TaskWorkLogs WHERE task_id = ? ORDER BY logged_at DESC LIMIT 100",
+        [taskId]
+      );
+      return rows || [];
+    } finally {
+      connection.release();
+    }
+  }
+
+  async createWorkLog(entry: {
+    id: string;
+    taskId: string;
+    userId: string | null;
+    hours: number;
+    note: string;
+    loggedAt: string;
+  }): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query(
+        "INSERT INTO TaskWorkLogs (id, task_id, user_id, hours, note, logged_at) VALUES (?, ?, ?, ?, ?, ?)",
+        [entry.id, entry.taskId, entry.userId, entry.hours, entry.note, entry.loggedAt]
+      );
+      const [sumRows]: any = await connection.query(
+        "SELECT COALESCE(SUM(hours), 0) AS total FROM TaskWorkLogs WHERE task_id = ?",
+        [entry.taskId]
+      );
+      const total = Number(sumRows?.[0]?.total || 0);
+      await connection.query("UPDATE Tasks SET loggedHours = ?, updatedAt = NOW() WHERE id = ?", [
+        total,
+        entry.taskId,
+      ]);
+    } finally {
+      connection.release();
+    }
+  }
 }
 
 export const taskRepository = new TaskRepository();

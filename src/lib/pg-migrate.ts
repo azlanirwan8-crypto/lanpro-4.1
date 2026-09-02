@@ -64,6 +64,8 @@ export async function runMigrations(pool: Pool): Promise<void> {
       // Item #296 — lihat komentar di CREATE TABLE di atas.
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "tempPasswordExpiresAt" TIMESTAMP',
       'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "mustChangePassword" BOOLEAN NOT NULL DEFAULT false',
+      // #345 — preferensi minimal: reminder due date in-app
+      'ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "notifDueReminder" BOOLEAN NOT NULL DEFAULT true',
     ];
     for (const stmt of userAlters) {
       try {
@@ -295,6 +297,34 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "linkType"      VARCHAR(50) DEFAULT 'relates_to',
         "createdAt"     TIMESTAMP DEFAULT NOW()
       );
+    `);
+
+    // ── TaskWorkLogs (#343 MVP) — snake_case agar tidak butuh ubah db.ts ──
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "TaskWorkLogs" (
+        id           VARCHAR(36) PRIMARY KEY,
+        task_id      VARCHAR(36) NOT NULL,
+        user_id      VARCHAR(36),
+        hours        DOUBLE PRECISION NOT NULL DEFAULT 0,
+        note         TEXT,
+        logged_at    TIMESTAMP DEFAULT NOW(),
+        created_at   TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_task_work_logs_task ON "TaskWorkLogs" (task_id);
+    `);
+
+    // ── NotificationDeliveryFailures (#345) — log gagal kirim in-app ──
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "NotificationDeliveryFailures" (
+        id             VARCHAR(36) PRIMARY KEY,
+        channel        VARCHAR(32) NOT NULL DEFAULT 'in_app',
+        context        VARCHAR(64),
+        recipient_id   VARCHAR(36),
+        related_id     VARCHAR(36),
+        error_message  TEXT,
+        created_at     TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_notif_fail_created ON "NotificationDeliveryFailures" (created_at DESC);
     `);
 
     // ── Comments ────────────────────────────────────────────────────────────
@@ -893,6 +923,11 @@ export async function runMigrations(pool: Pool): Promise<void> {
       ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS "release" VARCHAR(255);
       ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS "category" VARCHAR(255);
 
+      -- #343 — jam estimasi / aktual (logged). Tanpa kutip agar PG melipat ke
+      -- huruf kecil dan cocok dengan adapter yang tidak mengutip kolom ini.
+      ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS estimatedHours DOUBLE PRECISION DEFAULT 0;
+      ALTER TABLE "Tasks" ADD COLUMN IF NOT EXISTS loggedHours DOUBLE PRECISION DEFAULT 0;
+
       ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "fileName" VARCHAR(255);
       ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "fileType" VARCHAR(100);
       ALTER TABLE "Attachments" ADD COLUMN IF NOT EXISTS "fileSize" BIGINT;
@@ -1035,6 +1070,7 @@ export const TABEL_WAJIB: readonly string[] = [
   "Messages",
   "MilestoneSprints",
   "Milestones",
+  "NotificationDeliveryFailures",
   "Notifications",
   "ProjectInvites",
   "ProjectMembers",
@@ -1046,6 +1082,7 @@ export const TABEL_WAJIB: readonly string[] = [
   "Sprints",
   "TaskCustomFields",
   "TaskExternalLinks",
+  "TaskWorkLogs",
   "Tasks",
   "TokenBlacklist",
   "UserIdentities",

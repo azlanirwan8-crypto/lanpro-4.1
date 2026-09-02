@@ -31,6 +31,8 @@ import {
   Bar,
   AreaChart,
   Area,
+  LineChart,
+  Line,
 } from "recharts";
 import { DashboardViewProps } from "./types";
 import { useDashboard, COLORS } from "./hooks";
@@ -83,6 +85,8 @@ export function DashboardView(props: DashboardViewProps) {
     burndownData,
     last7DaysData,
     weeklyVelocity,
+    throughputWeeklyData,
+    buildRangeActivity,
     velocityData,
     estimationAccuracyData,
     estimationStats,
@@ -196,6 +200,20 @@ export function DashboardView(props: DashboardViewProps) {
 
   const [revenueFilter, setRevenueFilter] = useState<"ALL" | "1M" | "6M" | "1Y">("ALL");
   const [productSort, setProductSort] = useState<string>("Today");
+
+  /** #342 — filter rentang menggerakkan deret tren (bukan hanya gaya tombol). */
+  const rangedTrendData = useMemo(() => {
+    if (revenueFilter === "ALL") return last7DaysData;
+    if (revenueFilter === "1M") return buildRangeActivity(30);
+    if (revenueFilter === "6M") return buildRangeActivity(90);
+    return buildRangeActivity(90);
+  }, [revenueFilter, last7DaysData, buildRangeActivity]);
+
+  const rangedThroughput = useMemo(() => {
+    if (revenueFilter === "ALL" || revenueFilter === "1M") return throughputWeeklyData;
+    // 6M / 1Y: tetap 8 minggu terakhir (MVP tipis — tidak memuat 52 bar)
+    return throughputWeeklyData;
+  }, [revenueFilter, throughputWeeklyData]);
 
   const {
     selectedProject,
@@ -968,6 +986,123 @@ export function DashboardView(props: DashboardViewProps) {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
+
+              {/* #342 — Burndown sprint aktif (Ideal vs Remaining) */}
+              {burndownData && burndownData.length > 0 && (
+                <div className="mt-6 pt-5 border-t border-border-faint">
+                  <h4 className="text-xs font-normal text-content-strong uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <Target className="w-3.5 h-3.5 text-primary" />
+                    {t("dashboard.burndownTitle")}
+                  </h4>
+                  <p className="text-[11px] text-content-muted mb-3">
+                    {t("dashboard.burndownHint")}
+                  </p>
+                  <div className="h-[220px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={burndownData}
+                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis
+                          dataKey="date"
+                          tick={{ fontSize: 10, fill: "#64748b" }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          allowDecimals={false}
+                          tick={{ fontSize: 10, fill: "#64748b" }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            borderRadius: "0.5rem",
+                            border: "none",
+                            background: "#1e293b",
+                            color: "#fff",
+                            fontSize: "11px",
+                          }}
+                        />
+                        <Legend
+                          wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }}
+                          formatter={(value: string) => (
+                            <span className="text-content-body">{value}</span>
+                          )}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="Ideal"
+                          name={t("dashboard.burndownIdeal")}
+                          stroke="#94a3b8"
+                          strokeDasharray="4 4"
+                          dot={false}
+                          strokeWidth={2}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="Actual"
+                          name={t("dashboard.burndownActual")}
+                          stroke="#6366f1"
+                          connectNulls={false}
+                          dot={false}
+                          strokeWidth={2}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              )}
+
+              {/* #342 — Throughput mingguan */}
+              <div className="mt-6 pt-5 border-t border-border-faint">
+                <h4 className="text-xs font-normal text-content-strong uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <Activity className="w-3.5 h-3.5 text-success-text" />
+                  {t("dashboard.throughputTitle")}
+                </h4>
+                <p className="text-[11px] text-content-muted mb-3">
+                  {t("dashboard.throughputHint")}
+                </p>
+                <div className="h-[200px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={rangedThroughput}
+                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis
+                        dataKey="name"
+                        tick={{ fontSize: 10, fill: "#64748b" }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        allowDecimals={false}
+                        tick={{ fontSize: 10, fill: "#64748b" }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: "0.5rem",
+                          border: "none",
+                          background: "#1e293b",
+                          color: "#fff",
+                          fontSize: "11px",
+                        }}
+                      />
+                      <Bar
+                        dataKey="Completed"
+                        name={t("dashboard.seriesCompleted")}
+                        fill="#10b981"
+                        radius={[4, 4, 0, 0]}
+                        maxBarSize={28}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </div>
 
             {/* Task Breakdown Grid (Jenis Task & Status Breakdown) */}
@@ -1303,8 +1438,8 @@ export function DashboardView(props: DashboardViewProps) {
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
                     data={
-                      last7DaysData && last7DaysData.length > 0
-                        ? last7DaysData
+                      rangedTrendData && rangedTrendData.length > 0
+                        ? rangedTrendData
                         : [
                             { name: t("dashboard.mon"), Activity: 4, Completed: 3 },
                             { name: t("dashboard.tue"), Activity: 6, Completed: 5 },
@@ -1366,7 +1501,7 @@ export function DashboardView(props: DashboardViewProps) {
                     />
                     <Area
                       type="monotone"
-                      dataKey="Created"
+                      dataKey="Activity"
                       name={t("dashboard.tasksCreated")}
                       stroke="#6366f1"
                       fill="#6366f1"

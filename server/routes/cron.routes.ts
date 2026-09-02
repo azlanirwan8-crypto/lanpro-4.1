@@ -32,6 +32,16 @@ async function handleTick(_req: Request, res: Response) {
     hasil.whatsapp = `error: ${err?.message || "unknown"}`;
   }
 
+  // #341 / #345 — reminder due date harus ikut cron serverless, bukan hanya setInterval
+  try {
+    const { checkUpcomingDueDates } = await import("../services/notification.service");
+    await checkUpcomingDueDates();
+    hasil.dueDateReminders = "ok";
+  } catch (err: any) {
+    console.error("[CRON] due date reminders:", err?.message);
+    hasil.dueDateReminders = `error: ${err?.message || "unknown"}`;
+  }
+
   res.json({ status: "success", data: hasil });
 }
 

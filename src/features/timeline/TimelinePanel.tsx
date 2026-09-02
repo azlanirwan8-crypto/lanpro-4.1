@@ -594,26 +594,27 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
   }, [tasks, pixelsPerDay]);
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-surface-muted p-4 md:p-5 gap-4 text-left">
+    <div className="flex-1 flex flex-col min-h-0 bg-surface-muted p-2 md:p-5 gap-2 md:gap-4 text-left">
       {selectedProject?.id && (
         <MilestonePanel projectId={selectedProject.id} canWrite={canWriteMilestone} />
       )}
-      {/* Timeline Controls Header */}
-      <div className="bg-surface px-5 py-3.5 rounded-md border border-border-subtle/80 shadow-2xs flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 flex items-center justify-center shrink-0 shadow-xs">
-            <Zap className="w-5 h-5 text-indigo-600" />
+      {/* Timeline Controls Header — #334/#338: kolom di HP, chrome tipis */}
+      <div className="bg-surface px-2.5 py-2 md:px-5 md:py-3.5 rounded-md border border-border-subtle/80 shadow-2xs flex flex-col gap-2 md:gap-3 md:flex-row md:items-center md:justify-between shrink-0">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 flex items-center justify-center shrink-0 shadow-xs">
+            <Zap className="w-4 h-4 md:w-5 md:h-5 text-indigo-600" />
           </div>
-          <div>
-            <h2 className="text-base font-bold text-content-strong tracking-tight">
+          <div className="min-w-0">
+            <h2 className="text-sm md:text-base font-bold text-content-strong tracking-tight truncate">
               {t("roadmap.title")}
             </h2>
-            <p className="text-xs font-medium text-content-muted mt-0.5">{t("roadmap.subtitle")}</p>
+            <p className="hidden md:block text-xs font-medium text-content-muted mt-0.5">
+              {t("roadmap.subtitle")}
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Quick Action Navigation Buttons */}
-          <div className="flex items-center gap-1.5 bg-surface-sunken/80 p-1 rounded-md border border-border-subtle/80">
+        <div className="flex items-center gap-2 md:gap-3 flex-wrap w-full md:w-auto">
+          <div className="flex items-center gap-1 md:gap-1.5 bg-surface-sunken/80 p-1 rounded-md border border-border-subtle/80">
             <button
               type="button"
               onClick={() => {
@@ -621,11 +622,11 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 scrollToDate(earliest, "smooth");
                 toast.success(t("toast.focusFirstTask"));
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-subtle/80 cursor-pointer active:scale-95"
+              className="flex items-center gap-1.5 px-2 md:px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-subtle/80 cursor-pointer active:scale-95"
               title={t("roadmap.focusFirstTask")}
             >
-              <Target className="w-3.5 h-3.5 text-primary" />
-              <span>{t("roadmap.focusFirstTask")}</span>
+              <Target className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="hidden sm:inline">{t("roadmap.focusFirstTask")}</span>
             </button>
             <button
               type="button"
@@ -633,11 +634,11 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 scrollToDate(new Date(), "smooth");
                 toast.success(t("toast.jumpToToday"));
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-subtle/80 cursor-pointer active:scale-95"
+              className="flex items-center gap-1.5 px-2 md:px-2.5 py-1 bg-surface hover:bg-surface-muted text-content-body rounded-md text-xs font-medium shadow-2xs transition-all border border-border-subtle/80 cursor-pointer active:scale-95"
               title={t("roadmap.jumpToday")}
             >
-              <Calendar className="w-3.5 h-3.5 text-success-text" />
-              <span>{t("roadmap.today")}</span>
+              <Calendar className="w-3.5 h-3.5 text-success-text shrink-0" />
+              <span className="hidden sm:inline">{t("roadmap.today")}</span>
             </button>
           </div>
 
@@ -650,7 +651,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             >
               <Minus className="w-3.5 h-3.5" />
             </button>
-            <div className="w-px h-4 bg-surface-strong mx-1" />
+            <div className="w-px h-4 bg-surface-strong mx-0.5 md:mx-1" />
 
             {(["days", "weeks", "months"] as const).map((z) => (
               <button
@@ -661,7 +662,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   else if (z === "weeks") setPixelsPerDay(24);
                   else if (z === "months") setPixelsPerDay(8);
                 }}
-                className={`px-3 py-1 text-xs uppercase tracking-wider rounded-md transition-all cursor-pointer ${
+                className={`px-2 md:px-3 py-1 text-[10px] md:text-xs uppercase tracking-wider rounded-md transition-all cursor-pointer ${
                   timelineZoom === z
                     ? "bg-indigo-600 text-content-inverse font-semibold shadow-2xs"
                     : "text-content-muted hover:text-content-strong hover:bg-surface-sunken font-medium"
@@ -671,7 +672,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               </button>
             ))}
 
-            <div className="w-px h-4 bg-surface-strong mx-1" />
+            <div className="w-px h-4 bg-surface-strong mx-0.5 md:mx-1" />
             <button
               type="button"
               onClick={() => setPixelsPerDay((prev) => Math.min(150, prev + 4))}
@@ -681,14 +682,16 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
               <Plus className="w-3.5 h-3.5" />
             </button>
           </div>
-          <div className="relative">
+          <div className="relative ml-auto md:ml-0">
             <button
               onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
               onBlur={() => setTimeout(() => setIsExportMenuOpen(false), 200)}
-              className="h-9 px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-lg text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              className="h-9 px-3 md:px-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-lg text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+              title={t("roadmap.exportAs")}
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>{t("roadmap.exportAs")}</span> <ChevronDown className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">{t("roadmap.exportAs")}</span>
+              <ChevronDown className="w-3.5 h-3.5" />
             </button>
             {isExportMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-surface rounded-md shadow-md border border-border-subtle/80 py-1.5 z-50">
@@ -717,7 +720,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
         <button
           type="button"
           onClick={() => setHierarchyOpen(true)}
-          className="md:hidden flex items-center gap-2 px-3 py-2.5 bg-surface border border-border-subtle/80 rounded-lg text-xs font-medium text-content-strong shadow-2xs cursor-pointer shrink-0"
+          className="md:hidden flex items-center gap-2 px-3 py-2 bg-surface border border-border-subtle/80 rounded-lg text-xs font-medium text-content-strong shadow-2xs cursor-pointer shrink-0"
         >
           <Menu className="w-4 h-4 text-indigo-600 shrink-0" />
           <span>{t("roadmap.itemHierarchy")}</span>

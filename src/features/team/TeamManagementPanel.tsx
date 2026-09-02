@@ -366,7 +366,8 @@ export const TeamManagementPanel = ({
               {t("team.membersOf")}{" "}
               {selectedProject ? (
                 <span className="font-medium text-content-body">
-                  {selectedProject.name} ({selectedProject.key})
+                  {selectedProject.name}
+                  {selectedProject.key ? ` (${selectedProject.key})` : ""}
                 </span>
               ) : (
                 ""
@@ -375,66 +376,66 @@ export const TeamManagementPanel = ({
           </div>
         </div>
 
-        {/* Team Summary KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-surface p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-500/10 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
-                <Users className="w-5 h-5" />
+        {/* Team Summary KPI Cards — #333: 2 kolom sejak HP (bukan menunggu sm:) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
+          <div className="bg-surface p-3 md:p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between gap-2 min-w-0">
+            <div className="flex items-center gap-2 md:gap-3 min-w-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-500/10 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+                <Users className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <div>
-                <div className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase tracking-wider">
+              <div className="min-w-0">
+                <div className="text-[10px] md:text-xs font-normal text-content-subtle uppercase tracking-wider truncate">
                   {t("team.activeTeam")}
                 </div>
-                <div className="text-xl font-medium text-content-strong mt-0.5">
+                <div className="text-lg md:text-xl font-medium text-content-strong mt-0.5">
                   {activeTeamCount}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-surface p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-500/10 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
-                <CheckCircle2 className="w-5 h-5" />
+          <div className="bg-surface p-3 md:p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between gap-2 min-w-0">
+            <div className="flex items-center gap-2 md:gap-3 min-w-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-emerald-500/10 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
+                <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <div>
-                <div className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase tracking-wider">
+              <div className="min-w-0">
+                <div className="text-[10px] md:text-xs font-normal text-content-subtle uppercase tracking-wider truncate">
                   {t("team.assignedTasks")}
                 </div>
-                <div className="text-xl font-medium text-content-strong mt-0.5">
+                <div className="text-lg md:text-xl font-medium text-content-strong mt-0.5">
                   {assignedTasksCount}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-surface p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-500/10 text-amber-600 rounded-lg flex items-center justify-center shrink-0">
-                <Clock className="w-5 h-5" />
+          <div className="bg-surface p-3 md:p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between gap-2 min-w-0">
+            <div className="flex items-center gap-2 md:gap-3 min-w-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-amber-500/10 text-amber-600 rounded-lg flex items-center justify-center shrink-0">
+                <Clock className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <div>
-                <div className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase tracking-wider">
+              <div className="min-w-0">
+                <div className="text-[10px] md:text-xs font-normal text-content-subtle uppercase tracking-wider truncate">
                   {t("team.pendingInvites")}
                 </div>
-                <div className="text-xl font-medium text-content-strong mt-0.5">
+                <div className="text-lg md:text-xl font-medium text-content-strong mt-0.5">
                   {pendingInvitesCount}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-surface p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-indigo-500/10 text-indigo-600 rounded-lg flex items-center justify-center shrink-0">
-                <Briefcase className="w-5 h-5" />
+          <div className="bg-surface p-3 md:p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between gap-2 min-w-0">
+            <div className="flex items-center gap-2 md:gap-3 min-w-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-indigo-500/10 text-indigo-600 rounded-lg flex items-center justify-center shrink-0">
+                <Briefcase className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <div>
-                <div className="text-xs sm:text-[11px] font-normal text-content-subtle uppercase tracking-wider">
+              <div className="min-w-0">
+                <div className="text-[10px] md:text-xs font-normal text-content-subtle uppercase tracking-wider truncate">
                   {t("team.projectTasks")}
                 </div>
-                <div className="text-xl font-medium text-content-strong mt-0.5">
+                <div className="text-lg md:text-xl font-medium text-content-strong mt-0.5">
                   {projectTasksCount}
                 </div>
               </div>
@@ -442,9 +443,9 @@ export const TeamManagementPanel = ({
           </div>
         </div>
 
-        {/* Filter & View Mode Control Bar */}
-        <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="relative flex-1 w-full">
+        {/* Filter & View Mode Control Bar — #333: wrap rapat di HP */}
+        <div className="bg-surface p-2.5 md:p-3.5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3">
+          <div className="relative flex-1 w-full min-w-0">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-content-subtle" />
             <input
               type="text"
@@ -455,8 +456,8 @@ export const TeamManagementPanel = ({
             />
           </div>
 
-          <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-            <div className="min-w-[160px]">
+          <div className="flex items-center gap-2 w-full md:w-auto flex-wrap justify-between md:justify-end">
+            <div className="min-w-0 flex-1 md:flex-none md:min-w-[160px]">
               <CommonStyledDropdown
                 value={roleFilter}
                 onChange={(val: string) => setRoleFilter(val)}
@@ -499,7 +500,7 @@ export const TeamManagementPanel = ({
       <div className="flex-1 overflow-y-auto pb-24 md:pb-32 space-y-5 pr-1 mt-3 custom-scrollbar">
         {/* Grid View Mode - Match Velzon Team Cards */}
         {viewMode === "grid" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
             {filteredPeople.map((person: any, i) => {
               const name = person?.displayName || person?.email || "Unknown Member";
               const initialsMatch = name.match(/\b\w/g);
@@ -524,38 +525,36 @@ export const TeamManagementPanel = ({
               return (
                 <div
                   key={person.uid || i}
-                  className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col hover:border-indigo-500/30 transition-all duration-200 group"
+                  className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col hover:border-indigo-500/30 transition-all duration-200 group min-w-0"
                 >
-                  {/* Banner Header dengan Cover Kustom / Gradien Identitas LanPro */}
+                  {/* Banner — lebih pendek di HP (#333) */}
                   <div
-                    className="h-16 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 relative p-2.5 flex items-start justify-end bg-cover bg-center transition-all"
+                    className="h-10 md:h-16 bg-gradient-to-br from-indigo-600 via-indigo-500 to-violet-600 relative p-1.5 md:p-2.5 flex items-start justify-end bg-cover bg-center transition-all"
                     style={personCover ? { backgroundImage: `url(${personCover})` } : undefined}
                   >
                     {personCover && <div className="absolute inset-0 bg-overlay/20" />}
-                    <Star className="w-4 h-4 text-white/50 hover:text-amber-300 cursor-pointer transition-colors relative z-10" />
+                    <Star className="w-3.5 h-3.5 md:w-4 md:h-4 text-white/50 hover:text-amber-300 cursor-pointer transition-colors relative z-10" />
                   </div>
 
-                  {/* Avatar Centered Overlap */}
-                  <div className="relative -mt-8 mx-auto z-10">
+                  <div className="relative -mt-5 md:-mt-8 mx-auto z-10">
                     <UserAvatar
                       user={person}
-                      className="w-16 h-16 border-4 border-surface shadow-md text-base"
+                      className="w-12 h-12 md:w-16 md:h-16 border-4 border-surface shadow-md text-sm md:text-base"
                     />
                     <div
-                      className={`w-3.5 h-3.5 rounded-full border-2 border-surface absolute bottom-0 right-0 shadow-2xs ${
+                      className={`w-2.5 h-2.5 md:w-3.5 md:h-3.5 rounded-full border-2 border-surface absolute bottom-0 right-0 shadow-2xs ${
                         person.isPending ? "bg-amber-500" : "bg-emerald-500"
                       }`}
                     />
                   </div>
 
-                  {/* Name & Role */}
-                  <div className="p-4 pt-2 text-center flex-1 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-medium text-content-strong text-sm leading-snug truncate group-hover:text-indigo-600 transition-colors">
+                  <div className="p-2 md:p-4 pt-1.5 md:pt-2 text-center flex-1 flex flex-col justify-between gap-1">
+                    <div className="min-w-0">
+                      <h3 className="font-medium text-content-strong text-xs md:text-sm leading-snug truncate group-hover:text-indigo-600 transition-colors">
                         {name}
                       </h3>
                       {bolehUbahPeran && !isOwner ? (
-                        <div className="mt-1 flex justify-center w-full max-w-[140px] mx-auto">
+                        <div className="mt-1 flex justify-center w-full max-w-full md:max-w-[140px] mx-auto">
                           <CommonStyledDropdown
                             value={
                               selectedProject?.memberRoles?.[person.uid] ||
@@ -567,39 +566,39 @@ export const TeamManagementPanel = ({
                             options={memberRoleDropdownOptions}
                             masterData={masterData}
                             className="w-full"
-                            buttonClassName="h-7 bg-surface-sunken rounded border border-border-subtle hover:border-border-subtle px-2 text-xs font-medium text-content-body"
+                            buttonClassName="h-7 bg-surface-sunken rounded border border-border-subtle hover:border-border-subtle px-1.5 md:px-2 text-[10px] md:text-xs font-medium text-content-body"
                           />
                         </div>
                       ) : (
-                        <p className="text-xs font-medium text-content-muted capitalize mt-0.5 truncate">
+                        <p className="text-[10px] md:text-xs font-medium text-content-muted capitalize mt-0.5 truncate">
                           {isOwner ? "Project Owner & Manager" : roleName}
                         </p>
                       )}
                     </div>
 
-                    <div className="border-t border-border-faint my-3 pt-3 grid grid-cols-2 gap-2 text-center">
-                      <div className="bg-surface-sunken p-2 rounded-md border border-border-faint">
-                        <span className="block font-medium text-content-strong text-sm">
+                    <div className="border-t border-border-faint my-1.5 md:my-3 pt-1.5 md:pt-3 grid grid-cols-2 gap-1 md:gap-2 text-center">
+                      <div className="bg-surface-sunken p-1 md:p-2 rounded-md border border-border-faint">
+                        <span className="block font-medium text-content-strong text-xs md:text-sm">
                           {userAssignedTasks.length}
                         </span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle font-normal uppercase tracking-wider">
+                        <span className="text-[9px] md:text-[10px] text-content-subtle font-normal uppercase tracking-wider truncate block">
                           {t("teamPanel.assigned")}
                         </span>
                       </div>
-                      <div className="bg-surface-sunken p-2 rounded-md border border-border-faint">
-                        <span className="block font-medium text-content-strong text-sm">
+                      <div className="bg-surface-sunken p-1 md:p-2 rounded-md border border-border-faint">
+                        <span className="block font-medium text-content-strong text-xs md:text-sm">
                           {completedTasks.length}
                         </span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle font-normal uppercase tracking-wider">
+                        <span className="text-[9px] md:text-[10px] text-content-subtle font-normal uppercase tracking-wider truncate block">
                           {t("teamPanel.done")}
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 md:gap-2">
                       <button
                         onClick={() => setSelectedProfileUser(person)}
-                        className="flex-1 py-2 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
+                        className="flex-1 py-1.5 md:py-2 bg-surface-muted hover:bg-indigo-500/10 hover:text-indigo-600 text-content-body text-[10px] md:text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer truncate px-1"
                       >
                         {t("team.viewProfile")}
                       </button>
@@ -611,7 +610,7 @@ export const TeamManagementPanel = ({
                             onClick={() => setMemberToRemove(person)}
                             title={t("team.removeMember")}
                             aria-label={t("team.removeMember")}
-                            className="p-2 bg-surface-muted hover:bg-rose-500/10 hover:text-rose-600 text-content-muted text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer"
+                            className="p-1.5 md:p-2 bg-surface-muted hover:bg-rose-500/10 hover:text-rose-600 text-content-muted text-xs font-medium rounded-md transition-colors border border-border-subtle/70 shadow-2xs cursor-pointer shrink-0"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

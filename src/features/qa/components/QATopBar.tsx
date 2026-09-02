@@ -35,17 +35,19 @@ export const QATopBar: React.FC<QATopBarProps> = ({
   const isLockedBySomeoneElse = lockState.lockedBy && lockState.lockedBy !== currentUserUid;
 
   return (
-    <div className="page-title-box flex flex-col md:flex-row justify-between items-start md:items-center gap-3.5 bg-surface border border-border-subtle/80 p-3.5 sm:p-4 rounded-xl shadow-xs">
+    <div className="page-title-box flex flex-col md:flex-row justify-between items-start md:items-center gap-2.5 md:gap-3.5 bg-surface border border-border-subtle/80 p-2.5 sm:p-4 rounded-xl shadow-xs">
       {/* Velzon Header Title Section */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-lg bg-primary-surface text-content-inverse flex items-center justify-center font-medium shadow-xs shadow-primary/20 shrink-0">
-          <FileSpreadsheet className="w-5 h-5" />
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-primary-surface text-content-inverse flex items-center justify-center font-medium shadow-xs shadow-primary/20 shrink-0">
+          <FileSpreadsheet className="w-4 h-4 sm:w-5 sm:h-5" />
         </div>
-        <div>
-          <h1 className="text-sm font-semibold text-content-strong tracking-tight">
+        <div className="min-w-0">
+          <h1 className="text-sm font-semibold text-content-strong tracking-tight truncate">
             {t("qaTop.title")}
           </h1>
-          <p className="text-xs text-content-muted font-normal mt-0.5">{t("qaTop.subtitle")}</p>
+          <p className="hidden sm:block text-xs text-content-muted font-normal mt-0.5">
+            {t("qaTop.subtitle")}
+          </p>
         </div>
       </div>
 
@@ -107,7 +109,7 @@ export const QATopBar: React.FC<QATopBarProps> = ({
           </>
         ) : (
           <div className="flex items-center gap-2 px-1 py-0.5">
-            <span className="w-2 h-2 rounded-full bg-content-subtle" />
+            <span className="w-2 h-2 rounded-full bg-surface-marker" />
             <span className="text-xs text-content-muted font-medium">
               {t("qaTop.noActiveLock")}
             </span>

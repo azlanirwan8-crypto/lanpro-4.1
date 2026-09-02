@@ -241,7 +241,7 @@ function buildSpec(hits: RouteHit[], routeFilesScanned: number) {
     "x-lanpro-notes": {
       apiVsV1:
         "/api adalah kanonik. /api/v1 tersisa di sebagian meetings AI, file stream, QA AI.",
-      idempotencyKey: "Ditahan — belum dipasang (keputusan pemilik).",
+      idempotencyKey: "DITAHAN sebagai #332 (bukan bagian #315 yang sudah SELESAI).",
     },
   };
 }

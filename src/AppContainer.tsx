@@ -2942,7 +2942,7 @@ function AppContainer() {
                   new CustomEvent("lanpro_qa_retest_updated", { detail: { bugKey } })
                 );
               }}
-              className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-slate-950 text-xs font-normal rounded-xl uppercase tracking-wider shrink-0 transition-all cursor-pointer shadow-md flex items-center gap-1"
+              className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-content text-xs font-normal rounded-xl uppercase tracking-wider shrink-0 transition-all cursor-pointer shadow-md flex items-center gap-1"
             >
               <span>{t("appShell.viewBug")}</span>
             </button>
@@ -3787,7 +3787,7 @@ function AppContainer() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden bg-black/50 fixed inset-0 z-40"
+              className="md:hidden bg-overlay/50 fixed inset-0 z-40"
               onClick={() => setIsMobileMenuOpen(false)}
             />
           )}
@@ -3856,10 +3856,13 @@ function AppContainer() {
                 "configuration",
               ].includes(currentView as string) ? (
                 <>
-                  <h2 className="text-sm md:text-lg font-medium text-content truncate text-ellipsis whitespace-nowrap max-w-[150px] sm:max-w-[300px] md:max-w-none">
+                  <h2
+                    className="text-sm md:text-lg font-medium text-content truncate text-ellipsis whitespace-nowrap max-w-[min(42vw,11rem)] sm:max-w-[300px] md:max-w-none"
+                    title={selectedProject.name}
+                  >
                     {selectedProject.name}
                   </h2>
-                  <div className="h-4 w-px bg-border-subtle mx-2 shrink-0" />
+                  <div className="h-4 w-px border-l border-border-subtle mx-2 shrink-0" />
                   <HeaderAvatarGroup
                     allUsers={allUsers}
                     currentUserUid={currentUser?.uid || currentUser?.id}
@@ -3928,7 +3931,7 @@ function AppContainer() {
                 >
                   <Bell className="w-5 h-5" />
                   {notifications.filter((n) => !n.read).length > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-surface"></span>
                   )}
                 </button>
 

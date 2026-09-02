@@ -108,3 +108,18 @@ export const createTaskLink = (projectId: string, taskId: string, body: any) =>
 
 export const deleteTaskLink = (projectId: string, taskId: string, linkId: string) =>
   apiRequest(`/api/projects/${projectId}/tasks/${taskId}/links/${linkId}`, { method: "DELETE" });
+
+/** #343 — daftar work log tugas. */
+export const fetchTaskWorkLogs = (projectId: string, taskId: string) =>
+  apiRequest(`/api/projects/${projectId}/tasks/${taskId}/work-logs`);
+
+/** #343 — catat jam kerja. */
+export const createTaskWorkLog = (
+  projectId: string,
+  taskId: string,
+  body: { hours: number; note?: string }
+) =>
+  apiRequest(`/api/projects/${projectId}/tasks/${taskId}/work-logs`, {
+    method: "POST",
+    body,
+  });

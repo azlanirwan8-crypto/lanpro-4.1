@@ -41,7 +41,7 @@ Tanpa Swagger UI. Regenerasi ulang setelah menambah/mengubah skema Zod atau mema
 
 ## Idempotency-Key
 
-**Ditahan** — belum dipasang. Catat di sini agar tidak dianggap lupa: butuh keputusan (header wajib pada POST mana; penyimpanan kunci; TTL). Bukan bagian gelombang 2–3.
+**DITAHAN** sebagai item **#332** (dipisah dari #315, 02 Sep 2026). Belum dipasang — butuh keputusan (header wajib/opsional pada POST mana; store Redis/Postgres; TTL). Bukan bagian gelombang 1–3 #315 dan bukan penahan rilis.
 
 ## DOMPurify
 
