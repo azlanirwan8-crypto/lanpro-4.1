@@ -104,16 +104,16 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                 className="p-4 sm:p-5 flex flex-col gap-4 cursor-pointer hover:bg-surface-sunken/40 transition border-b border-border-subtle"
                 onClick={() => setExpandedSprintId(isExpanded ? "" : sprint.id)}
               >
-                {/* Baris Atas: Icon, Title, Goal, Action Button */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                {/* #364 — judul + fase + aksi sejajar 1 baris; tanggal di bawah */}
+                <div className="flex items-center justify-between gap-2 sm:gap-4">
                   {/* Sisi Kiri: Icon Roket + Name + Status + Date */}
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 text-content-inverse flex items-center justify-center shadow-xs shrink-0">
-                      <Rocket className="w-5 h-5 text-content-inverse" />
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                    <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 text-content-inverse flex items-center justify-center shadow-xs shrink-0">
+                      <Rocket className="w-4 h-4 sm:w-5 sm:h-5 text-content-inverse" />
                     </div>
-                    <div className="flex flex-col min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="font-semibold text-content-strong text-sm truncate">
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                        <h3 className="font-semibold text-content-strong text-sm truncate min-w-0">
                           {sprint.name?.trim() || t("planning.untitledSprint")}
                         </h3>
                         <span
@@ -137,9 +137,9 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                               : "Completed"}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-xs text-content-subtle font-normal mt-0.5">
+                      <div className="flex items-center gap-1.5 text-xs text-content-subtle font-normal mt-0.5 min-w-0">
                         <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
-                        <span>
+                        <span className="truncate">
                           {sprint.startDate && sprint.endDate
                             ? `${format(ensureDate(sprint.startDate), "MMM d, yyyy")} - ${format(ensureDate(sprint.endDate), "MMM d, yyyy")} ${
                                 Math.ceil(
@@ -168,8 +168,8 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                     </p>
                   </div>
 
-                  {/* Sisi Kanan: Action Buttons */}
-                  <div className="flex items-center gap-2 shrink-0 self-start md:self-auto">
+                  {/* Sisi Kanan: Action Buttons — sejajar judul/fase */}
+                  <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                     {canEditPlanning && (
                       <>
                         {sprint.status === "planned" && (

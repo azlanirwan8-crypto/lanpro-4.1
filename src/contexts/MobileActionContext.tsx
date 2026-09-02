@@ -52,6 +52,13 @@ export const MobileActionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         },
       };
     });
+    // #366 — setelah cleanup same-tick (yang perlu di-skip) selesai,
+    // izinkan unregister sungguhan saat meninggalkan modul.
+    queueMicrotask(() => {
+      if (skipUnregisterForIdRef.current === action.id) {
+        skipUnregisterForIdRef.current = null;
+      }
+    });
   }, []);
 
   const unregisterAction = useCallback((id: string) => {

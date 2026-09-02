@@ -107,10 +107,10 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
 
   return (
     <>
-      {/* Header Toolbar */}
+      {/* Header Toolbar — #363: search + filter + config 1 baris; pill aktif baris bawah */}
       <div className={styles.toolbar}>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className={cn(styles.searchWrapper, "flex-1 sm:flex-none")}>
+        <div className="flex flex-nowrap items-center gap-2 w-full min-w-0">
+          <div className={styles.searchWrapper}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-content-subtle group-focus-within:text-indigo-500 transition-colors" />
             <input
               value={issueSearch}
@@ -124,23 +124,42 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             type="button"
             onClick={() => setIsFiltersPanelOpen((prev) => !prev)}
             className={cn(
-              "flex items-center justify-center gap-1.5 px-3 py-2 sm:px-3.5 bg-surface border border-border-subtle/80 rounded-md text-content-body hover:text-primary hover:border-primary/40 transition-all text-xs font-medium shadow-xs select-none shrink-0 cursor-pointer",
+              "flex items-center justify-center gap-1.5 p-2 sm:px-3.5 sm:py-2 bg-surface border border-border-subtle/80 rounded-md text-content-body hover:text-primary hover:border-primary/40 transition-all text-xs font-medium shadow-xs select-none shrink-0 cursor-pointer",
               isFiltersPanelOpen &&
                 "bg-primary-surface/10 border-primary/30 text-primary hover:bg-primary-surface/15"
             )}
             title={t("filters.toggleFilterPanel")}
+            aria-label={t("filters.toggleFilterPanel")}
           >
             <Filter className="w-3.5 h-3.5 text-content-muted shrink-0" />
             <span className="hidden sm:inline">{t("filters.advancedFilters")}</span>
-            <span className="sm:hidden">{t("filters.filtersShort")}</span>
             {activeCount > 0 && (
-              <span className="ml-1 bg-primary-surface text-content-inverse rounded-full px-1.5 py-0.5 flex items-center justify-center text-xs sm:text-[11px] sm:text-[9px] font-semibold leading-none">
+              <span className="bg-primary-surface text-content-inverse rounded-full px-1.5 py-0.5 flex items-center justify-center text-[10px] sm:text-[9px] font-semibold leading-none">
                 {activeCount}
               </span>
             )}
           </button>
 
-          <div className="flex items-center gap-1.5 flex-wrap max-w-xl">
+          <div className="flex items-center gap-1.5 shrink-0 ml-auto">
+            <button
+              type="button"
+              onClick={() => setIsConfigureColumnsOpen(true)}
+              className="p-2 bg-surface border border-border-subtle rounded-lg text-content-muted hover:text-indigo-600 hover:border-indigo-500/30 transition-all shadow-soft"
+              title={t("filters.configureColumns")}
+            >
+              <Settings2 className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              className="p-2 bg-surface border border-border-subtle rounded-lg text-content-muted hover:text-content-body transition-all shadow-soft"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {activeCount > 0 && (
+          <div className="flex items-center gap-1.5 flex-wrap max-w-full">
             {listFilterStatus !== "All" && (
               <span
                 className={cn(
@@ -303,20 +322,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               </span>
             )}
           </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsConfigureColumnsOpen(true)}
-            className="p-2 bg-surface border border-border-subtle rounded-lg text-content-muted hover:text-indigo-600 hover:border-indigo-500/30 transition-all shadow-soft"
-            title={t("filters.configureColumns")}
-          >
-            <Settings2 className="w-4 h-4" />
-          </button>
-          <button className="p-2 bg-surface border border-border-subtle rounded-lg text-content-muted hover:text-content-body transition-all shadow-soft">
-            <MoreHorizontal className="w-4 h-4" />
-          </button>
-        </div>
+        )}
       </div>
 
       {/* Expandable Advanced Filters Panel content */}

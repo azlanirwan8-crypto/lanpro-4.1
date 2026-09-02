@@ -689,9 +689,10 @@ export function DashboardView(props: DashboardViewProps) {
             {t("dashboard.epicExcluded")}
           </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
+        {/* #365 — HP: 2 kartu/baris (tugas berjalan … tersumbat) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
           {/* Card 1: Total Tasks */}
-          <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
+          <div className="bg-surface p-3 sm:p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
@@ -699,8 +700,8 @@ export function DashboardView(props: DashboardViewProps) {
                 </span>
                 <h3 className="text-2xl font-medium text-content-strong mt-1">{totalTasks}</h3>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-success-text border border-emerald-500/30">
-                <CheckCircle2 className="w-5 h-5" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-success-text border border-emerald-500/30">
+                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
             <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
@@ -729,7 +730,7 @@ export function DashboardView(props: DashboardViewProps) {
           </div>
 
           {/* Card 2: Pending & Active Tasks */}
-          <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
+          <div className="bg-surface p-3 sm:p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
@@ -739,8 +740,8 @@ export function DashboardView(props: DashboardViewProps) {
                   {nonEpicTasks.filter((t) => t.status !== "Done" && t.status !== "Selesai").length}
                 </h3>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-info-text border border-blue-500/30">
-                <Activity className="w-5 h-5 animate-pulse" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-info-text border border-blue-500/30">
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
               </div>
             </div>
             <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
@@ -757,7 +758,7 @@ export function DashboardView(props: DashboardViewProps) {
           </div>
 
           {/* Card 3: Done Tasks */}
-          <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
+          <div className="bg-surface p-3 sm:p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
@@ -767,8 +768,8 @@ export function DashboardView(props: DashboardViewProps) {
                   {completedTasks.length}
                 </h3>
               </div>
-              <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-primary border border-indigo-500/30">
-                <PackageOpen className="w-5 h-5" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-primary border border-indigo-500/30">
+                <PackageOpen className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
             <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
@@ -801,7 +802,7 @@ export function DashboardView(props: DashboardViewProps) {
           </div>
 
           {/* Card 4: Blocked & Critical Issues */}
-          <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
+          <div className="bg-surface p-3 sm:p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
@@ -825,8 +826,8 @@ export function DashboardView(props: DashboardViewProps) {
               </div>
               {/* Ikon menandai IDENTITAS kartu, bukan nilainya, jadi ia tetap
                   merah di keadaan mana pun — hanya tokennya yang diselaraskan. */}
-              <div className="w-10 h-10 rounded-lg bg-danger/10 flex items-center justify-center text-danger-text border border-danger/30">
-                <ShieldAlert className="w-5 h-5" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-danger/10 flex items-center justify-center text-danger-text border border-danger/30">
+                <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
             <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">

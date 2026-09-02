@@ -23,13 +23,17 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   const { activeAction } = useMobileAction();
 
   // FAB (+): aksi modul terdaftar, atau fallback buat tugas HANYA di list/board (#310).
+  // #366 — Beranda tidak pernah menampilkan plus (termasuk residual activeAction).
   const taskViews = currentView === "list" || currentView === "board" || currentView === "table";
+  const isDashboard = currentView === "dashboard";
   const actionLabel = activeAction?.label || t("navigation.mobileAdd");
   const actionClick = activeAction?.onClick || (taskViews ? onOpenNewTask : undefined);
   const actionIcon = activeAction?.icon || Plus;
-  const showActionButton = activeAction
-    ? activeAction.canCreate
-    : taskViews && canCreateTask && !!onOpenNewTask;
+  const showActionButton = isDashboard
+    ? false
+    : activeAction
+      ? activeAction.canCreate
+      : taskViews && canCreateTask && !!onOpenNewTask;
 
   interface NavItem {
     id: string;
