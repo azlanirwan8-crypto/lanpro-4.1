@@ -57,20 +57,22 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-col gap-2.5">
-          <div className="relative">
-            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-content-subtle" />
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="relative min-w-0 flex-1">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-content-subtle pointer-events-none" />
             <input
               placeholder={t("planning.searchBacklog")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-8 pr-3 h-[32px] bg-surface-sunken/70 border border-border-subtle/80 rounded-md text-xs font-normal outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-surface transition-all shadow-2xs"
+              className="w-full pl-8 pr-2 h-[32px] bg-surface-sunken/70 border border-border-subtle/80 rounded-md text-xs font-normal outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 focus:bg-surface transition-all shadow-2xs"
             />
           </div>
-
-          <div className="flex items-center gap-2">
-            <Filter className="w-3.5 h-3.5 text-content-subtle shrink-0" />
-            <div className="flex-1">
+          <div className="w-[42%] max-w-[9.5rem] shrink-0 flex items-center gap-1.5 min-w-0">
+            <Filter
+              className="w-3.5 h-3.5 text-content-subtle shrink-0 hidden xs:block"
+              aria-hidden
+            />
+            <div className="min-w-0 flex-1">
               <StyledDropdown
                 value={priorityFilter}
                 onChange={(val) => setPriorityFilter(val)}
@@ -83,7 +85,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
                 type="priority"
                 masterData={masterData}
                 className="w-full"
-                buttonClassName="h-[32px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-3 text-xs font-normal"
+                buttonClassName="h-[32px] w-full bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-2 text-xs font-normal"
               />
             </div>
           </div>

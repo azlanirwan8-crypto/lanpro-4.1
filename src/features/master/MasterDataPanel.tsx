@@ -27,6 +27,7 @@ import { Modal } from "../../components/ui/Modal";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { RenderIcon, AVAILABLE_ICONS } from "../../components/RenderIcon";
 import { cn } from "../../lib/utils";
+import { useMobileAction } from "../../contexts/MobileActionContext";
 import {
   fetchProjectModules as fetchProjectModulesApi,
   createProjectModule,
@@ -153,6 +154,43 @@ export const MasterDataPanel = ({
   const [newModuleProjectId, setNewModuleProjectId] = React.useState("");
   const [newModuleNamaModul, setNewModuleNamaModul] = React.useState("");
   const [newModuleKeterangan, setNewModuleKeterangan] = React.useState("");
+
+  // #358 — FAB navbar: buka modal Tambah Master / Modul
+  const { registerAction, unregisterAction } = useMobileAction();
+  const canAddMaster = hasPermission(
+    userRole as PeranEfektif,
+    "configuration",
+    "update",
+    false,
+    currentUserProfile?.permissions
+  );
+  const openAddMaster = React.useCallback(() => {
+    if (selectedType === "modul_aplikasi") {
+      setNewModuleProjectId(projects?.[0]?.id || "");
+      setNewModuleNamaModul("");
+      setNewModuleKeterangan("");
+      setIsNewModuleModalOpen(true);
+    } else {
+      setNewMasterType(selectedType);
+      setNewMasterLabel("");
+      setNewMasterShortCode("");
+      setNewMasterBaseUrl("");
+      setIsNewMasterModalOpen(true);
+    }
+  }, [selectedType, projects]);
+  React.useEffect(() => {
+    if (canAddMaster) {
+      registerAction({
+        id: "master-add-new",
+        label: t("master.addItem", "Tambah"),
+        onClick: openAddMaster,
+        canCreate: true,
+      });
+    } else {
+      unregisterAction("master-add-new");
+    }
+    return () => unregisterAction("master-add-new");
+  }, [canAddMaster, openAddMaster, registerAction, unregisterAction, t]);
 
   const [isEditModuleModalOpen, setIsEditModuleModalOpen] = React.useState(false);
   const [editingModuleId, setEditingModuleId] = React.useState("");

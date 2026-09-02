@@ -124,7 +124,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
   return (
     <div
       className={cn(
-        "lg:col-span-4 bg-surface-sunken/70/40 p-4 md:p-5 space-y-4 border-l border-border-subtle/80 min-h-full transition-opacity text-left",
+        "lg:col-span-4 bg-surface-sunken/70/40 p-3.5 sm:p-4 md:p-5 space-y-3 sm:space-y-4 border-t lg:border-t-0 lg:border-l border-border-subtle/80 min-h-full transition-opacity text-left",
         isUpdatingTask?.[task.id] && "opacity-50 pointer-events-none"
       )}
     >

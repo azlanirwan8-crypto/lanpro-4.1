@@ -72,75 +72,79 @@ export const ActivityLogPanel = ({
   });
 
   return (
-    <div className="flex-1 overflow-auto p-6 md:p-8 bg-surface-sunken custom-scrollbar">
-      <div className="space-y-6 w-full">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-border-subtle pb-6 mb-2">
-          <div className="flex gap-4 items-center">
-            <div className="w-14 h-14 bg-indigo-500/10 text-indigo-600 rounded-xl flex items-center justify-center shadow-inner">
-              <History className="w-7 h-7" />
+    <div className="flex-1 overflow-auto p-3 sm:p-6 md:p-8 bg-surface-sunken custom-scrollbar">
+      <div className="space-y-4 sm:space-y-6 w-full">
+        <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:justify-between md:items-center border-b border-border-subtle pb-4 sm:pb-6 mb-1 sm:mb-2">
+          <div className="flex gap-3 sm:gap-4 items-center min-w-0">
+            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-indigo-500/10 text-indigo-600 rounded-xl flex items-center justify-center shadow-inner shrink-0">
+              <History className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
-            <div>
-              <h1 className="text-3xl font-medium text-content-strong tracking-tight">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-3xl font-medium text-content-strong tracking-tight truncate">
                 {t("activityLog.title")}
               </h1>
-              <p className="text-content-muted font-medium mt-1 text-sm tracking-wide">
+              <p className="text-content-muted font-medium mt-0.5 sm:mt-1 text-xs sm:text-sm tracking-wide hidden sm:block">
                 {t("activityLog.subtitle")}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex bg-surface border border-border-subtle rounded-xl px-3 py-2 items-center gap-2 shadow-soft">
-              <Search className="w-4 h-4 text-content-subtle" />
+          <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto min-w-0">
+            <div className="flex min-w-0 flex-1 md:flex-none bg-surface border border-border-subtle rounded-xl px-3 py-2 items-center gap-2 shadow-soft">
+              <Search className="w-4 h-4 text-content-subtle shrink-0" />
               <input
                 value={auditLogSearch}
                 onChange={(e) => setAuditLogSearch(e.target.value)}
                 placeholder={t("activityLog.searchLogs")}
-                className="bg-transparent border-none outline-none text-xs w-48 placeholder:text-content-subtle text-content-body"
+                className="bg-transparent border-none outline-none text-xs w-full md:w-48 placeholder:text-content-subtle text-content-body min-w-0"
               />
             </div>
             <button
               onClick={exportTasksToCSV}
-              className="px-4 py-2.5 bg-indigo-600 border border-indigo-600 text-content-inverse rounded-xl text-xs font-normal shadow-soft-lg shadow-indigo-100 transition-all flex items-center gap-2 tracking-widest hover:bg-indigo-700 hover:-translate-y-0.5 active:scale-95 uppercase"
+              title={t("activityLog.exportCsv")}
+              className="shrink-0 px-2.5 sm:px-4 py-2.5 bg-indigo-600 border border-indigo-600 text-content-inverse rounded-xl text-xs font-normal shadow-soft-lg shadow-indigo-100 transition-all flex items-center gap-2 tracking-widest hover:bg-indigo-700 active:scale-95 uppercase"
             >
-              <DownloadCloud className="w-4 h-4" /> {t("activityLog.exportCsv")}
+              <DownloadCloud className="w-4 h-4" />
+              <span className="hidden sm:inline">{t("activityLog.exportCsv")}</span>
             </button>
           </div>
         </div>
 
-        {/* Summary Metric Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-surface p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-32 relative overflow-hidden">
+        {/* Summary Metric Cards — #361: 2 kolom di HP */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-6 mb-4 sm:mb-8">
+          <div className="bg-surface p-3.5 sm:p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden">
             <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4">
               <Activity className="w-32 h-32" />
             </div>
-            <div className="text-xs sm:text-[10px] font-medium tracking-[0.2em] uppercase text-content-subtle z-10 flex items-center gap-2">
+            <div className="text-[10px] sm:text-[10px] font-medium tracking-[0.15em] uppercase text-content-subtle z-10 flex items-center gap-1.5 sm:gap-2">
               <Zap className="w-3.5 h-3.5" /> {t("activityLog.totalEvents")}
             </div>
-            <div className="text-4xl font-medium text-content-strong z-10">
+            <div className="text-2xl sm:text-4xl font-medium text-content-strong z-10">
               {activityLogs.length}
             </div>
           </div>
-          <div className="bg-surface p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-32 relative overflow-hidden">
+          <div className="bg-surface p-3.5 sm:p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden">
             <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4">
               <Users className="w-32 h-32" />
             </div>
-            <div className="text-xs sm:text-[10px] font-medium tracking-[0.2em] uppercase text-content-subtle z-10 flex items-center gap-2">
+            <div className="text-[10px] font-medium tracking-[0.15em] uppercase text-content-subtle z-10 flex items-center gap-1.5 sm:gap-2">
               <Users className="w-3.5 h-3.5" /> {t("activityLog.activeActors24h")}
             </div>
-            <div className="text-4xl font-medium text-content-strong z-10">{activeActorsCount}</div>
+            <div className="text-2xl sm:text-4xl font-medium text-content-strong z-10">
+              {activeActorsCount}
+            </div>
           </div>
-          <div className="bg-surface p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-32 relative overflow-hidden">
+          <div className="bg-surface p-3.5 sm:p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden col-span-2 md:col-span-1">
             <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4">
               <Clock className="w-32 h-32" />
             </div>
-            <div className="text-xs sm:text-[10px] font-medium tracking-[0.2em] uppercase text-content-subtle z-10 flex items-center gap-2">
+            <div className="text-[10px] font-medium tracking-[0.15em] uppercase text-content-subtle z-10 flex items-center gap-1.5 sm:gap-2">
               <Clock className="w-3.5 h-3.5" /> {t("activityLog.lastEvent")}
             </div>
-            <div className="text-xl font-medium text-content-strong tracking-tight z-10 flex flex-col">
+            <div className="text-base sm:text-xl font-medium text-content-strong tracking-tight z-10 flex flex-col">
               {activityLogs.length > 0 ? (
                 <>
                   <span>{safeFormat(activityLogs[0].createdAt, "MMM dd, yyyy")}</span>
-                  <span className="text-sm font-medium text-content-muted">
+                  <span className="text-xs sm:text-sm font-medium text-content-muted">
                     {safeFormat(activityLogs[0].createdAt, "HH:mm:ss")}
                   </span>
                 </>
@@ -152,14 +156,14 @@ export const ActivityLogPanel = ({
         </div>
 
         <div className="bg-surface border border-border-subtle rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-          <div className="p-6 bg-surface-sunken border-b border-border-faint flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="p-3 sm:p-6 bg-surface-sunken border-b border-border-faint flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-4">
             <div className="relative flex-1 custom-search-bar w-full">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle" />
+              <Search className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle" />
               <input
                 placeholder={t("activityLog.searchEvents")}
                 value={auditLogSearch}
                 onChange={(e) => setAuditLogSearch(e.target.value)}
-                className="w-full pl-14 pr-6 py-4 bg-surface border border-border-subtle rounded-xl text-[13px] font-normal text-content-body tracking-wide focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:font-normal placeholder:text-content-subtle"
+                className="w-full pl-10 sm:pl-14 pr-4 sm:pr-6 py-2.5 sm:py-4 bg-surface border border-border-subtle rounded-xl text-[13px] font-normal text-content-body tracking-wide focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:font-normal placeholder:text-content-subtle"
               />
             </div>
           </div>

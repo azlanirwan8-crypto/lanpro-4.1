@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import React from "react";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
+import { GripVertical } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { RenderIcon } from "../../../components/RenderIcon";
 import { KanbanCard } from "./KanbanCard";
@@ -80,18 +81,41 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        {...provided.dragHandleProps}
                         style={provided.draggableProps.style}
-                        className="rounded-lg"
+                        className="rounded-lg relative group/drag"
                       >
-                        <KanbanCard
-                          task={task}
-                          mArr={mArr}
-                          pArr={pArr}
-                          onClick={() => onTaskClick(task)}
-                          isDragging={snapshot.isDragging}
-                          shakingTaskId={shakingTaskId}
-                        />
+                        {/*
+                          #357 — handle drag terpisah + touch-action:none agar
+                          scroll kolom tidak merebut gesture di mobile browser.
+                          Di desktop, seluruh kartu tetap bisa digeser lewat
+                          area handle yang lebih lebar (hover).
+                        */}
+                        <button
+                          type="button"
+                          aria-label={t("kanban.dragHandle", "Geser kartu")}
+                          {...provided.dragHandleProps}
+                          style={{ touchAction: "none" }}
+                          className={cn(
+                            "absolute left-0.5 top-1/2 -translate-y-1/2 z-10",
+                            "flex items-center justify-center w-7 h-9 rounded-md",
+                            "text-content-subtle hover:text-content-strong hover:bg-surface-muted",
+                            "border border-transparent hover:border-border-subtle/70",
+                            "active:scale-95 cursor-grab active:cursor-grabbing touch-none"
+                          )}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <GripVertical className="w-4 h-4" />
+                        </button>
+                        <div className="pl-7">
+                          <KanbanCard
+                            task={task}
+                            mArr={mArr}
+                            pArr={pArr}
+                            onClick={() => onTaskClick(task)}
+                            isDragging={snapshot.isDragging}
+                            shakingTaskId={shakingTaskId}
+                          />
+                        </div>
                       </div>
                     )}
                   </Draggable>

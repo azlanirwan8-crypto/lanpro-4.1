@@ -159,7 +159,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         <div className="flex-1 overflow-auto custom-scrollbar">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 h-full">
             {/* Left Column (Main Info) */}
-            <div className="lg:col-span-8 p-5 md:p-6 lg:p-7 space-y-6 border-r border-border-subtle/80 bg-surface">
+            <div className="lg:col-span-8 p-3.5 sm:p-5 md:p-6 lg:p-7 space-y-4 sm:space-y-6 border-r border-border-subtle/80 bg-surface">
               {(() => {
                 const parentEpic = task?.parentId
                   ? (tasks || []).find((t) => t.id === task.parentId)

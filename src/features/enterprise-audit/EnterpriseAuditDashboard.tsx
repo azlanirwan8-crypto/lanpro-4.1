@@ -211,37 +211,37 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-surface-muted p-4 md:p-5 gap-4 text-left">
+    <div className="flex-1 flex flex-col min-h-0 bg-surface-muted p-2.5 sm:p-4 md:p-5 gap-3 sm:gap-4 text-left">
       {/* 1. Header & Summary Section */}
-      <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
+      <div className="bg-surface p-3 sm:p-4 md:p-5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between shrink-0">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
               {t("audit.systemAudit")}
             </span>
-            <span className="text-xs text-content-subtle font-medium">
+            <span className="text-xs text-content-subtle font-medium hidden sm:inline">
               {t("common.enterpriseControlCentre")}
             </span>
           </div>
           <h1 className="text-base font-medium text-content-strong tracking-tight">
             {t("audit.title")}
           </h1>
-          <p className="text-xs text-content-muted font-medium mt-0.5">
+          <p className="text-xs text-content-muted font-medium mt-0.5 hidden sm:block">
             {t("audit.infraSubtitle")}
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="flex bg-surface-sunken rounded-md p-2 border border-border-subtle/80 items-center gap-4 text-xs">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex flex-1 sm:flex-none bg-surface-sunken rounded-md p-2 border border-border-subtle/80 items-center gap-3 sm:gap-4 text-xs min-w-0">
             <div className="flex items-center gap-1.5">
-              <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-wider">
+              <span className="text-[10px] font-normal text-content-subtle uppercase tracking-wider">
                 {t("audit.totalLog")}
               </span>
               <span className="font-medium text-content-strong">{logs.length}</span>
             </div>
             <div className="h-4 w-px bg-surface-strong" />
             <div className="flex items-center gap-1.5">
-              <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-wider">
+              <span className="text-[10px] font-normal text-content-subtle uppercase tracking-wider hidden xs:inline">
                 {t("audit.status")}
               </span>
               <div className="flex items-center gap-1 text-emerald-600 font-medium">
@@ -256,7 +256,7 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
               fetchLogs();
             }}
             disabled={isRefreshing}
-            className="h-8 w-8 bg-surface hover:bg-surface-sunken border border-border-subtle/80 rounded-md text-content-secondary flex items-center justify-center shadow-2xs transition-all cursor-pointer disabled:opacity-50"
+            className="h-8 w-8 shrink-0 bg-surface hover:bg-surface-sunken border border-border-subtle/80 rounded-md text-content-secondary flex items-center justify-center shadow-2xs transition-all cursor-pointer disabled:opacity-50"
             title={t("audit.refreshLogs")}
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
@@ -264,38 +264,38 @@ export const EnterpriseAuditDashboard: React.FC<EnterpriseAuditDashboardProps> =
         </div>
       </div>
 
-      {/* 2. Advanced Filtering Control Bar */}
-      <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col md:flex-row items-center justify-between gap-3 shrink-0">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle" />
+      {/* 2. Advanced Filtering — #362: search + chip filter lebih padat di HP */}
+      <div className="bg-surface p-2.5 sm:p-3.5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col gap-2.5 shrink-0">
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle pointer-events-none" />
           <input
             type="text"
             placeholder={t("audit.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-1.5 bg-surface-sunken border border-border-subtle rounded-md text-xs font-medium focus:bg-surface focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+            className="w-full pl-9 pr-3 py-1.5 bg-surface-sunken border border-border-subtle rounded-md text-xs font-medium focus:bg-surface focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto flex-wrap justify-end">
-          <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80">
+        <div className="flex items-center gap-2 w-full overflow-x-auto pb-0.5 custom-scrollbar">
+          <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0">
             {["All", "Tasks", "Sprints", "Wiki", "Milestones"].map((ent) => (
               <button
                 key={ent}
                 onClick={() => setEntityFilter(ent)}
-                className={`px-3 py-1 text-xs font-medium rounded transition-all ${entityFilter === ent ? "bg-surface text-indigo-700 shadow-2xs font-medium" : "text-content-muted hover:text-content-strong"}`}
+                className={`px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-medium rounded transition-all whitespace-nowrap ${entityFilter === ent ? "bg-surface text-indigo-700 shadow-2xs font-medium" : "text-content-muted hover:text-content-strong"}`}
               >
                 {ent === "All" ? t("audit.allEntities") : ent}
               </button>
             ))}
           </div>
 
-          <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80">
+          <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0">
             {["All", "CREATE", "UPDATE", "DELETE"].map((act) => (
               <button
                 key={act}
                 onClick={() => setActionFilter(act)}
-                className={`px-3 py-1 text-xs font-medium rounded transition-all ${actionFilter === act ? "bg-surface text-indigo-700 shadow-2xs font-medium" : "text-content-muted hover:text-content-strong"}`}
+                className={`px-2.5 sm:px-3 py-1 text-[11px] sm:text-xs font-medium rounded transition-all whitespace-nowrap ${actionFilter === act ? "bg-surface text-indigo-700 shadow-2xs font-medium" : "text-content-muted hover:text-content-strong"}`}
               >
                 {act === "All" ? t("audit.allAccess") : act}
               </button>

@@ -37,6 +37,7 @@ import {
   updateUser,
   deleteUser,
 } from "./services/users.service";
+import { useMobileAction } from "../../contexts/MobileActionContext";
 
 const Input = ({ value, onChange, placeholder, type = "text", className = "", ...props }: any) => (
   <input
@@ -58,6 +59,18 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const [isInviteModalOpen, setIsInviteModalOpen] = React.useState(false);
   const [isInviteSuccessModalOpen, setIsInviteSuccessModalOpen] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<"overview" | "settings">("overview");
+
+  // #358 — FAB navbar mobile: daftarkan aksi Tambah User
+  const { registerAction, unregisterAction } = useMobileAction();
+  React.useEffect(() => {
+    registerAction({
+      id: "users-add-person",
+      label: t("users.addUser"),
+      onClick: () => setIsInviteModalOpen(true),
+      canCreate: true,
+    });
+    return () => unregisterAction("users-add-person");
+  }, [registerAction, unregisterAction, t]);
 
   // Project Assignment State
   const [selectedAssignProjectId, setSelectedAssignProjectId] = React.useState("");
@@ -572,30 +585,24 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               baris ikut hilang — kalau ditinggal, ia menyisakan celah kosong
               di bawah kartu.
             */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-3 lg:flex-row lg:justify-between lg:items-center">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="w-9 h-9 bg-info/10 text-info-text rounded-lg flex items-center justify-center border border-info/20 shrink-0">
                   <Users className="w-4.5 h-4.5" />
                 </div>
-                <div>
-                  <h3 className="text-base font-medium text-content-strong tracking-tight leading-none">
+                <div className="min-w-0">
+                  <h3 className="text-base font-medium text-content-strong tracking-tight leading-none truncate">
                     {t("users.title")}
                   </h3>
-                  <p className="text-content-subtle font-medium text-xs sm:text-[11px] mt-1">
+                  <p className="text-content-subtle font-medium text-xs sm:text-[11px] mt-1 hidden sm:block">
                     {t("users.subtitle")}
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto">
-                {/*
-                  Pencarian dipindah ke sini dari baris kedua. `sm:w-64` dipakai
-                  alih-alih `flex-1`: di baris ini tetangganya dua tombol
-                  berlebar tetap, jadi `flex-1` akan meregang sampai menyentuh
-                  judul di layar lebar. Di bawah `sm` ia kembali selebar penuh
-                  supaya tidak terhimpit.
-                */}
-                <div className="relative w-full sm:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle" />
+              {/* #359 — search + export + tambah selalu 1 baris di HP */}
+              <div className="flex items-center gap-2 w-full lg:w-auto min-w-0">
+                <div className="relative min-w-0 flex-1 lg:flex-none lg:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle pointer-events-none" />
                   <input
                     type="text"
                     placeholder={t("users.searchPlaceholder")}

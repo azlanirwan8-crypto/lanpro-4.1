@@ -20,7 +20,6 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Filter,
   ShieldAlert,
   ChevronRight as ArrowRight,
   Monitor,
@@ -277,8 +276,8 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
         </div>
       </div>
 
-      {/* Velzon Stat Widgets Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Velzon Stat Widgets Grid — #360: 2 kolom di HP */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         {/* Card 1: Sesi Aktif */}
         <div className="bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-emerald-500/30">
           <div className="flex items-start justify-between">
@@ -371,12 +370,11 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
 
       {/* Velzon Main Card: Search, Filter & Table */}
       <div className="bg-surface border border-border-subtle rounded-xl shadow-xs overflow-hidden flex flex-col">
-        {/* Card Header Filter Bar */}
-        <div className="p-3 border-b border-border-subtle bg-surface flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-            {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
+        {/* Card Header Filter Bar — #360: search + status 1 baris di HP */}
+        <div className="p-3 border-b border-border-subtle bg-surface flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
+          <div className="flex flex-1 items-center gap-2 min-w-0">
+            <div className="relative min-w-0 flex-1">
+              <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={search}
@@ -388,13 +386,10 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                   "sessionMonitor.searchPlaceholder",
                   "Cari nama, email, IP, lokasi..."
                 )}
-                className="w-full pl-10 pr-4 py-2 bg-surface-sunken border border-border-subtle rounded-lg text-sm text-content-strong placeholder:text-content-subtle focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
+                className="w-full pl-9 pr-3 py-2 bg-surface-sunken border border-border-subtle rounded-lg text-sm text-content-strong placeholder:text-content-subtle focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
               />
             </div>
-
-            {/* Filter Status */}
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-content-subtle shrink-0 hidden sm:inline" />
+            <div className="shrink-0 w-[40%] max-w-[10.5rem] sm:w-auto sm:max-w-none">
               <StyledDropdown
                 value={statusFilter}
                 onChange={(val) => {
@@ -410,12 +405,12 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                     label: t("sessionMonitor.statusForceLogout", "Diputus Admin"),
                   },
                 ]}
-                buttonClassName="px-3 py-2 bg-surface-sunken border border-border-subtle rounded-lg text-sm text-left font-medium text-content-strong"
+                buttonClassName="w-full px-2.5 sm:px-3 py-2 bg-surface-sunken border border-border-subtle rounded-lg text-sm text-left font-medium text-content-strong"
               />
             </div>
           </div>
 
-          <div className="text-xs text-content-subtle font-medium self-end sm:self-auto">
+          <div className="text-xs text-content-subtle font-medium self-end sm:self-auto hidden sm:block">
             {t("sessionMonitor.totalRecords", "Total Sesi: {{total}}", { total: totalRecords })}
           </div>
         </div>
