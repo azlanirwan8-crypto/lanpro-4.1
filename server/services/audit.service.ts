@@ -3,13 +3,13 @@ import db from "../../src/lib/db";
 
 export const maskSensitiveData = (data: any): any => {
   if (!data) return data;
-  if (typeof data !== 'object') return data;
+  if (typeof data !== "object") return data;
   const masked = { ...data };
-  const sensitiveKeys = ['password', 'token', 'secret', 'passwordHash', 'jwt'];
+  const sensitiveKeys = ["password", "token", "secret", "passwordHash", "jwt"];
   for (const key in masked) {
-    if (sensitiveKeys.some(sk => key.toLowerCase().includes(sk))) {
-      masked[key] = '***';
-    } else if (typeof masked[key] === 'object') {
+    if (sensitiveKeys.some((sk) => key.toLowerCase().includes(sk))) {
+      masked[key] = "***";
+    } else if (typeof masked[key] === "object") {
       masked[key] = maskSensitiveData(masked[key]);
     }
   }
@@ -19,7 +19,7 @@ export const maskSensitiveData = (data: any): any => {
 export interface AuditLogInput {
   userId: string;
   projectId: string | null;
-  actionType: 'CREATE' | 'UPDATE' | 'DELETE';
+  actionType: "CREATE" | "UPDATE" | "DELETE";
   entityName: string;
   entityId: string;
   oldValues: any;
@@ -40,7 +40,7 @@ export const createAuditLog = async (
   let input: AuditLogInput;
 
   // New signature: single object parameter
-  if (typeof arg1 === 'object' && arg1.userId && !arg2) {
+  if (typeof arg1 === "object" && arg1.userId && !arg2) {
     input = arg1;
   }
   // Old signature: legacy 7-8 parameter format (with optional io)
@@ -53,7 +53,7 @@ export const createAuditLog = async (
       entityName: arg5,
       entityId: arg6,
       oldValues: arg7,
-      newValues: arg8
+      newValues: arg8,
     };
   }
   // Old signature: legacy 7 parameter format (no io)
@@ -65,7 +65,7 @@ export const createAuditLog = async (
       entityName: arg4,
       entityId: arg5,
       oldValues: arg6,
-      newValues: arg7
+      newValues: arg7,
     };
   }
 
@@ -75,25 +75,31 @@ export const createAuditLog = async (
     try {
       logConn = await db.getConnection();
       const logId = crypto.randomUUID();
-      
+
       let cleanOld = null;
       let cleanNew = null;
       try {
-         cleanOld = oldValues ? maskSensitiveData(JSON.parse(JSON.stringify(oldValues))) : null;
-         cleanNew = newValues ? maskSensitiveData(JSON.parse(JSON.stringify(newValues))) : null;
+        cleanOld = oldValues ? maskSensitiveData(JSON.parse(JSON.stringify(oldValues))) : null;
+        cleanNew = newValues ? maskSensitiveData(JSON.parse(JSON.stringify(newValues))) : null;
       } catch (stringifyError) {
-         console.warn("Circular Dependency terdeteksi pada objek AuditLogs:", stringifyError);
-         cleanOld = { __error: "Data kompleks / Circular Reference tidak dapat direkam" };
-         cleanNew = { __error: "Data kompleks / Circular Reference tidak dapat direkam" };
+        console.warn("Circular Dependency terdeteksi pada objek AuditLogs:", stringifyError);
+        cleanOld = { __error: "Data kompleks / Circular Reference tidak dapat direkam" };
+        cleanNew = { __error: "Data kompleks / Circular Reference tidak dapat direkam" };
       }
 
       let resolvedUserId = userId;
-      const [uCheck]: any = await logConn.query("SELECT id FROM Users WHERE id = ? OR uid = ?", [userId, userId]);
+      const [uCheck]: any = await logConn.query("SELECT id FROM Users WHERE id = ? OR uid = ?", [
+        userId,
+        userId,
+      ]);
       if (uCheck.length > 0) {
         resolvedUserId = uCheck[0].id;
       } else {
-        const [anyUser]: any = await logConn.query("SELECT id FROM Users LIMIT 1");
-        resolvedUserId = anyUser.length > 0 ? anyUser[0].id : null;
+        // #352 — jangan atribusi ke user acak (LIMIT 1). Tanpa aktor yang dikenal, lewati.
+        console.warn(
+          `Audit log skipped: userId tidak ter-resolve (${String(userId || "").slice(0, 64)})`
+        );
+        return;
       }
 
       if (!resolvedUserId) {
@@ -103,7 +109,9 @@ export const createAuditLog = async (
 
       let resolvedProjectId = projectId;
       if (projectId) {
-        const [pCheck]: any = await logConn.query("SELECT id FROM Projects WHERE id = ?", [projectId]);
+        const [pCheck]: any = await logConn.query("SELECT id FROM Projects WHERE id = ?", [
+          projectId,
+        ]);
         if (pCheck.length === 0) {
           resolvedProjectId = null;
         }
@@ -112,10 +120,21 @@ export const createAuditLog = async (
       await logConn.query(
         `INSERT INTO AuditLogs (id, userId, projectId, actionType, entityName, entityId, oldValues, newValues) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [logId, resolvedUserId, resolvedProjectId, actionType, entityName, entityId, JSON.stringify(cleanOld), JSON.stringify(cleanNew)]
+        [
+          logId,
+          resolvedUserId,
+          resolvedProjectId,
+          actionType,
+          entityName,
+          entityId,
+          JSON.stringify(cleanOld),
+          JSON.stringify(cleanNew),
+        ]
       );
 
-      const [uRows]: any = await logConn.query("SELECT displayName FROM Users WHERE id = ?", [resolvedUserId]);
+      const [uRows]: any = await logConn.query("SELECT displayName FROM Users WHERE id = ?", [
+        resolvedUserId,
+      ]);
       const userName = uRows.length > 0 ? uRows[0].displayName : "Unknown User";
 
       const broadcastData = {
@@ -128,7 +147,7 @@ export const createAuditLog = async (
         entityId,
         oldValues: cleanOld,
         newValues: cleanNew,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       if (io) {

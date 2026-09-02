@@ -340,6 +340,40 @@ async function startServer() {
   });
   app.use("/api/auth/register", registerLimiter);
 
+  // #350 — forgot/reset tanpa limiter khusus: login 10/15m bisa dihindari lewat
+  // endpoint pemulihan. Forgot SELALU memulangkan 200 netral bila format email
+  // sah, jadi skipSuccessfulRequests akan membuat pembatas tidak pernah
+  // menghitung — harus hitung SEMUA permintaan.
+  const forgotPasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: {
+      status: "error",
+      message:
+        "Terlalu banyak permintaan lupa kata sandi. Silakan coba lagi dalam 15 menit.",
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
+  });
+  app.use("/api/auth/forgot-password", forgotPasswordLimiter);
+
+  // Reset bertoken: hitung percobaan GAGAL (token rusak/tebakan), sukses boleh skip.
+  const resetPasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: {
+      status: "error",
+      message:
+        "Terlalu banyak percobaan pengaturan ulang kata sandi. Silakan coba lagi dalam 15 menit.",
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
+    skipSuccessfulRequests: true,
+  });
+  app.use("/api/auth/reset-password", resetPasswordLimiter);
+
   app.use(express.json({ limit: '100mb' }));
   app.use(express.urlencoded({ extended: true, limit: '100mb' }));
 
