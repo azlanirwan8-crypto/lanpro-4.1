@@ -1634,9 +1634,9 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "flex items-center gap-2 py-3.5 text-xs font-semibold whitespace-nowrap transition-all border-b-2 cursor-pointer",
+                    "flex items-center gap-2 py-3.5 text-xs font-medium whitespace-nowrap transition-all border-b-2 cursor-pointer",
                     activeTab === tab.id
-                      ? "text-primary border-primary font-bold"
+                      ? "text-primary border-primary font-semibold"
                       : "text-content-muted border-transparent hover:text-content-strong"
                   )}
                 >
@@ -1685,7 +1685,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       <span className="font-medium text-content-muted whitespace-nowrap">
                         {t("userDetail.fullName")} :
                       </span>
-                      <span className="font-semibold text-content-strong break-words">
+                      <span className="font-medium text-content-strong break-words">
                         {user.displayName || user.username}
                       </span>
 
@@ -1744,7 +1744,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           >
                             <UserAvatar user={tm} className="w-9 h-9 text-xs shrink-0" />
                             <div className="min-w-0">
-                              <div className="text-xs font-semibold text-content-strong truncate">
+                              <div className="text-xs font-medium text-content-strong truncate">
                                 {tm.displayName || tm.username || tm.email}
                               </div>
                               <div className="text-xs text-content-muted font-medium truncate mt-0.5">
@@ -1798,11 +1798,11 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               </div>
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs font-semibold text-content-strong truncate">
+                                  <span className="text-xs font-medium text-content-strong truncate">
                                     {item.device}
                                   </span>
                                   {item.isCurrent && (
-                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-700 shrink-0">
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 shrink-0">
                                       {t("userDetail.currentDevice")}
                                     </span>
                                   )}
@@ -1852,7 +1852,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         </span>
                         <div className="text-xl font-bold text-content-strong mt-0.5">
                           {userProjectsList.length}{" "}
-                          <span className="text-xs font-semibold text-content-muted">Project</span>
+                          <span className="text-xs font-medium text-content-muted">Project</span>
                         </div>
                       </div>
                     </div>
@@ -1867,7 +1867,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         </span>
                         <div className="text-xl font-bold text-content-strong mt-0.5">
                           {userTasks.length}{" "}
-                          <span className="text-xs font-semibold text-content-muted">Tasks</span>
+                          <span className="text-xs font-medium text-content-muted">Tasks</span>
                         </div>
                         <span className="text-[10px] text-content-subtle block mt-0.5">
                           {userTasks.length === 0
@@ -1947,7 +1947,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                   />
                                   <div className="space-y-1.5 flex-1 min-w-0">
                                     <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                                      <span className="font-semibold text-content-strong">
+                                      <span className="font-medium text-content-strong">
                                         {user.displayName || user.username}
                                       </span>
                                       <span className="text-content-subtle">
@@ -2003,7 +2003,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                   <ItemIcon className="w-4.5 h-4.5" />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="text-xs font-semibold text-content-strong truncate">
+                                  <div className="text-xs font-medium text-content-strong truncate">
                                     {item.title}
                                   </div>
                                   <div className="flex items-center gap-2 text-xs text-content-subtle mt-0.5">
@@ -2156,7 +2156,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 <div className="flex items-start gap-3 min-w-0">
                                   <div
                                     className={cn(
-                                      "w-11 h-11 rounded-xl flex items-center justify-center text-content-inverse shrink-0 shadow-soft font-bold text-lg",
+                                      "w-11 h-11 rounded-xl flex items-center justify-center text-content-inverse shrink-0 shadow-soft font-semibold text-lg",
                                       pIdx % 2 === 0
                                         ? "bg-gradient-to-br from-primary-surface to-primary-surface-active"
                                         : "bg-gradient-to-br from-teal-500 to-emerald-600"
@@ -2169,7 +2169,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                     )}
                                   </div>
                                   <div className="min-w-0">
-                                    <h3 className="text-sm font-bold text-content-strong truncate">
+                                    <h3 className="text-sm font-semibold text-content-strong truncate">
                                       {p.name}
                                     </h3>
                                     <p className="text-xs text-content-muted line-clamp-1 mt-0.5">
@@ -2224,7 +2224,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               {/* Progress Bar Row */}
                               <div className="space-y-1.5">
                                 <div className="flex items-center justify-between text-xs sm:text-[11px]">
-                                  <span className="font-semibold text-primary">
+                                  <span className="font-medium text-primary">
                                     {progressPercent}% Complete
                                   </span>
                                 </div>
@@ -2262,7 +2262,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                           <div className="w-4 h-4 rounded-full border-2 border-border-subtle shrink-0 flex items-center justify-center" />
                                           <div className="min-w-0">
                                             <div className="flex items-center gap-2">
-                                              <span className="text-xs font-semibold text-content-strong truncate">
+                                              <span className="text-xs font-medium text-content-strong truncate">
                                                 {tItem.title}
                                               </span>
                                               <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-primary/10 text-primary border border-primary/20 uppercase">
@@ -2351,7 +2351,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           <span className="w-2 h-2 rounded-full bg-surface-muted" />
                           <span className="text-content-body font-medium">To Do</span>
                         </div>
-                        <span className="font-bold text-content-strong">
+                        <span className="font-semibold text-content-strong">
                           {
                             userTasks.filter((t) => t.status === "To Do" || t.status === "Backlog")
                               .length
@@ -2364,7 +2364,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           <span className="w-2 h-2 rounded-full bg-blue-500" />
                           <span className="text-content-body font-medium">In Progress</span>
                         </div>
-                        <span className="font-bold text-content-strong">
+                        <span className="font-semibold text-content-strong">
                           {
                             userTasks.filter(
                               (t) => t.status === "In Progress" || t.status === "In Development"
@@ -2378,7 +2378,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           <span className="w-2 h-2 rounded-full bg-amber-500" />
                           <span className="text-content-body font-medium">In Review</span>
                         </div>
-                        <span className="font-bold text-content-strong">
+                        <span className="font-semibold text-content-strong">
                           {
                             userTasks.filter(
                               (t) =>
@@ -2395,7 +2395,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           <span className="w-2 h-2 rounded-full bg-emerald-500" />
                           <span className="text-content-body font-medium">Done</span>
                         </div>
-                        <span className="font-bold text-content-strong">
+                        <span className="font-semibold text-content-strong">
                           {
                             userTasks.filter((t) => t.status === "Done" || t.status === "Selesai")
                               .length
@@ -2417,7 +2417,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     <div className="relative pl-5 space-y-4 border-l-2 border-primary/20 ml-2 py-1 text-xs">
                       <div className="relative">
                         <div className="absolute -left-[27px] top-0.5 w-3 h-3 rounded-full bg-primary-surface ring-4 ring-surface" />
-                        <div className="font-semibold text-content-strong">Project created</div>
+                        <div className="font-medium text-content-strong">Project created</div>
                         <div className="text-[11px] text-content-muted mt-0.5">
                           Word Merchant & Issue Resolution
                         </div>
@@ -2426,7 +2426,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                       <div className="relative">
                         <div className="absolute -left-[27px] top-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-surface" />
-                        <div className="font-semibold text-content-strong">Last activity</div>
+                        <div className="font-medium text-content-strong">Last activity</div>
                         <div className="text-[11px] text-content-muted mt-0.5">
                           Onboarding NTB - task updated
                         </div>
@@ -2444,7 +2444,9 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <Sparkles className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-content-strong">Stay Productive</h4>
+                        <h4 className="text-xs font-semibold text-content-strong">
+                          Stay Productive
+                        </h4>
                         <p className="text-[11px] text-content-muted mt-0.5 line-clamp-2">
                           Focus on your tasks and keep your projects on track.
                         </p>
@@ -2487,7 +2489,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Full Name */}
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                        <label className="text-xs font-medium text-content-strong flex items-center gap-2">
                           <User className="w-4 h-4 text-content-subtle" />
                           <span>{t("userDetail.fullName")}</span>
                         </label>
@@ -2501,7 +2503,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                       {/* Email Address */}
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                        <label className="text-xs font-medium text-content-strong flex items-center gap-2">
                           <Mail className="w-4 h-4 text-content-subtle" />
                           <span>{t("userDetail.email")}</span>
                         </label>
@@ -2515,7 +2517,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                       {/* Phone / WhatsApp */}
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                        <label className="text-xs font-medium text-content-strong flex items-center gap-2">
                           <Phone className="w-4 h-4 text-content-subtle" />
                           <span>{t("userDetail.phone")} / WhatsApp Number</span>
                         </label>
@@ -2529,7 +2531,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                       {/* Department */}
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                        <label className="text-xs font-medium text-content-strong flex items-center gap-2">
                           <Building2 className="w-4 h-4 text-content-subtle" />
                           <span>{t("userDetail.department")}</span>
                         </label>
@@ -2562,7 +2564,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                       {/* Position / Jabatan */}
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                        <label className="text-xs font-medium text-content-strong flex items-center gap-2">
                           <Briefcase className="w-4 h-4 text-content-subtle" />
                           <span>{t("userDetail.position")}</span>
                         </label>
@@ -2598,7 +2600,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       {/* System Role (Admin only) */}
                       {isAdmin && (
                         <div className="space-y-2">
-                          <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                          <label className="text-xs font-medium text-content-strong flex items-center gap-2">
                             <UserCheck className="w-4 h-4 text-content-subtle" />
                             <span>{t("userDetail.systemRole")}</span>
                           </label>
@@ -2635,7 +2637,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       {/* Account Status */}
                       {isAdmin && (
                         <div className="space-y-2 md:col-span-2">
-                          <label className="text-xs font-semibold text-content-strong flex items-center gap-2">
+                          <label className="text-xs font-medium text-content-strong flex items-center gap-2">
                             <ShieldCheck className="w-4 h-4 text-content-subtle" />
                             <span>{t("userDetail.accountStatus")}</span>
                           </label>
@@ -2689,7 +2691,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           <Lock className="w-5 h-5" />
                         </div>
                         <div>
-                          <h3 className="text-sm font-bold text-content-strong">
+                          <h3 className="text-sm font-semibold text-content-strong">
                             {t("userDetail.tabChangePassword", "Change Password")}
                           </h3>
                           <p className="text-xs text-content-muted mt-0.5">
@@ -2704,7 +2706,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
                         {/* Old Password */}
                         <div className="space-y-2">
-                          <label className="text-xs font-semibold text-content-strong">
+                          <label className="text-xs font-medium text-content-strong">
                             {t("userDetail.oldPassword")} <span className="text-rose-500">*</span>
                           </label>
                           <div className="relative">
@@ -2739,7 +2741,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         {/* New Password with Generate Button */}
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <label className="text-xs font-semibold text-content-strong">
+                            <label className="text-xs font-medium text-content-strong">
                               {t("userDetail.newPassword")} <span className="text-rose-500">*</span>
                             </label>
                           </div>
@@ -2788,7 +2790,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                         {/* Confirm New Password */}
                         <div className="space-y-2">
-                          <label className="text-xs font-semibold text-content-strong">
+                          <label className="text-xs font-medium text-content-strong">
                             {t("userDetail.confirmPassword")}{" "}
                             <span className="text-rose-500">*</span>
                           </label>
@@ -2859,7 +2861,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             <Clock className="w-5 h-5" />
                           </div>
                           <div>
-                            <h3 className="text-sm font-bold text-content-strong">
+                            <h3 className="text-sm font-semibold text-content-strong">
                               {t("userDetail.loginHistory", "Login History")}
                             </h3>
                             <p className="text-xs text-content-muted mt-0.5">
@@ -2902,7 +2904,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-2">
-                                    <span className="text-xs font-bold text-content-strong">
+                                    <span className="text-xs font-semibold text-content-strong">
                                       {item.device}
                                     </span>
                                   </div>
@@ -3050,7 +3052,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                               className="inline-flex items-center gap-1.5"
                                               title={moduleInfo.desc}
                                             >
-                                              <span className="font-semibold text-content-body">
+                                              <span className="font-medium text-content-body">
                                                 {moduleInfo.label}
                                               </span>
                                             </div>

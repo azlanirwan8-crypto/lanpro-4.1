@@ -32,6 +32,7 @@ const shared = {
     '^react-markdown$': '<rootDir>/src/test/mocks/reactMarkdown.tsx',
     '^remark-gfm$': '<rootDir>/src/test/mocks/esmStub.cjs',
     '^@ffmpeg/(ffmpeg|util)$': '<rootDir>/src/test/mocks/esmStub.cjs',
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
   clearMocks: true,
   resetMocks: true,

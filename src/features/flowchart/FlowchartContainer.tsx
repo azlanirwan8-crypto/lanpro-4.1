@@ -2917,7 +2917,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 height: 5px;
               }
               .custom-scrollbar::-webkit-scrollbar-thumb {
-                background: #5c6270;
+                background: var(--color-content-muted);
                 border-radius: 4px;
               }
             `,
