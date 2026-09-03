@@ -7,6 +7,7 @@ import { RenderIcon } from "../../../components/RenderIcon";
 import { KanbanCard } from "./KanbanCard";
 import { useAppStore } from "../../../store/useAppStore";
 import { statusSelesai } from "../../../lib/statusSelesai";
+import { statusColumnKey } from "../../../lib/statusKolom";
 
 interface KanbanColumnProps {
   status: any;
@@ -61,7 +62,7 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
             isCompact ? "p-1.5" : "p-2"
           )}
         >
-          <Droppable droppableId={columnId || status.label}>
+          <Droppable droppableId={columnId || statusColumnKey(status)}>
             {(provided: any, snapshot: any) => (
               <div
                 {...provided.droppableProps}

@@ -193,7 +193,7 @@ export const DbExplorerPanel: React.FC<any> = ({
               <button
                 onClick={fetchSchema}
                 title={t("dbExplorer.refreshSchemaTip")}
-                className="p-1 hover:bg-black/5 rounded transition-all text-content-secondary hover:text-content flex items-center gap-1 text-xs font-medium cursor-pointer"
+                className="p-1 hover:bg-surface-muted rounded transition-all text-content-secondary hover:text-content flex items-center gap-1 text-xs font-medium cursor-pointer"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path

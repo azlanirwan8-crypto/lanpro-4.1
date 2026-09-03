@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { useMemo, useState } from "react";
 import { KanbanBoardProps } from "../types";
 import { statusSelesai } from "../../../lib/statusSelesai";
+import { resolveStatusWriteValue } from "../../../lib/statusKolom";
 import { updateTask, resolveUserId } from "../services/kanban.service";
 import { suppressTaskDataRefresh } from "../../../lib/taskRefreshControl";
 
@@ -105,7 +106,12 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
     const taskToMove = tArr.find((t) => t.id === draggableId);
 
     const parts = destination.droppableId.split(":");
-    const newStatus = parts.length > 1 ? parts.slice(1).join(":") : destination.droppableId;
+    const rawStatus = parts.length > 1 ? parts.slice(1).join(":") : destination.droppableId;
+    // #382 — tulis code bila MasterData punya; tetap terima label warisan di droppableId
+    const newStatus = resolveStatusWriteValue(
+      rawStatus,
+      (mArr || []).filter((m: any) => m.type === "status")
+    );
 
     if (taskToMove && statusSelesai(newStatus, mArr)) {
       const inlineUnfinished = (taskToMove.subtasks || []).filter(

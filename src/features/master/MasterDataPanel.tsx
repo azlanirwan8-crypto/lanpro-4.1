@@ -220,14 +220,18 @@ export const MasterDataPanel = ({
 
   const getUsageCount = (item: MasterData) => {
     if (!tasks || tasks.length === 0) return 0;
-    const labelLower = (item.label || "").toLowerCase();
+    // #382 — cocokkan code ATAU label (data warisan sering label)
+    const keys = [item.code, item.label].map((v) => (v || "").toLowerCase().trim()).filter(Boolean);
+    if (keys.length === 0) return 0;
+    const match = (val: string | undefined | null) =>
+      !!val && keys.includes(String(val).toLowerCase().trim());
     return tasks.filter(
       (t: any) =>
-        (t.status && t.status.toLowerCase() === labelLower) ||
-        (t.priority && t.priority.toLowerCase() === labelLower) ||
-        (t.type && t.type.toLowerCase() === labelLower) ||
-        (t.environment && t.environment.toLowerCase() === labelLower) ||
-        (t.category && t.category.toLowerCase() === labelLower)
+        match(t.status) ||
+        match(t.priority) ||
+        match(t.type) ||
+        match(t.environment) ||
+        match(t.category)
     ).length;
   };
 
@@ -526,8 +530,11 @@ export const MasterDataPanel = ({
 
   const deleteMasterData = async (item: { id: string; label: string; isModule?: boolean }) => {
     const isConfirmed = await confirmDeleteAlert(
-      "Apakah Anda Yakin?",
-      `Data master "${item.label}" akan dihapus secara permanen dan tidak dapat dikembalikan!`
+      t("alerts.areYouSure", "Apakah Anda Yakin?"),
+      t("alerts.deleteMasterText", {
+        label: item.label,
+        defaultValue: `Data master "${item.label}" akan dihapus secara permanen dan tidak dapat dikembalikan!`,
+      })
     );
     if (!isConfirmed) return;
 
@@ -536,17 +543,23 @@ export const MasterDataPanel = ({
       if (item.isModule || item.label.includes("(Modul)")) {
         const data = await deleteProjectModule(item.id);
         if (data.status !== "success") throw new Error(data.message);
-        showSuccessAlert("Berhasil!", "Modul berhasil dihapus.");
+        showSuccessAlert(
+          t("alerts.successTitle"),
+          t("alerts.moduleDeleted", "Modul berhasil dihapus.")
+        );
         fetchProjectModules();
       } else {
         const data = await deleteMasterDataApi(item.id);
         if (data.status !== "success") throw new Error(data.message);
-        showSuccessAlert("Berhasil!", "Data master berhasil dihapus.");
+        showSuccessAlert(
+          t("alerts.successTitle"),
+          t("alerts.masterDeleted", "Data master berhasil dihapus.")
+        );
         onRefresh();
       }
     } catch (error: any) {
       console.error(error);
-      toast.error(error.message || "Gagal menghapus master data.");
+      toast.error(error.message || t("toast.masterDeleteFailed", "Gagal menghapus master data."));
     } finally {
       setIsDeleting(false);
     }
@@ -1011,7 +1024,7 @@ export const MasterDataPanel = ({
                                         </div>
                                       ) : (
                                         <div
-                                          className="w-4 h-4 rounded-full shrink-0 shadow-2xs border border-black/10"
+                                          className="w-4 h-4 rounded-full shrink-0 shadow-2xs border border-border-subtle"
                                           style={{ backgroundColor: item.color || "#ccc" }}
                                         />
                                       )}
@@ -1365,10 +1378,10 @@ export const MasterDataPanel = ({
                   type="button"
                   onClick={() => setNewMasterColor(p.hex)}
                   className={cn(
-                    "w-6 h-6 rounded-full border border-black/10 transition-transform active:scale-95 duration-100 hover:scale-110",
+                    "w-6 h-6 rounded-full border border-border-subtle transition-transform active:scale-95 duration-100 hover:scale-110",
                     newMasterColor.toLowerCase() === p.hex.toLowerCase()
                       ? "ring-2 ring-offset-2 ring-indigo-500 scale-110"
-                      : "hover:border-slate-400"
+                      : "hover:border-border-strong"
                   )}
                   style={{ backgroundColor: p.hex }}
                   title={p.label}
@@ -1548,10 +1561,10 @@ export const MasterDataPanel = ({
                     type="button"
                     onClick={() => setEditingMaster({ ...editingMaster, color: p.hex })}
                     className={cn(
-                      "w-6 h-6 rounded-full border border-black/10 transition-transform active:scale-95 duration-100 hover:scale-110",
+                      "w-6 h-6 rounded-full border border-border-subtle transition-transform active:scale-95 duration-100 hover:scale-110",
                       (editingMaster.color || "").toLowerCase() === p.hex.toLowerCase()
                         ? "ring-2 ring-offset-2 ring-indigo-500 scale-110"
-                        : "hover:border-slate-400"
+                        : "hover:border-border-strong"
                     )}
                     style={{ backgroundColor: p.hex }}
                     title={p.label}

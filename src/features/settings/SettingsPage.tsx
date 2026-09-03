@@ -82,7 +82,7 @@ export const SettingsPage: React.FC = () => {
             >
               <MessageSquare size={15} className="shrink-0" />
               <span className="hidden sm:inline">{t("settings.whatsappGateway")}</span>
-              <span className="sm:hidden">WhatsApp</span>
+              <span className="sm:hidden">{t("settings.whatsappShort", "WA")}</span>
             </button>
             <button
               onClick={() => setActiveTab("taskBroadcast")}

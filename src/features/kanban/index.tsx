@@ -7,6 +7,7 @@ import { KanbanBoardProps } from "./types";
 import { RenderIcon } from "../../components/RenderIcon";
 import { useAppStore } from "../../store/useAppStore";
 import { cn } from "../../lib/utils";
+import { statusColumnKey, tasksForStatusLane, taskMatchesStatus } from "../../lib/statusKolom";
 import { Layers } from "lucide-react";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
@@ -95,7 +96,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
     ? epics
     : epics.filter((epic) => {
         const epicTasks = boardStatuses.reduce(
-          (acc, status) => acc + (groupedTasks[`${epic.id}:${status.label}`]?.length || 0),
+          (acc, status) => acc + tasksForStatusLane(groupedTasks, epic.id, status).length,
           0
         );
         return epicTasks > 0;
@@ -154,7 +155,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
     const memberLanes = allMemberSwimlanes.filter((m) => {
       if (showEmptySwimlanes) return true;
       const taskCount = boardStatuses.reduce(
-        (acc, status) => acc + (groupedTasks[`${m.id}:${status.label}`]?.length || 0),
+        (acc, status) => acc + tasksForStatusLane(groupedTasks, m.id, status).length,
         0
       );
       return taskCount > 0;
@@ -162,7 +163,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
 
     // Calculate unassigned tasks count
     const unassignedCount = boardStatuses.reduce(
-      (acc, status) => acc + (groupedTasks[`unassigned:${status.label}`]?.length || 0),
+      (acc, status) => acc + tasksForStatusLane(groupedTasks, "unassigned", status).length,
       0
     );
 
@@ -218,14 +219,17 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
             </div>
           </div>
           {/* Bagian B Header - Scrollable */}
-          <div className="flex overflow-x-auto items-center px-4 py-2.5 gap-4 bg-surface custom-scrollbar">
+          <div className="flex overflow-x-auto items-center px-4 py-2.5 gap-3 sm:gap-4 bg-surface custom-scrollbar snap-x snap-mandatory md:snap-none">
             {boardStatuses.map((status, index) => {
-              const statusStyle = getStatusStyle(status.label);
-              const taskCount = tArr.filter((t: any) => t.status === status.label).length;
+              const statusStyle = getStatusStyle(status.label || status.code || "");
+              const taskCount = tArr.filter((t: any) => taskMatchesStatus(t.status, status)).length;
               return (
                 <div
-                  key={`header-${status.id || status.label}-${index}`}
-                  className={cn("shrink-0", isCompact ? "w-[240px]" : "w-[270px]")}
+                  key={`header-${status.id || statusColumnKey(status)}-${index}`}
+                  className={cn(
+                    "shrink-0 snap-start",
+                    isCompact ? "w-[200px] sm:w-[240px]" : "w-[220px] sm:w-[270px]"
+                  )}
                 >
                   <div className="flex items-center justify-between bg-surface-sunken/80 border border-border-subtle/80 px-3.5 py-2 rounded-lg shadow-2xs transition-all">
                     <div className="flex items-center gap-2 min-w-0">
@@ -283,7 +287,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                         <span className="ml-auto bg-primary-surface/10 text-primary px-1.5 py-0.2 rounded text-[10px] leading-none font-medium border border-purple-500/30">
                           {boardStatuses.reduce(
                             (acc, status) =>
-                              acc + (groupedTasks[`${epic.id}:${status.label}`]?.length || 0),
+                              acc + tasksForStatusLane(groupedTasks, epic.id, status).length,
                             0
                           )}
                         </span>
@@ -295,18 +299,21 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                   </div>
 
                   {/* Bagian B Row Cells - Columns */}
-                  <div className="flex gap-4 px-4 py-3">
+                  <div className="flex gap-3 sm:gap-4 px-4 py-3 snap-x snap-mandatory md:snap-none overflow-x-visible">
                     {boardStatuses.map((status, index) => (
                       <div
-                        key={`${epic.id}-${status.id || status.label}-${index}`}
-                        className={cn("shrink-0", isCompact ? "w-[240px]" : "w-[270px]")}
+                        key={`${epic.id}-${status.id || statusColumnKey(status)}-${index}`}
+                        className={cn(
+                          "shrink-0 snap-start",
+                          isCompact ? "w-[200px] sm:w-[240px]" : "w-[220px] sm:w-[270px]"
+                        )}
                       >
                         <KanbanColumn
                           status={status}
-                          tasks={groupedTasks[`${epic.id}:${status.label}`] || []}
+                          tasks={tasksForStatusLane(groupedTasks, epic.id, status)}
                           mArr={mArr}
                           pArr={pArr}
-                          columnId={`${epic.id}:${status.label}`}
+                          columnId={`${epic.id}:${statusColumnKey(status)}`}
                           showHeader={false}
                           shakingTaskId={shakingTaskId}
                           onTaskClick={(task) => {
@@ -340,18 +347,21 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                   </div>
 
                   {/* Bagian B Row Cells - Columns */}
-                  <div className="flex gap-4 px-4 py-3">
+                  <div className="flex gap-3 sm:gap-4 px-4 py-3">
                     {boardStatuses.map((status, index) => (
                       <div
-                        key={`standalone-${status.id || status.label}-${index}`}
-                        className={cn("shrink-0", isCompact ? "w-[240px]" : "w-[270px]")}
+                        key={`standalone-${status.id || statusColumnKey(status)}-${index}`}
+                        className={cn(
+                          "shrink-0 snap-start",
+                          isCompact ? "w-[200px] sm:w-[240px]" : "w-[220px] sm:w-[270px]"
+                        )}
                       >
                         <KanbanColumn
                           status={status}
-                          tasks={groupedTasks[`standalone:${status.label}`] || []}
+                          tasks={tasksForStatusLane(groupedTasks, "standalone", status)}
                           mArr={mArr}
                           pArr={pArr}
-                          columnId={`standalone:${status.label}`}
+                          columnId={`standalone:${statusColumnKey(status)}`}
                           showHeader={false}
                           shakingTaskId={shakingTaskId}
                           onTaskClick={(task) => {
@@ -371,7 +381,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                 const uId = member.id;
                 const isUnassigned = uId === "unassigned";
                 const totalIssueCount = boardStatuses.reduce(
-                  (acc, status) => acc + (groupedTasks[`${uId}:${status.label}`]?.length || 0),
+                  (acc, status) => acc + tasksForStatusLane(groupedTasks, uId, status).length,
                   0
                 );
 
@@ -413,18 +423,21 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                     </div>
 
                     {/* Bagian B Row Cells - Columns */}
-                    <div className="flex gap-4 px-4 py-3">
+                    <div className="flex gap-3 sm:gap-4 px-4 py-3">
                       {boardStatuses.map((status, index) => (
                         <div
-                          key={`${uId}-${status.id || status.label}-${index}`}
-                          className={cn("shrink-0", isCompact ? "w-[240px]" : "w-[270px]")}
+                          key={`${uId}-${status.id || statusColumnKey(status)}-${index}`}
+                          className={cn(
+                            "shrink-0 snap-start",
+                            isCompact ? "w-[200px] sm:w-[240px]" : "w-[220px] sm:w-[270px]"
+                          )}
                         >
                           <KanbanColumn
                             status={status}
-                            tasks={groupedTasks[`${uId}:${status.label}`] || []}
+                            tasks={tasksForStatusLane(groupedTasks, uId, status)}
                             mArr={mArr}
                             pArr={pArr}
-                            columnId={`${uId}:${status.label}`}
+                            columnId={`${uId}:${statusColumnKey(status)}`}
                             showHeader={false}
                             shakingTaskId={shakingTaskId}
                             onTaskClick={(task) => {

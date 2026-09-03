@@ -46,7 +46,20 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
   const { t } = useTranslation();
 
   if (!tasks || tasks.length === 0) {
-    return null;
+    return (
+      <div className="sm:hidden flex flex-col items-center justify-center gap-3 py-16 px-6 text-center mobile-nav-pb">
+        <Layers className="w-10 h-10 text-content-subtle" />
+        <p className="text-sm font-medium text-content-strong">
+          {t("issues.emptyTitle", "Belum ada isu")}
+        </p>
+        <p className="text-xs text-content-muted max-w-xs">
+          {t(
+            "issues.emptyHint",
+            "Buat isu baru lewat tombol aksi (+), atau ubah filter pencarian."
+          )}
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -59,17 +72,23 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
         const statusMeta = masterData.find(
           (m) =>
             m.type === "status" &&
-            (m.label?.toLowerCase() === task.status?.toLowerCase() || m.id === task.status)
+            (m.code?.toLowerCase() === task.status?.toLowerCase() ||
+              m.label?.toLowerCase() === task.status?.toLowerCase() ||
+              m.id === task.status)
         );
         const priorityMeta = masterData.find(
           (m) =>
             m.type === "priority" &&
-            (m.label?.toLowerCase() === task.priority?.toLowerCase() || m.id === task.priority)
+            (m.code?.toLowerCase() === task.priority?.toLowerCase() ||
+              m.label?.toLowerCase() === task.priority?.toLowerCase() ||
+              m.id === task.priority)
         );
         const typeMeta = masterData.find(
           (m) =>
             (m.type === "issue_type" || m.type === "issueType") &&
-            (m.label?.toLowerCase() === task.type?.toLowerCase() || m.id === task.type)
+            (m.code?.toLowerCase() === task.type?.toLowerCase() ||
+              m.label?.toLowerCase() === task.type?.toLowerCase() ||
+              m.id === task.type)
         );
         const sprint = sprints.find((s) => s.id === task.sprintId);
 

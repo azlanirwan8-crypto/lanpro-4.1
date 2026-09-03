@@ -265,7 +265,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
 
     case "meetingNotes":
       return (
-        <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken">
+        <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken mobile-nav-pb md:pb-0">
           <MeetingNotes
             projectId={selectedProject?.id || ""}
             userRole={effectiveRole}
@@ -279,7 +279,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
 
     case "wiki":
       return (
-        <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken">
+        <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken mobile-nav-pb md:pb-0">
           <WikiView
             projectId={selectedProject?.id || ""}
             users={allUsers}
@@ -293,67 +293,71 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
 
     case "list":
       return (
-        <IssueListView
-          projectRole={
-            selectedProject && currentUser?.uid
-              ? selectedProject.memberRoles?.[currentUser.uid]
-              : undefined
-          }
-          tasks={tasks || []}
-          roots={(tasks || []).filter(
-            (t) => !t.parentId || !(tasks || []).some((p) => p.id === t.parentId)
-          )}
-          sprints={sprints || []}
-          projectMembers={projectMembers || []}
-          allUsers={allUsers || []}
-          masterData={masterData || []}
-          userRole={effectiveRole}
-          user={currentUser}
-          currentUserProfile={currentUserProfile!}
-          hasPermission={hasPermission}
-          updateTaskField={updateTaskField}
-          handleQuickCreate={handleQuickCreate}
-          setSelectedTaskForDetail={setSelectedTaskForDetail}
-          setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-          setIsNewTaskModalOpen={setIsNewTaskModalOpen}
-          deleteTask={deleteTask}
-          bulkDeleteTasks={bulkDeleteTasks}
-          selectedProject={selectedProject}
-          fetchTasks={fetchTasks}
-          issueListPage={issueListPage}
-          setIssueListPage={setIssueListPage}
-          issueListSearch={issueListSearch}
-          setIssueListSearch={setIssueListSearch}
-          issueListMeta={issueListMeta}
-        />
+        <div className="flex-1 flex flex-col min-h-0 mobile-nav-pb md:pb-0">
+          <IssueListView
+            projectRole={
+              selectedProject && currentUser?.uid
+                ? selectedProject.memberRoles?.[currentUser.uid]
+                : undefined
+            }
+            tasks={tasks || []}
+            roots={(tasks || []).filter(
+              (t) => !t.parentId || !(tasks || []).some((p) => p.id === t.parentId)
+            )}
+            sprints={sprints || []}
+            projectMembers={projectMembers || []}
+            allUsers={allUsers || []}
+            masterData={masterData || []}
+            userRole={effectiveRole}
+            user={currentUser}
+            currentUserProfile={currentUserProfile!}
+            hasPermission={hasPermission}
+            updateTaskField={updateTaskField}
+            handleQuickCreate={handleQuickCreate}
+            setSelectedTaskForDetail={setSelectedTaskForDetail}
+            setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+            setIsNewTaskModalOpen={setIsNewTaskModalOpen}
+            deleteTask={deleteTask}
+            bulkDeleteTasks={bulkDeleteTasks}
+            selectedProject={selectedProject}
+            fetchTasks={fetchTasks}
+            issueListPage={issueListPage}
+            setIssueListPage={setIssueListPage}
+            issueListSearch={issueListSearch}
+            setIssueListSearch={setIssueListSearch}
+            issueListMeta={issueListMeta}
+          />
+        </div>
       );
 
     case "sprints":
       return (
-        <PlanningView
-          tasks={tasks || []}
-          sprints={sprints || []}
-          masterData={masterData || []}
-          userRole={effectiveRole}
-          currentUserProfile={currentUserProfile}
-          projectMembers={projectMembers || []}
-          expandedSprintId={expandedSprintId}
-          setExpandedSprintId={setExpandedSprintId}
-          setSelectedTaskForDetail={setSelectedTaskForDetail}
-          setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-          setIsNewSprintModalOpen={setIsNewSprintModalOpen}
-          setIsEditSprintModalOpen={setIsEditSprintModalOpen}
-          setEditingSprint={setEditingSprint}
-          handleStartSprint={handleStartSprint}
-          handleCompleteSprint={handleCompleteSprint}
-          handleDeleteSprint={handleDeleteSprint}
-          handleDragEndPlanning={handleDragEndPlanning}
-        />
+        <div className="flex-1 flex flex-col min-h-0 mobile-nav-pb md:pb-0">
+          <PlanningView
+            tasks={tasks || []}
+            sprints={sprints || []}
+            masterData={masterData || []}
+            userRole={effectiveRole}
+            currentUserProfile={currentUserProfile}
+            projectMembers={projectMembers || []}
+            expandedSprintId={expandedSprintId}
+            setExpandedSprintId={setExpandedSprintId}
+            setSelectedTaskForDetail={setSelectedTaskForDetail}
+            setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+            setIsNewSprintModalOpen={setIsNewSprintModalOpen}
+            setIsEditSprintModalOpen={setIsEditSprintModalOpen}
+            setEditingSprint={setEditingSprint}
+            handleStartSprint={handleStartSprint}
+            handleCompleteSprint={handleCompleteSprint}
+            handleDeleteSprint={handleDeleteSprint}
+            handleDragEndPlanning={handleDragEndPlanning}
+          />
+        </div>
       );
 
     case "board":
       return (
-        <div className="flex-1 flex flex-col min-h-0 p-6 bg-surface-sunken">
+        <div className="flex-1 flex flex-col min-h-0 p-4 sm:p-6 bg-surface-sunken mobile-nav-pb md:pb-0">
           <BoardView
             tasks={tasks || []}
             masterData={masterData || []}
@@ -371,7 +375,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
 
     case "qa":
       return (
-        <div className="flex-1 overflow-auto bg-surface-sunken relative custom-scrollbar p-6 mobile-nav-pb md:pb-6">
+        <div className="flex-1 overflow-auto bg-surface-sunken relative custom-scrollbar p-4 sm:p-6 mobile-nav-pb md:pb-6">
           <TestQAPanel
             tasks={tasks || []}
             projectMembers={projectMembers || []}
@@ -389,37 +393,41 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
 
     case "timeline":
       return (
-        <TimelinePanel
-          tasks={tasks || []}
-          selectedProject={selectedProject}
-          updateTaskField={updateTaskField}
-          setSelectedTaskForDetail={setSelectedTaskForDetail}
-          setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
-          currentUser={currentUserProfile || currentUser}
-        />
+        <div className="flex-1 flex flex-col min-h-0 mobile-nav-pb md:pb-0">
+          <TimelinePanel
+            tasks={tasks || []}
+            selectedProject={selectedProject}
+            updateTaskField={updateTaskField}
+            setSelectedTaskForDetail={setSelectedTaskForDetail}
+            setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}
+            currentUser={currentUserProfile || currentUser}
+          />
+        </div>
       );
 
     case "access":
     case "team":
       return (
-        <TeamManagementPanel
-          projectMembers={projectMembers || []}
-          selectedProject={selectedProject!}
-          tasks={tasks || []}
-          currentUserProfile={currentUserProfile!}
-          userRole={effectiveRole}
-          masterData={masterData || []}
-          StyledDropdown={StyledDropdown}
-          updateProjectRole={updateProjectRole || (() => {})}
-          removeProjectMember={removeProjectMember || (async () => {})}
-          hasPermission={hasPermission}
-          onRefreshProjects={fetchProjects}
-        />
+        <div className="flex-1 flex flex-col min-h-0 mobile-nav-pb md:pb-0">
+          <TeamManagementPanel
+            projectMembers={projectMembers || []}
+            selectedProject={selectedProject!}
+            tasks={tasks || []}
+            currentUserProfile={currentUserProfile!}
+            userRole={effectiveRole}
+            masterData={masterData || []}
+            StyledDropdown={StyledDropdown}
+            updateProjectRole={updateProjectRole || (() => {})}
+            removeProjectMember={removeProjectMember || (async () => {})}
+            hasPermission={hasPermission}
+            onRefreshProjects={fetchProjects}
+          />
+        </div>
       );
 
     case "flowchart":
       return (
-        <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken">
+        <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken mobile-nav-pb md:pb-0">
           <FlowchartView
             selectedProject={selectedProject}
             tasks={tasks || []}
@@ -433,48 +441,58 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
 
     case "master":
       return (
-        <MasterDataPanel
-          projects={[]}
-          tasks={tasks || []}
-          masterData={masterData || []}
-          userRole={effectiveRole}
-          currentUserProfile={currentUserProfile}
-          hasPermission={hasPermission}
-          onRefresh={fetchMasterData}
-        />
+        <div className="flex-1 flex flex-col min-h-0 mobile-nav-pb md:pb-0">
+          <MasterDataPanel
+            projects={[]}
+            tasks={tasks || []}
+            masterData={masterData || []}
+            userRole={effectiveRole}
+            currentUserProfile={currentUserProfile}
+            hasPermission={hasPermission}
+            onRefresh={fetchMasterData}
+          />
+        </div>
       );
 
     case "connect":
-      return <ConnectPanel />;
+      return (
+        <div className="flex-1 flex flex-col min-h-0 mobile-nav-pb md:pb-0">
+          <ConnectPanel />
+        </div>
+      );
 
     case "enterprise-audit":
     case "auditLog":
       return (
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex-1 flex flex-col min-h-0 mobile-nav-pb md:pb-0">
           <EnterpriseAuditDashboard selectedProject={selectedProject} currentUser={currentUser} />
         </div>
       );
 
     case "activity":
       return (
-        <ActivityLogPanel
-          activityLogs={activityLogs || []}
-          exportTasksToCSV={exportTasksToCSV}
-          projectMembers={projectMembers || []}
-          safeFormat={safeFormat}
-        />
+        <div className="flex-1 flex flex-col min-h-0 mobile-nav-pb md:pb-0">
+          <ActivityLogPanel
+            activityLogs={activityLogs || []}
+            exportTasksToCSV={exportTasksToCSV}
+            projectMembers={projectMembers || []}
+            safeFormat={safeFormat}
+          />
+        </div>
       );
 
     case "dbExplorer":
       return (
-        <DbExplorerPanel
-          selectedProject={selectedProject}
-          tasks={tasks || []}
-          sprints={sprints || []}
-          projectMembers={projectMembers}
-          activityLogs={activityLogs}
-          masterData={masterData}
-        />
+        <div className="flex-1 flex flex-col min-h-0 mobile-nav-pb md:pb-0">
+          <DbExplorerPanel
+            selectedProject={selectedProject}
+            tasks={tasks || []}
+            sprints={sprints || []}
+            projectMembers={projectMembers}
+            activityLogs={activityLogs}
+            masterData={masterData}
+          />
+        </div>
       );
 
     case "settingsIntegration":
@@ -503,7 +521,11 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
           );
         }
 
-        return <SettingsPage />;
+        return (
+          <div className="flex-1 flex flex-col min-h-0 mobile-nav-pb md:pb-0">
+            <SettingsPage />
+          </div>
+        );
       })();
 
     default:

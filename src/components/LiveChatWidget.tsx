@@ -677,13 +677,13 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             ref={chatBoxRef}
-            className="absolute bottom-16 right-0 w-80 h-[480px] bg-surface rounded-xl border border-border-subtle/80 shadow-2xl flex flex-col overflow-hidden z-50 bg-opacity-95 backdrop-blur-md"
+            className="absolute bottom-16 right-0 max-md:fixed max-md:inset-x-0 max-md:bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] max-md:right-0 max-md:left-0 w-full md:w-80 h-[min(72vh,520px)] md:h-[480px] bg-surface rounded-t-2xl md:rounded-xl border border-border-subtle/80 shadow-2xl flex flex-col overflow-hidden z-50 bg-opacity-95 backdrop-blur-md"
           >
             {/* VIEW A: CONTACT LIST VIEW */}
             {!activeChatUser ? (
               <div id="chat-user-list-view" className="flex flex-col h-full bg-surface">
                 {/* Header */}
-                <div className="px-4 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-content-inverse flex items-center justify-between border-b border-border-inverse">
+                <div className="px-4 py-3 bg-surface-inverse-strong text-content-inverse flex items-center justify-between border-b border-border-inverse">
                   <div className="flex items-center gap-2">
                     <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
                     <span className="font-medium text-sm tracking-tight text-content-inverse">
@@ -869,7 +869,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
               /* VIEW B: ACTIVE CHAT VIEW */
               <div id="chat-active-room-view" className="flex flex-col h-full bg-surface">
                 {/* Header */}
-                <div className="px-3 py-2 bg-gradient-to-r from-slate-900 to-slate-800 text-content-inverse flex items-center justify-between border-b border-border-inverse shrink-0">
+                <div className="px-3 py-2 bg-surface-inverse-strong text-content-inverse flex items-center justify-between border-b border-border-inverse shrink-0">
                   <div className="flex items-center gap-2 min-w-0">
                     <button
                       onClick={() => setActiveChatUser(null)}
@@ -1027,7 +1027,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           <div
                             className={`max-w-[85%] px-3 py-2 rounded-xl text-xs break-all shadow-soft ${
                               isSelf
-                                ? "bg-gradient-to-br from-slate-900 to-slate-800 text-content-inverse rounded-br-none"
+                                ? "bg-surface-inverse-strong text-content-inverse rounded-br-none"
                                 : "bg-surface border border-border-faint text-content-strong rounded-bl-none"
                             }`}
                           >

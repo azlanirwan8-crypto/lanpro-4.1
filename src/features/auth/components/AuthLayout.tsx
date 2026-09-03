@@ -73,7 +73,7 @@ const AuthLayoutSplit = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
       dibatasi max-w-md dan dipusatkan di kolom terang; padding kiri md+
       memberi napas dari lengkung clip-path hero.
     */}
-    <div className="w-full md:w-1/2 flex items-center justify-center px-6 py-10 sm:px-10 md:pl-14 md:pr-10 lg:pl-20 lg:pr-14 bg-surface-muted relative overflow-y-auto min-h-screen">
+    <div className="w-full md:w-1/2 flex items-center justify-center px-6 pt-24 pb-10 sm:px-10 md:pl-14 md:pr-10 lg:pl-20 lg:pr-14 md:pt-10 bg-surface-muted relative overflow-y-auto min-h-screen">
       {/*
         #231 — "watermark" sisi terang, sesuai gambar acuan pemilik proyek:
         BUKAN motif batik/kanban (itu ditolak), melainkan kartu placeholder
@@ -87,12 +87,17 @@ const AuthLayoutSplit = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
 
       <div className="relative z-10 w-full max-w-md mx-auto">{children}</div>
 
-      {/* Logo mikro untuk layar sempit (<1024px). */}
-      <div className="absolute top-6 left-6 lg:hidden flex items-center gap-2 z-20">
-        <div className="w-7 h-7 bg-primary-surface rounded-lg flex items-center justify-center shadow-md shadow-primary/20">
-          <ShieldCheck className="text-content-inverse w-4 h-4" />
+      {/* Logo brand-first untuk layar sempit — #374 */}
+      <div className="absolute top-5 left-5 lg:hidden flex items-center gap-2.5 z-20">
+        <div className="w-10 h-10 bg-primary-surface rounded-xl flex items-center justify-center shadow-md shadow-primary/25">
+          <ShieldCheck className="text-content-inverse w-5 h-5" />
         </div>
-        <span className="text-sm font-medium text-content tracking-tight">LANPRO</span>
+        <div className="flex flex-col leading-tight">
+          <span className="text-base font-semibold text-content tracking-tight">LANPRO</span>
+          <span className="text-[10px] font-medium text-content-muted tracking-wide uppercase">
+            Project Hub
+          </span>
+        </div>
       </div>
     </div>
 

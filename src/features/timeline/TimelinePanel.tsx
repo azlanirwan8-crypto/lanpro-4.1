@@ -91,18 +91,18 @@ const getStatusColors = (status: string = "", isEpic: boolean) => {
     };
   }
 
-  // Default (To Do / Backlog)
+  // Default (To Do / Backlog) — #339 token surface, tanpa silang kosakata §22
   return {
-    bg: "bg-gradient-to-r from-slate-50 to-white",
+    bg: "bg-gradient-to-r from-surface-muted to-surface",
     border: "border-border-subtle/80 hover:border-border-subtle",
     text: "text-content",
-    activeBg: "bg-slate-950 ring-2 ring-slate-400 border-border-inverse",
-    handle: "hover:bg-slate-600/15 active:bg-slate-600/25 group/l-handle",
-    handleBar: "bg-slate-400/80 border-slate-400/20 group-hover/l-handle:bg-slate-600",
-    handleR: "hover:bg-slate-600/15 active:bg-slate-600/25 group/r-handle",
-    handleBarR: "bg-slate-400/80 border-slate-400/20 group-hover/r-handle:bg-slate-600",
+    activeBg: "bg-surface-inverse-strong ring-2 ring-border-strong border-border-inverse",
+    handle: "hover:bg-surface-muted/80 active:bg-surface-strong group/l-handle",
+    handleBar: "bg-surface-marker border-border-subtle group-hover/l-handle:bg-surface-strong",
+    handleR: "hover:bg-surface-muted/80 active:bg-surface-strong group/r-handle",
+    handleBarR: "bg-surface-marker border-border-subtle group-hover/r-handle:bg-surface-strong",
     tooltipText: "text-content-subtle",
-    tooltipBadge: "bg-slate-500/30 text-content-inverse-muted",
+    tooltipBadge: "bg-surface-marker/30 text-content-inverse-muted",
   };
 };
 
@@ -646,7 +646,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             <button
               type="button"
               onClick={() => setPixelsPerDay((prev) => Math.max(4, prev - 4))}
-              className="p-1.5 text-xs text-content-muted hover:text-content-strong hover:bg-surface-muted rounded-md transition-colors cursor-pointer"
+              className="min-h-11 min-w-11 inline-flex items-center justify-center text-xs text-content-muted hover:text-content-strong hover:bg-surface-muted rounded-md transition-colors cursor-pointer"
               title={t("roadmap.zoomOut")}
             >
               <Minus className="w-3.5 h-3.5" />
@@ -662,13 +662,17 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                   else if (z === "weeks") setPixelsPerDay(24);
                   else if (z === "months") setPixelsPerDay(8);
                 }}
-                className={`px-2 md:px-3 py-1 text-[10px] md:text-xs uppercase tracking-wider rounded-md transition-all cursor-pointer ${
+                className={`min-h-11 px-2.5 md:px-3 text-[10px] md:text-xs uppercase tracking-wider rounded-md transition-all cursor-pointer ${
                   timelineZoom === z
-                    ? "bg-indigo-600 text-content-inverse font-semibold shadow-2xs"
+                    ? "bg-primary-surface text-content-inverse font-semibold shadow-2xs"
                     : "text-content-muted hover:text-content-strong hover:bg-surface-sunken font-medium"
                 }`}
               >
-                {z}
+                {z === "days"
+                  ? t("roadmap.zoomDays")
+                  : z === "weeks"
+                    ? t("roadmap.zoomWeeks")
+                    : t("roadmap.zoomMonths")}
               </button>
             ))}
 
@@ -676,7 +680,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             <button
               type="button"
               onClick={() => setPixelsPerDay((prev) => Math.min(150, prev + 4))}
-              className="p-1.5 text-xs text-content-muted hover:text-content-strong hover:bg-surface-muted rounded-md transition-colors cursor-pointer"
+              className="min-h-11 min-w-11 inline-flex items-center justify-center text-xs text-content-muted hover:text-content-strong hover:bg-surface-muted rounded-md transition-colors cursor-pointer"
               title={t("roadmap.zoomIn")}
             >
               <Plus className="w-3.5 h-3.5" />

@@ -111,7 +111,8 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <Portal>
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          {/* #373 — HP bottom sheet; md+ centered */}
+          <div className="fixed inset-0 z-[110] flex items-end md:items-center justify-center p-0 md:p-4">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -123,16 +124,17 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
             {/* Velzon SweetAlert Modal Window */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              initial={{ opacity: 0, scale: 0.95, y: 40 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              exit={{ opacity: 0, scale: 0.95, y: 40 }}
               transition={{ type: "spring", duration: 0.3 }}
-              className="relative bg-surface rounded-md shadow-2xl w-full max-w-sm border border-border-subtle/80 z-10 p-6 sm:p-8 text-center flex flex-col items-center"
+              className="relative bg-surface rounded-t-2xl md:rounded-md shadow-2xl w-full max-w-sm border border-border-subtle/80 z-10 p-6 sm:p-8 text-center flex flex-col items-center pb-[max(1.5rem,env(safe-area-inset-bottom))] md:pb-8"
             >
+              <div className="md:hidden w-10 h-1 rounded-full bg-surface-marker mb-3" aria-hidden />
               {/* Top Right Close X Button */}
               <button
                 onClick={onClose}
-                className="absolute top-3.5 right-3.5 text-content-muted hover:text-content-body transition-colors p-1 rounded cursor-pointer"
+                className="absolute top-3.5 right-3.5 text-content-muted hover:text-content-body transition-colors min-h-11 min-w-11 inline-flex items-center justify-center rounded cursor-pointer"
                 aria-label={t("ui.close")}
               >
                 <X className="w-4 h-4" />
@@ -156,7 +158,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
               {/* Title */}
               <h3 className="text-[1.21875rem] font-semibold text-content-body mb-2 leading-[1.4] tracking-tight text-center">
-                {title || "Apakah Anda Yakin?"}
+                {title || t("alerts.areYouSure", "Apakah Anda Yakin?")}
               </h3>
 
               {/* Message */}

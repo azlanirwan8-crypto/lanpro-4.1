@@ -66,7 +66,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
               );
             }}
             className={cn(
-              "p-1.5 rounded-md transition-all flex items-center gap-1 cursor-pointer",
+              "min-h-11 min-w-11 p-2 rounded-md transition-all flex items-center gap-1 cursor-pointer",
               canvasTheme === "miro"
                 ? "bg-surface-muted hover:bg-surface-strong text-content-body"
                 : "bg-blue-950/40 hover:bg-blue-900/40 text-blue-400"
@@ -93,7 +93,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
               toast.success(t("toast.snapToGrid", { keadaan: nextSnap ? "AKTIF" : "NON-AKTIF" }));
             }}
             className={cn(
-              "p-1.5 rounded-md transition-all flex items-center gap-1 cursor-pointer",
+              "min-h-11 min-w-11 p-2 rounded-md transition-all flex items-center gap-1 cursor-pointer",
               isSnapToGrid
                 ? "bg-violet-500/10 text-violet-700 hover:bg-violet-500/15 border border-violet-500/30"
                 : "text-content-subtle hover:bg-surface-muted border border-transparent"

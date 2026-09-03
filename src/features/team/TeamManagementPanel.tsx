@@ -472,14 +472,14 @@ export const TeamManagementPanel = ({
             <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80">
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded transition-all ${viewMode === "grid" ? "bg-indigo-600 text-content-inverse shadow-2xs" : "text-content-muted hover:text-content-strong"}`}
+                className={`min-h-11 min-w-11 inline-flex items-center justify-center rounded transition-all ${viewMode === "grid" ? "bg-primary-surface text-content-inverse shadow-2xs" : "text-content-muted hover:text-content-strong"}`}
                 title={t("team.gridView")}
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`p-1.5 rounded transition-all ${viewMode === "list" ? "bg-indigo-600 text-content-inverse shadow-2xs" : "text-content-muted hover:text-content-strong"}`}
+                className={`min-h-11 min-w-11 inline-flex items-center justify-center rounded transition-all ${viewMode === "list" ? "bg-primary-surface text-content-inverse shadow-2xs" : "text-content-muted hover:text-content-strong"}`}
                 title={t("team.listView")}
               >
                 <List className="w-4 h-4" />
@@ -535,7 +535,7 @@ export const TeamManagementPanel = ({
                     style={personCover ? { backgroundImage: `url(${personCover})` } : undefined}
                   >
                     {personCover && <div className="absolute inset-0 bg-overlay/20" />}
-                    <Star className="w-3.5 h-3.5 md:w-4 md:h-4 text-white/50 hover:text-amber-300 cursor-pointer transition-colors relative z-10" />
+                    <Star className="w-3.5 h-3.5 md:w-4 md:h-4 text-content-inverse/50 hover:text-amber-300 cursor-pointer transition-colors relative z-10" />
                   </div>
 
                   <div className="relative -mt-5 md:-mt-8 mx-auto z-10">
