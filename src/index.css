@@ -199,7 +199,8 @@ html.dark {
   --color-content-inverse: #ffffff;
 
   /* Yang ini justru HARUS berganti: ia permukaan terisi, bukan aksen. */
-  --color-surface-strong: #24314a;
+  /* #427 — diselaraskan ke Velzon neutral gray (sebelumnya #24314a blue-slate). */
+  --color-surface-strong: #343a40;
 
   /* Sengaja sama dengan mode terang — lihat catatan di `:root`. */
   --color-overlay: #0f172a;
@@ -215,33 +216,35 @@ html.dark {
   --color-content-inverse-muted: #e2e8f0;
   --color-surface-marker: #cbd5e1;
 
-  --color-surface: #121a2a;
-  --color-surface-muted: #0b0f19;
-  --color-surface-raised: #1a2438;
-  --color-border-subtle: #24314a;
-  --color-border-faint: #1a2438;
-  --color-surface-sunken: #080c15;
-  --color-content: #f1f5f9;
-  --color-content-strong: #e2e8f0;
-  --color-content-body: #cbd5e1;
-  --color-content-secondary: #a9b6c8;
-  --color-content-muted: #94a3b8;
-  --color-content-subtle: #7c8ba1;
+  /* #427 — Permukaan & teks diselaraskan ke Velzon Admin Dashboard dark palette.
+   * Sebelumnya blue-slate (#121a2a/#0b0f19); kini neutral gray Velzon. */
+  --color-surface: #212529; /* kartu — Velzon --vz-card-bg */
+  --color-surface-muted: #1a1d21; /* body — Velzon --vz-body-bg */
+  --color-surface-raised: #2a2f34; /* elevasi — Velzon --vz-light */
+  --color-border-subtle: #32383e; /* garis — Velzon --vz-border-color */
+  --color-border-faint: #2a2f34; /* garis samar */
+  --color-surface-sunken: #171a1e; /* kanvas terdalam */
+  --color-content: #e9ecef; /* teks utama */
+  --color-content-strong: #f3f6f9; /* judul — Velzon --vz-dark */
+  --color-content-body: #ced4da; /* teks isi — Velzon --vz-body-color */
+  --color-content-secondary: #adb5bd; /* teks sekunder */
+  --color-content-muted: #878a99; /* teks redup — Velzon --vz-text-muted */
+  --color-content-subtle: #6c757d; /* placeholder — Bootstrap gray-600 */
 
-  /* Sidebar Semantik Velzon (Mode Gelap: Clean Dark Charcoal) */
-  --color-sidebar-surface: #252b3b;
-  --color-sidebar-border: #333a4d;
-  --color-sidebar-title: #64748b;
-  --color-sidebar-text: #8b96ab;
+  /* #427 — Sidebar diselaraskan ke Velzon neutral gray */
+  --color-sidebar-surface: #212529; /* = card bg */
+  --color-sidebar-border: #32383e; /* = border */
+  --color-sidebar-title: #878a99; /* = muted */
+  --color-sidebar-text: #adb5bd; /* = secondary */
   --color-sidebar-text-active: #ffffff;
-  --color-sidebar-item-active: rgba(255, 255, 255, 0.07);
+  --color-sidebar-item-active: rgba(255, 255, 255, 0.08);
   --color-sidebar-item-hover: rgba(255, 255, 255, 0.05);
 }
 
 html.dark {
   color-scheme: dark;
-  background-color: #0b0f19;
-  color: #f8fafc;
+  background-color: #1a1d21; /* #427 — Velzon body bg */
+  color: #e9ecef; /* #427 — Velzon text */
 }
 
 body {
@@ -256,19 +259,19 @@ select option {
 }
 
 .dark .markdown-body h2 {
-  border-bottom-color: #334155;
+  border-bottom-color: #32383e; /* #427 — Velzon border */
 }
 .dark .markdown-body blockquote {
-  border-left-color: #475569;
-  color: #94a3b8;
+  border-left-color: #495057; /* #427 — Velzon gray-700 */
+  color: #878a99; /* #427 — Velzon muted */
 }
 .dark .markdown-body code {
-  background-color: #1e293b;
-  color: #e2e8f0;
+  background-color: #2a2f34; /* #427 — Velzon --vz-light */
+  color: #e9ecef;
 }
 .dark .markdown-body pre {
-  background-color: #0f172a;
-  color: #e2e8f0;
+  background-color: #1a1d21; /* #427 — Velzon body bg */
+  color: #e9ecef;
 }
 
 @media print {

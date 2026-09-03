@@ -18,6 +18,9 @@ import {
   UserCheck,
   Layers,
   CheckSquare,
+  Lock,
+  Unlock,
+  ShieldAlert,
 } from "lucide-react";
 import { QATestCase, QATestSuite } from "../types";
 import { UserAvatar } from "../../../components/ui/UserAvatar";
@@ -36,6 +39,9 @@ interface QATestCaseTableProps {
   currentUserUid: string;
   currentUserRole: string;
   lockState: { lockedBy: string | null; userName: string | null; lockedAt: number | null };
+  remainingTime: number;
+  handleForceUnlock: () => void;
+  releaseLockManually: () => void;
   isGeneratingAi: boolean;
   handleGenerateWithAi: () => void;
   handleExportQAReport: () => void;
@@ -93,6 +99,12 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   searchTerm,
   setSearchTerm,
   projectMembers,
+  currentUserUid,
+  currentUserRole,
+  lockState,
+  remainingTime,
+  handleForceUnlock,
+  releaseLockManually,
   isGeneratingAi,
   handleGenerateWithAi,
   handleExportQAReport,
@@ -163,11 +175,76 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
   const searchedCases = filteredCases;
   const totalPages = Math.max(1, Math.ceil((casesTotal || filteredCases.length) / casesPerPage));
   const isAllSelected = searchedCases.length > 0 && selectedCaseIds.length === searchedCases.length;
+  const isLockedBySomeoneElse = lockState.lockedBy && lockState.lockedBy !== currentUserUid;
+  const fmtTime = (secs: number) => {
+    const m = Math.floor(secs / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (secs % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
 
   return (
     <div className="md:col-span-9 space-y-3.5 md:sticky md:top-4">
       {/* Velzon Header & Micro Stats Box */}
       <div className="bg-surface border border-border-subtle/80 p-4 rounded-md shadow-xs space-y-3">
+        {/* #426 — Lock indicator dipindah ke atas Add Task biar 1 konteks */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 bg-surface-muted border border-border-subtle/60 px-3 py-2 rounded-lg shadow-2xs">
+            {lockState.lockedBy ? (
+              isLockedBySomeoneElse ? (
+                <>
+                  <div className="p-1.5 bg-danger/10 text-danger-text rounded-md">
+                    <Lock className="w-3.5 h-3.5 animate-pulse" />
+                  </div>
+                  <span className="text-[10px] text-danger-text font-normal uppercase tracking-wider">
+                    {t("qaTop.lockedByOther")}
+                  </span>
+                  <span className="text-xs font-medium text-content-body">
+                    {lockState.userName}
+                  </span>
+                  {(currentUserRole === "admin" ||
+                    currentUserRole === "head" ||
+                    currentUserRole === "manager") && (
+                    <button
+                      onClick={handleForceUnlock}
+                      className="ml-1 px-2 py-1 bg-danger-surface hover:bg-danger-hover text-content-inverse text-[10px] font-normal uppercase tracking-wider rounded-md transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+                    >
+                      <ShieldAlert className="w-3 h-3" />
+                      {t("qaTop.forceUnlock")}
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="p-1.5 bg-success/10 text-success-text rounded-md">
+                    <Unlock className="w-3.5 h-3.5" />
+                  </div>
+                  <span className="text-[10px] text-success-text font-normal uppercase tracking-wider">
+                    {t("qaTop.youHoldLock")}
+                  </span>
+                  <span className="px-1.5 py-[2px] bg-primary-surface/10 text-primary text-[10px] leading-none font-medium rounded-md">
+                    {fmtTime(remainingTime)}
+                  </span>
+                  <button
+                    onClick={releaseLockManually}
+                    className="ml-1 px-2 py-1 bg-surface hover:bg-surface-sunken text-content-body text-[10px] font-normal uppercase tracking-wider rounded-md transition-all cursor-pointer border border-border-subtle"
+                  >
+                    {t("qaTop.unlockNow")}
+                  </button>
+                </>
+              )
+            ) : (
+              <>
+                <span className="w-2 h-2 rounded-full bg-surface-marker" />
+                <span className="text-xs text-content-muted font-medium">
+                  {t("qaTop.noActiveLock")}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
           <div>
             <div className="flex items-center gap-2">

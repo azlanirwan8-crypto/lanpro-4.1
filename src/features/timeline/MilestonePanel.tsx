@@ -19,9 +19,17 @@ import {
 interface MilestonePanelProps {
   projectId: string;
   canWrite?: boolean;
+  /** Controlled expanded state (opsional — dari toolbar header #426). */
+  expanded?: boolean;
+  onToggleExpanded?: (v: boolean) => void;
 }
 
-export const MilestonePanel: React.FC<MilestonePanelProps> = ({ projectId, canWrite = true }) => {
+export const MilestonePanel: React.FC<MilestonePanelProps> = ({
+  projectId,
+  canWrite = true,
+  expanded: controlledExpanded,
+  onToggleExpanded,
+}) => {
   const { t } = useTranslation();
   const [items, setItems] = useState<Milestone[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,9 +40,11 @@ export const MilestonePanel: React.FC<MilestonePanelProps> = ({ projectId, canWr
   const [editDue, setEditDue] = useState("");
   const [saving, setSaving] = useState(false);
   /** #338 — di HP default tertutup agar Gantt mendapat tinggi viewport. */
-  const [expanded, setExpanded] = useState(() =>
+  const [internalExpanded, setInternalExpanded] = useState(() =>
     typeof window !== "undefined" ? window.matchMedia("(min-width: 768px)").matches : true
   );
+  const expanded = controlledExpanded ?? internalExpanded;
+  const setExpanded = onToggleExpanded ?? setInternalExpanded;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -129,7 +139,7 @@ export const MilestonePanel: React.FC<MilestonePanelProps> = ({ projectId, canWr
         type="button"
         onClick={() => {
           if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
-            setExpanded((v) => !v);
+            setExpanded(!expanded);
           }
         }}
         className="flex items-center gap-2 w-full text-left cursor-pointer md:cursor-default"
