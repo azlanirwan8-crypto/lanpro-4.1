@@ -40,7 +40,26 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
   const { t } = useTranslation();
   const opsiStatus = useMasterOptionItems("sprint_status", CADANGAN_STATUS_SPRINT);
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t("editSprint.title")} maxWidth="max-w-xl">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("editSprint.title")}
+      maxWidth="max-w-xl"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose} className="flex-1 justify-center">
+            {t("editSprint.cancel")}
+          </Button>
+          <Button
+            onClick={onSubmit}
+            disabled={isSubmitting}
+            className="flex-1 justify-center bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse shadow-xs rounded-md text-xs font-medium py-2 cursor-pointer"
+          >
+            {t("editSprint.saveChanges")}
+          </Button>
+        </>
+      }
+    >
       {editingSprint && (
         <div className="space-y-4">
           <div>
@@ -116,33 +135,6 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
                 }
               />
             </div>
-          </div>
-          <div>
-            <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
-              {t("editSprint.status")}
-            </label>
-            <StyledDropdown
-              value={editingSprint.status || "planned"}
-              onChange={(val) => setEditingSprint({ ...editingSprint, status: val as any })}
-              options={opsiStatus}
-              type="sprint_status"
-              masterData={[]}
-              className="w-full"
-              buttonClassName="w-full px-4 py-2 border border-border-subtle rounded-lg text-sm bg-surface"
-            />
-          </div>
-
-          <div className="flex gap-3 pt-4 border-t border-border-subtle">
-            <Button variant="secondary" onClick={onClose} className="flex-1 justify-center">
-              {t("editSprint.cancel")}
-            </Button>
-            <Button
-              onClick={onSubmit}
-              disabled={isSubmitting}
-              className="flex-1 justify-center bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse shadow-xs rounded-md text-xs font-medium py-2 cursor-pointer"
-            >
-              {t("editSprint.saveChanges")}
-            </Button>
           </div>
         </div>
       )}

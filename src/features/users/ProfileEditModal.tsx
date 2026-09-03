@@ -221,7 +221,7 @@ export const ProfileEditModal = ({
                 {t("profile.preview")}
               </span>
             )}
-            <label className="absolute inset-0 bg-black/50 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
+            <label className="absolute inset-0 bg-overlay/50 text-content-inverse rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
               <span className="text-xs sm:text-[10px] font-normal uppercase tracking-wider">
                 {isUploading ? "..." : t("profile.choosePhoto")}
               </span>
@@ -336,7 +336,7 @@ export const ProfileEditModal = ({
           type="button"
           onClick={handleUpdateProfile}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-lg px-4 py-2 font-medium transition-all disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-lg px-4 py-2 font-medium transition-all disabled:opacity-50"
         >
           {loading ? (
             "Saving..."

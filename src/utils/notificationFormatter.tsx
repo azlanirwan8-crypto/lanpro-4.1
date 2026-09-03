@@ -182,10 +182,10 @@ export const formatNotification = (
       break;
 
     case "status":
-      icon = <ArrowRightLeft className="w-4 h-4 text-indigo-600" />;
-      iconBgClass = "bg-indigo-500/10 border border-indigo-500/30 text-indigo-600";
+      icon = <ArrowRightLeft className="w-4 h-4 text-primary" />;
+      iconBgClass = "bg-primary/10 border border-primary/30 text-primary";
       badgeText = i18n.t("notif.nStatusCap");
-      badgeClass = "bg-indigo-500/10 text-indigo-700 border-indigo-500/30";
+      badgeClass = "bg-primary/10 text-primary border-primary/30";
       formattedTitleStr = i18n.t("notif.nTaskStatusUpdate");
       break;
 
@@ -198,10 +198,10 @@ export const formatNotification = (
       break;
 
     case "comment":
-      icon = <MessageSquare className="w-4 h-4 text-violet-600" />;
-      iconBgClass = "bg-violet-500/10 border border-violet-500/30 text-violet-600";
+      icon = <MessageSquare className="w-4 h-4 text-primary" />;
+      iconBgClass = "bg-primary/10 border border-primary/30 text-primary";
       badgeText = i18n.t("notif.nCommentCap");
-      badgeClass = "bg-violet-500/10 text-violet-700 border-violet-500/30";
+      badgeClass = "bg-primary/10 text-primary border-primary/30";
       formattedTitleStr = i18n.t("notif.nNewComment");
       break;
 
@@ -331,7 +331,7 @@ export const formatNotification = (
         key={`task-${code}-${startIndex}`}
         className="inline-flex items-center gap-0.5 px-1 py-0 rounded bg-surface-muted hover:bg-surface-strong border border-border-subtle/60 text-xs sm:text-[10px] font-medium text-content-strong font-mono transition-colors my-0.5 select-all"
       >
-        <span className="text-violet-600 font-medium">{code}</span>
+        <span className="text-primary font-medium">{code}</span>
         <span className="text-content-subtle">|</span>
         <span className="truncate max-w-[120px]">{name}</span>
       </span>
@@ -395,7 +395,7 @@ export const formatNotification = (
 
       {/* Special Block: Render comments inside stylized blockquotes (Compact: mt-1 pl-2 py-0.5 px-1.5) */}
       {commentBlock && (
-        <div className="mt-1 pl-2 border-l-2 border-violet-500 bg-surface-sunken/60 py-0.5 px-1.5 rounded-r text-content-secondary italic font-medium text-xs sm:text-[11px] max-w-prose">
+        <div className="mt-1 pl-2 border-l-2 border-primary bg-surface-sunken/60 py-0.5 px-1.5 rounded-r text-content-secondary italic font-medium text-xs sm:text-[11px] max-w-prose">
           "{commentBlock}"
         </div>
       )}

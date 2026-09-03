@@ -24,6 +24,8 @@ import { toast } from "sonner";
 import { fetchTeamTasks as fetchTeamTasksApi } from "./services/team.service";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { StyledDropdown as CommonStyledDropdown } from "../../components/ui/CommonComponents";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { LIST_SEARCH_INPUT_CLASS, LIST_THEAD_ROW_CLASS } from "../../components/ui/ListPageShell";
 import { safeLocalStorage } from "../../lib/safeStorage";
 
 export const TeamManagementPanel = ({
@@ -49,6 +51,7 @@ export const TeamManagementPanel = ({
   removeProjectMember?: (uid: string) => Promise<void>;
   masterData?: MasterData[];
   onRefreshProjects?: () => void;
+  onInviteMember?: (email: string) => Promise<void>;
 }) => {
   const { t } = useTranslation();
   const [teamSearch, setTeamSearch] = useState("");
@@ -353,34 +356,33 @@ export const TeamManagementPanel = ({
   };
 
   return (
-    <div className="p-4 md:p-6 w-full h-[calc(100vh-80px)] flex flex-col overflow-hidden text-left">
-      {/* Fixed Top Section Wrapper */}
-      <div className="shrink-0 space-y-5 pb-1">
-        {/* Header Title */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-xl font-medium text-content-strong tracking-tight">
-              {t("team.title")}
-            </h1>
-            <p className="text-xs text-content-muted font-medium mt-0.5">
+    <div className="p-3 md:p-6 w-full h-[calc(100dvh-80px)] flex flex-col overflow-hidden text-left bg-surface-muted">
+      {/* Fixed Top Section Wrapper — #422: PageHeader flat, bukan dalam card */}
+      <div className="shrink-0 space-y-4 md:space-y-5 pb-1">
+        <PageHeader
+          breadcrumbs={[
+            { label: t("team.breadcrumbGroup", "PROJECT") },
+            { label: t("team.title"), current: true },
+          ]}
+          title={t("team.title")}
+          subtitle={
+            <>
               {t("team.membersOf")}{" "}
               {selectedProject ? (
                 <span className="font-medium text-content-body">
                   {selectedProject.name}
                   {selectedProject.key ? ` (${selectedProject.key})` : ""}
                 </span>
-              ) : (
-                ""
-              )}
-            </p>
-          </div>
-        </div>
+              ) : null}
+            </>
+          }
+        />
 
         {/* Team Summary KPI Cards — #333: 2 kolom sejak HP (bukan menunggu sm:) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
           <div className="bg-surface p-3 md:p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 md:gap-3 min-w-0">
-              <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-500/10 text-blue-600 rounded-lg flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-info/10 text-info-text rounded-lg flex items-center justify-center shrink-0">
                 <Users className="w-4 h-4 md:w-5 md:h-5" />
               </div>
               <div className="min-w-0">
@@ -452,7 +454,7 @@ export const TeamManagementPanel = ({
               placeholder={t("team.searchPlaceholder")}
               value={teamSearch}
               onChange={(e) => setTeamSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-1.5 bg-surface-sunken border border-border-subtle rounded-md text-xs focus:ring-1 focus:ring-indigo-500 focus:bg-surface outline-none text-content-body font-medium transition-all"
+              className={LIST_SEARCH_INPUT_CLASS}
             />
           </div>
 
@@ -631,7 +633,7 @@ export const TeamManagementPanel = ({
             <div className="overflow-x-auto">
               <ResponsiveTable className="w-full text-left">
                 <thead>
-                  <tr className="bg-surface-sunken/80 border-b border-border-subtle/80 text-xs sm:text-[11px] font-normal text-content-muted uppercase tracking-wider">
+                  <tr className={LIST_THEAD_ROW_CLASS}>
                     <th className="px-5 py-3">{t("team.member")}</th>
                     <th className="px-5 py-3">{t("team.role")}</th>
                     <th className="px-5 py-3 text-center">{t("team.assignedTasks")}</th>

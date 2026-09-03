@@ -26,7 +26,7 @@ export const DescriptionEditor: React.FC<Props> = ({ task, onSave, onCancel, onA
   }, [localDescription, onAutoSave, task.description]);
 
   return (
-    <div className="border border-indigo-500 rounded-xl overflow-hidden bg-surface shadow-soft-lg ring-4 ring-indigo-500/10 transition-all">
+    <div className="border border-primary rounded-xl overflow-hidden bg-surface shadow-soft-lg ring-4 ring-primary/10 transition-all">
       <textarea
         value={localDescription}
         onChange={(e) => setLocalDescription(e.target.value)}

@@ -41,7 +41,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
     { name: "rose", bg: "bg-rose-500" },
     { name: "violet", bg: "bg-violet-500" },
     { name: "purple", bg: "bg-purple-500" },
-    { name: "slate", bg: "bg-slate-500" },
+    { name: "slate", bg: "bg-surface-strong" },
   ];
 
   // Adjust coordinates so it doesn't overflow screen boundaries
@@ -88,7 +88,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
       {/* Node Info Header */}
       <div className="px-3 py-1.5 text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle border-b border-border-faint mb-1 flex items-center justify-between">
         <span>{t("nodeMenu.title")}</span>
-        <span className="text-violet-600 font-mono text-xs sm:text-[10px]">
+        <span className="text-primary font-mono text-xs sm:text-[10px]">
           ID: {nodeId.split("_")[1] || "Active"}
         </span>
       </div>
@@ -99,9 +99,9 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
           onEditProperties(nodeId);
           onClose();
         }}
-        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-content-body hover:text-violet-600 hover:bg-violet-500/10 transition-colors text-left"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-content-body hover:text-primary hover:bg-primary/10 transition-colors text-left"
       >
-        <Edit3 className="w-3.5 h-3.5 text-content-subtle group-hover:text-violet-500" />
+        <Edit3 className="w-3.5 h-3.5 text-content-subtle group-hover:text-primary" />
         <span>{t("nodeMenu.editProperties")}</span>
       </button>
 
@@ -111,7 +111,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
           onDuplicate(nodeId);
           onClose();
         }}
-        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-content-body hover:text-indigo-600 hover:bg-indigo-500/10 transition-colors text-left"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded-xl text-content-body hover:text-primary hover:bg-primary/10 transition-colors text-left"
       >
         <Copy className="w-3.5 h-3.5 text-content-subtle" />
         <span>{t("nodeMenu.duplicate")}</span>
@@ -139,9 +139,7 @@ export const NodeContextMenu: React.FC<NodeContextMenuProps> = ({
               className={cn(
                 "w-7 h-7 rounded-lg transition-transform hover:scale-110 active:scale-95 flex items-center justify-center relative shadow-soft cursor-pointer border",
                 c.bg,
-                isSelected
-                  ? "ring-2 ring-violet-500 border-surface scale-105"
-                  : "border-transparent"
+                isSelected ? "ring-2 ring-primary border-surface scale-105" : "border-transparent"
               )}
               title={c.name.toUpperCase()}
             >

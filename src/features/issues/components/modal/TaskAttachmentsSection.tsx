@@ -48,7 +48,7 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
           <div className="flex gap-4">
             <button
               onClick={() => setIsAddingLinkLocal(!isAddingLink)}
-              className="text-xs sm:text-[10px] font-medium text-indigo-600 hover:underline"
+              className="text-xs sm:text-[10px] font-medium text-primary hover:underline"
             >
               {t("issues.addLink")}
             </button>
@@ -114,7 +114,7 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/30 space-y-3"
+          className="p-4 bg-primary/10 rounded-xl border border-primary/30 space-y-3"
         >
           <input
             placeholder={t("attachments.resourceTitle")}

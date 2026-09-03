@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import { Response, NextFunction } from "express";
 
 jest.mock("../../src/lib/db", () => ({
   __esModule: true,
@@ -8,9 +7,17 @@ jest.mock("../../src/lib/db", () => ({
   },
 }));
 
-import { authenticateJWT, generateToken, getJwtSecret } from "./auth";
+import { authenticateJWT } from "./auth";
 import { createMockRequest, createMockResponse } from "../test/setup";
 import db from "../../src/lib/db";
+
+/** authenticateJWT menyelesaikan lewat promise berantai — tunggu next atau status. */
+async function tungguSelesai(next: jest.Mock, res: { status: jest.Mock }) {
+  for (let i = 0; i < 30; i++) {
+    if (next.mock.calls.length > 0 || res.status.mock.calls.length > 0) return;
+    await new Promise((r) => setImmediate(r));
+  }
+}
 
 describe("authenticateJWT - Sinkronisasi Peran & Status Real-time (§19.28 / Item #92)", () => {
   const secret = "test-secret-for-jwt-role-sync";
@@ -31,10 +38,10 @@ describe("authenticateJWT - Sinkronisasi Peran & Status Real-time (§19.28 / Ite
       { expiresIn: "2h" }
     );
 
-    // Di database, peran user sudah diturunkan menjadi 'user'
-    (db.query as jest.Mock).mockResolvedValueOnce([
-      [{ currentSessionToken: token, role: "user", status: "active" }],
-    ]);
+    // #347 denylist kosong, lalu sesi + peran dari DB
+    (db.query as jest.Mock)
+      .mockResolvedValueOnce([[]])
+      .mockResolvedValueOnce([[{ currentSessionToken: token, role: "user", status: "active" }]]);
 
     const req = createMockRequest({
       headers: { authorization: `Bearer ${token}` },
@@ -42,12 +49,16 @@ describe("authenticateJWT - Sinkronisasi Peran & Status Real-time (§19.28 / Ite
     const res = createMockResponse();
     const next = jest.fn();
 
-    await authenticateJWT(req as any, res as any, next);
+    authenticateJWT(req as any, res as any, next);
+    await tungguSelesai(next, res as any);
 
-    expect(db.query).toHaveBeenCalledWith(
-      expect.stringContaining("currentSessionToken"),
-      ["user-123", "user-123"]
-    );
+    expect(db.query).toHaveBeenCalledWith(expect.stringContaining("TokenBlacklist"), [
+      token.slice(0, 512),
+    ]);
+    expect(db.query).toHaveBeenCalledWith(expect.stringContaining("currentSessionToken"), [
+      "user-123",
+      "user-123",
+    ]);
     expect(next).toHaveBeenCalled();
     // req.user.role harus mengambil peran dari DB ('user'), bukan dari token ('admin')
     expect(req.user.role).toBe("user");
@@ -61,9 +72,9 @@ describe("authenticateJWT - Sinkronisasi Peran & Status Real-time (§19.28 / Ite
       { expiresIn: "2h" }
     );
 
-    (db.query as jest.Mock).mockResolvedValueOnce([
-      [{ currentSessionToken: token, role: "admin", status: "approved" }],
-    ]);
+    (db.query as jest.Mock)
+      .mockResolvedValueOnce([[]])
+      .mockResolvedValueOnce([[{ currentSessionToken: token, role: "admin", status: "approved" }]]);
 
     const req = createMockRequest({
       headers: { authorization: `Bearer ${token}` },
@@ -71,7 +82,8 @@ describe("authenticateJWT - Sinkronisasi Peran & Status Real-time (§19.28 / Ite
     const res = createMockResponse();
     const next = jest.fn();
 
-    await authenticateJWT(req as any, res as any, next);
+    authenticateJWT(req as any, res as any, next);
+    await tungguSelesai(next, res as any);
 
     expect(next).toHaveBeenCalled();
     expect(req.user.role).toBe("admin");
@@ -85,9 +97,9 @@ describe("authenticateJWT - Sinkronisasi Peran & Status Real-time (§19.28 / Ite
       { expiresIn: "2h" }
     );
 
-    (db.query as jest.Mock).mockResolvedValueOnce([
-      [{ currentSessionToken: token, role: "user", status: "suspended" }],
-    ]);
+    (db.query as jest.Mock)
+      .mockResolvedValueOnce([[]])
+      .mockResolvedValueOnce([[{ currentSessionToken: token, role: "user", status: "suspended" }]]);
 
     const req = createMockRequest({
       headers: { authorization: `Bearer ${token}` },
@@ -95,7 +107,8 @@ describe("authenticateJWT - Sinkronisasi Peran & Status Real-time (§19.28 / Ite
     const res = createMockResponse();
     const next = jest.fn();
 
-    await authenticateJWT(req as any, res as any, next);
+    authenticateJWT(req as any, res as any, next);
+    await tungguSelesai(next, res as any);
 
     expect(res.status).toHaveBeenCalledWith(403);
     expect(res.json).toHaveBeenCalledWith(
@@ -114,7 +127,7 @@ describe("authenticateJWT - Sinkronisasi Peran & Status Real-time (§19.28 / Ite
       { expiresIn: "2h" }
     );
 
-    (db.query as jest.Mock).mockResolvedValueOnce([[]]);
+    (db.query as jest.Mock).mockResolvedValueOnce([[]]).mockResolvedValueOnce([[]]);
 
     const req = createMockRequest({
       headers: { authorization: `Bearer ${token}` },
@@ -122,7 +135,8 @@ describe("authenticateJWT - Sinkronisasi Peran & Status Real-time (§19.28 / Ite
     const res = createMockResponse();
     const next = jest.fn();
 
-    await authenticateJWT(req as any, res as any, next);
+    authenticateJWT(req as any, res as any, next);
+    await tungguSelesai(next, res as any);
 
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith(

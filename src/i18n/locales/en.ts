@@ -55,6 +55,7 @@ export const en = {
     "srv.dokumen_tidak_ditemukan": "Document not found.",
     "srv.terjadi_kesalahan_saat_mengunduh": "Something went wrong while downloading the document.",
     "srv.token_metrik_tidak_valid": "Invalid metrics token.",
+    "srv.token_dicabut": "Your session has been ended. Please sign in again.",
     "srv.nama_role_minimal_harus": "The role name must be at least 3 characters.",
     "srv.masterdata_updated": "Master data updated",
     "srv.master_data_tidak_ditemukan": "Master data not found.",
@@ -770,11 +771,20 @@ export const en = {
     collapse: "Collapse Sidebar",
     projectManagement2: "Project management",
   },
+  nav: {
+    dashboard: "Dashboard",
+    activity: "Activity",
+    planning: "Planning",
+    qa: "QA",
+    settings: "Settings",
+    roadmap: "Roadmap",
+  },
   dashboard: {
     greetingMorning: "Good Morning",
     greetingAfternoon: "Good Afternoon",
     greetingEvening: "Good Evening",
     greetingNight: "Good Evening",
+    breadcrumbGroup: "PROJECT",
     subtitle: "Team performance summary, sprint progress, and real-time task allocation.",
     taskSummary: "Task Summary",
     epicExcluded: "Epics excluded",
@@ -880,6 +890,7 @@ export const en = {
     dueSoonShort: "due soon",
   },
   team: {
+    breadcrumbGroup: "PROJECT",
     membersOf: "Team members joined to the project",
     title: "Team Management",
     activeTeam: "Active Team",
@@ -907,8 +918,12 @@ export const en = {
     csvUsername: "Username",
     csvTaskCount: "Task Count",
     searchPlaceholder: "Search for name, designation, or email...",
+    inviteMember: "Invite member",
+    inviteHint:
+      "Enter an email. If the account exists, the member is added immediately; otherwise an invite waits for registration.",
   },
   users: {
+    breadcrumbGroup: "ADMINISTRATION",
     waPhone: "WA/Phone:",
     emptyRoleCatalog: "(system role catalog is empty)",
     projectsCount: "{{count}} Projects",
@@ -973,6 +988,7 @@ export const en = {
     copyJoinLink: "Copy join link",
   },
   meetings: {
+    breadcrumbGroup: "PROJECT",
     title: "Meeting Notes",
     subtitle: "Manage project meeting notes, agenda, datetime, and discussion points.",
     addMeeting: "Add Meeting",
@@ -1356,6 +1372,7 @@ export const en = {
     unassigned: "Unassigned",
   },
   kanban: {
+    breadcrumbGroup: "PROJECT",
     blockedCardHint: "Card blocked: finish all subtasks before moving it to Done",
     loadingBoard: "Loading board...",
     empty: "Empty",
@@ -1365,9 +1382,12 @@ export const en = {
     otherTasksHint: "Tasks not assigned to any Epic",
     swimlanes: "Swimlanes",
     dropHere: "Drop here",
+    title: "Kanban Board",
+    subtitle: "Drag cards across status columns. Group by epic or assignee.",
     dragHandle: "Drag card",
   },
   flowchart: {
+    breadcrumbGroup: "PROJECT",
     addModalTitle: "Create New Diagram",
     mulaiDenganWarna: "Start with the colour {{warna}}",
     tambahKeKanvas: "Add {{bentuk}} to the canvas",
@@ -1550,6 +1570,7 @@ export const en = {
     yesRestoreNow: "Yes, restore now",
   },
   wiki: {
+    breadcrumbGroup: "PROJECT",
     clearSearch: "Clear Search",
     title: "Documentation",
     addDocument: "Add Document",
@@ -1674,6 +1695,8 @@ export const en = {
   },
   common: {
     unknown: "Unknown",
+    language: "Language",
+    loading: "Loading...",
     projectSettings: "Project Settings",
     showing: "Showing",
     to: "to",
@@ -2145,6 +2168,11 @@ export const en = {
       "Fully ready: every component mapped to a whiteboard element. Click one of the buttons below to apply.",
   },
   audit: {
+    breadcrumbGroup: "ADMINISTRATION",
+    breadcrumbItem: "AUDIT",
+    notifFailuresTitle: "Notification delivery failures",
+    notifFailuresHint: "Recent failed notification sends recorded by the system.",
+    notifFailuresEmpty: "No failed deliveries recorded.",
     infraSubtitle: "LanPro infrastructure activity history (Real-time & Immutable)",
     allEntities: "All Entities",
     allAccess: "All Access",
@@ -2673,6 +2701,7 @@ export const en = {
     shapes: "Shapes",
   },
   connect: {
+    breadcrumbGroup: "ADMINISTRATION",
     mysqlHelp: "Active MySQL Connection Help",
     mysqlConfig: "MySQL Database Configuration",
     saveApply: "Save & Apply Live",
@@ -2726,6 +2755,7 @@ export const en = {
       "You do not have permission to view Integration Settings. Please contact your administrator if you need access.",
     viewBug: "VIEW BUG",
     notifications: "Notifications",
+    moreActions: "More",
     back: "Back",
     issueDetails: "Issue Details",
     pickOrCreateProject: "Select or Create a New Project",
@@ -3095,6 +3125,7 @@ export const en = {
     mobileAdd: "Add",
   },
   issues: {
+    breadcrumbGroup: "PROJECT",
     cancel: "Cancel",
     addLink: "+ Add link",
     relatedIssues: "Related issues",

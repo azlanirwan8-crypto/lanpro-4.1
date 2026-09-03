@@ -1,5 +1,23 @@
 import db from "../../src/lib/db";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
+
+/**
+ * #347 — masa berlaku baris TokenBlacklist: pakai `exp` JWT bila ada,
+ * else 2 jam (sama dengan `generateToken`).
+ * Kolom tabel (pg-migrate): id SERIAL, token VARCHAR(512), "expiresAt", "createdAt".
+ */
+export function expiresAtDariJwt(token: string): Date {
+  try {
+    const decoded = jwt.decode(token) as { exp?: number } | null;
+    if (decoded?.exp && Number.isFinite(decoded.exp)) {
+      return new Date(decoded.exp * 1000);
+    }
+  } catch {
+    // token sampah — fallback di bawah
+  }
+  return new Date(Date.now() + 2 * 60 * 60 * 1000);
+}
 
 export class AuthRepository {
   async findUserRoleById(id: string): Promise<string | null> {
@@ -60,6 +78,44 @@ export class AuthRepository {
     const connection = await db.getConnection();
     try {
       await connection.query("UPDATE Users SET currentSessionToken = NULL WHERE id = ?", [userId]);
+    } finally {
+      connection.release();
+    }
+  }
+
+  /**
+   * #347 — catat JWT yang dicabut (logout / reset kata sandi) ke TokenBlacklist.
+   * Identifier dikutip sesuai pg-migrate (`"TokenBlacklist"`, `"expiresAt"`).
+   * Token dipotong ke 512 agar cocok VARCHAR(512); pencarian memakai potongan yang sama.
+   */
+  async addToTokenBlacklist(token: string, expiresAt?: Date): Promise<void> {
+    if (!token) return;
+    const safeToken = String(token).slice(0, 512);
+    const expiry = expiresAt ?? expiresAtDariJwt(token);
+    const connection = await db.getConnection();
+    try {
+      await connection.query(`INSERT INTO "TokenBlacklist" (token, "expiresAt") VALUES (?, ?)`, [
+        safeToken,
+        expiry,
+      ]);
+    } finally {
+      connection.release();
+    }
+  }
+
+  /** #347 — true bila token ada di denylist dan belum lewat "expiresAt". */
+  async isTokenBlacklisted(token: string): Promise<boolean> {
+    if (!token) return false;
+    const safeToken = String(token).slice(0, 512);
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query(
+        `SELECT 1 AS hit FROM "TokenBlacklist"
+          WHERE token = ? AND "expiresAt" > NOW()
+          LIMIT 1`,
+        [safeToken]
+      );
+      return Array.isArray(rows) && rows.length > 0;
     } finally {
       connection.release();
     }

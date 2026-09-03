@@ -174,6 +174,7 @@ describe("Auth Routes - Forgot Password & Reset Password (Item #27)", () => {
       );
 
       mockKueri.mockResolvedValueOnce([[{ id: "usr-100" }]]); // UPDATE Users RETURNING id
+      mockKueri.mockResolvedValueOnce([[]]); // findSessionData — tidak ada currentSessionToken
       mockKueri.mockResolvedValueOnce([[]]); // clearSessionToken
 
       const res = await request(buatApp())

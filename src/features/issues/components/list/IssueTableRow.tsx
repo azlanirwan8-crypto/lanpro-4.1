@@ -336,7 +336,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
 
                     {task.type !== "epic" && (
                       <span
-                        className="text-[10px] font-normal text-indigo-600 bg-indigo-500/10 border border-indigo-500/20 px-1.5 py-0.5 rounded select-all shrink-0 uppercase tracking-tighter ml-1"
+                        className="text-[10px] font-normal text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded select-all shrink-0 uppercase tracking-tighter ml-1"
                         title={task.key}
                       >
                         {task.key}
@@ -565,7 +565,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     onSave={(val: any) =>
                       updateTaskField(task.id, "storyPoints", val ? Number(val) : null)
                     }
-                    className="bg-transparent border border-transparent hover:border-border-subtle focus:border-indigo-500 rounded px-2 py-1 text-xs font-normal text-content-body w-full outline-none transition-colors"
+                    className="bg-transparent border border-transparent hover:border-border-subtle focus:border-primary rounded px-2 py-1 text-xs font-normal text-content-body w-full outline-none transition-colors"
                     placeholder="-"
                   />
                 );
@@ -696,7 +696,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                   e.stopPropagation();
                   setActiveContextMenuTaskId(activeContextMenuTaskId === task.id ? null : task.id);
                 }}
-                className="p-1 bg-surface-muted hover:bg-indigo-600 text-content-secondary hover:text-content-inverse border border-border-subtle rounded-lg transition-all cursor-pointer shadow-xs font-medium"
+                className="p-1 bg-surface-muted hover:bg-primary-surface text-content-secondary hover:text-content-inverse border border-border-subtle rounded-lg transition-all cursor-pointer shadow-xs font-medium"
                 title={t("issueRow.actionMenu")}
               >
                 <MoreVertical className="w-3.5 h-3.5 shrink-0" />

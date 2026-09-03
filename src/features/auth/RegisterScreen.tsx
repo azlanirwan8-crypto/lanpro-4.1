@@ -136,7 +136,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder={t("register.namePlaceholder")}
             className={cn(
-              "w-full px-3.5 py-2 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-xs font-normal text-content placeholder:text-content-subtle",
+              "w-full px-3.5 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
               fieldErrors.name
                 ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -161,7 +161,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             onChange={(e) => handleEmailChange(e.target.value)}
             placeholder={t("register.emailPlaceholder")}
             className={cn(
-              "w-full px-3.5 py-2 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-xs font-normal text-content placeholder:text-content-subtle",
+              "w-full px-3.5 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
               fieldErrors.email
                 ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -190,7 +190,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             onChange={handleUsernameChange}
             placeholder={t("register.usernamePlaceholder")}
             className={cn(
-              "w-full px-3.5 py-2 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-xs font-normal text-content placeholder:text-content-subtle",
+              "w-full px-3.5 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
               fieldErrors.username
                 ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -216,7 +216,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               onChange={(e) => handlePasswordChange(e.target.value)}
               placeholder={t("register.passwordPlaceholder")}
               className={cn(
-                "w-full pl-3.5 pr-10 py-2 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-xs font-normal text-content placeholder:text-content-subtle",
+                "w-full pl-3.5 pr-10 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
                 fieldErrors.password
                   ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
                   : "border-border-subtle focus:ring-primary/20 focus:border-primary"

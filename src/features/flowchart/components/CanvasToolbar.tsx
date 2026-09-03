@@ -41,8 +41,8 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
       <div className="flex items-center gap-2 pointer-events-auto min-w-0">
         {/* Active Diagram Name Indicator */}
         <div className="flex items-center gap-2 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 px-2.5 py-1 rounded-lg shadow-[0_6px_18px_rgba(0,0,0,0.05)] pointer-events-auto transition-all duration-300 min-w-0">
-          <div className="p-1 bg-violet-500/10 rounded-md text-violet-700 shrink-0">
-            <Workflow className="w-3.5 h-3.5 text-violet-600" />
+          <div className="p-1 bg-primary/10 rounded-md text-primary shrink-0">
+            <Workflow className="w-3.5 h-3.5 text-primary" />
           </div>
           <div className="text-left font-sans min-w-0">
             <p className="text-[10px] font-medium text-content-subtle leading-none mb-0.5 hidden sm:block">
@@ -95,16 +95,13 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             className={cn(
               "min-h-11 min-w-11 p-2 rounded-md transition-all flex items-center gap-1 cursor-pointer",
               isSnapToGrid
-                ? "bg-violet-500/10 text-violet-700 hover:bg-violet-500/15 border border-violet-500/30"
+                ? "bg-primary/10 text-primary hover:bg-primary/15 border border-primary/30"
                 : "text-content-subtle hover:bg-surface-muted border border-transparent"
             )}
             title={`Snap to Grid (Saat ini: ${isSnapToGrid ? "Aktif" : "Mati"})`}
           >
             <LayoutGrid
-              className={cn(
-                "w-3.5 h-3.5",
-                isSnapToGrid ? "text-violet-600" : "text-content-subtle"
-              )}
+              className={cn("w-3.5 h-3.5", isSnapToGrid ? "text-primary" : "text-content-subtle")}
             />
             <span className="text-[10px] font-medium hidden lg:inline px-0.5">
               {isSnapToGrid ? t("flowchart.snapGrid") : t("flowchart.freeMove")}
@@ -128,7 +125,7 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           <button
             type="button"
             onClick={handleExportJSON}
-            className="flex items-center gap-1 px-2 py-1.5 text-indigo-700 hover:bg-indigo-500/10 rounded-md text-[10px] leading-none font-medium transition-all cursor-pointer"
+            className="flex items-center gap-1 px-2 py-1.5 text-primary hover:bg-primary/10 rounded-md text-[10px] leading-none font-medium transition-all cursor-pointer"
             title={t("flowchart.backup")}
           >
             <Database className="w-3.5 h-3.5" />
@@ -142,8 +139,8 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
           className={cn(
             "p-2 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 shadow-[0_6px_18px_rgba(0,0,0,0.05)] rounded-lg transition-all duration-300 cursor-pointer",
             isRightSidebarOpen
-              ? "bg-violet-600 text-content-inverse border-violet-600"
-              : "text-content-secondary hover:text-violet-600"
+              ? "bg-primary-surface text-content-inverse border-primary"
+              : "text-content-secondary hover:text-primary"
           )}
           title={t("canvasMenu.toggleConfigPanel")}
         >

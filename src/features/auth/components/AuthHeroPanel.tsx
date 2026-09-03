@@ -35,7 +35,7 @@ export const AuthHeroPanel = () => {
       busurnya, jadi ini tuas yang tepat untuk "lebih smooth" tanpa
       menghilangkan lengkungannya sama sekali.
     */
-    <div className="hidden md:flex md:w-1/2 relative bg-gradient-to-br from-primary-surface-hover via-primary-surface to-primary-surface-active items-center justify-center p-8 xl:p-12 select-none min-h-screen z-10 overflow-hidden [clip-path:ellipse(100%_230%_at_0%_50%)]">
+    <div className="hidden md:flex md:w-1/2 relative bg-gradient-to-br from-primary-surface-hover via-primary-surface to-primary-surface-active items-center justify-center p-8 xl:p-12 select-none min-h-dvh z-10 overflow-hidden [clip-path:ellipse(100%_230%_at_0%_50%)]">
       {/* Floating White Particles Effect */}
       <VelzonFloatingParticles />
 

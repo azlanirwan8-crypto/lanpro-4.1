@@ -130,9 +130,11 @@ beforeEach(() => {
   mockKueri.mockResolvedValue([[]]);
   // Dibaca saat DIPANGGIL, bukan saat dipasang: `mockTokenAktif` baru terisi
   // di dalam `setujui()`, sesudah beforeEach selesai.
-  mockDbQuery.mockImplementation(async () => [
-    [{ currentSessionToken: mockTokenAktif, role: "admin", status: "approved" }],
-  ]);
+  // #347: authenticateJWT mengecek TokenBlacklist dulu; baris non-kosong di situ = 401.
+  mockDbQuery.mockImplementation(async (sql: string) => {
+    if (String(sql).includes("TokenBlacklist")) return [[]];
+    return [[{ currentSessionToken: mockTokenAktif, role: "admin", status: "approved" }]];
+  });
   (kirimEmailAktivasiAkun as jest.Mock).mockResolvedValue({ success: true });
   (kirimEmailLatarBelakang as jest.Mock).mockResolvedValue(undefined);
   (userRepository.findByIdOrUid as jest.Mock).mockResolvedValue({

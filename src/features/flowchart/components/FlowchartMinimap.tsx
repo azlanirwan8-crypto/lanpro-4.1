@@ -163,7 +163,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
               "p-2 rounded-xl border mb-2 shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-all duration-300 relative overflow-hidden",
               isMiro
                 ? "bg-surface/80 border-border-subtle/40 backdrop-blur-md text-content-strong"
-                : "bg-slate-950/80  backdrop-blur-md text-content-inverse-strong"
+                : "bg-overlay/80 backdrop-blur-md text-content-inverse-strong"
             )}
           >
             {/* Ambient Background Glow matching selected theme */}
@@ -208,7 +208,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
                 const miniH = nodeHeight * SCALE_Y;
 
                 // Color mapping for node types
-                let bgClass = "bg-slate-400";
+                let bgClass = "bg-surface-marker";
                 if (node.type === "start") bgClass = "bg-emerald-500";
                 else if (node.type === "end") bgClass = "bg-rose-500";
                 else if (node.type === "decision") bgClass = "bg-amber-500";
@@ -242,7 +242,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
                 className={cn(
                   "absolute border-[1.5px] rounded-md pointer-events-none transition-shadow duration-300",
                   isMiro
-                    ? " border-indigo-600 bg-indigo-500/10 shadow-[0_0_8px_rgba(99,102,241,0.2)]"
+                    ? " border-primary bg-primary/10 shadow-[0_0_8px_rgba(64,81,137,0.2)]"
                     : "border-blue-500 bg-blue-500/15 shadow-[0_0_12px_rgba(59,130,246,0.3)]"
                 )}
                 style={{
@@ -257,7 +257,7 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
             {/* Bottom mini status bar */}
             <div className="flex justify-between items-center mt-1 px-1 text-xs sm:text-[10px] font-normal uppercase tracking-wider text-content-subtle">
               <span className="flex items-center gap-1">
-                <Move className="w-2.5 h-2.5 text-indigo-500" />
+                <Move className="w-2.5 h-2.5 text-primary" />
                 <span>{t("flowNode.dragToPan")}</span>
               </span>
               <span>{t("rakit.itemsCount", { count: nodes.length })}</span>
@@ -272,14 +272,14 @@ export const FlowchartMinimap: React.FC<FlowchartMinimapProps> = ({
         className={cn(
           "flex items-center gap-2 px-3 py-1.5 rounded-xl border font-normal text-xs sm:text-[11px]  uppercase tracking-wider transition-all duration-300 shadow-[0_4px_12px_rgba(0,0,0,0.04)] cursor-pointer active:scale-95",
           isMiro
-            ? "bg-surface/80 hover:bg-surface/95 border-border-subtle/40  hover:text-indigo-600"
-            : "bg-overlay/80  border-slate-800/60  hover:text-blue-400"
+            ? "bg-surface/80 hover:bg-surface/95 border-border-subtle/40  hover:text-primary"
+            : "bg-overlay/80 border-border-inverse/60 hover:text-blue-400"
         )}
       >
         <Map
           className={cn(
             "w-3.5 h-3.5",
-            isOpen ? "text-indigo-500 animate-pulse" : "text-content-subtle"
+            isOpen ? "text-primary animate-pulse" : "text-content-subtle"
           )}
         />
         <span>{t("flowNode.minimap")}</span>

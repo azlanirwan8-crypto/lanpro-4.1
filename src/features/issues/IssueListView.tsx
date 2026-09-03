@@ -25,6 +25,8 @@ import {
   IssuePermissionContext,
 } from "./issuePermissions";
 import { useMobileAction } from "../../contexts/MobileActionContext";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { ListPageShell } from "../../components/ui/ListPageShell";
 
 export const IssueListView: React.FC<IssueListViewProps> = (props) => {
   const { t } = useTranslation();
@@ -292,8 +294,27 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
   );
 
   return (
-    <div className="flex-1 p-2 sm:p-4 md:p-6 bg-surface-sunken overflow-hidden flex flex-col w-full h-full">
-      <div className={cn(styles.container, "rounded-xl flex-1 flex flex-col")}>
+    <ListPageShell
+      className="h-full"
+      header={
+        <PageHeader
+          breadcrumbs={[
+            { label: t("issues.breadcrumbGroup", "PROJECT") },
+            { label: t("sidebar.issueList"), current: true },
+          ]}
+          title={t("sidebar.issueList")}
+          subtitle={
+            selectedProject ? (
+              <span className="font-medium text-content-body">
+                {selectedProject.name}
+                {selectedProject.key ? ` (${selectedProject.key})` : ""}
+              </span>
+            ) : undefined
+          }
+        />
+      }
+    >
+      <div className={cn(styles.container, "rounded-none border-0 shadow-none flex-1 min-h-0")}>
         {/* Header Toolbar & Advanced Filters */}
         <IssueAdvancedFiltersPanel
           issueSearch={issueSearch}
@@ -387,7 +408,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                   displayRoots.length > 0
                                 }
                                 onChange={handleToggleSelectAll}
-                                className="w-4 h-4 rounded border-border-subtle text-indigo-600 focus:ring-indigo-500 shadow-soft transition-all cursor-pointer"
+                                className="w-4 h-4 rounded border-border-subtle text-primary focus:ring-primary shadow-soft transition-all cursor-pointer"
                               />
                             </div>
                           </th>
@@ -454,7 +475,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                   className={cn(
                                     "divide-y divide-border-faint italic-rows text-xs font-normal",
                                     snapshot.isDragging &&
-                                      "bg-surface-muted/50 shadow-soft border border-indigo-500/30"
+                                      "bg-surface-muted/50 shadow-soft border border-primary/30"
                                   )}
                                   style={providedDraggable.draggableProps.style}
                                 >
@@ -578,7 +599,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           handleReorderColumns={handleReorderColumns}
         />
       </div>
-    </div>
+    </ListPageShell>
   );
 };
 

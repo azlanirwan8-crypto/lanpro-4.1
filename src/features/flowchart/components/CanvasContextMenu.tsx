@@ -147,8 +147,8 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
       {/* Title */}
       <div className="px-3 py-1.5 text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle border-b border-border-faint mb-1 flex items-center justify-between">
         <span>{t("canvasMenu.title")}</span>
-        <span className="text-indigo-600 font-mono text-xs sm:text-[10px] flex items-center gap-0.5">
-          <MapPin className="w-2 h-2 text-indigo-400" />
+        <span className="text-primary font-mono text-xs sm:text-[10px] flex items-center gap-0.5">
+          <MapPin className="w-2 h-2 text-primary" />
           {t("canvasMenu.activeCanvas")}
         </span>
       </div>
@@ -170,11 +170,11 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
                 onAddNode(shape.type, shape.label, shape.color);
                 onClose();
               }}
-              className="w-full flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:text-indigo-600 hover:bg-surface hover:shadow-soft transition-all text-left border border-transparent"
+              className="w-full flex items-center gap-2.5 px-2.5 py-1.5 text-xs font-medium rounded-lg hover:text-primary hover:bg-surface hover:shadow-soft transition-all text-left border border-transparent"
             >
               <Icon className={cn("w-3.5 h-3.5 text-content-subtle", `text-${shape.color}-500`)} />
               <div className="flex flex-col">
-                <span className="font-medium text-content-body hover:text-indigo-600">
+                <span className="font-medium text-content-body hover:text-primary">
                   {shape.text}
                 </span>
                 <span className="text-xs sm:text-[11px] text-content-subtle font-normal">
@@ -195,7 +195,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
             onZoomIn();
             onClose();
           }}
-          className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] font-medium text-content-secondary hover:text-indigo-600 hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
+          className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] font-medium text-content-secondary hover:text-primary hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
           title={t("canvasMenu.zoomInTip")}
         >
           <ZoomIn className="w-3.5 h-3.5 text-content-muted" />
@@ -206,7 +206,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
             onZoomOut();
             onClose();
           }}
-          className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] font-medium text-content-secondary hover:text-indigo-600 hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
+          className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] font-medium text-content-secondary hover:text-primary hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
           title={t("canvasMenu.zoomOutTip")}
         >
           <ZoomOut className="w-3.5 h-3.5 text-content-muted" />
@@ -217,7 +217,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
             onResetZoom();
             onClose();
           }}
-          className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] font-medium text-content-secondary hover:text-indigo-600 hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
+          className="flex flex-col items-center gap-1 p-1.5 rounded-lg text-xs sm:text-[11px] font-medium text-content-secondary hover:text-primary hover:bg-surface-sunken border border-transparent hover:border-border-faint transition-all"
           title={t("canvasMenu.resetTip")}
         >
           <RotateCcw className="w-3.5 h-3.5 text-content-muted" />
@@ -238,7 +238,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
           className={cn(
             "flex-1 flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs sm:text-[10px] font-medium border transition-all",
             canUndo
-              ? " hover:bg-surface-sunken hover:text-violet-600 border-border-faint/80 cursor-pointer"
+              ? " hover:bg-surface-sunken hover:text-primary border-border-faint/80 cursor-pointer"
               : "text-content-subtle border-transparent cursor-not-allowed"
           )}
         >
@@ -255,7 +255,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
           className={cn(
             "flex-1 flex items-center justify-center gap-2 py-1.5 rounded-lg text-xs sm:text-[10px] font-medium border transition-all",
             canRedo
-              ? " hover:bg-surface-sunken hover:text-violet-600 border-border-faint/80 cursor-pointer"
+              ? " hover:bg-surface-sunken hover:text-primary border-border-faint/80 cursor-pointer"
               : "text-content-subtle border-transparent cursor-not-allowed"
           )}
         >

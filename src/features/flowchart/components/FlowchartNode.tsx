@@ -303,13 +303,13 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
         )}
 
         {isDiamond && node.type !== "decision" && node.type !== "diamond" && (
-          <div className="absolute inset-1.5 border border-black/10 rotate-45 pointer-events-none rounded bg-inherit" />
+          <div className="absolute inset-1.5 border border-current/15 rotate-45 pointer-events-none rounded bg-inherit" />
         )}
 
         {node.type === "parallelogram" && (
           <div
             className={cn(
-              "absolute inset-0 transform -skew-x-12 border border-black/10 rounded-md bg-inherit pointer-events-none",
+              "absolute inset-0 transform -skew-x-12 border border-current/15 rounded-md bg-inherit pointer-events-none",
               node.borderStyle === "dashed"
                 ? "border-dashed border-2"
                 : node.borderStyle === "none"
@@ -320,22 +320,22 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
         )}
 
         {node.type === "document" && (
-          <div className="absolute top-0 right-0 w-3 h-3 bg-black/15 rounded-bl border-b border-l border-black/10 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-3 h-3 bg-current/15 rounded-bl border-b border-l border-current/15 pointer-events-none" />
         )}
 
         {(node.type === "subprocess" || node.type === "predefined") && (
           <>
-            <div className="absolute left-1.5 inset-y-0 w-0.5 bg-black/15 pointer-events-none border-l border-current/20" />
-            <div className="absolute right-1.5 inset-y-0 w-0.5 bg-black/15 pointer-events-none border-r border-current/20" />
+            <div className="absolute left-1.5 inset-y-0 w-0.5 bg-current/15 pointer-events-none border-l border-current/20" />
+            <div className="absolute right-1.5 inset-y-0 w-0.5 bg-current/15 pointer-events-none border-r border-current/20" />
           </>
         )}
 
         {(node.type === "cylinder" || node.type === "database") && (
           <>
             {/* Cylinder Top Lip overlay */}
-            <div className="absolute top-0 inset-x-0 h-3 rounded-t-[18px] border-b border-black/15 bg-inherit pointer-events-none opacity-80" />
+            <div className="absolute top-0 inset-x-0 h-3 rounded-t-[18px] border-b border-current/20 bg-inherit pointer-events-none opacity-80" />
             {/* Cylinder Bottom curved base overlay */}
-            <div className="absolute bottom-0 inset-x-0 h-3 rounded-b-[18px] border-t border-black/15 pointer-events-none opacity-40 bg-black/5" />
+            <div className="absolute bottom-0 inset-x-0 h-3 rounded-b-[18px] border-t border-current/20 pointer-events-none opacity-40 bg-current/5" />
           </>
         )}
 
@@ -344,7 +344,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
         )}
 
         {node.type === "folder" && (
-          <div className="absolute -top-1.5 left-2 w-7 h-1.5 rounded-t bg-inherit border-t border-x border-black/15 pointer-events-none" />
+          <div className="absolute -top-1.5 left-2 w-7 h-1.5 rounded-t bg-inherit border-t border-x border-current/20 pointer-events-none" />
         )}
 
         {/* Display Text content box */}

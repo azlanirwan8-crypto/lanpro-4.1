@@ -77,7 +77,17 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
   const opsiStatus = opsiDariMaster("project_status", CADANGAN_STATUS);
   const opsiMetodologi = opsiDariMaster("methodology", CADANGAN_METODOLOGI);
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t("editProject.title")} maxWidth="max-w-2xl">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("editProject.title")}
+      maxWidth="max-w-2xl"
+      footer={
+        <Button onClick={onSubmit} disabled={isSubmitting} className="w-full justify-center">
+          {t("editProject.saveChanges")}
+        </Button>
+      }
+    >
       {editingProject && (
         <div className="space-y-4">
           <div>
@@ -162,11 +172,6 @@ export const EditProjectModal: React.FC<EditProjectModalProps> = ({
                 #{editingProject.id.slice(-6).toUpperCase()}
               </div>
             </div>
-          </div>
-          <div className="pt-2">
-            <Button onClick={onSubmit} disabled={isSubmitting} className="w-full justify-center">
-              {t("editProject.saveChanges")}
-            </Button>
           </div>
 
           {hasPermission(

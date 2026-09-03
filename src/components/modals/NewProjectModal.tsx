@@ -30,7 +30,16 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t("newProject.title")}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("newProject.title")}
+      footer={
+        <Button onClick={onSubmit} disabled={isSubmitting} className="justify-center min-w-[7rem]">
+          {t("newProject.create")}
+        </Button>
+      }
+    >
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-content-body mb-1">
@@ -59,14 +68,11 @@ export const NewProjectModal: React.FC<NewProjectModalProps> = ({
           <textarea
             value={newProjectDescription}
             onChange={(e) => setNewProjectDescription(e.target.value)}
-            className="w-full border border-border-subtle rounded-lg p-2 text-sm"
+            className="w-full border border-border-subtle rounded-lg p-2 text-sm bg-surface text-content-body focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
             placeholder={t("newProject.descriptionPlaceholder")}
             rows={3}
           />
         </div>
-        <Button onClick={onSubmit} disabled={isSubmitting} className="w-full justify-center">
-          {t("newProject.create")}
-        </Button>
       </div>
     </Modal>
   );

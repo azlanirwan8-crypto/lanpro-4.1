@@ -27,8 +27,6 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   const taskViews = currentView === "list" || currentView === "board" || currentView === "table";
   const noFabViews = new Set([
     "dashboard",
-    "team",
-    "access",
     "timeline",
     "activity",
     "auditLog",

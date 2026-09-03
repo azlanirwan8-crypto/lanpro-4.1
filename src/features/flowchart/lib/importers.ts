@@ -30,15 +30,27 @@ export interface ParsedDiagram {
 /**
  * Mengubah entitas HTML (`&amp;`, `&lt;`, …) menjadi karakter aslinya.
  *
- * Label Draw.io dan Miro tersimpan dalam bentuk ter-encode. Elemen textarea
- * dipakai karena isinya di-parse sebagai teks biasa, bukan markup, dan elemen
- * itu tidak pernah masuk ke halaman sehingga tidak ada yang dieksekusi.
+ * #348 — jangan pakai `textarea.innerHTML = userText` (XSS jika string
+ * mengandung markup). Decoder berbasis ganti string untuk entitas umum +
+ * numerik; cukup untuk label Draw.io/Miro yang ter-encode.
  */
 export const decodeHtmlEntity = (htmlText: string): string => {
-  if (typeof document === "undefined") return htmlText;
-  const txt = document.createElement("textarea");
-  txt.innerHTML = htmlText;
-  return txt.value;
+  if (!htmlText) return htmlText;
+  return String(htmlText)
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&amp;/gi, "&")
+    .replace(/&#(\d+);/g, (_, n) => {
+      const code = Number(n);
+      return Number.isFinite(code) ? String.fromCodePoint(code) : "";
+    })
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => {
+      const code = parseInt(h, 16);
+      return Number.isFinite(code) ? String.fromCodePoint(code) : "";
+    });
 };
 
 /** Membaca berkas .drawio/.xml dan memetakan tiap <mxCell> ke node atau edge. */

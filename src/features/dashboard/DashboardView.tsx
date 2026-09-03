@@ -18,7 +18,6 @@ import {
   AlertTriangle,
   ShieldAlert,
   Target,
-  Filter,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -48,6 +47,8 @@ import {
 import { SidebarWidgetsStack } from "./components/SidebarWidgetsStack";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { Card } from "../../components/ui/CoreUI";
 
 const defaultChartOrder = [
   "status-distribution",
@@ -643,38 +644,41 @@ export function DashboardView(props: DashboardViewProps) {
   return (
     <div className={styles.container}>
       <div className={styles.wrapper}>
-        {/* Velzon Agile Dashboard Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs">
-          <div>
-            <h2 className="text-xl font-medium text-content-strong flex items-center gap-2">
-              {getGreeting()}, {currentUser?.displayName || "Administrator"}!
-            </h2>
-            <p className="text-xs text-content-muted mt-1">{t("dashboard.subtitle")}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto min-w-0">
-            {/* Global Filter by Sprint */}
-            <div className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[240px] min-w-0 flex-1 md:flex-none">
-              <StyledDropdown
-                value={selectedSprintFilter}
-                onChange={(val) => setSelectedSprintFilter(val)}
-                options={sprintFilterOptions}
-                masterData={[]}
-                className="w-full min-w-0"
-                buttonClassName="h-10 w-full min-w-0 bg-surface-muted rounded-lg border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
-              />
-            </div>
+        {/* Velzon Agile Dashboard Header — #400 PageHeader */}
+        <PageHeader
+          className="mb-6"
+          breadcrumbs={[
+            { label: t("dashboard.breadcrumbGroup", "PROJECT") },
+            { label: t("nav.dashboard", "Dashboard"), current: true },
+          ]}
+          title={`${getGreeting()}, ${currentUser?.displayName || "Administrator"}!`}
+          subtitle={t("dashboard.subtitle")}
+          actions={
+            <>
+              {/* Global Filter by Sprint */}
+              <div className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[240px] min-w-0 flex-1 md:flex-none">
+                <StyledDropdown
+                  value={selectedSprintFilter}
+                  onChange={(val) => setSelectedSprintFilter(val)}
+                  options={sprintFilterOptions}
+                  masterData={[]}
+                  className="w-full min-w-0"
+                  buttonClassName="h-10 w-full min-w-0 bg-surface-muted rounded-lg border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
+                />
+              </div>
 
-            <div className="flex items-center gap-2 bg-info/10 px-3 py-2 rounded-lg border border-info/20 text-xs font-medium text-info-text min-w-0 max-w-full">
-              <Zap className="w-3.5 h-3.5 text-info-text shrink-0" />
-              <span className="truncate">
-                {t("dashboard.activeSprintChip", {
-                  name: activeSprint?.name || t("dashboard.noActiveSprint"),
-                  days: sprintDaysLeft,
-                })}
-              </span>
-            </div>
-          </div>
-        </div>
+              <div className="flex items-center gap-2 bg-info/10 px-3 py-2 rounded-lg border border-info/20 text-xs font-medium text-info-text min-w-0 max-w-full">
+                <Zap className="w-3.5 h-3.5 text-info-text shrink-0" />
+                <span className="truncate">
+                  {t("dashboard.activeSprintChip", {
+                    name: activeSprint?.name || t("dashboard.noActiveSprint"),
+                    days: sprintDaysLeft,
+                  })}
+                </span>
+              </div>
+            </>
+          }
+        />
 
         {/* Real-time Agile Top 4 KPI Metric Cards
             #129 — keempat kartu ini menghitung `nonEpicTasks`, sedangkan
@@ -689,18 +693,20 @@ export function DashboardView(props: DashboardViewProps) {
             {t("dashboard.epicExcluded")}
           </span>
         </div>
-        {/* #365 — HP: 2 kartu/baris (tugas berjalan … tersumbat) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
-          {/* Card 1: Total Tasks */}
-          <div className="bg-surface p-3 sm:p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
+          {/* Card 1: Total Tasks — putih + soft icon + hover lift (#415) */}
+          <Card
+            hoverLift
+            className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
+          >
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
                   {t("dashboard.totalTasks")}
                 </span>
-                <h3 className="text-2xl font-medium text-content-strong mt-1">{totalTasks}</h3>
+                <h3 className="text-2xl font-semibold text-content-strong mt-1">{totalTasks}</h3>
               </div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-success-text border border-emerald-500/30">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-success/10 flex items-center justify-center text-success-text border border-success/20">
                 <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
@@ -722,53 +728,60 @@ export function DashboardView(props: DashboardViewProps) {
               </span>
               <button
                 onClick={() => props.setCurrentView("board")}
-                className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
+                className="text-primary hover:underline text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
               >
                 {t("dashboard.viewAllTasks")}
               </button>
             </div>
-          </div>
+          </Card>
 
-          {/* Card 2: Pending & Active Tasks */}
-          <div className="bg-surface p-3 sm:p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
+          {/* Card 2: Running — varian solid primary ala Velzon Orders (#415) */}
+          <Card
+            variant="primary"
+            hoverLift
+            className="p-3 sm:p-5 flex flex-col justify-between relative overflow-hidden"
+          >
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
+                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-inverse/70">
                   {t("dashboard.runningTasks")}
                 </span>
-                <h3 className="text-2xl font-medium text-content-strong mt-1">
+                <h3 className="text-2xl font-semibold text-content-inverse mt-1">
                   {nonEpicTasks.filter((t) => t.status !== "Done" && t.status !== "Selesai").length}
                 </h3>
               </div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-info-text border border-blue-500/30">
-                <Activity className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-surface/15 flex items-center justify-center text-content-inverse border border-border-inverse/40">
+                <Activity className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
-            <div className="mt-4 flex items-center justify-between text-xs border-t border-border-faint pt-3">
-              <span className="font-medium text-info-text">
+            <div className="mt-4 flex items-center justify-between text-xs border-t border-border-inverse/30 pt-3">
+              <span className="font-medium text-content-inverse/85">
                 {t("dashboard.notDoneYet", { count: inProgressTasks.length })}
               </span>
               <button
                 onClick={() => props.setCurrentView("board")}
-                className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
+                className="text-content-inverse/90 hover:text-content-inverse hover:underline text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
               >
                 {t("dashboard.viewActiveBoard")}
               </button>
             </div>
-          </div>
+          </Card>
 
-          {/* Card 3: Done Tasks */}
-          <div className="bg-surface p-3 sm:p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
+          {/* Card 3: Done — putih + soft primary icon */}
+          <Card
+            hoverLift
+            className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
+          >
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
                   {t("dashboard.doneTasks")}
                 </span>
-                <h3 className="text-2xl font-medium text-content-strong mt-1">
+                <h3 className="text-2xl font-semibold text-content-strong mt-1">
                   {completedTasks.length}
                 </h3>
               </div>
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-primary border border-indigo-500/30">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-warning/15 flex items-center justify-center text-warning-text border border-warning/25">
                 <PackageOpen className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
@@ -794,15 +807,18 @@ export function DashboardView(props: DashboardViewProps) {
               </span>
               <button
                 onClick={() => props.setCurrentView("board")}
-                className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
+                className="text-primary hover:underline text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
               >
                 {t("dashboard.viewDoneListLink")}
               </button>
             </div>
-          </div>
+          </Card>
 
-          {/* Card 4: Blocked & Critical Issues */}
-          <div className="bg-surface p-3 sm:p-5 rounded-lg border border-border-subtle shadow-2xs flex flex-col justify-between relative overflow-hidden">
+          {/* Card 4: Blocked — putih; angka danger hanya bila >0 */}
+          <Card
+            hoverLift
+            className="p-3 sm:p-5 shadow-2xs flex flex-col justify-between relative overflow-hidden"
+          >
             <div className="flex justify-between items-start">
               <div>
                 <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
@@ -815,7 +831,7 @@ export function DashboardView(props: DashboardViewProps) {
                     TEKS berwarna milik `{aksen}-text`, dan `rose-600` hanya
                     mencapai 3,84 di mode gelap. */}
                 <h3
-                  className={`text-2xl font-medium mt-1 ${
+                  className={`text-2xl font-semibold mt-1 ${
                     blockedTasks.length + overdueTasks.length > 0
                       ? "text-danger-text"
                       : "text-content-strong"
@@ -826,7 +842,7 @@ export function DashboardView(props: DashboardViewProps) {
               </div>
               {/* Ikon menandai IDENTITAS kartu, bukan nilainya, jadi ia tetap
                   merah di keadaan mana pun — hanya tokennya yang diselaraskan. */}
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-danger/10 flex items-center justify-center text-danger-text border border-danger/30">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-danger/10 flex items-center justify-center text-danger-text border border-danger/20">
                 <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
             </div>
@@ -845,12 +861,12 @@ export function DashboardView(props: DashboardViewProps) {
               </span>
               <button
                 onClick={() => props.setCurrentView("board")}
-                className="text-content-subtle hover:text-primary text-xs sm:text-[11px] font-medium underline transition inline-flex items-center min-h-11 py-2"
+                className="text-primary hover:underline text-xs sm:text-[11px] font-medium transition inline-flex items-center min-h-11 py-2"
               >
                 {t("dashboard.handleBlockersLink")}
               </button>
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Real-time Dashboard Panels Grid Layout */}
@@ -858,11 +874,11 @@ export function DashboardView(props: DashboardViewProps) {
           {/* Main Column: Left Area */}
           <div className="lg:col-span-8 space-y-6">
             {/* Sprint Velocity & Progress Chart */}
-            <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs">
+            <Card hoverLift className="p-5 shadow-2xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                 <div>
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-indigo-500" />
+                    <TrendingUp className="w-4 h-4 text-primary" />
                     {t("dashboard.sprintOverview")}
                   </h3>
                 </div>
@@ -874,7 +890,7 @@ export function DashboardView(props: DashboardViewProps) {
                       className={cn(
                         "px-3 py-2.5 min-h-11 min-w-11 inline-flex items-center justify-center rounded text-xs sm:text-[11px] font-medium transition cursor-pointer",
                         revenueFilter === filter
-                          ? "bg-indigo-600 text-content-inverse shadow-2xs"
+                          ? "bg-primary-surface text-content-inverse shadow-2xs"
                           : "text-content-secondary hover:text-content"
                       )}
                     >
@@ -1104,15 +1120,15 @@ export function DashboardView(props: DashboardViewProps) {
                   </ResponsiveContainer>
                 </div>
               </div>
-            </div>
+            </Card>
 
             {/* Task Breakdown Grid (Jenis Task & Status Breakdown) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* {t("dashboard.breakdownByType")} (Epic, Story, Task, Bug, Subtask) */}
-              <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
+              <Card hoverLift className="p-5 shadow-2xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
-                    <LayoutGrid className="w-4 h-4 text-purple-500" />
+                    <LayoutGrid className="w-4 h-4 text-primary" />
                     {t("dashboard.breakdownByType")}
                   </h3>
                   {/* #112 — judul WAJIB menjumlahkan isi yang ditampilkan.
@@ -1154,13 +1170,13 @@ export function DashboardView(props: DashboardViewProps) {
                     </div>
                   ))}
                 </div>
-              </div>
+              </Card>
 
               {/* {t("dashboard.breakdownByStatus")} (To Do, In Progress, Review, Done, Blocked) */}
-              <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
+              <Card hoverLift className="p-5 shadow-2xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
-                    <PieChartIcon className="w-4 h-4 text-emerald-500" />
+                    <PieChartIcon className="w-4 h-4 text-success-text" />
                     {t("dashboard.breakdownByStatus")}
                   </h3>
                   {/* #112 — idem, dijumlahkan dari isinya sendiri. */}
@@ -1198,15 +1214,15 @@ export function DashboardView(props: DashboardViewProps) {
                     </div>
                   ))}
                 </div>
-              </div>
+              </Card>
             </div>
 
             {/* Task Allocation per Team Member (Workload per User) */}
-            <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs">
+            <Card hoverLift className="p-5 shadow-2xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-border-faint pb-3 gap-2">
                 <div>
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
-                    <Users className="w-4 h-4 text-indigo-500" />
+                    <Users className="w-4 h-4 text-primary" />
                     {t("dashboard.workloadTitle")}
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
@@ -1244,19 +1260,19 @@ export function DashboardView(props: DashboardViewProps) {
                         let capacityBadge = null;
                         if (user.Active >= 5) {
                           capacityBadge = (
-                            <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-bold bg-rose-500/15 text-rose-700 border border-rose-500/30">
+                            <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-bold bg-danger/10 text-danger-text border border-danger/30">
                               <AlertTriangle className="w-3 h-3" /> Overload ({user.Active})
                             </span>
                           );
                         } else if (user.Active >= 3) {
                           capacityBadge = (
-                            <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-medium bg-amber-500/15 text-amber-800 border border-amber-500/30">
+                            <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-medium bg-warning/15 text-warning-text border border-warning/30">
                               <Zap className="w-3 h-3" /> Heavy ({user.Active})
                             </span>
                           );
                         } else if (user.Active >= 1) {
                           capacityBadge = (
-                            <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-medium bg-emerald-500/15 text-emerald-800 border border-emerald-500/30">
+                            <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded-full text-[10px] leading-none font-medium bg-success/10 text-success-text border border-success/30">
                               <CheckCircle2 className="w-3 h-3" /> Balanced ({user.Active})
                             </span>
                           );
@@ -1272,7 +1288,7 @@ export function DashboardView(props: DashboardViewProps) {
                           <tr key={idx} className="hover:bg-surface-sunken transition">
                             <td className="py-3 px-2">
                               <div className="flex items-center gap-2.5">
-                                <div className="w-7 h-7 rounded-full bg-indigo-700 text-content-inverse flex items-center justify-center font-medium text-xs">
+                                <div className="w-7 h-7 rounded-full bg-primary-surface text-content-inverse flex items-center justify-center font-medium text-xs">
                                   {user.name.slice(0, 2).toUpperCase()}
                                 </div>
                                 <span className="font-medium text-content-strong ">
@@ -1293,7 +1309,7 @@ export function DashboardView(props: DashboardViewProps) {
                                 </span>
                                 <div className="w-24 h-2 bg-surface-muted rounded-full overflow-hidden">
                                   <div
-                                    className="h-full bg-emerald-500 rounded-full"
+                                    className="h-full bg-success rounded-full"
                                     style={{ width: `${pct}%` }}
                                   />
                                 </div>
@@ -1312,14 +1328,14 @@ export function DashboardView(props: DashboardViewProps) {
                   </tbody>
                 </ResponsiveTable>
               </div>
-            </div>
+            </Card>
 
             {/* Widget 4: Epic & Roadmap Delivery Status (Waterfall & Agile Milestone Tracker) */}
-            <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
+            <Card hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <div>
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
-                    <Target className="w-4 h-4 text-purple-500" />
+                    <Target className="w-4 h-4 text-primary" />
                     {t("dashboard.epicTitle")}
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
@@ -1343,7 +1359,7 @@ export function DashboardView(props: DashboardViewProps) {
                     >
                       <div className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-[10px] leading-none font-mono font-medium text-purple-600 bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-500/30">
+                          <span className="text-[10px] leading-none font-mono font-medium text-primary bg-primary/10 px-1.5 py-0.2 rounded border border-primary/30">
                             {epic.key || "EPIC"}
                           </span>
                           <span className="font-medium text-content-strong truncate">
@@ -1359,7 +1375,7 @@ export function DashboardView(props: DashboardViewProps) {
                         <div
                           className={cn(
                             "h-full rounded-full transition-all duration-500",
-                            epic.progress === 100 ? "bg-emerald-500" : "bg-purple-600"
+                            epic.progress === 100 ? "bg-success" : "bg-primary"
                           )}
                           style={{ width: `${epic.progress}%` }}
                         />
@@ -1372,21 +1388,21 @@ export function DashboardView(props: DashboardViewProps) {
                   </div>
                 )}
               </div>
-            </div>
+            </Card>
 
             {/* Widget 5: Sprint Time Tracking & Estimation Accuracy */}
-            <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
+            <Card hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <div>
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-blue-500" />
+                    <Clock className="w-4 h-4 text-info-text" />
                     {t("dashboard.timeTitle")}
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
                     {t("dashboard.timeSubtitle")}
                   </p>
                 </div>
-                <span className="text-[10px] leading-none font-medium text-primary bg-indigo-500/10 px-2 py-[3px] rounded border border-indigo-500/30">
+                <span className="text-[10px] leading-none font-medium text-primary bg-primary/10 px-2 py-[3px] rounded border border-primary/30">
                   {t("dashboard.accuracy", { percent: timeTrackingStats.accuracy })}
                 </span>
               </div>
@@ -1419,14 +1435,14 @@ export function DashboardView(props: DashboardViewProps) {
                   </p>
                 </div>
               </div>
-            </div>
+            </Card>
 
             {/* Widget 6: 7-Day Activity Trend & Task Creation Rate */}
-            <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
+            <Card hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <div>
                   <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-emerald-500" />
+                    <Activity className="w-4 h-4 text-success-text" />
                     {t("dashboard.trendTitle")}
                   </h3>
                   <p className="text-xs sm:text-[11px] text-content-subtle mt-0.5 font-medium">
@@ -1512,16 +1528,16 @@ export function DashboardView(props: DashboardViewProps) {
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* Right Column: Priority Distribution & Watchlist */}
           <div className="lg:col-span-4 space-y-6">
             {/* Priority Breakdown */}
-            <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
+            <Card hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-amber-500" />
+                  <Zap className="w-4 h-4 text-warning-text" />
                   {t("dashboard.priorityBreakdown")}
                 </h3>
                 <button
@@ -1565,16 +1581,16 @@ export function DashboardView(props: DashboardViewProps) {
                   );
                 })}
               </div>
-            </div>
+            </Card>
 
             {/* Blocked & Overdue Watchlist */}
-            <div className="bg-surface p-5 rounded-lg border border-border-subtle shadow-2xs space-y-4">
+            <Card hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
-                  <ShieldAlert className="w-4 h-4 text-rose-500" />
+                  <ShieldAlert className="w-4 h-4 text-danger-text" />
                   {t("dashboard.blockedOverdueTitle")}
                 </h3>
-                <span className="text-[10px] leading-none font-medium text-rose-600 bg-rose-500/10 px-2 py-[3px] rounded border border-rose-500/30">
+                <span className="text-[10px] leading-none font-medium text-danger-text bg-danger/10 px-2 py-[3px] rounded border border-danger/30">
                   {t("dashboard.needAction", { count: blockedTasks.length + overdueTasks.length })}
                 </span>
               </div>
@@ -1587,7 +1603,7 @@ export function DashboardView(props: DashboardViewProps) {
                       props.setSelectedTaskForDetail(issue);
                       props.setIsTaskDetailModalOpen(true);
                     }}
-                    className="p-3 rounded-lg border border-border-subtle/70 bg-surface-sunken/50 hover:bg-surface hover:border-indigo-500/30 transition cursor-pointer flex items-center justify-between gap-3 shadow-2xs group"
+                    className="p-3 rounded-lg border border-border-subtle/70 bg-surface-sunken/50 hover:bg-surface hover:border-primary/30 transition cursor-pointer flex items-center justify-between gap-3 shadow-2xs group"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
@@ -1595,7 +1611,7 @@ export function DashboardView(props: DashboardViewProps) {
                           {issue.key}
                         </span>
                         {issue.isBlocked && (
-                          <span className="text-[10px] leading-none sm:text-[9px] font-medium text-rose-600 bg-rose-500/10 px-1.5 py-0.2 rounded border border-rose-500/30">
+                          <span className="text-[10px] leading-none sm:text-[9px] font-medium text-danger-text bg-danger/10 px-1.5 py-0.2 rounded border border-danger/30">
                             BLOCKED
                           </span>
                         )}
@@ -1613,7 +1629,7 @@ export function DashboardView(props: DashboardViewProps) {
                   </div>
                 )}
               </div>
-            </div>
+            </Card>
 
             {/* Sidebar Widgets Stack for remaining tools */}
             <SidebarWidgetsStack

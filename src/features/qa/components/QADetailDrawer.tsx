@@ -107,7 +107,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                       : selectedTestCase.status === "Blocked"
                         ? "bg-amber-500/10 text-warning-text border-amber-500/30"
                         : selectedTestCase.status === "Retest"
-                          ? "bg-indigo-500/10 text-indigo-700 border-indigo-500/30"
+                          ? "bg-primary/10 text-primary border-primary/30"
                           : "bg-surface-muted text-content-secondary border-border-subtle"
                 }`}
               />
@@ -212,7 +212,7 @@ export const QADetailDrawer: React.FC<QADetailDrawerProps> = ({
                               ? "border-success bg-success-surface"
                               : st === "FAILED"
                                 ? "border-danger bg-danger-surface"
-                                : "border-slate-400 bg-slate-400"
+                                : "border-border-subtle bg-surface-marker"
                           }`}
                         />
                         <div className="bg-surface-sunken p-2.5 rounded-md border border-border-faint space-y-1">

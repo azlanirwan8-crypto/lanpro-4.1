@@ -89,6 +89,28 @@
   color: #fff;
 }
 
-.velzon-swal-btn-danger:hover {
-  background-color: var(--color-danger-hover);
+/* #393 — HP: bottom sheet; md+: tetap centered Velzon */
+@media (max-width: 767px) {
+  .swal2-container.swal2-center {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .velzon-swal-popup {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 1rem 1rem 0 0 !important;
+    padding: 1.25rem 1.25rem max(1.25rem, env(safe-area-inset-bottom)) !important;
+  }
+
+  .velzon-swal-popup::before {
+    content: "";
+    display: block;
+    width: 2.5rem;
+    height: 0.25rem;
+    margin: 0 auto 0.75rem;
+    border-radius: 9999px;
+    background-color: var(--color-surface-marker);
+  }
 }

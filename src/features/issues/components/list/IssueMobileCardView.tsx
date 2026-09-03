@@ -111,7 +111,7 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
                   {typeMeta?.icon ? (
                     <RenderIcon iconName={typeMeta.icon} className="w-4 h-4 text-primary" />
                   ) : task.type === "epic" ? (
-                    <Zap className="w-4 h-4 text-purple-600" />
+                    <Zap className="w-4 h-4 text-primary" />
                   ) : (
                     <CircleDot className="w-4 h-4 text-primary" />
                   )}

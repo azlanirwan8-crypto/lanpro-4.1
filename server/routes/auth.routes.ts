@@ -382,6 +382,14 @@ router.post("/api/auth/logout", async (req, res) => {
 
     if (userId) {
       activeUserSessions.delete(userId.toString());
+      // #347 — denylist JWT sebelum wipe sesi (dicuri token tetap ditolak meski race)
+      if (token) {
+        try {
+          await authRepository.addToTokenBlacklist(token);
+        } catch (blErr) {
+          console.error("[logout] Gagal menulis TokenBlacklist:", blErr);
+        }
+      }
       await authRepository.clearSessionToken(userId.toString());
       await authRepository.recordSessionLogout(userId.toString(), token);
     }
@@ -739,6 +747,15 @@ router.post("/api/auth/reset-password", async (req, res) => {
 
     // Invalidate active sessions to force re-login
     activeUserSessions.delete(decoded.id.toString());
+    // #347 — blacklist JWT sesi aktif (bila ada) sebelum wipe; token reset ≠ session JWT
+    try {
+      const sesi = await authRepository.findSessionData(decoded.id.toString());
+      if (sesi?.currentSessionToken) {
+        await authRepository.addToTokenBlacklist(sesi.currentSessionToken);
+      }
+    } catch (blErr) {
+      console.error("[reset-password] Gagal menulis TokenBlacklist:", blErr);
+    }
     await authRepository.clearSessionToken(decoded.id.toString());
 
     return res.json({

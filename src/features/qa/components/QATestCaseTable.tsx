@@ -369,7 +369,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                         handleBulkAssignPic("");
                         setIsBulkPicDropdownOpen(false);
                       }}
-                      className="w-full text-left px-3.5 py-2 text-xs font-medium hover:bg-indigo-500/10 hover:text-primary transition-colors"
+                      className="w-full text-left px-3.5 py-2 text-xs font-medium hover:bg-primary/10 hover:text-primary transition-colors"
                     >
                       {t("qa.allProjectPic")}
                     </button>
@@ -383,7 +383,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                               handleBulkAssignPic(mId);
                               setIsBulkPicDropdownOpen(false);
                             }}
-                            className="w-full text-left px-3.5 py-2 text-xs font-medium hover:bg-indigo-500/10 hover:text-primary transition-colors flex items-center gap-2"
+                            className="w-full text-left px-3.5 py-2 text-xs font-medium hover:bg-primary/10 hover:text-primary transition-colors flex items-center gap-2"
                           >
                             <UserAvatar
                               uid={mId}
@@ -427,7 +427,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                           handleBulkChangeStatus(st as any);
                           setIsBulkStatusDropdownOpen(false);
                         }}
-                        className="w-full text-left px-3.5 py-1.5 text-xs font-medium hover:bg-indigo-500/10 hover:text-primary transition-colors"
+                        className="w-full text-left px-3.5 py-1.5 text-xs font-medium hover:bg-primary/10 hover:text-primary transition-colors"
                       >
                         {t("rakit.setTo", { nilai: st })}
                       </button>
@@ -500,7 +500,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       key={tc.id || idx}
                       onClick={() => setSelectedTestCase(tc)}
                       className={`hover:bg-primary-surface/[0.03] transition-colors cursor-pointer group ${
-                        isChecked ? "bg-indigo-500/10" : ""
+                        isChecked ? "bg-primary/10" : ""
                       }`}
                     >
                       {/* Checkbox Multi-Select */}
@@ -589,7 +589,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                   : tc.status === "Blocked"
                                     ? "bg-amber-500/10 text-warning-text border-amber-500/30"
                                     : tc.status === "Retest"
-                                      ? "bg-indigo-500/10 text-indigo-700 border-indigo-500/30"
+                                      ? "bg-primary/10 text-primary border-primary/30"
                                       : "bg-surface-muted text-content-secondary border-border-subtle"
                             }`}
                           />
@@ -648,9 +648,9 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                       e.stopPropagation();
                                       handleUpdateCasePic(activeSuite.id, tc.id, "");
                                     }}
-                                    className={`w-full text-left px-3.5 py-1.5 text-xs font-medium hover:bg-indigo-500/10 hover:text-primary transition-colors flex items-center justify-between ${
+                                    className={`w-full text-left px-3.5 py-1.5 text-xs font-medium hover:bg-primary/10 hover:text-primary transition-colors flex items-center justify-between ${
                                       !tc.assignedTo
-                                        ? "bg-indigo-500/10 text-primary"
+                                        ? "bg-primary/10 text-primary"
                                         : "text-content-body"
                                     }`}
                                   >
@@ -670,9 +670,9 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                             e.stopPropagation();
                                             handleUpdateCasePic(activeSuite.id, tc.id, mId);
                                           }}
-                                          className={`w-full text-left px-3.5 py-1.5 text-xs font-medium hover:bg-indigo-500/10 hover:text-primary transition-colors flex items-center justify-between gap-2 ${
+                                          className={`w-full text-left px-3.5 py-1.5 text-xs font-medium hover:bg-primary/10 hover:text-primary transition-colors flex items-center justify-between gap-2 ${
                                             isSelected
-                                              ? "bg-indigo-500/10 text-primary"
+                                              ? "bg-primary/10 text-primary"
                                               : "text-content-body"
                                           }`}
                                         >
@@ -705,7 +705,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => setSelectedTestCase(tc)}
-                            className="p-1 text-content-subtle hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all"
+                            className="p-1 text-content-subtle hover:text-primary hover:bg-primary/10 rounded-md transition-all"
                             title={t("qaTable.viewScenario")}
                           >
                             <Eye className="w-3.5 h-3.5" />
@@ -731,7 +731,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                 setCaseEditPriority(tc.priority || "Medium");
                                 setCaseEditAssignedTo(tc.assignedTo || "");
                               }}
-                              className="p-1 text-content-subtle hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all"
+                              className="p-1 text-content-subtle hover:text-primary hover:bg-primary/10 rounded-md transition-all"
                               title={t("qa.editTestCase")}
                             >
                               <Edit3 className="w-3.5 h-3.5" />

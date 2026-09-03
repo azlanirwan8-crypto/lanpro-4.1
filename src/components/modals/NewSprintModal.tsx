@@ -35,8 +35,17 @@ export const NewSprintModal: React.FC<NewSprintModalProps> = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t("newSprint.title")}>
-      <div className="space-y-4 max-h-[80vh] overflow-y-auto pr-2">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("newSprint.title")}
+      footer={
+        <Button onClick={onSubmit} disabled={isSubmitting} className="justify-center min-w-[8rem]">
+          {t("newSprint.createAssign")}
+        </Button>
+      }
+    >
+      <div className="space-y-4">
         <div>
           <label className="block text-xs font-normal text-content-body mb-1">
             {t("newSprint.name")}
@@ -77,14 +86,6 @@ export const NewSprintModal: React.FC<NewSprintModalProps> = ({
             />
           </div>
         </div>
-
-        <Button
-          onClick={onSubmit}
-          disabled={isSubmitting}
-          className="w-full justify-center bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse shadow-xs py-2 rounded-md font-normal text-xs cursor-pointer"
-        >
-          {t("newSprint.createAssign")}
-        </Button>
       </div>
     </Modal>
   );

@@ -422,7 +422,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       {/* Header Bar — #369: AI icon-only di HP */}
       <div className="px-3 sm:px-5 py-3 border-b border-border-subtle/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface-sunken/40 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-primary shadow-2xs shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-2xs shrink-0">
             <MessageSquare className="w-4 h-4" />
           </div>
           <div className="min-w-0">
@@ -458,7 +458,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               "inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-md text-xs font-normal transition-all border shadow-2xs cursor-pointer shrink-0",
               showAiAssistant
                 ? "bg-surface-muted hover:bg-surface-strong text-content-body border-border-subtle"
-                : "bg-indigo-500/10 hover:bg-indigo-500/15 text-primary border-indigo-500/30"
+                : "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
             )}
             title={showAiAssistant ? t("discussion.closeAiAssistant") : t("discussion.aiAssistant")}
           >
@@ -483,7 +483,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
           <div className="bg-surface rounded-lg w-full max-w-2xl shadow-xl border border-border-subtle flex flex-col max-h-[90vh] overflow-hidden">
             <div className="px-5 py-4 border-b border-border-faint flex items-center justify-between bg-surface-sunken/50 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-md bg-indigo-500/10 flex items-center justify-center border border-indigo-500/30 text-primary">
+                <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20 text-primary">
                   <Edit2 className="w-4 h-4" />
                 </div>
                 <div>
@@ -700,7 +700,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             )}
             {paginatedPoints.length === 0 ? (
               <div className="text-center py-12 text-content-subtle">
-                <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
                   <MessageSquare className="w-5 h-5" />
                 </div>
                 <p className="font-normal text-content-strong text-xs">
@@ -762,7 +762,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 {paginatedPoints.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="text-center py-12 text-content-subtle">
-                      <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-2 text-primary shadow-2xs">
                         <MessageSquare className="w-5 h-5" />
                       </div>
                       <p className="font-normal text-content-strong text-xs">
@@ -823,7 +823,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                         <td className="py-3 px-4 align-middle">
                           <div className="flex flex-wrap gap-1 items-center">
                             {p.fitur ? (
-                              <span className="px-2 py-0.5 rounded-md text-[10px] leading-none font-normal bg-indigo-500/10 text-primary border border-indigo-500/30">
+                              <span className="px-2 py-0.5 rounded-md text-[10px] leading-none font-normal bg-primary/10 text-primary border border-primary/20">
                                 {(() => {
                                   const meta = masterData.find(
                                     (m) =>
@@ -868,13 +868,13 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                                 onClick={() => handleOpenThreadDrawer(p)}
                                 className={`inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs font-normal transition-all cursor-pointer border shadow-2xs active:scale-95 ${
                                   count > 0
-                                    ? "bg-indigo-500/10 hover:bg-indigo-500/15 text-primary border-indigo-500/30"
+                                    ? "bg-primary/10 hover:bg-primary/15 text-primary border-primary/20"
                                     : "bg-surface-sunken hover:bg-surface-muted text-content-subtle border-border-subtle/60"
                                 }`}
                                 title={t("discussion.openThread")}
                               >
                                 <MessageSquare
-                                  className={`w-3.5 h-3.5 ${count > 0 ? "text-primary fill-indigo-100" : "text-content-subtle"}`}
+                                  className={`w-3.5 h-3.5 ${count > 0 ? "text-primary fill-primary/20" : "text-content-subtle"}`}
                                 />
                                 <span>{count}</span>
                               </button>
@@ -916,7 +916,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                             ) && (
                               <button
                                 onClick={() => startEdit(p)}
-                                className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
+                                className="p-1.5 text-content-muted hover:text-primary hover:bg-primary/10 rounded-md transition-all cursor-pointer"
                                 title={t("discussion.editRow")}
                               >
                                 <Edit2 className="w-4 h-4" />
@@ -946,8 +946,8 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
                 {/* LIVE QUICK ADD INLINE ROW (Separate columns matching headers) */}
                 {canAdd && (
-                  <tr className="bg-indigo-500/10 hover:bg-indigo-500/10 transition-colors">
-                    <td className="py-2.5 px-4 text-center text-indigo-400 text-xs align-middle font-normal">
+                  <tr className="bg-primary/10 hover:bg-primary/10 transition-colors">
+                    <td className="py-2.5 px-4 text-center text-primary text-xs align-middle font-normal">
                       +
                     </td>
 
@@ -1066,7 +1066,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
               >
                 <ChevronLeft className="w-3.5 h-3.5" /> {t("discussion.prev")}
               </button>
-              <span className="px-3 py-1 bg-surface border border-border-subtle rounded-md text-indigo-600 shadow-2xs text-xs font-normal">
+              <span className="px-3 py-1 bg-surface border border-border-subtle rounded-md text-primary shadow-2xs text-xs font-normal">
                 {currentPage} {t("common.of")} {totalPages}
               </span>
               <button
@@ -1083,16 +1083,16 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
 
       {/* THREAD DISCUSSIONS SLIDE-OVER SHEET */}
       {activeThreadPoint && (
-        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-[9999] flex justify-end">
+        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs z-[9999] flex justify-end">
           <div className="absolute inset-0" onClick={() => setActiveThreadPoint(null)} />
           <div className="relative bg-surface w-full max-w-lg h-full shadow-2xl border-l border-border-subtle flex flex-col text-left">
             <div className="p-5 border-b border-border-faint flex items-center justify-between bg-surface-sunken/80 shrink-0">
               <div className="flex items-center gap-3 pr-4">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/15 text-indigo-600 flex items-center justify-center border border-indigo-500/30 shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center border border-primary/20 shrink-0">
                   <MessageSquare className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <span className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-indigo-600 block">
+                  <span className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-primary block">
                     {t("discussion.threadDiscussions")}
                   </span>
                   <h3 className="text-sm font-medium text-content truncate">
@@ -1112,11 +1112,11 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
             <div className="flex-1 p-5 overflow-y-auto flex flex-col gap-4 bg-surface-sunken/30">
               {threadComments.length === 0 ? (
                 <div className="text-center py-16 px-4">
-                  <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-3 text-indigo-400">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 text-primary">
                     <MessageSquare className="w-6 h-6" />
                   </div>
-                  <h4 className="text-xs  text-content-body">{t("discussion.noReplies")}</h4>
-                  <p className="text-xs sm:text-[11px] text-content-subtle  mt-1 leading-normal">
+                  <h4 className="text-xs text-content-body">{t("discussion.noReplies")}</h4>
+                  <p className="text-xs sm:text-[11px] text-content-subtle mt-1 leading-normal">
                     {t("discussion.noRepliesHint")}
                   </p>
                 </div>
@@ -1174,7 +1174,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           className={cn(
                             "px-3.5 py-2 rounded-2xl relative shadow-soft group",
                             isMine
-                              ? "bg-indigo-600 text-content-inverse rounded-br-sm"
+                              ? "bg-primary-surface text-content-inverse rounded-br-sm"
                               : "bg-surface text-content-strong border border-border-subtle rounded-bl-sm"
                           )}
                         >
@@ -1184,7 +1184,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                           <span
                             className={cn(
                               "absolute bottom-1 right-3 text-xs sm:text-[11px] sm:text-[9px]  tracking-tight",
-                              isMine ? "text-indigo-200" : "text-content-subtle"
+                              isMine ? "text-content-inverse/80" : "text-content-subtle"
                             )}
                           >
                             {new Date(commentDate).toLocaleTimeString("id-ID", {
@@ -1217,7 +1217,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
                 <button
                   onClick={handleSendThreadComment}
                   disabled={isSendingComment || !newCommentText.trim()}
-                  className="p-2 text-indigo-600 hover:text-indigo-700 disabled:opacity-40 cursor-pointer rounded-full transition-colors shrink-0"
+                  className="p-2 text-primary hover:text-primary-hover disabled:opacity-40 cursor-pointer rounded-full transition-colors shrink-0"
                   title={t("discussion.sendReply")}
                 >
                   <Send className="w-4 h-4" />

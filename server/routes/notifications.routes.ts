@@ -524,7 +524,7 @@ router.get("/api/admin/notification-failures", verifyGlobalAdmin, async (_req, r
   try {
     conn = await db.getConnection();
     const [rows]: any = await conn.query(
-      "SELECT id, channel, context, recipient_id, related_id, error_message, created_at FROM NotificationDeliveryFailures ORDER BY created_at DESC LIMIT 50"
+      `SELECT id, channel, context, recipient_id, related_id, error_message, created_at FROM "NotificationDeliveryFailures" ORDER BY created_at DESC LIMIT 50`
     );
     res.json({ status: "success", data: rows || [] });
   } catch (error: any) {

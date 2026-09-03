@@ -150,14 +150,18 @@
    * Sisi gelapnya tidak disentuh: #7c8ba1 di atas kartu gelap sudah 5,03:1. */
   --color-content-subtle: #64748b; /* = slate-500 */
 
-  /* Sidebar Semantik Velzon (Mode Terang: Dark Navy) */
-  --color-sidebar-surface: #2a3042;
-  --color-sidebar-border: #3a4059;
-  --color-sidebar-title: #878a99;
-  --color-sidebar-text: #9099b8;
+  /* Sidebar Semantik Velzon — Mode Terang (#395 koreksi).
+   * Bukan light-menu putih: referensi pemilik = sidebar brand navy
+   * `#405189` (= `--color-primary` / Velzon dark-sidebar) + teks terang,
+   * sementara area konten tetap mode terang. Mode gelap = charcoal di
+   * `html.dark` — beda jelas saat toggle. */
+  --color-sidebar-surface: #405189;
+  --color-sidebar-border: #364473;
+  --color-sidebar-title: #abb9e8;
+  --color-sidebar-text: #a6b0cf;
   --color-sidebar-text-active: #ffffff;
-  --color-sidebar-item-active: rgba(255, 255, 255, 0.08);
-  --color-sidebar-item-hover: rgba(255, 255, 255, 0.06);
+  --color-sidebar-item-active: rgba(255, 255, 255, 0.12);
+  --color-sidebar-item-hover: rgba(255, 255, 255, 0.08);
 }
 
 /* Padanan mode gelap. Hanya nilainya yang berganti; nama tokennya tetap. */
@@ -413,15 +417,22 @@ select option {
 }
 
 /* ─── Jira & Velzon Compact Design System Baseline (Global LanPro) ────────────
- * Menetapkan standar typography, hirarki judul, dan densitas tabel yang compact,
- * clean, sleek, dan profesional ala Jira & Velzon Admin di SELURUH modul LanPro.
- * ─────────────────────────────────────────────────────────────────────────── */
+/**
+ * STANDAR TIPOGRAFI & DENSITAS — #402 (keputusan 03 Sep 2026)
+ *
+ * Font: Inter (standar Velzon React admin). Bukan Poppins HTML lama.
+ * Densitas: html 81.25% (13px) — padat ala Velzon/Jira admin, SENGAJA
+ * dipertahankan agar seluruh modul tetap lega di layar data-dense.
+ * Mengubah font-size global = ubah seluruh UI; hanya dengan keputusan pemilik.
+ *
+ * Hirarki judul compact; tabel th uppercase 10px — konsisten lintas modul.
+ */
 html {
   font-size: 81.25%; /* 1rem = 13px Baseline (Jira Standard) */
 }
 
 @layer base {
-  /* Standarisasi Universal Font Family Inter (Velzon Admin Standard) */
+  /* Standarisasi Universal Font Family Inter (#402 — Velzon Admin Standard) */
   *,
   ::before,
   ::after,
@@ -518,6 +529,33 @@ summary {
     0 12px 32px rgb(15 23 42 / 0.08);
 }
 
+/* #415 — Hover lift kartu Velzon (naik sedikit + bayangan). Hormati reduced-motion. */
+@utility card-lift {
+  transition:
+    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 4px 8px rgb(15 23 42 / 0.06),
+    0 12px 24px rgb(15 23 42 / 0.1);
+}
+html.dark .card-lift:hover {
+  box-shadow:
+    0 4px 8px rgb(0 0 0 / 0.35),
+    0 12px 28px rgb(0 0 0 / 0.45);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-lift {
+    transition: none;
+  }
+  .card-lift:hover {
+    transform: none;
+  }
+}
+
 /* #310 — safe area & ruang nav bawah HP */
 @utility safe-area-pb {
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -536,8 +574,9 @@ html.dark .shadow-soft-lg {
     0 12px 32px rgb(0 0 0 / 0.4);
 }
 
-/* 3. Animasi masuk dropdown & popover: memudar sambil sedikit membesar dan
- *    naik. 120ms dipilih supaya terasa responsif, bukan lamban. */
+/* 3. Animasi masuk dropdown & popover (#403 — standar Velzon LanPro):
+ *    memudar sambil sedikit membesar dan naik. CTA memakai btn-animation/waves.
+ *    Panel melayang memakai animate-dropdown; Modal memakai motion 180ms. */
 @keyframes velzon-in {
   from {
     opacity: 0;
@@ -604,36 +643,84 @@ html.dark .shadow-soft-lg {
   transition: 0s;
 }
 
+/* #396 — Tombol solid memakai token Velzon, bukan hex keras #354574 / #60a5fa */
 .btn-primary {
-  background-color: #354574;
-  color: #ffffff;
-  border-color: #354574;
+  background-color: var(--color-primary-surface);
+  color: var(--color-content-inverse);
+  border-color: var(--color-primary-surface);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-primary:hover {
-  background-color: rgba(53, 69, 116, 0.15);
-  color: #60a5fa;
-  border-color: #60a5fa;
+  background-color: var(--color-primary-surface-hover);
+  color: var(--color-content-inverse);
+  border-color: var(--color-primary-surface-hover);
 }
 .btn-primary:active {
-  background-color: #354574;
-  color: #ffffff;
+  background-color: var(--color-primary-surface-active);
+  color: var(--color-content-inverse);
 }
 .btn-secondary {
-  @apply bg-blue-600 text-white border-blue-600 hover:bg-blue-500/15 hover:text-blue-400 hover:border-blue-400 active:bg-blue-600 active:text-white transition-all duration-200;
+  background-color: var(--color-secondary);
+  color: var(--color-content-inverse);
+  border-color: var(--color-secondary);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-secondary:hover {
+  filter: brightness(1.08);
 }
 .btn-success {
-  @apply bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-500/15 hover:text-emerald-400 hover:border-emerald-400 active:bg-emerald-600 active:text-white transition-all duration-200;
+  background-color: var(--color-success-surface);
+  color: var(--color-content-inverse);
+  border-color: var(--color-success-surface);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-success:hover {
+  filter: brightness(1.08);
 }
 .btn-info {
-  @apply bg-sky-500 text-white border-sky-500 hover:bg-sky-500/15 hover:text-sky-400 hover:border-sky-400 active:bg-sky-500 active:text-white transition-all duration-200;
+  background-color: var(--color-info-surface);
+  color: var(--color-content-inverse);
+  border-color: var(--color-info-surface);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-info:hover {
+  filter: brightness(1.08);
 }
 .btn-warning {
-  @apply bg-amber-500 text-white border-amber-500 hover:bg-amber-500/15 hover:text-amber-400 hover:border-amber-400 active:bg-amber-500 active:text-white transition-all duration-200;
+  background-color: var(--color-warning-surface);
+  color: var(--color-content-inverse);
+  border-color: var(--color-warning-surface);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-warning:hover {
+  filter: brightness(1.08);
 }
 .btn-danger {
-  @apply bg-rose-600 text-white border-rose-600 hover:bg-rose-500/15 hover:text-rose-400 hover:border-rose-400 active:bg-rose-600 active:text-white transition-all duration-200;
+  background-color: var(--color-danger-surface);
+  color: var(--color-content-inverse);
+  border-color: var(--color-danger-surface);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-danger:hover {
+  filter: brightness(1.08);
 }
 .btn-dark {
-  @apply bg-slate-800 text-white border-slate-800 hover:bg-slate-700/30 hover:text-slate-200 hover:border-slate-400 active:bg-slate-800 active:text-white transition-all duration-200;
+  background-color: var(--color-surface-inverse-strong);
+  color: var(--color-content-inverse);
+  border-color: var(--color-surface-inverse-strong);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-dark:hover {
+  filter: brightness(1.15);
+}
+/* Soft primary — pola Velzon btn-soft-primary */
+.btn-soft-primary {
+  background-color: color-mix(in srgb, var(--color-primary-surface) 12%, transparent);
+  color: var(--color-primary);
+  border-color: color-mix(in srgb, var(--color-primary-surface) 25%, transparent);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-soft-primary:hover {
+  background-color: color-mix(in srgb, var(--color-primary-surface) 20%, transparent);
+  color: var(--color-primary);
 }

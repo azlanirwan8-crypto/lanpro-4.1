@@ -398,7 +398,7 @@ export const StyledDropdown = ({
                       className={cn(
                         "w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md transition-all text-left group/opt",
                         isActive
-                          ? "bg-indigo-500/10 text-indigo-700"
+                          ? "bg-primary/10 text-primary"
                           : "hover:bg-surface-sunken text-content-secondary"
                       )}
                     >
@@ -446,7 +446,7 @@ export const StyledDropdown = ({
                           {opt.label}
                         </span>
                       </div>
-                      {isActive && <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
+                      {isActive && <div className="w-1.5 h-1.5 rounded-full bg-primary/100" />}
                     </button>
                   );
                 })}

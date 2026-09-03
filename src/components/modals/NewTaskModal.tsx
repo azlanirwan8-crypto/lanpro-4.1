@@ -197,7 +197,17 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={t("newTask.title")} maxWidth="max-w-3xl">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("newTask.title")}
+      maxWidth="max-w-3xl"
+      footer={
+        <Button onClick={onSubmit} disabled={isSubmitting} className="justify-center min-w-[8rem]">
+          {t("newTask.createIssue")}
+        </Button>
+      }
+    >
       <div className="space-y-4">
         {/* Group 1: Basic Info */}
         <div className="space-y-4">
@@ -491,9 +501,6 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
             <LanproDatePicker value={newTaskDueDate} onChange={(val) => setNewTaskDueDate(val)} />
           </div>
         </div>
-        <Button onClick={onSubmit} disabled={isSubmitting} className="w-full justify-center">
-          {t("newTask.createIssue")}
-        </Button>
       </div>
     </Modal>
   );

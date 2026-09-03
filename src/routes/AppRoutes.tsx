@@ -162,6 +162,8 @@ export interface AppRoutesProps {
   StyledDropdown?: any;
   updateProjectRole?: (memberId: string, newRole: string) => void;
   removeProjectMember?: (memberId: string) => any;
+  /** #384 — undang anggota ke proyek aktif (email). */
+  onInviteMember?: (email: string) => Promise<void>;
 }
 
 /**
@@ -223,6 +225,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
     StyledDropdown,
     updateProjectRole,
     removeProjectMember,
+    onInviteMember,
   } = props;
 
   if (
@@ -231,7 +234,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
   ) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8 text-center">
-        <div className="w-16 h-16 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 mb-4 shadow-soft">
+        <div className="w-16 h-16 rounded-xl bg-primary-surface/15 border border-primary/30 flex items-center justify-center text-primary mb-4 shadow-soft">
           <FolderKanban className="w-8 h-8" />
         </div>
         <h3 className="text-xl font-medium text-content-strong mb-2">
@@ -245,7 +248,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
   switch (currentView) {
     case "dashboard":
       return (
-        <div className="flex-1 flex flex-col overflow-auto bg-surface-sunken min-h-screen mobile-nav-pb md:pb-0 transition-colors duration-200">
+        <div className="flex-1 flex flex-col overflow-auto bg-surface-sunken min-h-dvh mobile-nav-pb md:pb-0 transition-colors duration-200">
           <DashboardView
             tasks={tasks || []}
             sprints={sprints || []}
@@ -421,6 +424,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
             removeProjectMember={removeProjectMember || (async () => {})}
             hasPermission={hasPermission}
             onRefreshProjects={fetchProjects}
+            onInviteMember={onInviteMember}
           />
         </div>
       );
@@ -511,7 +515,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
 
         if (!hasAccess) {
           return (
-            <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center bg-surface-sunken min-h-[calc(100vh-theme(spacing.16))]">
+            <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center bg-surface-sunken min-h-[calc(100dvh-theme(spacing.16))]">
               <ShieldAlert className="w-16 h-16 text-rose-500 mb-4" />
               <h2 className="text-2xl font-medium text-content-strong mb-2">
                 {t("appShell.forbidden")}

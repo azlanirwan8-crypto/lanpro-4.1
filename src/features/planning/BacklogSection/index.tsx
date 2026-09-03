@@ -52,7 +52,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
               {t("planning.backlogTasks")}
             </h3>
           </div>
-          <div className="px-2 py-[3px] bg-indigo-500/10 border border-indigo-500/30 rounded-md text-[11px] font-medium text-primary">
+          <div className="px-2 py-[3px] bg-primary/10 border border-primary/30 rounded-md text-[11px] font-medium text-primary">
             {t("planning.issueCount", { count: filteredBacklogTasks.length })}
           </div>
         </div>

@@ -266,7 +266,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
             className={`px-4 py-1.5 rounded-md text-content-inverse text-xs font-medium shadow-xs transition-colors ${
               mode === "whatsapp"
                 ? "bg-emerald-600 hover:bg-emerald-700"
-                : "bg-indigo-600 hover:bg-indigo-700"
+                : "bg-primary-surface hover:bg-primary-surface-hover"
             }`}
           >
             {t("template.saveTemplate")}

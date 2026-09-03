@@ -11,7 +11,10 @@ import { statusColumnKey, tasksForStatusLane, taskMatchesStatus } from "../../li
 import { Layers } from "lucide-react";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { Card } from "../../components/ui/CoreUI";
 
+/** #417 — status chrome pakai token soft, bukan hex keras. */
 const getStatusStyle = (label: string) => {
   const lower = label.toLowerCase();
   if (
@@ -21,22 +24,22 @@ const getStatusStyle = (label: string) => {
     lower.includes("resolved")
   ) {
     return {
-      bg: "bg-[#ECFDF5]",
-      border: "border-t-[#10B981]",
-      borderColor: "#10B981",
-      text: "text-emerald-700",
-      indicatorBg: "bg-emerald-500/15",
-      indicatorText: "text-emerald-700",
+      bg: "bg-success/10",
+      border: "border-t-success",
+      borderColor: "var(--color-success)",
+      text: "text-success-text",
+      indicatorBg: "bg-success/15",
+      indicatorText: "text-success-text",
     };
   }
   if (lower.includes("uat") || lower.includes("review") || lower.includes("code review")) {
     return {
-      bg: "bg-[#F3E8FF]",
-      border: "border-t-[#8B5CF6]",
-      borderColor: "#8B5CF6",
-      text: "text-purple-700",
-      indicatorBg: "bg-purple-500/15",
-      indicatorText: "text-purple-700",
+      bg: "bg-primary/10",
+      border: "border-t-primary",
+      borderColor: "var(--color-primary)",
+      text: "text-primary",
+      indicatorBg: "bg-primary/15",
+      indicatorText: "text-primary",
     };
   }
   if (
@@ -46,22 +49,21 @@ const getStatusStyle = (label: string) => {
     lower.includes("active")
   ) {
     return {
-      bg: "bg-[#FFFBEB]",
-      border: "border-t-[#F59E0B]",
-      borderColor: "#F59E0B",
-      text: "text-amber-700",
-      indicatorBg: "bg-amber-500/15",
-      indicatorText: "text-amber-700",
+      bg: "bg-warning/10",
+      border: "border-t-warning",
+      borderColor: "var(--color-warning)",
+      text: "text-warning-text",
+      indicatorBg: "bg-warning/15",
+      indicatorText: "text-warning-text",
     };
   }
-  // TO DO / BACKLOG / others
   return {
-    bg: "bg-[#EFF6FF]",
-    border: "border-t-[#3B82F6]",
-    borderColor: "#3B82F6",
-    text: "text-blue-700",
-    indicatorBg: "bg-blue-500/15",
-    indicatorText: "text-blue-700",
+    bg: "bg-info/10",
+    border: "border-t-info",
+    borderColor: "var(--color-info)",
+    text: "text-info-text",
+    indicatorBg: "bg-info/15",
+    indicatorText: "text-info-text",
   };
 };
 
@@ -397,7 +399,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                           "bg-surface rounded-lg shadow-2xs border border-border-subtle/80 border-l-4 p-3 transition-all",
                           isUnassigned
                             ? "border-l-slate-400 bg-surface-sunken/50"
-                            : "border-l-indigo-600",
+                            : "border-l-primary",
                           isCompact ? "p-2.5" : "p-3"
                         )}
                       >
@@ -459,12 +461,25 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-surface-sunken rounded-md border border-border-subtle/80 shadow-2xs overflow-hidden font-sans relative">
-      <DragDropContext onDragEnd={handleDragEndBoard}>
-        <div className="flex-1 overflow-auto bg-transparent relative z-10 custom-scrollbar">
-          {renderBoard()}
-        </div>
-      </DragDropContext>
+    <div className="flex flex-col h-full gap-3 font-sans relative">
+      {/* #417 — PageHeader Velzon */}
+      <PageHeader
+        className="shrink-0 px-1"
+        breadcrumbs={[
+          { label: t("kanban.breadcrumbGroup", "PROJECT") },
+          { label: t("sidebar.kanbanBoard"), current: true },
+        ]}
+        title={t("kanban.title", t("sidebar.kanbanBoard"))}
+        subtitle={t("kanban.subtitle")}
+      />
+      {/* #417/#421 — Card board shell */}
+      <Card className="flex-1 flex flex-col rounded-lg overflow-hidden min-h-0">
+        <DragDropContext onDragEnd={handleDragEndBoard}>
+          <div className="flex-1 overflow-auto bg-transparent relative z-10 custom-scrollbar">
+            {renderBoard()}
+          </div>
+        </DragDropContext>
+      </Card>
     </div>
   );
 };

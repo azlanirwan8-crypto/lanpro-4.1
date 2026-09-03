@@ -25,6 +25,7 @@ import { AppRole } from "../../types";
 import { normalkanPeran, sebagaiPeranSistem } from "../../types/roles";
 import { AdminUserPanelProps } from "./types";
 import { useAdminUsers } from "./hooks";
+import { PageHeader } from "../../components/ui/PageHeader";
 import { Button, Modal, UserAvatar } from "./styles";
 import { toast } from "sonner";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
@@ -45,7 +46,7 @@ const Input = ({ value, onChange, placeholder, type = "text", className = "", ..
     value={value}
     onChange={onChange}
     placeholder={placeholder}
-    className={`w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle placeholder:font-normal focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all ${className}`}
+    className={`w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle placeholder:font-normal focus:ring-4 focus:ring-primary/10 focus:border-primary focus:bg-surface outline-none transition-all ${className}`}
     {...props}
   />
 );
@@ -576,30 +577,16 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
     <div className="flex-1 flex flex-col overflow-hidden bg-surface-sunken w-full h-full">
       <div className="flex-1 overflow-y-auto p-3 md:p-6 w-full">
         <div className="flex flex-col space-y-6 min-h-full">
-          {/* Header & Controls */}
-          <div className="bg-surface rounded-lg shadow-soft border border-border-subtle/80 p-4 shrink-0">
-            {/*
-              Item #160 — dua saringan (Semua Peran, Semua Status) DIHAPUS atas
-              permintaan pemilik proyek, dan pencarian naik sebaris dengan
-              Ekspor + Tambah. Barisnya jadi satu, jadi `mb-4` pemisah antar
-              baris ikut hilang — kalau ditinggal, ia menyisakan celah kosong
-              di bawah kartu.
-            */}
-            <div className="flex flex-col gap-3 lg:flex-row lg:justify-between lg:items-center">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 bg-info/10 text-info-text rounded-lg flex items-center justify-center border border-info/20 shrink-0">
-                  <Users className="w-4.5 h-4.5" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-base font-medium text-content-strong tracking-tight leading-none truncate">
-                    {t("users.title")}
-                  </h3>
-                  <p className="text-content-subtle font-medium text-xs sm:text-[11px] mt-1 hidden sm:block">
-                    {t("users.subtitle")}
-                  </p>
-                </div>
-              </div>
-              {/* #359 — search + export + tambah selalu 1 baris di HP */}
+          {/* Header & Controls — #422: PageHeader flat, bukan dalam Card */}
+          <PageHeader
+            className="shrink-0"
+            breadcrumbs={[
+              { label: t("users.breadcrumbGroup", "ADMINISTRATION") },
+              { label: t("users.title"), current: true },
+            ]}
+            title={t("users.title")}
+            subtitle={<span className="hidden sm:inline">{t("users.subtitle")}</span>}
+            actions={
               <div className="flex items-center gap-2 w-full lg:w-auto min-w-0">
                 <div className="relative min-w-0 flex-1 lg:flex-none lg:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle pointer-events-none" />
@@ -608,7 +595,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     placeholder={t("users.searchPlaceholder")}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-3 py-1.5 bg-surface-sunken/50 border border-border-subtle/80 rounded focus:bg-surface focus:ring-1 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none text-xs h-8.5 font-normal text-content-strong placeholder:text-content-subtle"
+                    className="w-full pl-9 pr-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium"
                   />
                 </div>
                 <button
@@ -630,8 +617,8 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   <span className="hidden sm:inline">{t("users.addUser")}</span>
                 </button>
               </div>
-            </div>
-          </div>
+            }
+          />
 
           {/* Statistics Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
@@ -692,12 +679,12 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           {/* User List */}
           <div className="bg-surface rounded-xl shadow-soft border border-border-subtle/50 overflow-hidden flex-1 flex flex-col">
             {selectedUserIds.length > 0 && (
-              <div className="bg-indigo-500/10 border-b border-indigo-500/30 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="bg-primary/10 border-b border-primary/30 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-indigo-600 text-content-inverse text-xs font-medium flex items-center justify-center">
+                  <span className="w-6 h-6 rounded-full bg-primary-surface text-content-inverse text-xs font-medium flex items-center justify-center">
                     {selectedUserIds.length}
                   </span>
-                  <span className="text-sm font-medium text-indigo-950">
+                  <span className="text-sm font-medium text-content-strong">
                     {t("users.selectedForBulk")}
                   </span>
                 </div>
@@ -787,7 +774,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             <div className="hidden sm:block overflow-x-auto flex-1">
               <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
                 <thead>
-                  <tr className="bg-surface-sunken/80 border-b border-border-faint text-xs sm:text-[11px] font-normal text-content-muted uppercase tracking-wider whitespace-nowrap">
+                  <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap">
                     <th className="py-3.5 px-4 text-center w-12">
                       <input
                         type="checkbox"
@@ -809,7 +796,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                             );
                           }
                         }}
-                        className="w-4 h-4 rounded text-indigo-600 border-border-subtle focus:ring-indigo-500 cursor-pointer"
+                        className="w-4 h-4 rounded text-primary border-border-subtle focus:ring-primary cursor-pointer"
                       />
                     </th>
                     <th
@@ -818,7 +805,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     >
                       <div className="flex items-center gap-1.5">
                         <span>{t("users.user")}</span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-indigo-600">
+                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-primary">
                           {sortField === "name" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
                         </span>
                       </div>
@@ -829,7 +816,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     >
                       <div className="flex items-center gap-1.5">
                         <span>{t("users.deptPosition")}</span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-indigo-600">
+                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-primary">
                           {sortField === "department" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
                         </span>
                       </div>
@@ -841,7 +828,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     >
                       <div className="flex items-center gap-1.5">
                         <span>{t("users.role")}</span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-indigo-600">
+                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-primary">
                           {sortField === "role" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
                         </span>
                       </div>
@@ -852,7 +839,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     >
                       <div className="flex items-center justify-center gap-1.5">
                         <span>{t("users.status")}</span>
-                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-indigo-600">
+                        <span className="text-xs sm:text-[10px] text-content-subtle group-hover:text-primary">
                           {sortField === "status" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
                         </span>
                       </div>
@@ -880,7 +867,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     ).length;
 
                     return (
-                      <tr key={user.id} className="hover:bg-indigo-500/10 transition-colors group">
+                      <tr key={user.id} className="hover:bg-primary/10 transition-colors group">
                         <td className="py-3.5 px-4 text-center">
                           <input
                             type="checkbox"
@@ -892,7 +879,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 setSelectedUserIds(selectedUserIds.filter((id) => id !== user.id));
                               }
                             }}
-                            className="w-4 h-4 rounded border-border-subtle focus:ring-indigo-500 cursor-pointer"
+                            className="w-4 h-4 rounded border-border-subtle focus:ring-primary cursor-pointer"
                           />
                         </td>
                         <td
@@ -904,7 +891,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                           <div className="flex items-center gap-3.5">
                             <UserAvatar user={user} className="w-9 h-9 text-sm shrink-0" />
                             <div>
-                              <div className="font-medium text-content-strong text-xs group-hover:text-indigo-600 transition-colors">
+                              <div className="font-medium text-content-strong text-xs group-hover:text-primary transition-colors">
                                 {user?.displayName || user?.username}
                               </div>
                               <div className="text-xs sm:text-[11px] text-content-muted">
@@ -936,11 +923,11 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 className={cn(
                                   "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs sm:text-[10px] font-medium border transition-colors",
                                   userProjectsCount > 0
-                                    ? "bg-indigo-500/10 text-indigo-700 border-indigo-500/30"
+                                    ? "bg-primary/10 text-primary border-primary/30"
                                     : "bg-surface-sunken/50 text-content-subtle border-border-faint"
                                 )}
                               >
-                                <Layout className="w-3 h-3 text-indigo-500" />
+                                <Layout className="w-3 h-3 text-primary" />
                                 <span>
                                   {t("users.projectsCount", { count: userProjectsCount })}
                                 </span>
@@ -951,11 +938,11 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                                 className={cn(
                                   "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs sm:text-[10px] font-medium border transition-colors",
                                   userTasksCount > 0
-                                    ? "bg-violet-500/10 text-violet-700 border-violet-500/30"
+                                    ? "bg-primary/10 text-primary border-primary/30"
                                     : "bg-surface-sunken/50 text-content-subtle border-border-faint"
                                 )}
                               >
-                                <CheckCircle className="w-3 h-3 text-violet-500" />
+                                <CheckCircle className="w-3 h-3 text-primary" />
                                 <span>{t("users.tasksCount", { count: userTasksCount })}</span>
                               </span>
                             </div>
@@ -968,7 +955,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               normalkanPeran(user.role) === "admin"
                                 ? "bg-rose-500/10 text-rose-600 border-rose-500/30"
                                 : normalkanPeran(user.role) === "head"
-                                  ? "bg-purple-500/10 text-purple-600 border-purple-500/30"
+                                  ? "bg-primary/10 text-primary border-primary/30"
                                   : "bg-surface-sunken text-content-secondary border-border-subtle"
                             )}
                           >
@@ -1010,7 +997,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               // dan fungsinya sudah digantikan UserDetailView yang lebih
                               // lengkap. Modal beserta cabangnya ikut dihapus.
                               onClick={() => props.onSelectUserForDetail?.(user)}
-                              className="p-1.5 bg-indigo-500/10 hover:bg-indigo-600 text-indigo-600 hover:text-content-inverse border border-indigo-500/30 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer font-medium flex items-center justify-center gap-1"
+                              className="p-1.5 bg-primary/10 hover:bg-primary-surface text-primary hover:text-content-inverse border border-primary/30 rounded-lg transition-all shadow-xs active:scale-95 cursor-pointer font-medium flex items-center justify-center gap-1"
                               title={t("users.userDetail")}
                             >
                               <UserCog className="w-3.5 h-3.5 shrink-0" />
@@ -1077,7 +1064,15 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                   {paginatedUsers.length === 0 && (
                     <tr>
                       <td colSpan={7} className="py-12 text-center text-content-muted">
-                        {t("users.empty")}
+                        <p>{t("users.empty")}</p>
+                        <button
+                          type="button"
+                          onClick={() => setIsInviteModalOpen(true)}
+                          className="mt-3 inline-flex items-center gap-1.5 min-h-11 px-4 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium cursor-pointer"
+                        >
+                          <UserPlus className="w-3.5 h-3.5" />
+                          {t("users.addUser")}
+                        </button>
                       </td>
                     </tr>
                   )}
@@ -1088,8 +1083,16 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
             {/* #309 — kartu pengguna di bawah sm */}
             <div className="sm:hidden flex-1 overflow-y-auto divide-y divide-border-subtle/60 min-h-[200px]">
               {paginatedUsers.length === 0 ? (
-                <div className="py-12 text-center text-content-muted text-sm">
-                  {t("users.empty")}
+                <div className="py-12 text-center text-content-muted text-sm space-y-3">
+                  <p>{t("users.empty")}</p>
+                  <button
+                    type="button"
+                    onClick={() => setIsInviteModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 min-h-11 px-4 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium cursor-pointer"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    {t("users.addUser")}
+                  </button>
                 </div>
               ) : (
                 paginatedUsers.map((user) => {
@@ -1137,7 +1140,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                               setSelectedUserIds(selectedUserIds.filter((id) => id !== user.id));
                             }
                           }}
-                          className="mt-1 w-4 h-4 rounded border-border-subtle focus:ring-indigo-500 cursor-pointer shrink-0"
+                          className="mt-1 w-4 h-4 rounded border-border-subtle focus:ring-primary cursor-pointer shrink-0"
                         />
                         <button
                           type="button"
@@ -1203,7 +1206,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                         <button
                           type="button"
                           onClick={() => props.onSelectUserForDetail?.(user)}
-                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-indigo-600 bg-indigo-500/10 border border-indigo-500/30 rounded-lg cursor-pointer"
+                          className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-primary bg-primary/10 border border-primary/30 rounded-lg cursor-pointer"
                         >
                           <UserCog className="w-3.5 h-3.5" />
                           {t("users.userDetail")}
@@ -1275,7 +1278,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
                     className={cn(
                       "w-7 h-7 rounded-lg text-xs sm:text-[10px] font-normal transition-colors",
                       currentPage === i + 1
-                        ? "bg-indigo-600 text-content-inverse shadow-2xs"
+                        ? "bg-primary-surface text-content-inverse shadow-2xs"
                         : "bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken"
                     )}
                   >
@@ -1303,9 +1306,9 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
         title={t("users.addNewUser")}
       >
         <div className="space-y-4">
-          <div className="p-4 bg-violet-500/10 rounded-xl border border-violet-500/30 mb-2">
-            <p className="text-sm font-medium text-violet-900">{t("users.userRegistration")}</p>
-            <p className="text-xs text-violet-700 mt-1">{t("users.registerNew")}</p>
+          <div className="p-4 bg-primary/10 rounded-xl border border-primary/30 mb-2">
+            <p className="text-sm font-medium text-content-strong">{t("users.userRegistration")}</p>
+            <p className="text-xs text-primary mt-1">{t("users.registerNew")}</p>
           </div>
 
           <div className="space-y-3">
@@ -1538,7 +1541,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
               // keduanya SUDAH menampilkan alasannya di bawah field, jadi
               // tombol matinya tidak membingungkan.
               disabled={!!usernameError || !!emailError}
-              className="flex-1 justify-center bg-violet-600 hover:bg-violet-700 disabled:opacity-50"
+              className="flex-1 justify-center bg-primary-surface hover:bg-primary-surface-hover disabled:opacity-50"
             >
               <UserPlus className="w-4 h-4" /> {t("users.addPerson")}
             </Button>
@@ -1595,7 +1598,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       {/* Senior Portal-Style Hover Tooltip overlay */}
       {hoveredTooltip && (
         <div
-          className="fixed z-9999 pointer-events-none bg-overlay/95 backdrop-blur-md border border-slate-700/80 text-content-inverse text-xs font-medium rounded-xl px-3.5 py-2.5 max-w-xs shadow-2xl transition-all duration-100 ease-out animate-dropdown"
+          className="fixed z-9999 pointer-events-none bg-overlay/95 backdrop-blur-md border border-border-inverse/80 text-content-inverse text-xs font-medium rounded-xl px-3.5 py-2.5 max-w-xs shadow-2xl transition-all duration-100 ease-out animate-dropdown"
           style={{
             left: `${hoveredTooltip.x + 14}px`,
             top: `${hoveredTooltip.y + 14}px`,
@@ -1603,7 +1606,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
           }}
         >
           <div className="flex items-start gap-2 max-w-[210px]">
-            <Info className="w-4 h-4 text-indigo-300 shrink-0 mt-0.5" />
+            <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
             <span className="leading-snug font-medium text-xs sm:text-[11px]">
               {hoveredTooltip.text}
             </span>

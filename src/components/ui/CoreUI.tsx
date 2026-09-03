@@ -87,7 +87,7 @@ export const Button = ({
   const base =
     "btn-animation waves-effect waves-light rounded-lg font-semibold transition-all inline-flex items-center justify-center gap-2 " +
     "disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none " +
-    "focus-visible:ring-2 focus-visible:ring-indigo-500/20 active:scale-[0.98] cursor-pointer shadow-xs";
+    "focus-visible:ring-2 focus-visible:ring-primary/25 active:scale-[0.98] cursor-pointer shadow-xs border";
 
   const sizes: any = {
     sm: "px-3 py-1.5 h-8 text-xs",
@@ -97,6 +97,7 @@ export const Button = ({
 
   const variants: any = {
     primary: "btn-primary",
+    soft: "btn-soft-primary shadow-none",
     secondary: "btn-secondary",
     success: "btn-success",
     info: "btn-info",
@@ -104,17 +105,18 @@ export const Button = ({
     danger: "btn-danger",
     ["dark"]: "btn-dark",
     ghost:
-      "bg-transparent text-content-secondary hover:bg-surface-sunken border border-transparent",
-    outline: "bg-surface text-content-strong hover:bg-surface-sunken border border-border-subtle",
+      "bg-transparent text-content-secondary hover:bg-surface-sunken border-transparent shadow-none",
+    outline:
+      "bg-surface text-content-strong hover:bg-surface-sunken border-border-subtle shadow-none",
   };
 
   return (
     <button
-      type="button"
       onClick={onClick}
       data-text={dataText}
       className={`${base} ${variants[variant] || variants.primary} ${sizes[size]} ${className}`}
       disabled={disabled}
+      type="button"
       {...props}
     >
       <span>{children}</span>
@@ -203,17 +205,50 @@ export const VelzonFloatingParticles = () => {
  * benar di mode gelap.
  * ───────────────────────────────────────────────────────────────────────── */
 
-export const Card = ({ children, className = "", ...props }: any) => (
-  <div
-    className={cn(
-      "bg-surface border border-border-subtle rounded-lg shadow-soft overflow-hidden",
-      className
-    )}
-    {...props}
-  >
-    {children}
-  </div>
-);
+/* ─── Card (#397 / #415) ───────────────────────────────────────────────────
+ * Wadah Velzon: radius 8px (rounded-lg), bayangan soft, opsional lift hover.
+ * Varian warna (bukan putih plos): default | primary | success | info | inverse
+ * sesuai contoh KPI Velzon (1–2 kartu solid + sisanya putih).
+ * ───────────────────────────────────────────────────────────────────────── */
+
+export type CardVariant = "default" | "primary" | "success" | "info" | "inverse";
+
+export const Card = ({
+  children,
+  className = "",
+  variant = "default",
+  hoverLift = false,
+  ...props
+}: {
+  children?: React.ReactNode;
+  className?: string;
+  variant?: CardVariant;
+  /** #415 — animasi naik sedikit saat hover (Velzon widget cards). */
+  hoverLift?: boolean;
+  [key: string]: any;
+}) => {
+  const variants: Record<CardVariant, string> = {
+    default: "bg-surface border border-border-subtle text-content-strong shadow-soft",
+    primary: "bg-primary-surface border border-primary-surface text-content-inverse shadow-soft",
+    success: "bg-success-surface border border-success-surface text-content-inverse shadow-soft",
+    info: "bg-info-surface border border-info-surface text-content-inverse shadow-soft",
+    inverse: "bg-surface-inverse border border-border-inverse text-content-inverse shadow-soft",
+  };
+
+  return (
+    <div
+      className={cn(
+        "rounded-lg overflow-hidden",
+        variants[variant] || variants.default,
+        hoverLift && "card-lift",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
 
 export const CardHeader = ({ children, className = "", ...props }: any) => (
   <div

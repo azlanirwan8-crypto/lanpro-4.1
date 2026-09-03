@@ -269,7 +269,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
                 <button
                   onClick={handleExtendSession}
                   disabled={isExtending}
-                  className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-content-inverse rounded-xl text-sm font-medium tracking-wide shadow-soft-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-3.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-surface-active text-content-inverse rounded-xl text-sm font-medium tracking-wide shadow-soft-lg hover:shadow-md active:scale-[0.99] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <RefreshCw className={`w-4 h-4 ${isExtending ? "animate-spin" : ""}`} />
                   {t("session.extend")}

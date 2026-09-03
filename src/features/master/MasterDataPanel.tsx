@@ -28,6 +28,7 @@ import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { RenderIcon, AVAILABLE_ICONS } from "../../components/RenderIcon";
 import { cn } from "../../lib/utils";
 import { useMobileAction } from "../../contexts/MobileActionContext";
+import { PageHeader } from "../../components/ui/PageHeader";
 import {
   fetchProjectModules as fetchProjectModulesApi,
   createProjectModule,
@@ -48,7 +49,7 @@ const Input = ({ value, onChange, placeholder, type = "text", className = "", ..
     value={value}
     onChange={onChange}
     placeholder={placeholder}
-    className={`w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle placeholder:font-normal focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-surface outline-none transition-all ${className}`}
+    className={`w-full px-4 py-3 bg-surface-sunken border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle placeholder:font-normal focus:ring-4 focus:ring-primary/10 focus:border-primary focus:bg-surface outline-none transition-all ${className}`}
     {...props}
   />
 );
@@ -66,7 +67,7 @@ const Button = ({
   let variantStyle = "";
   if (variant === "primary")
     variantStyle =
-      "bg-indigo-600 text-content-inverse hover:bg-indigo-700 active:scale-95 shadow-md shadow-indigo-600/20";
+      "bg-primary-surface text-content-inverse hover:bg-primary-surface-hover active:scale-95 shadow-md";
   if (variant === "secondary")
     variantStyle = "bg-surface-muted text-content-body hover:bg-surface-strong active:scale-95";
   if (variant === "outline")
@@ -74,7 +75,7 @@ const Button = ({
       "border-2 border-border-subtle text-content-body hover:border-border-subtle hover:bg-surface-sunken active:scale-95";
   if (variant === "danger")
     variantStyle =
-      "bg-rose-500 text-content-inverse hover:bg-rose-600 active:scale-95 shadow-md shadow-rose-500/20";
+      "bg-danger-surface text-content-inverse hover:brightness-110 active:scale-95 shadow-md";
   if (variant === "ghost")
     variantStyle =
       "bg-transparent text-content-secondary hover:bg-surface-muted hover:text-content active:scale-95";
@@ -597,7 +598,7 @@ export const MasterDataPanel = ({
               </p>
             </div>
             <div className="flex items-center gap-1">
-              <div className="w-7 h-7 rounded-md bg-indigo-500/10 flex items-center justify-center text-indigo-600">
+              <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center text-primary">
                 <Settings className="w-3.5 h-3.5" />
               </div>
               <button
@@ -627,7 +628,7 @@ export const MasterDataPanel = ({
                   className={cn(
                     "w-full text-left px-3 py-2 rounded-md text-xs transition-all flex items-center justify-between group relative cursor-pointer select-none",
                     isActive
-                      ? "bg-indigo-500/10 text-indigo-700 font-medium border-l-3 border-l-indigo-600 shadow-2xs"
+                      ? "bg-primary/10 text-primary font-medium border-l-3 border-l-primary shadow-2xs"
                       : "text-content-secondary hover:bg-surface-sunken hover:text-content font-medium"
                   )}
                 >
@@ -635,7 +636,9 @@ export const MasterDataPanel = ({
                     <span
                       className={cn(
                         "w-1.5 h-1.5 rounded-full shrink-0",
-                        isActive ? "bg-indigo-600" : "bg-surface-marker group-hover:bg-indigo-400"
+                        isActive
+                          ? "bg-primary-surface"
+                          : "bg-surface-marker group-hover:bg-primary/40"
                       )}
                     />
                     {t.label}
@@ -644,7 +647,7 @@ export const MasterDataPanel = ({
                     className={cn(
                       "text-xs sm:text-[10px] font-medium px-2 py-0.5 rounded-md transition-all shrink-0",
                       isActive
-                        ? "bg-indigo-500/15 text-indigo-700"
+                        ? "bg-primary/15 text-primary"
                         : "bg-surface-muted text-content-muted group-hover:bg-surface-strong"
                     )}
                   >
@@ -664,72 +667,77 @@ export const MasterDataPanel = ({
             onClick={() => setSidebarOpen(true)}
             className="md:hidden mb-3 flex items-center gap-2 px-3 py-2.5 bg-surface border border-border-subtle/80 rounded-lg text-xs font-medium text-content-strong shadow-2xs cursor-pointer"
           >
-            <Menu className="w-4 h-4 text-indigo-600 shrink-0" />
+            <Menu className="w-4 h-4 text-primary shrink-0" />
             <span className="truncate">
               {masterDataTypes.find((x) => x.type === selectedType)?.label ||
                 t("master.openCategories", "Kategori master")}
             </span>
           </button>
 
-          {/* Header */}
-          <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 shadow-2xs shrink-0 min-w-0">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
-                  {t("master.systemMaster")}
-                </span>
-                <span className="text-xs text-content-subtle font-medium">
-                  • {t("master.enterpriseControl")}
-                </span>
-              </div>
-              <h2 className="text-base font-medium text-content-strong tracking-tight">
-                {masterDataTypes.find((t) => t.type === selectedType)?.label}
-              </h2>
-              <p className="text-content-muted text-xs font-medium mt-0.5">
-                {selectedType === "modul_aplikasi"
+          {/* Header — #409 PageHeader */}
+          <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 mb-4 shadow-2xs shrink-0 min-w-0">
+            <PageHeader
+              breadcrumbs={[
+                { label: t("master.systemMaster") },
+                {
+                  label:
+                    masterDataTypes.find((x) => x.type === selectedType)?.label ||
+                    t("master.openCategories", "Kategori master"),
+                  current: true,
+                },
+              ]}
+              title={masterDataTypes.find((t) => t.type === selectedType)?.label}
+              subtitle={
+                selectedType === "modul_aplikasi"
                   ? t("master.moduleHint")
                   : t("master.configHint", {
                       type: masterDataTypes
                         .find((mt) => mt.type === selectedType)
                         ?.label.toLowerCase(),
+                    })
+              }
+              actions={
+                hasPermission(
+                  userRole as PeranEfektif,
+                  "configuration",
+                  "update",
+                  false,
+                  currentUserProfile?.permissions
+                ) ? (
+                  <button
+                    onClick={() => {
+                      if (selectedType === "modul_aplikasi") {
+                        setNewModuleProjectId(projects?.[0]?.id || "");
+                        setNewModuleNamaModul("");
+                        setNewModuleKeterangan("");
+                        setIsNewModuleModalOpen(true);
+                      } else {
+                        setNewMasterType(selectedType);
+                        setNewMasterLabel("");
+                        setNewMasterShortCode("");
+                        setNewMasterBaseUrl("");
+                        setIsNewMasterModalOpen(true);
+                      }
+                    }}
+                    className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-xs w-auto self-start sm:self-auto whitespace-nowrap"
+                    title={t("master.addType", {
+                      type: masterDataTypes.find((mt) => mt.type === selectedType)?.label,
                     })}
-              </p>
-            </div>
-            {hasPermission(
-              userRole as PeranEfektif,
-              "configuration",
-              "update",
-              false,
-              currentUserProfile?.permissions
-            ) && (
-              <button
-                onClick={() => {
-                  if (selectedType === "modul_aplikasi") {
-                    setNewModuleProjectId(projects?.[0]?.id || "");
-                    setNewModuleNamaModul("");
-                    setNewModuleKeterangan("");
-                    setIsNewModuleModalOpen(true);
-                  } else {
-                    setNewMasterType(selectedType);
-                    setNewMasterLabel("");
-                    setNewMasterShortCode("");
-                    setNewMasterBaseUrl("");
-                    setIsNewMasterModalOpen(true);
-                  }
-                }}
-                className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-xs w-auto self-start sm:self-auto whitespace-nowrap"
-                title={t("master.addType", {
-                  type: masterDataTypes.find((mt) => mt.type === selectedType)?.label,
-                })}
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">
-                  {t("master.addType", {
-                    type: masterDataTypes.find((mt) => mt.type === selectedType)?.label,
-                  })}
-                </span>
-              </button>
-            )}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">
+                      {t("master.addType", {
+                        type: masterDataTypes.find((mt) => mt.type === selectedType)?.label,
+                      })}
+                    </span>
+                  </button>
+                ) : undefined
+              }
+            >
+              <span className="text-[10px] leading-none font-medium text-primary bg-primary/10 px-2.5 py-[3px] rounded-md border border-primary/30">
+                {t("master.systemMaster")}
+              </span>
+            </PageHeader>
           </div>
 
           {selectedType === "modul_aplikasi" ? (
@@ -753,10 +761,10 @@ export const MasterDataPanel = ({
                     return (
                       <div
                         key={mod.id}
-                        className="flex items-center justify-between p-3 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs hover:border-indigo-500/30 transition-all group"
+                        className="flex items-center justify-between p-3 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs hover:border-primary/30 transition-all group"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-md bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0 font-medium text-xs">
+                          <div className="w-8 h-8 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0 font-medium text-xs">
                             MOD
                           </div>
                           <div>
@@ -764,7 +772,7 @@ export const MasterDataPanel = ({
                               <span className="text-xs font-medium text-content-strong">
                                 {mod.namaModul}
                               </span>
-                              <span className="text-[10px] leading-none bg-indigo-500/10 text-indigo-700 font-medium px-2 py-[3px] rounded-md border border-indigo-500/30">
+                              <span className="text-[10px] leading-none bg-primary/10 text-primary font-medium px-2 py-[3px] rounded-md border border-primary/30">
                                 {p ? p.name : mod.projectId}
                               </span>
                             </div>
@@ -793,7 +801,7 @@ export const MasterDataPanel = ({
                                 setEditingModuleKeterangan(mod.keterangan || "");
                                 setIsEditModuleModalOpen(true);
                               }}
-                              className="w-7 h-7 bg-surface-sunken hover:bg-indigo-500/10 text-content-muted hover:text-indigo-600 border border-border-subtle/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
+                              className="w-7 h-7 bg-surface-sunken hover:bg-primary/10 text-content-muted hover:text-primary border border-border-subtle/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
                               title={t("master.editModule")}
                             >
                               <Edit className="w-3.5 h-3.5 shrink-0" />
@@ -970,7 +978,7 @@ export const MasterDataPanel = ({
                         ref={provided.innerRef}
                         className={cn(
                           "space-y-2 min-h-[300px] transition-colors p-1",
-                          snapshot.isDraggingOver ? "bg-indigo-500/10 rounded-lg" : ""
+                          snapshot.isDraggingOver ? "bg-primary/10 rounded-lg" : ""
                         )}
                       >
                         {localMasterData
@@ -1001,9 +1009,9 @@ export const MasterDataPanel = ({
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
                                     className={cn(
-                                      "flex justify-between items-center p-3 bg-surface border border-border-subtle/80 rounded-lg transition-all group hover:border-indigo-500/30 shadow-2xs",
+                                      "flex justify-between items-center p-3 bg-surface border border-border-subtle/80 rounded-lg transition-all group hover:border-primary/30 shadow-2xs",
                                       snapshot.isDragging
-                                        ? "shadow-soft-lg border-indigo-500 bg-indigo-500/10 cursor-grabbing z-50"
+                                        ? "shadow-soft-lg border-primary bg-primary/10 cursor-grabbing z-50"
                                         : ""
                                     )}
                                   >
@@ -1081,7 +1089,7 @@ export const MasterDataPanel = ({
                                             })()}
 
                                           {usageCount > 0 && (
-                                            <span className="text-[10px] leading-none font-medium px-2 py-0.2 rounded-md bg-indigo-500/10 text-indigo-700 border border-indigo-500/30 flex items-center gap-1">
+                                            <span className="text-[10px] leading-none font-medium px-2 py-0.2 rounded-md bg-primary/10 text-primary border border-primary/30 flex items-center gap-1">
                                               <Tag className="w-3 h-3" />{" "}
                                               {t("rakit.activeTasks", { count: usageCount })}
                                             </span>
@@ -1109,7 +1117,7 @@ export const MasterDataPanel = ({
                                               setEditingMaster(item);
                                               setIsEditMasterModalOpen(true);
                                             }}
-                                            className="w-7 h-7 bg-surface-sunken hover:bg-indigo-500/10 text-content-muted hover:text-indigo-600 border border-border-subtle/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
+                                            className="w-7 h-7 bg-surface-sunken hover:bg-primary/10 text-content-muted hover:text-primary border border-border-subtle/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
                                             title={t("master.editMasterData")}
                                           >
                                             <Edit className="w-3.5 h-3.5 shrink-0" />
@@ -1173,7 +1181,7 @@ export const MasterDataPanel = ({
                   {newMasterLabel || t("master.labelMasterData")}
                 </span>
                 {selectedType === "project_role" && (
-                  <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-widest text-indigo-400 mt-0.5">
+                  <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-widest text-primary mt-0.5">
                     {newMasterRoleType === "PROJECT"
                       ? "Project Role (Tim Proyek)"
                       : "System Role (Akses Platform)"}
@@ -1195,7 +1203,7 @@ export const MasterDataPanel = ({
                   className={cn(
                     "py-2.5 px-3 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer",
                     newMasterRoleType === "PROJECT"
-                      ? "bg-surface text-indigo-600 shadow-soft border border-border-subtle/60"
+                      ? "bg-surface text-primary shadow-soft border border-border-subtle/60"
                       : "text-content-secondary hover:text-content"
                   )}
                 >
@@ -1207,7 +1215,7 @@ export const MasterDataPanel = ({
                   className={cn(
                     "py-2.5 px-3 rounded-xl text-xs font-medium transition-all flex items-center justify-center gap-2 cursor-pointer",
                     newMasterRoleType === "SYSTEM"
-                      ? "bg-surface text-indigo-600 shadow-soft border border-border-subtle/60"
+                      ? "bg-surface text-primary shadow-soft border border-border-subtle/60"
                       : "text-content-secondary hover:text-content"
                   )}
                 >
@@ -1347,7 +1355,7 @@ export const MasterDataPanel = ({
                         setNewMasterColor("#" + val);
                       }
                     }}
-                    className="w-full h-12 px-3 bg-surface border border-border-subtle rounded-xl text-xs font-mono font-medium text-content-body outline-none focus:border-indigo-500 transition-all uppercase"
+                    className="w-full h-12 px-3 bg-surface border border-border-subtle rounded-xl text-xs font-mono font-medium text-content-body outline-none focus:border-primary transition-all uppercase"
                     placeholder="#3b82f6"
                   />
                 </div>
@@ -1380,7 +1388,7 @@ export const MasterDataPanel = ({
                   className={cn(
                     "w-6 h-6 rounded-full border border-border-subtle transition-transform active:scale-95 duration-100 hover:scale-110",
                     newMasterColor.toLowerCase() === p.hex.toLowerCase()
-                      ? "ring-2 ring-offset-2 ring-indigo-500 scale-110"
+                      ? "ring-2 ring-offset-2 ring-primary scale-110"
                       : "hover:border-border-strong"
                   )}
                   style={{ backgroundColor: p.hex }}
@@ -1403,7 +1411,7 @@ export const MasterDataPanel = ({
                 placeholder={t("master.searchIcon")}
                 value={iconSearch}
                 onChange={(e) => setIconSearch(e.target.value)}
-                className="w-full px-10 py-2.5 bg-surface border border-border-subtle rounded-xl text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none focus:border-indigo-500 transition-all pl-10"
+                className="w-full px-10 py-2.5 bg-surface border border-border-subtle rounded-xl text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none focus:border-primary transition-all pl-10"
               />
               <Search className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
             </div>
@@ -1418,7 +1426,7 @@ export const MasterDataPanel = ({
                     className={cn(
                       "flex flex-col items-center justify-center p-2 rounded-lg transition-all",
                       newMasterIcon === i.id
-                        ? "bg-indigo-600 text-content-inverse shadow-md scale-105"
+                        ? "bg-primary-surface text-content-inverse shadow-md scale-105"
                         : "hover:bg-surface text-content-muted hover:text-content-strong"
                     )}
                     title={i.label}
@@ -1449,7 +1457,7 @@ export const MasterDataPanel = ({
             <Button
               onClick={handleCreateMasterData}
               disabled={isSaving}
-              className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
+              className="flex-1 justify-center py-3 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium"
             >
               {isSaving ? t("master.saving") : t("master.saveMasterData")}
             </Button>
@@ -1530,7 +1538,7 @@ export const MasterDataPanel = ({
                           setEditingMaster({ ...editingMaster, color: "#" + val });
                         }
                       }}
-                      className="w-full h-12 px-3 bg-surface border border-border-subtle rounded-xl text-xs font-mono font-medium text-content-body outline-none focus:border-indigo-500 transition-all uppercase"
+                      className="w-full h-12 px-3 bg-surface border border-border-subtle rounded-xl text-xs font-mono font-medium text-content-body outline-none focus:border-primary transition-all uppercase"
                       placeholder="#3b82f6"
                     />
                   </div>
@@ -1563,7 +1571,7 @@ export const MasterDataPanel = ({
                     className={cn(
                       "w-6 h-6 rounded-full border border-border-subtle transition-transform active:scale-95 duration-100 hover:scale-110",
                       (editingMaster.color || "").toLowerCase() === p.hex.toLowerCase()
-                        ? "ring-2 ring-offset-2 ring-indigo-500 scale-110"
+                        ? "ring-2 ring-offset-2 ring-primary scale-110"
                         : "hover:border-border-strong"
                     )}
                     style={{ backgroundColor: p.hex }}
@@ -1600,7 +1608,7 @@ export const MasterDataPanel = ({
                   placeholder={t("master.searchIcon")}
                   value={editIconSearch}
                   onChange={(e) => setEditIconSearch(e.target.value)}
-                  className="w-full px-10 py-2.5 bg-surface border border-border-subtle rounded-xl text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none focus:border-indigo-500 transition-all pl-10"
+                  className="w-full px-10 py-2.5 bg-surface border border-border-subtle rounded-xl text-xs font-normal text-content-body placeholder:text-content-subtle focus:outline-none focus:border-primary transition-all pl-10"
                 />
                 <Search className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2" />
               </div>
@@ -1615,7 +1623,7 @@ export const MasterDataPanel = ({
                       className={cn(
                         "flex flex-col items-center justify-center p-2 rounded-lg transition-all",
                         editingMaster.icon === i.id
-                          ? "bg-indigo-600 text-content-inverse shadow-md scale-105"
+                          ? "bg-primary-surface text-content-inverse shadow-md scale-105"
                           : "hover:bg-surface text-content-muted hover:text-content-strong"
                       )}
                       title={i.label}
@@ -1646,7 +1654,7 @@ export const MasterDataPanel = ({
               <Button
                 onClick={handleUpdateMasterData}
                 disabled={isSaving}
-                className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
+                className="flex-1 justify-center py-3 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium"
               >
                 {isSaving ? t("common.saving") : t("common.saveChanges2")}
               </Button>
@@ -1699,7 +1707,7 @@ export const MasterDataPanel = ({
               onChange={(e) => setNewModuleKeterangan(e.target.value)}
               placeholder={t("master.remarksPlaceholder")}
               rows={3}
-              className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+              className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
             />
           </div>
 
@@ -1714,7 +1722,7 @@ export const MasterDataPanel = ({
             <Button
               onClick={handleCreateModule}
               disabled={isSaving}
-              className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
+              className="flex-1 justify-center py-3 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium"
             >
               {isSaving ? t("common.saving") : t("master.addModule")}
             </Button>
@@ -1766,7 +1774,7 @@ export const MasterDataPanel = ({
               onChange={(e) => setEditingModuleKeterangan(e.target.value)}
               placeholder={t("master.remarksPlaceholder")}
               rows={3}
-              className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+              className="w-full px-4 py-3 bg-surface border border-border-subtle rounded-xl text-sm font-normal text-content-strong placeholder:text-content-subtle outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all"
             />
           </div>
 
@@ -1781,7 +1789,7 @@ export const MasterDataPanel = ({
             <Button
               onClick={handleUpdateModule}
               disabled={isSaving}
-              className="flex-1 justify-center py-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
+              className="flex-1 justify-center py-3 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium"
             >
               {isSaving ? t("common.saving") : t("common.saveChanges2")}
             </Button>

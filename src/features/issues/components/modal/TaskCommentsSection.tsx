@@ -57,7 +57,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
           className={cn(
             "pb-4 text-xs font-normal uppercase tracking-widest transition-all relative",
             activeTab === "comments"
-              ? "text-indigo-600"
+              ? "text-primary"
               : "text-content-subtle hover:text-content-secondary"
           )}
           onClick={() => setActiveTab("comments")}
@@ -66,7 +66,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
           {activeTab === "comments" && (
             <motion.div
               layoutId="activeTab"
-              className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-full"
+              className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-full"
             />
           )}
         </button>
@@ -74,7 +74,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
           className={cn(
             "pb-4 text-xs font-normal uppercase tracking-widest transition-all relative",
             activeTab === "history"
-              ? "text-indigo-600"
+              ? "text-primary"
               : "text-content-subtle hover:text-content-secondary"
           )}
           onClick={() => setActiveTab("history")}
@@ -83,7 +83,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
           {activeTab === "history" && (
             <motion.div
               layoutId="activeTab"
-              className="absolute bottom-0 left-0 right-0 h-1 bg-indigo-600 rounded-full"
+              className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-full"
             />
           )}
         </button>
@@ -99,10 +99,10 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
               className="w-9 h-9 border-2 border-surface shadow-md shrink-0"
             />
             <div className="flex-1 relative group">
-              <div className="border border-border-subtle rounded-xl bg-surface overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500/30 transition-all shadow-soft">
+              <div className="border border-border-subtle rounded-xl bg-surface overflow-hidden focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all shadow-soft">
                 <div className="flex items-center gap-1 p-1.5 border-b border-border-faint bg-surface-sunken/50 text-content-muted overflow-x-auto custom-scrollbar">
                   <button className="flex items-center gap-1.5 px-2 py-1 hover:bg-surface-strong rounded text-xs sm:text-[11px] font-normal text-content-secondary transition-colors shrink-0">
-                    <Sparkles className="w-3 h-3 text-indigo-500" />
+                    <Sparkles className="w-3 h-3 text-primary" />
                     {t("comments.improveWriting")}
                   </button>
                   <div className="w-px h-4 bg-surface-strong mx-1 shrink-0" />
@@ -163,7 +163,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                       .map((member) => (
                         <button
                           key={member.uid}
-                          className="w-full text-left px-4 py-3 hover:bg-indigo-500/10 flex items-center gap-3 focus:outline-none focus:bg-indigo-500/10 transition-all font-medium text-content-secondary"
+                          className="w-full text-left px-4 py-3 hover:bg-primary/10 flex items-center gap-3 focus:outline-none focus:bg-primary/10 transition-all font-medium text-content-secondary"
                           onClick={() => handleSelectMention(member?.username ?? "")}
                         >
                           <UserAvatar
@@ -189,7 +189,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                   size="sm"
                   onClick={wrapSubmit("addComment", handleAddComment)}
                   disabled={isSubmitting["addComment"] || !newCommentText.trim() || !isLoggedIn}
-                  className="shadow-soft-lg shadow-indigo-500/20 px-6 font-normal uppercase tracking-widest text-xs sm:text-[10px]"
+                  className="shadow-soft-lg shadow-primary/20 px-6 font-normal uppercase tracking-widest text-xs sm:text-[10px]"
                 >
                   {t("comments.save")}
                 </Button>
@@ -229,7 +229,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                         part.startsWith("@") ? (
                           <span
                             key={idx}
-                            className="text-indigo-600 font-medium bg-indigo-500/10 px-1 rounded shadow-2xs border border-indigo-500/30"
+                            className="text-primary font-medium bg-primary/10 px-1 rounded shadow-2xs border border-primary/30"
                           >
                             {part}
                           </span>

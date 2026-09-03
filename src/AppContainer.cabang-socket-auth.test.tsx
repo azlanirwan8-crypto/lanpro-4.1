@@ -10,9 +10,9 @@
 import React from "react";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 
-let socketListeners: Record<string, Function> = {};
+let socketListeners: Record<string, (...args: unknown[]) => void> = {};
 const mockSocket = {
-  on: jest.fn((event: string, cb: Function) => {
+  on: jest.fn((event: string, cb: (...args: unknown[]) => void) => {
     socketListeners[event] = cb;
   }),
   off: jest.fn(),
@@ -93,9 +93,12 @@ describe("AppContainer — Cabang Socket & Auth Lifecycle", () => {
   it("merespon window event 'auth_expired' dengan memanggil handleLogout", async () => {
     tampilkan();
 
-    await waitFor(() => {
-      expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    }, { timeout: 12000 });
+    await waitFor(
+      () => {
+        expect(screen.getAllByText(/Proyek Aktif|Active Projects/i).length).toBeGreaterThan(0);
+      },
+      { timeout: 12000 }
+    );
 
     // Pemicu token kedaluwarsa dari lapisan API
     fireEvent(window, new Event("auth_expired"));
@@ -107,9 +110,12 @@ describe("AppContainer — Cabang Socket & Auth Lifecycle", () => {
   it("menjalankan callback socket data_changed untuk seluruh tipe entitas", async () => {
     tampilkan();
 
-    await waitFor(() => {
-      expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    }, { timeout: 12000 });
+    await waitFor(
+      () => {
+        expect(screen.getAllByText(/Proyek Aktif|Active Projects/i).length).toBeGreaterThan(0);
+      },
+      { timeout: 12000 }
+    );
 
     // Jalankan listener data_changed jika terpasang
     if (socketListeners["data_changed"]) {

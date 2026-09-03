@@ -30,7 +30,7 @@ const logNotificationFailure = async (opts: {
           ? opts.error
           : JSON.stringify(opts.error);
     await conn.query(
-      "INSERT INTO NotificationDeliveryFailures (id, channel, context, recipient_id, related_id, error_message) VALUES (?, ?, ?, ?, ?, ?)",
+      `INSERT INTO "NotificationDeliveryFailures" (id, channel, context, recipient_id, related_id, error_message) VALUES (?, ?, ?, ?, ?, ?)`,
       [
         crypto.randomUUID(),
         opts.channel || "in_app",

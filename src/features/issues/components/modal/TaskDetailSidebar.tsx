@@ -131,7 +131,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
       {/* Header Title */}
       <div className="flex items-center justify-between pb-2.5 border-b border-border-subtle/80">
         <h4 className="text-[11px] font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
-          <Activity className="w-3.5 h-3.5 text-indigo-500" />
+          <Activity className="w-3.5 h-3.5 text-primary" />
           {t("issueDetail.issueAttributes")}
         </h4>
         <span className="text-[10px] font-normal text-content-muted bg-surface-strong/60 px-2 py-0.5 rounded">
@@ -246,7 +246,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               {isEditable && (!isProjectMember || isReporter) && (
                 <button
                   onClick={() => handleSuggestStoryPoints(task)}
-                  className="text-[10px] font-normal text-indigo-600 hover:text-indigo-700 flex items-center gap-0.5"
+                  className="text-[10px] font-normal text-primary hover:text-primary flex items-center gap-0.5"
                 >
                   <Sparkles className="w-3 h-3" /> AI
                 </button>
@@ -256,7 +256,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               type="number"
               initialValue={task.storyPoints || ""}
               onSave={(val: any) => updateTaskField(task.id, "storyPoints", parseInt(val) || 0)}
-              className="h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all shadow-2xs outline-none text-content-body"
+              className="h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all shadow-2xs outline-none text-content-body"
               disabled={!isEditable || blockMember}
               placeholder="0"
             />
@@ -446,7 +446,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
                 )
               }
               placeholder={t("issueDetail.addTags")}
-              className="h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs outline-none text-content-body"
+              className="h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-1 focus:ring-primary/20 focus:border-primary shadow-2xs outline-none text-content-body"
               disabled={!isEditable}
             />
           </div>
@@ -467,14 +467,14 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               onSave={(val: any) =>
                 updateTaskField(task.id, "estimatedHours", parseFloat(val) || 0)
               }
-              className="h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs outline-none text-content-body"
+              className="h-[32px] w-full text-xs font-normal bg-surface border border-border-subtle/80 hover:border-border-subtle rounded-md px-2.5 focus:ring-1 focus:ring-primary/20 focus:border-primary shadow-2xs outline-none text-content-body"
               disabled={!isEditable}
               placeholder={t("issueDetail.egHours")}
             />
           </div>
           <div className="space-y-1">
             <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
-              <LineChart className="w-3 h-3 text-indigo-500" />
+              <LineChart className="w-3 h-3 text-primary" />
               {t("issueDetail.loggedHours")}
             </label>
             <UncontrolledInput
@@ -483,7 +483,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
               step="0.5"
               initialValue={task.loggedHours || ""}
               onSave={(val: any) => updateTaskField(task.id, "loggedHours", parseFloat(val) || 0)}
-              className="h-[32px] w-full text-xs font-normal bg-indigo-500/10 border border-indigo-500/30 hover:border-indigo-500/30 rounded-md px-2.5 focus:ring-1 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-2xs outline-none text-indigo-700"
+              className="h-[32px] w-full text-xs font-normal bg-primary/10 border border-primary/30 hover:border-primary/30 rounded-md px-2.5 focus:ring-1 focus:ring-primary/20 focus:border-primary shadow-2xs outline-none text-primary"
               disabled={!isEditable}
               placeholder={t("issueDetail.egLogged")}
             />

@@ -38,6 +38,14 @@ import { cn } from "../../lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
+import { Card } from "../../components/ui/CoreUI";
+import { PageHeader } from "../../components/ui/PageHeader";
+import {
+  ListPageShell,
+  LIST_SEARCH_INPUT_CLASS,
+  LIST_TABLE_WRAP_CLASS,
+  LIST_THEAD_ROW_CLASS,
+} from "../../components/ui/ListPageShell";
 import { WikiMobileCardView } from "./components/WikiMobileCardView";
 import { hasPermission } from "../../lib/permissions";
 import { useMobileAction } from "../../contexts/MobileActionContext";
@@ -858,9 +866,9 @@ export const WikiView: React.FC<WikiViewProps> = ({
     switch (type?.toUpperCase()) {
       case "PRD":
         return {
-          bg: "bg-indigo-500/10 border-indigo-500/30 text-primary hover:bg-indigo-500/15",
+          bg: "bg-primary/10 border-primary/20 text-primary hover:bg-primary/15",
           badge:
-            "bg-indigo-500/10 text-primary border border-indigo-500/30 text-[10px] leading-none font-normal px-2.5 py-[3px] rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
+            "bg-primary/10 text-primary border border-primary/20 text-[10px] leading-none font-normal px-2.5 py-[3px] rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
           accent: "border-primary",
         };
       case "PANDUAN":
@@ -889,7 +897,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
           bg: "bg-surface-sunken border-border-faint text-content-body hover:bg-surface-muted/50",
           badge:
             "bg-surface-sunken text-content-body border border-border-subtle text-xs sm:text-[10px] font-normal px-2.5 py-0.5 rounded-md tracking-wider uppercase whitespace-nowrap inline-block",
-          accent: "border-slate-500",
+          accent: "border-border-subtle",
         };
     }
   };
@@ -898,7 +906,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
     switch (type?.toUpperCase()) {
       case "PRD":
         return (
-          <Layers className="w-3.5 h-3.5 text-indigo-600 group-hover:scale-110 transition-transform duration-300" />
+          <Layers className="w-3.5 h-3.5 text-primary group-hover:scale-110 transition-transform duration-300" />
         );
       case "PANDUAN":
         return (
@@ -922,7 +930,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
   const getCategoryGlow = (type: string) => {
     switch (type?.toUpperCase()) {
       case "PRD":
-        return "from-indigo-400/80 via-indigo-500/80 to-indigo-400/80";
+        return "from-primary/80 via-primary to-primary/80";
       case "PANDUAN":
         return "from-blue-400/80 via-blue-500/80 to-blue-400/80";
       case "LAPORAN":
@@ -937,25 +945,17 @@ export const WikiView: React.FC<WikiViewProps> = ({
   return (
     <div className="w-full flex-1 flex flex-col min-h-0 overflow-hidden relative">
       {!activeDocId ? (
-        <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-surface-muted text-left font-sans">
-          <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
-            <div className="flex-1 flex flex-col min-h-0 bg-surface">
-              {/* Header / Action Bar — #369 */}
-              <div className="p-3 md:p-6 border-b border-border-subtle/80 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/30 rounded-md text-primary shadow-2xs shrink-0">
-                    <BookOpen className="w-5 h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-medium text-content tracking-tight truncate">
-                      {t("wiki.title")}
-                    </h3>
-                    <p className="text-xs font-medium text-content-muted mt-0.5 hidden sm:block">
-                      {t("wiki.subtitle")}
-                    </p>
-                  </div>
-                </div>
-
+        <ListPageShell
+          className="font-sans"
+          header={
+            <PageHeader
+              breadcrumbs={[
+                { label: t("wiki.breadcrumbGroup", "PROJECT") },
+                { label: t("wiki.title"), current: true },
+              ]}
+              title={t("wiki.title")}
+              subtitle={<span className="hidden sm:inline">{t("wiki.subtitle")}</span>}
+              actions={
                 <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
                   <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">
                     <input
@@ -966,7 +966,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         setSearch(e.target.value);
                         setCurrentPage(1);
                       }}
-                      className="w-full min-w-0 pl-9 pr-3.5 py-1.5 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong font-medium shadow-2xs"
+                      className={LIST_SEARCH_INPUT_CLASS}
                     />
                     <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
                   </div>
@@ -982,203 +982,200 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     </button>
                   )}
                 </div>
-              </div>
+              }
+            />
+          }
+        >
+          {/* Datatable Container (Desktop sm+) */}
+          <div className={LIST_TABLE_WRAP_CLASS}>
+            <ResponsiveTable className="w-full text-left border-collapse min-w-[880px]">
+              <thead>
+                <tr className={LIST_THEAD_ROW_CLASS}>
+                  <th className="py-3 px-4 w-14 text-center">No</th>
+                  <th className="py-3 px-4 min-w-[200px] max-w-[320px]">{t("wiki.thTitle")}</th>
+                  <th className="py-3 px-4 w-44">{t("wiki.thCategory")}</th>
+                  <th className="py-3 px-4 w-44">{t("wiki.thFile")}</th>
+                  <th className="py-3 px-4 w-40">{t("meetings.thAuthor")}</th>
+                  <th className="py-3 px-4 w-36">{t("wiki.thLastUpdated")}</th>
+                  <th className="py-3 px-4 w-28 text-center">{t("discussion.action")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border-faint text-xs font-medium text-content-body">
+                {currentDocs.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-16 text-content-subtle">
+                      <div className="w-12 h-12 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
+                        <FileText className="w-5 h-5" />
+                      </div>
+                      <p className="font-medium text-content-strong text-sm">
+                        {t("wiki.emptyTitle")}
+                      </p>
+                      <p className="text-xs text-content-subtle mt-1">{t("wiki.emptyHint")}</p>
+                    </td>
+                  </tr>
+                ) : (
+                  currentDocs.map((doc, index) => {
+                    const srNo = (currentPage - 1) * itemsPerPage + index + 1;
+                    const creatorName = getUserName(doc.createdBy);
+                    const style = getCategoryStyles(doc.type);
+                    const lastEdited = doc.updatedAt
+                      ? new Date(doc.updatedAt).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      : "-";
 
-              {/* Datatable Container (Desktop sm+) */}
-              <div className="hidden sm:block flex-1 overflow-x-auto overflow-y-auto m-5 bg-surface rounded-md border border-border-subtle/80 shadow-2xs">
-                <ResponsiveTable className="w-full text-left border-collapse min-w-[880px]">
-                  <thead>
-                    <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs sm:text-[11px] font-normal text-primary uppercase tracking-wider whitespace-nowrap">
-                      <th className="py-3 px-4 w-14 text-center">No</th>
-                      <th className="py-3 px-4 min-w-[200px] max-w-[320px]">{t("wiki.thTitle")}</th>
-                      <th className="py-3 px-4 w-44">{t("wiki.thCategory")}</th>
-                      <th className="py-3 px-4 w-44">{t("wiki.thFile")}</th>
-                      <th className="py-3 px-4 w-40">{t("meetings.thAuthor")}</th>
-                      <th className="py-3 px-4 w-36">{t("wiki.thLastUpdated")}</th>
-                      <th className="py-3 px-4 w-28 text-center">{t("discussion.action")}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border-faint text-xs font-medium text-content-body">
-                    {currentDocs.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} className="text-center py-16 text-content-subtle">
-                          <div className="w-12 h-12 rounded-md bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
-                            <FileText className="w-5 h-5" />
+                    return (
+                      <tr
+                        key={doc.id}
+                        onClick={() => {
+                          setActiveDocId(doc.id);
+                          setMobileActiveView("detail");
+                        }}
+                        className="hover:bg-surface-sunken/80 transition-colors duration-150 group cursor-pointer whitespace-nowrap h-12"
+                      >
+                        <td className="py-2.5 px-4 text-center text-content-subtle font-medium whitespace-nowrap">
+                          {String(srNo).padStart(2, "0")}
+                        </td>
+                        <td className="py-2.5 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[320px]">
+                          <div className="line-clamp-1">{doc.title}</div>
+                        </td>
+                        <td className="py-2.5 px-4">
+                          <span className={style.badge}>
+                            {doc.type ? doc.type.toUpperCase() : "PRD"}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-4" onClick={(e) => e.stopPropagation()}>
+                          {doc.fileName ? (
+                            <button
+                              onClick={() => handleDownload(doc.id, doc.fileName || undefined)}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
+                              title={t("meetings.clickToDownload")}
+                            >
+                              <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
+                              <span className="truncate max-w-[130px]">
+                                {doc.fileName || t("wiki.attachment")}
+                              </span>
+                            </button>
+                          ) : (
+                            <span className="text-content-subtle italic text-xs">—</span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-4 text-content-body font-medium">
+                          <div className="flex items-center gap-2">
+                            <UserAvatar
+                              uid={doc.createdBy}
+                              members={users}
+                              name={creatorName}
+                              className="w-6 h-6 text-xs sm:text-[10px]"
+                            />
+                            <span className="truncate max-w-[130px]">{creatorName}</span>
                           </div>
-                          <p className="font-medium text-content-strong text-sm">
-                            {t("wiki.emptyTitle")}
-                          </p>
-                          <p className="text-xs text-content-subtle mt-1">{t("wiki.emptyHint")}</p>
+                        </td>
+                        <td className="py-2.5 px-4 text-content-muted font-medium">{lastEdited}</td>
+                        <td
+                          className="py-2.5 px-4 text-center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="inline-flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => {
+                                setActiveDocId(doc.id);
+                                setMobileActiveView("detail");
+                              }}
+                              className="p-1.5 text-content-subtle hover:text-primary hover:bg-primary/10 rounded-md transition-all cursor-pointer"
+                              title={t("wiki.viewDetail")}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            {canModifyDoc(doc) && (
+                              <>
+                                <button
+                                  onClick={(e) => handleEditClick(doc, e)}
+                                  className="p-1.5 text-content-subtle hover:text-primary hover:bg-primary/10 rounded-md transition-all cursor-pointer"
+                                  title={t("wiki.editDocument")}
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={(e) => handleDeleteClick(doc, e)}
+                                  className="p-1.5 text-content-subtle hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
+                                  title={t("wiki.deleteDocument")}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
-                    ) : (
-                      currentDocs.map((doc, index) => {
-                        const srNo = (currentPage - 1) * itemsPerPage + index + 1;
-                        const creatorName = getUserName(doc.createdBy);
-                        const style = getCategoryStyles(doc.type);
-                        const lastEdited = doc.updatedAt
-                          ? new Date(doc.updatedAt).toLocaleDateString("id-ID", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })
-                          : "-";
-
-                        return (
-                          <tr
-                            key={doc.id}
-                            onClick={() => {
-                              setActiveDocId(doc.id);
-                              setMobileActiveView("detail");
-                            }}
-                            className="hover:bg-surface-sunken/80 transition-colors duration-150 group cursor-pointer whitespace-nowrap h-12"
-                          >
-                            <td className="py-2.5 px-4 text-center text-content-subtle font-medium whitespace-nowrap">
-                              {String(srNo).padStart(2, "0")}
-                            </td>
-                            <td className="py-2.5 px-4 font-medium text-content group-hover:text-primary transition-colors max-w-[320px]">
-                              <div className="line-clamp-1">{doc.title}</div>
-                            </td>
-                            <td className="py-2.5 px-4">
-                              <span className={style.badge}>
-                                {doc.type ? doc.type.toUpperCase() : "PRD"}
-                              </span>
-                            </td>
-                            <td className="py-2.5 px-4" onClick={(e) => e.stopPropagation()}>
-                              {doc.fileName ? (
-                                <button
-                                  onClick={() => handleDownload(doc.id, doc.fileName || undefined)}
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
-                                  title={t("meetings.clickToDownload")}
-                                >
-                                  <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
-                                  <span className="truncate max-w-[130px]">
-                                    {doc.fileName || t("wiki.attachment")}
-                                  </span>
-                                </button>
-                              ) : (
-                                <span className="text-content-subtle italic text-xs">—</span>
-                              )}
-                            </td>
-                            <td className="py-2.5 px-4 text-content-body font-medium">
-                              <div className="flex items-center gap-2">
-                                <UserAvatar
-                                  uid={doc.createdBy}
-                                  members={users}
-                                  name={creatorName}
-                                  className="w-6 h-6 text-xs sm:text-[10px]"
-                                />
-                                <span className="truncate max-w-[130px]">{creatorName}</span>
-                              </div>
-                            </td>
-                            <td className="py-2.5 px-4 text-content-muted font-medium">
-                              {lastEdited}
-                            </td>
-                            <td
-                              className="py-2.5 px-4 text-center"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <div className="inline-flex items-center justify-center gap-1">
-                                <button
-                                  onClick={() => {
-                                    setActiveDocId(doc.id);
-                                    setMobileActiveView("detail");
-                                  }}
-                                  className="p-1.5 text-content-subtle hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
-                                  title={t("wiki.viewDetail")}
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </button>
-                                {canModifyDoc(doc) && (
-                                  <>
-                                    <button
-                                      onClick={(e) => handleEditClick(doc, e)}
-                                      className="p-1.5 text-content-subtle hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
-                                      title={t("wiki.editDocument")}
-                                    >
-                                      <Edit2 className="w-4 h-4" />
-                                    </button>
-                                    <button
-                                      onClick={(e) => handleDeleteClick(doc, e)}
-                                      className="p-1.5 text-content-subtle hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
-                                      title={t("wiki.deleteDocument")}
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </button>
-                                  </>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </ResponsiveTable>
-              </div>
-
-              {/* Mobile Card List View (< 640px) */}
-              <div className="sm:hidden flex-1 overflow-y-auto p-4 space-y-3">
-                <WikiMobileCardView
-                  documents={currentDocs}
-                  onSelectDoc={(id) => {
-                    setActiveDocId(id);
-                    setMobileActiveView("detail");
-                  }}
-                  onEditDoc={(doc, e) => handleEditClick(doc, e)}
-                  onDeleteDoc={(doc, e) => handleDeleteClick(doc, e)}
-                  onDownloadDoc={(id, fileName) => handleDownload(id, fileName || undefined)}
-                  getUserName={getUserName}
-                  canModifyDoc={canModifyDoc}
-                  canCreate={canCreate}
-                  onOpenCreate={handleCreateNew}
-                />
-              </div>
-
-              {/* Table Footer / Pagination */}
-              <div className="px-6 py-4 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-                <div className="text-xs sm:text-[10px] text-content-muted font-normal">
-                  {t("common.showing")}{" "}
-                  {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} {t("common.to")}{" "}
-                  {Math.min(currentPage * itemsPerPage, totalItems)} {t("common.of")} {totalItems}{" "}
-                  {t("common.entries")}
-                </div>
-
-                {totalPages > 1 && (
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
-                    >
-                      {t("wiki.previous")}
-                    </button>
-                    <span className="text-xs sm:text-[10px] font-normal px-2 text-content-secondary">
-                      {t("rakit.pageOf", { kini: currentPage, total: totalPages })}
-                    </span>
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
-                    >
-                      {t("wiki.next")}
-                    </button>
-                  </div>
+                    );
+                  })
                 )}
-              </div>
-            </div>
+              </tbody>
+            </ResponsiveTable>
           </div>
-        </div>
+
+          {/* Mobile Card List View (< 640px) */}
+          <div className="sm:hidden flex-1 overflow-y-auto p-4 space-y-3">
+            <WikiMobileCardView
+              documents={currentDocs}
+              onSelectDoc={(id) => {
+                setActiveDocId(id);
+                setMobileActiveView("detail");
+              }}
+              onEditDoc={(doc, e) => handleEditClick(doc, e)}
+              onDeleteDoc={(doc, e) => handleDeleteClick(doc, e)}
+              onDownloadDoc={(id, fileName) => handleDownload(id, fileName || undefined)}
+              getUserName={getUserName}
+              canModifyDoc={canModifyDoc}
+              canCreate={canCreate}
+              onOpenCreate={handleCreateNew}
+            />
+          </div>
+
+          {/* Table Footer / Pagination */}
+          <div className="px-6 py-4 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+            <div className="text-xs sm:text-[10px] text-content-muted font-normal">
+              {t("common.showing")} {totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
+              {t("common.to")} {Math.min(currentPage * itemsPerPage, totalItems)} {t("common.of")}{" "}
+              {totalItems} {t("common.entries")}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                >
+                  {t("wiki.previous")}
+                </button>
+                <span className="text-xs sm:text-[10px] font-normal px-2 text-content-secondary">
+                  {t("rakit.pageOf", { kini: currentPage, total: totalPages })}
+                </span>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                >
+                  {t("wiki.next")}
+                </button>
+              </div>
+            )}
+          </div>
+        </ListPageShell>
       ) : (
         <div className="w-full flex-1 flex flex-col min-h-0 bg-surface-sunken text-left font-sans">
           <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4">
             {activeDoc ? (
               <>
-                {/* Panel 1: Top Actions */}
-                <div className="bg-surface border border-border-subtle rounded-lg p-3.5 md:p-4 flex items-center justify-between shadow-2xs shrink-0">
+                {/* Panel 1: Top Actions — #406 Card */}
+                <Card className="p-3.5 md:p-4 flex items-center justify-between shadow-2xs shrink-0 rounded-lg">
                   <button
                     onClick={() => setActiveDocId(null)}
-                    className="flex items-center gap-1.5 text-xs font-medium text-primary bg-indigo-500/10 hover:bg-indigo-500/15 border border-indigo-500/30 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
+                    className="flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
                     title={t("wiki.backToList")}
                   >
                     <ChevronLeft className="w-4 h-4" /> {t("wiki.list")}
@@ -1204,7 +1201,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                         className={cn(
                           "flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs border rounded-md transition-all cursor-pointer whitespace-nowrap shadow-2xs",
                           isFullscreenPreview
-                            ? "bg-surface-inverse-strong border-slate-900 text-content-inverse hover:bg-surface-inverse-strong"
+                            ? "bg-surface-inverse-strong border-border-inverse text-content-inverse hover:bg-surface-inverse-strong"
                             : "bg-surface border-border-subtle text-content-body hover:bg-surface-sunken"
                         )}
                         title={
@@ -1229,7 +1226,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       <>
                         <button
                           onClick={(e) => handleEditClick(activeDoc, e)}
-                          className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer border border-border-subtle bg-surface shadow-2xs"
+                          className="p-1.5 text-content-muted hover:text-primary hover:bg-primary/10 rounded-md transition-all cursor-pointer border border-border-subtle bg-surface shadow-2xs"
                           title={t("wiki.editTitleCategory")}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -1244,10 +1241,10 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       </>
                     )}
                   </div>
-                </div>
+                </Card>
 
-                {/* Panel 2: Meta Context & Title */}
-                <div className="bg-surface border border-border-subtle rounded-lg p-5 md:p-6 shadow-2xs shrink-0">
+                {/* Panel 2: Meta Context & Title — #406 Card */}
+                <Card className="p-5 md:p-6 shadow-2xs shrink-0 rounded-lg">
                   <div className="flex flex-wrap items-center gap-2 select-none mb-3">
                     <span className={getCategoryStyles(activeDoc.type).badge}>
                       {activeDoc.type}
@@ -1271,10 +1268,10 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     <FileText className="w-6 h-6 text-primary shrink-0" />
                     <span className="truncate">{activeDoc.title}</span>
                   </h2>
-                </div>
+                </Card>
 
-                {/* Mobile Tab Switcher (< 768px) */}
-                <div className="md:hidden flex items-center bg-surface border border-border-subtle rounded-lg p-1 shadow-2xs shrink-0">
+                {/* Mobile Tab Switcher (< 768px) — #406 Card */}
+                <Card className="md:hidden flex items-center p-1 shadow-2xs shrink-0 rounded-lg">
                   <button
                     type="button"
                     onClick={() => setMobileDetailTab("preview")}
@@ -1301,10 +1298,10 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     <MessageSquare className="w-3.5 h-3.5" />
                     <span>{t("wiki.notesComments")}</span>
                   </button>
-                </div>
+                </Card>
 
-                {/* Panel 3: Split-Pane Dual Workspace Layout */}
-                <div className="bg-surface border border-border-subtle rounded-lg shadow-2xs flex-1 flex flex-col md:flex-row min-h-[500px] md:min-h-[600px] overflow-hidden p-3 gap-3">
+                {/* Panel 3: Split-Pane Dual Workspace Layout — #406 Card */}
+                <Card className="shadow-2xs flex-1 flex flex-col md:flex-row min-h-[500px] md:min-h-[600px] overflow-hidden p-3 gap-3 rounded-lg">
                   {/* LEFT PANE / MAIN VIEW (DOCUMENT VIEWER) */}
                   <div
                     className={cn(
@@ -1409,11 +1406,11 @@ export const WikiView: React.FC<WikiViewProps> = ({
                             className={cn(
                               "border-2 border-dashed rounded-md p-5 max-w-sm w-full flex flex-col items-center justify-center gap-3 text-center group transition-all bg-surface shadow-2xs",
                               canUpdate
-                                ? "cursor-pointer hover:border-primary hover:bg-indigo-500/10"
+                                ? "cursor-pointer hover:border-primary hover:bg-primary/10"
                                 : "cursor-not-allowed opacity-70 border-border-subtle"
                             )}
                           >
-                            <div className="w-12 h-12 bg-indigo-500/10 text-primary rounded-md flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform duration-200">
+                            <div className="w-12 h-12 bg-primary/10 text-primary rounded-md flex items-center justify-center shadow-2xs group-hover:scale-105 transition-transform duration-200">
                               <Upload className="w-6 h-6" />
                             </div>
                             <div>
@@ -1480,7 +1477,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3.5 bg-surface-sunken/30">
                       {!activeDocId || (docCommentsMap[activeDocId] || []).length === 0 ? (
                         <div className="text-center py-12 px-4 my-auto">
-                          <div className="w-12 h-12 rounded-md bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
+                          <div className="w-12 h-12 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
                             <MessageSquare className="w-6 h-6" />
                           </div>
                           <h4 className="text-xs font-medium text-content-strong">
@@ -1530,7 +1527,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                                   <span
                                     className={cn(
                                       "absolute bottom-1 right-3 text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-tight",
-                                      isMine ? "text-indigo-200" : "text-content-subtle"
+                                      isMine ? "text-content-inverse/70" : "text-content-subtle"
                                     )}
                                   >
                                     {new Date(comment.createdAt).toLocaleTimeString("id-ID", {
@@ -1576,12 +1573,12 @@ export const WikiView: React.FC<WikiViewProps> = ({
                       </div>
                     </div>
                   </div>
-                </div>
+                </Card>
               </>
             ) : (
-              /* Workspace Empty State */
-              <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-surface border border-border-subtle rounded-lg shadow-2xs select-none">
-                <div className="w-14 h-14 rounded-md bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mb-4 text-primary shadow-2xs">
+              /* Workspace Empty State — #406 Card */
+              <Card className="flex-1 flex flex-col items-center justify-center p-8 text-center shadow-2xs select-none rounded-lg">
+                <div className="w-14 h-14 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center mb-4 text-primary shadow-2xs">
                   <BookOpen className="w-7 h-7" />
                 </div>
                 <h2 className="text-sm font-medium text-content-strong tracking-tight">
@@ -1598,7 +1595,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     <Plus className="w-4 h-4" /> {t("wiki.addNewDocument")}
                   </button>
                 )}
-              </div>
+              </Card>
             )}
           </div>
         </div>
@@ -1621,7 +1618,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
               {/* Modal header decor */}
               <div className="bg-surface-sunken/80 px-5 py-3.5 border-b border-border-faint flex justify-between items-center select-none">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-indigo-500/10 border border-indigo-500/30 text-primary rounded-md flex items-center justify-center shadow-2xs">
+                  <div className="w-8 h-8 bg-primary/10 border border-primary/20 text-primary rounded-md flex items-center justify-center shadow-2xs">
                     {isNew ? <Plus className="w-4 h-4" /> : <Edit2 className="w-4 h-4" />}
                   </div>
                   <div>
@@ -1722,8 +1719,8 @@ export const WikiView: React.FC<WikiViewProps> = ({
                     className={cn(
                       "border-2 border-dashed rounded-md p-4 flex flex-col items-center justify-center gap-2 cursor-pointer text-center group transition-all",
                       dragActive
-                        ? "border-primary bg-indigo-500/10"
-                        : "border-border-subtle bg-surface-sunken/50 hover:border-primary hover:bg-indigo-500/10"
+                        ? "border-primary bg-primary/10"
+                        : "border-border-subtle bg-surface-sunken/50 hover:border-primary hover:bg-primary/10"
                     )}
                   >
                     <Upload
@@ -1735,7 +1732,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
 
                     {editFile ? (
                       <div>
-                        <p className="text-[10px] leading-none font-medium text-primary bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-1 rounded-md inline-flex items-center gap-1">
+                        <p className="text-[10px] leading-none font-medium text-primary bg-primary/10 border border-primary/20 px-2.5 py-1 rounded-md inline-flex items-center gap-1">
                           <Paperclip className="w-3 h-3" />
                           {editFile.name}
                         </p>

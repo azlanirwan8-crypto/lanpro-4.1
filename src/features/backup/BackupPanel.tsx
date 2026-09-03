@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { createBackup, restoreBackup } from "./services/backup.service";
 import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
+import { PageHeader } from "../../components/ui/PageHeader";
 
 interface ExportItem {
   id: string;
@@ -194,6 +195,14 @@ export const BackupPanel = (_props: {
 
   return (
     <div className="flex-1 overflow-auto p-4 md:p-5 bg-surface-sunken/60 custom-scrollbar w-full space-y-4">
+      <PageHeader
+        breadcrumbs={[
+          { label: t("dbExplorer.systemTools", "Tools") },
+          { label: t("backup.exportDatabase"), current: true },
+        ]}
+        title={t("backup.exportDatabase")}
+        subtitle={t("backupPanel.exportHint")}
+      />
       {/* Top Cards: Export & Restore — #370: 2 kolom di HP */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
         {/* Export Box */}
@@ -277,7 +286,7 @@ export const BackupPanel = (_props: {
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="hidden sm:block overflow-x-auto">
           <ResponsiveTable className="w-full text-left border-collapse text-xs">
             <thead className="bg-surface-muted/70 text-content-body border-b border-border-subtle/80 font-normal uppercase tracking-wider text-xs sm:text-[11px]">
               <tr>
@@ -337,7 +346,7 @@ export const BackupPanel = (_props: {
                       {item.status === "completed" && (
                         <button
                           onClick={() => handleDownloadItem(item)}
-                          className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded font-medium text-xs sm:text-[11px] transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
+                          className="px-2.5 py-1 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded font-medium text-xs sm:text-[11px] transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
                           title={t("backup.downloadBackup")}
                         >
                           <Download className="w-3 h-3" />
@@ -368,6 +377,75 @@ export const BackupPanel = (_props: {
               )}
             </tbody>
           </ResponsiveTable>
+        </div>
+
+        {/* #388 — kartu riwayat backup di bawah sm */}
+        <div className="sm:hidden divide-y divide-border-subtle/60">
+          {exportHistory.length > 0 ? (
+            exportHistory.map((item) => (
+              <div key={item.id} className="p-4 flex flex-col gap-3">
+                <div className="min-w-0">
+                  <p className="font-mono text-xs font-medium text-content-strong truncate">
+                    {item.filename}
+                  </p>
+                  <p className="text-[11px] text-content-muted mt-1 flex items-center gap-1">
+                    <Clock className="w-3 h-3 shrink-0" />
+                    {format(item.createdAt, "dd MMM yyyy, HH:mm")}
+                    {item.status === "completed" && (
+                      <span className="text-content-subtle">· {formatSize(item.sizeBytes)}</span>
+                    )}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  {item.status === "processing" && (
+                    <span className="inline-flex items-center gap-1 text-[11px] text-amber-700 font-medium">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      {item.progress}%
+                    </span>
+                  )}
+                  {item.status === "completed" && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">
+                      <CheckCircle2 className="w-3 h-3" />
+                      {t("backupPanel.done")}
+                    </span>
+                  )}
+                  {item.status === "failed" && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-rose-500/10 text-rose-700 border border-rose-500/30">
+                      <AlertTriangle className="w-3 h-3" />
+                      {t("backupPanel.failed")}
+                    </span>
+                  )}
+                  <div className="flex-1" />
+                  {item.status === "completed" && (
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadItem(item)}
+                      className="min-h-11 px-3 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium inline-flex items-center gap-1 cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      {t("backupPanel.download")}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setDeleteId(item.id)}
+                    className="min-h-11 px-3 bg-rose-500/10 text-rose-700 border border-rose-500/30 rounded-md text-xs font-medium inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    {t("backupPanel.delete")}
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="py-8 px-4 text-center text-content-subtle text-xs">
+              {t("backup.noBackupExportHistoryYet")}{" "}
+              <strong className="font-medium text-content-secondary">
+                {t("backup.exportProjectBackup")}
+              </strong>{" "}
+              {t("backup.buttonAboveToCreateA")}
+            </div>
+          )}
         </div>
       </div>
 

@@ -112,7 +112,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
                 handleUpdateActiveNode({ color: colName });
               }}
               className={cn(
-                "w-3.5 h-3.5 rounded-full border border-black/10 transition-transform hover:scale-125 focus:outline-none",
+                "w-3.5 h-3.5 rounded-full border border-border-subtle transition-transform hover:scale-125 focus:outline-none",
                 colorClassMap[colName],
                 node.color === colName && "ring-2 ring-violet-500 scale-110"
               )}
@@ -214,7 +214,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
       {/* Duplicate */}
       <button
         onClick={() => handleDuplicateNode(node)}
-        className="p-1 text-content-muted hover:text-indigo-600 rounded hover:bg-indigo-500/10"
+        className="p-1 text-content-muted hover:text-primary rounded hover:bg-primary/10"
         title={t("shapes.duplicateShape")}
       >
         <Copy className="w-3.5 h-3.5" />

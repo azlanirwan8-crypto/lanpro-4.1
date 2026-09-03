@@ -3,7 +3,7 @@
  */
 export const styles = {
   container:
-    "flex flex-col bg-surface rounded-md border border-border-subtle/80 shadow-xs font-sans relative flex-1 min-h-[500px] overflow-hidden",
+    "flex flex-col bg-surface rounded-lg border border-border-subtle/80 shadow-xs font-sans relative flex-1 min-h-[500px] overflow-hidden",
   // #363 — kontrol utama (search/filter/config) 1 baris di HP; pill aktif di baris bawah.
   toolbar:
     "flex flex-col gap-2 px-3 sm:px-4 py-3 border-b border-border-subtle/80 bg-surface-sunken/50 shrink-0",

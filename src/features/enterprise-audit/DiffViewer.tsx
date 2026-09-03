@@ -62,7 +62,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
               key={key}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className={`grid grid-cols-12 gap-0 py-3 px-3 items-center transition-colors hover:bg-surface-sunken/50 ${isDifferent ? "bg-indigo-500/10" : ""}`}
+              className={`grid grid-cols-12 gap-0 py-3 px-3 items-center transition-colors hover:bg-surface-sunken/50 ${isDifferent ? "bg-primary/10" : ""}`}
             >
               <div className="col-span-4 px-2">
                 <span className="text-xs font-medium text-content-body bg-surface-muted px-2 py-1 rounded-md break-all">
@@ -76,7 +76,7 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
                     <Minus className="w-2 h-2" /> {t("audit.newData")}
                   </span>
                 ) : (
-                  <span className="text-xs text-rose-500 line-through decoration-rose-300 break-words w-full">
+                  <span className="text-xs text-danger-text line-through decoration-danger/40 break-words w-full">
                     {formatValue(oldVal)}
                   </span>
                 )}
@@ -84,15 +84,13 @@ export const DiffViewer: React.FC<DiffViewerProps> = ({ oldValues, newValues }) 
 
               <div className="col-span-4 px-2 border-l border-border-faint min-h-[1.5rem] flex items-center">
                 {newVal === undefined || newVal === null ? (
-                  <span className="text-xs sm:text-[10px] font-medium text-rose-400 italic">
+                  <span className="text-xs sm:text-[10px] font-medium text-danger-text italic">
                     {t("diff.deleted")}
                   </span>
                 ) : (
                   <div className="flex items-center gap-2 w-full">
-                    {isDifferent && (
-                      <ArrowRight className="w-3 h-3 text-indigo-300 flex-shrink-0" />
-                    )}
-                    <span className="text-xs text-emerald-600 font-medium break-words">
+                    {isDifferent && <ArrowRight className="w-3 h-3 text-primary flex-shrink-0" />}
+                    <span className="text-xs text-success-text font-medium break-words">
                       {formatValue(newVal)}
                     </span>
                   </div>

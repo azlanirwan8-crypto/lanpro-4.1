@@ -2498,7 +2498,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
           <div className="flex-1 flex flex-col min-h-[600px] bg-transparent relative mb-8">
             {!selectedFlowId ? (
               <div className="flex-1 flex flex-col items-center justify-center p-8 bg-surface border border-border-subtle rounded-lg shadow-soft">
-                <div className="w-16 h-16 bg-surface border border-border-faint shadow-soft rounded-xl flex items-center justify-center mb-4 text-violet-600">
+                <div className="w-16 h-16 bg-surface border border-border-faint shadow-soft rounded-xl flex items-center justify-center mb-4 text-primary">
                   <FileText className="w-6 h-6 animate-pulse" />
                 </div>
                 <h2 className="text-base font-medium text-content-strong mb-1">
@@ -2599,7 +2599,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       </span>
                     )}
                     {!currentFlowMetadata?.category && (
-                      <span className="px-2.5 py-1 text-[10px] leading-none font-normal uppercase tracking-wider bg-violet-500/10 text-violet-700 border border-violet-500/30 rounded-full">
+                      <span className="px-2.5 py-1 text-[10px] leading-none font-normal uppercase tracking-wider bg-primary/10 text-primary border border-primary/30 rounded-full">
                         {t("flowchart.general")}
                       </span>
                     )}
@@ -2624,7 +2624,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       <>
                         <span className="text-content-subtle">•</span>
                         <span
-                          className="text-[10px] leading-none font-medium bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-[3px] rounded-full truncate max-w-[180px]"
+                          className="text-[10px] leading-none font-medium bg-primary/10 border border-primary/30 px-2.5 py-[3px] rounded-full truncate max-w-[180px]"
                           title={linkedEpic.title}
                         >
                           {t("flowchart.epic")} {linkedEpic.title}
@@ -2634,7 +2634,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   </div>
 
                   <h2 className="text-xl md:text-2xl font-medium text-content tracking-tight leading-snug flex items-center gap-2">
-                    <Workflow className="w-6 h-6 text-violet-600 shrink-0" />
+                    <Workflow className="w-6 h-6 text-primary shrink-0" />
                     <span className="truncate">{currentFlowMetadata?.name}</span>
                   </h2>
 
@@ -2655,12 +2655,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         {/* Header Left Pane */}
                         <div className="p-4 border-b border-border-subtle flex items-center justify-between bg-surface shrink-0">
                           <h4 className="text-sm font-medium text-content-strong flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-violet-600" />
+                            <FileText className="w-5 h-5 text-primary" />
                             {t("flowchart.documentList")}
                           </h4>
                           <button
                             onClick={openUploadDocumentModal}
-                            className="p-2 bg-violet-600 hover:bg-violet-700 text-content-inverse font-medium rounded text-xs transition-colors cursor-pointer shadow-soft active:scale-95 flex items-center gap-2"
+                            className="p-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded text-xs transition-colors cursor-pointer shadow-soft active:scale-95 flex items-center gap-2"
                             title={t("flowchart.uploadNewDocument")}
                           >
                             <Plus className="w-4 h-4" /> {t("flowchart.addDocument")}
@@ -2674,10 +2674,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               {currentFlowMetadata.documents.map((doc, idx) => (
                                 <div
                                   key={doc.id}
-                                  className="p-4 rounded-xl border border-border-subtle bg-surface flex flex-col gap-4 shadow-soft hover:shadow hover:border-violet-500/30 transition-all group"
+                                  className="p-4 rounded-xl border border-border-subtle bg-surface flex flex-col gap-4 shadow-soft hover:shadow hover:border-primary/30 transition-all group"
                                 >
                                   <div className="flex items-start justify-between gap-3">
-                                    <div className="w-10 h-10 rounded-lg bg-violet-500/10 text-violet-600 flex items-center justify-center shrink-0">
+                                    <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
                                       <FileText className="w-5 h-5" />
                                     </div>
                                     <div className="flex flex-col flex-1 min-w-0">
@@ -2700,7 +2700,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                     <a
                                       href={doc.fileData}
                                       download={doc.fileName}
-                                      className="flex items-center gap-2 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-500/10 hover:bg-indigo-500/15 px-3 py-1.5 rounded-lg transition-colors"
+                                      className="flex items-center gap-2 text-xs font-medium text-primary hover:text-primary bg-primary/10 hover:bg-primary/15 px-3 py-1.5 rounded-lg transition-colors"
                                     >
                                       <Download className="w-3.5 h-3.5" /> {t("flowchart.download")}
                                     </a>
@@ -2756,7 +2756,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           className={cn(
                             "p-2 rounded-lg transition-all w-9 h-9 flex items-center justify-center",
                             activeTool === "select"
-                              ? "bg-violet-600 text-content-inverse shadow-md"
+                              ? "bg-primary-surface text-content-inverse shadow-md"
                               : "hover:bg-surface-muted text-content-body"
                           )}
                           title={t("flowchart.toolPointer")}
@@ -2773,7 +2773,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           className={cn(
                             "p-2 rounded-lg transition-all w-9 h-9 flex items-center justify-center",
                             activeTool === "hand"
-                              ? "bg-violet-600 text-content-inverse shadow-md"
+                              ? "bg-primary-surface text-content-inverse shadow-md"
                               : "hover:bg-surface-muted text-content-body"
                           )}
                           title={t("flowchart.toolHand")}
@@ -2841,7 +2841,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                         <button
                           type="button"
-                          className="p-2 text-content-subtle hover:text-violet-600 transition-colors rounded-lg w-9 h-9 flex items-center justify-center"
+                          className="p-2 text-content-subtle hover:text-primary transition-colors rounded-lg w-9 h-9 flex items-center justify-center"
                           title={t("flowchart.helpNav")}
                           onClick={() =>
                             toast.info(
@@ -3044,7 +3044,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               <div className="w-px h-3.5" />
               <span className="font-medium">X: <span className="text-content-inverse-strong">{hoverCoords.x}</span> Y: <span className="text-content-inverse-strong">{hoverCoords.y}</span></span>
               <div className="w-px h-3.5" />
-              <span className="text-violet-300 font-medium">{t("rakit.objectsCount", { count: nodes.length })}</span>
+              <span className="text-primary font-medium">{t("rakit.objectsCount", { count: nodes.length })}</span>
             </div> */}
 
                         {/* Right sidebar flap — #321: icon-only di HP */}
@@ -3056,7 +3056,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             if (next) setIsShapeDropdownOpen(false);
                           }}
                           className={cn(
-                            "absolute z-30 p-2 bg-surface/70 backdrop-blur hover:bg-surface/85 border border-border-subtle/40 text-content-body hover:text-violet-600 shadow-soft-lg rounded-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 text-xs font-medium duration-300",
+                            "absolute z-30 p-2 bg-surface/70 backdrop-blur hover:bg-surface/85 border border-border-subtle/40 text-content-body hover:text-primary shadow-soft-lg rounded-xl transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 text-xs font-medium duration-300",
                             isRightSidebarOpen
                               ? "right-3 bottom-[min(58vh,30rem)] md:bottom-4 md:right-[304px]"
                               : "right-3 bottom-4"
@@ -3089,7 +3089,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               "p-2 rounded-xl transition-all flex items-center justify-center",
                               historyIndex <= 0
                                 ? "text-content-subtle cursor-not-allowed"
-                                : " hover:bg-surface-muted hover:text-violet-600 active:scale-95"
+                                : " hover:bg-surface-muted hover:text-primary active:scale-95"
                             )}
                             title={t("flowchart.undo")}
                           >
@@ -3104,7 +3104,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               "p-2 rounded-xl transition-all flex items-center justify-center",
                               historyIndex >= historyStack.length - 1
                                 ? "text-content-subtle cursor-not-allowed"
-                                : " hover:bg-surface-muted hover:text-violet-600 active:scale-95"
+                                : " hover:bg-surface-muted hover:text-primary active:scale-95"
                             )}
                             title={t("flowchart.redo")}
                           >
@@ -3119,7 +3119,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             className="p-1 px-2 text-content-body hover:bg-surface-muted rounded-xl transition-all flex items-center gap-1 active:scale-95 text-xs sm:text-[10px] font-medium"
                             title={t("flowchart.autoAlignHint")}
                           >
-                            <Sparkles className="w-3.5 h-3.5 text-violet-600 fill-violet-200" />
+                            <Sparkles className="w-3.5 h-3.5 text-primary fill-primary/20" />
                             <span className="hidden sm:inline">{t("flowchart.autoAlign")}</span>
                           </button>
 
@@ -3190,7 +3190,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           {isWorkspaceEditable ? (
                             <button
                               onClick={() => handleSaveWorkspace()}
-                              className="p-2 bg-violet-600 hover:bg-violet-700 text-content-inverse font-medium rounded-xl flex items-center gap-1.5 transition-all shadow-soft active:scale-95"
+                              className="p-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-xl flex items-center gap-1.5 transition-all shadow-soft active:scale-95"
                               title={t("flowchart.saveFlowchart")}
                             >
                               <Save className="w-3.5 h-3.5" />
@@ -3228,7 +3228,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </button>
                             <button
                               onClick={() => setZoomLevel(1)}
-                              className="px-2 text-xs sm:text-[10px] font-medium text-content-secondary hover:text-violet-600 w-11 text-center font-mono cursor-pointer transition-colors"
+                              className="px-2 text-xs sm:text-[10px] font-medium text-content-secondary hover:text-primary w-11 text-center font-mono cursor-pointer transition-colors"
                               title={t("flowchart.zoomReset")}
                             >
                               {Math.round(zoomLevel * 100)}%
@@ -3263,7 +3263,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         {isKeyboardHelpOpen && (
                           <div className="absolute left-4 right-4 md:left-auto md:right-4 bottom-20 z-40 bg-overlay/95 backdrop-blur text-content-inverse p-4 rounded-xl border shadow-2xl max-w-sm space-y-3 p-4 select-none">
                             <div className="flex justify-between items-center pb-2 border-b border-border-inverse">
-                              <span className="font-medium tracking-wide text-xs sm:text-[11px] text-violet-400">
+                              <span className="font-medium tracking-wide text-xs sm:text-[11px] text-primary">
                                 {t("flowchart.shortcutsTitle")}
                               </span>
                               <button
@@ -3378,7 +3378,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                   {t("flowchart.selectedComponent")}
                                 </span>
                                 <div className="text-content font-medium capitalize flex items-center gap-1.5 mt-0.5 text-xs">
-                                  <div className="w-2 h-2 rounded bg-violet-500" />
+                                  <div className="w-2 h-2 rounded bg-primary" />
                                   {nodes.find((n) => n.id === selectedNodeId)?.type || "Unknown"}
                                 </div>
                               </div>
@@ -3395,7 +3395,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             {/* Shape Type Dropper Selector (Miro Dynamic conversion) */}
                             <div className="space-y-1.5">
                               <label className="text-[11px] font-medium text-content-muted flex items-center gap-1">
-                                <Layers className="w-3.5 h-3.5 text-violet-600" />
+                                <Layers className="w-3.5 h-3.5 text-primary" />
                                 <span>{t("flowchart.changeShapeType")}</span>
                               </label>
                               <StyledDropdown
@@ -3435,7 +3435,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               <textarea
                                 value={nodes.find((n) => n.id === selectedNodeId)?.label || ""}
                                 onChange={(e) => handleUpdateActiveNode({ label: e.target.value })}
-                                className="w-full h-16 text-xs bg-surface-sunken border border-border-subtle rounded p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 font-medium transition-all"
+                                className="w-full h-16 text-xs bg-surface-sunken border border-border-subtle rounded p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary font-medium transition-all"
                                 placeholder={t("flowchart.textLabelPlaceholder")}
                               />
                             </div>
@@ -3457,7 +3457,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         "h-5 rounded-md hover:scale-105 border transition-all",
                                         colorPalettes[colName].preview,
                                         isActive
-                                          ? "border-slate-400 ring-2 ring-violet-500 scale-105"
+                                          ? "border-border-subtle ring-2 ring-primary scale-105"
                                           : "border-border-subtle"
                                       )}
                                       title={colName}
@@ -3490,7 +3490,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                       className={cn(
                                         "p-1 rounded font-medium text-xs sm:text-[10px] text-center border capitalize transition-all",
                                         currentVal === st.val
-                                          ? "bg-violet-500/10 text-violet-700 border-violet-500/30"
+                                          ? "bg-primary/10 text-primary border-primary/30"
                                           : "bg-surface-sunken text-content-secondary border-border-subtle hover:bg-surface-muted"
                                       )}
                                     >
@@ -3521,7 +3521,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         width: parseInt(e.target.value) || 120,
                                       })
                                     }
-                                    className="w-full text-xs font-mono bg-surface-sunken border border-border-subtle rounded p-1 mt-0.5 text-center text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-medium"
+                                    className="w-full text-xs font-mono bg-surface-sunken border border-border-subtle rounded p-1 mt-0.5 text-center text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary transition-all font-medium"
                                   />
                                 </div>
                                 <div>
@@ -3540,7 +3540,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                         height: parseInt(e.target.value) || 120,
                                       })
                                     }
-                                    className="w-full text-xs font-mono bg-surface-sunken border border-border-subtle rounded p-1 mt-0.5 text-center text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 transition-all font-medium"
+                                    className="w-full text-xs font-mono bg-surface-sunken border border-border-subtle rounded p-1 mt-0.5 text-center text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary transition-all font-medium"
                                   />
                                 </div>
                               </div>
@@ -3549,7 +3549,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             {/* Integration with Workspace tasks list (LINKING TASKS BACKLOG TO SHAPES) */}
                             <div className="space-y-1.5 pt-2 border-t border-border-subtle">
                               <label className="text-[11px] font-medium text-content-muted flex items-center gap-1">
-                                <Workflow className="w-3.5 h-3.5 text-violet-600" />
+                                <Workflow className="w-3.5 h-3.5 text-primary" />
                                 <span>{t("flowchart.linkTaskBacklog")}</span>
                               </label>
                               <p className="text-xs sm:text-[11px] text-content-muted mb-2 font-medium">
@@ -3598,7 +3598,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                                   );
                                   setEdges(updated);
                                 }}
-                                className="w-full text-xs bg-surface-sunken border border-border-subtle rounded p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-violet-500 font-medium transition-all"
+                                className="w-full text-xs bg-surface-sunken border border-border-subtle rounded p-2 text-content focus:bg-surface focus:outline-none focus:ring-1 focus:ring-primary font-medium transition-all"
                                 placeholder={t("flowchart.lineLabelPlaceholder")}
                               />
                             </div>
@@ -3613,7 +3613,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         ) : (
                           <div className="text-center py-16 text-content-muted space-y-3">
                             <div className="w-10 h-10 bg-surface-sunken rounded-full flex items-center justify-center mx-auto text-content-subtle border border-border-subtle shadow-soft">
-                              <MousePointer className="w-4 h-4 text-violet-600" />
+                              <MousePointer className="w-4 h-4 text-primary" />
                             </div>
                             <div className="text-xs sm:text-[11px] font-medium text-content">
                               {t("flowchart.noComponentSelected")}
@@ -3879,7 +3879,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   </p>
 
                   {uploadDocFile && (
-                    <div className="mt-3 p-2.5 bg-indigo-500/10 border border-indigo-500/30 rounded-md w-full flex items-center justify-between">
+                    <div className="mt-3 p-2.5 bg-primary/10 border border-primary/30 rounded-md w-full flex items-center justify-between">
                       <div className="flex flex-col min-w-0">
                         <span className="text-xs font-medium text-primary truncate">
                           {uploadDocFile.name}

@@ -123,7 +123,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
                   <button
                     type="button"
                     onClick={() => onEditPoint(p)}
-                    className="p-1 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
+                    className="p-1 text-content-muted hover:text-primary hover:bg-primary/10 rounded-md transition-all cursor-pointer"
                     title={t("discussion.editRow")}
                   >
                     <Edit2 className="w-3.5 h-3.5" />
@@ -173,7 +173,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
               {/* Context Tag */}
               <div className="flex items-center gap-1 min-w-0">
                 {p.fitur ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-indigo-500/10 text-primary border border-indigo-500/30 truncate max-w-[130px]">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20 truncate max-w-[130px]">
                     <Tag className="w-3 h-3 shrink-0" />
                     {contextMeta?.label || p.fitur}
                   </span>

@@ -92,11 +92,11 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                 sprint.status === "active"
                   ? isOverdue
                     ? "border-red-400 ring-2 ring-red-50"
-                    : "border-indigo-500 ring-2 ring-indigo-500/10"
+                    : "border-primary ring-2 ring-primary/10"
                   : sprint.status === "planned"
-                    ? "border-border-subtle/90 hover:border-indigo-500/40"
+                    ? "border-border-subtle/90 hover:border-primary/40"
                     : "border-border-subtle/60 bg-surface-sunken/40 opacity-95",
-                isExpanded && sprint.status !== "active" ? "border-indigo-500/30" : ""
+                isExpanded && sprint.status !== "active" ? "border-primary/30" : ""
               )}
             >
               {/* Header Sprint (Presisi Gambar 1) */}
@@ -158,7 +158,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
 
                   {/* Sisi Tengah: Sprint Goal (Pemisah Garis Vertikal - Tanpa Ikon Pensil) */}
                   <div className="hidden md:flex flex-col min-w-0 flex-1 border-l border-border-subtle/80 pl-5 my-0.5 max-w-md">
-                    <div className="text-xs font-normal text-indigo-600">Sprint Goal</div>
+                    <div className="text-xs font-normal text-primary">Sprint Goal</div>
                     <p className="text-xs text-content-body font-normal leading-relaxed line-clamp-2 mt-0.5">
                       {sprint.goal ||
                         t(
@@ -225,7 +225,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                                 }}
                                 className="w-full px-3 py-2 text-left text-xs font-normal text-content-strong hover:bg-surface-sunken flex items-center gap-2 transition-colors cursor-pointer"
                               >
-                                <Edit2 className="w-3.5 h-3.5 text-indigo-500" />
+                                <Edit2 className="w-3.5 h-3.5 text-primary" />
                                 <span>{t("planning.editSprint", "Edit Sprint")}</span>
                               </button>
                               <button
@@ -250,7 +250,7 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-2.5 bg-surface-sunken/50 rounded-xl border border-border-subtle/70 mt-1">
                   {/* 1. Issues Card */}
                   <div className="bg-surface border border-border-subtle/80 rounded-lg p-2.5 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
                       <Calendar className="w-4 h-4" />
                     </div>
                     <div>

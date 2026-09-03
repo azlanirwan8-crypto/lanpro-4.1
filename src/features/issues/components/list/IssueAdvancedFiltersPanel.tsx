@@ -111,7 +111,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
       <div className={styles.toolbar}>
         <div className="flex flex-nowrap items-center gap-2 w-full min-w-0">
           <div className={styles.searchWrapper}>
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-content-subtle group-focus-within:text-indigo-500 transition-colors" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-content-subtle group-focus-within:text-primary transition-colors" />
             <input
               value={issueSearch}
               onChange={(e) => setIssueSearch(e.target.value)}
@@ -144,7 +144,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             <button
               type="button"
               onClick={() => setIsConfigureColumnsOpen(true)}
-              className="p-2 bg-surface border border-border-subtle rounded-lg text-content-muted hover:text-indigo-600 hover:border-indigo-500/30 transition-all shadow-soft"
+              className="p-2 bg-surface border border-border-subtle rounded-lg text-content-muted hover:text-primary hover:border-primary/30 transition-all shadow-soft"
               title={t("filters.configureColumns")}
             >
               <Settings2 className="w-4 h-4" />
@@ -195,7 +195,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
               </span>
             )}
             {listFilterAssignee !== "All" && (
-              <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/30 flex items-center gap-1 shadow-soft">
+              <span className="text-[10px] leading-none font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full border border-primary/30 flex items-center gap-1 shadow-soft">
                 {t("filters.assignee")}{" "}
                 {projectMembers.find((m) => m.uid === listFilterAssignee)?.displayName ||
                   t("newTask.unassigned")}

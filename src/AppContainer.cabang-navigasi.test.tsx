@@ -129,9 +129,12 @@ describe("AppContainer — Cabang Navigasi & Interaksi Global", () => {
   it("berpindah view saat menu navigasi diklik", async () => {
     tampilkan();
 
-    await waitFor(() => {
-      expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    }, { timeout: 12000 });
+    await waitFor(
+      () => {
+        expect(screen.getAllByText(/Proyek Aktif|Active Projects/i).length).toBeGreaterThan(0);
+      },
+      { timeout: 12000 }
+    );
 
     // Klik menu Board / Kanban jika ada
     const kanbanButtons = screen.queryAllByText(/Board|Kanban/i);
@@ -157,9 +160,12 @@ describe("AppContainer — Cabang Navigasi & Interaksi Global", () => {
   it("merespon keyboard shortcut '?' untuk membuka modal shortcuts", async () => {
     tampilkan();
 
-    await waitFor(() => {
-      expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    }, { timeout: 12000 });
+    await waitFor(
+      () => {
+        expect(screen.getAllByText(/Proyek Aktif|Active Projects/i).length).toBeGreaterThan(0);
+      },
+      { timeout: 12000 }
+    );
 
     fireEvent.keyDown(window, { key: "?", code: "Slash", shiftKey: true });
     expect(screen.queryByText(/React Render Crash/i)).not.toBeInTheDocument();
@@ -168,9 +174,12 @@ describe("AppContainer — Cabang Navigasi & Interaksi Global", () => {
   it("merespon keyboard shortcut 'n' untuk trigger modal task baru", async () => {
     tampilkan();
 
-    await waitFor(() => {
-      expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    }, { timeout: 12000 });
+    await waitFor(
+      () => {
+        expect(screen.getAllByText(/Proyek Aktif|Active Projects/i).length).toBeGreaterThan(0);
+      },
+      { timeout: 12000 }
+    );
 
     fireEvent.keyDown(window, { key: "n", code: "KeyN" });
     expect(screen.queryByText(/React Render Crash/i)).not.toBeInTheDocument();
@@ -179,9 +188,12 @@ describe("AppContainer — Cabang Navigasi & Interaksi Global", () => {
   it("merespon keyboard shortcut 'p' untuk modal proyek baru", async () => {
     tampilkan();
 
-    await waitFor(() => {
-      expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    }, { timeout: 12000 });
+    await waitFor(
+      () => {
+        expect(screen.getAllByText(/Proyek Aktif|Active Projects/i).length).toBeGreaterThan(0);
+      },
+      { timeout: 12000 }
+    );
 
     fireEvent.keyDown(window, { key: "p", code: "KeyP" });
     expect(screen.queryByText(/React Render Crash/i)).not.toBeInTheDocument();
@@ -190,9 +202,12 @@ describe("AppContainer — Cabang Navigasi & Interaksi Global", () => {
   it("merespon event fullscreenchange tanpa crash", async () => {
     tampilkan();
 
-    await waitFor(() => {
-      expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    }, { timeout: 12000 });
+    await waitFor(
+      () => {
+        expect(screen.getAllByText(/Proyek Aktif|Active Projects/i).length).toBeGreaterThan(0);
+      },
+      { timeout: 12000 }
+    );
 
     fireEvent(document, new Event("fullscreenchange"));
     expect(screen.queryByText(/React Render Crash/i)).not.toBeInTheDocument();

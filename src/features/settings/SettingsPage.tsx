@@ -6,6 +6,7 @@ import { WhatsAppConfigForm } from "./components/WhatsAppConfigForm";
 import { BroadcastMonitor } from "./components/BroadcastMonitor";
 import { SystemConfigForm } from "./components/SystemConfigForm";
 import { TaskBroadcastForm } from "./components/TaskBroadcastForm";
+import { PageHeader } from "../../components/ui/PageHeader";
 
 export const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -51,10 +52,14 @@ export const SettingsPage: React.FC = () => {
   return (
     <div className="w-full flex-1 flex flex-col p-3 md:p-5 min-h-0 overflow-hidden bg-surface-sunken/60 text-left">
       <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-border-subtle/80 bg-surface-sunken/80 shrink-0 flex items-center justify-between">
-          <h1 className="text-xs font-normal text-content-strong uppercase tracking-wide">
-            {t("settings.systemIntegrationConfiguration")}
-          </h1>
+        <div className="px-5 py-3.5 border-b border-border-subtle/80 bg-surface-sunken/80 shrink-0">
+          <PageHeader
+            breadcrumbs={[
+              { label: t("nav.settings", "Settings") },
+              { label: t("settings.systemIntegrationConfiguration"), current: true },
+            ]}
+            title={t("settings.systemIntegrationConfiguration")}
+          />
         </div>
 
         <div className="flex-1 overflow-auto flex flex-col">

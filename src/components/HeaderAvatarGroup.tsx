@@ -75,7 +75,7 @@ export const HeaderAvatarGroup: React.FC<HeaderAvatarGroupProps> = ({
               members={allUsers}
               className={`w-8 h-8 border-2 ${
                 isCurrentUser
-                  ? "border-indigo-400 ring-2 ring-indigo-100 z-10"
+                  ? "border-primary ring-2 ring-primary/20 z-10"
                   : "border-surface ring-1 ring-border-faint"
               } relative group-hover:z-20 group-hover:scale-110 transition-all shadow-soft`}
             />

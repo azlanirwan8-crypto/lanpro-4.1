@@ -3,22 +3,9 @@
   "src/features/auth/RegisterScreen.tsx": 1,
   "src/features/dashboard/components/SidebarWidgetsStack.tsx": 1,
   "src/features/dashboard/styles.ts": 4,
-  "src/features/enterprise-audit/EnterpriseAuditDashboard.tsx": 1,
-  "src/features/flowchart/components/FlowchartMinimap.tsx": 3,
-  "src/features/flowchart/components/FlowchartNode.tsx": 10,
-  "src/features/flowchart/components/NodeContextMenu.tsx": 1,
-  "src/features/flowchart/components/NodePropertiesOverlay.tsx": 1,
-  "src/features/flowchart/components/ShapePalette.tsx": 2,
   "src/features/flowchart/constants.ts": 1,
-  "src/features/flowchart/FlowchartContainer.tsx": 1,
   "src/features/flowchart/lib/nodeTheme.ts": 2,
-  "src/features/meeting-notes/AiMeetingCompanion.tsx": 1,
-  "src/features/meeting-notes/DiscussionPointsTable.tsx": 1,
   "src/features/meeting-notes/MeetingNotes.tsx": 1,
-  "src/features/qa/components/QADetailDrawer.tsx": 2,
   "src/features/qa/components/QATestCaseTable.tsx": 2,
-  "src/features/users/AdminUserPanel.tsx": 1,
-  "src/features/users/ProfileEditModal.tsx": 1,
-  "src/features/users/UserDetailView.tsx": 1,
-  "src/features/wiki/WikiView.tsx": 2
+  "src/features/users/UserDetailView.tsx": 1
 }

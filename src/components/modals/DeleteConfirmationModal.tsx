@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { motion, AnimatePresence } from "motion/react";
 import { Trash2 } from "lucide-react";
+import { Modal } from "../ui/Modal";
+import { Button } from "../ui/CoreUI";
 
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
@@ -19,42 +20,39 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
   onConfirm,
 }) => {
   const { t } = useTranslation();
-  if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-overlay/60 backdrop-blur-xs">
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          className="bg-surface border border-border-subtle/80 rounded-md p-6 max-w-sm w-full shadow-2xl space-y-4 text-center"
-        >
-          <Trash2 className="w-10 h-10 text-danger-text mx-auto" />
-          <div>
-            <h3 className="text-sm font-normal text-content-strong uppercase tracking-wider">
-              {title}
-            </h3>
-            <p className="text-xs text-content-muted mt-1">
-              {t("common.areYouSureYouWant")} <strong>{itemName}</strong>?
-            </p>
-          </div>
-          <div className="flex gap-2.5 pt-2">
-            <button
-              onClick={onClose}
-              className="flex-1 py-2.5 bg-surface-muted hover:bg-surface-strong text-content-body text-xs font-medium rounded-md cursor-pointer transition-colors"
-            >
-              {t("ui.cancel")}
-            </button>
-            <button
-              onClick={onConfirm}
-              className="flex-1 py-2.5 bg-danger-surface hover:bg-danger-hover text-content-inverse text-xs font-medium rounded-md cursor-pointer shadow-xs transition-colors"
-            >
-              {t("ui.yesDelete")}
-            </button>
-          </div>
-        </motion.div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      maxWidth="max-w-sm"
+      footer={
+        <>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={onClose}
+            className="flex-1 justify-center"
+          >
+            {t("ui.cancel")}
+          </Button>
+          <Button
+            type="button"
+            onClick={onConfirm}
+            className="flex-1 justify-center bg-danger-surface hover:bg-danger-hover text-content-inverse"
+          >
+            {t("ui.yesDelete")}
+          </Button>
+        </>
+      }
+    >
+      <div className="text-center space-y-3">
+        <Trash2 className="w-10 h-10 text-danger-text mx-auto" />
+        <p className="text-xs text-content-muted">
+          {t("common.areYouSureYouWant")} <strong>{itemName}</strong>?
+        </p>
       </div>
-    </AnimatePresence>
+    </Modal>
   );
 };

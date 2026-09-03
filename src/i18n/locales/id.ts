@@ -56,6 +56,7 @@ export const id = {
     "srv.dokumen_tidak_ditemukan": "Dokumen tidak ditemukan.",
     "srv.terjadi_kesalahan_saat_mengunduh": "Terjadi kesalahan saat mengunduh dokumen.",
     "srv.token_metrik_tidak_valid": "Token metrik tidak valid.",
+    "srv.token_dicabut": "Sesi Anda telah diakhiri. Silakan login kembali.",
     "srv.nama_role_minimal_harus": "Nama peran minimal 3 karakter.",
     "srv.masterdata_updated": "Master Data diperbarui",
     "srv.master_data_tidak_ditemukan": "Master Data tidak ditemukan.",
@@ -780,11 +781,20 @@ export const id = {
     collapse: "Ciutkan Bilah Sisi",
     projectManagement2: "Manajemen Proyek",
   },
+  nav: {
+    dashboard: "Dashboard",
+    activity: "Aktivitas",
+    planning: "Perencanaan",
+    qa: "QA",
+    settings: "Pengaturan",
+    roadmap: "Peta Jalan",
+  },
   dashboard: {
     greetingMorning: "Selamat Pagi",
     greetingAfternoon: "Selamat Siang",
     greetingEvening: "Selamat Sore",
     greetingNight: "Selamat Malam",
+    breadcrumbGroup: "PROYEK",
     subtitle: "Ringkasan performa tim, progres sprint, dan alokasi tugas real-time.",
     taskSummary: "Ringkasan Tugas",
     epicExcluded: "Epic tidak dihitung",
@@ -890,6 +900,7 @@ export const id = {
     dueSoonShort: "segera jatuh tempo",
   },
   team: {
+    breadcrumbGroup: "PROYEK",
     membersOf: "Daftar anggota tim yang bergabung dalam proyek",
     title: "Manajemen Tim",
     activeTeam: "Tim Aktif",
@@ -917,8 +928,12 @@ export const id = {
     csvUsername: "Username",
     csvTaskCount: "Jumlah Tugas",
     searchPlaceholder: "Cari nama, jabatan, atau email...",
+    inviteMember: "Undang anggota",
+    inviteHint:
+      "Masukkan email. Jika akun sudah ada, anggota ditambahkan langsung; jika belum, undangan menunggu registrasi.",
   },
   users: {
+    breadcrumbGroup: "ADMINISTRATION",
     waPhone: "WA/HP:",
     emptyRoleCatalog: "(katalog peran sistem kosong)",
     projectsCount: "{{count}} Proyek",
@@ -983,6 +998,7 @@ export const id = {
     copyJoinLink: "Salin Tautan Bergabung",
   },
   meetings: {
+    breadcrumbGroup: "PROYEK",
     title: "Catatan Rapat",
     subtitle: "Kelola catatan rapat proyek, agenda, datetime, dan poin diskusi.",
     addMeeting: "Tambah Rapat",
@@ -1366,6 +1382,9 @@ export const id = {
     unassigned: "Belum Ditugaskan",
   },
   kanban: {
+    breadcrumbGroup: "PROYEK",
+    title: "Papan Kanban",
+    subtitle: "Seret kartu antar kolom status. Kelompokkan per epic atau penanggung jawab.",
     blockedCardHint: "Kartu terbelenggu: Selesaikan semua subtask sebelum memindahkan ke Done",
     loadingBoard: "Memuat papan...",
     empty: "Kosong",
@@ -1378,6 +1397,7 @@ export const id = {
     dragHandle: "Geser kartu",
   },
   flowchart: {
+    breadcrumbGroup: "PROYEK",
     addModalTitle: "Buat Diagram Baru",
     mulaiDenganWarna: "Mulai dengan warna {{warna}}",
     tambahKeKanvas: "Tambahkan {{bentuk}} ke kanvas",
@@ -1560,6 +1580,7 @@ export const id = {
     yesRestoreNow: "Ya, Restore Sekarang",
   },
   wiki: {
+    breadcrumbGroup: "PROYEK",
     clearSearch: "Bersihkan Pencarian",
     title: "Dokumentasi",
     addDocument: "Tambah Dokumen",
@@ -1686,6 +1707,8 @@ export const id = {
   },
   common: {
     unknown: "Tidak Diketahui",
+    language: "Bahasa",
+    loading: "Memuat...",
     projectSettings: "Pengaturan Proyek",
     showing: "Menampilkan",
     to: "sampai",
@@ -2164,6 +2187,11 @@ export const id = {
       "Kesiapan penuh: semua komponen berhasil dipetakan ke elemen papan tulis. Klik salah satu tombol di bawah untuk menerapkannya.",
   },
   audit: {
+    breadcrumbGroup: "ADMINISTRATION",
+    breadcrumbItem: "AUDIT",
+    notifFailuresTitle: "Gagal kirim notifikasi",
+    notifFailuresHint: "Gagal kirim notifikasi terbaru yang tercatat sistem.",
+    notifFailuresEmpty: "Tidak ada gagal kirim tercatat.",
     infraSubtitle: "Riwayat aktivitas infrastruktur LanPro (Real-time & Immutable)",
     allEntities: "Semua Entitas",
     allAccess: "Semua Akses",
@@ -2695,6 +2723,7 @@ export const id = {
     shapes: "Bentuk",
   },
   connect: {
+    breadcrumbGroup: "ADMINISTRATION",
     mysqlHelp: "Bantuan Koneksi MySQL Aktif",
     mysqlConfig: "Konfigurasi Basis Data MySQL",
     saveApply: "Simpan & Terapkan Langsung",
@@ -2748,6 +2777,7 @@ export const id = {
       "Anda tidak memiliki izin untuk melihat Pengaturan Integrasi. Hubungi administrator bila memerlukan akses.",
     viewBug: "LIHAT BUG",
     notifications: "Notifikasi",
+    moreActions: "Lainnya",
     back: "Kembali",
     issueDetails: "Detail Isu",
     pickOrCreateProject: "Pilih atau Buat Proyek Baru",
@@ -3119,6 +3149,7 @@ export const id = {
     mobileAdd: "Tambah",
   },
   issues: {
+    breadcrumbGroup: "PROYEK",
     cancel: "Batal",
     addLink: "+ Tambah Tautan",
     relatedIssues: "Isu Terkait",

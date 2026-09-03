@@ -55,7 +55,7 @@ export const QATestCaseMobileCardView: React.FC<QATestCaseMobileCardViewProps> =
       case "high":
         return "bg-amber-500/15 text-amber-700 border-amber-500/30";
       case "medium":
-        return "bg-indigo-500/15 text-primary border-indigo-500/30";
+        return "bg-primary/15 text-primary border-primary/30";
       case "low":
       default:
         return "bg-surface-sunken text-content-subtle border-border-subtle";
@@ -84,7 +84,7 @@ export const QATestCaseMobileCardView: React.FC<QATestCaseMobileCardViewProps> =
         };
       case "Retest":
         return {
-          bg: "bg-indigo-500/15 text-primary border-indigo-500/30",
+          bg: "bg-primary/15 text-primary border-primary/30",
           icon: RefreshCw,
           label: "Retest",
         };
@@ -133,7 +133,7 @@ export const QATestCaseMobileCardView: React.FC<QATestCaseMobileCardViewProps> =
             onClick={() => onSelectCase(tc)}
             className={`p-4 bg-surface rounded-lg border shadow-2xs hover:shadow-xs transition-all cursor-pointer flex flex-col gap-3 ${
               isChecked
-                ? "border-primary/50 bg-indigo-500/5 ring-1 ring-primary/20"
+                ? "border-primary/50 bg-primary/5 ring-1 ring-primary/20"
                 : "border-border-subtle/80 hover:border-primary/40"
             }`}
           >

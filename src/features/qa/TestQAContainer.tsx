@@ -41,7 +41,7 @@ export function TestQAPanel({
   if (!selectedProject) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-6 bg-surface rounded-md border border-border-subtle shadow-soft max-w-lg mx-auto mt-12">
-        <div className="p-4 bg-indigo-500/10 text-indigo-600 rounded-full mb-4 animate-bounce">
+        <div className="p-4 bg-primary/10 text-primary rounded-full mb-4 animate-bounce">
           <ShieldAlert className="w-8 h-8" />
         </div>
         <h3 className="text-xl font-medium text-content-strong">

@@ -75,7 +75,7 @@ export const KeyboardShortcutsModal: React.FC<KeyboardShortcutsModalProps> = ({
         <div className="pt-2 flex justify-end">
           <Button
             onClick={() => setIsShortcutsModalOpen(false)}
-            className="justify-center bg-indigo-600 hover:bg-indigo-700 text-content-inverse font-medium"
+            className="justify-center bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium"
           >
             {t("shortcuts.gotIt")}
           </Button>

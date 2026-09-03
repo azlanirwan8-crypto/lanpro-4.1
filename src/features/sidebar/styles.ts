@@ -1,7 +1,6 @@
 /**
- * Gaya sidebar. Menggunakan token semantik `sidebar-*` yang responsif terhadap
- * mode terang (Dark Navy #111c43) dan mode gelap (Clean Dark Charcoal #121a2a)
- * sesuai standar desain Velzon asli.
+ * Gaya sidebar. Token `sidebar-*` berganti per mode (#395):
+ * terang = Velzon brand navy (#405189 + teks terang); gelap = charcoal.
  */
 export const styles = {
   aside:
@@ -14,7 +13,7 @@ export const styles = {
     "hidden md:absolute md:flex items-center justify-center -right-3 top-6 bg-sidebar-surface border border-sidebar-border rounded-full p-1.5 min-w-8 min-h-8 text-sidebar-text hover:text-sidebar-text-active shadow-md z-10 hover:scale-110 transition-transform cursor-pointer",
   logoWrapper: "p-5 flex items-center shrink-0 border-b border-sidebar-border",
   logoIcon:
-    "w-8 h-8 bg-gradient-to-tr from-indigo-500 via-blue-500 to-cyan-400 rounded-md flex items-center justify-center shrink-0 shadow-md",
+    "w-8 h-8 bg-primary-surface rounded-md flex items-center justify-center shrink-0 shadow-md",
   logoText: "font-bold text-lg tracking-wider text-sidebar-text-active uppercase font-sans",
   nav: "flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar py-3",
   sectionLabelWrapper: "flex items-center justify-between mb-1.5 px-3 mt-5 group",

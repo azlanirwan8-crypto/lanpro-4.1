@@ -14,6 +14,7 @@ const Draggable = _Draggable as any;
 import { cn, ensureDate } from "../../lib/utils";
 import { Task } from "../../types";
 import { UserAvatar } from "../../components/ui/UserAvatar";
+import { PageHeader } from "../../components/ui/PageHeader";
 import { PlanningViewProps } from "./types";
 import { usePlanning } from "./hooks";
 import { useAppStore } from "../../store/useAppStore";
@@ -110,8 +111,8 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
               className={cn(
                 "transition-all duration-200 ease-out select-none",
                 variant === "card"
-                  ? "group bg-surface p-3 rounded-md border border-border-subtle/80 shadow-2xs cursor-pointer hover:border-primary/40 hover:shadow-xs"
-                  : "group bg-surface flex items-center justify-between p-2.5 px-3 rounded-md border border-border-subtle/80 shadow-2xs cursor-pointer hover:bg-surface-sunken/70 hover:border-primary/40",
+                  ? "group bg-surface p-3 rounded-lg border border-border-subtle/80 shadow-2xs cursor-pointer hover:border-primary/40 hover:shadow-xs"
+                  : "group bg-surface flex items-center justify-between p-2.5 px-3 rounded-lg border border-border-subtle/80 shadow-2xs cursor-pointer hover:bg-surface-sunken/70 hover:border-primary/40",
                 task.isBlocked && "ring-1 ring-red-500/50 bg-red-500/10 border-red-500/30",
                 snapshot.isDragging &&
                   "shadow-xl ring-2 ring-primary/20 scale-[1.02] z-50 bg-surface border-primary"
@@ -121,7 +122,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                 <div className="flex flex-col gap-1.5">
                   <div className="flex justify-between items-center">
                     <div className="flex gap-2 items-center">
-                      <span className="text-[10px] leading-none tracking-tight font-mono font-semibold text-primary bg-indigo-500/10 px-1.5 py-[3px] rounded border border-indigo-500/30">
+                      <span className="text-[10px] leading-none tracking-tight font-mono font-semibold text-primary bg-primary/10 px-1.5 py-[3px] rounded border border-primary/30">
                         {task.key}
                       </span>
                       {task.priority && (
@@ -174,7 +175,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                         </div>
                       )}
                     </div>
-                    <span className="text-[10px] leading-none font-medium text-primary bg-indigo-500/10 px-1.5 py-[3px] rounded border border-indigo-500/30">
+                    <span className="text-[10px] leading-none font-medium text-primary bg-primary/10 px-1.5 py-[3px] rounded border border-primary/30">
                       {task.status}
                     </span>
                   </div>
@@ -182,7 +183,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
               ) : (
                 <div className="flex items-center gap-3 w-full">
                   <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                    <span className="text-[10px] leading-none tracking-tight font-mono font-semibold text-primary bg-indigo-500/10 px-1.5 py-[3px] rounded border border-indigo-500/30 shrink-0">
+                    <span className="text-[10px] leading-none tracking-tight font-mono font-semibold text-primary bg-primary/10 px-1.5 py-[3px] rounded border border-primary/30 shrink-0">
                       {task.key}
                     </span>
                     <h4 className="text-xs font-medium text-content-strong truncate">
@@ -230,7 +231,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto md:overflow-hidden bg-surface-muted flex flex-col p-2 sm:p-4 md:p-5 h-[calc(100vh-64px)] text-left">
+    <div className="flex-1 overflow-y-auto md:overflow-hidden bg-surface-muted flex flex-col p-2 sm:p-4 md:p-5 h-[calc(100dvh-64px)] text-left">
       <DragDropContext onDragEnd={handleDragEndPlanning}>
         <div className="flex flex-col md:flex-row flex-1 gap-5 w-full h-full min-h-0">
           <div className="w-full md:w-[320px] lg:w-[360px] xl:w-[380px] h-[220px] sm:h-[280px] md:h-full shrink-0 flex flex-col bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">
@@ -252,28 +253,30 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
             </Droppable>
           </div>
           <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
-            <div className="bg-surface px-3 py-2.5 sm:px-5 sm:py-3.5 rounded-lg border border-border-subtle/80 mb-3 md:mb-4 flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center shadow-2xs shrink-0">
-              <div className="min-w-0">
-                <h2 className="text-sm font-semibold text-content-strong tracking-tight">
-                  {t("planning.sprintPlanning")}
-                </h2>
-                <p className="text-xs font-normal text-content-muted mt-0.5 line-clamp-1 sm:line-clamp-none">
-                  {t("planning.subtitle")}
-                </p>
-              </div>
-              {canEditPlanning && (
-                <div className="flex gap-2 shrink-0 self-end sm:self-auto">
-                  <button
-                    type="button"
-                    onClick={() => setIsNewSprintModalOpen(true)}
-                    title={t("planning.newSprint")}
-                    className="h-8 px-2.5 sm:px-3.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5 shrink-0" />
-                    <span className="hidden sm:inline">{t("planning.newSprint")}</span>
-                  </button>
-                </div>
-              )}
+            <div className="bg-surface px-3 py-2.5 sm:px-5 sm:py-3.5 rounded-lg border border-border-subtle/80 mb-3 md:mb-4 shadow-2xs shrink-0">
+              <PageHeader
+                breadcrumbs={[
+                  { label: t("nav.planning", "Planning") },
+                  { label: t("planning.sprintPlanning"), current: true },
+                ]}
+                title={t("planning.sprintPlanning")}
+                subtitle={
+                  <span className="line-clamp-1 sm:line-clamp-none">{t("planning.subtitle")}</span>
+                }
+                actions={
+                  canEditPlanning ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsNewSprintModalOpen(true)}
+                      title={t("planning.newSprint")}
+                      className="h-8 px-2.5 sm:px-3.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-xs font-medium shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5 shrink-0" />
+                      <span className="hidden sm:inline">{t("planning.newSprint")}</span>
+                    </button>
+                  ) : undefined
+                }
+              />
             </div>
 
             <SprintSection

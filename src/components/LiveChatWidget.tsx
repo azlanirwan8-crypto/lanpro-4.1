@@ -750,7 +750,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                                   <Users className="w-4 h-4" />
                                 </div>
                               ) : (
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-content-inverse flex items-center justify-center border border-purple-500 shadow-soft relative">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-surface to-primary-surface-active text-content-inverse flex items-center justify-center border border-primary shadow-soft relative">
                                   <Sparkles className="w-4 h-4 animate-pulse text-yellow-200" />
                                 </div>
                               )}
@@ -885,7 +885,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           <Users className="w-3.5 h-3.5" />
                         </div>
                       ) : activeChatUser.id === "lanpro-ai" ? (
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 text-content-inverse flex items-center justify-center border border-purple-500/30">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-surface to-primary-surface-active text-content-inverse flex items-center justify-center border border-primary/30">
                           <Bot className="w-3.5 h-3.5 text-yellow-200" />
                         </div>
                       ) : (
@@ -909,7 +909,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       <p className="text-xs font-medium text-content-inverse truncate leading-tight flex items-center gap-1">
                         {activeChatUser?.displayName}
                         {activeChatUser.id === "lanpro-ai" && (
-                          <span className="px-1 py-0.2 bg-purple-500/20 text-purple-300 text-xs sm:text-[10px] sm:text-[8px] font-medium rounded uppercase border border-purple-500/30">
+                          <span className="px-1 py-0.2 bg-primary/20 text-primary text-xs sm:text-[10px] sm:text-[8px] font-medium rounded uppercase border border-primary/30">
                             AI
                           </span>
                         )}
@@ -1019,7 +1019,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
                           {/* Sender name for AI Assistant messages in direct chat */}
                           {!isSelf && msg.senderId === "lanpro-ai" && (
-                            <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-purple-600 mb-0.5 ml-1 flex items-center gap-0.5 select-none font-sans">
+                            <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-primary mb-0.5 ml-1 flex items-center gap-0.5 select-none font-sans">
                               <Sparkles className="w-2.5 h-2.5" /> {senderDisplayName}
                             </span>
                           )}

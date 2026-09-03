@@ -7,6 +7,7 @@ import { cn } from "../../lib/utils";
 import { toast } from "sonner";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { runQuery, fetchSchema as fetchSchemaApi } from "./services/explorer.service";
+import { PageHeader } from "../../components/ui/PageHeader";
 
 export const DbExplorerPanel: React.FC<any> = ({
   selectedProject,
@@ -96,63 +97,60 @@ export const DbExplorerPanel: React.FC<any> = ({
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-surface-muted p-4 md:p-5 gap-4 text-left">
-      {/* Header & Tabs */}
-      <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[10px] leading-none font-medium text-indigo-600 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
-              {t("dbExplorer.systemTools")}
-            </span>
-            <span className="text-xs text-content-subtle font-medium">
-              {t("common.enterpriseControlCentre")}
-            </span>
-          </div>
-          <h1 className="text-base font-medium text-content-strong tracking-tight flex items-center gap-2">
-            {t("dbExplorer.databaseTools")}
-          </h1>
-          <p className="text-xs text-content-muted font-medium mt-0.5">
-            {t("dbExplorer.toolsSubtitle")}
-          </p>
-        </div>
-
-        <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0">
-          <button
-            onClick={() => setActiveTab("backup")}
-            className={cn(
-              "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
-              activeTab === "backup"
-                ? "bg-surface text-indigo-700 font-medium shadow-2xs"
-                : "text-content-muted hover:text-content-strong"
-            )}
-          >
-            <HardDrive className="w-3.5 h-3.5" />
-            <span>{t("dbExplorer.backupRestore")}</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("connect")}
-            className={cn(
-              "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
-              activeTab === "connect"
-                ? "bg-surface text-indigo-700 font-medium shadow-2xs"
-                : "text-content-muted hover:text-content-strong"
-            )}
-          >
-            <Wifi className="w-3.5 h-3.5" />
-            <span>{t("dbExplorer.connection")}</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("explorer")}
-            className={cn(
-              "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
-              activeTab === "explorer"
-                ? "bg-surface text-indigo-700 font-medium shadow-2xs"
-                : "text-content-muted hover:text-content-strong"
-            )}
-          >
-            <Code className="w-3.5 h-3.5" />
-            <span>{t("dbExplorer.explorer")}</span>
-          </button>
-        </div>
+      {/* Header & Tabs — #409 PageHeader */}
+      <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 shadow-2xs shrink-0">
+        <PageHeader
+          breadcrumbs={[
+            { label: t("dbExplorer.systemTools") },
+            { label: t("dbExplorer.databaseTools"), current: true },
+          ]}
+          title={t("dbExplorer.databaseTools")}
+          subtitle={t("dbExplorer.toolsSubtitle")}
+          actions={
+            <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0">
+              <button
+                onClick={() => setActiveTab("backup")}
+                className={cn(
+                  "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
+                  activeTab === "backup"
+                    ? "bg-surface text-primary font-medium shadow-2xs"
+                    : "text-content-muted hover:text-content-strong"
+                )}
+              >
+                <HardDrive className="w-3.5 h-3.5" />
+                <span>{t("dbExplorer.backupRestore")}</span>
+              </button>
+              <button
+                onClick={() => setActiveTab("connect")}
+                className={cn(
+                  "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
+                  activeTab === "connect"
+                    ? "bg-surface text-primary font-medium shadow-2xs"
+                    : "text-content-muted hover:text-content-strong"
+                )}
+              >
+                <Wifi className="w-3.5 h-3.5" />
+                <span>{t("dbExplorer.connection")}</span>
+              </button>
+              <button
+                onClick={() => setActiveTab("explorer")}
+                className={cn(
+                  "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
+                  activeTab === "explorer"
+                    ? "bg-surface text-primary font-medium shadow-2xs"
+                    : "text-content-muted hover:text-content-strong"
+                )}
+              >
+                <Code className="w-3.5 h-3.5" />
+                <span>{t("dbExplorer.explorer")}</span>
+              </button>
+            </div>
+          }
+        >
+          <span className="text-[10px] leading-none font-medium text-primary bg-primary/10 px-2.5 py-[3px] rounded-md border border-primary/30">
+            {t("dbExplorer.systemTools")}
+          </span>
+        </PageHeader>
       </div>
 
       {activeTab === "backup" && (
@@ -250,7 +248,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                           loadTable(tableName);
                           setSidebarOpen(false);
                         }}
-                        className={`flex items-center justify-between gap-2 px-3 py-1.5 text-xs rounded-md transition-colors cursor-pointer ${activeTable === tableName ? "bg-indigo-500/10 text-indigo-700 font-medium border border-indigo-500/30" : "text-content-secondary hover:bg-surface-muted font-medium"}`}
+                        className={`flex items-center justify-between gap-2 px-3 py-1.5 text-xs rounded-md transition-colors cursor-pointer ${activeTable === tableName ? "bg-primary/10 text-primary font-medium border border-primary/30" : "text-content-secondary hover:bg-surface-muted font-medium"}`}
                       >
                         <div className="flex items-center gap-2 truncate">
                           <TableIcon className="w-3.5 h-3.5 shrink-0 text-content-subtle" />
@@ -280,7 +278,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                   onClick={() => setSidebarOpen(true)}
                   className="w-full flex items-center gap-2 px-3 py-2.5 bg-surface-sunken border border-border-subtle rounded-lg text-xs font-medium text-content-strong cursor-pointer"
                 >
-                  <Menu className="w-4 h-4 text-indigo-600 shrink-0" />
+                  <Menu className="w-4 h-4 text-primary shrink-0" />
                   <span className="truncate">
                     {activeTable || t("dbExplorer.openTables", "Pilih tabel")}
                   </span>
@@ -293,12 +291,12 @@ export const DbExplorerPanel: React.FC<any> = ({
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder={t("dbExplorer.queryPlaceholder")}
-                    className="w-full text-content-strong bg-surface border border-border-subtle rounded-md p-3 font-mono text-xs min-h-[90px] focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none resize-y"
+                    className="w-full text-content-strong bg-surface border border-border-subtle rounded-md p-3 font-mono text-xs min-h-[90px] focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none resize-y"
                   />
                   <button
                     onClick={() => handleRunQuery(query)}
                     disabled={loading || !query.trim()}
-                    className="absolute bottom-3 right-3 bg-indigo-600 hover:bg-indigo-700 text-content-inverse h-8 px-3.5 rounded-md shadow-2xs font-medium text-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+                    className="absolute bottom-3 right-3 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse h-8 px-3.5 rounded-md shadow-2xs font-medium text-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
                   >
                     <Play className="w-3.5 h-3.5" />
                     <span>{t("dbExplorer.runQuery")}</span>
@@ -317,7 +315,7 @@ export const DbExplorerPanel: React.FC<any> = ({
 
                 {loading && (
                   <div className="flex items-center gap-3 text-content-muted mt-4 ml-4">
-                    <div className="w-4 h-4 rounded-full border-2 border-indigo-600 top-border-transparent animate-spin" />
+                    <div className="w-4 h-4 rounded-full border-2 border-primary top-border-transparent animate-spin" />
                     {t("dbExplorer.executing")}
                   </div>
                 )}

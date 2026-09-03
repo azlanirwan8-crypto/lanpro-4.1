@@ -63,7 +63,7 @@ const AuthLayoutSplit = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
     terbaca sebagai bidang warna ketiga di sebelah sisi form — jahitan yang
     justru ingin dihilangkan lengkungannya.
   */
-  <div className="min-h-screen flex flex-col md:flex-row font-sans bg-surface-muted overflow-x-hidden">
+  <div className="min-h-dvh flex flex-col md:flex-row font-sans bg-surface-muted overflow-x-hidden">
     {/* Sisi visual (desktop) — tetap diam saat login/register bertukar. */}
     <AuthHeroPanel />
 
@@ -73,7 +73,7 @@ const AuthLayoutSplit = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
       dibatasi max-w-md dan dipusatkan di kolom terang; padding kiri md+
       memberi napas dari lengkung clip-path hero.
     */}
-    <div className="w-full md:w-1/2 flex items-center justify-center px-6 pt-24 pb-10 sm:px-10 md:pl-14 md:pr-10 lg:pl-20 lg:pr-14 md:pt-10 bg-surface-muted relative overflow-y-auto min-h-screen">
+    <div className="w-full md:w-1/2 flex items-center justify-center px-6 pt-24 pb-10 sm:px-10 md:pl-14 md:pr-10 lg:pl-20 lg:pr-14 md:pt-10 bg-surface-muted relative overflow-y-auto min-h-dvh">
       {/*
         #231 — "watermark" sisi terang, sesuai gambar acuan pemilik proyek:
         BUKAN motif batik/kanban (itu ditolak), melainkan kartu placeholder
@@ -107,7 +107,7 @@ const AuthLayoutSplit = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
 
 const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant">) => {
   return (
-    <div className="relative min-h-screen flex flex-col font-sans bg-surface-sunken overflow-x-hidden">
+    <div className="relative min-h-dvh flex flex-col font-sans bg-surface-sunken overflow-x-hidden">
       <CorakBatikKawung />
 
       {/*
@@ -188,7 +188,7 @@ const AuthLayoutCover = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
         di tepi dan sebagian terpotong, sebab pemusatan tidak menyisakan ruang
         napas dengan sendirinya.
       */}
-      <div className="relative z-30 flex flex-1 items-center justify-center px-4 py-4 sm:py-6 overflow-y-auto max-h-screen my-auto">
+      <div className="relative z-30 flex flex-1 items-center justify-center px-4 py-4 sm:py-6 overflow-y-auto max-h-dvh my-auto">
         {children}
       </div>
 

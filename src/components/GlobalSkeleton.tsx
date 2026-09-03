@@ -2,7 +2,7 @@ import React from "react";
 
 export const GlobalSkeleton = () => {
   return (
-    <div className="min-h-screen flex h-screen bg-surface-sunken">
+    <div className="min-h-dvh flex h-dvh bg-surface-sunken">
       {/* Sidebar Skeleton */}
       <div className="w-64 bg-surface-inverse-strong flex-shrink-0 flex flex-col hidden md:flex">
         <div className="p-4 border-b border-border-inverse flex items-center gap-3">

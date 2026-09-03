@@ -17,6 +17,7 @@ import { ActivityLog, UserProfile } from "../../types";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { Modal } from "../../components/ui/Modal";
+import { PageHeader } from "../../components/ui/PageHeader";
 
 export const ActivityLogPanel = ({
   activityLogs: propLogs,
@@ -74,39 +75,43 @@ export const ActivityLogPanel = ({
   return (
     <div className="flex-1 overflow-auto p-3 sm:p-6 md:p-8 bg-surface-sunken custom-scrollbar">
       <div className="space-y-4 sm:space-y-6 w-full">
-        <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:justify-between md:items-center border-b border-border-subtle pb-4 sm:pb-6 mb-1 sm:mb-2">
-          <div className="flex gap-3 sm:gap-4 items-center min-w-0">
-            <div className="w-10 h-10 sm:w-14 sm:h-14 bg-indigo-500/10 text-indigo-600 rounded-xl flex items-center justify-center shadow-inner shrink-0">
-              <History className="w-5 h-5 sm:w-7 sm:h-7" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-xl sm:text-3xl font-medium text-content-strong tracking-tight truncate">
-                {t("activityLog.title")}
-              </h1>
-              <p className="text-content-muted font-medium mt-0.5 sm:mt-1 text-xs sm:text-sm tracking-wide hidden sm:block">
-                {t("activityLog.subtitle")}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto min-w-0">
-            <div className="flex min-w-0 flex-1 md:flex-none bg-surface border border-border-subtle rounded-xl px-3 py-2 items-center gap-2 shadow-soft">
-              <Search className="w-4 h-4 text-content-subtle shrink-0" />
-              <input
-                value={auditLogSearch}
-                onChange={(e) => setAuditLogSearch(e.target.value)}
-                placeholder={t("activityLog.searchLogs")}
-                className="bg-transparent border-none outline-none text-xs w-full md:w-48 placeholder:text-content-subtle text-content-body min-w-0"
-              />
-            </div>
-            <button
-              onClick={exportTasksToCSV}
-              title={t("activityLog.exportCsv")}
-              className="shrink-0 px-2.5 sm:px-4 py-2.5 bg-indigo-600 border border-indigo-600 text-content-inverse rounded-xl text-xs font-normal shadow-soft-lg shadow-indigo-100 transition-all flex items-center gap-2 tracking-widest hover:bg-indigo-700 active:scale-95 uppercase"
-            >
-              <DownloadCloud className="w-4 h-4" />
-              <span className="hidden sm:inline">{t("activityLog.exportCsv")}</span>
-            </button>
-          </div>
+        <div className="border-b border-border-subtle pb-4 sm:pb-6 mb-1 sm:mb-2">
+          <PageHeader
+            breadcrumbs={[
+              { label: t("nav.activity", "Activity") },
+              { label: t("activityLog.title"), current: true },
+            ]}
+            title={
+              <span className="inline-flex items-center gap-3 min-w-0">
+                <span className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center shadow-inner shrink-0">
+                  <History className="w-5 h-5 sm:w-6 sm:h-6" />
+                </span>
+                <span className="truncate">{t("activityLog.title")}</span>
+              </span>
+            }
+            subtitle={<span className="hidden sm:inline">{t("activityLog.subtitle")}</span>}
+            actions={
+              <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto min-w-0">
+                <div className="flex min-w-0 flex-1 md:flex-none bg-surface border border-border-subtle rounded-xl px-3 py-2 items-center gap-2 shadow-soft">
+                  <Search className="w-4 h-4 text-content-subtle shrink-0" />
+                  <input
+                    value={auditLogSearch}
+                    onChange={(e) => setAuditLogSearch(e.target.value)}
+                    placeholder={t("activityLog.searchLogs")}
+                    className="bg-transparent border-none outline-none text-xs w-full md:w-48 placeholder:text-content-subtle text-content-body min-w-0"
+                  />
+                </div>
+                <button
+                  onClick={exportTasksToCSV}
+                  title={t("activityLog.exportCsv")}
+                  className="shrink-0 px-2.5 sm:px-4 py-2.5 bg-primary-surface border border-primary text-content-inverse rounded-xl text-xs font-normal shadow-soft-lg transition-all flex items-center gap-2 tracking-widest hover:bg-primary-surface-hover active:scale-95 uppercase"
+                >
+                  <DownloadCloud className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t("activityLog.exportCsv")}</span>
+                </button>
+              </div>
+            }
+          />
         </div>
 
         {/* Summary Metric Cards — #361: 2 kolom di HP */}
@@ -165,20 +170,12 @@ export const ActivityLogPanel = ({
             <>
               <div className="hidden sm:block overflow-x-auto min-h-[500px]">
                 <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
-                  <thead className="bg-surface">
-                    <tr>
-                      <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle whitespace-nowrap">
-                        {t("activityLog.timestamp")}
-                      </th>
-                      <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle">
-                        {t("activityLog.eventSignature")}
-                      </th>
-                      <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle">
-                        {t("activityLog.subjectActor")}
-                      </th>
-                      <th className="px-8 py-5 text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-[0.2em] border-b border-border-subtle text-right">
-                        {t("activityLog.auditTrailId")}
-                      </th>
+                  <thead>
+                    <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap">
+                      <th className="px-8 py-5">{t("activityLog.timestamp")}</th>
+                      <th className="px-8 py-5">{t("activityLog.eventSignature")}</th>
+                      <th className="px-8 py-5">{t("activityLog.subjectActor")}</th>
+                      <th className="px-8 py-5 text-right">{t("activityLog.auditTrailId")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border-faint">
@@ -234,9 +231,8 @@ export const ActivityLogPanel = ({
                                 } else {
                                   Icon = Zap;
                                   colorClass =
-                                    "text-indigo-600 bg-indigo-500/10 border-indigo-500/30 group-hover:bg-indigo-500/15 group-hover:text-indigo-700";
-                                  badgeClass =
-                                    "bg-indigo-500/15 text-indigo-700 border-indigo-500/30";
+                                    "text-primary bg-primary/10 border-primary/30 group-hover:bg-primary/15 group-hover:text-primary";
+                                  badgeClass = "bg-primary/15 text-primary border-primary/30";
                                 }
 
                                 return (
@@ -300,7 +296,7 @@ export const ActivityLogPanel = ({
                               <button
                                 type="button"
                                 onClick={() => setInspectedLog(log)}
-                                className="text-xs sm:text-[10px] font-normal text-indigo-600 hover:text-indigo-800 uppercase tracking-widest flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                                className="text-xs sm:text-[10px] font-normal text-primary hover:text-primary uppercase tracking-widest flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                               >
                                 {t("activityLog.inspect")} <ChevronRight className="w-3 h-3" />
                               </button>

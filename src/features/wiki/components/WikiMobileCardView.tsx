@@ -13,6 +13,7 @@ import {
   FileSpreadsheet,
   FileCheck,
 } from "lucide-react";
+import { Card } from "../../../components/ui/CoreUI";
 import type { DocumentModel } from "../types";
 
 interface WikiMobileCardViewProps {
@@ -43,13 +44,13 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
   const getCategoryBadgeClass = (type: string) => {
     switch (type?.toUpperCase()) {
       case "PRD":
-        return "bg-indigo-500/10 text-primary border border-indigo-500/30";
+        return "bg-primary/10 text-primary border border-primary/20";
       case "PANDUAN":
         return "bg-blue-500/10 text-blue-700 border border-blue-500/30";
       case "LAPORAN":
         return "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30";
       case "SPESIFIKASI":
-        return "bg-purple-500/10 text-purple-700 border border-purple-500/30";
+        return "bg-primary/10 text-primary border border-primary/30";
       default:
         return "bg-surface-sunken text-content-body border border-border-subtle";
     }
@@ -85,8 +86,8 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
 
   if (documents.length === 0) {
     return (
-      <div className="p-8 text-center bg-surface border border-border-subtle/80 rounded-lg shadow-2xs">
-        <div className="w-12 h-12 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
+      <Card className="p-8 text-center shadow-2xs rounded-lg">
+        <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 text-primary shadow-2xs">
           <BookOpen className="w-6 h-6" />
         </div>
         <p className="font-medium text-content-strong text-sm">{t("wiki.emptyTitle")}</p>
@@ -100,7 +101,7 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
             {t("wiki.addDocument")}
           </button>
         )}
-      </div>
+      </Card>
     );
   }
 
@@ -112,10 +113,10 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
         const badgeClass = getCategoryBadgeClass(doc.type);
 
         return (
-          <div
+          <Card
             key={doc.id || index}
             onClick={() => onSelectDoc(doc.id)}
-            className="p-4 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all cursor-pointer flex flex-col gap-3"
+            className="p-4 shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all cursor-pointer flex flex-col gap-3 rounded-lg"
           >
             {/* Header: Title & Action buttons */}
             <div className="flex items-start justify-between gap-2">
@@ -197,7 +198,7 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/30 text-primary font-medium hover:underline"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-primary font-medium hover:underline"
                 >
                   <ExternalLink className="w-3 h-3" />
                   <span>{t("wiki.openLink")}</span>
@@ -217,7 +218,7 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
                 <span>{formatDate(doc.updatedAt)}</span>
               </div>
             </div>
-          </div>
+          </Card>
         );
       })}
     </div>

@@ -130,10 +130,10 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
             animate={{ y: 0, opacity: 1, x: "-50%" }}
             exit={{ y: 80, opacity: 0, x: "-50%" }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed bottom-6 left-1/2 z-50 bg-overlay/95 backdrop-blur-md border border-border-inverse/40 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-6 py-3.5 flex flex-wrap items-center gap-6 text-content-inverse text-xs font-medium select-none"
+            className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:bottom-6 left-1/2 z-50 bg-overlay/95 backdrop-blur-md border border-border-inverse/40 rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] px-6 py-3.5 flex flex-wrap items-center gap-6 text-content-inverse text-xs font-medium select-none max-w-[calc(100vw-1.5rem)]"
           >
             <div className="flex items-center gap-2 border-r border-border-inverse pr-4">
-              <span className="bg-indigo-600 text-content-inverse text-xs sm:text-[10px] font-medium rounded-full px-2 py-0.5 min-w-[20px] text-center">
+              <span className="bg-primary-surface text-content-inverse text-xs sm:text-[10px] font-medium rounded-full px-2 py-0.5 min-w-[20px] text-center">
                 {selectedTaskIds.size}
               </span>
               <span className="text-content-subtle font-normal uppercase tracking-wider text-xs sm:text-[10px]">

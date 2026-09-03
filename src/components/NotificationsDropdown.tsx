@@ -97,10 +97,13 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute right-0 mt-2 w-80 sm:w-[380px] bg-surface rounded-xl shadow-soft-lg border border-border-subtle z-50 overflow-hidden origin-top-right"
+            className="absolute right-0 mt-2 w-80 sm:w-[380px] bg-surface rounded-xl shadow-soft-lg border border-border-subtle z-50 overflow-hidden origin-top-right max-md:fixed max-md:inset-x-0 max-md:right-0 max-md:left-0 max-md:mt-0 max-md:bottom-[calc(4.25rem+env(safe-area-inset-bottom,0px))] max-md:w-full max-md:max-w-none max-md:rounded-t-2xl max-md:rounded-b-none max-md:origin-bottom max-md:h-[min(72vh,520px)] max-md:flex max-md:flex-col"
           >
             {/* Dropdown Header */}
-            <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-surface">
+            <div className="md:hidden flex justify-center pt-2 pb-0 shrink-0" aria-hidden>
+              <div className="w-10 h-1 rounded-full bg-surface-marker" />
+            </div>
+            <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between bg-surface shrink-0">
               <h3 className="font-medium text-content text-[16px]">{t("notifications.title")}</h3>
               <div className="flex items-center gap-2.5">
                 <span className="bg-violet-500/15 text-violet-700 text-xs font-medium px-2.5 py-1 rounded-md">
@@ -125,7 +128,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
             </div>
 
             {/* Notification Items List */}
-            <div className="max-h-[380px] overflow-y-auto">
+            <div className="max-h-[380px] max-md:flex-1 max-md:max-h-none overflow-y-auto">
               {notifications.length === 0 ? (
                 <div className="p-8 text-center text-content-muted text-sm italic">
                   {t("notifications.empty")}
@@ -215,8 +218,8 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
 
                         {!n.read && (
                           <div className="absolute right-5 top-5 flex h-2 w-2 shrink-0">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-600 shadow-xs shadow-indigo-300"></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-surface shadow-xs"></span>
                           </div>
                         )}
                       </div>
@@ -227,7 +230,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
             </div>
 
             {/* Dropdown Footer — #345 preferensi minimal */}
-            <div className="p-4 border-t border-border-subtle bg-surface space-y-3">
+            <div className="p-4 border-t border-border-subtle bg-surface space-y-3 shrink-0 pb-[max(1rem,env(safe-area-inset-bottom))] md:pb-4">
               <label className="flex items-center justify-between gap-3 text-xs text-content-secondary cursor-pointer select-none">
                 <span>{t("notifications.dueReminderPref", "Pengingat jatuh tempo (24 jam)")}</span>
                 <input
@@ -242,7 +245,7 @@ export const NotificationsDropdown: React.FC<NotificationsDropdownProps> = ({
                 onClick={() => {
                   setIsNotificationsOpen(false);
                 }}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-content-inverse py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-150 text-center block shadow-xs"
+                className="w-full bg-primary-surface hover:bg-primary-surface-hover text-content-inverse py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-150 text-center block shadow-xs"
               >
                 {t("notifications.viewAll")}
               </button>

@@ -40,6 +40,13 @@ import { LanproDatePicker } from "../../components/ui/LanproDatePicker";
 import { LanproTimePicker } from "../../components/ui/LanproTimePicker";
 import { MeetingMobileCardView } from "./components/MeetingMobileCardView";
 import { useMobileAction } from "../../contexts/MobileActionContext";
+import { PageHeader } from "../../components/ui/PageHeader";
+import {
+  ListPageShell,
+  LIST_SEARCH_INPUT_CLASS,
+  LIST_TABLE_WRAP_CLASS,
+  LIST_THEAD_ROW_CLASS,
+} from "../../components/ui/ListPageShell";
 import {
   loadProjectMeetings,
   peekProjectMeetings,
@@ -518,376 +525,362 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   const activeMeeting = meetings.find((m) => m.id === activeMeetingId);
 
   return (
-    <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-surface-muted text-left">
-      <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
-        {activeMeetingId === null ? (
-          /* DATATABLE VIEW */
-          <div className="flex-1 flex flex-col min-h-0 bg-surface">
-            {/* Table Header / Action Bar — #369: padat HP; Add icon-only */}
-            <div className="p-3 md:p-6 border-b border-border-subtle/80 bg-surface flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0">
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/30 rounded-lg text-primary shadow-2xs shrink-0">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-sm font-medium text-content-strong tracking-tight truncate">
-                    {t("meetings.title")}
-                  </h3>
-                  <p className="text-xs text-content-muted mt-0.5 hidden sm:block">
-                    {t("meetings.subtitle")}
-                  </p>
-                </div>
-              </div>
+    <>
+      {activeMeetingId === null ? (
+        <ListPageShell
+          header={
+            <PageHeader
+              breadcrumbs={[
+                { label: t("meetings.breadcrumbGroup", "PROJECT") },
+                { label: t("meetings.title", "Meeting"), current: true },
+              ]}
+              title={t("meetings.title")}
+              subtitle={<span className="hidden sm:inline">{t("meetings.subtitle")}</span>}
+              actions={
+                <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
+                  <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">
+                    <input
+                      type="text"
+                      placeholder={t("meetings.searchPlaceholder")}
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      className={LIST_SEARCH_INPUT_CLASS}
+                    />
+                    <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
+                  </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
-                <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">
-                  <input
-                    type="text"
-                    placeholder={t("meetings.searchPlaceholder")}
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="w-full min-w-0 pl-9 pr-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium"
-                  />
-                  <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
+                  {canAdd && (
+                    <button
+                      onClick={startAddMeeting}
+                      className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
+                      title={t("meetings.addMeeting")}
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span className="hidden sm:inline">{t("meetings.addMeeting")}</span>
+                    </button>
+                  )}
                 </div>
-
-                {canAdd && (
-                  <button
-                    onClick={startAddMeeting}
-                    className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
-                    title={t("meetings.addMeeting")}
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span className="hidden sm:inline">{t("meetings.addMeeting")}</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* DataTable Container (Desktop sm+) */}
-            <div className="hidden sm:block flex-1 overflow-x-auto overflow-y-auto m-4 md:m-6 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs">
-              <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
-                <thead>
-                  <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap">
-                    <th className="py-3 px-4 w-14 text-center">{t("meetings.thNo")}</th>
-                    <th className="py-3 px-4 min-w-[180px] max-w-[260px]">
-                      {t("meetings.thTitle")}
-                    </th>
-                    <th className="py-3 px-4 w-44">{t("meetings.thDatetime")}</th>
-                    <th className="py-3 px-4 w-40">{t("meetings.thLink")}</th>
-                    <th className="py-3 px-4 w-40">{t("meetings.thDocument")}</th>
-                    <th className="py-3 px-4 w-36">{t("meetings.thAuthor")}</th>
-                    <th className="py-3 px-4 min-w-[180px] max-w-[260px]">
-                      {t("meetings.thDescription")}
-                    </th>
-                    <th className="py-3 px-4 w-28 text-center">{t("meetings.thAction")}</th>
+              }
+            />
+          }
+        >
+          {/* DataTable Container (Desktop sm+) */}
+          <div className={LIST_TABLE_WRAP_CLASS}>
+            <ResponsiveTable className="w-full text-left border-collapse min-w-[900px]">
+              <thead>
+                <tr className={LIST_THEAD_ROW_CLASS}>
+                  <th className="py-3 px-4 w-14 text-center">{t("meetings.thNo")}</th>
+                  <th className="py-3 px-4 min-w-[180px] max-w-[260px]">{t("meetings.thTitle")}</th>
+                  <th className="py-3 px-4 w-44">{t("meetings.thDatetime")}</th>
+                  <th className="py-3 px-4 w-40">{t("meetings.thLink")}</th>
+                  <th className="py-3 px-4 w-40">{t("meetings.thDocument")}</th>
+                  <th className="py-3 px-4 w-36">{t("meetings.thAuthor")}</th>
+                  <th className="py-3 px-4 min-w-[180px] max-w-[260px]">
+                    {t("meetings.thDescription")}
+                  </th>
+                  <th className="py-3 px-4 w-28 text-center">{t("meetings.thAction")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border-faint text-xs text-content-body">
+                {paginatedMeetings.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-16 text-content-subtle">
+                      <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-3 shadow-2xs">
+                        <MessageSquare className="w-6 h-6 text-primary" />
+                      </div>
+                      <p className="font-medium text-content-strong text-sm">
+                        {t("meetings.emptyTitle")}
+                      </p>
+                      <p className="text-xs text-content-subtle mt-1">{t("meetings.emptyHint")}</p>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="divide-y divide-border-faint text-xs text-content-body">
-                  {paginatedMeetings.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="text-center py-16 text-content-subtle">
-                        <div className="w-12 h-12 rounded-lg bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mx-auto mb-3 shadow-2xs">
-                          <MessageSquare className="w-6 h-6 text-primary" />
-                        </div>
-                        <p className="font-medium text-content-strong text-sm">
-                          {t("meetings.emptyTitle")}
-                        </p>
-                        <p className="text-xs text-content-subtle mt-1">
-                          {t("meetings.emptyHint")}
-                        </p>
-                      </td>
-                    </tr>
-                  ) : (
-                    paginatedMeetings.map((meeting, index) => {
-                      const srNo = (currentPage - 1) * itemsPerPage + index + 1;
-                      const author = getAuthorDisplay(meeting.authorId);
-                      return (
-                        <tr
-                          key={meeting.id}
-                          onClick={() => {
-                            setActiveMeetingId(meeting.id!);
-                            setMobileViewMode("detail");
-                          }}
-                          className="hover:bg-surface-sunken/70 transition-colors duration-200 group cursor-pointer"
-                        >
-                          <td className="py-3 px-4 text-center text-content-subtle font-medium">
-                            {String(srNo).padStart(2, "0")}
-                          </td>
-                          <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors">
-                            <div className="line-clamp-1">{meeting.title}</div>
-                          </td>
-                          <td className="py-3 px-4 text-content-muted font-medium">
-                            <div className="flex items-center gap-1.5">
-                              <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
-                              <span>{formatDate(meeting.createdAt)}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
-                            {meeting.meetingLink ? (
-                              <a
-                                href={
-                                  meeting.meetingLink.startsWith("http")
-                                    ? meeting.meetingLink
-                                    : `https://${meeting.meetingLink}`
-                                }
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 text-primary hover:bg-indigo-500/15 rounded-md font-medium truncate max-w-[150px] transition-all text-[10px] leading-none border border-indigo-500/30"
-                                title={meeting.meetingLink}
-                              >
-                                <Video className="w-3.5 h-3.5 shrink-0" />
-                                <span className="truncate">{t("meetings.joinRoom")}</span>
-                              </a>
-                            ) : (
-                              <span className="px-2 py-0.5 bg-surface-muted text-content-muted rounded-md text-xs sm:text-[10px] font-medium">
-                                {t("meetings.noLink")}
+                ) : (
+                  paginatedMeetings.map((meeting, index) => {
+                    const srNo = (currentPage - 1) * itemsPerPage + index + 1;
+                    const author = getAuthorDisplay(meeting.authorId);
+                    return (
+                      <tr
+                        key={meeting.id}
+                        onClick={() => {
+                          setActiveMeetingId(meeting.id!);
+                          setMobileViewMode("detail");
+                        }}
+                        className="hover:bg-surface-sunken/70 transition-colors duration-200 group cursor-pointer"
+                      >
+                        <td className="py-3 px-4 text-center text-content-subtle font-medium">
+                          {String(srNo).padStart(2, "0")}
+                        </td>
+                        <td className="py-3 px-4 font-medium text-content group-hover:text-primary transition-colors">
+                          <div className="line-clamp-1">{meeting.title}</div>
+                        </td>
+                        <td className="py-3 px-4 text-content-muted font-medium">
+                          <div className="flex items-center gap-1.5">
+                            <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />
+                            <span>{formatDate(meeting.createdAt)}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                          {meeting.meetingLink ? (
+                            <a
+                              href={
+                                meeting.meetingLink.startsWith("http")
+                                  ? meeting.meetingLink
+                                  : `https://${meeting.meetingLink}`
+                              }
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-indigo-500/10 text-primary hover:bg-indigo-500/15 rounded-md font-medium truncate max-w-[150px] transition-all text-[10px] leading-none border border-indigo-500/30"
+                              title={meeting.meetingLink}
+                            >
+                              <Video className="w-3.5 h-3.5 shrink-0" />
+                              <span className="truncate">{t("meetings.joinRoom")}</span>
+                            </a>
+                          ) : (
+                            <span className="px-2 py-0.5 bg-surface-muted text-content-muted rounded-md text-xs sm:text-[10px] font-medium">
+                              {t("meetings.noLink")}
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
+                          {meeting.fileName ? (
+                            <button
+                              onClick={() => handleDownloadMeeting(meeting.id!, meeting.fileName!)}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
+                              title={t("meetings.clickToDownload")}
+                            >
+                              <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
+                              <span className="truncate max-w-[140px]">{meeting.fileName}</span>
+                            </button>
+                          ) : (
+                            <span className="text-content-subtle italic text-xs">—</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 text-content-body font-medium">
+                          <div className="flex items-center gap-2">
+                            <UserAvatar
+                              uid={meeting.authorId}
+                              members={users && users.length > 0 ? users : projectMembers}
+                              name={author.name}
+                              className="w-6 h-6 text-xs sm:text-[10px]"
+                            />
+                            <span className="truncate">{author.name}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-content-muted font-normal">
+                          <div className="line-clamp-1 max-w-xs">
+                            {meeting.description || (
+                              <span className="text-content-subtle text-xs sm:text-[11px] italic">
+                                {t("meetings.noDescription")}
                               </span>
                             )}
-                          </td>
-                          <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
-                            {meeting.fileName ? (
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-center" onClick={(e) => e.stopPropagation()}>
+                          <div className="inline-flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => {
+                                setActiveMeetingId(meeting.id!);
+                                setMobileViewMode("detail");
+                              }}
+                              className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
+                              title={t("meetings.viewDetails")}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            {(isUserAdmin || isMeetingAuthor(meeting)) && (
                               <button
-                                onClick={() =>
-                                  handleDownloadMeeting(meeting.id!, meeting.fileName!)
-                                }
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 rounded-md text-xs font-medium transition-all cursor-pointer group/file shadow-2xs"
-                                title={t("meetings.clickToDownload")}
-                              >
-                                <Download className="w-3.5 h-3.5 shrink-0 text-emerald-600 group-hover/file:scale-110 transition-transform" />
-                                <span className="truncate max-w-[140px]">{meeting.fileName}</span>
-                              </button>
-                            ) : (
-                              <span className="text-content-subtle italic text-xs">—</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-content-body font-medium">
-                            <div className="flex items-center gap-2">
-                              <UserAvatar
-                                uid={meeting.authorId}
-                                members={users && users.length > 0 ? users : projectMembers}
-                                name={author.name}
-                                className="w-6 h-6 text-xs sm:text-[10px]"
-                              />
-                              <span className="truncate">{author.name}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-content-muted font-normal">
-                            <div className="line-clamp-1 max-w-xs">
-                              {meeting.description || (
-                                <span className="text-content-subtle text-xs sm:text-[11px] italic">
-                                  {t("meetings.noDescription")}
-                                </span>
-                              )}
-                            </div>
-                          </td>
-                          <td
-                            className="py-3 px-4 text-center"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <div className="inline-flex items-center justify-center gap-1">
-                              <button
-                                onClick={() => {
-                                  setActiveMeetingId(meeting.id!);
-                                  setMobileViewMode("detail");
-                                }}
+                                onClick={() => startEdit(meeting)}
                                 className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
-                                title={t("meetings.viewDetails")}
+                                title={t("meetings.editMeeting")}
                               >
-                                <Eye className="w-4 h-4" />
+                                <Edit2 className="w-4 h-4" />
                               </button>
-                              {(isUserAdmin || isMeetingAuthor(meeting)) && (
-                                <button
-                                  onClick={() => startEdit(meeting)}
-                                  className="p-1.5 text-content-muted hover:text-primary hover:bg-indigo-500/10 rounded-md transition-all cursor-pointer"
-                                  title={t("meetings.editMeeting")}
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                </button>
-                              )}
-                              {canDeleteMeeting(meeting) && (
-                                <button
-                                  onClick={() => handleDeleteMeeting(meeting.id!)}
-                                  className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
-                                  title={t("meetings.deleteMeeting")}
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </ResponsiveTable>
-            </div>
-
-            {/* Mobile Card List View (< 640px) */}
-            <div className="sm:hidden flex-1 overflow-y-auto p-4 space-y-3">
-              <MeetingMobileCardView
-                meetings={paginatedMeetings}
-                users={users}
-                projectMembers={projectMembers}
-                onSelectMeeting={(id) => {
-                  setActiveMeetingId(id);
-                  setMobileViewMode("detail");
-                }}
-                onEditMeeting={(meeting) => startEdit(meeting)}
-                onDeleteMeeting={(meeting) => handleDeleteMeeting(meeting.id!)}
-                onDownloadAttachment={(meetingId, fileName) =>
-                  handleDownloadMeeting(meetingId, fileName)
-                }
-                canEdit={canAdd}
-                canDelete={true}
-                isMeetingAuthor={isMeetingAuthor}
-                isAdmin={isUserAdmin}
-              />
-            </div>
-
-            {/* Table Footer / Pagination */}
-            <div className="px-6 py-3.5 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-              <div className="text-[11px] text-content-subtle font-normal">
-                {t("common.showing")}{" "}
-                {totalMeetings === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1} {t("common.to")}{" "}
-                {Math.min(currentPage * itemsPerPage, totalMeetings)} {t("common.of")}{" "}
-                {totalMeetings} {t("common.entries")}
-              </div>
-
-              {totalPages > 1 && (
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
-                  >
-                    {t("meetingExtra.previous")}
-                  </button>
-                  <span className="px-3 py-1.5 bg-primary-surface text-content-inverse rounded-md text-xs sm:text-[10px] font-normal shadow-xs">
-                    {currentPage}
-                  </span>
-                  <button
-                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
-                  >
-                    {t("meetingExtra.next")}
-                  </button>
-                </div>
-              )}
-            </div>
+                            )}
+                            {canDeleteMeeting(meeting) && (
+                              <button
+                                onClick={() => handleDeleteMeeting(meeting.id!)}
+                                className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer"
+                                title={t("meetings.deleteMeeting")}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </ResponsiveTable>
           </div>
-        ) : (
-          /* DETAIL VIEW */
-          <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken/50 w-full">
-            {activeMeeting ? (
-              <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4">
-                {/* Panel 1: Top Actions */}
-                <div className="bg-surface border border-border-subtle/80 rounded-lg p-4 flex items-center justify-between shadow-2xs shrink-0">
-                  <button
-                    onClick={() => setActiveMeetingId(null)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken rounded-md text-xs font-normal text-content-body transition-all cursor-pointer shadow-2xs"
-                  >
-                    <ChevronLeft className="w-4 h-4" /> {t("meetings.backToList")}
-                  </button>
 
-                  <div className="flex items-center gap-2">
-                    {activeMeeting.meetingLink && (
-                      <a
-                        href={
-                          activeMeeting.meetingLink.startsWith("http")
-                            ? activeMeeting.meetingLink
-                            : `https://${activeMeeting.meetingLink}`
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-normal transition-all shadow-xs cursor-pointer"
-                      >
-                        <Video className="w-3.5 h-3.5" /> {t("rakit.joinMeeting")}{" "}
-                        <ExternalLink className="w-3 h-3 opacity-80" />
-                      </a>
-                    )}
-                    {(isUserAdmin || isMeetingAuthor(activeMeeting)) && (
-                      <button
-                        onClick={() => startEdit(activeMeeting)}
-                        className="px-3.5 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken text-content-body rounded-md text-xs font-normal transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
-                      >
-                        <Edit2 className="w-3.5 h-3.5 text-primary" /> {t("meetings.edit")}
-                      </button>
-                    )}
-                    {canDeleteMeeting(activeMeeting) && (
-                      <button
-                        onClick={() => handleDeleteMeeting(activeMeeting.id!)}
-                        className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 rounded-md text-xs font-normal transition-all cursor-pointer border border-rose-500/30 flex items-center gap-1.5"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" /> {t("meetings.delete")}
-                      </button>
-                    )}
-                  </div>
-                </div>
+          {/* Mobile Card List View (< 640px) */}
+          <div className="sm:hidden flex-1 overflow-y-auto p-4 space-y-3">
+            <MeetingMobileCardView
+              meetings={paginatedMeetings}
+              users={users}
+              projectMembers={projectMembers}
+              onSelectMeeting={(id) => {
+                setActiveMeetingId(id);
+                setMobileViewMode("detail");
+              }}
+              onEditMeeting={(meeting) => startEdit(meeting)}
+              onDeleteMeeting={(meeting) => handleDeleteMeeting(meeting.id!)}
+              onDownloadAttachment={(meetingId, fileName) =>
+                handleDownloadMeeting(meetingId, fileName)
+              }
+              canEdit={canAdd}
+              canDelete={true}
+              isMeetingAuthor={isMeetingAuthor}
+              isAdmin={isUserAdmin}
+            />
+          </div>
 
-                {/* Panel 2: Meeting Context & Agenda */}
-                <div className="bg-surface border border-border-subtle/80 rounded-lg p-5 md:p-6 shadow-2xs shrink-0">
-                  <h2 className="text-lg md:text-xl font-medium text-content tracking-tight">
-                    {activeMeeting.title}
-                  </h2>
+          {/* Table Footer / Pagination */}
+          <div className="px-6 py-3.5 border-t border-border-subtle bg-surface-sunken/60 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
+            <div className="text-[11px] text-content-subtle font-normal">
+              {t("common.showing")} {totalMeetings === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1}{" "}
+              {t("common.to")} {Math.min(currentPage * itemsPerPage, totalMeetings)}{" "}
+              {t("common.of")} {totalMeetings} {t("common.entries")}
+            </div>
 
-                  {activeMeeting.description && (
-                    <div className="mt-4 p-4 border border-indigo-500/30 bg-indigo-500/10 rounded-lg border-l-4 border-l-primary flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <span className="text-xs font-normal text-primary block mb-1">
-                          {t("meetings.meetingDescriptionAgenda")}
-                        </span>
-                        <div className="flex items-center gap-2 text-xs sm:text-[11px] text-content-muted mb-2 not-italic">
-                          <Calendar className="w-3.5 h-3.5 text-content-subtle" />
-                          <span className="text-content-secondary font-normal">
-                            {formatDate(activeMeeting.createdAt)}
-                          </span>
-                        </div>
-                        <p className="text-xs text-content-body leading-relaxed whitespace-pre-wrap">
-                          {activeMeeting.description}
-                        </p>
-                      </div>
-                      {activeMeeting.fileName && (
-                        <button
-                          onClick={() =>
-                            handleDownloadMeeting(activeMeeting.id!, activeMeeting.fileName!)
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                >
+                  {t("meetingExtra.previous")}
+                </button>
+                <span className="px-3 py-1.5 bg-primary-surface text-content-inverse rounded-md text-xs sm:text-[10px] font-normal shadow-xs">
+                  {currentPage}
+                </span>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 bg-surface border border-border-subtle text-content-secondary hover:bg-surface-sunken rounded-md text-xs sm:text-[10px] font-normal disabled:opacity-40 transition-colors cursor-pointer shadow-2xs"
+                >
+                  {t("meetingExtra.next")}
+                </button>
+              </div>
+            )}
+          </div>
+        </ListPageShell>
+      ) : (
+        /* DETAIL VIEW — #422: tanpa PageHeader dalam card; panel detail di kartu */
+        <div className="w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-surface-muted text-left">
+          <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken/50 w-full">
+              {activeMeeting ? (
+                <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4">
+                  {/* Panel 1: Top Actions */}
+                  <div className="bg-surface border border-border-subtle/80 rounded-lg p-4 flex items-center justify-between shadow-2xs shrink-0">
+                    <button
+                      onClick={() => setActiveMeetingId(null)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken rounded-md text-xs font-normal text-content-body transition-all cursor-pointer shadow-2xs"
+                    >
+                      <ChevronLeft className="w-4 h-4" /> {t("meetings.backToList")}
+                    </button>
+
+                    <div className="flex items-center gap-2">
+                      {activeMeeting.meetingLink && (
+                        <a
+                          href={
+                            activeMeeting.meetingLink.startsWith("http")
+                              ? activeMeeting.meetingLink
+                              : `https://${activeMeeting.meetingLink}`
                           }
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 rounded-md text-xs font-normal transition-all border border-emerald-500/30 cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
-                          title={t("meetingExtra.downloadAttachment")}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-normal transition-all shadow-xs cursor-pointer"
                         >
-                          <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                          <span className="truncate max-w-[140px]">{activeMeeting.fileName}</span>
-                          <span className="text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded font-normal">
-                            {t("meetingExtra.download")}
-                          </span>
+                          <Video className="w-3.5 h-3.5" /> {t("rakit.joinMeeting")}{" "}
+                          <ExternalLink className="w-3 h-3 opacity-80" />
+                        </a>
+                      )}
+                      {(isUserAdmin || isMeetingAuthor(activeMeeting)) && (
+                        <button
+                          onClick={() => startEdit(activeMeeting)}
+                          className="px-3.5 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken text-content-body rounded-md text-xs font-normal transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
+                        >
+                          <Edit2 className="w-3.5 h-3.5 text-primary" /> {t("meetings.edit")}
+                        </button>
+                      )}
+                      {canDeleteMeeting(activeMeeting) && (
+                        <button
+                          onClick={() => handleDeleteMeeting(activeMeeting.id!)}
+                          className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 rounded-md text-xs font-normal transition-all cursor-pointer border border-rose-500/30 flex items-center gap-1.5"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> {t("meetings.delete")}
                         </button>
                       )}
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                {/* Panel 3: Discussion Points Table */}
-                <div className="flex-1 flex flex-col min-h-0">
-                  <DiscussionPointsTable
-                    projectId={projectId}
-                    meetingId={activeMeeting.id!}
-                    userRole={userRole}
-                    currentUser={currentUser}
-                    permissions={permissions}
-                    projectMembers={projectMembers}
-                    masterData={masterData}
-                  />
+                  {/* Panel 2: Meeting Context & Agenda */}
+                  <div className="bg-surface border border-border-subtle/80 rounded-lg p-5 md:p-6 shadow-2xs shrink-0">
+                    <h2 className="text-lg md:text-xl font-medium text-content tracking-tight">
+                      {activeMeeting.title}
+                    </h2>
+
+                    {activeMeeting.description && (
+                      <div className="mt-4 p-4 border border-indigo-500/30 bg-indigo-500/10 rounded-lg border-l-4 border-l-primary flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <span className="text-xs font-normal text-primary block mb-1">
+                            {t("meetings.meetingDescriptionAgenda")}
+                          </span>
+                          <div className="flex items-center gap-2 text-xs sm:text-[11px] text-content-muted mb-2 not-italic">
+                            <Calendar className="w-3.5 h-3.5 text-content-subtle" />
+                            <span className="text-content-secondary font-normal">
+                              {formatDate(activeMeeting.createdAt)}
+                            </span>
+                          </div>
+                          <p className="text-xs text-content-body leading-relaxed whitespace-pre-wrap">
+                            {activeMeeting.description}
+                          </p>
+                        </div>
+                        {activeMeeting.fileName && (
+                          <button
+                            onClick={() =>
+                              handleDownloadMeeting(activeMeeting.id!, activeMeeting.fileName!)
+                            }
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 rounded-md text-xs font-normal transition-all border border-emerald-500/30 cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
+                            title={t("meetingExtra.downloadAttachment")}
+                          >
+                            <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                            <span className="truncate max-w-[140px]">{activeMeeting.fileName}</span>
+                            <span className="text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded font-normal">
+                              {t("meetingExtra.download")}
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Panel 3: Discussion Points Table */}
+                  <div className="flex-1 flex flex-col min-h-0">
+                    <DiscussionPointsTable
+                      projectId={projectId}
+                      meetingId={activeMeeting.id!}
+                      userRole={userRole}
+                      currentUser={currentUser}
+                      permissions={permissions}
+                      projectMembers={projectMembers}
+                      masterData={masterData}
+                    />
+                  </div>
                 </div>
-              </div>
-            ) : null}
+              ) : null}
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* POPUP MODAL: Add / Edit Meeting */}
       {isModalOpen && (
@@ -1117,6 +1110,6 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };

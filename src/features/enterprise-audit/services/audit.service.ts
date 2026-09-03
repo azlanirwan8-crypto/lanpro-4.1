@@ -38,3 +38,8 @@ export async function fetchAuditLogs(filter: AuditLogFilter): Promise<AuditApiRe
   }
   return apiRequest(`/api/audit-logs?${params.toString()}`);
 }
+
+/** #353 — log gagal kirim notifikasi (admin). */
+export async function fetchNotificationFailures(): Promise<AuditApiResponse> {
+  return apiRequest("/api/admin/notification-failures");
+}

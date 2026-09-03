@@ -4,6 +4,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { Zap, AlertCircle, Clock, FileText, ArrowRight, Video, Globe } from "lucide-react";
 import { ensureDate, humanizeActivityAction } from "../../../lib/utils";
 import { cn } from "../../../lib/utils";
+import { Card } from "../../../components/ui/CoreUI";
 
 const isDueSoon24h = (endDate?: string | Date | null) => {
   if (!endDate) return false;
@@ -60,8 +61,8 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
   const { t } = useTranslation();
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar space-y-6 h-auto p-1 select-none">
-      {/* My Active Tasks */}
-      <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
+      {/* My Active Tasks — #413 Card hoverLift */}
+      <Card hoverLift className="p-5 rounded-xl">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-primary flex items-center gap-2">
             <Zap className="w-4 h-4 text-primary" /> {t("widgets.myActiveTasks")} (
@@ -115,10 +116,10 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             ))
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Blocked / Stoppers */}
-      <div className="bg-surface shadow-soft border border-danger-border/40 rounded-xl p-5">
+      <Card hoverLift className="p-5 rounded-xl border-danger-border/40">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-danger flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-danger animate-bounce" />{" "}
@@ -172,10 +173,10 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             ))
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Needs Attention / Overdue */}
-      <div className="bg-surface shadow-soft border border-danger-border/30 rounded-xl p-5">
+      <Card hoverLift className="p-5 rounded-xl border-danger-border/30">
         <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-content-strong flex items-center gap-2 mb-3">
           <AlertCircle className="w-4 h-4 text-danger animate-pulse" />{" "}
           {t("widgets.needsAttention")} ({overdueTasks.length})
@@ -208,10 +209,10 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             ))
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Due Soon */}
-      <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
+      <Card hoverLift className="p-5 rounded-xl">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-content-strong flex items-center gap-2">
             <Zap className="w-4 h-4 text-warning" /> {t("widgets.dueSoon")} ({dueSoonTasks.length})
@@ -266,10 +267,10 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             ))
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Recent Meeting Notes */}
-      <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
+      <Card hoverLift className="p-5 rounded-xl">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-content-strong flex items-center gap-2">
             <Video className="w-4 h-4 text-info" /> {t("widgets.recentMeetings")} ({meetings.length}
@@ -303,10 +304,10 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             ))
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Recent Documentation */}
-      <div className="bg-surface shadow-soft border border-border-subtle/80 rounded-xl p-5">
+      <Card hoverLift className="p-5 rounded-xl">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-content-strong flex items-center gap-2">
             <FileText className="w-4 h-4 text-success" /> {t("widgets.documentation")} (
@@ -340,15 +341,15 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
             ))
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Live Activity (24h) */}
-      <div className="bg-surface-inverse rounded-xl p-5 shadow-soft-lg text-content-inverse relative overflow-hidden">
+      <Card variant="inverse" hoverLift className="p-5 rounded-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 -translate-y-4 translate-x-4 opacity-10 pointer-events-none">
           <Globe className="w-32 h-32" />
         </div>
-        <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-indigo-300 flex items-center gap-2 mb-3 relative z-10">
-          <Clock className="w-4 h-4 text-indigo-400" /> {t("widgets.liveActivity")}
+        <h3 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-info flex items-center gap-2 mb-3 relative z-10">
+          <Clock className="w-4 h-4 text-info" /> {t("widgets.liveActivity")}
         </h3>
         <div className="space-y-3 max-h-[260px] overflow-y-auto custom-scrollbar pr-1 relative z-10">
           {activityLogs.map((log) => {
@@ -369,7 +370,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
               "System";
             return (
               <div key={log.id} className="flex gap-2.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
+                <div className="w-1.5 h-1.5 rounded-full bg-info mt-1.5 shrink-0" />
                 <div>
                   <div className="text-xs sm:text-[11px] text-content-subtle font-medium leading-tight">
                     <span className="text-content-inverse font-medium">{author}</span>{" "}
@@ -391,7 +392,7 @@ export const SidebarWidgetsStack: React.FC<SidebarWidgetsStackProps> = ({
         >
           {t("widgets.viewFullAuditLog")}
         </button>
-      </div>
+      </Card>
     </div>
   );
 };

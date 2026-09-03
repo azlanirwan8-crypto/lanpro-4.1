@@ -21,10 +21,11 @@ import {
   ChevronLeft,
   ChevronRight,
   ShieldAlert,
-  ChevronRight as ArrowRight,
   Monitor,
 } from "lucide-react";
 import { UserAvatar } from "../../components/ui/UserAvatar";
+import { PageHeader } from "../../components/ui/PageHeader";
+import { Card, CardHeader, CardBody } from "../../components/ui/CoreUI";
 import { apiClient } from "../../lib/api";
 import { PeranEfektif } from "../../types/roles";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
@@ -237,44 +238,33 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken p-3.5 sm:p-4 overflow-y-auto space-y-3.5">
-      {/* Velzon Header & Breadcrumb */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div>
-          <nav className="flex items-center gap-1.5 text-[11px] font-normal uppercase tracking-wider text-content-subtle mb-0.5">
-            <span>{t("sessionMonitor.breadcrumbGroup", "ADMINISTRATION")}</span>
-            <ArrowRight className="w-3 h-3 text-content-subtle" />
-            <span className="text-primary">
-              {t("sessionMonitor.breadcrumbItem", "SESI PENGGUNA")}
-            </span>
-          </nav>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-lg font-bold text-content-strong tracking-tight">
-              {t("sessionMonitor.title", "Monitoring Sesi & Aktivitas Pengguna")}
-            </h1>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              {t("sessionMonitor.liveMonitoring", "Live Monitoring")}
-            </span>
-          </div>
-          <p className="text-xs text-content-muted mt-0.5">
-            {t(
-              "sessionMonitor.subtitle",
-              "Pantau status login, riwayat sesi, lokasi, perangkat, dan log aktivitas pengguna secara real-time."
-            )}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 self-start md:self-auto">
+      {/* Velzon Header & Breadcrumb — #397 PageHeader */}
+      <PageHeader
+        breadcrumbs={[
+          { label: t("sessionMonitor.breadcrumbGroup", "ADMINISTRATION") },
+          { label: t("sessionMonitor.breadcrumbItem", "SESI PENGGUNA"), current: true },
+        ]}
+        title={t("sessionMonitor.title", "Monitoring Sesi & Aktivitas Pengguna")}
+        subtitle={t(
+          "sessionMonitor.subtitle",
+          "Pantau status login, riwayat sesi, lokasi, perangkat, dan log aktivitas pengguna secara real-time."
+        )}
+        actions={
           <button
             onClick={() => fetchSessions()}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-content-strong bg-surface hover:bg-surface-hover border border-border-subtle rounded-lg transition-all shadow-xs disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-content-strong bg-surface hover:bg-surface-sunken border border-border-subtle rounded-lg transition-all shadow-xs disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
             <span>{t("sessionMonitor.refresh", "Segarkan")}</span>
           </button>
-        </div>
-      </div>
+        }
+      >
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-success/10 text-success-text border border-success/20">
+          <span className="w-1.5 h-1.5 rounded-full bg-success-surface animate-pulse"></span>
+          {t("sessionMonitor.liveMonitoring", "Live Monitoring")}
+        </span>
+      </PageHeader>
 
       {/* Velzon Stat Widgets Grid — #360: 2 kolom di HP */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
@@ -368,10 +358,10 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
         </div>
       </div>
 
-      {/* Velzon Main Card: Search, Filter & Table */}
-      <div className="bg-surface border border-border-subtle rounded-xl shadow-xs overflow-hidden flex flex-col">
+      {/* Velzon Main Card: Search, Filter & Table — #397 Card */}
+      <Card className="rounded-xl shadow-xs flex flex-col">
         {/* Card Header Filter Bar — #360: search + status 1 baris di HP */}
-        <div className="p-3 border-b border-border-subtle bg-surface flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
+        <CardHeader className="p-3 bg-surface flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
           <div className="flex flex-1 items-center gap-2 min-w-0">
             <div className="relative min-w-0 flex-1">
               <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -413,13 +403,13 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           <div className="text-xs text-content-subtle font-medium self-end sm:self-auto hidden sm:block">
             {t("sessionMonitor.totalRecords", "Total Sesi: {{total}}", { total: totalRecords })}
           </div>
-        </div>
+        </CardHeader>
 
         {/* Table Body — desktop; kartu di HP (#309) */}
         <div className="hidden sm:block overflow-x-auto min-h-[350px]">
           <table className="w-full text-left border-collapse table-fixed">
             <thead>
-              <tr className="bg-surface-sunken/70 border-b border-border-subtle text-[11px] font-normal uppercase tracking-wider text-content-subtle">
+              <tr className="bg-primary-surface/5 border-b border-primary/15 text-xs font-normal text-content-subtle whitespace-nowrap">
                 <th className="py-2.5 px-3 w-[22%]">{t("sessionMonitor.colUser", "PENGGUNA")}</th>
                 <th className="py-2.5 px-3 w-[16%]">
                   {t("sessionMonitor.colIp", "IP & GEOLOKASI")}
@@ -799,7 +789,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
             </button>
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Velzon Activity & Audit Log Viewer Modal */}
       {selectedUserForActivity && (

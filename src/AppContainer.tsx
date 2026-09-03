@@ -163,6 +163,7 @@ import {
   ArrowLeft,
   Lock as LockIcon,
   Link2 as Link2Icon,
+  MoreHorizontal,
   Settings,
   ShieldAlert,
 } from "lucide-react";
@@ -455,6 +456,20 @@ function AppContainer() {
   const setLoginStatusText = setHookLoginStatusText;
   const isAuthLoading = hookIsAuthLoading;
   const [isInitialDataLoading, setIsInitialDataLoading] = useState(false);
+  // #392 — overflow Settings/bahasa/tema di bawah md
+  const [isHeaderMoreOpen, setIsHeaderMoreOpen] = useState(false);
+  const headerMoreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isHeaderMoreOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (headerMoreRef.current && !headerMoreRef.current.contains(e.target as Node)) {
+        setIsHeaderMoreOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [isHeaderMoreOpen]);
 
   const {
     notifications,
@@ -2620,19 +2635,20 @@ function AppContainer() {
     }
   };
 
-  const handleInviteMember = async () => {
+  const handleInviteMember = async (emailArg?: string) => {
     if (!selectedProject) {
       toast.error(t("toast.noProjectSelected"));
       return;
     }
-    if (!inviteEmail.trim()) {
+    const rawEmail = (emailArg ?? inviteEmail).trim();
+    if (!rawEmail) {
       toast.error(t("toast.enterEmail"));
       return;
     }
 
     const toastId = toast.loading(t("toast.sendingInvite"));
     try {
-      const emailToInvite = inviteEmail.trim().toLowerCase();
+      const emailToInvite = rawEmail.toLowerCase();
       // allUsers is available locally from the /api/users fetch
       const userToInvite = allUsers.find((u) => u.email === emailToInvite);
 
@@ -3778,7 +3794,7 @@ function AppContainer() {
     <PresenceProvider currentUser={currentUser} socket={socket} allUsers={allUsers}>
       <Toaster position="top-right" richColors closeButton duration={5000} />
       <RateLimitIndicator />
-      <div className="min-h-screen flex h-screen bg-surface-sunken text-content transition-colors duration-200">
+      <div className="min-h-dvh flex h-dvh bg-surface-sunken text-content transition-colors duration-200">
         {/* Backdrop Overlay for Mobile Sidebar */}
         <AnimatePresence>
           {isMobileMenuOpen && (
@@ -3871,57 +3887,117 @@ function AppContainer() {
               ) : null}
             </div>
 
-            {/* Area Ikon Navigasi Kanan */}
-            <div className="flex items-center gap-2">
-              {/* Tombol Pengaturan Proyek */}
-              {selectedProject &&
-                hasPermission(
-                  userRoleForProject,
-                  "configuration",
-                  "read",
-                  selectedProject?.ownerId === (currentUser?.uid || user?.uid),
-                  currentUserProfile?.permissions
-                ) && (
-                  <button
-                    onClick={() => {
-                      setEditingProject(selectedProject);
-                      setIsEditProjectModalOpen(true);
-                    }}
-                    className="p-2.5 min-w-11 min-h-11 flex items-center justify-center hover:bg-surface-sunken rounded-full text-content-subtle hover:text-content-secondary group transition-all"
-                    title={t("common.projectSettings")}
-                  >
-                    <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform" />
-                  </button>
-                )}
+            {/* Area Ikon Navigasi Kanan — #392: di HP Settings/bahasa/tema masuk menu overflow */}
+            <div className="flex items-center gap-1 sm:gap-2">
+              {/* Desktop md+: Settings + Language + Theme */}
+              <div className="hidden md:flex items-center gap-2">
+                {selectedProject &&
+                  hasPermission(
+                    userRoleForProject,
+                    "configuration",
+                    "read",
+                    selectedProject?.ownerId === (currentUser?.uid || user?.uid),
+                    currentUserProfile?.permissions
+                  ) && (
+                    <button
+                      onClick={() => {
+                        setEditingProject(selectedProject);
+                        setIsEditProjectModalOpen(true);
+                      }}
+                      className="p-2.5 min-w-11 min-h-11 flex items-center justify-center hover:bg-surface-sunken rounded-full text-content-subtle hover:text-content-secondary group transition-all"
+                      title={t("common.projectSettings")}
+                    >
+                      <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+                    </button>
+                  )}
 
-              {/* Fullscreen Toggle Button */}
-              <button
-                onClick={toggleFullscreen}
-                className="hidden sm:flex p-2.5 min-w-11 min-h-11 items-center justify-center text-content-subtle hover:text-primary hover:bg-surface-sunken rounded-full transition-all"
-                title={isFullscreen ? t("common.exitFullscreen") : t("common.fullscreen")}
-              >
-                {isFullscreen ? (
-                  <Minimize2 className="w-5 h-5" />
-                ) : (
-                  <Maximize className="w-5 h-5" />
-                )}
-              </button>
+                <button
+                  onClick={toggleFullscreen}
+                  className="hidden sm:flex p-2.5 min-w-11 min-h-11 items-center justify-center text-content-subtle hover:text-primary hover:bg-surface-sunken rounded-full transition-all"
+                  title={isFullscreen ? t("common.exitFullscreen") : t("common.fullscreen")}
+                >
+                  {isFullscreen ? (
+                    <Minimize2 className="w-5 h-5" />
+                  ) : (
+                    <Maximize className="w-5 h-5" />
+                  )}
+                </button>
 
-              <LanguageSwitcher />
+                <LanguageSwitcher />
 
-              {/* Velzon 1-Click Direct Theme Switcher Button */}
-              <button
-                onClick={toggleTheme}
-                className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-content-strong hover:bg-surface-sunken rounded-full transition-all cursor-pointer relative"
-                title={isDarkMode() ? t("appShell.toLightMode") : t("appShell.toDarkMode")}
-                aria-label={isDarkMode() ? t("appShell.toLightMode") : t("appShell.toDarkMode")}
-              >
-                {isDarkMode() ? (
-                  <Sun className="w-5 h-5 text-warning transition-transform hover:rotate-45 duration-200" />
-                ) : (
-                  <Moon className="w-5 h-5 text-content-body transition-transform hover:-rotate-12 duration-200" />
+                <button
+                  onClick={toggleTheme}
+                  className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-content-strong hover:bg-surface-sunken rounded-full transition-all cursor-pointer relative"
+                  title={isDarkMode() ? t("appShell.toLightMode") : t("appShell.toDarkMode")}
+                  aria-label={isDarkMode() ? t("appShell.toLightMode") : t("appShell.toDarkMode")}
+                >
+                  {isDarkMode() ? (
+                    <Sun className="w-5 h-5 text-warning transition-transform hover:rotate-45 duration-200" />
+                  ) : (
+                    <Moon className="w-5 h-5 text-content-body transition-transform hover:-rotate-12 duration-200" />
+                  )}
+                </button>
+              </div>
+
+              {/* HP: satu tombol More untuk Settings / bahasa / tema */}
+              <div className="relative md:hidden" ref={headerMoreRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsHeaderMoreOpen((o) => !o)}
+                  className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-content-strong hover:bg-surface-sunken rounded-full transition-all cursor-pointer"
+                  title={t("appShell.moreActions", "Lainnya")}
+                  aria-label={t("appShell.moreActions", "Lainnya")}
+                  aria-expanded={isHeaderMoreOpen}
+                >
+                  <MoreHorizontal className="w-5 h-5" />
+                </button>
+                {isHeaderMoreOpen && (
+                  <div className="absolute right-0 top-full mt-1 z-50 min-w-[11rem] rounded-lg border border-border-subtle bg-surface shadow-soft-lg py-1">
+                    {selectedProject &&
+                      hasPermission(
+                        userRoleForProject,
+                        "configuration",
+                        "read",
+                        selectedProject?.ownerId === (currentUser?.uid || user?.uid),
+                        currentUserProfile?.permissions
+                      ) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingProject(selectedProject);
+                            setIsEditProjectModalOpen(true);
+                            setIsHeaderMoreOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 min-h-11 text-left text-xs text-content-body hover:bg-surface-sunken cursor-pointer"
+                        >
+                          <Settings className="w-4 h-4 shrink-0" />
+                          {t("common.projectSettings")}
+                        </button>
+                      )}
+                    <div className="flex items-center gap-2.5 px-3 min-h-11">
+                      <span className="text-xs text-content-muted shrink-0 w-16">
+                        {t("common.language", "Bahasa")}
+                      </span>
+                      <LanguageSwitcher />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        toggleTheme();
+                        setIsHeaderMoreOpen(false);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 min-h-11 text-left text-xs text-content-body hover:bg-surface-sunken cursor-pointer"
+                    >
+                      {isDarkMode() ? (
+                        <Sun className="w-4 h-4 text-warning shrink-0" />
+                      ) : (
+                        <Moon className="w-4 h-4 shrink-0" />
+                      )}
+                      {isDarkMode() ? t("appShell.toLightMode") : t("appShell.toDarkMode")}
+                    </button>
+                  </div>
                 )}
-              </button>
+              </div>
 
               <div className="relative" ref={notificationsRef}>
                 <button
@@ -4075,25 +4151,32 @@ function AppContainer() {
                     className="flex-1 flex flex-col min-h-0 bg-surface-sunken transition-colors duration-200"
                   >
                     {currentView === "issueDetail" && (
-                      <div className="w-full flex-1 flex flex-col p-3 md:p-4 min-h-0 overflow-hidden bg-surface-muted text-left">
-                        <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden">
-                          {/* Velzon-style Action / Title Bar */}
-                          <div className="px-4 py-3 md:px-6 md:py-3.5 border-b border-border-subtle/80 bg-surface flex items-center justify-between gap-4 shrink-0 shadow-2xs">
-                            <div className="flex items-center gap-3">
+                      <div className="w-full flex-1 flex flex-col p-3 md:p-4 min-h-0 overflow-hidden bg-surface-sunken text-left">
+                        {/* #418 — full-page TaskDetail chrome = Card + title bar Velzon (bukan Modal overlay) */}
+                        <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle rounded-lg shadow-soft overflow-hidden">
+                          <div className="px-4 py-3 md:px-5 md:py-3.5 border-b border-border-subtle bg-surface-sunken/40 flex items-center justify-between gap-4 shrink-0">
+                            <div className="flex items-center gap-3 min-w-0">
                               <button
+                                type="button"
                                 onClick={() => setIsTaskDetailModalOpen(false)}
-                                className="h-8 w-8 rounded-md bg-surface-sunken border border-border-subtle/80 text-content-secondary hover:bg-indigo-500/10 hover:text-indigo-600 hover:border-indigo-500/30 flex items-center justify-center transition-all shadow-2xs"
+                                className="h-9 w-9 rounded-lg bg-surface border border-border-subtle text-content-secondary hover:bg-primary/10 hover:text-primary hover:border-primary/30 flex items-center justify-center transition-all shadow-2xs shrink-0"
                                 title={t("appShell.back")}
                               >
                                 <ArrowLeft className="w-4 h-4" />
                               </button>
-                              <div className="flex items-center gap-2.5">
-                                <h3 className="text-sm font-medium text-content-strong tracking-tight">
-                                  {t("appShell.issueDetails")}
-                                </h3>
-                                <span className="text-xs font-medium text-indigo-700 bg-indigo-500/10 px-2.5 py-[3px] rounded-md border border-indigo-500/30">
-                                  {selectedTaskForDetail?.key || "TASK"}
-                                </span>
+                              <div className="min-w-0">
+                                <div className="text-[11px] font-normal uppercase tracking-wider text-content-subtle">
+                                  {t("issues.breadcrumbGroup", "PROJECT")} /{" "}
+                                  {t("sidebar.issueList")}
+                                </div>
+                                <div className="flex items-center gap-2.5 mt-0.5 min-w-0">
+                                  <h3 className="text-base font-bold text-content-strong tracking-tight truncate">
+                                    {t("appShell.issueDetails")}
+                                  </h3>
+                                  <span className="text-xs font-medium text-primary bg-primary/10 px-2.5 py-[3px] rounded-md border border-primary/30 shrink-0">
+                                    {selectedTaskForDetail?.key || "TASK"}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -4211,6 +4294,7 @@ function AppContainer() {
                       StyledDropdown={StyledDropdown}
                       updateProjectRole={updateProjectRole}
                       removeProjectMember={removeProjectMember}
+                      onInviteMember={handleInviteMember}
                     />
                   </motion.div>
                 </AnimatePresence>
@@ -4249,7 +4333,7 @@ function AppContainer() {
               />
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center bg-surface-sunken/50 p-8 text-center">
-                <div className="w-16 h-16 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-600 mb-4 shadow-soft">
+                <div className="w-16 h-16 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center text-primary mb-4 shadow-soft">
                   <FolderKanban className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-medium text-content-strong mb-2">
@@ -4279,7 +4363,7 @@ function AppContainer() {
                 ) && (
                   <button
                     onClick={() => setIsNewProjectModalOpen(true)}
-                    className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-xl font-medium text-sm shadow-md shadow-indigo-200 transition-all flex items-center gap-2"
+                    className="px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-xl font-medium text-sm shadow-md shadow-primary/20 transition-all flex items-center gap-2"
                   >
                     <Plus className="w-4 h-4" />
                     <span>{t("appShell.createNewProject")}</span>

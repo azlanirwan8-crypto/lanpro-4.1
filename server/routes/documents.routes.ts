@@ -11,6 +11,7 @@ import { validasiBody, validasiQuery } from "../middleware/validate";
 import { createDocumentSchema, updateDocumentSchema } from "../schemas/document.schema";
 import { documentListQuerySchema } from "../schemas/pagination.schema";
 import { respondWithProjectList } from "../lib/listResponse";
+import { sanitizeUserText } from "../lib/sanitizeText";
 
 const router = Router();
 
@@ -105,12 +106,16 @@ router.post(
       const currentUserId = req.user?.id || req.user?.uid || "guest";
       const currentUserName = req.user?.displayName || req.user?.username || createdBy || null;
       const newId = crypto.randomUUID();
+      // #348 — sanitasi teks wiki sebelum simpan
+      const safeTitle = sanitizeUserText(title);
+      const safeDescription =
+        description !== undefined && description !== null ? sanitizeUserText(description) : null;
 
       await documentRepository.create({
         id: newId,
         projectId,
-        title,
-        description: description || null,
+        title: safeTitle,
+        description: safeDescription,
         type: type || null,
         link: link || null,
         fileData: fileData || null,
@@ -127,8 +132,8 @@ router.post(
         data: {
           id: newId,
           projectId,
-          title,
-          description,
+          title: safeTitle,
+          description: safeDescription,
           type,
           link,
           fileName,
@@ -179,8 +184,13 @@ router.put(
         req.body;
 
       await documentRepository.update(id, {
-        title,
-        description,
+        title: title !== undefined ? sanitizeUserText(title) : title,
+        description:
+          description !== undefined
+            ? description === null
+              ? null
+              : sanitizeUserText(description)
+            : description,
         type,
         link,
         fileData,

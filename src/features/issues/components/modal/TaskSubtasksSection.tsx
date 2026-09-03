@@ -45,15 +45,13 @@ export const TaskSubtasksSection: React.FC<TaskSubtasksSectionProps> = ({
           <div
             key={st.id ? `${st.id}-${stIdx}` : `sub-${stIdx}`}
             className={cn(
-              "flex items-center gap-4 p-3 bg-surface hover:bg-indigo-500/10 rounded-xl group border border-border-faint transition-all shadow-soft",
-              isUpdatingTask?.[st.id]
-                ? "opacity-50 pointer-events-none"
-                : "hover:border-indigo-500/30"
+              "flex items-center gap-4 p-3 bg-surface hover:bg-primary/10 rounded-xl group border border-border-faint transition-all shadow-soft",
+              isUpdatingTask?.[st.id] ? "opacity-50 pointer-events-none" : "hover:border-primary/30"
             )}
           >
             <input
               type="checkbox"
-              className="w-5 h-5 rounded-lg border-border-subtle text-indigo-600 focus:ring-indigo-500 transition-all cursor-pointer shadow-soft"
+              className="w-5 h-5 rounded-lg border-border-subtle text-primary focus:ring-primary transition-all cursor-pointer shadow-soft"
               checked={st.status === "Done"}
               onChange={() =>
                 updateTaskField(st.id, "status", st.status === "Done" ? "To Do" : "Done")

@@ -91,9 +91,12 @@ describe("AppContainer — Cabang Modals & Task State", () => {
   it("merespon shortcut '/' untuk memfokuskan kotak pencarian", async () => {
     tampilkan();
 
-    await waitFor(() => {
-      expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    }, { timeout: 12000 });
+    await waitFor(
+      () => {
+        expect(screen.getAllByText(/Proyek Aktif|Active Projects/i).length).toBeGreaterThan(0);
+      },
+      { timeout: 12000 }
+    );
 
     fireEvent.keyDown(window, { key: "/", code: "Slash" });
     expect(screen.queryByText(/React Render Crash/i)).not.toBeInTheDocument();
@@ -102,9 +105,12 @@ describe("AppContainer — Cabang Modals & Task State", () => {
   it("menangani interaksi tombol buat tugas atau modal baru", async () => {
     tampilkan();
 
-    await waitFor(() => {
-      expect(screen.getByText("Dashboard")).toBeInTheDocument();
-    }, { timeout: 12000 });
+    await waitFor(
+      () => {
+        expect(screen.getAllByText(/Proyek Aktif|Active Projects/i).length).toBeGreaterThan(0);
+      },
+      { timeout: 12000 }
+    );
 
     const createButtons = screen.queryAllByTitle(/Buat Proyek Baru|New Task|Create/i);
     if (createButtons.length > 0) {

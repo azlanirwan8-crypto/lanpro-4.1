@@ -50,7 +50,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
       {/* Panel Header */}
       <div className="p-3 border-b border-border-faint flex items-center justify-between shrink-0 bg-surface-sunken/50">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="p-1 px-1.5 bg-indigo-500/15 rounded text-indigo-700 shrink-0">
+          <div className="p-1 px-1.5 bg-primary/15 rounded text-primary shrink-0">
             <Layers className="w-3.5 h-3.5" />
           </div>
           <span className="text-xs font-medium text-content-strong tracking-tight truncate">
@@ -81,7 +81,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
               purple: "bg-purple-300 border-purple-400",
               rose: "bg-rose-300 border-rose-400",
               sky: "bg-sky-300 border-sky-400",
-              slate: "bg-surface-marker border-slate-400",
+              slate: "bg-surface-marker border-border-subtle",
             };
             return (
               <button
@@ -95,8 +95,8 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                   "w-3.5 h-3.5 rounded-full border transition-all active:scale-75",
                   colorClassMap[colName] || "bg-indigo-300",
                   selectedAddColor === colName
-                    ? "ring-2 ring-indigo-500 ring-offset-1 scale-110 "
-                    : "border-black/5"
+                    ? "ring-2 ring-primary ring-offset-1 scale-110 "
+                    : "border-border-faint"
                 )}
                 title={t("flowchart.mulaiDenganWarna", { warna: colName })}
               />
@@ -114,7 +114,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
             placeholder={t("shapePalette.searchShape")}
             value={shapeSearchQuery}
             onChange={(e) => setShapeSearchQuery(e.target.value)}
-            className="w-full text-xs sm:text-[11px] bg-surface-sunken border border-border-subtle rounded-lg p-1.5 pl-7 text-content placeholder-content-subtle focus:outline-none focus:ring-1 focus:ring-violet-500 focus:bg-surface transition-all"
+            className="w-full text-xs sm:text-[11px] bg-surface-sunken border border-border-subtle rounded-lg p-1.5 pl-7 text-content placeholder-content-subtle focus:outline-none focus:ring-1 focus:ring-primary focus:bg-surface transition-all"
           />
           {shapeSearchQuery && (
             <button
@@ -159,7 +159,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                   {(group.title === "AWS" ||
                     group.title === "UML" ||
                     group.title === "My Shapes") && (
-                    <span className="text-[9px] leading-none bg-indigo-500/10 text-indigo-600 font-medium px-1 py-[1px] rounded border border-indigo-500/30">
+                    <span className="text-[9px] leading-none bg-primary/10 text-primary font-medium px-1 py-[1px] rounded border border-primary/30">
                       FREE
                     </span>
                   )}
@@ -200,14 +200,14 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                           closePalette();
                         }
                       }}
-                      className="flex items-center gap-1.5 p-1.5 bg-surface hover:bg-indigo-500/10 border border-border-faint hover:border-indigo-500/30 text-left rounded-lg transition-all group pointer-events-auto w-full min-w-0"
+                      className="flex items-center gap-1.5 p-1.5 bg-surface hover:bg-primary/10 border border-border-faint hover:border-primary/30 text-left rounded-lg transition-all group pointer-events-auto w-full min-w-0"
                       title={t("flowchart.tambahKeKanvas", { bentuk: item.name })}
                     >
-                      <div className="w-7 h-7 flex items-center justify-center shrink-0 border border-border-faint rounded-md bg-surface-sunken/30 group-hover:bg-indigo-500/10 group-hover:border-indigo-500/30 transition-all">
+                      <div className="w-7 h-7 flex items-center justify-center shrink-0 border border-border-faint rounded-md bg-surface-sunken/30 group-hover:bg-primary/10 group-hover:border-primary/30 transition-all">
                         {renderMiniPreviewIcon(item.type)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-medium text-content-body leading-tight truncate group-hover:text-indigo-600 transition-colors">
+                        <p className="text-[11px] font-medium text-content-body leading-tight truncate group-hover:text-primary transition-colors">
                           {item.name}
                         </p>
                         <p className="text-[10px] text-content-subtle leading-none truncate mt-0.5">
@@ -250,7 +250,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
         className={cn(
           "p-2 rounded-lg transition-all flex items-center justify-center w-9 h-9 border border-border-faint",
           isShapeDropdownOpen
-            ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-700"
+            ? "bg-primary/10 border-primary/30 text-primary"
             : "hover:bg-surface-muted text-content-body"
         )}
         title={t("shapePalette.openCollection")}

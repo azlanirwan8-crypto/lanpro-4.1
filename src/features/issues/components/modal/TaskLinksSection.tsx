@@ -84,7 +84,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
           <button
             type="button"
             onClick={() => setIsAddingTaskLinkLocal(!isAddingTaskLinkLocal)}
-            className="text-xs sm:text-[10px] font-medium text-indigo-600 hover:underline"
+            className="text-xs sm:text-[10px] font-medium text-primary hover:underline"
           >
             {t("issues.link")}
           </button>
@@ -140,7 +140,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="p-4 bg-indigo-500/10 rounded-xl border border-indigo-500/30 space-y-3"
+          className="p-4 bg-primary/10 rounded-xl border border-primary/30 space-y-3"
         >
           <StyledDropdown
             value={taskLinkRelation}

@@ -63,7 +63,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
   const { t } = useTranslation();
   const opsiFase = useMasterOptionItems("qa_phase", CADANGAN_FASE);
   return (
-    <div className="md:col-span-3 space-y-3 md:max-h-[calc(100vh-140px)] md:sticky md:top-4 pr-1 custom-scrollbar">
+    <div className="md:col-span-3 space-y-3 md:max-h-[calc(100dvh-140px)] md:sticky md:top-4 pr-1 custom-scrollbar">
       {/* Velzon Ultra-Compact Card Box */}
       <div className="bg-surface border border-border-subtle/80 rounded-md p-3.5 shadow-xs space-y-3">
         {/* Header Title */}
@@ -157,7 +157,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                             setSuiteEditName(cleanTitle);
                             setSuiteEditAssignedTo(suite.assignedTo || "");
                           }}
-                          className="text-content-subtle hover:text-primary transition-all p-1 bg-surface-sunken hover:bg-indigo-500/10 rounded-md border border-border-faint"
+                          className="text-content-subtle hover:text-primary transition-all p-1 bg-surface-sunken hover:bg-primary/10 rounded-md border border-border-faint"
                           title={t("qaSuite.editDoc")}
                         >
                           <Edit3 className="w-3 h-3" />
@@ -221,7 +221,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                         }}
                         className={`flex items-center gap-1 px-2 py-0.5 bg-surface-sunken rounded-md border border-border-subtle/80 transition-all ${
                           canUpdate
-                            ? "cursor-pointer hover:bg-indigo-500/10 hover:border-primary/50"
+                            ? "cursor-pointer hover:bg-primary/10 hover:border-primary/50"
                             : "cursor-default"
                         }`}
                         title={canUpdate ? t("qaSuite.assignPic") : t("qaSuite.picRegistered")}
@@ -269,9 +269,9 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                                 e.stopPropagation();
                                 handleUpdateSuitePic(suite.id, "");
                               }}
-                              className={`w-full text-left px-3 py-1.5 text-xs font-normal hover:bg-indigo-500/10 hover:text-primary transition-colors flex items-center justify-between ${
+                              className={`w-full text-left px-3 py-1.5 text-xs font-normal hover:bg-primary/10 hover:text-primary transition-colors flex items-center justify-between ${
                                 !suite.assignedTo
-                                  ? "bg-indigo-500/10 text-primary"
+                                  ? "bg-primary/10 text-primary"
                                   : "text-content-body"
                               }`}
                             >
@@ -291,9 +291,9 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                                       e.stopPropagation();
                                       handleUpdateSuitePic(suite.id, mId);
                                     }}
-                                    className={`w-full text-left px-3 py-1.5 text-xs font-normal hover:bg-indigo-500/10 hover:text-primary transition-colors flex items-center justify-between gap-2 ${
+                                    className={`w-full text-left px-3 py-1.5 text-xs font-normal hover:bg-primary/10 hover:text-primary transition-colors flex items-center justify-between gap-2 ${
                                       isSelected
-                                        ? "bg-indigo-500/10 text-primary"
+                                        ? "bg-primary/10 text-primary"
                                         : "text-content-body"
                                     }`}
                                   >

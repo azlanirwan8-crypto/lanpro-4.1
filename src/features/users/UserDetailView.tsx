@@ -162,7 +162,7 @@ const ROLE_DESCRIPTIONS: Record<string, { label: string; desc: string; icon: Rea
   head: {
     label: "Department Head",
     desc: "Wewenang supervisi departemen, persetujuan modul rapat & dokumentasi.",
-    icon: <Award className="w-4 h-4 text-purple-600" />,
+    icon: <Award className="w-4 h-4 text-primary" />,
   },
   manager: {
     label: "Project Manager",
@@ -172,7 +172,7 @@ const ROLE_DESCRIPTIONS: Record<string, { label: string; desc: string; icon: Rea
   user: {
     label: "Standard User (Anggota Tim)",
     desc: "Akses membuat & memperbarui tugas, notulensi rapat, serta catatan AI.",
-    icon: <Users className="w-4 h-4 text-indigo-600" />,
+    icon: <Users className="w-4 h-4 text-primary" />,
   },
   viewer: {
     label: "Observer (Read-Only)",
@@ -224,7 +224,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
         <h2 className="text-xl font-medium text-content-strong mb-2">{t("userDetail.notFound")}</h2>
         <button
           onClick={onBack}
-          className="px-4 py-2 bg-indigo-600 text-content-inverse rounded-md text-xs font-medium"
+          className="px-4 py-2 bg-primary-surface text-content-inverse rounded-md text-xs font-medium"
         >
           {t("userDetail.back")}
         </button>
@@ -1420,7 +1420,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     }
     return {
       icon: FileText,
-      bgColor: "bg-indigo-500/10 text-indigo-600 border border-indigo-500/20",
+      bgColor: "bg-primary/10 text-primary border border-primary/20",
       typeLabel: "Doc File",
     };
   };
@@ -1470,8 +1470,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
       };
     }
     return {
-      border: "border-l-indigo-500",
-      badge: "bg-indigo-500/10 text-indigo-700 border-indigo-500/30",
+      border: "border-l-primary",
+      badge: "bg-primary/10 text-primary border-primary/30",
     };
   };
   const projectMemberAvatars = (p: Project) => {
@@ -1493,7 +1493,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
           <div className="bg-surface rounded-2xl shadow-xs border border-border-subtle overflow-hidden">
             {/* Purple Gradient Cover Banner */}
             <div
-              className="min-h-[150px] sm:min-h-[175px] w-full bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-600 relative p-4 sm:p-6 flex flex-col justify-between transition-all"
+              className="min-h-[150px] sm:min-h-[175px] w-full bg-gradient-to-r from-primary-surface via-primary to-primary-surface-active relative p-4 sm:p-6 flex flex-col justify-between transition-all"
               style={
                 previewCoverUrl || coverURL
                   ? {
@@ -1636,14 +1636,14 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   className={cn(
                     "flex items-center gap-2 py-3.5 text-xs font-semibold whitespace-nowrap transition-all border-b-2 cursor-pointer",
                     activeTab === tab.id
-                      ? "text-indigo-600 border-indigo-600 font-bold"
+                      ? "text-primary border-primary font-bold"
                       : "text-content-muted border-transparent hover:text-content-strong"
                   )}
                 >
                   <tab.icon
                     className={cn(
                       "w-4 h-4",
-                      activeTab === tab.id ? "text-indigo-600" : "text-content-subtle"
+                      activeTab === tab.id ? "text-primary" : "text-content-subtle"
                     )}
                   />
                   <span>{tab.label}</span>
@@ -1661,7 +1661,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <User className="w-4.5 h-4.5" />
                         </div>
                         <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
@@ -1674,7 +1674,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           onClick={enterEditMode}
                           aria-label="Edit Profile"
                           title="Edit Profile"
-                          className="px-3.5 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 hover:bg-indigo-600 hover:text-content-inverse transition-all flex items-center gap-1 cursor-pointer border border-indigo-500/20"
+                          className="px-3.5 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary hover:bg-primary-surface hover:text-content-inverse transition-all flex items-center gap-1 cursor-pointer border border-primary/20"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                           <span>Edit</span>
@@ -1719,7 +1719,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                   <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                         <Users className="w-4.5 h-4.5" />
                       </div>
                       <div>
@@ -1760,7 +1760,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Laptop className="w-4.5 h-4.5" />
                         </div>
                         <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
@@ -1793,7 +1793,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             className="py-3 first:pt-1 last:pb-0 flex items-center justify-between gap-3"
                           >
                             <div className="flex items-center gap-3 min-w-0 flex-1">
-                              <div className="w-9 h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                 <DeviceIcon className="w-4.5 h-4.5" />
                               </div>
                               <div className="min-w-0">
@@ -1843,7 +1843,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 <div className="lg:col-span-8 space-y-5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="bg-surface border border-border-subtle p-4 sm:p-5 rounded-xl flex items-center gap-4 shadow-xs">
-                      <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0 border border-indigo-500/20">
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
                         <Folder className="w-6 h-6" />
                       </div>
                       <div>
@@ -1881,7 +1881,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-border-subtle/60 pb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Activity className="w-4.5 h-4.5" />
                         </div>
                         <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
@@ -1903,8 +1903,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             className={cn(
                               "px-4 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer",
                               activityFilter === f.id
-                                ? "bg-indigo-600 text-content-inverse shadow-xs"
-                                : "bg-indigo-500/10 text-indigo-600 hover:bg-indigo-500/20"
+                                ? "bg-primary-surface text-content-inverse shadow-xs"
+                                : "bg-primary/10 text-primary hover:bg-primary/20"
                             )}
                           >
                             {f.label}
@@ -1976,7 +1976,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="bg-surface p-4 sm:p-5 rounded-2xl border border-border-subtle shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-border-subtle/60 pb-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Sparkles className="w-4.5 h-4.5" />
                         </div>
                         <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
@@ -1999,7 +1999,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               className="flex items-center justify-between gap-3 p-3 bg-surface hover:bg-surface-muted/60 border border-border-subtle/60 rounded-xl transition-colors"
                             >
                               <div className="flex items-center gap-3 min-w-0 flex-1">
-                                <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0">
+                                <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                                   <ItemIcon className="w-4.5 h-4.5" />
                                 </div>
                                 <div className="min-w-0 flex-1">
@@ -2009,7 +2009,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                   <div className="flex items-center gap-2 text-xs text-content-subtle mt-0.5">
                                     {item.subtitle && (
                                       <>
-                                        <span className="font-mono text-indigo-600 font-medium uppercase truncate max-w-[120px]">
+                                        <span className="font-mono text-primary font-medium uppercase truncate max-w-[120px]">
                                           {item.subtitle}
                                         </span>
                                         <span>•</span>
@@ -2025,7 +2025,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               </div>
 
                               <div className="flex items-center gap-2 shrink-0">
-                                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20">
+                                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
                                   {item.status || "To Do"}
                                 </span>
                               </div>
@@ -2047,7 +2047,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   {/* Header Row: Sub-title + Search Bar + View Mode Toggle */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3.5 sm:p-4 rounded-lg border border-border-subtle shadow-xs">
                     <div className="flex items-center gap-2">
-                      <Layout className="w-4.5 h-4.5 text-indigo-600" />
+                      <Layout className="w-4.5 h-4.5 text-primary" />
                       <h2 className="text-sm font-normal text-content-strong uppercase tracking-wider">
                         {t("userDetail.tabProject", "Project Terkait")} ({userProjectsList.length})
                       </h2>
@@ -2062,7 +2062,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           value={projectSearchQuery}
                           onChange={(e) => setProjectSearchQuery(e.target.value)}
                           placeholder={t("userDetail.searchProjectPlaceholder", "Cari project...")}
-                          className="w-full pl-8 pr-3 py-1.5 bg-surface-sunken border border-border-subtle rounded-md text-xs outline-none focus:border-indigo-500 text-content-strong transition"
+                          className="w-full pl-8 pr-3 py-1.5 bg-surface-sunken border border-border-subtle rounded-md text-xs outline-none focus:border-primary text-content-strong transition"
                         />
                       </div>
 
@@ -2074,7 +2074,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           className={cn(
                             "p-1.5 rounded text-xs transition cursor-pointer",
                             projectTabMode === "grid"
-                              ? "bg-indigo-600 text-content-inverse shadow-xs"
+                              ? "bg-primary-surface text-content-inverse shadow-xs"
                               : "text-content-muted hover:text-content-body"
                           )}
                           title="Grid View"
@@ -2087,7 +2087,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           className={cn(
                             "p-1.5 rounded text-xs transition cursor-pointer",
                             projectTabMode === "list"
-                              ? "bg-indigo-600 text-content-inverse shadow-xs"
+                              ? "bg-primary-surface text-content-inverse shadow-xs"
                               : "text-content-muted hover:text-content-body"
                           )}
                           title="List View"
@@ -2149,7 +2149,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           return (
                             <div
                               key={p.id || `proj-${pIdx}`}
-                              className="bg-surface rounded-xl border border-border-subtle p-4 sm:p-5 shadow-xs space-y-4 hover:border-indigo-500/30 transition-all"
+                              className="bg-surface rounded-xl border border-border-subtle p-4 sm:p-5 shadow-xs space-y-4 hover:border-primary/30 transition-all"
                             >
                               {/* Header Card Proyek */}
                               <div className="flex items-start justify-between gap-3">
@@ -2158,7 +2158,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                     className={cn(
                                       "w-11 h-11 rounded-xl flex items-center justify-center text-content-inverse shrink-0 shadow-soft font-bold text-lg",
                                       pIdx % 2 === 0
-                                        ? "bg-gradient-to-br from-indigo-500 to-purple-600"
+                                        ? "bg-gradient-to-br from-primary-surface to-primary-surface-active"
                                         : "bg-gradient-to-br from-teal-500 to-emerald-600"
                                     )}
                                   >
@@ -2187,7 +2187,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                               {/* Badges Row */}
                               <div className="flex flex-wrap items-center gap-2 text-xs sm:text-[11px]">
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-700 font-semibold border border-indigo-500/20">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-semibold border border-primary/20">
                                   <User className="w-3 h-3" />
                                   <span>Product Owner</span>
                                 </span>
@@ -2224,13 +2224,13 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               {/* Progress Bar Row */}
                               <div className="space-y-1.5">
                                 <div className="flex items-center justify-between text-xs sm:text-[11px]">
-                                  <span className="font-semibold text-indigo-600">
+                                  <span className="font-semibold text-primary">
                                     {progressPercent}% Complete
                                   </span>
                                 </div>
                                 <div className="w-full h-2 bg-surface-sunken rounded-full overflow-hidden border border-border-subtle/50">
                                   <div
-                                    className="h-full bg-indigo-600 rounded-full transition-all duration-500"
+                                    className="h-full bg-primary-surface rounded-full transition-all duration-500"
                                     style={{ width: `${progressPercent}%` }}
                                   />
                                 </div>
@@ -2265,7 +2265,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                               <span className="text-xs font-semibold text-content-strong truncate">
                                                 {tItem.title}
                                               </span>
-                                              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 uppercase">
+                                              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-primary/10 text-primary border border-primary/20 uppercase">
                                                 {tItem.key || tItem.taskKey || "TASK"}
                                               </span>
                                               <span
@@ -2297,7 +2297,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                                         <div className="flex items-center gap-2 shrink-0">
                                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-surface-sunken text-content-body border border-border-subtle">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                                            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                                             {tItem.status || "To Do"}
                                           </span>
                                           <ChevronRight className="w-3.5 h-3.5 text-content-subtle" />
@@ -2319,7 +2319,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   {/* Widget 1: Ringkasan Project */}
                   <div className="bg-surface p-4 sm:p-5 rounded-xl border border-border-subtle shadow-xs space-y-4">
                     <div className="flex items-center gap-2 border-b border-border-subtle/60 pb-3">
-                      <Activity className="w-4 h-4 text-indigo-600" />
+                      <Activity className="w-4 h-4 text-primary" />
                       <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
                         Ringkasan Project
                       </h3>
@@ -2408,15 +2408,15 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   {/* Widget 2: Timeline Aktivitas */}
                   <div className="bg-surface p-4 sm:p-5 rounded-xl border border-border-subtle shadow-xs space-y-4">
                     <div className="flex items-center gap-2 border-b border-border-subtle/60 pb-3">
-                      <Clock className="w-4 h-4 text-indigo-600" />
+                      <Clock className="w-4 h-4 text-primary" />
                       <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
                         Timeline Aktivitas
                       </h3>
                     </div>
 
-                    <div className="relative pl-5 space-y-4 border-l-2 border-indigo-500/20 ml-2 py-1 text-xs">
+                    <div className="relative pl-5 space-y-4 border-l-2 border-primary/20 ml-2 py-1 text-xs">
                       <div className="relative">
-                        <div className="absolute -left-[27px] top-0.5 w-3 h-3 rounded-full bg-indigo-600 ring-4 ring-surface" />
+                        <div className="absolute -left-[27px] top-0.5 w-3 h-3 rounded-full bg-primary-surface ring-4 ring-surface" />
                         <div className="font-semibold text-content-strong">Project created</div>
                         <div className="text-[11px] text-content-muted mt-0.5">
                           Word Merchant & Issue Resolution
@@ -2438,9 +2438,9 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   </div>
 
                   {/* Widget 3: Stay Productive Card Banner */}
-                  <div className="bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20 p-4 sm:p-5 rounded-xl flex items-center justify-between gap-3 shadow-xs">
+                  <div className="bg-gradient-to-br from-primary/10 via-primary/10 to-primary/5 border border-primary/20 p-4 sm:p-5 rounded-xl flex items-center justify-between gap-3 shadow-xs">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-600 text-content-inverse flex items-center justify-center shrink-0 shadow-soft">
+                      <div className="w-10 h-10 rounded-full bg-primary-surface text-content-inverse flex items-center justify-center shrink-0 shadow-soft">
                         <Sparkles className="w-5 h-5" />
                       </div>
                       <div>
@@ -2452,7 +2452,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     </div>
                     <button
                       type="button"
-                      className="w-8 h-8 rounded-full bg-surface border border-border-subtle flex items-center justify-center text-indigo-600 hover:bg-indigo-600 hover:text-content-inverse transition shrink-0 cursor-pointer shadow-2xs"
+                      className="w-8 h-8 rounded-full bg-surface border border-border-subtle flex items-center justify-center text-primary hover:bg-primary-surface hover:text-content-inverse transition shrink-0 cursor-pointer shadow-2xs"
                     >
                       <ChevronRight className="w-4 h-4" />
                     </button>
@@ -2495,7 +2495,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           value={editFullName}
                           onChange={(e) => setEditFullName(e.target.value)}
                           placeholder={t("userDetail.fullNamePlaceholder")}
-                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-indigo-500 text-content-strong transition shadow-2xs"
+                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary text-content-strong transition shadow-2xs"
                         />
                       </div>
 
@@ -2509,7 +2509,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           value={editEmail}
                           onChange={(e) => setEditEmail(e.target.value)}
                           placeholder={t("userDetail.emailPlaceholder")}
-                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-indigo-500 text-content-strong transition shadow-2xs"
+                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary text-content-strong transition shadow-2xs"
                         />
                       </div>
 
@@ -2523,7 +2523,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           value={editPhone}
                           onChange={(e) => setEditPhone(e.target.value)}
                           placeholder={t("userDetail.phonePlaceholder")}
-                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-indigo-500 text-content-strong transition shadow-2xs"
+                          className="w-full px-4 py-2.5 bg-surface-sunken/60 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary text-content-strong transition shadow-2xs"
                         />
                       </div>
 
@@ -2666,7 +2666,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         type="button"
                         onClick={handleSaveUser}
                         disabled={isSaving}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-xl text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-xl text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
                       >
                         {isSaving ? (
                           <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -2685,7 +2685,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     {/* Card 1: Change Password Fields */}
                     <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-border-subtle shadow-xs space-y-6">
                       <div className="flex items-center gap-3 border-b border-border-subtle/60 pb-4">
-                        <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Lock className="w-5 h-5" />
                         </div>
                         <div>
@@ -2713,7 +2713,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               value={editOldPassword}
                               onChange={(e) => setEditOldPassword(e.target.value)}
                               placeholder={t("userDetail.oldPasswordPlaceholder")}
-                              className="w-full pl-4 pr-10 py-2.5 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-indigo-500 bg-surface-sunken/60 text-content-strong transition"
+                              className="w-full pl-4 pr-10 py-2.5 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary bg-surface-sunken/60 text-content-strong transition"
                             />
                             <button
                               type="button"
@@ -2730,7 +2730,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           <button
                             type="button"
                             onClick={() => setShowForgotPasswordModal(true)}
-                            className="text-xs text-indigo-600 hover:underline pt-0.5 block cursor-pointer"
+                            className="text-xs text-primary hover:underline pt-0.5 block cursor-pointer"
                           >
                             {t("userDetail.forgotPassword")}
                           </button>
@@ -2750,7 +2750,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 value={editPassword}
                                 onChange={(e) => setEditPassword(e.target.value)}
                                 placeholder={t("userDetail.passwordPlaceholder")}
-                                className="w-full pl-4 pr-10 py-2.5 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-indigo-500 bg-surface-sunken/60 text-content-strong transition"
+                                className="w-full pl-4 pr-10 py-2.5 border border-border-subtle/70 rounded-xl text-xs font-medium outline-none focus:border-primary bg-surface-sunken/60 text-content-strong transition"
                               />
                               <button
                                 type="button"
@@ -2778,7 +2778,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             <button
                               type="button"
                               onClick={generateRandomPassword}
-                              className="px-3.5 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 text-xs font-semibold flex items-center gap-1.5 transition shrink-0 cursor-pointer border border-indigo-500/20"
+                              className="px-3.5 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold flex items-center gap-1.5 transition shrink-0 cursor-pointer border border-primary/20"
                             >
                               <RefreshCw className="w-3.5 h-3.5" />
                               <span>Generate</span>
@@ -2799,7 +2799,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               onChange={(e) => setEditConfirmPassword(e.target.value)}
                               placeholder={t("userDetail.confirmPasswordPlaceholder")}
                               className={cn(
-                                "w-full pl-4 pr-10 py-2.5 border rounded-xl text-xs font-medium outline-none focus:border-indigo-500 bg-surface-sunken/60 text-content-strong transition",
+                                "w-full pl-4 pr-10 py-2.5 border rounded-xl text-xs font-medium outline-none focus:border-primary bg-surface-sunken/60 text-content-strong transition",
                                 editConfirmPassword && editPassword !== editConfirmPassword
                                   ? "border-rose-500"
                                   : "border-border-subtle/70"
@@ -2839,7 +2839,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           disabled={
                             isSaving || !editPassword.trim() || editPassword !== editConfirmPassword
                           }
-                          className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-xl text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
+                          className="flex items-center gap-2 px-5 py-2.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-xl text-xs font-semibold shadow-soft transition disabled:opacity-50 cursor-pointer"
                         >
                           {isSaving ? (
                             <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -2855,7 +2855,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-border-subtle shadow-xs space-y-5">
                       <div className="flex items-center justify-between border-b border-border-subtle/60 pb-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                             <Clock className="w-5 h-5" />
                           </div>
                           <div>
@@ -2894,10 +2894,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           return (
                             <div
                               key={item.id}
-                              className="flex items-center justify-between p-4 bg-surface-sunken/60 rounded-xl border border-border-subtle/50 hover:border-indigo-500/30 transition-all"
+                              className="flex items-center justify-between p-4 bg-surface-sunken/60 rounded-xl border border-border-subtle/50 hover:border-primary/30 transition-all"
                             >
                               <div className="flex items-center gap-3.5">
-                                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 shrink-0">
+                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                   <DeviceIcon className="w-5 h-5" />
                                 </div>
                                 <div>
@@ -2991,7 +2991,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             >
                               <div className="flex items-center gap-2.5">
                                 {isOpen ? (
-                                  <FolderOpen className="w-4 h-4 text-indigo-600 shrink-0" />
+                                  <FolderOpen className="w-4 h-4 text-primary shrink-0" />
                                 ) : (
                                   <Folder className="w-4 h-4 text-content-muted shrink-0" />
                                 )}
@@ -3084,8 +3084,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                                     className={cn(
                                                       "w-5 h-5 rounded-md flex items-center justify-center mx-auto border relative cursor-pointer select-none transition-all",
                                                       isChecked
-                                                        ? "bg-indigo-600 text-content-inverse border-indigo-500 shadow-xs"
-                                                        : "bg-surface-sunken text-content-subtle border-border-subtle hover:border-indigo-400",
+                                                        ? "bg-primary-surface text-content-inverse border-primary shadow-xs"
+                                                        : "bg-surface-sunken text-content-subtle border-border-subtle hover:border-primary/40",
                                                       isOverride &&
                                                         "ring-2 ring-amber-400 ring-offset-1"
                                                     )}
@@ -3134,10 +3134,10 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               <div className="space-y-5">
                 {/* Form Delegasi Project Baru */}
                 {isAdmin && pageMode === "edit" && (
-                  <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-lg p-4 shadow-xs space-y-3">
+                  <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 shadow-xs space-y-3">
                     <div className="space-y-0.5">
-                      <h4 className="font-normal text-indigo-950 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                        <UserPlus className="w-4 h-4 text-indigo-600 shrink-0" />
+                      <h4 className="font-normal text-content-strong text-xs uppercase tracking-wider flex items-center gap-1.5">
+                        <UserPlus className="w-4 h-4 text-primary shrink-0" />
                         {t("userDetail.delegateNewProject")}
                       </h4>
                       <p className="text-xs text-content-secondary ">
@@ -3191,7 +3191,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <button
                           type="button"
                           onClick={handleAssignToProject}
-                          className="w-full flex items-center justify-center gap-1 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-content-inverse rounded-md text-xs font-medium shadow-xs transition"
+                          className="w-full flex items-center justify-center gap-1 px-3 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium shadow-xs transition"
                         >
                           <Plus className="w-3.5 h-3.5" />
                           <span>{t("userDetail.delegate")}</span>
@@ -3203,8 +3203,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     {["admin", "manager", "lead"].includes(
                       selectedAssignProjectRole.toLowerCase()
                     ) && (
-                      <div className="pt-2 space-y-1.5 border-t border-indigo-500/30 ">
-                        <label className="text-xs sm:text-[11px] font-normal text-indigo-950 uppercase tracking-wider block">
+                      <div className="pt-2 space-y-1.5 border-t border-primary/30 ">
+                        <label className="text-xs sm:text-[11px] font-normal text-content-strong uppercase tracking-wider block">
                           {t("userDetail.selectSubTeam")}
                         </label>
                         <div className="max-h-36 overflow-y-auto bg-surface border border-border-subtle rounded-md p-2 space-y-1 custom-scrollbar">
@@ -3230,7 +3230,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                         setSelectedSubordinateIds([...selectedSubordinateIds, uId]);
                                       }
                                     }}
-                                    className="rounded border-border-subtle text-indigo-600 focus:ring-indigo-500"
+                                    className="rounded border-border-subtle text-primary focus:ring-primary"
                                   />
                                   <span className="font-medium">
                                     {u.displayName || u.username || u.email}
@@ -3252,7 +3252,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="bg-surface p-4 rounded-lg shadow-xs border border-border-subtle space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Layout className="w-4 h-4 text-indigo-600 " />
+                        <Layout className="w-4 h-4 text-primary " />
                         <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
                           Proyek Terkait ({userProjectsList.length})
                         </h3>
@@ -3294,7 +3294,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                     <div className="font-medium text-xs text-content-strong">
                                       {p.name}
                                     </div>
-                                    <div className="text-xs sm:text-[10px] font-mono text-indigo-600 uppercase mt-0.5">
+                                    <div className="text-xs sm:text-[10px] font-mono text-primary uppercase mt-0.5">
                                       {p.key}
                                     </div>
                                   </div>
@@ -3328,7 +3328,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                     className={cn(
                                       "text-xs sm:text-[10px] font-medium uppercase px-2 py-0.5 rounded-md border",
                                       peranDikenal
-                                        ? "bg-indigo-500/15 text-indigo-700 border-indigo-500/30 "
+                                        ? "bg-primary/15 text-primary border-primary/30 "
                                         : "bg-amber-500/15 text-amber-800 border-amber-500/30 "
                                     )}
                                     title={
@@ -3349,7 +3349,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                       title={isExpanded ? "Sembunyikan Tugas" : "Lihat Tugas"}
                                     >
                                       {isExpanded ? (
-                                        <ChevronDown className="w-4 h-4 text-indigo-600" />
+                                        <ChevronDown className="w-4 h-4 text-primary" />
                                       ) : (
                                         <ChevronRight className="w-4 h-4 text-content-subtle" />
                                       )}
@@ -3379,13 +3379,13 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                     {projectTasks.map((t) => (
                                       <div
                                         key={t.id}
-                                        className="flex items-center justify-between text-xs bg-surface p-1.5 px-2.5 rounded-md border border-border-subtle/80 shadow-2xs hover:border-indigo-500/30 transition-colors"
+                                        className="flex items-center justify-between text-xs bg-surface p-1.5 px-2.5 rounded-md border border-border-subtle/80 shadow-2xs hover:border-primary/30 transition-colors"
                                       >
                                         <div className="min-w-0 flex-1 pr-2">
                                           <div className="font-medium text-content-strong truncate">
                                             {t.title}
                                           </div>
-                                          <div className="text-xs sm:text-[10px] font-mono text-indigo-600 uppercase">
+                                          <div className="text-xs sm:text-[10px] font-mono text-primary uppercase">
                                             {t.key || "TASK"}
                                           </div>
                                         </div>
@@ -3412,7 +3412,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               <div className="bg-surface p-4 sm:p-5 rounded-lg border border-border-subtle shadow-xs space-y-4">
                 <div className="flex items-center justify-between border-b border-border-subtle/60 pb-3">
                   <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-indigo-600" />
+                    <FileText className="w-4 h-4 text-primary" />
                     <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
                       {t("userDetail.documentTitle")} ({userDocuments.length})
                     </h3>
@@ -3481,7 +3481,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         download={doc.name}
-                                        className="font-medium text-xs text-content-strong hover:text-indigo-600 hover:underline transition-colors block truncate max-w-xs sm:max-w-md cursor-pointer"
+                                        className="font-medium text-xs text-content-strong hover:text-primary hover:underline transition-colors block truncate max-w-xs sm:max-w-md cursor-pointer"
                                         title={`Unduh / Buka: ${doc.name}`}
                                       >
                                         {doc.name}
@@ -3517,7 +3517,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     download={doc.name}
-                                    className="inline-flex p-1.5 rounded-md text-content-muted hover:text-indigo-600 hover:bg-surface-muted transition-colors cursor-pointer"
+                                    className="inline-flex p-1.5 rounded-md text-content-muted hover:text-primary hover:bg-surface-muted transition-colors cursor-pointer"
                                     title="Download File"
                                   >
                                     <Download className="w-4 h-4" />

@@ -214,7 +214,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 )}
               >
                 <UncontrolledInput
-                  className="text-2xl font-medium text-content-strong bg-transparent hover:bg-surface-sunken focus:bg-surface border border-transparent hover:border-border-subtle/80 focus:border-indigo-400 rounded-lg px-3 py-1.5 w-full transition-all outline-none focus:ring-2 focus:ring-indigo-500/10 placeholder:text-content-subtle tracking-tight"
+                  className="text-2xl font-medium text-content-strong bg-transparent hover:bg-surface-sunken focus:bg-surface border border-transparent hover:border-border-subtle/80 focus:border-primary rounded-lg px-3 py-1.5 w-full transition-all outline-none focus:ring-2 focus:ring-primary/10 placeholder:text-content-subtle tracking-tight"
                   placeholder={t("issueDetail.issueTitle")}
                   initialValue={task.title || (task as any).summary || (task as any).name || ""}
                   onSave={(val: string) => updateTaskField(task.id, "title", val)}
@@ -233,7 +233,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     )}
                     disabled={isSubmitting["addSubtask"]}
                   >
-                    <Plus className="w-3.5 h-3.5 mr-1 text-indigo-500" />
+                    <Plus className="w-3.5 h-3.5 mr-1 text-primary" />
                     {t("issueDetail.addChild")}
                   </Button>
                   <Button
@@ -261,7 +261,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               <div className="bg-surface border border-border-subtle/80 rounded-lg p-4 md:p-5 shadow-2xs space-y-3">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-normal text-content-body uppercase tracking-wider flex items-center gap-2">
-                    <ListTodo className="w-4 h-4 text-indigo-500" />
+                    <ListTodo className="w-4 h-4 text-primary" />
                     {t("issueDetail.description")}
                   </h3>
                 </div>
@@ -284,7 +284,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                     />
                   ) : (
                     <div
-                      className="min-h-[110px] border border-border-subtle/70 hover:border-indigo-500/30 rounded-md p-4 bg-surface-sunken/30 hover:bg-surface transition-all cursor-text shadow-2xs"
+                      className="min-h-[110px] border border-border-subtle/70 hover:border-primary/30 rounded-md p-4 bg-surface-sunken/30 hover:bg-surface transition-all cursor-text shadow-2xs"
                       onClick={() => isEditable && setIsEditingDescription(true)}
                     >
                       {task.description ? (
