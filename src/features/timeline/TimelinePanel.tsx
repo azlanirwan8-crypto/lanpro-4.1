@@ -30,6 +30,7 @@ import {
   Calendar,
   Menu,
   X,
+  Flag,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { MilestonePanel } from "./MilestonePanel";
@@ -132,6 +133,9 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
     project: selectedProject,
   });
   const [pixelsPerDay, setPixelsPerDay] = useState<number>(24);
+  const [milestoneExpanded, setMilestoneExpanded] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(min-width: 768px)").matches : true
+  );
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const [timelineInteraction, setTimelineInteraction] = useState<{
     taskId: string;
@@ -676,6 +680,18 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                 <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
+            {/* #426 — Add Milestone sejajar toolbar */}
+            {canWriteMilestone && (
+              <button
+                type="button"
+                onClick={() => setMilestoneExpanded(true)}
+                className="h-9 px-3 md:px-4 bg-success-surface hover:bg-success-hover text-content-inverse rounded-lg text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                title={t("roadmap.milestoneAdd")}
+              >
+                <Flag className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">{t("roadmap.milestoneAdd")}</span>
+              </button>
+            )}
             <div className="relative ml-auto md:ml-0">
               <button
                 onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
@@ -712,7 +728,12 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
 
       {selectedProject?.id && (
         <div className="px-2 md:px-5 pt-2">
-          <MilestonePanel projectId={selectedProject.id} canWrite={canWriteMilestone} />
+          <MilestonePanel
+            projectId={selectedProject.id}
+            canWrite={canWriteMilestone}
+            expanded={milestoneExpanded}
+            onToggleExpanded={setMilestoneExpanded}
+          />
         </div>
       )}
 

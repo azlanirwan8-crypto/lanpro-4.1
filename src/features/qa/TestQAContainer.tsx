@@ -737,14 +737,7 @@ export function TestQAPanel({
       id="qa_module_container"
     >
       {/* Topbar Lock Indicator & Integrated Velzon Page Title */}
-      <QATopBar
-        lockState={lockState}
-        remainingTime={remainingTime}
-        currentUserUid={currentUserUid}
-        currentUserRole={currentUserRole}
-        handleForceUnlock={handleForceUnlock}
-        releaseLockManually={releaseLockManually}
-      />
+      <QATopBar />
 
       {/* OPTIMIZED RESPONSIVE GRID (3 : 9 RATIO) - 75% WIDTH FOR TABLE */}
       <div className="flex-1 overflow-auto px-3 md:px-5 pt-3 md:pt-4 pb-3 md:pb-5 custom-scrollbar">
@@ -780,6 +773,9 @@ export function TestQAPanel({
             currentUserUid={currentUserUid}
             currentUserRole={currentUserRole}
             lockState={lockState}
+            remainingTime={remainingTime}
+            handleForceUnlock={handleForceUnlock}
+            releaseLockManually={releaseLockManually}
             isGeneratingAi={isGeneratingAi}
             handleGenerateWithAi={handleGenerateWithAi}
             handleExportQAReport={handleExportQAReport}

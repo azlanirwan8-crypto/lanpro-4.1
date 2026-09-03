@@ -79,27 +79,6 @@ export const ActivityLogPanel = ({
           { label: t("activityLog.title"), current: true },
         ]}
         title={t("activityLog.title")}
-        actions={
-          <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto min-w-0">
-            <div className="flex min-w-0 flex-1 md:flex-none bg-surface-muted border border-border-subtle rounded-lg px-3 py-2 items-center gap-2 shadow-2xs">
-              <Search className="w-4 h-4 text-content-subtle shrink-0" />
-              <input
-                value={auditLogSearch}
-                onChange={(e) => setAuditLogSearch(e.target.value)}
-                placeholder={t("activityLog.searchLogs")}
-                className="bg-transparent border-none outline-none text-xs w-full md:w-48 placeholder:text-content-subtle text-content-body min-w-0"
-              />
-            </div>
-            <button
-              onClick={exportTasksToCSV}
-              title={t("activityLog.exportCsv")}
-              className="shrink-0 px-2.5 sm:px-4 py-2 bg-primary-surface border border-primary text-content-inverse rounded-lg text-xs font-medium shadow-soft transition-all flex items-center gap-2 tracking-wider hover:bg-primary-surface-hover active:scale-95 uppercase"
-            >
-              <DownloadCloud className="w-4 h-4" />
-              <span className="hidden sm:inline">{t("activityLog.exportCsv")}</span>
-            </button>
-          </div>
-        }
       />
       <div className="space-y-4 sm:space-y-6 w-full px-3 md:px-5 pt-3 md:pt-4 pb-3 md:pb-5">
         {/* Summary Metric Cards — #361: 2 kolom di HP */}
@@ -149,7 +128,26 @@ export const ActivityLogPanel = ({
         </div>
 
         <div className="bg-surface border border-border-subtle rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
-          {/* #370 — search hanya di header; baris duplikat di kartu dihapus */}
+          {/* #426 — search + export dipindah ke dalam card Audit Trail */}
+          <div className="px-4 py-3 border-b border-border-subtle/80 bg-surface shrink-0 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex min-w-0 flex-1 md:flex-none bg-surface-sunken border border-border-subtle rounded-lg px-3 py-2 items-center gap-2">
+              <Search className="w-3.5 h-3.5 text-content-subtle shrink-0" />
+              <input
+                value={auditLogSearch}
+                onChange={(e) => setAuditLogSearch(e.target.value)}
+                placeholder={t("activityLog.searchLogs")}
+                className="bg-transparent border-none outline-none text-xs w-full md:w-48 placeholder:text-content-subtle text-content-body min-w-0"
+              />
+            </div>
+            <button
+              onClick={exportTasksToCSV}
+              title={t("activityLog.exportCsv")}
+              className="shrink-0 px-2.5 sm:px-4 py-2 bg-primary-surface border border-primary text-content-inverse rounded-lg text-xs font-medium shadow-soft transition-all flex items-center gap-2 tracking-wider hover:bg-primary-surface-hover active:scale-95 uppercase"
+            >
+              <DownloadCloud className="w-4 h-4" />
+              <span className="hidden sm:inline">{t("activityLog.exportCsv")}</span>
+            </button>
+          </div>
           {activityLogs.length === 0 ? (
             <div className="p-8 sm:p-20 text-center text-content-subtle font-medium">
               {t("activityLog.empty")}

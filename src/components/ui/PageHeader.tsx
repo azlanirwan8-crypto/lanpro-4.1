@@ -40,7 +40,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <div
       className={cn(
-        "w-full shrink-0 bg-surface border-b border-border-subtle",
+        "w-full shrink-0 bg-surface-raised border-b border-border-subtle",
         "px-4 md:px-5 py-2.5",
         "flex items-center justify-between gap-2 min-h-0",
         "[&_button]:min-h-0 [&_button]:h-7 [&_button]:px-2 [&_button]:text-[11px] [&_button]:rounded-md",

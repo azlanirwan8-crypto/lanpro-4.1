@@ -244,16 +244,6 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           { label: t("sessionMonitor.breadcrumbItem", "SESI PENGGUNA"), current: true },
         ]}
         title={t("sessionMonitor.title", "Monitoring Sesi & Aktivitas Pengguna")}
-        actions={
-          <button
-            onClick={() => fetchSessions()}
-            disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-content-strong bg-surface-muted hover:bg-surface-sunken border border-border-subtle rounded-lg transition-all shadow-xs disabled:opacity-50"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            <span>{t("sessionMonitor.refresh", "Segarkan")}</span>
-          </button>
-        }
       >
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-success/10 text-success-text border border-success/20">
           <span className="w-1.5 h-1.5 rounded-full bg-success-surface animate-pulse"></span>
@@ -397,6 +387,15 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                   buttonClassName="w-full px-2.5 sm:px-3 py-2 bg-surface-sunken border border-border-subtle rounded-lg text-sm text-left font-medium text-content-strong"
                 />
               </div>
+              {/* #426 — Refresh dipindah sejajar search + status */}
+              <button
+                onClick={() => fetchSessions()}
+                disabled={loading}
+                className="shrink-0 flex items-center gap-1.5 px-2.5 py-2 text-xs font-semibold text-content-strong bg-surface-sunken hover:bg-surface-strong border border-border-subtle rounded-lg transition-all shadow-xs disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+                <span className="hidden sm:inline">{t("sessionMonitor.refresh", "Segarkan")}</span>
+              </button>
             </div>
 
             <div className="text-xs text-content-subtle font-medium self-end sm:self-auto hidden sm:block">
