@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
 import {
-  History,
   Search,
   DownloadCloud,
   Activity,
@@ -73,47 +72,36 @@ export const ActivityLogPanel = ({
   });
 
   return (
-    <div className="flex-1 overflow-auto p-3 sm:p-6 md:p-8 bg-surface-sunken custom-scrollbar">
-      <div className="space-y-4 sm:space-y-6 w-full">
-        <div className="border-b border-border-subtle pb-4 sm:pb-6 mb-1 sm:mb-2">
-          <PageHeader
-            breadcrumbs={[
-              { label: t("nav.activity", "Activity") },
-              { label: t("activityLog.title"), current: true },
-            ]}
-            title={
-              <span className="inline-flex items-center gap-3 min-w-0">
-                <span className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center shadow-inner shrink-0">
-                  <History className="w-5 h-5 sm:w-6 sm:h-6" />
-                </span>
-                <span className="truncate">{t("activityLog.title")}</span>
-              </span>
-            }
-            subtitle={<span className="hidden sm:inline">{t("activityLog.subtitle")}</span>}
-            actions={
-              <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto min-w-0">
-                <div className="flex min-w-0 flex-1 md:flex-none bg-surface border border-border-subtle rounded-xl px-3 py-2 items-center gap-2 shadow-soft">
-                  <Search className="w-4 h-4 text-content-subtle shrink-0" />
-                  <input
-                    value={auditLogSearch}
-                    onChange={(e) => setAuditLogSearch(e.target.value)}
-                    placeholder={t("activityLog.searchLogs")}
-                    className="bg-transparent border-none outline-none text-xs w-full md:w-48 placeholder:text-content-subtle text-content-body min-w-0"
-                  />
-                </div>
-                <button
-                  onClick={exportTasksToCSV}
-                  title={t("activityLog.exportCsv")}
-                  className="shrink-0 px-2.5 sm:px-4 py-2.5 bg-primary-surface border border-primary text-content-inverse rounded-xl text-xs font-normal shadow-soft-lg transition-all flex items-center gap-2 tracking-widest hover:bg-primary-surface-hover active:scale-95 uppercase"
-                >
-                  <DownloadCloud className="w-4 h-4" />
-                  <span className="hidden sm:inline">{t("activityLog.exportCsv")}</span>
-                </button>
-              </div>
-            }
-          />
-        </div>
-
+    <div className="flex-1 overflow-auto bg-surface-muted custom-scrollbar">
+      <PageHeader
+        breadcrumbs={[
+          { label: t("nav.activity", "Activity") },
+          { label: t("activityLog.title"), current: true },
+        ]}
+        title={t("activityLog.title")}
+        actions={
+          <div className="flex items-center gap-2 sm:gap-3 w-full md:w-auto min-w-0">
+            <div className="flex min-w-0 flex-1 md:flex-none bg-surface-muted border border-border-subtle rounded-lg px-3 py-2 items-center gap-2 shadow-2xs">
+              <Search className="w-4 h-4 text-content-subtle shrink-0" />
+              <input
+                value={auditLogSearch}
+                onChange={(e) => setAuditLogSearch(e.target.value)}
+                placeholder={t("activityLog.searchLogs")}
+                className="bg-transparent border-none outline-none text-xs w-full md:w-48 placeholder:text-content-subtle text-content-body min-w-0"
+              />
+            </div>
+            <button
+              onClick={exportTasksToCSV}
+              title={t("activityLog.exportCsv")}
+              className="shrink-0 px-2.5 sm:px-4 py-2 bg-primary-surface border border-primary text-content-inverse rounded-lg text-xs font-medium shadow-soft transition-all flex items-center gap-2 tracking-wider hover:bg-primary-surface-hover active:scale-95 uppercase"
+            >
+              <DownloadCloud className="w-4 h-4" />
+              <span className="hidden sm:inline">{t("activityLog.exportCsv")}</span>
+            </button>
+          </div>
+        }
+      />
+      <div className="space-y-4 sm:space-y-6 w-full px-3 md:px-5 pt-3 md:pt-4 pb-3 md:pb-5">
         {/* Summary Metric Cards — #361: 2 kolom di HP */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-6 mb-4 sm:mb-8">
           <div className="bg-surface p-3.5 sm:p-6 rounded-xl border border-border-subtle shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between hover:shadow-md transition-shadow h-24 sm:h-32 relative overflow-hidden">

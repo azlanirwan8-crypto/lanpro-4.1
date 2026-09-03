@@ -2,12 +2,12 @@ import React from "react";
 import { cn } from "../../lib/utils";
 
 /**
- * #422 — Pola list-page standar (koreksi pemilik 03 Sep):
- * PageHeader **flat** di latar `surface-muted` — tidak di dalam card/panel
- * (referensi: Manajemen Tim). Konten tabel/filter masuk kartu di bawahnya.
+ * #422 / #424 — List page Velzon:
+ * PageHeader = panel putih full-bleed nempel header;
+ * Search/Tambah di toolbar dalam kartu konten.
  */
 
-/** Search input di strip aksi kanan PageHeader. */
+/** Search input di strip toolbar dalam kartu. */
 export const LIST_SEARCH_INPUT_CLASS =
   "w-full min-w-0 pl-9 pr-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium";
 
@@ -19,9 +19,15 @@ export const LIST_THEAD_ROW_CLASS =
 export const LIST_TABLE_WRAP_CLASS =
   "hidden sm:block flex-1 overflow-x-auto overflow-y-auto m-4 md:m-6 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs";
 
+/** Strip toolbar Search + Tambah di atas isi kartu (#424). */
+const LIST_CARD_TOOLBAR_CLASS =
+  "px-4 py-3 border-b border-border-subtle/80 bg-surface shrink-0 flex flex-wrap items-center justify-end gap-2";
+
 type ListPageShellProps = {
-  /** Biasanya `<PageHeader … />` — flat, di luar kartu. */
+  /** `<PageHeader />` — panel putih full-bleed, di luar padding konten. */
   header: React.ReactNode;
+  /** Search + Tambah (pojok kanan atas dalam kartu). */
+  toolbar?: React.ReactNode;
   /** Isi kartu konten (tabel, filter, paginasi). */
   children: React.ReactNode;
   className?: string;
@@ -37,6 +43,7 @@ type ListPageShellProps = {
 
 export const ListPageShell: React.FC<ListPageShellProps> = ({
   header,
+  toolbar,
   children,
   className,
   headerClassName,
@@ -46,23 +53,28 @@ export const ListPageShell: React.FC<ListPageShellProps> = ({
   return (
     <div
       className={cn(
-        "w-full flex-1 flex flex-col p-3 md:p-6 min-h-0 overflow-hidden bg-surface-muted text-left gap-3 md:gap-4",
+        // Konten di bawah panel title — gap tipis (Velzon rapi)
+        "w-full flex-1 flex flex-col min-h-0 overflow-hidden bg-surface-muted text-left",
         className
       )}
     >
       <div className={cn("shrink-0", headerClassName)}>{header}</div>
-      {bare ? (
-        children
-      ) : (
-        <div
-          className={cn(
-            "flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden",
-            cardClassName
-          )}
-        >
-          {children}
-        </div>
-      )}
+
+      <div className="flex-1 flex flex-col min-h-0 px-3 md:px-5 pt-2.5 md:pt-3 pb-3 md:pb-5">
+        {bare ? (
+          children
+        ) : (
+          <div
+            className={cn(
+              "flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-soft overflow-hidden",
+              cardClassName
+            )}
+          >
+            {toolbar && <div className={LIST_CARD_TOOLBAR_CLASS}>{toolbar}</div>}
+            {children}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

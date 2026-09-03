@@ -188,20 +188,20 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
     return (
       <div className="relative w-fit min-w-full pb-16">
         {/* Header Bar - Static Sidebar and Scrollable Status Headers */}
-        <div className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[280px_1fr] sticky top-0 z-30 bg-surface border-b border-border-subtle/80 shadow-2xs">
+        <div className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[240px_1fr] sticky top-0 z-30 bg-surface border-b border-border-subtle/80">
           {/* Bagian A Header */}
-          <div className="sticky left-0 z-50 bg-surface border-r border-border-subtle/80 h-[56px] flex items-center px-3.5 relative">
-            <div className="text-xs font-medium text-content-body tracking-wider flex items-center justify-between w-full gap-2">
-              <div className="flex items-center gap-2">
-                <span className="font-normal text-xs text-content-strong">
+          <div className="sticky left-0 z-50 bg-surface border-r border-border-subtle/80 h-11 flex items-center px-3 relative">
+            <div className="text-[11px] font-medium text-content-body tracking-wide flex items-center justify-between w-full gap-1.5">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="font-medium text-[11px] text-content-strong shrink-0">
                   {t("kanban.swimlanes")}
                 </span>
-                <label className="flex items-center gap-1 cursor-pointer bg-surface-muted px-2 py-0.5 rounded-md text-xs sm:text-[10px] font-normal text-content-secondary hover:bg-surface-sunken transition-colors select-none">
+                <label className="flex items-center gap-1 cursor-pointer bg-surface-muted px-1.5 py-0.5 rounded text-[10px] font-normal text-content-secondary hover:bg-surface-sunken transition-colors select-none">
                   <input
                     type="checkbox"
                     checked={showEmptySwimlanes}
                     onChange={(e) => setShowEmptySwimlanes(e.target.checked)}
-                    className="accent-primary rounded-md cursor-pointer"
+                    className="accent-primary rounded-sm cursor-pointer w-3 h-3"
                   />
                   <span>{t("kanban.empty")}</span>
                 </label>
@@ -215,13 +215,13 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                     { id: "assignee", label: t("kanban.byAssignee") },
                   ]}
                   className="w-auto"
-                  buttonClassName="bg-primary-surface/10 text-primary border border-primary/20 rounded-md text-[10px] leading-none font-medium px-2 py-1 cursor-pointer outline-none hover:bg-primary-surface/20 transition-all"
+                  buttonClassName="bg-primary-surface/10 text-primary border border-primary/20 rounded text-[10px] leading-none font-medium px-1.5 py-1 cursor-pointer outline-none hover:bg-primary-surface/20 transition-all"
                 />
               </div>
             </div>
           </div>
           {/* Bagian B Header - Scrollable */}
-          <div className="flex overflow-x-auto items-center px-4 py-2.5 gap-3 sm:gap-4 bg-surface custom-scrollbar snap-x snap-mandatory md:snap-none">
+          <div className="flex overflow-x-auto items-center px-3 py-2 gap-2.5 sm:gap-3 bg-surface custom-scrollbar snap-x snap-mandatory md:snap-none">
             {boardStatuses.map((status, index) => {
               const statusStyle = getStatusStyle(status.label || status.code || "");
               const taskCount = tArr.filter((t: any) => taskMatchesStatus(t.status, status)).length;
@@ -233,25 +233,25 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                     isCompact ? "w-[200px] sm:w-[240px]" : "w-[220px] sm:w-[270px]"
                   )}
                 >
-                  <div className="flex items-center justify-between bg-surface-sunken/80 border border-border-subtle/80 px-3.5 py-2 rounded-lg shadow-2xs transition-all">
-                    <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex items-center justify-between bg-surface-sunken/80 border border-border-subtle/80 px-2.5 py-1.5 rounded-md shadow-2xs transition-all">
+                    <div className="flex items-center gap-1.5 min-w-0">
                       {status.icon ? (
                         <RenderIcon
                           iconName={status.icon}
-                          className="w-3.5 h-3.5 shrink-0"
+                          className="w-3 h-3 shrink-0"
                           style={{ color: statusStyle.borderColor }}
                         />
                       ) : (
                         <div
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          className="w-2 h-2 rounded-full shrink-0"
                           style={{ backgroundColor: statusStyle.borderColor }}
                         />
                       )}
-                      <span className="text-[11px] font-normal uppercase tracking-wider text-content-strong truncate">
+                      <span className="text-[10px] font-medium uppercase tracking-wide text-content-strong truncate">
                         {status.label}
                       </span>
                     </div>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-normal bg-surface text-content-secondary border border-border-subtle/60 shadow-2xs shrink-0">
+                    <span className="px-1.5 py-0.5 rounded text-[10px] font-normal bg-surface text-content-secondary border border-border-subtle/60 shadow-2xs shrink-0">
                       {taskCount}
                     </span>
                   </div>
@@ -461,25 +461,25 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
   };
 
   return (
-    <div className="flex flex-col h-full gap-3 font-sans relative">
-      {/* #417 — PageHeader Velzon */}
+    <div className="flex flex-col h-full gap-0 font-sans relative bg-surface-muted">
       <PageHeader
-        className="shrink-0 px-1"
+        className="shrink-0"
         breadcrumbs={[
           { label: t("kanban.breadcrumbGroup", "PROJECT") },
           { label: t("sidebar.kanbanBoard"), current: true },
         ]}
         title={t("kanban.title", t("sidebar.kanbanBoard"))}
-        subtitle={t("kanban.subtitle")}
       />
       {/* #417/#421 — Card board shell */}
-      <Card className="flex-1 flex flex-col rounded-lg overflow-hidden min-h-0">
-        <DragDropContext onDragEnd={handleDragEndBoard}>
-          <div className="flex-1 overflow-auto bg-transparent relative z-10 custom-scrollbar">
-            {renderBoard()}
-          </div>
-        </DragDropContext>
-      </Card>
+      <div className="flex-1 flex flex-col min-h-0 px-3 md:px-4 pt-3 pb-3">
+        <Card className="flex-1 flex flex-col rounded-lg overflow-hidden min-h-0">
+          <DragDropContext onDragEnd={handleDragEndBoard}>
+            <div className="flex-1 overflow-auto bg-transparent relative z-10 custom-scrollbar">
+              {renderBoard()}
+            </div>
+          </DragDropContext>
+        </Card>
+      </div>
     </div>
   );
 };

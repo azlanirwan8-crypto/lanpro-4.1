@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
-import { Zap, Search, Target, LayoutGrid, Filter } from "lucide-react";
+import { Zap, Search, Target, LayoutGrid, Filter, Plus } from "lucide-react";
 import { Task, MasterData } from "../../../types";
 import { StyledDropdown } from "../../../components/ui/CommonComponents";
 
@@ -8,12 +8,16 @@ interface BacklogSectionProps {
   tasks: Task[];
   masterData: MasterData[];
   renderDraggableTask: (task: Task, index: number, variant: "card" | "row") => React.ReactNode;
+  canEditPlanning?: boolean;
+  onAddSprint?: () => void;
 }
 
 export const BacklogSection: React.FC<BacklogSectionProps> = ({
   tasks,
   masterData,
   renderDraggableTask,
+  canEditPlanning = false,
+  onAddSprint,
 }) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
@@ -45,15 +49,28 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
   return (
     <>
       <div className="p-4 border-b border-border-subtle/80 flex flex-col gap-3 shrink-0 bg-surface shadow-2xs">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <LayoutGrid className="w-4 h-4 text-content-muted" />
-            <h3 className="font-semibold text-content-strong text-xs tracking-tight">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <LayoutGrid className="w-4 h-4 text-content-muted shrink-0" />
+            <h3 className="font-semibold text-content-strong text-xs tracking-tight truncate">
               {t("planning.backlogTasks")}
             </h3>
           </div>
-          <div className="px-2 py-[3px] bg-primary/10 border border-primary/30 rounded-md text-[11px] font-medium text-primary">
-            {t("planning.issueCount", { count: filteredBacklogTasks.length })}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="px-2 py-[3px] bg-primary/10 border border-primary/30 rounded-md text-[11px] font-medium text-primary">
+              {t("planning.issueCount", { count: filteredBacklogTasks.length })}
+            </div>
+            {canEditPlanning && onAddSprint && (
+              <button
+                type="button"
+                onClick={onAddSprint}
+                title={t("planning.newSprint")}
+                className="h-7 px-2 sm:px-2.5 bg-primary-surface hover:bg-primary-surface-hover active:bg-primary-active text-content-inverse rounded-md text-[11px] font-medium shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">{t("planning.newSprint")}</span>
+              </button>
+            )}
           </div>
         </div>
 

@@ -96,299 +96,303 @@ export const DbExplorerPanel: React.FC<any> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-surface-muted p-4 md:p-5 gap-4 text-left">
-      {/* Header & Tabs — #409 PageHeader */}
-      <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 shadow-2xs shrink-0">
-        <PageHeader
-          breadcrumbs={[
-            { label: t("dbExplorer.systemTools") },
-            { label: t("dbExplorer.databaseTools"), current: true },
-          ]}
-          title={t("dbExplorer.databaseTools")}
-          subtitle={t("dbExplorer.toolsSubtitle")}
-          actions={
-            <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0">
-              <button
-                onClick={() => setActiveTab("backup")}
-                className={cn(
-                  "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
-                  activeTab === "backup"
-                    ? "bg-surface text-primary font-medium shadow-2xs"
-                    : "text-content-muted hover:text-content-strong"
-                )}
-              >
-                <HardDrive className="w-3.5 h-3.5" />
-                <span>{t("dbExplorer.backupRestore")}</span>
-              </button>
-              <button
-                onClick={() => setActiveTab("connect")}
-                className={cn(
-                  "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
-                  activeTab === "connect"
-                    ? "bg-surface text-primary font-medium shadow-2xs"
-                    : "text-content-muted hover:text-content-strong"
-                )}
-              >
-                <Wifi className="w-3.5 h-3.5" />
-                <span>{t("dbExplorer.connection")}</span>
-              </button>
-              <button
-                onClick={() => setActiveTab("explorer")}
-                className={cn(
-                  "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
-                  activeTab === "explorer"
-                    ? "bg-surface text-primary font-medium shadow-2xs"
-                    : "text-content-muted hover:text-content-strong"
-                )}
-              >
-                <Code className="w-3.5 h-3.5" />
-                <span>{t("dbExplorer.explorer")}</span>
-              </button>
-            </div>
-          }
-        >
-          <span className="text-[10px] leading-none font-medium text-primary bg-primary/10 px-2.5 py-[3px] rounded-md border border-primary/30">
-            {t("dbExplorer.systemTools")}
-          </span>
-        </PageHeader>
-      </div>
-
-      {activeTab === "backup" && (
-        <div className="flex-1 overflow-hidden relative z-10 w-full h-full flex flex-col">
-          <BackupPanel
-            selectedProject={selectedProject}
-            tasks={tasks}
-            sprints={sprints}
-            projectMembers={projectMembers}
-            activityLogs={activityLogs}
-            masterData={masterData}
-          />
-        </div>
-      )}
-
-      {activeTab === "connect" && (
-        <div className="flex-1 overflow-hidden relative z-10 w-full h-full flex flex-col">
-          <ConnectPanel />
-        </div>
-      )}
-
-      {activeTab === "explorer" && (
-        <div className="flex-1 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col min-h-0 relative z-10">
-          {/* Database Mode Banner */}
-          <div className="px-4 py-2.5 border-b border-border-subtle/80 flex flex-wrap items-center justify-between gap-4 shrink-0 bg-emerald-500/10 text-emerald-800">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full animate-pulse bg-emerald-500" />
-              <span className="text-xs font-medium flex items-center gap-1.5">
-                {t("dbExplorer.databaseMode")}{" "}
-                <span className="underline font-medium">PostgreSQL (Neon Cloud)</span>
-              </span>
-              <span className="text-xs sm:text-[11px] opacity-75 hidden sm:inline">
-                {t("dbExplorer.primaryEngineActive")}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button
-                onClick={fetchSchema}
-                title={t("dbExplorer.refreshSchemaTip")}
-                className="p-1 hover:bg-surface-muted rounded transition-all text-content-secondary hover:text-content flex items-center gap-1 text-xs font-medium cursor-pointer"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 4.75L18 8"
-                  />
-                </svg>
-                {t("dbExplorer.refreshSchema")}
-              </button>
-            </div>
-          </div>
-
-          <div className="flex-1 flex overflow-hidden relative">
-            {/* #309 — overlay laci tabel */}
-            {sidebarOpen && (
-              <button
-                type="button"
-                aria-label={t("dbExplorer.closeTables", "Tutup daftar tabel")}
-                className="fixed inset-0 z-40 bg-overlay/50 md:hidden cursor-pointer"
-                onClick={() => setSidebarOpen(false)}
-              />
-            )}
-
-            {/* Sidebar: Table List — laci di bawah md */}
-            <div
+    <div className="flex-1 flex flex-col min-h-0 bg-surface-muted text-left">
+      <PageHeader
+        breadcrumbs={[
+          { label: t("dbExplorer.systemTools") },
+          { label: t("dbExplorer.databaseTools"), current: true },
+        ]}
+        title={t("dbExplorer.databaseTools")}
+        actions={
+          <div className="flex bg-surface-muted p-0.5 rounded-md border border-border-subtle/80 shrink-0 shadow-2xs">
+            <button
+              onClick={() => setActiveTab("backup")}
               className={cn(
-                "w-[240px] bg-surface-sunken/50 border-r border-border-subtle/80 flex flex-col overflow-y-auto shrink-0 custom-scrollbar",
-                "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:bg-surface max-md:shadow-xl",
-                "max-md:transition-transform max-md:duration-200",
-                sidebarOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
+                "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
+                activeTab === "backup"
+                  ? "bg-surface text-primary font-medium shadow-2xs"
+                  : "text-content-muted hover:text-content-strong"
               )}
             >
-              <div className="px-3.5 py-2.5 text-xs sm:text-[11px] font-normal text-content-muted uppercase tracking-wider sticky top-0 bg-surface-sunken border-b border-border-subtle/80 flex justify-between items-center z-10">
-                <span>{t("dbExplorer.tables")}</span>
-                <button
-                  type="button"
-                  className="md:hidden p-1 rounded-md text-content-muted hover:bg-surface-muted cursor-pointer"
-                  onClick={() => setSidebarOpen(false)}
-                  aria-label={t("dbExplorer.closeTables", "Tutup daftar tabel")}
-                >
-                  <X className="w-4 h-4" />
-                </button>
+              <HardDrive className="w-3.5 h-3.5" />
+              <span>{t("dbExplorer.backupRestore")}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("connect")}
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
+                activeTab === "connect"
+                  ? "bg-surface text-primary font-medium shadow-2xs"
+                  : "text-content-muted hover:text-content-strong"
+              )}
+            >
+              <Wifi className="w-3.5 h-3.5" />
+              <span>{t("dbExplorer.connection")}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("explorer")}
+              className={cn(
+                "px-3 py-1.5 text-xs font-medium transition-all rounded flex items-center gap-1.5 cursor-pointer",
+                activeTab === "explorer"
+                  ? "bg-surface text-primary font-medium shadow-2xs"
+                  : "text-content-muted hover:text-content-strong"
+              )}
+            >
+              <Code className="w-3.5 h-3.5" />
+              <span>{t("dbExplorer.explorer")}</span>
+            </button>
+          </div>
+        }
+      >
+        <span className="text-[10px] leading-none font-medium text-primary bg-primary/10 px-2.5 py-[3px] rounded-md border border-primary/30">
+          {t("dbExplorer.systemTools")}
+        </span>
+      </PageHeader>
+
+      <div className="flex-1 flex flex-col min-h-0 px-4 md:px-5 pt-3 md:pt-4 pb-4 md:pb-5 gap-3">
+        {activeTab === "backup" && (
+          <div className="flex-1 overflow-hidden relative z-10 w-full h-full flex flex-col">
+            <BackupPanel
+              selectedProject={selectedProject}
+              tasks={tasks}
+              sprints={sprints}
+              projectMembers={projectMembers}
+              activityLogs={activityLogs}
+              masterData={masterData}
+              hideHeader
+            />
+          </div>
+        )}
+
+        {activeTab === "connect" && (
+          <div className="flex-1 overflow-hidden relative z-10 w-full h-full flex flex-col">
+            <ConnectPanel hideHeader />
+          </div>
+        )}
+
+        {activeTab === "explorer" && (
+          <div className="flex-1 bg-surface rounded-lg border border-border-subtle/80 shadow-2xs overflow-hidden flex flex-col min-h-0 relative z-10">
+            {/* Database Mode Banner */}
+            <div className="px-4 py-2.5 border-b border-border-subtle/80 flex flex-wrap items-center justify-between gap-4 shrink-0 bg-emerald-500/10 text-emerald-800">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full animate-pulse bg-emerald-500" />
+                <span className="text-xs font-medium flex items-center gap-1.5">
+                  {t("dbExplorer.databaseMode")}{" "}
+                  <span className="underline font-medium">PostgreSQL (Neon Cloud)</span>
+                </span>
+                <span className="text-xs sm:text-[11px] opacity-75 hidden sm:inline">
+                  {t("dbExplorer.primaryEngineActive")}
+                </span>
               </div>
-              <div className="p-2 flex flex-col gap-1">
-                {schema &&
-                  Object.keys(schema).map((tableName) => {
-                    const stats = tableStats.find((s) => s.tableName === tableName);
-                    return (
-                      <button
-                        key={tableName}
-                        onClick={() => {
-                          loadTable(tableName);
-                          setSidebarOpen(false);
-                        }}
-                        className={`flex items-center justify-between gap-2 px-3 py-1.5 text-xs rounded-md transition-colors cursor-pointer ${activeTable === tableName ? "bg-primary/10 text-primary font-medium border border-primary/30" : "text-content-secondary hover:bg-surface-muted font-medium"}`}
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          <TableIcon className="w-3.5 h-3.5 shrink-0 text-content-subtle" />
-                          <span className="truncate">{tableName}</span>
-                        </div>
-                        {stats && (
-                          <span className="text-xs sm:text-[10px] text-content-subtle font-mono tracking-tighter shrink-0">
-                            {formatSize(stats.sizeBytes)}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                {!schema && (
-                  <div className="text-xs text-content-subtle px-3 py-2 font-medium">
-                    {t("dbExplorer.loadingTables")}
-                  </div>
-                )}
+
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={fetchSchema}
+                  title={t("dbExplorer.refreshSchemaTip")}
+                  className="p-1 hover:bg-surface-muted rounded transition-all text-content-secondary hover:text-content flex items-center gap-1 text-xs font-medium cursor-pointer"
+                >
+                  <svg
+                    className="w-3.5 h-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 4.75L18 8"
+                    />
+                  </svg>
+                  {t("dbExplorer.refreshSchema")}
+                </button>
               </div>
             </div>
 
-            {/* Main Content: Query Editor and Results */}
-            <div className="flex-1 flex flex-col min-w-0">
-              <div className="md:hidden px-3 pt-3 shrink-0">
+            <div className="flex-1 flex overflow-hidden relative">
+              {/* #309 — overlay laci tabel */}
+              {sidebarOpen && (
                 <button
                   type="button"
-                  onClick={() => setSidebarOpen(true)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 bg-surface-sunken border border-border-subtle rounded-lg text-xs font-medium text-content-strong cursor-pointer"
-                >
-                  <Menu className="w-4 h-4 text-primary shrink-0" />
-                  <span className="truncate">
-                    {activeTable || t("dbExplorer.openTables", "Pilih tabel")}
-                  </span>
-                </button>
-              </div>
-              {/* Query Editor */}
-              <div className="p-3.5 border-b border-border-subtle/80 bg-surface-sunken/50 shrink-0">
-                <div className="relative">
-                  <textarea
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder={t("dbExplorer.queryPlaceholder")}
-                    className="w-full text-content-strong bg-surface border border-border-subtle rounded-md p-3 font-mono text-xs min-h-[90px] focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none resize-y"
-                  />
+                  aria-label={t("dbExplorer.closeTables", "Tutup daftar tabel")}
+                  className="fixed inset-0 z-40 bg-overlay/50 md:hidden cursor-pointer"
+                  onClick={() => setSidebarOpen(false)}
+                />
+              )}
+
+              {/* Sidebar: Table List — laci di bawah md */}
+              <div
+                className={cn(
+                  "w-[240px] bg-surface-sunken/50 border-r border-border-subtle/80 flex flex-col overflow-y-auto shrink-0 custom-scrollbar",
+                  "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:bg-surface max-md:shadow-xl",
+                  "max-md:transition-transform max-md:duration-200",
+                  sidebarOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
+                )}
+              >
+                <div className="px-3.5 py-2.5 text-xs sm:text-[11px] font-normal text-content-muted uppercase tracking-wider sticky top-0 bg-surface-sunken border-b border-border-subtle/80 flex justify-between items-center z-10">
+                  <span>{t("dbExplorer.tables")}</span>
                   <button
-                    onClick={() => handleRunQuery(query)}
-                    disabled={loading || !query.trim()}
-                    className="absolute bottom-3 right-3 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse h-8 px-3.5 rounded-md shadow-2xs font-medium text-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+                    type="button"
+                    className="md:hidden p-1 rounded-md text-content-muted hover:bg-surface-muted cursor-pointer"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-label={t("dbExplorer.closeTables", "Tutup daftar tabel")}
                   >
-                    <Play className="w-3.5 h-3.5" />
-                    <span>{t("dbExplorer.runQuery")}</span>
+                    <X className="w-4 h-4" />
                   </button>
+                </div>
+                <div className="p-2 flex flex-col gap-1">
+                  {schema &&
+                    Object.keys(schema).map((tableName) => {
+                      const stats = tableStats.find((s) => s.tableName === tableName);
+                      return (
+                        <button
+                          key={tableName}
+                          onClick={() => {
+                            loadTable(tableName);
+                            setSidebarOpen(false);
+                          }}
+                          className={`flex items-center justify-between gap-2 px-3 py-1.5 text-xs rounded-md transition-colors cursor-pointer ${activeTable === tableName ? "bg-primary/10 text-primary font-medium border border-primary/30" : "text-content-secondary hover:bg-surface-muted font-medium"}`}
+                        >
+                          <div className="flex items-center gap-2 truncate">
+                            <TableIcon className="w-3.5 h-3.5 shrink-0 text-content-subtle" />
+                            <span className="truncate">{tableName}</span>
+                          </div>
+                          {stats && (
+                            <span className="text-xs sm:text-[10px] text-content-subtle font-mono tracking-tighter shrink-0">
+                              {formatSize(stats.sizeBytes)}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  {!schema && (
+                    <div className="text-xs text-content-subtle px-3 py-2 font-medium">
+                      {t("dbExplorer.loadingTables")}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Results Area */}
-              <div className="flex-1 overflow-auto bg-surface p-4">
-                {!loading && !result && !error && (
-                  <div className="h-full flex flex-col items-center justify-center text-content-subtle">
-                    <Database className="w-12 h-12 mb-4 opacity-20" />
-                    <p>{t("dbExplorer.pickTable")}</p>
+              {/* Main Content: Query Editor and Results */}
+              <div className="flex-1 flex flex-col min-w-0">
+                <div className="md:hidden px-3 pt-3 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setSidebarOpen(true)}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 bg-surface-sunken border border-border-subtle rounded-lg text-xs font-medium text-content-strong cursor-pointer"
+                  >
+                    <Menu className="w-4 h-4 text-primary shrink-0" />
+                    <span className="truncate">
+                      {activeTable || t("dbExplorer.openTables", "Pilih tabel")}
+                    </span>
+                  </button>
+                </div>
+                {/* Query Editor */}
+                <div className="p-3.5 border-b border-border-subtle/80 bg-surface-sunken/50 shrink-0">
+                  <div className="relative">
+                    <textarea
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder={t("dbExplorer.queryPlaceholder")}
+                      className="w-full text-content-strong bg-surface border border-border-subtle rounded-md p-3 font-mono text-xs min-h-[90px] focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none resize-y"
+                    />
+                    <button
+                      onClick={() => handleRunQuery(query)}
+                      disabled={loading || !query.trim()}
+                      className="absolute bottom-3 right-3 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse h-8 px-3.5 rounded-md shadow-2xs font-medium text-xs flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+                    >
+                      <Play className="w-3.5 h-3.5" />
+                      <span>{t("dbExplorer.runQuery")}</span>
+                    </button>
                   </div>
-                )}
+                </div>
 
-                {loading && (
-                  <div className="flex items-center gap-3 text-content-muted mt-4 ml-4">
-                    <div className="w-4 h-4 rounded-full border-2 border-primary top-border-transparent animate-spin" />
-                    {t("dbExplorer.executing")}
-                  </div>
-                )}
+                {/* Results Area */}
+                <div className="flex-1 overflow-auto bg-surface p-4">
+                  {!loading && !result && !error && (
+                    <div className="h-full flex flex-col items-center justify-center text-content-subtle">
+                      <Database className="w-12 h-12 mb-4 opacity-20" />
+                      <p>{t("dbExplorer.pickTable")}</p>
+                    </div>
+                  )}
 
-                {!loading && error && (
-                  <div className="bg-red-500/10 border border-red-500/30 text-red-700 p-4 rounded-lg font-mono text-sm max-w-full overflow-x-auto whitespace-pre-wrap">
-                    {error}
-                  </div>
-                )}
+                  {loading && (
+                    <div className="flex items-center gap-3 text-content-muted mt-4 ml-4">
+                      <div className="w-4 h-4 rounded-full border-2 border-primary top-border-transparent animate-spin" />
+                      {t("dbExplorer.executing")}
+                    </div>
+                  )}
 
-                {!loading && result && Array.isArray(result) && (
-                  <div className="border border-border-subtle rounded-lg overflow-x-auto">
-                    <ResponsiveTable className="w-full text-left border-collapse text-sm">
-                      <thead className="bg-primary-surface/5 text-primary font-normal uppercase tracking-wider">
-                        <tr>
-                          {result.length > 0 ? (
-                            Object.keys(result[0]).map((key) => (
-                              <th
-                                key={key}
-                                className="p-3 border-b border-border-subtle font-medium truncate max-w-[200px]"
-                              >
-                                {key}
+                  {!loading && error && (
+                    <div className="bg-red-500/10 border border-red-500/30 text-red-700 p-4 rounded-lg font-mono text-sm max-w-full overflow-x-auto whitespace-pre-wrap">
+                      {error}
+                    </div>
+                  )}
+
+                  {!loading && result && Array.isArray(result) && (
+                    <div className="border border-border-subtle rounded-lg overflow-x-auto">
+                      <ResponsiveTable className="w-full text-left border-collapse text-sm">
+                        <thead className="bg-primary-surface/5 text-primary font-normal uppercase tracking-wider">
+                          <tr>
+                            {result.length > 0 ? (
+                              Object.keys(result[0]).map((key) => (
+                                <th
+                                  key={key}
+                                  className="p-3 border-b border-border-subtle font-medium truncate max-w-[200px]"
+                                >
+                                  {key}
+                                </th>
+                              ))
+                            ) : (
+                              <th className="p-3 border-b border-border-subtle font-medium text-content-subtle">
+                                {t("dbExplorer.result0Rows")}
                               </th>
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border-faint">
+                          {result.length > 0 ? (
+                            result.map((row: any, i: number) => (
+                              <tr key={i} className="hover:bg-surface-sunken">
+                                {Object.keys(row).map((key: string, j: number) => (
+                                  <td key={j} className="p-3 max-w-[300px]">
+                                    <div className="truncate w-full text-content-secondary font-mono text-xs">
+                                      {row[key] === null ? (
+                                        <span className="text-content-subtle italic">null</span>
+                                      ) : typeof row[key] === "object" ? (
+                                        JSON.stringify(row[key])
+                                      ) : (
+                                        String(row[key])
+                                      )}
+                                    </div>
+                                  </td>
+                                ))}
+                              </tr>
                             ))
                           ) : (
-                            <th className="p-3 border-b border-border-subtle font-medium text-content-subtle">
-                              {t("dbExplorer.result0Rows")}
-                            </th>
-                          )}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border-faint">
-                        {result.length > 0 ? (
-                          result.map((row: any, i: number) => (
-                            <tr key={i} className="hover:bg-surface-sunken">
-                              {Object.keys(row).map((key: string, j: number) => (
-                                <td key={j} className="p-3 max-w-[300px]">
-                                  <div className="truncate w-full text-content-secondary font-mono text-xs">
-                                    {row[key] === null ? (
-                                      <span className="text-content-subtle italic">null</span>
-                                    ) : typeof row[key] === "object" ? (
-                                      JSON.stringify(row[key])
-                                    ) : (
-                                      String(row[key])
-                                    )}
-                                  </div>
-                                </td>
-                              ))}
+                            <tr>
+                              <td className="p-8 text-center text-content-subtle">
+                                {t("dbExplorer.noData")}
+                              </td>
                             </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td className="p-8 text-center text-content-subtle">
-                              {t("dbExplorer.noData")}
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </ResponsiveTable>
-                  </div>
-                )}
+                          )}
+                        </tbody>
+                      </ResponsiveTable>
+                    </div>
+                  )}
 
-                {!loading && result && !Array.isArray(result) && (
-                  <div className="bg-surface-sunken border border-border-subtle text-content-body p-4 rounded-lg font-mono text-sm break-words">
-                    {t("dbExplorer.queryOk")} <br />
-                    {JSON.stringify(result, null, 2)}
-                  </div>
-                )}
+                  {!loading && result && !Array.isArray(result) && (
+                    <div className="bg-surface-sunken border border-border-subtle text-content-body p-4 rounded-lg font-mono text-sm break-words">
+                      {t("dbExplorer.queryOk")} <br />
+                      {JSON.stringify(result, null, 2)}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

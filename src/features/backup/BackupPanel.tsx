@@ -38,6 +38,8 @@ export const BackupPanel = (_props: {
   projectMembers: UserProfile[];
   activityLogs: ActivityLog[];
   masterData: MasterData[];
+  /** Sembunyikan PageHeader saat ditampilkan sebagai tab di DbExplorerPanel. */
+  hideHeader?: boolean;
 }) => {
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -194,258 +196,265 @@ export const BackupPanel = (_props: {
   };
 
   return (
-    <div className="flex-1 overflow-auto p-4 md:p-5 bg-surface-sunken/60 custom-scrollbar w-full space-y-4">
-      <PageHeader
-        breadcrumbs={[
-          { label: t("dbExplorer.systemTools", "Tools") },
-          { label: t("backup.exportDatabase"), current: true },
-        ]}
-        title={t("backup.exportDatabase")}
-        subtitle={t("backupPanel.exportHint")}
-      />
-      {/* Top Cards: Export & Restore — #370: 2 kolom di HP */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        {/* Export Box */}
-        <div className="bg-surface border border-border-subtle/80 rounded-lg p-3 sm:p-5 flex flex-col justify-between shadow-2xs">
-          <div>
-            <div className="flex items-center gap-2 sm:gap-3 mb-3">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-500/10 text-blue-600 rounded-md flex items-center justify-center shrink-0">
-                <Download className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-[10px] sm:text-xs font-normal text-content-strong uppercase tracking-wide truncate">
-                  {t("backup.exportDatabase")}
-                </h2>
-                <p className="text-[10px] sm:text-xs text-content-muted mt-0.5 line-clamp-2">
-                  {t("backupPanel.exportHint")}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="mt-3 sm:mt-4 pt-3 border-t border-border-faint flex justify-end">
-            <button
-              onClick={exportProjectBackup}
-              className="px-2.5 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-content-inverse rounded-md font-medium text-xs transition-all shadow-2xs active:scale-95 flex items-center gap-1.5 cursor-pointer"
-              title={t("backup.exportProject")}
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t("backup.exportProject")}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Restore Box */}
-        <div className="bg-surface border border-border-subtle/80 rounded-lg p-3 sm:p-5 flex flex-col justify-between shadow-2xs">
-          <div>
-            <div className="flex items-center gap-2 sm:gap-3 mb-3">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-rose-500/10 text-rose-600 rounded-md flex items-center justify-center shrink-0">
-                <Upload className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-[10px] sm:text-xs font-normal text-content-strong uppercase tracking-wide truncate">
-                  {t("backupPanel.restoreTitle")}
-                </h2>
-                <p className="text-[10px] sm:text-xs text-content-muted flex items-center gap-1 mt-0.5">
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                  <span className="line-clamp-2">{t("backup.overwriteWarning")}</span>
-                </p>
+    <div className="flex-1 overflow-auto bg-surface-muted custom-scrollbar w-full">
+      {!_props.hideHeader && (
+        <PageHeader
+          breadcrumbs={[
+            { label: t("dbExplorer.systemTools", "Tools") },
+            { label: t("backup.exportDatabase"), current: true },
+          ]}
+          title={t("backup.exportDatabase")}
+        />
+      )}
+      <div
+        className={
+          _props.hideHeader ? "space-y-4" : "px-4 md:px-5 pt-3 md:pt-4 pb-4 md:pb-5 space-y-4"
+        }
+      >
+        {/* Top Cards: Export & Restore — #370: 2 kolom di HP */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          {/* Export Box */}
+          <div className="bg-surface border border-border-subtle/80 rounded-lg p-3 sm:p-5 flex flex-col justify-between shadow-2xs">
+            <div>
+              <div className="flex items-center gap-2 sm:gap-3 mb-3">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 bg-blue-500/10 text-blue-600 rounded-md flex items-center justify-center shrink-0">
+                  <Download className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-[10px] sm:text-xs font-normal text-content-strong uppercase tracking-wide truncate">
+                    {t("backup.exportDatabase")}
+                  </h2>
+                  <p className="text-[10px] sm:text-xs text-content-muted mt-0.5 line-clamp-2">
+                    {t("backupPanel.exportHint")}
+                  </p>
+                </div>
               </div>
             </div>
+            <div className="mt-3 sm:mt-4 pt-3 border-t border-border-faint flex justify-end">
+              <button
+                onClick={exportProjectBackup}
+                className="px-2.5 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-content-inverse rounded-md font-medium text-xs transition-all shadow-2xs active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                title={t("backup.exportProject")}
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{t("backup.exportProject")}</span>
+              </button>
+            </div>
           </div>
-          <div className="mt-3 sm:mt-4 pt-3 border-t border-border-faint flex justify-end">
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="px-2.5 sm:px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-700 hover:bg-rose-500/15 rounded-md font-medium text-xs transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
-              title={t("backup.uploadBackupFile")}
-            >
-              <Upload className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t("backup.uploadBackupFile")}</span>
-            </button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleRestoreChange}
-              accept="application/json"
-              className="hidden"
-            />
+
+          {/* Restore Box */}
+          <div className="bg-surface border border-border-subtle/80 rounded-lg p-3 sm:p-5 flex flex-col justify-between shadow-2xs">
+            <div>
+              <div className="flex items-center gap-2 sm:gap-3 mb-3">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 bg-rose-500/10 text-rose-600 rounded-md flex items-center justify-center shrink-0">
+                  <Upload className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-[10px] sm:text-xs font-normal text-content-strong uppercase tracking-wide truncate">
+                    {t("backupPanel.restoreTitle")}
+                  </h2>
+                  <p className="text-[10px] sm:text-xs text-content-muted flex items-center gap-1 mt-0.5">
+                    <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span className="line-clamp-2">{t("backup.overwriteWarning")}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-3 sm:mt-4 pt-3 border-t border-border-faint flex justify-end">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="px-2.5 sm:px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-700 hover:bg-rose-500/15 rounded-md font-medium text-xs transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                title={t("backup.uploadBackupFile")}
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{t("backup.uploadBackupFile")}</span>
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleRestoreChange}
+                accept="application/json"
+                className="hidden"
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Export History DataTable */}
-      <div className="bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
-        <div className="px-4 py-3 bg-surface-sunken/80 border-b border-border-subtle/80 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-content-muted" />
-            <h3 className="text-xs font-normal text-content-body uppercase tracking-wider">
-              {t("backup.resultTitle")}
-            </h3>
+        {/* Export History DataTable */}
+        <div className="bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
+          <div className="px-4 py-3 bg-surface-sunken/80 border-b border-border-subtle/80 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-content-muted" />
+              <h3 className="text-xs font-normal text-content-body uppercase tracking-wider">
+                {t("backup.resultTitle")}
+              </h3>
+            </div>
+            <span className="text-xs sm:text-[11px] text-content-muted font-medium">
+              {t("rakit.totalFiles", { count: exportHistory.length })}
+            </span>
           </div>
-          <span className="text-xs sm:text-[11px] text-content-muted font-medium">
-            {t("rakit.totalFiles", { count: exportHistory.length })}
-          </span>
-        </div>
 
-        <div className="hidden sm:block overflow-x-auto">
-          <ResponsiveTable className="w-full text-left border-collapse text-xs">
-            <thead className="bg-surface-muted/70 text-content-body border-b border-border-subtle/80 font-normal uppercase tracking-wider text-xs sm:text-[11px]">
-              <tr>
-                <th className="py-2.5 px-3.5">{t("backup.exportTime")}</th>
-                <th className="py-2.5 px-3.5">{t("backup.fileName")}</th>
-                <th className="py-2.5 px-3.5">{t("backupPanel.size")}</th>
-                <th className="py-2.5 px-3.5">{t("backup.processStatus")}</th>
-                <th className="py-2.5 px-3.5 text-right">{t("backupPanel.action")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border-faint font-medium">
-              {exportHistory.length > 0 ? (
-                exportHistory.map((item) => (
-                  <tr key={item.id} className="hover:bg-surface-sunken/80 transition-colors">
-                    <td className="py-2.5 px-3.5 text-content-secondary flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-content-subtle" />
-                      {format(item.createdAt, "dd MMM yyyy, HH:mm:ss")}
-                    </td>
-                    <td className="py-2.5 px-3.5 font-mono text-content-body font-medium">
-                      {item.filename}
-                    </td>
-                    <td className="py-2.5 px-3.5 text-content-secondary font-mono">
-                      {item.status === "completed" ? formatSize(item.sizeBytes) : "-"}
-                    </td>
-                    <td className="py-2.5 px-3.5">
-                      {item.status === "processing" && (
-                        <div className="space-y-1 w-48">
-                          <div className="flex justify-between text-xs sm:text-[10px] text-amber-700 font-medium">
-                            <span className="flex items-center gap-1">
-                              <Loader2 className="w-3 h-3 animate-spin text-amber-600" />
-                              {t("backupPanel.exporting")}
-                            </span>
-                            <span>{item.progress}%</span>
+          <div className="hidden sm:block overflow-x-auto">
+            <ResponsiveTable className="w-full text-left border-collapse text-xs">
+              <thead className="bg-surface-muted/70 text-content-body border-b border-border-subtle/80 font-normal uppercase tracking-wider text-xs sm:text-[11px]">
+                <tr>
+                  <th className="py-2.5 px-3.5">{t("backup.exportTime")}</th>
+                  <th className="py-2.5 px-3.5">{t("backup.fileName")}</th>
+                  <th className="py-2.5 px-3.5">{t("backupPanel.size")}</th>
+                  <th className="py-2.5 px-3.5">{t("backup.processStatus")}</th>
+                  <th className="py-2.5 px-3.5 text-right">{t("backupPanel.action")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border-faint font-medium">
+                {exportHistory.length > 0 ? (
+                  exportHistory.map((item) => (
+                    <tr key={item.id} className="hover:bg-surface-sunken/80 transition-colors">
+                      <td className="py-2.5 px-3.5 text-content-secondary flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-content-subtle" />
+                        {format(item.createdAt, "dd MMM yyyy, HH:mm:ss")}
+                      </td>
+                      <td className="py-2.5 px-3.5 font-mono text-content-body font-medium">
+                        {item.filename}
+                      </td>
+                      <td className="py-2.5 px-3.5 text-content-secondary font-mono">
+                        {item.status === "completed" ? formatSize(item.sizeBytes) : "-"}
+                      </td>
+                      <td className="py-2.5 px-3.5">
+                        {item.status === "processing" && (
+                          <div className="space-y-1 w-48">
+                            <div className="flex justify-between text-xs sm:text-[10px] text-amber-700 font-medium">
+                              <span className="flex items-center gap-1">
+                                <Loader2 className="w-3 h-3 animate-spin text-amber-600" />
+                                {t("backupPanel.exporting")}
+                              </span>
+                              <span>{item.progress}%</span>
+                            </div>
+                            <div className="w-full bg-surface-strong h-1.5 rounded-full overflow-hidden">
+                              <div
+                                className="bg-amber-500 h-full rounded-full transition-all duration-300 ease-out"
+                                style={{ width: `${item.progress}%` }}
+                              />
+                            </div>
                           </div>
-                          <div className="w-full bg-surface-strong h-1.5 rounded-full overflow-hidden">
-                            <div
-                              className="bg-amber-500 h-full rounded-full transition-all duration-300 ease-out"
-                              style={{ width: `${item.progress}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
-                      {item.status === "completed" && (
-                        <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded text-[10px] leading-none font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                          {t("backupPanel.done")}
-                        </span>
-                      )}
-                      {item.status === "failed" && (
-                        <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded text-[10px] leading-none font-medium bg-rose-500/10 text-rose-700 border border-rose-500/30">
-                          <AlertTriangle className="w-3 h-3 text-rose-600" />
-                          {t("backupPanel.failed")}
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-2.5 px-3.5 text-right space-x-1.5">
-                      {item.status === "completed" && (
+                        )}
+                        {item.status === "completed" && (
+                          <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded text-[10px] leading-none font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                            {t("backupPanel.done")}
+                          </span>
+                        )}
+                        {item.status === "failed" && (
+                          <span className="inline-flex items-center gap-1 px-2 py-[3px] rounded text-[10px] leading-none font-medium bg-rose-500/10 text-rose-700 border border-rose-500/30">
+                            <AlertTriangle className="w-3 h-3 text-rose-600" />
+                            {t("backupPanel.failed")}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2.5 px-3.5 text-right space-x-1.5">
+                        {item.status === "completed" && (
+                          <button
+                            onClick={() => handleDownloadItem(item)}
+                            className="px-2.5 py-1 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded font-medium text-xs sm:text-[11px] transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
+                            title={t("backup.downloadBackup")}
+                          >
+                            <Download className="w-3 h-3" />
+                            {t("backupPanel.download")}
+                          </button>
+                        )}
                         <button
-                          onClick={() => handleDownloadItem(item)}
-                          className="px-2.5 py-1 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded font-medium text-xs sm:text-[11px] transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
-                          title={t("backup.downloadBackup")}
+                          onClick={() => setDeleteId(item.id)}
+                          className="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 border border-rose-500/30 rounded font-medium text-[10px] leading-none transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
+                          title={t("backupPanel.deleteHistory")}
                         >
-                          <Download className="w-3 h-3" />
-                          {t("backupPanel.download")}
+                          <Trash2 className="w-3 h-3" />
+                          {t("backupPanel.delete")}
                         </button>
-                      )}
-                      <button
-                        onClick={() => setDeleteId(item.id)}
-                        className="px-2.5 py-1 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 border border-rose-500/30 rounded font-medium text-[10px] leading-none transition-all shadow-2xs inline-flex items-center gap-1 cursor-pointer active:scale-95"
-                        title={t("backupPanel.deleteHistory")}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                        {t("backupPanel.delete")}
-                      </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="py-8 text-center text-content-subtle italic text-xs">
+                      {t("backup.noBackupExportHistoryYet")}{" "}
+                      <strong className="font-medium text-content-secondary">
+                        {t("backup.exportProjectBackup")}
+                      </strong>{" "}
+                      {t("backup.buttonAboveToCreateA")}
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="py-8 text-center text-content-subtle italic text-xs">
-                    {t("backup.noBackupExportHistoryYet")}{" "}
-                    <strong className="font-medium text-content-secondary">
-                      {t("backup.exportProjectBackup")}
-                    </strong>{" "}
-                    {t("backup.buttonAboveToCreateA")}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </ResponsiveTable>
-        </div>
+                )}
+              </tbody>
+            </ResponsiveTable>
+          </div>
 
-        {/* #388 — kartu riwayat backup di bawah sm */}
-        <div className="sm:hidden divide-y divide-border-subtle/60">
-          {exportHistory.length > 0 ? (
-            exportHistory.map((item) => (
-              <div key={item.id} className="p-4 flex flex-col gap-3">
-                <div className="min-w-0">
-                  <p className="font-mono text-xs font-medium text-content-strong truncate">
-                    {item.filename}
-                  </p>
-                  <p className="text-[11px] text-content-muted mt-1 flex items-center gap-1">
-                    <Clock className="w-3 h-3 shrink-0" />
-                    {format(item.createdAt, "dd MMM yyyy, HH:mm")}
-                    {item.status === "completed" && (
-                      <span className="text-content-subtle">· {formatSize(item.sizeBytes)}</span>
+          {/* #388 — kartu riwayat backup di bawah sm */}
+          <div className="sm:hidden divide-y divide-border-subtle/60">
+            {exportHistory.length > 0 ? (
+              exportHistory.map((item) => (
+                <div key={item.id} className="p-4 flex flex-col gap-3">
+                  <div className="min-w-0">
+                    <p className="font-mono text-xs font-medium text-content-strong truncate">
+                      {item.filename}
+                    </p>
+                    <p className="text-[11px] text-content-muted mt-1 flex items-center gap-1">
+                      <Clock className="w-3 h-3 shrink-0" />
+                      {format(item.createdAt, "dd MMM yyyy, HH:mm")}
+                      {item.status === "completed" && (
+                        <span className="text-content-subtle">· {formatSize(item.sizeBytes)}</span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {item.status === "processing" && (
+                      <span className="inline-flex items-center gap-1 text-[11px] text-amber-700 font-medium">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        {item.progress}%
+                      </span>
                     )}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  {item.status === "processing" && (
-                    <span className="inline-flex items-center gap-1 text-[11px] text-amber-700 font-medium">
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                      {item.progress}%
-                    </span>
-                  )}
-                  {item.status === "completed" && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">
-                      <CheckCircle2 className="w-3 h-3" />
-                      {t("backupPanel.done")}
-                    </span>
-                  )}
-                  {item.status === "failed" && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-rose-500/10 text-rose-700 border border-rose-500/30">
-                      <AlertTriangle className="w-3 h-3" />
-                      {t("backupPanel.failed")}
-                    </span>
-                  )}
-                  <div className="flex-1" />
-                  {item.status === "completed" && (
+                    {item.status === "completed" && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/30">
+                        <CheckCircle2 className="w-3 h-3" />
+                        {t("backupPanel.done")}
+                      </span>
+                    )}
+                    {item.status === "failed" && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-rose-500/10 text-rose-700 border border-rose-500/30">
+                        <AlertTriangle className="w-3 h-3" />
+                        {t("backupPanel.failed")}
+                      </span>
+                    )}
+                    <div className="flex-1" />
+                    {item.status === "completed" && (
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadItem(item)}
+                        className="min-h-11 px-3 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        {t("backupPanel.download")}
+                      </button>
+                    )}
                     <button
                       type="button"
-                      onClick={() => handleDownloadItem(item)}
-                      className="min-h-11 px-3 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium inline-flex items-center gap-1 cursor-pointer"
+                      onClick={() => setDeleteId(item.id)}
+                      className="min-h-11 px-3 bg-rose-500/10 text-rose-700 border border-rose-500/30 rounded-md text-xs font-medium inline-flex items-center gap-1 cursor-pointer"
                     >
-                      <Download className="w-3.5 h-3.5" />
-                      {t("backupPanel.download")}
+                      <Trash2 className="w-3.5 h-3.5" />
+                      {t("backupPanel.delete")}
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setDeleteId(item.id)}
-                    className="min-h-11 px-3 bg-rose-500/10 text-rose-700 border border-rose-500/30 rounded-md text-xs font-medium inline-flex items-center gap-1 cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    {t("backupPanel.delete")}
-                  </button>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="py-8 px-4 text-center text-content-subtle text-xs">
+                {t("backup.noBackupExportHistoryYet")}{" "}
+                <strong className="font-medium text-content-secondary">
+                  {t("backup.exportProjectBackup")}
+                </strong>{" "}
+                {t("backup.buttonAboveToCreateA")}
               </div>
-            ))
-          ) : (
-            <div className="py-8 px-4 text-center text-content-subtle text-xs">
-              {t("backup.noBackupExportHistoryYet")}{" "}
-              <strong className="font-medium text-content-secondary">
-                {t("backup.exportProjectBackup")}
-              </strong>{" "}
-              {t("backup.buttonAboveToCreateA")}
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 

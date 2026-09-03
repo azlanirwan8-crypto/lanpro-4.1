@@ -3856,8 +3856,8 @@ function AppContainer() {
           <div className="absolute inset-0 bg-surface-sunken/50 backdrop-blur-3xl z-[-1]" />
 
           {/* Global Top Header Bar */}
-          <header className="flex items-center justify-between w-full px-6 py-3 border-b border-border-faint bg-surface shrink-0 pl-14 md:pl-6 text-content-strong transition-all z-20">
-            <div className="flex items-center gap-4 min-w-0">
+          <header className="flex items-center justify-between w-full px-4 md:px-5 py-2 bg-surface shrink-0 pl-14 md:pl-5 text-content-strong transition-all z-20">
+            <div className="flex items-center gap-3 min-w-0">
               {selectedProject &&
               ![
                 "userDetail",
@@ -3873,12 +3873,12 @@ function AppContainer() {
               ].includes(currentView as string) ? (
                 <>
                   <h2
-                    className="text-sm md:text-lg font-medium text-content truncate text-ellipsis whitespace-nowrap max-w-[min(42vw,11rem)] sm:max-w-[300px] md:max-w-none"
+                    className="text-[13px] md:text-sm font-medium text-content truncate text-ellipsis whitespace-nowrap max-w-[min(42vw,11rem)] sm:max-w-[300px] md:max-w-none"
                     title={selectedProject.name}
                   >
                     {selectedProject.name}
                   </h2>
-                  <div className="h-4 w-px border-l border-border-subtle mx-2 shrink-0" />
+                  <div className="h-3.5 w-px border-l border-border-subtle mx-1 shrink-0" />
                   <HeaderAvatarGroup
                     allUsers={allUsers}
                     currentUserUid={currentUser?.uid || currentUser?.id}
@@ -3904,22 +3904,22 @@ function AppContainer() {
                         setEditingProject(selectedProject);
                         setIsEditProjectModalOpen(true);
                       }}
-                      className="p-2.5 min-w-11 min-h-11 flex items-center justify-center hover:bg-surface-sunken rounded-full text-content-subtle hover:text-content-secondary group transition-all"
+                      className="p-1.5 md:min-w-0 md:min-h-0 min-w-11 min-h-11 flex items-center justify-center hover:bg-surface-sunken rounded-md text-content-subtle hover:text-content-secondary group transition-all"
                       title={t("common.projectSettings")}
                     >
-                      <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+                      <Settings className="w-4 h-4 group-hover:rotate-90 transition-transform" />
                     </button>
                   )}
 
                 <button
                   onClick={toggleFullscreen}
-                  className="hidden sm:flex p-2.5 min-w-11 min-h-11 items-center justify-center text-content-subtle hover:text-primary hover:bg-surface-sunken rounded-full transition-all"
+                  className="hidden sm:flex p-1.5 md:min-w-0 md:min-h-0 items-center justify-center text-content-subtle hover:text-primary hover:bg-surface-sunken rounded-md transition-all"
                   title={isFullscreen ? t("common.exitFullscreen") : t("common.fullscreen")}
                 >
                   {isFullscreen ? (
-                    <Minimize2 className="w-5 h-5" />
+                    <Minimize2 className="w-4 h-4" />
                   ) : (
-                    <Maximize className="w-5 h-5" />
+                    <Maximize className="w-4 h-4" />
                   )}
                 </button>
 
@@ -3927,14 +3927,14 @@ function AppContainer() {
 
                 <button
                   onClick={toggleTheme}
-                  className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-content-strong hover:bg-surface-sunken rounded-full transition-all cursor-pointer relative"
+                  className="p-1.5 md:min-w-0 md:min-h-0 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-content-strong hover:bg-surface-sunken rounded-md transition-all cursor-pointer relative"
                   title={isDarkMode() ? t("appShell.toLightMode") : t("appShell.toDarkMode")}
                   aria-label={isDarkMode() ? t("appShell.toLightMode") : t("appShell.toDarkMode")}
                 >
                   {isDarkMode() ? (
-                    <Sun className="w-5 h-5 text-warning transition-transform hover:rotate-45 duration-200" />
+                    <Sun className="w-4 h-4 text-warning transition-transform hover:rotate-45 duration-200" />
                   ) : (
-                    <Moon className="w-5 h-5 text-content-body transition-transform hover:-rotate-12 duration-200" />
+                    <Moon className="w-4 h-4 text-content-body transition-transform hover:-rotate-12 duration-200" />
                   )}
                 </button>
               </div>
@@ -4002,12 +4002,12 @@ function AppContainer() {
               <div className="relative" ref={notificationsRef}>
                 <button
                   onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                  className="p-2.5 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-violet-600 hover:bg-violet-500/10 rounded-full transition-all relative"
+                  className="p-1.5 md:min-w-0 md:min-h-0 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-violet-600 hover:bg-violet-500/10 rounded-md transition-all relative"
                   title={t("appShell.notifications")}
                 >
-                  <Bell className="w-5 h-5" />
+                  <Bell className="w-4 h-4" />
                   {notifications.filter((n) => !n.read).length > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-surface"></span>
+                    <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-rose-500 rounded-full ring-2 ring-surface"></span>
                   )}
                 </button>
 

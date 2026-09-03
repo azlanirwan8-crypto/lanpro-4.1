@@ -732,7 +732,10 @@ export function TestQAPanel({
     activeSuiteObj?.cases.filter((c) => statusFilter === "ALL" || c.status === statusFilter) || [];
 
   return (
-    <div className="w-full space-y-3.5 select-none" id="qa_module_container">
+    <div
+      className="flex-1 flex flex-col min-h-0 bg-surface-muted select-none"
+      id="qa_module_container"
+    >
       {/* Topbar Lock Indicator & Integrated Velzon Page Title */}
       <QATopBar
         lockState={lockState}
@@ -744,72 +747,74 @@ export function TestQAPanel({
       />
 
       {/* OPTIMIZED RESPONSIVE GRID (3 : 9 RATIO) - 75% WIDTH FOR TABLE */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
-        <QASuiteSidebar
-          suitesForFilter={suitesForFilter}
-          selectedSuiteId={selectedSuiteId}
-          setSelectedSuiteId={setSelectedSuiteId}
-          phaseFilter={phaseFilter}
-          setPhaseFilter={setPhaseFilter}
-          setIsAddSuiteOpen={setIsAddSuiteOpen}
-          setSuiteToEdit={setSuiteToEdit}
-          setSuiteEditName={setSuiteEditName}
-          setSuiteEditAssignedTo={setSuiteEditAssignedTo}
-          handleDeleteSuite={handleDeleteSuite}
-          activeSuitePicDropdownId={activeSuitePicDropdownId}
-          setActiveSuitePicDropdownId={setActiveSuitePicDropdownId}
-          handleUpdateSuitePic={handleUpdateSuitePic}
-          projectMembers={projectMembers}
-          canCreate={canCreate}
-          canUpdate={canUpdate}
-          canDelete={canDelete}
-        />
+      <div className="flex-1 overflow-auto px-3 md:px-5 pt-3 md:pt-4 pb-3 md:pb-5 custom-scrollbar">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5 items-start">
+          <QASuiteSidebar
+            suitesForFilter={suitesForFilter}
+            selectedSuiteId={selectedSuiteId}
+            setSelectedSuiteId={setSelectedSuiteId}
+            phaseFilter={phaseFilter}
+            setPhaseFilter={setPhaseFilter}
+            setIsAddSuiteOpen={setIsAddSuiteOpen}
+            setSuiteToEdit={setSuiteToEdit}
+            setSuiteEditName={setSuiteEditName}
+            setSuiteEditAssignedTo={setSuiteEditAssignedTo}
+            handleDeleteSuite={handleDeleteSuite}
+            activeSuitePicDropdownId={activeSuitePicDropdownId}
+            setActiveSuitePicDropdownId={setActiveSuitePicDropdownId}
+            handleUpdateSuitePic={handleUpdateSuitePic}
+            projectMembers={projectMembers}
+            canCreate={canCreate}
+            canUpdate={canUpdate}
+            canDelete={canDelete}
+          />
 
-        <QATestCaseTable
-          activeSuite={activeSuiteObj}
-          filteredCases={filteredCases}
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          projectMembers={projectMembers}
-          currentUserUid={currentUserUid}
-          currentUserRole={currentUserRole}
-          lockState={lockState}
-          isGeneratingAi={isGeneratingAi}
-          handleGenerateWithAi={handleGenerateWithAi}
-          handleExportQAReport={handleExportQAReport}
-          handleMigrateSuitePhase={handleMigrateSuitePhase}
-          setIsAddCaseOpen={setIsAddCaseOpen}
-          setActiveAddTab={setActiveAddTab}
-          handleStatusChange={handleStatusChange}
-          activeCasePicDropdownId={activeCasePicDropdownId}
-          setActiveCasePicDropdownId={setActiveCasePicDropdownId}
-          handleUpdateCasePic={handleUpdateCasePic}
-          setCaseToEditInfo={setCaseToEditInfo}
-          setCaseEditTitle={setCaseEditTitle}
-          setCaseEditSteps={setCaseEditSteps}
-          setCaseEditExpected={setCaseEditExpected}
-          setCaseEditPriority={setCaseEditPriority}
-          setCaseEditAssignedTo={setCaseEditAssignedTo}
-          handleDeleteTestCase={handleDeleteTestCase}
-          handleOpenCreateBugModal={handleOpenCreateBugModal}
-          setSelectedTestCase={setSelectedTestCase}
-          canCreate={canCreate}
-          canUpdate={canUpdate}
-          canDelete={canDelete}
-          isAdminRole={isAdminRole}
-          selectedCaseIds={selectedCaseIds}
-          handleToggleSelectAll={handleToggleSelectAll}
-          handleToggleSelectCase={handleToggleSelectCase}
-          handleBulkAssignPic={handleBulkAssignPic}
-          handleBulkChangeStatus={handleBulkChangeStatus}
-          handleBulkDeleteCases={handleBulkDeleteCases}
-          casesPage={casesPage}
-          setCasesPage={setCasesPage}
-          casesTotal={casesTotal}
-          casesPerPage={casesPerPage}
-        />
+          <QATestCaseTable
+            activeSuite={activeSuiteObj}
+            filteredCases={filteredCases}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            projectMembers={projectMembers}
+            currentUserUid={currentUserUid}
+            currentUserRole={currentUserRole}
+            lockState={lockState}
+            isGeneratingAi={isGeneratingAi}
+            handleGenerateWithAi={handleGenerateWithAi}
+            handleExportQAReport={handleExportQAReport}
+            handleMigrateSuitePhase={handleMigrateSuitePhase}
+            setIsAddCaseOpen={setIsAddCaseOpen}
+            setActiveAddTab={setActiveAddTab}
+            handleStatusChange={handleStatusChange}
+            activeCasePicDropdownId={activeCasePicDropdownId}
+            setActiveCasePicDropdownId={setActiveCasePicDropdownId}
+            handleUpdateCasePic={handleUpdateCasePic}
+            setCaseToEditInfo={setCaseToEditInfo}
+            setCaseEditTitle={setCaseEditTitle}
+            setCaseEditSteps={setCaseEditSteps}
+            setCaseEditExpected={setCaseEditExpected}
+            setCaseEditPriority={setCaseEditPriority}
+            setCaseEditAssignedTo={setCaseEditAssignedTo}
+            handleDeleteTestCase={handleDeleteTestCase}
+            handleOpenCreateBugModal={handleOpenCreateBugModal}
+            setSelectedTestCase={setSelectedTestCase}
+            canCreate={canCreate}
+            canUpdate={canUpdate}
+            canDelete={canDelete}
+            isAdminRole={isAdminRole}
+            selectedCaseIds={selectedCaseIds}
+            handleToggleSelectAll={handleToggleSelectAll}
+            handleToggleSelectCase={handleToggleSelectCase}
+            handleBulkAssignPic={handleBulkAssignPic}
+            handleBulkChangeStatus={handleBulkChangeStatus}
+            handleBulkDeleteCases={handleBulkDeleteCases}
+            casesPage={casesPage}
+            setCasesPage={setCasesPage}
+            casesTotal={casesTotal}
+            casesPerPage={casesPerPage}
+          />
+        </div>
       </div>
 
       {/* Side Drawer Detail */}

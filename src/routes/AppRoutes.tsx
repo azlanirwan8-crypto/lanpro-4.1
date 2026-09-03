@@ -360,7 +360,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
 
     case "board":
       return (
-        <div className="flex-1 flex flex-col min-h-0 p-4 sm:p-6 bg-surface-sunken mobile-nav-pb md:pb-0">
+        <div className="flex-1 flex flex-col min-h-0 mobile-nav-pb md:pb-0">
           <BoardView
             tasks={tasks || []}
             masterData={masterData || []}
@@ -378,7 +378,7 @@ const TampilanTerpilih: React.FC<AppRoutesProps> = (props) => {
 
     case "qa":
       return (
-        <div className="flex-1 overflow-auto bg-surface-sunken relative custom-scrollbar p-4 sm:p-6 mobile-nav-pb md:pb-6">
+        <div className="flex-1 flex flex-col min-h-0 mobile-nav-pb md:pb-0">
           <TestQAPanel
             tasks={tasks || []}
             projectMembers={projectMembers || []}

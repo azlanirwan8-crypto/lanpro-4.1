@@ -574,52 +574,17 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   }
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-surface-sunken w-full h-full">
-      <div className="flex-1 overflow-y-auto p-3 md:p-6 w-full">
-        <div className="flex flex-col space-y-6 min-h-full">
-          {/* Header & Controls — #422: PageHeader flat, bukan dalam Card */}
-          <PageHeader
-            className="shrink-0"
-            breadcrumbs={[
-              { label: t("users.breadcrumbGroup", "ADMINISTRATION") },
-              { label: t("users.title"), current: true },
-            ]}
-            title={t("users.title")}
-            subtitle={<span className="hidden sm:inline">{t("users.subtitle")}</span>}
-            actions={
-              <div className="flex items-center gap-2 w-full lg:w-auto min-w-0">
-                <div className="relative min-w-0 flex-1 lg:flex-none lg:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle pointer-events-none" />
-                  <input
-                    type="text"
-                    placeholder={t("users.searchPlaceholder")}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-9 pr-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium"
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={handleExportCSV}
-                  title={t("users.exportCsv")}
-                  className="btn-animation waves-effect waves-light bg-surface border border-border-subtle text-content-strong hover:bg-surface-sunken h-9 px-2.5 sm:px-3.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
-                >
-                  <Download className="w-3.5 h-3.5 text-content-muted shrink-0" />
-                  <span className="hidden sm:inline">{t("users.exportCsv")}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsInviteModalOpen(true)}
-                  title={t("users.addUser")}
-                  className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
-                >
-                  <UserPlus className="w-3.5 h-3.5 shrink-0" />
-                  <span className="hidden sm:inline">{t("users.addUser")}</span>
-                </button>
-              </div>
-            }
-          />
-
+    <div className="flex-1 flex flex-col overflow-hidden bg-surface-muted w-full h-full">
+      <PageHeader
+        className="shrink-0"
+        breadcrumbs={[
+          { label: t("users.breadcrumbGroup", "ADMINISTRATION") },
+          { label: t("users.title"), current: true },
+        ]}
+        title={t("users.title")}
+      />
+      <div className="flex-1 overflow-y-auto px-3 md:px-5 pt-3 md:pt-4 pb-3 md:pb-5 w-full">
+        <div className="flex flex-col space-y-4 md:space-y-6 min-h-full">
           {/* Statistics Grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
             <div className="bg-surface p-3.5 rounded-lg border border-border-subtle/60 shadow-2xs flex items-center gap-3 transition-all hover:shadow-xs">
@@ -678,6 +643,36 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
 
           {/* User List */}
           <div className="bg-surface rounded-xl shadow-soft border border-border-subtle/50 overflow-hidden flex-1 flex flex-col">
+            <div className="px-4 py-3 border-b border-border-subtle/80 flex flex-wrap items-center justify-end gap-2 shrink-0">
+              <div className="relative min-w-0 flex-1 lg:flex-none lg:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-content-subtle pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder={t("users.searchPlaceholder")}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-3.5 py-2 bg-surface border border-border-subtle rounded-md text-xs placeholder:text-content-subtle outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all text-content-strong shadow-2xs font-medium"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleExportCSV}
+                title={t("users.exportCsv")}
+                className="btn-animation waves-effect waves-light bg-surface border border-border-subtle text-content-strong hover:bg-surface-sunken h-9 px-2.5 sm:px-3.5 rounded-lg text-xs font-medium flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+              >
+                <Download className="w-3.5 h-3.5 text-content-muted shrink-0" />
+                <span className="hidden sm:inline">{t("users.exportCsv")}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsInviteModalOpen(true)}
+                title={t("users.addUser")}
+                className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs shrink-0"
+              >
+                <UserPlus className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">{t("users.addUser")}</span>
+              </button>
+            </div>
             {selectedUserIds.length > 0 && (
               <div className="bg-primary/10 border-b border-primary/30 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-2">

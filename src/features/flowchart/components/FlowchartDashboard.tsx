@@ -98,33 +98,33 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
           ]}
           title={t("flowchart.editorTitle")}
           subtitle={<span className="hidden sm:inline">{t("flowchart.subtitle")}</span>}
-          actions={
-            <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
-              <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">
-                <input
-                  type="text"
-                  placeholder={t("flowchart.searchPlaceholder")}
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className={LIST_SEARCH_INPUT_CLASS}
-                />
-                <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
-              </div>
-
-              <button
-                onClick={openCreateModal}
-                className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
-                title={t("flowchart.addFlowchart")}
-              >
-                <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">{t("flowchart.addFlowchart")}</span>
-              </button>
-            </div>
-          }
         />
+      }
+      toolbar={
+        <div className="flex items-center gap-2 w-full sm:w-auto min-w-0 sm:ml-auto">
+          <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">
+            <input
+              type="text"
+              placeholder={t("flowchart.searchPlaceholder")}
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className={LIST_SEARCH_INPUT_CLASS}
+            />
+            <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
+          </div>
+
+          <button
+            onClick={openCreateModal}
+            className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
+            title={t("flowchart.addFlowchart")}
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">{t("flowchart.addFlowchart")}</span>
+          </button>
+        </div>
       }
     >
       {/* Data Table (Desktop sm+) */}

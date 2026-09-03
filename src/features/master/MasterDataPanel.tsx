@@ -568,7 +568,23 @@ export const MasterDataPanel = ({
 
   return (
     <div className="flex-1 overflow-hidden bg-surface-muted flex flex-col w-full h-full text-left">
-      <div className="flex flex-1 gap-4 w-full h-full p-4 md:p-5 relative">
+      <PageHeader
+        breadcrumbs={[
+          { label: t("master.systemMaster") },
+          {
+            label:
+              masterDataTypes.find((x) => x.type === selectedType)?.label ||
+              t("master.openCategories", "Kategori master"),
+            current: true,
+          },
+        ]}
+        title={masterDataTypes.find((t) => t.type === selectedType)?.label}
+      >
+        <span className="text-[10px] leading-none font-medium text-primary bg-primary/10 px-2.5 py-[3px] rounded-md border border-primary/30">
+          {t("master.systemMaster")}
+        </span>
+      </PageHeader>
+      <div className="flex flex-1 gap-4 w-full h-full min-h-0 px-4 md:px-5 pt-3 md:pt-4 pb-4 md:pb-5 relative">
         {/* #309 — overlay laci kategori (hanya < md) */}
         {sidebarOpen && (
           <button
@@ -674,52 +690,24 @@ export const MasterDataPanel = ({
             </span>
           </button>
 
-          {/* Header — #409 PageHeader */}
-          <div className="bg-surface p-4 md:p-5 rounded-lg border border-border-subtle/80 mb-4 shadow-2xs shrink-0 min-w-0">
-            <PageHeader
-              breadcrumbs={[
-                { label: t("master.systemMaster") },
-                {
-                  label:
-                    masterDataTypes.find((x) => x.type === selectedType)?.label ||
-                    t("master.openCategories", "Kategori master"),
-                  current: true,
-                },
-              ]}
-              title={masterDataTypes.find((t) => t.type === selectedType)?.label}
-              subtitle={
-                selectedType === "modul_aplikasi"
-                  ? t("master.moduleHint")
-                  : t("master.configHint", {
-                      type: masterDataTypes
-                        .find((mt) => mt.type === selectedType)
-                        ?.label.toLowerCase(),
-                    })
-              }
-              actions={
-                hasPermission(
-                  userRole as PeranEfektif,
-                  "configuration",
-                  "update",
-                  false,
-                  currentUserProfile?.permissions
-                ) ? (
+          {selectedType === "modul_aplikasi" ? (
+            <div className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs flex-1 overflow-hidden flex flex-col min-h-0">
+              {hasPermission(
+                userRole as PeranEfektif,
+                "configuration",
+                "update",
+                false,
+                currentUserProfile?.permissions
+              ) && (
+                <div className="px-4 py-3 border-b border-border-subtle/80 flex justify-end shrink-0">
                   <button
                     onClick={() => {
-                      if (selectedType === "modul_aplikasi") {
-                        setNewModuleProjectId(projects?.[0]?.id || "");
-                        setNewModuleNamaModul("");
-                        setNewModuleKeterangan("");
-                        setIsNewModuleModalOpen(true);
-                      } else {
-                        setNewMasterType(selectedType);
-                        setNewMasterLabel("");
-                        setNewMasterShortCode("");
-                        setNewMasterBaseUrl("");
-                        setIsNewMasterModalOpen(true);
-                      }
+                      setNewModuleProjectId(projects?.[0]?.id || "");
+                      setNewModuleNamaModul("");
+                      setNewModuleKeterangan("");
+                      setIsNewModuleModalOpen(true);
                     }}
-                    className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-xs w-auto self-start sm:self-auto whitespace-nowrap"
+                    className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
                     title={t("master.addType", {
                       type: masterDataTypes.find((mt) => mt.type === selectedType)?.label,
                     })}
@@ -731,101 +719,94 @@ export const MasterDataPanel = ({
                       })}
                     </span>
                   </button>
-                ) : undefined
-              }
-            >
-              <span className="text-[10px] leading-none font-medium text-primary bg-primary/10 px-2.5 py-[3px] rounded-md border border-primary/30">
-                {t("master.systemMaster")}
-              </span>
-            </PageHeader>
-          </div>
-
-          {selectedType === "modul_aplikasi" ? (
-            <div className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs p-4 flex-1 overflow-y-auto custom-scrollbar">
-              {loadingModules ? (
-                <div className="flex justify-center items-center h-48">
-                  <span className="text-xs font-medium text-content-muted animate-pulse">
-                    {t("master.loadingModules")}
-                  </span>
-                </div>
-              ) : projectModules.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-content-subtle">
-                  <Layers className="w-12 h-12 mb-3 text-content-subtle animate-pulse" />
-                  <p className="text-xs font-medium text-content-body">{t("master.noModules")}</p>
-                  <p className="text-xs mt-1 text-content-subtle">{t("master.noModulesHint")}</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {projectModules.map((mod: any) => {
-                    const p = projects?.find((proj) => proj.id === mod.projectId);
-                    return (
-                      <div
-                        key={mod.id}
-                        className="flex items-center justify-between p-3 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs hover:border-primary/30 transition-all group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0 font-medium text-xs">
-                            MOD
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-medium text-content-strong">
-                                {mod.namaModul}
-                              </span>
-                              <span className="text-[10px] leading-none bg-primary/10 text-primary font-medium px-2 py-[3px] rounded-md border border-primary/30">
-                                {p ? p.name : mod.projectId}
-                              </span>
-                            </div>
-                            <p className="text-xs sm:text-[11px] text-content-subtle font-medium mt-0.5">
-                              {mod.keterangan || (
-                                <span className="text-content-subtle italic">
-                                  {t("master.noDescription")}
-                                </span>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                        {hasPermission(
-                          userRole as PeranEfektif,
-                          "configuration",
-                          "update",
-                          false,
-                          currentUserProfile?.permissions
-                        ) && (
-                          <div className="flex gap-1.5 items-center">
-                            <button
-                              onClick={() => {
-                                setEditingModuleId(mod.id);
-                                setEditingModuleProjectId(mod.projectId);
-                                setEditingModuleNamaModul(mod.namaModul);
-                                setEditingModuleKeterangan(mod.keterangan || "");
-                                setIsEditModuleModalOpen(true);
-                              }}
-                              className="w-7 h-7 bg-surface-sunken hover:bg-primary/10 text-content-muted hover:text-primary border border-border-subtle/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
-                              title={t("master.editModule")}
-                            >
-                              <Edit className="w-3.5 h-3.5 shrink-0" />
-                            </button>
-                            <button
-                              onClick={() => {
-                                deleteMasterData({
-                                  id: mod.id,
-                                  label: `${mod.namaModul} (Modul)`,
-                                  isModule: true,
-                                });
-                              }}
-                              className="w-7 h-7 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
-                              title={t("master.deleteModule")}
-                            >
-                              <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
                 </div>
               )}
+              <div className="p-4 flex-1 overflow-y-auto custom-scrollbar">
+                {loadingModules ? (
+                  <div className="flex justify-center items-center h-48">
+                    <span className="text-xs font-medium text-content-muted animate-pulse">
+                      {t("master.loadingModules")}
+                    </span>
+                  </div>
+                ) : projectModules.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-content-subtle">
+                    <Layers className="w-12 h-12 mb-3 text-content-subtle animate-pulse" />
+                    <p className="text-xs font-medium text-content-body">{t("master.noModules")}</p>
+                    <p className="text-xs mt-1 text-content-subtle">{t("master.noModulesHint")}</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {projectModules.map((mod: any) => {
+                      const p = projects?.find((proj) => proj.id === mod.projectId);
+                      return (
+                        <div
+                          key={mod.id}
+                          className="flex items-center justify-between p-3 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs hover:border-primary/30 transition-all group"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0 font-medium text-xs">
+                              MOD
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-content-strong">
+                                  {mod.namaModul}
+                                </span>
+                                <span className="text-[10px] leading-none bg-primary/10 text-primary font-medium px-2 py-[3px] rounded-md border border-primary/30">
+                                  {p ? p.name : mod.projectId}
+                                </span>
+                              </div>
+                              <p className="text-xs sm:text-[11px] text-content-subtle font-medium mt-0.5">
+                                {mod.keterangan || (
+                                  <span className="text-content-subtle italic">
+                                    {t("master.noDescription")}
+                                  </span>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                          {hasPermission(
+                            userRole as PeranEfektif,
+                            "configuration",
+                            "update",
+                            false,
+                            currentUserProfile?.permissions
+                          ) && (
+                            <div className="flex gap-1.5 items-center">
+                              <button
+                                onClick={() => {
+                                  setEditingModuleId(mod.id);
+                                  setEditingModuleProjectId(mod.projectId);
+                                  setEditingModuleNamaModul(mod.namaModul);
+                                  setEditingModuleKeterangan(mod.keterangan || "");
+                                  setIsEditModuleModalOpen(true);
+                                }}
+                                className="w-7 h-7 bg-surface-sunken hover:bg-primary/10 text-content-muted hover:text-primary border border-border-subtle/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
+                                title={t("master.editModule")}
+                              >
+                                <Edit className="w-3.5 h-3.5 shrink-0" />
+                              </button>
+                              <button
+                                onClick={() => {
+                                  deleteMasterData({
+                                    id: mod.id,
+                                    label: `${mod.namaModul} (Modul)`,
+                                    isModule: true,
+                                  });
+                                }}
+                                className="w-7 h-7 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
+                                title={t("master.deleteModule")}
+                              >
+                                <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <div className="flex-1 flex flex-col min-h-0">
@@ -925,229 +906,261 @@ export const MasterDataPanel = ({
                 </div>
               )}
 
-              <div className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs p-3.5 flex-1 overflow-y-auto custom-scrollbar">
-                <DragDropContext
-                  onDragEnd={async (result) => {
-                    if (!result.destination) return;
-                    const currentList = localMasterData
-                      .filter((d) => {
-                        if (d.type !== selectedType) return false;
-                        if (selectedType === "project_role") {
-                          if (roleTabFilter === "PROJECT") {
-                            return (
-                              d.roleType === "PROJECT" ||
-                              d.role_type === "PROJECT" ||
-                              (!d.roleType && !d.role_type)
-                            );
-                          }
-                          if (roleTabFilter === "SYSTEM") {
-                            return d.roleType === "SYSTEM" || d.role_type === "SYSTEM";
-                          }
-                        }
-                        return true;
-                      })
-                      .sort((a, b) => (a.order || 0) - (b.order || 0));
-                    const [reorderedItem] = currentList.splice(result.source.index, 1);
-                    currentList.splice(result.destination.index, 0, reorderedItem);
-
-                    const updatedAll = localMasterData.map((item) => {
-                      if (item.type !== selectedType) return item;
-                      const foundIdx = currentList.findIndex((c) => c.id === item.id);
-                      if (foundIdx !== -1) {
-                        return { ...item, order: foundIdx };
-                      }
-                      return item;
-                    });
-                    setLocalMasterData(updatedAll);
-
-                    try {
-                      await reorderMasterData(currentList);
-                      onRefresh();
-                      toast.success(t("toast.orderUpdated"));
-                    } catch (error) {
-                      console.error("Reorder error", error);
-                      toast.error(t("toast.orderSaveFailed"));
-                      setLocalMasterData(masterData);
-                    }
-                  }}
-                >
-                  <Droppable droppableId={`master-${selectedType}`}>
-                    {(provided: any, snapshot: any) => (
-                      <div
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                        className={cn(
-                          "space-y-2 min-h-[300px] transition-colors p-1",
-                          snapshot.isDraggingOver ? "bg-primary/10 rounded-lg" : ""
-                        )}
-                      >
-                        {localMasterData
-                          .filter((d) => {
-                            if (d.type !== selectedType) return false;
-                            if (selectedType === "project_role") {
-                              if (roleTabFilter === "PROJECT") {
-                                return (
-                                  d.roleType === "PROJECT" ||
-                                  d.role_type === "PROJECT" ||
-                                  (!d.roleType && !d.role_type)
-                                );
-                              }
-                              if (roleTabFilter === "SYSTEM") {
-                                return d.roleType === "SYSTEM" || d.role_type === "SYSTEM";
-                              }
+              <div className="bg-surface rounded-lg border border-border-subtle/80 shadow-2xs flex-1 overflow-hidden flex flex-col min-h-0">
+                {hasPermission(
+                  userRole as PeranEfektif,
+                  "configuration",
+                  "update",
+                  false,
+                  currentUserProfile?.permissions
+                ) && (
+                  <div className="px-3.5 py-3 border-b border-border-subtle/80 flex justify-end shrink-0">
+                    <button
+                      onClick={() => {
+                        setNewMasterType(selectedType);
+                        setNewMasterLabel("");
+                        setNewMasterShortCode("");
+                        setNewMasterBaseUrl("");
+                        setIsNewMasterModalOpen(true);
+                      }}
+                      className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
+                      title={t("master.addType", {
+                        type: masterDataTypes.find((mt) => mt.type === selectedType)?.label,
+                      })}
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">
+                        {t("master.addType", {
+                          type: masterDataTypes.find((mt) => mt.type === selectedType)?.label,
+                        })}
+                      </span>
+                    </button>
+                  </div>
+                )}
+                <div className="p-3.5 flex-1 overflow-y-auto custom-scrollbar">
+                  <DragDropContext
+                    onDragEnd={async (result) => {
+                      if (!result.destination) return;
+                      const currentList = localMasterData
+                        .filter((d) => {
+                          if (d.type !== selectedType) return false;
+                          if (selectedType === "project_role") {
+                            if (roleTabFilter === "PROJECT") {
+                              return (
+                                d.roleType === "PROJECT" ||
+                                d.role_type === "PROJECT" ||
+                                (!d.roleType && !d.role_type)
+                              );
                             }
-                            return true;
-                          })
-                          .sort((a, b) => (a.order || 0) - (b.order || 0))
-                          .map((item, index) => {
-                            const usageCount = getUsageCount(item);
-                            return (
-                              <Draggable key={item.id} draggableId={item.id} index={index}>
-                                {(provided: any, snapshot: any) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.draggableProps}
-                                    {...provided.dragHandleProps}
-                                    className={cn(
-                                      "flex justify-between items-center p-3 bg-surface border border-border-subtle/80 rounded-lg transition-all group hover:border-primary/30 shadow-2xs",
-                                      snapshot.isDragging
-                                        ? "shadow-soft-lg border-primary bg-primary/10 cursor-grabbing z-50"
-                                        : ""
-                                    )}
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <div className="text-content-subtle group-hover:text-content-muted transition-colors cursor-grab active:cursor-grabbing p-1">
-                                        <GripVertical className="w-4 h-4" />
-                                      </div>
+                            if (roleTabFilter === "SYSTEM") {
+                              return d.roleType === "SYSTEM" || d.role_type === "SYSTEM";
+                            }
+                          }
+                          return true;
+                        })
+                        .sort((a, b) => (a.order || 0) - (b.order || 0));
+                      const [reorderedItem] = currentList.splice(result.source.index, 1);
+                      currentList.splice(result.destination.index, 0, reorderedItem);
 
-                                      {item.icon ? (
-                                        <div
-                                          className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 border border-border-faint shadow-2xs"
-                                          style={{
-                                            backgroundColor: (item.color || "#3b82f6") + "15",
-                                            color: item.color || "#3b82f6",
-                                          }}
-                                        >
-                                          <RenderIcon iconName={item.icon} className="w-4 h-4" />
-                                        </div>
-                                      ) : (
-                                        <div
-                                          className="w-4 h-4 rounded-full shrink-0 shadow-2xs border border-border-subtle"
-                                          style={{ backgroundColor: item.color || "#ccc" }}
-                                        />
+                      const updatedAll = localMasterData.map((item) => {
+                        if (item.type !== selectedType) return item;
+                        const foundIdx = currentList.findIndex((c) => c.id === item.id);
+                        if (foundIdx !== -1) {
+                          return { ...item, order: foundIdx };
+                        }
+                        return item;
+                      });
+                      setLocalMasterData(updatedAll);
+
+                      try {
+                        await reorderMasterData(currentList);
+                        onRefresh();
+                        toast.success(t("toast.orderUpdated"));
+                      } catch (error) {
+                        console.error("Reorder error", error);
+                        toast.error(t("toast.orderSaveFailed"));
+                        setLocalMasterData(masterData);
+                      }
+                    }}
+                  >
+                    <Droppable droppableId={`master-${selectedType}`}>
+                      {(provided: any, snapshot: any) => (
+                        <div
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          className={cn(
+                            "space-y-2 min-h-[300px] transition-colors p-1",
+                            snapshot.isDraggingOver ? "bg-primary/10 rounded-lg" : ""
+                          )}
+                        >
+                          {localMasterData
+                            .filter((d) => {
+                              if (d.type !== selectedType) return false;
+                              if (selectedType === "project_role") {
+                                if (roleTabFilter === "PROJECT") {
+                                  return (
+                                    d.roleType === "PROJECT" ||
+                                    d.role_type === "PROJECT" ||
+                                    (!d.roleType && !d.role_type)
+                                  );
+                                }
+                                if (roleTabFilter === "SYSTEM") {
+                                  return d.roleType === "SYSTEM" || d.role_type === "SYSTEM";
+                                }
+                              }
+                              return true;
+                            })
+                            .sort((a, b) => (a.order || 0) - (b.order || 0))
+                            .map((item, index) => {
+                              const usageCount = getUsageCount(item);
+                              return (
+                                <Draggable key={item.id} draggableId={item.id} index={index}>
+                                  {(provided: any, snapshot: any) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      className={cn(
+                                        "flex justify-between items-center p-3 bg-surface border border-border-subtle/80 rounded-lg transition-all group hover:border-primary/30 shadow-2xs",
+                                        snapshot.isDragging
+                                          ? "shadow-soft-lg border-primary bg-primary/10 cursor-grabbing z-50"
+                                          : ""
                                       )}
+                                    >
+                                      <div className="flex items-center gap-3">
+                                        <div className="text-content-subtle group-hover:text-content-muted transition-colors cursor-grab active:cursor-grabbing p-1">
+                                          <GripVertical className="w-4 h-4" />
+                                        </div>
 
-                                      <div className="flex flex-col">
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                          <span className="text-xs font-medium text-content-strong">
-                                            {item.label}
-                                          </span>
+                                        {item.icon ? (
+                                          <div
+                                            className="w-8 h-8 rounded-md flex items-center justify-center shrink-0 border border-border-faint shadow-2xs"
+                                            style={{
+                                              backgroundColor: (item.color || "#3b82f6") + "15",
+                                              color: item.color || "#3b82f6",
+                                            }}
+                                          >
+                                            <RenderIcon iconName={item.icon} className="w-4 h-4" />
+                                          </div>
+                                        ) : (
+                                          <div
+                                            className="w-4 h-4 rounded-full shrink-0 shadow-2xs border border-border-subtle"
+                                            style={{ backgroundColor: item.color || "#ccc" }}
+                                          />
+                                        )}
 
-                                          {selectedType === "project_role" &&
-                                            (() => {
-                                              const rType =
-                                                item.roleType || item.role_type || "PROJECT";
-                                              const isSystemReserved =
-                                                item.is_system_default ||
-                                                [
-                                                  "admin",
-                                                  "member",
-                                                  "viewer",
-                                                  "developer",
-                                                  "ui/ux",
-                                                  "qa",
-                                                  "dba",
-                                                  "arsitektur",
-                                                  "system analyst",
-                                                  "bisnis analyst",
-                                                ].some((def) =>
-                                                  (item.label || "").toLowerCase().includes(def)
+                                        <div className="flex flex-col">
+                                          <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="text-xs font-medium text-content-strong">
+                                              {item.label}
+                                            </span>
+
+                                            {selectedType === "project_role" &&
+                                              (() => {
+                                                const rType =
+                                                  item.roleType || item.role_type || "PROJECT";
+                                                const isSystemReserved =
+                                                  item.is_system_default ||
+                                                  [
+                                                    "admin",
+                                                    "member",
+                                                    "viewer",
+                                                    "developer",
+                                                    "ui/ux",
+                                                    "qa",
+                                                    "dba",
+                                                    "arsitektur",
+                                                    "system analyst",
+                                                    "bisnis analyst",
+                                                  ].some((def) =>
+                                                    (item.label || "").toLowerCase().includes(def)
+                                                  );
+                                                return (
+                                                  <div className="flex items-center gap-1 shrink-0 select-none">
+                                                    {rType === "PROJECT" ? (
+                                                      <span className="text-[10px] leading-none sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-blue-500/10 text-blue-700 border border-blue-500/30 uppercase">
+                                                        {t("master.projectRole")}
+                                                      </span>
+                                                    ) : (
+                                                      <span className="text-[10px] leading-none sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-purple-500/10 text-purple-700 border border-purple-500/30 uppercase">
+                                                        {t("master.systemRole")}
+                                                      </span>
+                                                    )}
+                                                    {isSystemReserved && (
+                                                      <span
+                                                        className="text-xs"
+                                                        title={t("master.reservedSystemRole")}
+                                                        role="img"
+                                                        aria-label="lock"
+                                                      >
+                                                        🔒
+                                                      </span>
+                                                    )}
+                                                  </div>
                                                 );
-                                              return (
-                                                <div className="flex items-center gap-1 shrink-0 select-none">
-                                                  {rType === "PROJECT" ? (
-                                                    <span className="text-[10px] leading-none sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-blue-500/10 text-blue-700 border border-blue-500/30 uppercase">
-                                                      {t("master.projectRole")}
-                                                    </span>
-                                                  ) : (
-                                                    <span className="text-[10px] leading-none sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-purple-500/10 text-purple-700 border border-purple-500/30 uppercase">
-                                                      {t("master.systemRole")}
-                                                    </span>
-                                                  )}
-                                                  {isSystemReserved && (
-                                                    <span
-                                                      className="text-xs"
-                                                      title={t("master.reservedSystemRole")}
-                                                      role="img"
-                                                      aria-label="lock"
-                                                    >
-                                                      🔒
-                                                    </span>
-                                                  )}
-                                                </div>
-                                              );
-                                            })()}
+                                              })()}
 
-                                          {usageCount > 0 && (
-                                            <span className="text-[10px] leading-none font-medium px-2 py-0.2 rounded-md bg-primary/10 text-primary border border-primary/30 flex items-center gap-1">
-                                              <Tag className="w-3 h-3" />{" "}
-                                              {t("rakit.activeTasks", { count: usageCount })}
+                                            {usageCount > 0 && (
+                                              <span className="text-[10px] leading-none font-medium px-2 py-0.2 rounded-md bg-primary/10 text-primary border border-primary/30 flex items-center gap-1">
+                                                <Tag className="w-3 h-3" />{" "}
+                                                {t("rakit.activeTasks", { count: usageCount })}
+                                              </span>
+                                            )}
+                                          </div>
+                                          {item.description && (
+                                            <span className="text-xs sm:text-[11px] text-content-subtle font-medium mt-0.5">
+                                              {item.description}
                                             </span>
                                           )}
                                         </div>
-                                        {item.description && (
-                                          <span className="text-xs sm:text-[11px] text-content-subtle font-medium mt-0.5">
-                                            {item.description}
-                                          </span>
+                                      </div>
+
+                                      <div className="flex items-center gap-2">
+                                        {hasPermission(
+                                          userRole as PeranEfektif,
+                                          "configuration",
+                                          "update",
+                                          false,
+                                          currentUserProfile?.permissions
+                                        ) && (
+                                          <div className="flex gap-1.5 items-center">
+                                            <button
+                                              onClick={() => {
+                                                setEditingMaster(item);
+                                                setIsEditMasterModalOpen(true);
+                                              }}
+                                              className="w-7 h-7 bg-surface-sunken hover:bg-primary/10 text-content-muted hover:text-primary border border-border-subtle/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
+                                              title={t("master.editMasterData")}
+                                            >
+                                              <Edit className="w-3.5 h-3.5 shrink-0" />
+                                            </button>
+                                            <button
+                                              onClick={() =>
+                                                deleteMasterData({
+                                                  id: item.id,
+                                                  label: item.label,
+                                                  isModule: false,
+                                                })
+                                              }
+                                              className="w-7 h-7 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
+                                              title={t("master.deleteMasterData")}
+                                            >
+                                              <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                                            </button>
+                                          </div>
                                         )}
                                       </div>
                                     </div>
-
-                                    <div className="flex items-center gap-2">
-                                      {hasPermission(
-                                        userRole as PeranEfektif,
-                                        "configuration",
-                                        "update",
-                                        false,
-                                        currentUserProfile?.permissions
-                                      ) && (
-                                        <div className="flex gap-1.5 items-center">
-                                          <button
-                                            onClick={() => {
-                                              setEditingMaster(item);
-                                              setIsEditMasterModalOpen(true);
-                                            }}
-                                            className="w-7 h-7 bg-surface-sunken hover:bg-primary/10 text-content-muted hover:text-primary border border-border-subtle/60 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
-                                            title={t("master.editMasterData")}
-                                          >
-                                            <Edit className="w-3.5 h-3.5 shrink-0" />
-                                          </button>
-                                          <button
-                                            onClick={() =>
-                                              deleteMasterData({
-                                                id: item.id,
-                                                label: item.label,
-                                                isModule: false,
-                                              })
-                                            }
-                                            className="w-7 h-7 bg-rose-500/10 hover:bg-rose-600 text-rose-600 hover:text-content-inverse border border-rose-500/30 rounded-md transition-all cursor-pointer font-medium flex items-center justify-center"
-                                            title={t("master.deleteMasterData")}
-                                          >
-                                            <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                                          </button>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
-                              </Draggable>
-                            );
-                          })}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </DragDropContext>
+                                  )}
+                                </Draggable>
+                              );
+                            })}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                </div>
               </div>
             </div>
           )}

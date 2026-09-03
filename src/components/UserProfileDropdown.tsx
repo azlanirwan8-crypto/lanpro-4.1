@@ -86,7 +86,7 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-2.5 sm:gap-3 p-1.5 sm:px-3 sm:py-1.5 rounded-full sm:rounded-lg min-h-11 transition-all cursor-pointer select-none",
+          "flex items-center gap-1.5 sm:gap-2 p-1 sm:px-2 sm:py-1 rounded-md min-h-0 transition-all cursor-pointer select-none",
           "hover:bg-surface-sunken focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus",
           isOpen ? "bg-surface-sunken" : "bg-transparent"
         )}
@@ -94,21 +94,18 @@ export const UserProfileDropdown: React.FC<UserProfileDropdownProps> = ({
         aria-haspopup="menu"
         title={displayName}
       >
-        <UserAvatar
-          user={activeUser}
-          className="w-8 h-8 sm:w-9 sm:h-9 shrink-0 ring-2 ring-border-subtle"
-        />
+        <UserAvatar user={activeUser} className="w-7 h-7 shrink-0 ring-1 ring-border-subtle" />
         <div className="hidden md:flex flex-col text-left leading-tight">
-          <span className="text-xs font-semibold text-content-strong truncate max-w-[130px]">
+          <span className="text-[12px] font-semibold text-content-strong truncate max-w-[120px]">
             {displayName}
           </span>
-          <span className="text-[11px] text-content-muted capitalize truncate max-w-[130px]">
+          <span className="text-[10px] font-normal text-content-muted capitalize truncate max-w-[120px]">
             {roleDisplay}
           </span>
         </div>
         <ChevronDown
           className={cn(
-            "hidden sm:block w-3.5 h-3.5 text-content-subtle transition-transform duration-200",
+            "hidden sm:block w-3 h-3 text-content-subtle transition-transform duration-200",
             isOpen && "rotate-180"
           )}
         />

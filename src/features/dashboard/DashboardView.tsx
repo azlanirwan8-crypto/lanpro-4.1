@@ -643,43 +643,40 @@ export function DashboardView(props: DashboardViewProps) {
 
   return (
     <div className={styles.container}>
+      <PageHeader
+        uppercase={false}
+        breadcrumbs={[
+          { label: t("dashboard.breadcrumbGroup", "PROJECT") },
+          { label: t("nav.dashboard", "Dashboard"), current: true },
+        ]}
+        title={`${getGreeting()}, ${currentUser?.displayName || "Administrator"}!`}
+        actions={
+          <>
+            {/* Global Filter by Sprint */}
+            <div className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[240px] min-w-0 flex-1 md:flex-none">
+              <StyledDropdown
+                value={selectedSprintFilter}
+                onChange={(val) => setSelectedSprintFilter(val)}
+                options={sprintFilterOptions}
+                masterData={[]}
+                className="w-full min-w-0"
+                buttonClassName="h-10 w-full min-w-0 bg-surface-muted rounded-lg border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 bg-info/10 px-3 py-2 rounded-lg border border-info/20 text-xs font-medium text-info-text min-w-0 max-w-full">
+              <Zap className="w-3.5 h-3.5 text-info-text shrink-0" />
+              <span className="truncate">
+                {t("dashboard.activeSprintChip", {
+                  name: activeSprint?.name || t("dashboard.noActiveSprint"),
+                  days: sprintDaysLeft,
+                })}
+              </span>
+            </div>
+          </>
+        }
+      />
       <div className={styles.wrapper}>
-        {/* Velzon Agile Dashboard Header — #400 PageHeader */}
-        <PageHeader
-          className="mb-6"
-          breadcrumbs={[
-            { label: t("dashboard.breadcrumbGroup", "PROJECT") },
-            { label: t("nav.dashboard", "Dashboard"), current: true },
-          ]}
-          title={`${getGreeting()}, ${currentUser?.displayName || "Administrator"}!`}
-          subtitle={t("dashboard.subtitle")}
-          actions={
-            <>
-              {/* Global Filter by Sprint */}
-              <div className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[240px] min-w-0 flex-1 md:flex-none">
-                <StyledDropdown
-                  value={selectedSprintFilter}
-                  onChange={(val) => setSelectedSprintFilter(val)}
-                  options={sprintFilterOptions}
-                  masterData={[]}
-                  className="w-full min-w-0"
-                  buttonClassName="h-10 w-full min-w-0 bg-surface-muted rounded-lg border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 bg-info/10 px-3 py-2 rounded-lg border border-info/20 text-xs font-medium text-info-text min-w-0 max-w-full">
-                <Zap className="w-3.5 h-3.5 text-info-text shrink-0" />
-                <span className="truncate">
-                  {t("dashboard.activeSprintChip", {
-                    name: activeSprint?.name || t("dashboard.noActiveSprint"),
-                    days: sprintDaysLeft,
-                  })}
-                </span>
-              </div>
-            </>
-          }
-        />
-
         {/* Real-time Agile Top 4 KPI Metric Cards
             #129 — keempat kartu ini menghitung `nonEpicTasks`, sedangkan
             dropdown sprint dan kedua kartu "Rincian Tugas" menghitung `tasks`

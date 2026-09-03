@@ -2516,23 +2516,40 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               </div>
             ) : (
               <div className="flex-1 flex flex-col min-h-0 relative space-y-4">
-                {/* Panel 1: Top Actions */}
-                <div className="bg-surface border border-border-subtle rounded-lg p-3.5 md:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-2xs shrink-0">
-                  <button
-                    onClick={() => {
-                      setIsEditorActive(false);
-                      setSelectedFlowId(null);
-                      setCurrentPage(1);
-                    }}
-                    className="flex items-center justify-center gap-1.5 text-xs font-medium text-primary bg-primary-surface/10 hover:bg-primary-surface/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
-                  >
-                    <ChevronLeft className="w-4 h-4" /> {t("flowchart.backToList")}
-                  </button>
+                {/* #425 — satu panel: aksi kiri + meta */}
+                <div className="bg-surface border border-border-subtle rounded-lg p-4 md:p-5 shadow-2xs shrink-0 space-y-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setIsEditorActive(false);
+                        setSelectedFlowId(null);
+                        setCurrentPage(1);
+                      }}
+                      className="flex items-center justify-center gap-1.5 text-xs font-medium text-primary bg-primary-surface/10 hover:bg-primary-surface/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
+                    >
+                      <ChevronLeft className="w-4 h-4" /> {t("flowchart.backToList")}
+                    </button>
 
-                  {/* Action Buttons & View Mode Toggle */}
-                  <div className="flex items-center justify-between sm:justify-end flex-wrap gap-2 shrink-0">
-                    {/* View Mode Segmented Control Toggle */}
-                    <div className="bg-surface-muted p-1 rounded-md flex items-center border border-border-subtle/60 shadow-inner">
+                    {currentFlowMetadata && canModifyFlowchart(currentFlowMetadata) && (
+                      <>
+                        <button
+                          onClick={(e) => openEditModal(currentFlowMetadata, e)}
+                          className="p-1.5 bg-surface hover:bg-surface-sunken text-content-secondary hover:text-primary rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"
+                          title={t("flowchart.editMetadata")}
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteFlowchart(currentFlowMetadata.id, e)}
+                          className="p-1.5 bg-surface hover:bg-rose-500/10 text-content-secondary hover:text-rose-600 rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"
+                          title={t("flowchart.deleteDocument")}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
+
+                    <div className="bg-surface-muted p-1 rounded-md flex items-center border border-border-subtle/60 shadow-inner ml-auto">
                       <button
                         onClick={() => setRightViewMode("embed")}
                         className={cn(
@@ -2556,96 +2573,72 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         <Workflow className="w-3.5 h-3.5" /> {t("flowchart.flowDiagram")}
                       </button>
                     </div>
-
-                    {/* Edit & Delete Action Buttons */}
-                    {currentFlowMetadata && canModifyFlowchart(currentFlowMetadata) && (
-                      <div className="flex items-center gap-1 bg-surface-muted p-1 rounded-md border border-border-subtle/60">
-                        <button
-                          onClick={(e) => openEditModal(currentFlowMetadata, e)}
-                          className="p-1.5 bg-surface hover:bg-surface-sunken text-content-secondary hover:text-primary rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"
-                          title={t("flowchart.editMetadata")}
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteFlowchart(currentFlowMetadata.id, e)}
-                          className="p-1.5 bg-surface hover:bg-rose-500/10 text-content-secondary hover:text-rose-600 rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"
-                          title={t("flowchart.deleteDocument")}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )}
                   </div>
-                </div>
 
-                {/* Panel 2: Meta Context & Title */}
-                <div className="bg-surface border border-border-subtle rounded-lg p-5 md:p-6 shadow-soft shrink-0">
-                  <div className="flex flex-wrap items-center gap-2 select-none mb-3">
-                    {/* Category Badge */}
-                    {currentFlowMetadata?.category === "PRD" && (
-                      <span className="px-2.5 py-1 text-xs sm:text-[10px] font-normal uppercase tracking-wider bg-surface-muted text-content-body border border-border-subtle/80 rounded-full">
-                        {t("flowchart.prd")}
-                      </span>
-                    )}
-                    {currentFlowMetadata?.category === "Panduan" && (
-                      <span className="px-2.5 py-1 text-[10px] leading-none font-normal uppercase tracking-wider bg-blue-500/10 text-blue-700 border border-blue-500/30 rounded-full">
-                        {t("flowchart.guideline")}
-                      </span>
-                    )}
-                    {currentFlowMetadata?.category === "Laporan" && (
-                      <span className="px-2.5 py-1 text-[10px] leading-none font-normal uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 rounded-full">
-                        {t("flowchart.report")}
-                      </span>
-                    )}
-                    {!currentFlowMetadata?.category && (
-                      <span className="px-2.5 py-1 text-[10px] leading-none font-normal uppercase tracking-wider bg-primary/10 text-primary border border-primary/30 rounded-full">
-                        {t("flowchart.general")}
-                      </span>
-                    )}
-
-                    {/* Creator Info */}
-                    <span className="text-xs text-content-muted font-medium flex items-center gap-1">
-                      <User className="w-3 h-3" /> {t("flowchart.by")}{" "}
-                      <strong className="text-content-strong">
-                        {tampilanNamaPembuat(currentFlowMetadata, getResolvedAuthor())}
-                      </strong>
-                    </span>
-
-                    <span className="text-content-subtle">•</span>
-
-                    {/* Date */}
-                    <span className="text-xs sm:text-[10px] text-content-subtle font-medium flex items-center gap-1">
-                      {t("flowchart.updatedAt")}{" "}
-                      {currentFlowMetadata?.lastEditedAt || currentFlowMetadata?.createdAt}
-                    </span>
-
-                    {linkedEpic && (
-                      <>
-                        <span className="text-content-subtle">•</span>
-                        <span
-                          className="text-[10px] leading-none font-medium bg-primary/10 border border-primary/30 px-2.5 py-[3px] rounded-full truncate max-w-[180px]"
-                          title={linkedEpic.title}
-                        >
-                          {t("flowchart.epic")} {linkedEpic.title}
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2 select-none mb-2">
+                      {currentFlowMetadata?.category === "PRD" && (
+                        <span className="px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-surface-muted text-content-body border border-border-subtle/80 rounded-full">
+                          {t("flowchart.prd")}
                         </span>
-                      </>
+                      )}
+                      {currentFlowMetadata?.category === "Panduan" && (
+                        <span className="px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-blue-500/10 text-blue-700 border border-blue-500/30 rounded-full">
+                          {t("flowchart.guideline")}
+                        </span>
+                      )}
+                      {currentFlowMetadata?.category === "Laporan" && (
+                        <span className="px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 rounded-full">
+                          {t("flowchart.report")}
+                        </span>
+                      )}
+                      {!currentFlowMetadata?.category && (
+                        <span className="px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-primary/10 text-primary border border-primary/30 rounded-full">
+                          {t("flowchart.general")}
+                        </span>
+                      )}
+
+                      <span className="text-xs text-content-muted font-medium flex items-center gap-1">
+                        <User className="w-3 h-3" /> {t("flowchart.by")}{" "}
+                        <strong className="text-content-strong font-semibold">
+                          {tampilanNamaPembuat(currentFlowMetadata, getResolvedAuthor())}
+                        </strong>
+                      </span>
+
+                      <span className="text-content-subtle">•</span>
+
+                      <span className="text-xs text-content-subtle font-medium flex items-center gap-1">
+                        {t("flowchart.updatedAt")}{" "}
+                        {currentFlowMetadata?.lastEditedAt || currentFlowMetadata?.createdAt}
+                      </span>
+
+                      {linkedEpic && (
+                        <>
+                          <span className="text-content-subtle">•</span>
+                          <span
+                            className="text-[10px] font-medium bg-primary/10 border border-primary/30 px-2.5 py-[3px] rounded-full truncate max-w-[180px]"
+                            title={linkedEpic.title}
+                          >
+                            {t("flowchart.epic")} {linkedEpic.title}
+                          </span>
+                        </>
+                      )}
+                    </div>
+
+                    <h2 className="text-lg font-semibold text-content-strong tracking-tight leading-snug flex items-center gap-2">
+                      <Workflow className="w-5 h-5 text-primary shrink-0" />
+                      <span className="truncate">{currentFlowMetadata?.name}</span>
+                    </h2>
+
+                    {currentFlowMetadata?.description && (
+                      <p className="text-xs text-content-muted font-medium max-w-3xl leading-relaxed mt-2">
+                        {currentFlowMetadata.description}
+                      </p>
                     )}
                   </div>
-
-                  <h2 className="text-xl md:text-2xl font-medium text-content tracking-tight leading-snug flex items-center gap-2">
-                    <Workflow className="w-6 h-6 text-primary shrink-0" />
-                    <span className="truncate">{currentFlowMetadata?.name}</span>
-                  </h2>
-
-                  {currentFlowMetadata?.description && (
-                    <p className="text-xs text-content-muted font-medium max-w-3xl leading-relaxed mt-2">
-                      {currentFlowMetadata.description}
-                    </p>
-                  )}
                 </div>
 
-                {/* Panel 3: Main Viewport (Canvas / Viewer) */}
+                {/* Main Viewport (Canvas / Viewer) */}
                 <div className="bg-surface border border-border-subtle rounded-lg shadow-soft flex-1 min-h-[600px] relative flex flex-col overflow-hidden">
                   {rightViewMode === "embed" ? (
                     /* 1. EMBED VIEWER (SPLIT PANE) */
@@ -2654,8 +2647,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       <div className="w-full flex-1 bg-surface-sunken/50 flex flex-col">
                         {/* Header Left Pane */}
                         <div className="p-4 border-b border-border-subtle flex items-center justify-between bg-surface shrink-0">
-                          <h4 className="text-sm font-medium text-content-strong flex items-center gap-2">
-                            <FileText className="w-5 h-5 text-primary" />
+                          <h4 className="text-sm font-semibold text-content-strong flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-primary" />
                             {t("flowchart.documentList")}
                           </h4>
                           <button

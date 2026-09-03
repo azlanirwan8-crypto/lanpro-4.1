@@ -536,35 +536,35 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
               ]}
               title={t("meetings.title")}
               subtitle={<span className="hidden sm:inline">{t("meetings.subtitle")}</span>}
-              actions={
-                <div className="flex items-center gap-2 w-full sm:w-auto min-w-0">
-                  <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">
-                    <input
-                      type="text"
-                      placeholder={t("meetings.searchPlaceholder")}
-                      value={searchQuery}
-                      onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className={LIST_SEARCH_INPUT_CLASS}
-                    />
-                    <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
-                  </div>
-
-                  {canAdd && (
-                    <button
-                      onClick={startAddMeeting}
-                      className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
-                      title={t("meetings.addMeeting")}
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span className="hidden sm:inline">{t("meetings.addMeeting")}</span>
-                    </button>
-                  )}
-                </div>
-              }
             />
+          }
+          toolbar={
+            <div className="flex items-center gap-2 w-full sm:w-auto min-w-0 sm:ml-auto">
+              <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">
+                <input
+                  type="text"
+                  placeholder={t("meetings.searchPlaceholder")}
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className={LIST_SEARCH_INPUT_CLASS}
+                />
+                <Search className="w-3.5 h-3.5 text-content-subtle absolute left-3 top-1/2 -translate-y-1/2" />
+              </div>
+
+              {canAdd && (
+                <button
+                  onClick={startAddMeeting}
+                  className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
+                  title={t("meetings.addMeeting")}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="hidden sm:inline">{t("meetings.addMeeting")}</span>
+                </button>
+              )}
+            </div>
           }
         >
           {/* DataTable Container (Desktop sm+) */}
@@ -778,16 +778,31 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
             <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken/50 w-full">
               {activeMeeting ? (
                 <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4">
-                  {/* Panel 1: Top Actions */}
-                  <div className="bg-surface border border-border-subtle/80 rounded-lg p-4 flex items-center justify-between shadow-2xs shrink-0">
-                    <button
-                      onClick={() => setActiveMeetingId(null)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken rounded-md text-xs font-normal text-content-body transition-all cursor-pointer shadow-2xs"
-                    >
-                      <ChevronLeft className="w-4 h-4" /> {t("meetings.backToList")}
-                    </button>
-
-                    <div className="flex items-center gap-2">
+                  {/* #425 — satu panel: aksi kiri + meta */}
+                  <div className="bg-surface border border-border-subtle/80 rounded-lg p-4 md:p-5 shadow-2xs shrink-0 space-y-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => setActiveMeetingId(null)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken rounded-md text-xs font-medium text-content-body transition-all cursor-pointer shadow-2xs"
+                      >
+                        <ChevronLeft className="w-4 h-4" /> {t("meetings.backToList")}
+                      </button>
+                      {(isUserAdmin || isMeetingAuthor(activeMeeting)) && (
+                        <button
+                          onClick={() => startEdit(activeMeeting)}
+                          className="px-3.5 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken text-content-body rounded-md text-xs font-medium transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
+                        >
+                          <Edit2 className="w-3.5 h-3.5 text-primary" /> {t("meetings.edit")}
+                        </button>
+                      )}
+                      {canDeleteMeeting(activeMeeting) && (
+                        <button
+                          onClick={() => handleDeleteMeeting(activeMeeting.id!)}
+                          className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 rounded-md text-xs font-medium transition-all cursor-pointer border border-rose-500/30 flex items-center gap-1.5"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> {t("meetings.delete")}
+                        </button>
+                      )}
                       {activeMeeting.meetingLink && (
                         <a
                           href={
@@ -797,73 +812,58 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                           }
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-normal transition-all shadow-xs cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer ml-auto"
                         >
                           <Video className="w-3.5 h-3.5" /> {t("rakit.joinMeeting")}{" "}
                           <ExternalLink className="w-3 h-3 opacity-80" />
                         </a>
                       )}
-                      {(isUserAdmin || isMeetingAuthor(activeMeeting)) && (
-                        <button
-                          onClick={() => startEdit(activeMeeting)}
-                          className="px-3.5 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken text-content-body rounded-md text-xs font-normal transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
-                        >
-                          <Edit2 className="w-3.5 h-3.5 text-primary" /> {t("meetings.edit")}
-                        </button>
-                      )}
-                      {canDeleteMeeting(activeMeeting) && (
-                        <button
-                          onClick={() => handleDeleteMeeting(activeMeeting.id!)}
-                          className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 rounded-md text-xs font-normal transition-all cursor-pointer border border-rose-500/30 flex items-center gap-1.5"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" /> {t("meetings.delete")}
-                        </button>
+                    </div>
+
+                    <div>
+                      <h2 className="text-lg font-semibold text-content-strong tracking-tight">
+                        {activeMeeting.title}
+                      </h2>
+
+                      {activeMeeting.description && (
+                        <div className="mt-3 p-4 border border-primary/30 bg-primary/10 rounded-lg border-l-4 border-l-primary flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <span className="text-xs font-medium text-primary block mb-1">
+                              {t("meetings.meetingDescriptionAgenda")}
+                            </span>
+                            <div className="flex items-center gap-2 text-xs text-content-muted mb-2">
+                              <Calendar className="w-3.5 h-3.5 text-content-subtle" />
+                              <span className="text-content-secondary font-medium">
+                                {formatDate(activeMeeting.createdAt)}
+                              </span>
+                            </div>
+                            <p className="text-xs text-content-body leading-relaxed whitespace-pre-wrap">
+                              {activeMeeting.description}
+                            </p>
+                          </div>
+                          {activeMeeting.fileName && (
+                            <button
+                              onClick={() =>
+                                handleDownloadMeeting(activeMeeting.id!, activeMeeting.fileName!)
+                              }
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 rounded-md text-xs font-medium transition-all border border-emerald-500/30 cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
+                              title={t("meetingExtra.downloadAttachment")}
+                            >
+                              <FileText className="w-3.5 h-3.5 text-emerald-600" />
+                              <span className="truncate max-w-[140px]">
+                                {activeMeeting.fileName}
+                              </span>
+                              <span className="text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded font-medium">
+                                {t("meetingExtra.download")}
+                              </span>
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Panel 2: Meeting Context & Agenda */}
-                  <div className="bg-surface border border-border-subtle/80 rounded-lg p-5 md:p-6 shadow-2xs shrink-0">
-                    <h2 className="text-lg md:text-xl font-medium text-content tracking-tight">
-                      {activeMeeting.title}
-                    </h2>
-
-                    {activeMeeting.description && (
-                      <div className="mt-4 p-4 border border-indigo-500/30 bg-indigo-500/10 rounded-lg border-l-4 border-l-primary flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <span className="text-xs font-normal text-primary block mb-1">
-                            {t("meetings.meetingDescriptionAgenda")}
-                          </span>
-                          <div className="flex items-center gap-2 text-xs sm:text-[11px] text-content-muted mb-2 not-italic">
-                            <Calendar className="w-3.5 h-3.5 text-content-subtle" />
-                            <span className="text-content-secondary font-normal">
-                              {formatDate(activeMeeting.createdAt)}
-                            </span>
-                          </div>
-                          <p className="text-xs text-content-body leading-relaxed whitespace-pre-wrap">
-                            {activeMeeting.description}
-                          </p>
-                        </div>
-                        {activeMeeting.fileName && (
-                          <button
-                            onClick={() =>
-                              handleDownloadMeeting(activeMeeting.id!, activeMeeting.fileName!)
-                            }
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 rounded-md text-xs font-normal transition-all border border-emerald-500/30 cursor-pointer shadow-2xs shrink-0 self-start sm:self-center"
-                            title={t("meetingExtra.downloadAttachment")}
-                          >
-                            <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                            <span className="truncate max-w-[140px]">{activeMeeting.fileName}</span>
-                            <span className="text-[10px] bg-emerald-200/60 px-1.5 py-0.5 rounded font-normal">
-                              {t("meetingExtra.download")}
-                            </span>
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Panel 3: Discussion Points Table */}
+                  {/* Discussion Points Table */}
                   <div className="flex-1 flex flex-col min-h-0">
                     <DiscussionPointsTable
                       projectId={projectId}

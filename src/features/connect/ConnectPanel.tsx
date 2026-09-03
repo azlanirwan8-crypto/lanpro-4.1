@@ -7,7 +7,7 @@ import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
 import { Card, CardHeader, CardBody } from "../../components/ui/CoreUI";
 import { PageHeader } from "../../components/ui/PageHeader";
 
-export const ConnectPanel = () => {
+export const ConnectPanel = ({ hideHeader }: { hideHeader?: boolean } = {}) => {
   const { t } = useTranslation();
   const [config, setConfig] = useState({
     host: "localhost",
@@ -96,17 +96,23 @@ export const ConnectPanel = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-surface-sunken/60 relative overflow-hidden">
-      <div className="flex-1 overflow-auto p-4 md:p-5 relative z-10 w-full space-y-4">
+    <div className="flex flex-col h-full bg-surface-muted relative overflow-hidden">
+      {!hideHeader && (
         <PageHeader
           breadcrumbs={[
             { label: t("connect.breadcrumbGroup", "ADMINISTRATION") },
             { label: t("connect.mysqlConfig"), current: true },
           ]}
           title={t("connect.mysqlConfig")}
-          subtitle={t("connect.theAppIsConnectedTo")}
         />
-
+      )}
+      <div
+        className={
+          hideHeader
+            ? "flex-1 overflow-auto relative z-10 w-full space-y-4"
+            : "flex-1 overflow-auto px-4 md:px-5 pt-3 md:pt-4 pb-4 md:pb-5 relative z-10 w-full space-y-4"
+        }
+      >
         {/* Help Banner - Velzon Style */}
         <div className="bg-surface p-4 rounded-lg border border-success/30 shadow-2xs flex items-start gap-3">
           <div className="bg-success/15 text-success-text p-2 rounded-md mt-0.5 shrink-0">
