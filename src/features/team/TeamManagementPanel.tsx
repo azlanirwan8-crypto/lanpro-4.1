@@ -26,6 +26,7 @@ import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { StyledDropdown as CommonStyledDropdown } from "../../components/ui/CommonComponents";
 import { PageHeader } from "../../components/ui/PageHeader";
 import { LIST_SEARCH_INPUT_CLASS, LIST_THEAD_ROW_CLASS } from "../../components/ui/ListPageShell";
+import { StatWidget } from "../../components/ui/StatWidget";
 import { safeLocalStorage } from "../../lib/safeStorage";
 
 export const TeamManagementPanel = ({
@@ -368,71 +369,32 @@ export const TeamManagementPanel = ({
       {/* Fixed Top Section Wrapper — konten di bawah panel title */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden px-3 md:px-5 pt-3 md:pt-4 pb-3 md:pb-5">
         <div className="shrink-0 space-y-4 md:space-y-5 pb-1">
-          {/* Team Summary KPI Cards — #333: 2 kolom sejak HP (bukan menunggu sm:) */}
+          {/* Team Summary KPI Cards — #333 + #429: StatWidget reusable */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
-            <div className="bg-surface p-3 md:p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between gap-2 min-w-0">
-              <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                <div className="w-8 h-8 md:w-10 md:h-10 bg-info/10 text-info-text rounded-lg flex items-center justify-center shrink-0">
-                  <Users className="w-4 h-4 md:w-5 md:h-5" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[10px] md:text-xs font-normal text-content-subtle uppercase tracking-wider truncate">
-                    {t("team.activeTeam")}
-                  </div>
-                  <div className="text-lg md:text-xl font-medium text-content-strong mt-0.5">
-                    {activeTeamCount}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-surface p-3 md:p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between gap-2 min-w-0">
-              <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                <div className="w-8 h-8 md:w-10 md:h-10 bg-emerald-500/10 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
-                  <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[10px] md:text-xs font-normal text-content-subtle uppercase tracking-wider truncate">
-                    {t("team.assignedTasks")}
-                  </div>
-                  <div className="text-lg md:text-xl font-medium text-content-strong mt-0.5">
-                    {assignedTasksCount}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-surface p-3 md:p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between gap-2 min-w-0">
-              <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                <div className="w-8 h-8 md:w-10 md:h-10 bg-amber-500/10 text-amber-600 rounded-lg flex items-center justify-center shrink-0">
-                  <Clock className="w-4 h-4 md:w-5 md:h-5" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[10px] md:text-xs font-normal text-content-subtle uppercase tracking-wider truncate">
-                    {t("team.pendingInvites")}
-                  </div>
-                  <div className="text-lg md:text-xl font-medium text-content-strong mt-0.5">
-                    {pendingInvitesCount}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-surface p-3 md:p-4 rounded-lg border border-border-subtle/80 shadow-2xs flex items-center justify-between gap-2 min-w-0">
-              <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                <div className="w-8 h-8 md:w-10 md:h-10 bg-indigo-500/10 text-indigo-600 rounded-lg flex items-center justify-center shrink-0">
-                  <Briefcase className="w-4 h-4 md:w-5 md:h-5" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[10px] md:text-xs font-normal text-content-subtle uppercase tracking-wider truncate">
-                    {t("team.projectTasks")}
-                  </div>
-                  <div className="text-lg md:text-xl font-medium text-content-strong mt-0.5">
-                    {projectTasksCount}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <StatWidget
+              label={t("team.activeTeam")}
+              value={activeTeamCount}
+              icon={<Users className="w-4 h-4 md:w-5 md:h-5" />}
+              iconBg="info"
+            />
+            <StatWidget
+              label={t("team.assignedTasks")}
+              value={assignedTasksCount}
+              icon={<CheckCircle2 className="w-4 h-4 md:w-5 md:h-5" />}
+              iconBg="success"
+            />
+            <StatWidget
+              label={t("team.pendingInvites")}
+              value={pendingInvitesCount}
+              icon={<Clock className="w-4 h-4 md:w-5 md:h-5" />}
+              iconBg="warning"
+            />
+            <StatWidget
+              label={t("team.projectTasks")}
+              value={projectTasksCount}
+              icon={<Briefcase className="w-4 h-4 md:w-5 md:h-5" />}
+              iconBg="bg-indigo-500/10 text-indigo-600 border-indigo-500/20"
+            />
           </div>
 
           {/* Filter & View Mode Control Bar — #333: wrap rapat di HP */}

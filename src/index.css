@@ -6,6 +6,26 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
+  /* ── Skala tipografi tambahan (#430) ───────────────────────────────────────
+   * Tailwind hanya menyediakan text-xs (12px) ke atas. Proyek ini memakai
+   * ukuran di bawahnya secara masif: text-[10px] (533x), text-[11px] (284x),
+   * text-[9px] (74x), text-[8px] (20x), text-[13px] (16x).
+   *
+   * Token di bawah menstandarkan ukuran-ukuran itu agar bisa dipanggil
+   * tanpa arbitrary value: text-2xs, text-3xs, text-4xs, text-md.
+   * Migrasi dari text-[Npx] ke token dilakukan bertahap (saat-disentuh).
+   * ──────────────────────────────────────────────────────────────────────── */
+  --text-4xs: 8px;
+  --text-4xs--line-height: 12px;
+  --text-3xs: 9px;
+  --text-3xs--line-height: 14px;
+  --text-2xs: 10px;
+  --text-2xs--line-height: 14px;
+  --text-xsm: 11px;
+  --text-xsm--line-height: 16px;
+  --text-md: 13px;
+  --text-md--line-height: 18px;
+
   /* ── Sistem warna semantik ────────────────────────────────────────────────
    * Nilai mode terang di bawah SAMA PERSIS dengan hex yang sebelumnya ditulis
    * langsung di JSX, sehingga tampilan mode terang tidak berubah sedikit pun.

@@ -66,4 +66,17 @@ module.exports = {
     '!**/dist/**',
   ],
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/test/'],
+  /**
+   * Ambang batas cakupan ratchet (#436, 04 Sep 2026).
+   * Diset sedikit di bawah cakupan aktual agar tidak bisa turun diam-diam.
+   * Naikkan bertahap setiap sprint (+2%).
+   */
+  coverageThreshold: {
+    global: {
+      statements: 30,
+      branches: 17,
+      functions: 18,
+      lines: 30,
+    },
+  },
 };
