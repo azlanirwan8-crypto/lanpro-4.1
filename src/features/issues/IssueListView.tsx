@@ -294,26 +294,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
   );
 
   return (
-    <ListPageShell
-      className="h-full"
-      header={
-        <PageHeader
-          breadcrumbs={[
-            { label: t("issues.breadcrumbGroup", "PROJECT") },
-            { label: t("sidebar.issueList"), current: true },
-          ]}
-          title={t("sidebar.issueList")}
-          subtitle={
-            selectedProject ? (
-              <span className="font-medium text-content-body">
-                {selectedProject.name}
-                {selectedProject.key ? ` (${selectedProject.key})` : ""}
-              </span>
-            ) : undefined
-          }
-        />
-      }
-    >
+    <ListPageShell className="h-full" header={<PageHeader title={t("sidebar.issueList")} />}>
       <div className={cn(styles.container, "rounded-none border-0 shadow-none flex-1 min-h-0")}>
         {/* Header Toolbar & Advanced Filters */}
         <IssueAdvancedFiltersPanel
@@ -356,6 +337,10 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           allReleases={allReleases}
           allResolutions={allResolutions}
           setIsConfigureColumnsOpen={setIsConfigureColumnsOpen}
+          canCreateIssue={canCreateIssue}
+          onAddIssue={
+            props.setIsNewTaskModalOpen ? () => props.setIsNewTaskModalOpen?.(true) : undefined
+          }
         />
 
         {/* Mobile View: Card List (< 640px) */}

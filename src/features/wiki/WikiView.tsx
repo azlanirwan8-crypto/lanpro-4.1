@@ -947,16 +947,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
       {!activeDocId ? (
         <ListPageShell
           className="font-sans"
-          header={
-            <PageHeader
-              breadcrumbs={[
-                { label: t("wiki.breadcrumbGroup", "PROJECT") },
-                { label: t("wiki.title"), current: true },
-              ]}
-              title={t("wiki.title")}
-              subtitle={<span className="hidden sm:inline">{t("wiki.subtitle")}</span>}
-            />
-          }
+          header={<PageHeader title={t("wiki.title")} />}
           toolbar={
             <div className="flex items-center gap-2 w-full sm:w-auto min-w-0 sm:ml-auto">
               <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">

@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import React from "react";
 import { AnimatePresence } from "motion/react";
-import { Search, Filter, X, Calendar, Settings2, MoreHorizontal } from "lucide-react";
+import { Search, Filter, X, Calendar, Settings2, MoreHorizontal, Plus } from "lucide-react";
 import { cn } from "../../../../lib/utils";
 import { styles } from "../../styles";
 import { MasterData, UserProfile, Sprint } from "../../../../types";
@@ -47,6 +47,9 @@ interface IssueAdvancedFiltersPanelProps {
   allReleases: { id: string; label: string; icon?: string; color?: string }[];
   allResolutions: { id: string; label: string; icon?: string; color?: string }[];
   setIsConfigureColumnsOpen: (val: boolean) => void;
+  /** #424 — Tambah di pojok toolbar kartu, bukan di PageHeader. */
+  canCreateIssue?: boolean;
+  onAddIssue?: () => void;
 }
 
 export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps> = ({
@@ -89,6 +92,8 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
   allReleases,
   allResolutions,
   setIsConfigureColumnsOpen,
+  canCreateIssue,
+  onAddIssue,
 }) => {
   const { t } = useTranslation();
   let activeCount = 0;
@@ -155,6 +160,17 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             >
               <MoreHorizontal className="w-4 h-4" />
             </button>
+            {canCreateIssue && onAddIssue && (
+              <button
+                type="button"
+                onClick={onAddIssue}
+                className="btn-animation waves-effect waves-light btn-primary h-9 px-2.5 sm:px-4 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0 shadow-xs whitespace-nowrap"
+                title={t("newTask.createIssue")}
+              >
+                <Plus className="w-4 h-4" />
+                <span className="hidden sm:inline">{t("newTask.createIssue")}</span>
+              </button>
+            )}
           </div>
         </div>
 

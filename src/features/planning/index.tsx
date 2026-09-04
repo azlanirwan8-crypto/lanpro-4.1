@@ -232,13 +232,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
 
   return (
     <div className="flex-1 overflow-y-auto md:overflow-hidden bg-surface-muted flex flex-col h-[calc(100dvh-64px)] text-left">
-      <PageHeader
-        breadcrumbs={[
-          { label: t("nav.planning", "Planning") },
-          { label: t("planning.sprintPlanning"), current: true },
-        ]}
-        title={t("planning.sprintPlanning")}
-      />
+      <PageHeader title={t("planning.sprintPlanning")} />
       <DragDropContext onDragEnd={handleDragEndPlanning}>
         <div className="flex flex-col md:flex-row flex-1 gap-5 w-full h-full min-h-0 px-2 sm:px-4 md:px-5 pt-3 md:pt-4 pb-2 sm:pb-4 md:pb-5">
           <div className="w-full md:w-[320px] lg:w-[360px] xl:w-[380px] h-[220px] sm:h-[280px] md:h-full shrink-0 flex flex-col bg-surface border border-border-subtle/80 rounded-lg overflow-hidden shadow-2xs">

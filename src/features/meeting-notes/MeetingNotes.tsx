@@ -528,16 +528,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
     <>
       {activeMeetingId === null ? (
         <ListPageShell
-          header={
-            <PageHeader
-              breadcrumbs={[
-                { label: t("meetings.breadcrumbGroup", "PROJECT") },
-                { label: t("meetings.title", "Meeting"), current: true },
-              ]}
-              title={t("meetings.title")}
-              subtitle={<span className="hidden sm:inline">{t("meetings.subtitle")}</span>}
-            />
-          }
+          header={<PageHeader title={t("meetings.title")} />}
           toolbar={
             <div className="flex items-center gap-2 w-full sm:w-auto min-w-0 sm:ml-auto">
               <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">

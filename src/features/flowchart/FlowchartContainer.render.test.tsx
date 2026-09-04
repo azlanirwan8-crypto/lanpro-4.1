@@ -115,10 +115,8 @@ describe("FlowchartView", () => {
     await waitFor(() =>
       expect(screen.getByRole("heading", { name: /Editor Diagram Alur/i })).toBeInTheDocument()
     );
-    // #135 — subjudul kini datang dari kamus i18n. Bahasa bawaan aplikasi
-    // adalah Indonesia, jadi penandanya ikut Indonesia. Yang dijaga tetap
-    // sama: tampilan daftar benar-benar ter-render, bukan sisa kerangka.
-    expect(screen.getByText(/Kelola diagram interaktif, alur proses/i)).toBeInTheDocument();
+    // #424 — subtitle PageHeader dihapus; penanda daftar = toolbar Search+Tambah.
+    expect(screen.getByPlaceholderText(/Cari diagram alur berdasarkan judul/i)).toBeInTheDocument();
   });
 
   // Tampilan kanvas adalah bagian yang dibelah pada Fase 5, jadi justru ia yang

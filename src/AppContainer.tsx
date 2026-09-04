@@ -3856,7 +3856,8 @@ function AppContainer() {
           <div className="absolute inset-0 bg-surface-sunken/50 backdrop-blur-3xl z-[-1]" />
 
           {/* Global Top Header Bar */}
-          <header className="flex items-center justify-between w-full px-4 md:px-5 py-2 bg-surface-raised border-b border-border-subtle shrink-0 pl-14 md:pl-5 text-content-strong transition-all z-20">
+          {/* #424 — tanpa border-b: PageHeader (border-b) nempel sebagai 1 panel */}
+          <header className="flex items-center justify-between w-full px-4 md:px-5 py-2 bg-surface-raised shrink-0 pl-14 md:pl-5 text-content-strong transition-all z-20">
             <div className="flex items-center gap-3 min-w-0">
               {selectedProject &&
               ![

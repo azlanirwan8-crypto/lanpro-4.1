@@ -623,13 +623,13 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 13 item
+### 1.1 BELUM SELESAI — 12 item
 
-**Sebaran per fase:** F0 2 · F1 1 · F2 0 · F3 2 · F4 0 · F5 1 · F6 1 · F7 1 · F8 0 · F9 0 · F10 3 · F11 1 · F12 0 · F13 1
+**Sebaran per fase:** F0 2 · F1 1 · F2 0 · F3 1 · F4 0 · F5 1 · F6 1 · F7 1 · F8 0 · F9 0 · F10 3 · F11 1 · F12 0 · F13 1
 
-**Dihitung ulang 03 Sep 2026 (ajuan #424+#425):** F0 #335 #394 · F1 #351 · F3 #424 #425 · F5 #305 · F6 #290 · F7 #354 · F11 #30 · F13 #320. **Jangan digandakan:** #335 #339 #348 #355–#423. Rekap: **§24.9**.
+**Dihitung ulang 04 Sep 2026 (pasca #424 SELESAI kode):** F0 #335 #394 · F1 #351 · F3 #425 · F5 #305 · F6 #290 · F7 #354 · F11 #30 · F13 #320. **Jangan digandakan:** #335 #339 #348 #355–#424. Rekap: **§24.9**.
 
-Catatan: **#405–#423** SELESAI kode. **#424** (list header Velzon + toolbar dalam kartu) dan **#425** (detail 1 panel + aksi kiri) BELUM. UI tab bersih tetap **#335**.
+Catatan: **#405–#424** SELESAI kode. **#425** (detail 1 panel + aksi kiri) BELUM. UI tab bersih tetap **#335**.
 
 **Format baris diubah 29 Agu 2026 (item #255, dikerjakan atas keputusan pemilik proyek hari yang sama):** kolom lama `Temuan` (satu paragraf gabungan) dipecah jadi `Isi` / `Solusi masalah` / `Proses perbaikan` / `Catatan jika dikerjakan oleh AI lain`, dan baris dikelompokkan per fase dengan subjudul. Kolom `Fase` dan `Blokir modul baru?` **dipertahankan** sebagai kolom tambahan (keputusan pemilik: bukan dipindah/dihapus). Format baru ini **hanya berlaku untuk §1.1** — §1.2 (255 item SELESAI) dan §1.3 (DITAHAN/DIBATALKAN) **tetap format lama** (kolom `Temuan` tunggal), sebab mengisi tiga kolom baru retroaktif untuk ratusan item tertutup tidak sepadan (keputusan pemilik proyek). Gerbang `scripts/validate/papan-audit.cjs` sudah diperbarui membaca kolom lewat NAMA header per tabel, bukan posisi tetap — dua format berbeda di §1.1 vs §1.2/§1.3 aman terhadap gerbang ini.
 
@@ -653,17 +653,16 @@ Sumber: pertanyaan pemilik + audit residual mobile/tema/CRUD 03 Sep (kode; UI ta
 
 | No tiket | Sev | Biaya  | Status                     | Isi                                                                                                                                                                                                                 | Solusi masalah                         | Proses perbaikan                            | Catatan jika dikerjakan oleh AI lain        |  Fase  | Blokir modul baru? |
 | :------: | :-: | ------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------- | ------------------------------------------- | :----: | :----------------: |
-|   335    | 🟠  | Sedang | `BELUM` verifikasi pemilik | **Bukan zero-bug — verifikasi kontras gelap/terang + sisa QA.** Checklist #383/#399. **Sisa #335:** tab bersih Login+modul terang+gelap. Velzon #395–#423 kode SELESAI; sisa #424+#425. Gerbang ≠ bukti visual.     | Checklist §15.3; temuan baru bernomor. | Jangan ubah nilai token tanpa `--perbarui`. | Butuh login pemilik.                        | **F0** |       Tidak        |
+|   335    | 🟠  | Sedang | `BELUM` verifikasi pemilik | **Bukan zero-bug — verifikasi kontras gelap/terang + sisa QA.** Checklist #383/#399. **Sisa #335:** tab bersih Login+modul terang+gelap. Velzon #395–#424 kode SELESAI; sisa #425. Gerbang ≠ bukti visual.          | Checklist §15.3; temuan baru bernomor. | Jangan ubah nilai token tanpa `--perbarui`. | Butuh login pemilik.                        | **F0** |       Tidak        |
 |   394    | 🟡  | Tinggi | `MENUNGGU` keputusan       | **Kebijakan hapus: soft-delete vs hard-delete.** Audit CRUD 03 Sep: Master/Users/Meeting/Wiki/Discussion memakai hapus permanen (Swal). Belum ada trash/restore. Ambigu produk — bukan sapuan kode tanpa keputusan. | Keputusan cakupan modul + retensi.     | Setelah keputusan; jangan tebak.            | Bukan mengganti seluruh CRUD tanpa jawaban. | **F0** |       Tidak        |
 
-#### F3 tambahan — Header Velzon list + detail shell (#424 #425; 2 terbuka)
+#### F3 tambahan — Header Velzon list + detail shell (#425; 1 terbuka; #424 → §1.2)
 
 Sumber: revisi pemilik 03 Sep 2026 (screenshot Velzon FORM SELECT + Catatan Rapat + detail Wiki/Flowchart).
 
-| No tiket | Sev | Biaya  | Status  | Isi                                                                                                                                                                                                                                                                                          | Solusi masalah                                                                                                                                        | Proses perbaikan         | Catatan jika dikerjakan oleh AI lain        |  Fase  | Blokir modul baru? |
-| :------: | :-: | ------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------- | :----: | :----------------: |
-|   424    | 🟠  | Sedang | BELUM   | **List chrome Velzon (koreksi 03 Sep).** (1) PageHeader: judul UPPERCASE ~15px/semibold, **nempel** di bawah header bar; **tanpa** breadcrumb & **tanpa** subtitle/keterangan. (2) Search + Tambah di pojok atas **dalam kartu tabel**. (3) Planning: Add Sprint sejajar badge jumlah issue. | Redesign PageHeader; slot toolbar ListPageShell; wire modul list; Planning toolbar.                                                                   | Chrome saja.             | UI → #335.                                  | **F3** |       Tidak        |
-|   425    | 🟠  | Sedang | `BELUM` | **Detail view multi-panel + aksi terpisah.** Wiki/Meeting/Flowchart: panel aksi terpisah dari meta/konten; Back kiri, Edit/Delete kanan. Pemilik: **1 panel** gabungan; tombol **Back + Edit + Delete sejajar kiri**. Font/ukuran judul belum Velzon.                                        | Satukan toolbar+meta(+preview bila perlu) jadi satu Card; baris aksi kiri; cek semua modul detail; tipografi title/section = token PageHeader/Velzon. | Jangan ubah logika CRUD. | UI → #335. Cek Wiki/Meeting/Flowchart dulu. | **F3** |       Tidak        |
+| No tiket | Sev | Biaya  | Status  | Isi                                                                                                                                                                                                                                                   | Solusi masalah                                                                                                                                        | Proses perbaikan         | Catatan jika dikerjakan oleh AI lain        |  Fase  | Blokir modul baru? |
+| :------: | :-: | ------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------- | :----: | :----------------: |
+|   425    | 🟠  | Sedang | `BELUM` | **Detail view multi-panel + aksi terpisah.** Wiki/Meeting/Flowchart: panel aksi terpisah dari meta/konten; Back kiri, Edit/Delete kanan. Pemilik: **1 panel** gabungan; tombol **Back + Edit + Delete sejajar kiri**. Font/ukuran judul belum Velzon. | Satukan toolbar+meta(+preview bila perlu) jadi satu Card; baris aksi kiri; cek semua modul detail; tipografi title/section = token PageHeader/Velzon. | Jangan ubah logika CRUD. | UI → #335. Cek Wiki/Meeting/Flowchart dulu. | **F3** |       Tidak        |
 
 #### F3 tambahan — PageHeader flat residual (#423 → §1.2; 0 terbuka)
 
@@ -777,9 +776,9 @@ Dibuktikan dari kode 01 Sep 2026, bukan dari UI.
 
 #### F13 — Produk AI Meeting Notes (1 item; #439–#441 di §1.2)
 
-| No tiket | Sev | Biaya  | Status              | Isi                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Solusi masalah                                              | Proses perbaikan                                                 | Catatan jika dikerjakan oleh AI lain                              |  Fase   | Blokir modul baru? |
-| :------: | :-: | ------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------- | :-----: | :----------------: |
-|   320    | 🟡  | Tinggi | `BELUM` gelombang 1 | **Asisten AI Meeting Notes.** Gelombang 1 kode (02 Sep): live MediaRecorder + unggah + retensi COMPLETED + anti-halu di runAIPipeline + mapping PIC. **04 Sep `45ae6e9`:** meter mikrofon, timeslice 1 dtk, WebM live = audio (bukan video), tolak rekaman kurang dari 5 dtk. **Belum terverifikasi pemilik:** rekam/unggah sampai COMPLETED dan `recording_url` NULL di DB. Sisa produk: diarization, UX Otter. Celah logika #439–#442 DITUTUP kode 04 Sep. | Jangan klaim parity Otter. Upload besar = job async (#322). | Live+upload; berkas dihapus setelah OK. E2E Gemini oleh pemilik. | Verifikasi UI salinan OK 02 Sep. Jangan pakai kredensial pemilik. | **F13** |       Tidak        |
+| No tiket | Sev | Biaya  | Status              | Isi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Solusi masalah                                              | Proses perbaikan                                                 | Catatan jika dikerjakan oleh AI lain                              |  Fase   | Blokir modul baru? |
+| :------: | :-: | ------ | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------- | :-----: | :----------------: |
+|   320    | 🟡  | Tinggi | `BELUM` gelombang 1 | **Asisten AI Meeting Notes.** Gelombang 1 kode (02 Sep): live MediaRecorder + unggah + retensi COMPLETED + anti-halu di runAIPipeline + mapping PIC. **04 Sep `45ae6e9`:** meter mikrofon, timeslice 1 dtk, WebM live = audio (bukan video), tolak rekaman kurang dari 5 dtk. **04 Sep tes retensi:** `clearRecordingFile` mengosongkan recording_url dan file_size tanpa menimpa upload_status; pipeline COMPLETED memanggilnya. **Belum terverifikasi pemilik:** rekam/unggah sampai COMPLETED dan recording_url NULL di DB. Sisa produk: diarization, UX Otter. Celah logika #439–#442 DITUTUP kode 04 Sep. | Jangan klaim parity Otter. Upload besar = job async (#322). | Live+upload; berkas dihapus setelah OK. E2E Gemini oleh pemilik. | Verifikasi UI salinan OK 02 Sep. Jangan pakai kredensial pemilik. | **F13** |       Tidak        |
 
 #### F4 tambahan — concurrent load (0 item; #322 ditutup)
 
@@ -822,7 +821,7 @@ Sumber: sisir ulang setelah `45ae6e9`. **DITUTUP kode 04 Sep 2026.** E2E lapanga
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
 
-### 1.2 SUDAH SELESAI — 425 item
+### 1.2 SUDAH SELESAI — 426 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -830,6 +829,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | #   | Temuan | Fase | Sev | Biaya | Blokir modul baru? | Status | Detail |
 | --- | ------ | :--: | :-: | ----- | :----------------: | ------ | ------ |
 
+| 424 | **List chrome Velzon (#424).** DITUTUP 04 Sep 2026: PageHeader judul UPPERCASE 15px/semibold tanpa breadcrumb/subtitle; topbar tanpa border-b supaya nempel; Search+Tambah di toolbar kartu Issues; Planning Add Sprint sejajar badge h-7. Tes PageHeader + IssueAdvancedFiltersPanel. UI belum terverifikasi (ikut #335). | **F3** | 🟠 | Sedang | Tidak | SELESAI 04 Sep (kode) | §1.1 |
 | 442 | **GET /metrics kembar tanpa token (#442).** DITUTUP 04 Sep 2026: handler telanjang di server.ts dihapus. Hanya health.routes dengan METRIK_TOKEN. Tes metrics-server-ts-442 (sumber + urutan mount). | **F7** | 🟠 | Sedang | Tidak | SELESAI 04 Sep (kode) | §1.1 |
 | 441 | **Batal analisis vs pipeline (#441).** DITUTUP 04 Sep 2026: cek upload_status di tiap tahap; IDLE melempar PipelineDibatalkanError; COMPLETED/FAILED memakai WHERE status bukan IDLE. Retensi berkas tidak dihapus dari kebijakan #320. | **F13** | 🟡 | Sedang | Tidak | SELESAI 04 Sep (kode) | §1.1 |
 | 440 | **analyze-transcript tanpa filterVerified (#440).** DITUTUP 04 Sep 2026: filterKlaimTerverifikasi diekstrak bersama; jalur tempel memakai saringHasilAnalisisTempel + skema bukti. Tes: klaim UNVERIFIED tanpa kutipan dibuang. | **F13** | 🟡 | Sedang | Tidak | SELESAI 04 Sep (kode) | §1.1 |
@@ -8376,15 +8376,15 @@ D. Storage #30: Drive-per-user tetap, atau blob sementara supaya unggahan tidak 
 
 Ini **User Challenge** di gerbang akhir: pemilik minta catat semua dan audit 6 poin; CEO merekomendasikan hanya mengerjakan #314 plus penahan rilis lama. Arah pemilik yang tercatat adalah default sampai diubah eksplisit.
 
-### 24.9 Rekap tabel item terbuka per fase (04 Sep 2026, pasca #439–#442 SELESAI kode)
+### 24.9 Rekap tabel item terbuka per fase (04 Sep 2026, pasca #424 SELESAI kode)
 
-Sumber baris: §1.1. **Terbuka 13:** #30 #290 #305 #320 #335 #351 #354 #394 #424 #425 #433 #434 #438.
+Sumber baris: §1.1. **Terbuka 12:** #30 #290 #305 #320 #335 #351 #354 #394 #425 #433 #434 #438.
 
-**Sebaran terbuka:** F0 2 · F1 1 · F3 2 · F5 1 · F6 1 · F7 1 · F10 3 · F11 1 · F13 1.
+**Sebaran terbuka:** F0 2 · F1 1 · F3 1 · F5 1 · F6 1 · F7 1 · F10 3 · F11 1 · F13 1.
 
 **Fidelity kode (estimasi):** ~88–90% Velzon-inspired + list shell seragam. Bukti visual = #335.
 
-**Logika (04 Sep, kode):** RBAC rute memakai `jagaProyek`; `verifyProjectAccess` nol di rute produksi; live WebM = audio; retensi COMPLETED ada di kode. **#439–#442 SELESAI kode.** **Belum diukur di lapangan:** rekam sampai COMPLETED (#320); unggah mp4 sungguhan (#439).
+**Logika (04 Sep, kode):** RBAC rute memakai `jagaProyek`; `verifyProjectAccess` nol di rute produksi; live WebM = audio; retensi COMPLETED ada di kode + tes `clearRecordingFile`. **#424, #439–#442 SELESAI kode.** **Belum diukur di lapangan:** rekam sampai COMPLETED (#320); unggah mp4 sungguhan (#439).
 
 **Cara baca kolom Blokir rilis?** Ya = janji production rusak selama item ini terbuka. Tidak = boleh rilis produk inti, item tetap utang.
 
@@ -8429,18 +8429,17 @@ Sumber baris: §1.1. **Terbuka 13:** #30 #290 #305 #320 #335 #351 #354 #394 #424
 | No  | Fase | Sev | Status | Isi singkat | Bukti (berkas/perilaku) | Dampak pengguna | Usulan | Syarat sebelum dikerjakan | Blokir rilis? |
 | :-: | :--: | :-: | ------ | ----------- | ----------------------- | --------------- | ------ | ------------------------- | :-----------: |
 
-#### F3 — UI/UX tampilan (2 terbuka; #405–#423 SELESAI kode; sisa #424 #425)
+#### F3 — UI/UX tampilan (1 terbuka; #405–#424 SELESAI kode; sisa #425)
 
-| No  | Fase | Sev | Status  | Isi singkat                                            | Bukti (berkas/perilaku)             | Dampak pengguna              | Usulan                                | Syarat sebelum dikerjakan | Blokir rilis? |
-| :-: | :--: | :-: | ------- | ------------------------------------------------------ | ----------------------------------- | ---------------------------- | ------------------------------------- | ------------------------- | :-----------: |
-| 424 |  F3  | 🟠  | `BELUM` | List chrome Velzon: judul nempel; toolbar dalam kartu. | PageHeader + ListPageShell.         | List belum sesuai referensi. | Redesign chrome; Planning Add Sprint. | UI → #335. Chrome saja.   |     Tidak     |
-| 425 |  F3  | 🟠  | `BELUM` | Detail 1 panel; Back+Edit+Delete kiri.                 | Wiki/Meeting/Flowchart multi-panel. | Aksi terpisah dari konten.   | Satukan Card; jangan ubah CRUD.       | UI → #335.                |     Tidak     |
+| No  | Fase | Sev | Status  | Isi singkat                            | Bukti (berkas/perilaku)             | Dampak pengguna            | Usulan                          | Syarat sebelum dikerjakan | Blokir rilis? |
+| :-: | :--: | :-: | ------- | -------------------------------------- | ----------------------------------- | -------------------------- | ------------------------------- | ------------------------- | :-----------: |
+| 425 |  F3  | 🟠  | `BELUM` | Detail 1 panel; Back+Edit+Delete kiri. | Wiki/Meeting/Flowchart multi-panel. | Aksi terpisah dari konten. | Satukan Card; jangan ubah CRUD. | UI → #335.                |     Tidak     |
 
 #### F13 — AI Meeting Notes (1 item; #439–#441 SELESAI kode)
 
-| No  | Fase | Sev | Status              | Isi singkat                                      | Bukti (berkas/perilaku)                                                    | Dampak pengguna                    | Usulan                          | Syarat sebelum dikerjakan           | Blokir rilis? |
-| :-: | :--: | :-: | ------------------- | ------------------------------------------------ | -------------------------------------------------------------------------- | ---------------------------------- | ------------------------------- | ----------------------------------- | :-----------: |
-| 320 | F13  | 🟡  | `BELUM` gelombang 1 | Live+upload+retensi+anti-halu dasar (`45ae6e9`). | Meter mic, WebM=audio, min 5 dtk. E2E Gemini + `recording_url` NULL belum. | Sisa lapangan + diarization/Otter. | Pemilik rekam sampai COMPLETED. | Keputusan live+upload+hapus: sudah. |     Tidak     |
+| No  | Fase | Sev | Status              | Isi singkat                                                                     | Bukti (berkas/perilaku)                                                  | Dampak pengguna                    | Usulan                          | Syarat sebelum dikerjakan           | Blokir rilis? |
+| :-: | :--: | :-: | ------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------- | ------------------------------- | ----------------------------------- | :-----------: |
+| 320 | F13  | 🟡  | `BELUM` gelombang 1 | Live+upload+retensi+anti-halu dasar (`45ae6e9`). Tes clearRecordingFile 04 Sep. | Meter mic, WebM=audio, min 5 dtk. E2E Gemini + recording_url NULL belum. | Sisa lapangan + diarization/Otter. | Pemilik rekam sampai COMPLETED. | Keputusan live+upload+hapus: sudah. |     Tidak     |
 
 #### F0 tambahan — sisir residual (masuk hitungan F0)
 
@@ -8468,11 +8467,11 @@ Sumber baris: §1.1. **Terbuka 13:** #30 #290 #305 #320 #335 #351 #354 #394 #424
 
 #### Urutan kerja yang disarankan (bukan antrian otomatis)
 
-Ketetapan lama §1.4 (murah dulu) tetap berlaku sebagai **prinsip**. Untuk **13 item terbuka 04 Sep** (pasca #439–#442 SELESAI kode):
+Ketetapan lama §1.4 (murah dulu) tetap berlaku sebagai **prinsip**. Untuk **12 item terbuka 04 Sep** (pasca #424 SELESAI kode):
 
 1. **Jangan kode** #30, #290, #351, #354, #394, #438 (`MENUNGGU`). #434 tunggu Opsi A/B.
-2. **Chrome UI:** #424 #425. Verifikasi tab bersih **#335**.
+2. **Chrome UI:** #425. Verifikasi tab bersih **#335**.
 3. **Lapangan pemilik:** #305 SSO · #320 rekam sampai COMPLETED.
 4. **#433** pecah berkas — satu commit per berkas. **#332** Idempotency tetap DITAHAN.
 
-**#405–#432, #435–#437, #439–#442: SELESAI kode.** UI → #335. Jangan menebak MENUNGGU.
+**#405–#432, #435–#437, #439–#442, #424: SELESAI kode.** UI → #335. Jangan menebak MENUNGGU.

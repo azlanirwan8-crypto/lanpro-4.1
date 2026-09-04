@@ -57,7 +57,7 @@ export const BacklogSection: React.FC<BacklogSectionProps> = ({
             </h3>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <div className="px-2 py-[3px] bg-primary/10 border border-primary/30 rounded-md text-[11px] font-medium text-primary">
+            <div className="h-7 px-2 inline-flex items-center bg-primary/10 border border-primary/30 rounded-md text-[11px] font-medium text-primary">
               {t("planning.issueCount", { count: filteredBacklogTasks.length })}
             </div>
             {canEditPlanning && onAddSprint && (

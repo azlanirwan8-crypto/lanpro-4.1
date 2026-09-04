@@ -90,16 +90,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
   return (
     <ListPageShell
       className="font-sans overflow-y-auto"
-      header={
-        <PageHeader
-          breadcrumbs={[
-            { label: t("flowchart.breadcrumbGroup", "PROJECT") },
-            { label: t("flowchart.editorTitle"), current: true },
-          ]}
-          title={t("flowchart.editorTitle")}
-          subtitle={<span className="hidden sm:inline">{t("flowchart.subtitle")}</span>}
-        />
-      }
+      header={<PageHeader title={t("flowchart.editorTitle")} />}
       toolbar={
         <div className="flex items-center gap-2 w-full sm:w-auto min-w-0 sm:ml-auto">
           <div className="relative flex-1 min-w-0 sm:w-64 sm:flex-none sm:max-w-[16rem]">
