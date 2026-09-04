@@ -22,6 +22,7 @@ import {
   Info,
   FileText,
   FileUp,
+  Mic,
   UploadCloud,
   X,
   XCircle,
@@ -40,6 +41,12 @@ import ReactMarkdown from "react-markdown";
 import type { AiMeetingCompanionProps, ActionItem, AiSummaryStructure } from "./types";
 import { mapToActiveMeetingData } from "./lib/mapping";
 import { analyzeTranscript, createTaskFromMeeting } from "./services/meeting.service";
+import {
+  bukaAliranMikrofon,
+  buatMeterLevel,
+  ekstensiDariMime,
+  pilihMimeRekaman,
+} from "./lib/liveRecording";
 
 export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   projectId,
@@ -196,20 +203,36 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   const [totalBytes, setTotalBytes] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [micLevel, setMicLevel] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const recordingStartedAtRef = useRef(0);
+  const meterStopRef = useRef<(() => void) | null>(null);
+  const liveStreamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
     if (isRecording) {
       interval = setInterval(() => {
-        setRecordingTime((prev) => prev + 1);
-      }, 1000);
+        setRecordingTime(Math.floor((Date.now() - recordingStartedAtRef.current) / 1000));
+      }, 250);
     } else {
       setRecordingTime(0);
+      setMicLevel(0);
     }
-    return () => clearInterval(interval);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [isRecording]);
+
+  useEffect(() => {
+    return () => {
+      meterStopRef.current?.();
+      meterStopRef.current = null;
+      liveStreamRef.current?.getTracks().forEach((track) => track.stop());
+      liveStreamRef.current = null;
+    };
+  }, []);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -217,11 +240,22 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const lepasAliranMikrofon = () => {
+    meterStopRef.current?.();
+    meterStopRef.current = null;
+    liveStreamRef.current?.getTracks().forEach((track) => track.stop());
+    liveStreamRef.current = null;
+  };
+
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await bukaAliranMikrofon();
+      liveStreamRef.current = stream;
       audioChunksRef.current = [];
-      const mediaRecorder = new MediaRecorder(stream);
+      const mime = pilihMimeRekaman();
+      const mediaRecorder = mime
+        ? new MediaRecorder(stream, { mimeType: mime })
+        : new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (event) => {
@@ -231,30 +265,42 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-        const file = new File([audioBlob], `recording-${new Date().getTime()}.webm`, {
-          type: "audio/webm",
+        const durasiDetik = Math.floor((Date.now() - recordingStartedAtRef.current) / 1000);
+        const mimeType = mediaRecorder.mimeType || mime || "audio/webm";
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        lepasAliranMikrofon();
+
+        if (durasiDetik < 5 || audioBlob.size < 1024) {
+          toast.error(t("toast.recordingTooShort"));
+          return;
+        }
+
+        const ext = ekstensiDariMime(mimeType);
+        const file = new File([audioBlob], `recording-${Date.now()}.${ext}`, {
+          type: mimeType.startsWith("audio/") ? mimeType : `audio/${ext}`,
         });
 
-        // Treat as a file upload
         await processUploadedFile(file);
-        stream.getTracks().forEach((track) => track.stop());
       };
 
-      mediaRecorder.start();
+      const meter = buatMeterLevel(stream, setMicLevel);
+      meterStopRef.current = meter.stop;
+
+      recordingStartedAtRef.current = Date.now();
+      mediaRecorder.start(1000);
       setIsRecording(true);
       toast.info(t("toast.recording"));
     } catch (err) {
       console.error(err);
+      lepasAliranMikrofon();
       toast.error(t("toast.micAccessFailed"));
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current) {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      // Removed premature toast.dismiss() to avoid clearing potential loading state
       toast.success(t("toast.recordingDone"));
     }
   };
@@ -1209,15 +1255,29 @@ ${(activeMeetingData.tab_tindak_lanjut || []).map((item: any) => `- **Concern**:
 
                     <div className="flex flex-col items-center justify-center gap-3 w-full py-4">
                       <button
+                        type="button"
                         onClick={isRecording ? stopRecording : startRecording}
                         className={`px-8 py-4 ${isRecording ? "bg-surface-inverse" : "bg-red-600"} hover:opacity-90 text-content-inverse rounded-xl text-sm font-medium shadow-soft-lg flex items-center gap-3 cursor-pointer transition-transform hover:scale-[1.02]`}
                       >
-                        <Brain className="w-5 h-5" />{" "}
+                        <Mic className={`w-5 h-5 ${isRecording ? "animate-pulse" : ""}`} />{" "}
                         {isRecording ? t("aiMeeting.stopRecording") : t("aiMeeting.startRecording")}
                       </button>
                       <span className="text-sm font-mono text-content-muted">
                         {formatTime(recordingTime)}
                       </span>
+                      {isRecording && (
+                        <div className="w-full max-w-[220px] space-y-1">
+                          <div className="h-2 rounded-full bg-surface-sunken overflow-hidden border border-border-subtle">
+                            <div
+                              className="h-full bg-success-surface transition-[width] duration-100"
+                              style={{ width: `${Math.round(micLevel * 100)}%` }}
+                            />
+                          </div>
+                          <p className="text-[10px] text-center text-content-subtle">
+                            {t("aiMeeting.micLevelHint")}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
 

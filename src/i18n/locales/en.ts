@@ -562,6 +562,8 @@ export const en = {
     recording: "Recording...",
     micAccessFailed: "Could not access the microphone.",
     recordingDone: "Recording finished; starting processing...",
+    recordingTooShort:
+      "Recording is too short or empty. Speak for at least 5 seconds, confirm the mic meter moves, then stop.",
     transcriptAnalyzed: "The transcript was analysed by the AI assistant!",
     recordingUploaded: "The meeting recording was uploaded!",
     extractingAudio: "Extracting audio and analysing the meeting with AI (STT & LLM)...",
@@ -2020,6 +2022,7 @@ export const en = {
     showAll: "Show all",
     stopRecording: "Stop recording",
     startRecording: "Start recording",
+    micLevelHint: "Speak now — this bar must move if the microphone is capturing audio.",
     ffmpegFailed: "FFmpeg failed to extract audio.",
     recordingRetentionNote:
       "Recordings are used for analysis only. After minutes succeed, the audio/video file is deleted; analysis results are kept.",

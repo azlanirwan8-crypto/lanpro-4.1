@@ -117,7 +117,10 @@ async function jalankanAiPipelineDalamSlot(meetingId: string): Promise<void> {
     // 1. FFmpeg Audio Extraction
     let audioPath = filePath;
     let finalMimeType = mimeType;
-    const isVideo = [".mp4", ".mkv", ".mov", ".avi", ".webm"].includes(fileExt);
+    // .webm live dari MediaRecorder adalah AUDIO, bukan video. FFmpeg -vn
+    // pada webm audio sering gagal dan membuat pipeline jatuh ke fallback
+    // yang tidak perlu. Video sungguhan: mp4/mkv/mov/avi (#320).
+    const isVideo = [".mp4", ".mkv", ".mov", ".avi"].includes(fileExt);
 
     if (isVideo) {
       const extractedPath = path.join(

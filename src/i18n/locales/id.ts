@@ -572,6 +572,8 @@ export const id = {
     recording: "Merekam...",
     micAccessFailed: "Gagal mengakses mikrofon.",
     recordingDone: "Rekaman selesai, memulai pemrosesan...",
+    recordingTooShort:
+      "Rekaman terlalu pendek atau kosong. Bicara minimal 5 detik, pastikan meter mikrofon bergerak, lalu hentikan.",
     transcriptAnalyzed: "Transkrip berhasil dianalisis oleh Asisten AI!",
     recordingUploaded: "File rekaman rapat berhasil diunggah!",
     extractingAudio: "Mengekstrak audio & menganalisis rapat dengan AI (STT & LLM)...",
@@ -2038,6 +2040,7 @@ export const id = {
     showAll: "Tampilkan Semua",
     stopRecording: "Hentikan Rekaman",
     startRecording: "Mulai Merekam",
+    micLevelHint: "Bicara sekarang — batang ini harus bergerak jika mikrofon menangkap suara.",
     ffmpegFailed: "FFmpeg gagal mengekstrak audio.",
     recordingRetentionNote:
       "Rekaman hanya dipakai untuk analisis sementara. Setelah notulen berhasil, berkas audio/video dihapus; hasil analisis tetap disimpan.",
