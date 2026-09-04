@@ -53,7 +53,7 @@ import { createAdapter } from "@socket.io/redis-adapter";
 import { generateContentWithFallback } from './server/services/ai.service';
 
 // --- PROMETHEUS METRICS REGISTRY (imported from server/config/metrics.ts) ---
-import { register, httpRequestsTotal, socketActiveConnections, optimisticLockingConflicts } from "./server/config/metrics";
+import { httpRequestsTotal, socketActiveConnections, optimisticLockingConflicts } from "./server/config/metrics";
 import { setSocketServer } from "./server/config/socket";
 
 import { getSecret } from "./server/config/secrets";
@@ -649,15 +649,9 @@ async function startServer() {
   const { default: fileRoutes } = await import('./server/routes/file.routes.ts');
   app.use(fileRoutes);
 
-  // --- PROMETHEUS METRICS ENDPOINT ---
-  app.get("/metrics", async (req, res) => {
-    try {
-      res.set("Content-Type", register.contentType);
-      res.end(await register.metrics());
-    } catch (ex) {
-      res.status(500).end(ex);
-    }
-  });
+  // GET /metrics — HANYA di health.routes.ts (#58, kaki #442 dihapus).
+  // Jangan daftarkan handler telanjang di sini: Express memakai rute pertama
+  // yang cocok, dan salinan tanpa METRIK_TOKEN adalah regresi.
 
   // RBAC Middleware (Moved to server/middleware/rbac.ts)
   const { verifyProjectAccess } = await import('./server/middleware/rbac.ts');

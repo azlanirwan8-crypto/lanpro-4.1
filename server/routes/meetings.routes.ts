@@ -15,6 +15,7 @@ import { generateContentWithFallback } from "../services/ai.service";
 import { getSocketServer } from "../config/socket";
 import { GLOBAL_UPLOADS_DIR } from "../config/uploads";
 import { runAIPipeline } from "../services/meeting.service";
+import { saringHasilAnalisisTempel } from "../services/meeting-ai-filter";
 import { MULTIMODAL_ANALYSIS_SCHEMA } from "../services/meeting-ai.schema";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { meetingRepository } from "../repositories/meeting.repository";
@@ -858,6 +859,7 @@ Kamu HARUS menghasilkan output dalam format JSON terstruktur yang memiliki kunci
 
 ATURAN KETAT (ANTI-HALUSINASI):
 - Kamu harus menganalisis transkrip secara RIIL. Jangan mengarang fitur, sistem, nama orang, tanggal, atau rencana yang sama sekali tidak disebutkan atau tidak disirat secara logis dari isi transkrip rapat.
+- Setiap butir notulen_rapat, poin_diskusi_tambahan, dan next_plan WAJIB punya bukti_cuplikan (kutipan singkat verbatim). Jika tidak ada kutipan: status_bukti=UNVERIFIED dan jangan isi klaim itu.
 - Gunakan Bahasa Indonesia yang formal, profesional, mudah dipahami, dan ringkas namun padat informasi.
 - Berikan output HANYA dalam format JSON valid sesuai skema yang diminta.`;
 
@@ -890,8 +892,17 @@ ATURAN KETAT (ANTI-HALUSINASI):
                       description:
                         "Alur argumen dan jalannya rapat mengenai topik ini (dalam Bahasa Indonesia).",
                     },
+                    bukti_cuplikan: {
+                      type: Type.STRING,
+                      description:
+                        "Kutipan singkat verbatim dari transkrip yang membuktikan topik/pembahasan.",
+                    },
+                    status_bukti: {
+                      type: Type.STRING,
+                      description: "VERIFIED jika ada kutipan; UNVERIFIED jika tidak.",
+                    },
                   },
-                  required: ["topik", "pembahasan"],
+                  required: ["topik", "pembahasan", "bukti_cuplikan", "status_bukti"],
                 },
                 description:
                   "Kronologi jalannya rapat terstruktur dikelompokkan berdasarkan topik bahasan utama.",
@@ -958,8 +969,16 @@ ATURAN KETAT (ANTI-HALUSINASI):
                       description:
                         "Tenggat waktu pengerjaan (format YYYY-MM-DD jika ada, atau teks singkat).",
                     },
+                    bukti_cuplikan: {
+                      type: Type.STRING,
+                      description: "Kutipan verbatim yang mendukung concern/tindakan lanjut.",
+                    },
+                    status_bukti: {
+                      type: Type.STRING,
+                      description: "VERIFIED atau UNVERIFIED.",
+                    },
                   },
-                  required: ["concern", "tindakanLanjut"],
+                  required: ["concern", "tindakanLanjut", "bukti_cuplikan", "status_bukti"],
                 },
                 description: "Daftar poin diskusi tambahan / action items.",
               },
@@ -981,8 +1000,16 @@ ATURAN KETAT (ANTI-HALUSINASI):
                       type: Type.STRING,
                       description: "Estimasi waktu pelaksanaan jika dibahas, jika tidak kosongi.",
                     },
+                    bukti_cuplikan: {
+                      type: Type.STRING,
+                      description: "Kutipan verbatim yang mendukung tahapan rencana.",
+                    },
+                    status_bukti: {
+                      type: Type.STRING,
+                      description: "VERIFIED atau UNVERIFIED.",
+                    },
                   },
-                  required: ["tahapan", "deskripsi"],
+                  required: ["tahapan", "deskripsi", "bukti_cuplikan", "status_bukti"],
                 },
                 description:
                   "Rencana jangka pendek dan menengah (Next Plan) riil hasil pembahasan rapat.",
@@ -1034,7 +1061,12 @@ ATURAN KETAT (ANTI-HALUSINASI):
         parsedData = {};
       }
 
-      await meetingRepository.updateTranscriptAndAiSummary(id, transcript, jsonStr);
+      parsedData = saringHasilAnalisisTempel(parsedData);
+      await meetingRepository.updateTranscriptAndAiSummary(
+        id,
+        transcript,
+        JSON.stringify(parsedData)
+      );
 
       res.json({
         status: "success",

@@ -47,6 +47,7 @@ import {
   ekstensiDariMime,
   pilihMimeRekaman,
 } from "./lib/liveRecording";
+import { metadataUnggahRekaman } from "./lib/uploadRecordingMeta";
 
 export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   projectId,
@@ -399,6 +400,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     try {
       const chunkSize = 1024 * 1024 * 2; // 2MB chunk size to ensure we bypass reverse proxy limits
       const totalChunks = Math.ceil(fileToUpload.size / chunkSize);
+      const metaUnggah = metadataUnggahRekaman(fileToUpload);
       let lastResponse = null;
 
       for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
@@ -406,16 +408,15 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
         const end = Math.min(start + chunkSize, fileToUpload.size);
         const chunkBlob = fileToUpload.slice(start, end);
 
-        // Wrap the chunk blob back into a File object with original name
         const chunkFile = new File([chunkBlob], fileToUpload.name, { type: fileToUpload.type });
 
         const formData = new FormData();
         formData.append("recording", chunkFile);
         formData.append("meeting_id", meeting.id || "");
-        formData.append("file_name", file.name);
+        formData.append("file_name", metaUnggah.file_name);
         formData.append("chunkIndex", chunkIndex.toString());
         formData.append("totalChunks", totalChunks.toString());
-        formData.append("fileSize", file.size.toString());
+        formData.append("fileSize", metaUnggah.fileSize);
 
         const token = getAuthToken();
         lastResponse = await axios.post(

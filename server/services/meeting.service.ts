@@ -18,6 +18,12 @@ import { generateContentWithFallback } from "./ai.service";
 import { getSocketServer } from "../config/socket";
 import { GLOBAL_UPLOADS_DIR } from "../config/uploads";
 import { meetingRepository } from "../repositories/meeting.repository";
+import { filterKlaimTerverifikasi } from "./meeting-ai-filter";
+import {
+  pipelineDibatalkan,
+  PipelineDibatalkanError,
+  updateMenyentuhBaris,
+} from "./meeting-pipeline-batal";
 
 /**
  * Instance Socket.IO untuk memancarkan progres.
@@ -56,6 +62,19 @@ function lepaskanSlotAiPipeline(): void {
   if (berikutnya) berikutnya();
 }
 
+async function pastikanPipelineAktif(
+  connection: { query: (sql: string, params?: unknown[]) => Promise<unknown> },
+  meetingId: string
+): Promise<void> {
+  const [rows]: any = await connection.query("SELECT upload_status FROM Meetings WHERE id = ?", [
+    meetingId,
+  ]);
+  const status = rows?.[0]?.upload_status;
+  if (!rows?.[0] || pipelineDibatalkan(status)) {
+    throw new PipelineDibatalkanError();
+  }
+}
+
 export async function runAIPipeline(meetingId: string): Promise<void> {
   await ambilSlotAiPipeline();
   try {
@@ -70,6 +89,8 @@ async function jalankanAiPipelineDalamSlot(meetingId: string): Promise<void> {
   let connection;
   try {
     connection = await db.getConnection();
+
+    await pastikanPipelineAktif(connection, meetingId);
 
     // Set status to EXTRACTING_AUDIO
     await connection.query("UPDATE Meetings SET upload_status = 'EXTRACTING_AUDIO' WHERE id = ?", [
@@ -158,6 +179,7 @@ async function jalankanAiPipelineDalamSlot(meetingId: string): Promise<void> {
 
     // 2. Speech-to-Text using Gemini
     console.log(`[AI PIPELINE] Transcribing audio file: ${audioPath}`);
+    await pastikanPipelineAktif(connection, meetingId);
     await connection.query("UPDATE Meetings SET upload_status = 'TRANSCRIBING_STT' WHERE id = ?", [
       meetingId,
     ]);
@@ -214,6 +236,7 @@ async function jalankanAiPipelineDalamSlot(meetingId: string): Promise<void> {
 
     // 3. LLM Structured Analysis using Gemini SDK with Structured Outputs (responseSchema)
     console.log("[AI PIPELINE] Generating structured output analysis...");
+    await pastikanPipelineAktif(connection, meetingId);
     await connection.query("UPDATE Meetings SET upload_status = 'ANALYZING_LLM' WHERE id = ?", [
       meetingId,
     ]);
@@ -448,24 +471,17 @@ ${learningSection}`;
       parsedData = {};
     }
 
-    const filterVerified = (items: any[], claimKeys: string[]) =>
-      (items || []).filter((item: any) => {
-        const status = String(item.status_bukti || "").toUpperCase();
-        const bukti = String(item.bukti_cuplikan || "").trim();
-        if (status === "UNVERIFIED" && !bukti) return false;
-        const hasClaim = claimKeys.some((k) => String(item[k] || "").trim());
-        return hasClaim;
-      });
-
-    const kronologi_dan_kesimpulan = filterVerified(parsedData.kronologi_dan_kesimpulan || [], [
-      "keputusan_akhir",
-      "topik_bahasan",
+    const kronologi_dan_kesimpulan = filterKlaimTerverifikasi(
+      parsedData.kronologi_dan_kesimpulan || [],
+      ["keputusan_akhir", "topik_bahasan"]
+    );
+    const tindak_lanjut_dan_concern = filterKlaimTerverifikasi(
+      parsedData.tindak_lanjut_dan_concern || [],
+      ["kekhawatiran_spesifik", "solusi_dan_arahan"]
+    );
+    const next_plan_roadmap = filterKlaimTerverifikasi(parsedData.next_plan_roadmap || [], [
+      "action_item",
     ]);
-    const tindak_lanjut_dan_concern = filterVerified(parsedData.tindak_lanjut_dan_concern || [], [
-      "kekhawatiran_spesifik",
-      "solusi_dan_arahan",
-    ]);
-    const next_plan_roadmap = filterVerified(parsedData.next_plan_roadmap || [], ["action_item"]);
     const ringkasan_eksekutif = parsedData.ringkasan_eksekutif || "";
     const target_to_be_architecture = parsedData.target_to_be_architecture || {
       proses_bisnis_as_is: "",
@@ -537,11 +553,15 @@ ${learningSection}`;
 
     const finalJson = JSON.stringify(combinedData);
 
-    // Save structured output to both analysis_result (LONGTEXT) and aiSummary (JSON) to avoid breakages
-    await connection.query(
-      "UPDATE Meetings SET aiSummary = ?, analysis_result = ?, upload_status = 'COMPLETED' WHERE id = ?",
+    await pastikanPipelineAktif(connection, meetingId);
+
+    const [hasilSelesai]: any = await connection.query(
+      "UPDATE Meetings SET aiSummary = ?, analysis_result = ?, upload_status = 'COMPLETED' WHERE id = ? AND upload_status <> 'IDLE'",
       [finalJson, finalJson, meetingId]
     );
+    if (!updateMenyentuhBaris(hasilSelesai || {})) {
+      throw new PipelineDibatalkanError();
+    }
 
     // #320 — kebijakan pemilik: rekaman HANYA untuk analisis. Setelah notulen
     // (aiSummary/analysis_result/transcript) tersimpan dan status COMPLETED,
@@ -576,11 +596,18 @@ ${learningSection}`;
       transcript: transcriptText,
     });
   } catch (err: any) {
+    if (err instanceof PipelineDibatalkanError) {
+      console.log(
+        `[AI PIPELINE] Dibatalkan, tidak menulis FAILED/COMPLETED (meeting ${meetingId}).`
+      );
+      return;
+    }
     console.error(`[AI PIPELINE ERROR] Error in AI pipeline for meeting ${meetingId}:`, err);
     if (connection) {
-      await connection.query("UPDATE Meetings SET upload_status = 'FAILED' WHERE id = ?", [
-        meetingId,
-      ]);
+      await connection.query(
+        "UPDATE Meetings SET upload_status = 'FAILED' WHERE id = ? AND upload_status <> 'IDLE'",
+        [meetingId]
+      );
     }
     io.emit("meeting_ai_failed", { meetingId, error: err.message || "Gagal memproses AI." });
   } finally {
