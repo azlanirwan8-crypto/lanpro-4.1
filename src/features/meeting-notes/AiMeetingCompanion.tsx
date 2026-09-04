@@ -46,6 +46,7 @@ import {
   buatMeterLevel,
   ekstensiDariMime,
   pilihMimeRekaman,
+  rekamanPerluTranscodeKeMp3,
 } from "./lib/liveRecording";
 import { metadataUnggahRekaman } from "./lib/uploadRecordingMeta";
 
@@ -281,7 +282,12 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
           type: mimeType.startsWith("audio/") ? mimeType : `audio/${ext}`,
         });
 
-        await processUploadedFile(file);
+        try {
+          await processUploadedFile(file);
+        } catch (err: unknown) {
+          const pesan = err instanceof Error ? err.message : String(err);
+          toast.error(pesan || t("toast.uploadFailed"));
+        }
       };
 
       const meter = buatMeterLevel(stream, setMicLevel);
@@ -386,9 +392,15 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
 
     let fileToUpload = file;
 
-    // Check if it's a video file and needs extraction
-    if (file.type.startsWith("video/")) {
-      fileToUpload = await extractAudioFromVideo(file);
+    // Gemini menolak audio/webm live. Video dan webm/m4a → MP3 dulu (#320).
+    if (rekamanPerluTranscodeKeMp3(file)) {
+      try {
+        fileToUpload = await extractAudioFromVideo(file);
+      } catch (err: unknown) {
+        const pesan = err instanceof Error ? err.message : String(err);
+        toast.error(pesan);
+        return;
+      }
     }
 
     setUploadState("IS_UPLOADING");

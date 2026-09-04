@@ -25,6 +25,29 @@ export function rekamanPerluEkstrakVideo(fileExt: string): boolean {
   return [".mp4", ".mkv", ".mov", ".avi"].includes(fileExt.toLowerCase());
 }
 
+/**
+ * Gemini inlineData tidak menerima audio/webm (Opus) atau video mentah.
+ * Rekaman live Chrome = webm; Safari = mp4/m4a. Harus jadi MP3/WAV dulu.
+ */
+export function rekamanPerluTranscodeKeMp3(file: { name: string; type?: string }): boolean {
+  const nama = file.name.toLowerCase();
+  const tipe = (file.type || "").toLowerCase();
+  if (
+    nama.endsWith(".mp3") ||
+    nama.endsWith(".wav") ||
+    tipe === "audio/mpeg" ||
+    tipe === "audio/wav"
+  ) {
+    return false;
+  }
+  return (
+    tipe.startsWith("video/") ||
+    tipe.includes("webm") ||
+    tipe.includes("audio/mp4") ||
+    /\.(webm|m4a|mp4|mkv|mov|avi|ogg)$/.test(nama)
+  );
+}
+
 export async function bukaAliranMikrofon(): Promise<MediaStream> {
   return navigator.mediaDevices.getUserMedia({
     audio: {

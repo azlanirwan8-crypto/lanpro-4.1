@@ -1,4 +1,9 @@
-import { ekstensiDariMime, pilihMimeRekaman, rekamanPerluEkstrakVideo } from "./liveRecording";
+import {
+  ekstensiDariMime,
+  pilihMimeRekaman,
+  rekamanPerluEkstrakVideo,
+  rekamanPerluTranscodeKeMp3,
+} from "./liveRecording";
 
 describe("liveRecording (#320)", () => {
   it("webm audio live tidak diperlakukan sebagai video", () => {
@@ -15,5 +20,11 @@ describe("liveRecording (#320)", () => {
   it("pilihMimeRekaman mengembalikan string (jsdom boleh kosong)", () => {
     const mime = pilihMimeRekaman();
     expect(typeof mime).toBe("string");
+  });
+
+  it("webm/m4a live wajib transcode ke MP3 sebelum Gemini", () => {
+    expect(rekamanPerluTranscodeKeMp3({ name: "recording.webm", type: "audio/webm" })).toBe(true);
+    expect(rekamanPerluTranscodeKeMp3({ name: "clip.m4a", type: "audio/mp4" })).toBe(true);
+    expect(rekamanPerluTranscodeKeMp3({ name: "rapat.mp3", type: "audio/mpeg" })).toBe(false);
   });
 });

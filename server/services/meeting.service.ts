@@ -24,6 +24,7 @@ import {
   PipelineDibatalkanError,
   updateMenyentuhBaris,
 } from "./meeting-pipeline-batal";
+import { ekstensiPerluMp3UntukGemini, perintahFfmpegKeMp3 } from "./meeting-transcode";
 
 /**
  * Instance Socket.IO untuk memancarkan progres.
@@ -135,45 +136,38 @@ async function jalankanAiPipelineDalamSlot(meetingId: string): Promise<void> {
     else if (fileExt === ".m4a") mimeType = "audio/x-m4a";
     else if (fileExt === ".mp4") mimeType = "video/mp4";
 
-    // 1. FFmpeg Audio Extraction
+    // 1. FFmpeg → MP3. Gemini tidak menerima audio/webm (rekaman live).
+    // Percobaan 1: -vn (video). Percobaan 2: tanpa -vn (webm audio-only).
     let audioPath = filePath;
     let finalMimeType = mimeType;
-    // .webm live dari MediaRecorder adalah AUDIO, bukan video. FFmpeg -vn
-    // pada webm audio sering gagal dan membuat pipeline jatuh ke fallback
-    // yang tidak perlu. Video sungguhan: mp4/mkv/mov/avi (#320).
-    const isVideo = [".mp4", ".mkv", ".mov", ".avi"].includes(fileExt);
-
-    if (isVideo) {
+    if (ekstensiPerluMp3UntukGemini(fileExt)) {
       const extractedPath = path.join(
         GLOBAL_UPLOADS_DIR,
         `extracted_${meetingId}_${Date.now()}.mp3`
       );
-      console.log(
-        `[AI PIPELINE] Extracting audio from video file using FFmpeg: ${filePath} -> ${extractedPath}`
-      );
+      console.log(`[AI PIPELINE] Transcode ke MP3: ${filePath} -> ${extractedPath}`);
+
+      const cobaFfmpeg = (pakaiVn: boolean) =>
+        new Promise<void>((resolve, reject) => {
+          exec(perintahFfmpegKeMp3(filePath, extractedPath, pakaiVn), (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
 
       try {
-        await new Promise<void>((resolve, reject) => {
-          exec(
-            `ffmpeg -y -i "${filePath}" -vn -acodec libmp3lame -ar 16000 -ac 1 "${extractedPath}"`,
-            (err, stdout, stderr) => {
-              if (err) {
-                console.warn(
-                  "[AI PIPELINE] FFmpeg execution failed, using original file:",
-                  err.message
-                );
-                reject(err);
-              } else {
-                console.log("[AI PIPELINE] FFmpeg extracted audio successfully.");
-                resolve();
-              }
-            }
-          );
-        });
+        try {
+          await cobaFfmpeg(true);
+        } catch {
+          await cobaFfmpeg(false);
+        }
         audioPath = extractedPath;
         finalMimeType = "audio/mp3";
-      } catch (ffmpegErr) {
-        console.warn("[AI PIPELINE] FFmpeg fallback activated. Direct processing.");
+        console.log("[AI PIPELINE] FFmpeg transcode ke MP3 berhasil.");
+      } catch {
+        throw new Error(
+          "Rekaman WebM/MP4 tidak bisa diubah ke MP3. Gemini menolak format itu. Pasang FFmpeg di server, atau unggah berkas MP3."
+        );
       }
     }
 
