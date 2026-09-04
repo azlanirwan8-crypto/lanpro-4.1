@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
+import { Tabs } from "../../components/ui/Tabs";
 import { safeLocalStorage } from "../../lib/safeStorage";
 import React, { useState, useEffect } from "react";
 import { UserProfile, Project, Task, AppRole, UserPermissions, ActivityLog } from "../../types";
@@ -1597,59 +1598,111 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
               </div>
             </div>
 
-            {/* Clean White Tab Bar Directly Attached Below Cover */}
-            <div className="bg-surface border-t border-border-subtle/60 px-4 sm:px-6 flex overflow-x-auto gap-6 sm:gap-8">
-              {(
-                (pageMode === "view"
+            {/* Clean White Tab Bar Directly Attached Below Cover — #432 */}
+            <Tabs
+              value={activeTab}
+              onChange={setActiveTab}
+              tone="primary"
+              className="bg-surface border-t border-border-subtle/60 border-b-0 px-4 sm:px-6 gap-6 sm:gap-8"
+              itemClassName="px-0 py-3.5"
+              tabs={
+                pageMode === "view"
                   ? [
-                      { id: "overview", label: t("userDetail.tabOverview"), icon: LayoutGrid },
-                      { id: "project", label: t("userDetail.tabProject"), icon: Layout },
-                      { id: "document", label: t("userDetail.tabDocument"), icon: FileText },
+                      {
+                        id: "overview" as const,
+                        label: t("userDetail.tabOverview"),
+                        icon: (
+                          <LayoutGrid
+                            className={cn(
+                              "w-4 h-4",
+                              activeTab === "overview" ? "text-primary" : "text-content-subtle"
+                            )}
+                          />
+                        ),
+                      },
+                      {
+                        id: "project" as const,
+                        label: t("userDetail.tabProject"),
+                        icon: (
+                          <Layout
+                            className={cn(
+                              "w-4 h-4",
+                              activeTab === "project" ? "text-primary" : "text-content-subtle"
+                            )}
+                          />
+                        ),
+                      },
+                      {
+                        id: "document" as const,
+                        label: t("userDetail.tabDocument"),
+                        icon: (
+                          <FileText
+                            className={cn(
+                              "w-4 h-4",
+                              activeTab === "document" ? "text-primary" : "text-content-subtle"
+                            )}
+                          />
+                        ),
+                      },
                     ]
                   : [
-                      { id: "personal", label: t("userDetail.tabPersonalDetail"), icon: IdCard },
-                      { id: "password", label: t("userDetail.tabChangePassword"), icon: KeyRound },
+                      {
+                        id: "personal" as const,
+                        label: t("userDetail.tabPersonalDetail"),
+                        icon: (
+                          <IdCard
+                            className={cn(
+                              "w-4 h-4",
+                              activeTab === "personal" ? "text-primary" : "text-content-subtle"
+                            )}
+                          />
+                        ),
+                      },
+                      {
+                        id: "password" as const,
+                        label: t("userDetail.tabChangePassword"),
+                        icon: (
+                          <KeyRound
+                            className={cn(
+                              "w-4 h-4",
+                              activeTab === "password" ? "text-primary" : "text-content-subtle"
+                            )}
+                          />
+                        ),
+                      },
                       ...(isAdmin
                         ? [
                             {
                               id: "project" as const,
                               label: t("userDetail.tabProject"),
-                              icon: Layout,
+                              icon: (
+                                <Layout
+                                  className={cn(
+                                    "w-4 h-4",
+                                    activeTab === "project" ? "text-primary" : "text-content-subtle"
+                                  )}
+                                />
+                              ),
                             },
                             {
                               id: "settings" as const,
                               label: t("userDetail.tabSettings"),
-                              icon: Settings2,
+                              icon: (
+                                <Settings2
+                                  className={cn(
+                                    "w-4 h-4",
+                                    activeTab === "settings"
+                                      ? "text-primary"
+                                      : "text-content-subtle"
+                                  )}
+                                />
+                              ),
                             },
                           ]
                         : []),
-                    ]) as Array<{
-                  id: DetailTab;
-                  label: string;
-                  icon: React.ComponentType<{ className?: string }>;
-                }>
-              ).map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "flex items-center gap-2 py-3.5 text-xs font-medium whitespace-nowrap transition-all border-b-2 cursor-pointer",
-                    activeTab === tab.id
-                      ? "text-primary border-primary font-semibold"
-                      : "text-content-muted border-transparent hover:text-content-strong"
-                  )}
-                >
-                  <tab.icon
-                    className={cn(
-                      "w-4 h-4",
-                      activeTab === tab.id ? "text-primary" : "text-content-subtle"
-                    )}
-                  />
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </div>
+                    ]
+              }
+            />
           </div>
 
           <div className="mt-5">

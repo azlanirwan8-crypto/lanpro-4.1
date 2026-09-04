@@ -7,6 +7,7 @@ import { BroadcastMonitor } from "./components/BroadcastMonitor";
 import { SystemConfigForm } from "./components/SystemConfigForm";
 import { TaskBroadcastForm } from "./components/TaskBroadcastForm";
 import { PageHeader } from "../../components/ui/PageHeader";
+import { Tabs } from "../../components/ui/Tabs";
 
 export const SettingsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -64,45 +65,34 @@ export const SettingsPage: React.FC = () => {
       <div className="flex-1 flex flex-col min-h-0 px-3 md:px-5 pt-3 md:pt-4 pb-3 md:pb-5">
         <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
           <div className="flex-1 overflow-auto flex flex-col">
-            {/* Tabs — #368: scroll horizontal di HP */}
-            <div className="flex border-b border-border-subtle/80 px-3 sm:px-5 bg-surface overflow-x-auto custom-scrollbar shrink-0">
-              <button
-                onClick={() => setActiveTab("konfigurasi")}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer shrink-0 whitespace-nowrap ${
-                  activeTab === "konfigurasi"
-                    ? "text-emerald-600 border-emerald-500 bg-emerald-500/10"
-                    : "text-content-muted border-transparent hover:text-content-body"
-                }`}
-              >
-                <Mail size={15} className="shrink-0" />
-                <span className="hidden sm:inline">{t("settings.emailConfiguration")}</span>
-                <span className="sm:hidden">{t("settings.emailShort", "Email")}</span>
-              </button>
-              <button
-                onClick={() => setActiveTab("whatsapp")}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer shrink-0 whitespace-nowrap ${
-                  activeTab === "whatsapp"
-                    ? "text-emerald-600 border-emerald-500 bg-emerald-500/10"
-                    : "text-content-muted border-transparent hover:text-content-body"
-                }`}
-              >
-                <MessageSquare size={15} className="shrink-0" />
-                <span className="hidden sm:inline">{t("settings.whatsappGateway")}</span>
-                <span className="sm:hidden">{t("settings.whatsappShort", "WA")}</span>
-              </button>
-              <button
-                onClick={() => setActiveTab("taskBroadcast")}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-xs font-medium transition-all border-b-2 cursor-pointer shrink-0 whitespace-nowrap ${
-                  activeTab === "taskBroadcast"
-                    ? "text-emerald-600 border-emerald-500 bg-emerald-500/10"
-                    : "text-content-muted border-transparent hover:text-content-body"
-                }`}
-              >
-                <CalendarClock size={15} className="shrink-0" />
-                <span className="hidden sm:inline">{t("taskBroadcast.tab")}</span>
-                <span className="sm:hidden">{t("taskBroadcast.tabShort", "Broadcast")}</span>
-              </button>
-            </div>
+            {/* Tabs — #368 scroll HP + #432 komponen bersama */}
+            <Tabs
+              value={activeTab}
+              onChange={setActiveTab}
+              tone="success"
+              showActiveSurface
+              className="px-3 sm:px-5 bg-surface"
+              tabs={[
+                {
+                  id: "konfigurasi",
+                  label: t("settings.emailConfiguration"),
+                  shortLabel: t("settings.emailShort", "Email"),
+                  icon: <Mail size={15} className="shrink-0" />,
+                },
+                {
+                  id: "whatsapp",
+                  label: t("settings.whatsappGateway"),
+                  shortLabel: t("settings.whatsappShort", "WA"),
+                  icon: <MessageSquare size={15} className="shrink-0" />,
+                },
+                {
+                  id: "taskBroadcast",
+                  label: t("taskBroadcast.tab"),
+                  shortLabel: t("taskBroadcast.tabShort", "Broadcast"),
+                  icon: <CalendarClock size={15} className="shrink-0" />,
+                },
+              ]}
+            />
 
             {/* Grid Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 p-5 items-start">

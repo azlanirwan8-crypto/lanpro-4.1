@@ -12,7 +12,6 @@ import { useFlowchartNodes } from "../../hooks/useFlowchartNodes";
 import {
   Plus,
   Trash2,
-  ArrowRight,
   Save,
   Sparkles,
   Eye,
@@ -20,9 +19,6 @@ import {
   Circle as CircleIcon,
   Layers,
   MousePointer,
-  Hand,
-  StickyNote,
-  Type,
   ZoomIn,
   ZoomOut,
   BookOpen,
@@ -48,7 +44,8 @@ import { toast } from "sonner";
 import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { FlowchartDashboard } from "./components/FlowchartDashboard";
-import { ShapePalette } from "./components/ShapePalette";
+import { CanvasToolRail } from "./components/CanvasToolRail";
+import { FlowchartDocumentModal } from "./components/FlowchartDocumentModal";
 import { ImportDiagramModal } from "./components/ImportDiagramModal";
 import { CanvasToolbar } from "./components/CanvasToolbar";
 import { FlowchartNode } from "./components/FlowchartNode";
@@ -2733,118 +2730,22 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         setIsRightSidebarOpen={setIsRightSidebarOpen}
                       />
 
-                      {/* FLOATING MIRO TOOLBAR (SISI KIRI) — #321 icon-only rail */}
-                      <div
-                        className={cn(
-                          "absolute top-24 md:top-20 z-20 flex flex-col gap-1.5 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1.5 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] shrink-0 select-none items-center transition-all duration-300 left-3"
-                        )}
-                      >
-                        {/* Active tools selector */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveTool("select");
-                            setConnectSourceId(null);
-                          }}
-                          className={cn(
-                            "p-2 rounded-lg transition-all w-9 h-9 flex items-center justify-center",
-                            activeTool === "select"
-                              ? "bg-primary-surface text-content-inverse shadow-md"
-                              : "hover:bg-surface-muted text-content-body"
-                          )}
-                          title={t("flowchart.toolPointer")}
-                        >
-                          <MousePointer className="w-4 h-4" />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveTool("hand");
-                            setConnectSourceId(null);
-                          }}
-                          className={cn(
-                            "p-2 rounded-lg transition-all w-9 h-9 flex items-center justify-center",
-                            activeTool === "hand"
-                              ? "bg-primary-surface text-content-inverse shadow-md"
-                              : "hover:bg-surface-muted text-content-body"
-                          )}
-                          title={t("flowchart.toolHand")}
-                        >
-                          <Hand className="w-4 h-4" />
-                        </button>
-
-                        <div className="w-5 h-px bg-surface-strong" />
-
-                        {/* Quick Sticky Note Adder */}
-                        <button
-                          type="button"
-                          onClick={() => handleAddNewNode("sticky", "yellow")}
-                          className="p-2 bg-amber-500/10 hover:bg-amber-500/15 border border-amber-500/30 text-amber-700 rounded-lg transition-all flex items-center justify-center shrink-0 w-9 h-9"
-                          title={t("flowchart.toolSticky")}
-                        >
-                          <StickyNote className="w-4 h-4 text-amber-500 fill-amber-300" />
-                        </button>
-
-                        {/* Shapes COLLECTION TRIGGER */}
-                        <ShapePalette
-                          isShapeDropdownOpen={isShapeDropdownOpen}
-                          setIsShapeDropdownOpen={setIsShapeDropdownOpen}
-                          selectedAddColor={selectedAddColor}
-                          setSelectedAddColor={setSelectedAddColor}
-                          shapeSearchQuery={shapeSearchQuery}
-                          setShapeSearchQuery={setShapeSearchQuery}
-                          expandedGroups={expandedGroups}
-                          toggleGroupExpanded={toggleGroupExpanded}
-                          handleAddNewNode={handleAddNewNode}
-                          onOpenPalette={() => setIsRightSidebarOpen(false)}
-                        />
-
-                        {/* Quick Link connection helper */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActiveTool("connect");
-                            setConnectSourceId(null);
-                            toast.info(
-                              "Mode Anak Panah Aktif. Klik bentuk asal di Canvas, lalu klik bentuk penerima."
-                            );
-                          }}
-                          className={cn(
-                            "p-2 rounded-lg transition-all flex items-center justify-center w-9 h-9 border border-border-faint",
-                            activeTool === "connect"
-                              ? "bg-amber-400 text-content border-amber-400"
-                              : "hover:bg-surface-muted text-content-body"
-                          )}
-                          title={t("flowchart.toolArrow")}
-                        >
-                          <ArrowRight className="w-4 h-4" />
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => handleAddNewNode("text")}
-                          className="p-2 hover:bg-surface-muted rounded-lg transition-all flex items-center justify-center w-9 h-9 text-content-body"
-                          title={t("flowchart.toolText")}
-                        >
-                          <Type className="w-4 h-4" />
-                        </button>
-
-                        <div className="w-5 h-px bg-surface-strong" />
-
-                        <button
-                          type="button"
-                          className="p-2 text-content-subtle hover:text-primary transition-colors rounded-lg w-9 h-9 flex items-center justify-center"
-                          title={t("flowchart.helpNav")}
-                          onClick={() =>
-                            toast.info(
-                              "Gunakan menu ini untuk menambahkan komponen ke visual whiteboard. Anda dapat mengubah isi teks dengan mengetik langsung diatas bentuk."
-                            )
-                          }
-                        >
-                          <HelpCircle className="w-4 h-4" />
-                        </button>
-                      </div>
+                      {/* FLOATING MIRO TOOLBAR (SISI KIRI) — #321 / #433 */}
+                      <CanvasToolRail
+                        activeTool={activeTool}
+                        setActiveTool={setActiveTool}
+                        setConnectSourceId={setConnectSourceId}
+                        handleAddNewNode={handleAddNewNode}
+                        isShapeDropdownOpen={isShapeDropdownOpen}
+                        setIsShapeDropdownOpen={setIsShapeDropdownOpen}
+                        selectedAddColor={selectedAddColor}
+                        setSelectedAddColor={setSelectedAddColor}
+                        shapeSearchQuery={shapeSearchQuery}
+                        setShapeSearchQuery={setShapeSearchQuery}
+                        expandedGroups={expandedGroups}
+                        toggleGroupExpanded={toggleGroupExpanded}
+                        setIsRightSidebarOpen={setIsRightSidebarOpen}
+                      />
 
                       {/* ACTIVE DRAWING SHEET CANVAS (THE BASE BACKGROUND LAYER) */}
                       <div
@@ -3643,135 +3544,24 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         handleApplyImportReplace={handleApplyImportReplace}
       />
 
-      {/* DETAILED POPUP DIALOG: TAMBAH DATA / ADD DATA / EDIT INFO DESCRIPTION */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-surface border border-border-subtle w-full max-w-md rounded-xl shadow-xl overflow-hidden text-content-strong">
-            {/* Modal Head */}
-            <div className="px-5 py-4 bg-surface border-b border-border-subtle flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary-surface/10 text-primary flex items-center justify-center">
-                  <Layers className="w-4 h-4" />
-                </div>
-                <h3 className="font-medium text-sm text-content">
-                  {modalMode === "create"
-                    ? t("flowchart.addFlowchartData")
-                    : t("flowchart.editDocDetail")}
-                </h3>
-              </div>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-1 hover:bg-surface-muted rounded-lg text-content-subtle hover:text-content-secondary transition-all"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Modal Body / Form */}
-            <form onSubmit={handleModalSubmit} className="p-5 space-y-4 text-xs">
-              <div className="space-y-1.5">
-                <label className="text-xs sm:text-[11px] font-medium text-content-body">
-                  {t("flowchart.docNameLabel")} <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder={t("flowchart.docNamePlaceholder")}
-                  value={flowName}
-                  onChange={(e) => setFlowName(e.target.value)}
-                  className="w-full text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
-                />
-              </div>
-
-              {/* Kategori Select */}
-              <div className="space-y-1.5">
-                <label className="text-xs sm:text-[11px] font-medium text-content-body">
-                  {t("flowchart.docCategoryLabel")} <span className="text-rose-500">*</span>
-                </label>
-                <StyledDropdown
-                  value={flowCategory}
-                  onChange={(val: string) => setFlowCategory(val)}
-                  options={opsiKategoriDokumen}
-                  type="jenis_dokumen"
-                  masterData={[]}
-                  className="w-full"
-                  buttonClassName="w-full text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong"
-                />
-              </div>
-
-              {/* Tautan Eksternal Input */}
-              <div className="space-y-1.5">
-                <label className="text-xs sm:text-[11px] font-medium text-content-body">
-                  {t("flowchart.externalLink")}
-                </label>
-                <input
-                  type="url"
-                  placeholder={t("flowchart.docLinkPlaceholder")}
-                  value={flowExternalUrl}
-                  onChange={(e) => setFlowExternalUrl(e.target.value)}
-                  className="w-full text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
-                />
-                <p className="text-xs sm:text-[10px] text-content-subtle leading-normal">
-                  {t("flowchart.externalLinkHint")}
-                </p>
-              </div>
-
-              {/* Link Epic Option integration */}
-              <div className="space-y-1.5">
-                <label className="text-xs sm:text-[11px] font-medium text-content-body flex items-center gap-1.5">
-                  <Workflow className="w-3.5 h-3.5 text-primary" /> {t("flowchart.linkedEpicLabel")}
-                </label>
-                <StyledDropdown
-                  value={flowEpicId}
-                  onChange={setFlowEpicId}
-                  options={[
-                    { id: "", label: t("flowchart.connectWithEpic") },
-                    ...availableEpics.map((epic) => ({
-                      id: epic.id,
-                      label: `[${epic.key}] ${epic.title}`,
-                    })),
-                  ]}
-                  buttonClassName="w-full text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-left text-content-strong"
-                />
-                <p className="text-xs sm:text-[10px] text-content-subtle leading-relaxed">
-                  {t("flowchart.linkedEpicHint")}
-                </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs sm:text-[11px] font-medium text-content-body">
-                  {t("flowchart.architectureDesc")}
-                </label>
-                <textarea
-                  placeholder={t("flowchart.architecturePlaceholder")}
-                  value={flowDescription}
-                  onChange={(e) => setFlowDescription(e.target.value)}
-                  className="w-full h-24 text-xs font-normal bg-surface-sunken border border-border-subtle rounded-lg p-2.5 text-content-strong placeholder:text-content-subtle focus:bg-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all"
-                />
-              </div>
-
-              {/* Modal Actions */}
-              <div className="pt-3 flex justify-end items-center gap-2 border-t border-border-faint">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-surface-muted hover:bg-surface-strong font-medium text-content-body transition-all text-xs"
-                >
-                  {t("flowchart.cancel")}
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-lg text-xs shadow-xs transition-all"
-                >
-                  {modalMode === "create"
-                    ? t("flowchart.createDocument")
-                    : t("flowchart.saveChanges")}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <FlowchartDocumentModal
+        open={isModalOpen}
+        modalMode={modalMode}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleModalSubmit}
+        flowName={flowName}
+        setFlowName={setFlowName}
+        flowCategory={flowCategory}
+        setFlowCategory={setFlowCategory}
+        opsiKategoriDokumen={opsiKategoriDokumen}
+        flowExternalUrl={flowExternalUrl}
+        setFlowExternalUrl={setFlowExternalUrl}
+        flowEpicId={flowEpicId}
+        setFlowEpicId={setFlowEpicId}
+        availableEpics={availableEpics}
+        flowDescription={flowDescription}
+        setFlowDescription={setFlowDescription}
+      />
 
       {nodeContextMenu && (
         <NodeContextMenu

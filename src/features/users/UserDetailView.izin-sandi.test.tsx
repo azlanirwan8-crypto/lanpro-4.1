@@ -71,7 +71,7 @@ const renderDetail = (peranPengguna: string, peranPeninjau: string) =>
 // terlihat kini ada di mode edit, di balik tab masing-masing.
 const bukaTab = (namaTab: RegExp) => {
   fireEvent.click(screen.getByRole("button", { name: /edit profil|edit profile/i }));
-  fireEvent.click(screen.getByRole("button", { name: namaTab }));
+  fireEvent.click(screen.getByRole("tab", { name: namaTab }));
 };
 
 describe("Item #155 — input Perbarui Kata Sandi", () => {
