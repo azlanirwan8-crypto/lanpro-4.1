@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import React from "react";
 import { motion } from "motion/react";
 import { X } from "lucide-react";
-import { MasterData, Sprint } from "../../../../types";
+import { MasterData, Sprint, UserProfile } from "../../../../types";
 import { StyledDropdown } from "../../../../components/ui/CommonComponents";
 import { LanproDatePicker } from "../../../../components/ui/LanproDatePicker";
 
@@ -11,6 +11,8 @@ interface IssueAdvancedFiltersExpandedProps {
   setListFilterStatus: (val: string) => void;
   listFilterPriority: string;
   setListFilterPriority: (val: string) => void;
+  listFilterAssignee: string;
+  setListFilterAssignee: (val: string) => void;
   listFilterSprint: string;
   setListFilterSprint: (val: string) => void;
   listFilterLabel: string;
@@ -31,6 +33,9 @@ interface IssueAdvancedFiltersExpandedProps {
   setListFilterStartDate: (val: string) => void;
   listFilterEndDate: string;
   setListFilterEndDate: (val: string) => void;
+  listFilterOverdue: boolean;
+  setListFilterOverdue: (val: boolean) => void;
+  projectMembers: UserProfile[];
   sprints: Sprint[];
   masterData: MasterData[];
   allLabels: string[];
@@ -45,6 +50,8 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
   setListFilterStatus,
   listFilterPriority,
   setListFilterPriority,
+  listFilterAssignee,
+  setListFilterAssignee,
   listFilterSprint,
   setListFilterSprint,
   listFilterLabel,
@@ -65,6 +72,9 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
   setListFilterStartDate,
   listFilterEndDate,
   setListFilterEndDate,
+  listFilterOverdue,
+  setListFilterOverdue,
+  projectMembers,
   sprints,
   masterData,
   allLabels,
@@ -132,6 +142,36 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
             />
           </div>
 
+          {/* Assignee Filter — #468 */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-normal text-content-subtle">
+              {t("filters.assigneeField")}
+            </label>
+            <StyledDropdown
+              value={listFilterAssignee}
+              onChange={(val) => setListFilterAssignee(val)}
+              options={[
+                { id: "All", label: t("filters.allAssignees"), icon: "Users", color: "#6366F1" },
+                {
+                  id: "unassigned",
+                  label: t("bulkActions.unassignedClear"),
+                  icon: "UserX",
+                  color: "#94a3b8",
+                },
+                ...(projectMembers || []).map((m) => ({
+                  id: m.uid,
+                  label: m.displayName || m.email || m.uid,
+                  icon: "User",
+                  color: "#6366F1",
+                })),
+              ]}
+              type="filter_assignee"
+              masterData={mArr}
+              className="w-full"
+              buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-md h-[32px] px-2.5 hover:border-border-subtle"
+            />
+          </div>
+
           {/* Sprint Filter */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-normal text-content-subtle">{t("filters.sprint")}</label>
@@ -181,6 +221,22 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               buttonClassName="w-full text-xs font-normal text-content-body bg-surface-sunken border border-border-subtle rounded-md h-[32px] px-2.5 hover:border-border-subtle"
             />
           </div>
+        </div>
+
+        {/* #468 — Overdue chip toggle (bukan SLA engine) */}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setListFilterOverdue(!listFilterOverdue)}
+            className={`px-3 h-[32px] rounded-md text-xs font-medium border transition-all cursor-pointer select-none ${
+              listFilterOverdue
+                ? "bg-rose-500/10 border-rose-500/40 text-rose-700"
+                : "bg-surface-sunken border-border-subtle text-content-secondary hover:border-border-subtle"
+            }`}
+            aria-pressed={listFilterOverdue}
+          >
+            {t("filters.overdueOnly")}
+          </button>
         </div>
 
         {/* Section 2: Custom fields & date ranges */}
@@ -353,6 +409,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
               onClick={() => {
                 setListFilterStatus("All");
                 setListFilterPriority("All");
+                setListFilterAssignee("All");
                 setListFilterSprint("All");
                 setListFilterLabel("All");
                 setListFilterCategory("All");
@@ -362,6 +419,7 @@ export const IssueAdvancedFiltersExpanded: React.FC<IssueAdvancedFiltersExpanded
                 setListFilterResolution("All");
                 setListFilterStartDate("");
                 setListFilterEndDate("");
+                setListFilterOverdue(false);
               }}
               className="px-3.5 h-[32px] bg-surface-muted hover:bg-surface-strong text-content-secondary rounded-md text-xs font-normal transition-all shrink-0 flex items-center justify-center gap-1.5 select-none cursor-pointer border border-border-subtle"
               title={t("filters.clearAllFields")}

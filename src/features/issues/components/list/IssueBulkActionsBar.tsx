@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Trash, X } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "../../../../lib/utils";
-import { Task, MasterData, UserProfile } from "../../../../types";
+import { Task, MasterData, UserProfile, Sprint } from "../../../../types";
 
 interface IssueBulkActionsBarProps {
   displayRoots: Task[];
@@ -18,6 +18,7 @@ interface IssueBulkActionsBarProps {
   tasks: Task[];
   masterData: MasterData[];
   projectMembers: UserProfile[];
+  sprints?: Sprint[];
   updateTaskField: (id: string, field: string, value: any) => void;
   deleteTask?: (id: string) => void;
   bulkDeleteTasks?: (taskIds: string[]) => void;
@@ -39,6 +40,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
   tasks,
   masterData,
   projectMembers,
+  sprints = [],
   updateTaskField,
   deleteTask,
   bulkDeleteTasks,
@@ -181,11 +183,6 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
               <StyledDropdown
                 value=""
                 onChange={(val) => {
-                  // Dropdown aksi, bukan dropdown nilai: nilainya sengaja dikunci ""
-                  // supaya selalu kembali ke placeholder sesudah dipakai, persis
-                  // seperti <select defaultValue=""> yang digantikannya. Penjaga di
-                  // bawah menggantikan atribut `disabled` pada opsi placeholder --
-                  // tanpa itu, memilih placeholder akan MENGOSONGKAN assignee.
                   if (!val) return;
                   const effectiveAssignee = val === "unassigned" ? null : val;
                   const ids = Array.from(selectedTaskIds);
@@ -202,6 +199,75 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
                   })),
                 ]}
                 buttonClassName="bg-surface-inverse border border-border-inverse text-content-inverse rounded-xl px-2.5 py-1.5 text-xs text-left font-medium"
+              />
+            </div>
+
+            {/* #468 — Change Priority */}
+            <div className="flex items-center gap-2">
+              <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-normal">
+                {t("bulkActions.priority")}
+              </span>
+              <StyledDropdown
+                value=""
+                onChange={(val: string) => {
+                  if (!val) return;
+                  const ids = Array.from(selectedTaskIds);
+                  ids.forEach((id) => updateTaskField(id, "priority", val));
+                  toast.success(
+                    t("toast.bulkPriorityChanged", { count: ids.length, priority: val })
+                  );
+                  setSelectedTaskIds(new Set());
+                }}
+                options={[
+                  {
+                    id: "",
+                    label: t("bulkActions.pickPriority"),
+                    icon: "Layers",
+                    color: "#6366F1",
+                  },
+                  ...mArr
+                    .filter((m) => m.type === "priority")
+                    .map((m) => ({ id: m.label, label: m.label, icon: m.icon, color: m.color })),
+                ]}
+                type="priority"
+                masterData={mArr}
+                buttonClassName="bg-surface-inverse border border-border-inverse text-content-inverse rounded-xl px-2.5 py-1.5 text-xs font-medium"
+              />
+            </div>
+
+            {/* #468 — Change Sprint */}
+            <div className="flex items-center gap-2">
+              <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-normal">
+                {t("bulkActions.sprint")}
+              </span>
+              <StyledDropdown
+                value=""
+                onChange={(val: string) => {
+                  if (!val) return;
+                  const sprintVal = val === "Backlog" ? null : val;
+                  const ids = Array.from(selectedTaskIds);
+                  ids.forEach((id) => updateTaskField(id, "sprintId", sprintVal));
+                  toast.success(t("toast.bulkSprintChanged", { count: ids.length }));
+                  setSelectedTaskIds(new Set());
+                }}
+                options={[
+                  {
+                    id: "",
+                    label: t("bulkActions.pickSprint"),
+                    icon: "IterationCcw",
+                    color: "#6366F1",
+                  },
+                  { id: "Backlog", label: "Backlog", icon: "Box", color: "#94a3b8" },
+                  ...sprints.map((s) => ({
+                    id: s.id,
+                    label: s.name,
+                    icon: "IterationCcw",
+                    color: "#6366F1",
+                  })),
+                ]}
+                type="sprint"
+                masterData={mArr}
+                buttonClassName="bg-surface-inverse border border-border-inverse text-content-inverse rounded-xl px-2.5 py-1.5 text-xs font-medium"
               />
             </div>
 

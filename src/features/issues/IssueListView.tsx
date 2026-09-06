@@ -90,6 +90,10 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
     setListFilterStartDate,
     listFilterEndDate,
     setListFilterEndDate,
+    listFilterOverdue,
+    setListFilterOverdue,
+    currentFilterSnapshot,
+    applyFilterSnapshot,
     issueSearch,
     setIssueSearch,
     listPage,
@@ -328,6 +332,11 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           setListFilterStartDate={setListFilterStartDate}
           listFilterEndDate={listFilterEndDate}
           setListFilterEndDate={setListFilterEndDate}
+          listFilterOverdue={listFilterOverdue}
+          setListFilterOverdue={setListFilterOverdue}
+          projectId={selectedProject?.id}
+          currentFilterSnapshot={currentFilterSnapshot}
+          onApplySavedFilter={applyFilterSnapshot}
           projectMembers={projectMembers}
           sprints={sprints}
           masterData={mArr}
@@ -568,6 +577,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           tasks={rawTasks}
           masterData={mArr}
           projectMembers={projectMembers}
+          sprints={sprints}
           updateTaskField={updateTaskField}
           deleteTask={deleteTask}
           bulkDeleteTasks={bulkDeleteTasks}

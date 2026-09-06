@@ -1,11 +1,13 @@
 import { useTranslation } from "react-i18next";
 import React from "react";
 import { AnimatePresence } from "motion/react";
-import { Search, Filter, X, Calendar, Settings2, MoreHorizontal, Plus } from "lucide-react";
+import { Search, Filter, X, Calendar, Settings2, Plus } from "lucide-react";
 import { cn } from "../../../../lib/utils";
 import { styles } from "../../styles";
 import { MasterData, UserProfile, Sprint } from "../../../../types";
 import { IssueAdvancedFiltersExpanded } from "./IssueAdvancedFiltersExpanded";
+import { IssueSavedFiltersMenu } from "./IssueSavedFiltersMenu";
+import type { IssueFilterSnapshot } from "../../lib/issueFilterSnapshot";
 
 interface IssueAdvancedFiltersPanelProps {
   issueSearch: string;
@@ -38,6 +40,11 @@ interface IssueAdvancedFiltersPanelProps {
   setListFilterStartDate: (val: string) => void;
   listFilterEndDate: string;
   setListFilterEndDate: (val: string) => void;
+  listFilterOverdue: boolean;
+  setListFilterOverdue: (val: boolean) => void;
+  projectId?: string;
+  currentFilterSnapshot: IssueFilterSnapshot;
+  onApplySavedFilter: (snapshot: IssueFilterSnapshot) => void;
   projectMembers: UserProfile[];
   sprints: Sprint[];
   masterData: MasterData[];
@@ -83,6 +90,11 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
   setListFilterStartDate,
   listFilterEndDate,
   setListFilterEndDate,
+  listFilterOverdue,
+  setListFilterOverdue,
+  projectId,
+  currentFilterSnapshot,
+  onApplySavedFilter,
   projectMembers,
   sprints,
   masterData,
@@ -109,6 +121,7 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
   if (listFilterResolution !== "All") activeCount++;
   if (listFilterStartDate) activeCount++;
   if (listFilterEndDate) activeCount++;
+  if (listFilterOverdue) activeCount++;
 
   return (
     <>
@@ -154,12 +167,11 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             >
               <Settings2 className="w-4 h-4" />
             </button>
-            <button
-              type="button"
-              className="p-2 bg-surface border border-border-subtle rounded-lg text-content-muted hover:text-content-body transition-all shadow-soft"
-            >
-              <MoreHorizontal className="w-4 h-4" />
-            </button>
+            <IssueSavedFiltersMenu
+              projectId={projectId}
+              currentSnapshot={currentFilterSnapshot}
+              onApply={onApplySavedFilter}
+            />
             {canCreateIssue && onAddIssue && (
               <button
                 type="button"
@@ -213,11 +225,25 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             {listFilterAssignee !== "All" && (
               <span className="text-[10px] leading-none font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full border border-primary/30 flex items-center gap-1 shadow-soft">
                 {t("filters.assignee")}{" "}
-                {projectMembers.find((m) => m.uid === listFilterAssignee)?.displayName ||
-                  t("newTask.unassigned")}
+                {listFilterAssignee === "unassigned"
+                  ? t("bulkActions.unassignedClear")
+                  : projectMembers.find((m) => m.uid === listFilterAssignee)?.displayName ||
+                    t("newTask.unassigned")}
                 <button
                   type="button"
                   onClick={() => setListFilterAssignee("All")}
+                  className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
+                >
+                  <X className="w-2.5 h-2.5 ml-0.5" />
+                </button>
+              </span>
+            )}
+            {listFilterOverdue && (
+              <span className="text-[10px] leading-none font-medium text-rose-700 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/30 flex items-center gap-1 shadow-soft">
+                {t("filters.overdueOnly")}
+                <button
+                  type="button"
+                  onClick={() => setListFilterOverdue(false)}
                   className="hover:text-red-500 font-medium transition-colors outline-none inline-flex items-center"
                 >
                   <X className="w-2.5 h-2.5 ml-0.5" />
@@ -349,6 +375,8 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             setListFilterStatus={setListFilterStatus}
             listFilterPriority={listFilterPriority}
             setListFilterPriority={setListFilterPriority}
+            listFilterAssignee={listFilterAssignee}
+            setListFilterAssignee={setListFilterAssignee}
             listFilterSprint={listFilterSprint}
             setListFilterSprint={setListFilterSprint}
             listFilterLabel={listFilterLabel}
@@ -369,6 +397,9 @@ export const IssueAdvancedFiltersPanel: React.FC<IssueAdvancedFiltersPanelProps>
             setListFilterStartDate={setListFilterStartDate}
             listFilterEndDate={listFilterEndDate}
             setListFilterEndDate={setListFilterEndDate}
+            listFilterOverdue={listFilterOverdue}
+            setListFilterOverdue={setListFilterOverdue}
+            projectMembers={projectMembers}
             sprints={sprints}
             masterData={masterData}
             allLabels={allLabels}

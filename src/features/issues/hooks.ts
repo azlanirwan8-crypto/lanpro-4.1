@@ -1,15 +1,23 @@
 import i18n from "../../i18n";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Task } from "../../types";
 import { IssueListViewProps } from "./types";
 import { toast } from "sonner";
 import { createTask } from "./services/issues.service";
 import { useAppStore } from "../../store/useAppStore";
 import { suppressTaskDataRefresh } from "../../lib/taskRefreshControl";
+import {
+  DEFAULT_ISSUE_FILTER_SNAPSHOT,
+  isIssueOverdue,
+  loadSessionFilters,
+  saveSessionFilters,
+  type IssueFilterSnapshot,
+} from "./lib/issueFilterSnapshot";
 
 export const useIssueList = (props: IssueListViewProps) => {
   const { tasks, roots, selectedProject, user, masterData, userRole } = props;
   const setTasks = useAppStore((s) => s.setTasks);
+  const projectId = selectedProject?.id || "";
 
   // UI state
   const [listFilterStatus, setListFilterStatus] = useState("All");
@@ -25,12 +33,14 @@ export const useIssueList = (props: IssueListViewProps) => {
   const [listFilterDateType, setListFilterDateType] = useState("dueDate");
   const [listFilterStartDate, setListFilterStartDate] = useState("");
   const [listFilterEndDate, setListFilterEndDate] = useState("");
+  const [listFilterOverdue, setListFilterOverdue] = useState(false);
 
   const [issueSearch, setIssueSearch] = useState("");
   const [listPage, setListPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
   const [selectedTaskIds, setSelectedTaskIds] = useState<Set<string>>(new Set());
+  const sessionHydratedRef = useRef<string | null>(null);
 
   // Columns state
   const [issueTableColumns, setIssueTableColumns] = useState([
@@ -69,6 +79,81 @@ export const useIssueList = (props: IssueListViewProps) => {
   const [isCreating, setIsCreating] = useState(false);
   const createInFlightRef = useRef(false);
 
+  const applyFilterSnapshot = (snap: IssueFilterSnapshot) => {
+    setIssueSearch(snap.search || "");
+    setListFilterStatus(snap.status || "All");
+    setListFilterPriority(snap.priority || "All");
+    setListFilterAssignee(snap.assignee || "All");
+    setListFilterCategory(snap.category || "All");
+    setListFilterSprint(snap.sprint || "All");
+    setListFilterLabel(snap.label || "All");
+    setListFilterEnvironment(snap.environment || "All");
+    setListFilterProjectRisk(snap.projectRisk || "All");
+    setListFilterRelease(snap.release || "All");
+    setListFilterResolution(snap.resolution || "All");
+    setListFilterDateType(snap.dateType || "dueDate");
+    setListFilterStartDate(snap.startDate || "");
+    setListFilterEndDate(snap.endDate || "");
+    setListFilterOverdue(Boolean(snap.overdue));
+    setListPage(1);
+  };
+
+  const currentFilterSnapshot = useMemo(
+    (): IssueFilterSnapshot => ({
+      search: issueSearch,
+      status: listFilterStatus,
+      priority: listFilterPriority,
+      assignee: listFilterAssignee,
+      category: listFilterCategory,
+      sprint: listFilterSprint,
+      label: listFilterLabel,
+      environment: listFilterEnvironment,
+      projectRisk: listFilterProjectRisk,
+      release: listFilterRelease,
+      resolution: listFilterResolution,
+      dateType: listFilterDateType,
+      startDate: listFilterStartDate,
+      endDate: listFilterEndDate,
+      overdue: listFilterOverdue,
+    }),
+    [
+      issueSearch,
+      listFilterStatus,
+      listFilterPriority,
+      listFilterAssignee,
+      listFilterCategory,
+      listFilterSprint,
+      listFilterLabel,
+      listFilterEnvironment,
+      listFilterProjectRisk,
+      listFilterRelease,
+      listFilterResolution,
+      listFilterDateType,
+      listFilterStartDate,
+      listFilterEndDate,
+      listFilterOverdue,
+    ]
+  );
+
+  // #468 — pulihkan filter sesi per proyek
+  useEffect(() => {
+    if (!projectId) return;
+    if (sessionHydratedRef.current === projectId) return;
+    sessionHydratedRef.current = projectId;
+    const saved = loadSessionFilters(projectId);
+    if (saved) applyFilterSnapshot(saved);
+    else applyFilterSnapshot(DEFAULT_ISSUE_FILTER_SNAPSHOT);
+  }, [projectId]);
+
+  // #468 — persist sesi (debounce)
+  useEffect(() => {
+    if (!projectId || sessionHydratedRef.current !== projectId) return;
+    const timer = setTimeout(() => {
+      saveSessionFilters(projectId, currentFilterSnapshot);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [projectId, currentFilterSnapshot]);
+
   const currentUserId =
     props.currentUserProfile?.uid ||
     props.currentUserProfile?.id ||
@@ -90,6 +175,7 @@ export const useIssueList = (props: IssueListViewProps) => {
 
   const rawTasks = Array.isArray(tasks) ? tasks : [];
   const isAdminOrManager = ["admin", "manager", "head"].includes(userRole || "");
+  const mArr = Array.isArray(masterData) ? masterData : [];
 
   const tArr = useMemo(() => {
     return rawTasks;
@@ -104,7 +190,6 @@ export const useIssueList = (props: IssueListViewProps) => {
     const query = issueSearch.toLowerCase().trim();
 
     return rootList.filter((root: Task) => {
-      // Direct helper to determine if an individual task matches filters & search query
       const matchesFiltersAndSearch = (t: Task) => {
         const matchesS =
           !query ||
@@ -117,12 +202,13 @@ export const useIssueList = (props: IssueListViewProps) => {
           return false;
         if (listFilterPriority && listFilterPriority !== "All" && t.priority !== listFilterPriority)
           return false;
-        if (
-          listFilterAssignee &&
-          listFilterAssignee !== "All" &&
-          t.assigneeId !== listFilterAssignee
-        )
-          return false;
+        if (listFilterAssignee && listFilterAssignee !== "All") {
+          if (listFilterAssignee === "unassigned") {
+            if (t.assigneeId) return false;
+          } else if (t.assigneeId !== listFilterAssignee) {
+            return false;
+          }
+        }
         if (listFilterCategory && listFilterCategory !== "All" && t.category !== listFilterCategory)
           return false;
         if (listFilterSprint && listFilterSprint !== "All") {
@@ -130,7 +216,6 @@ export const useIssueList = (props: IssueListViewProps) => {
           if (listFilterSprint !== "Backlog" && t.sprintId !== listFilterSprint) return false;
         }
 
-        // Custom field / Attribute filtering
         if (
           listFilterEnvironment &&
           listFilterEnvironment !== "All" &&
@@ -152,13 +237,13 @@ export const useIssueList = (props: IssueListViewProps) => {
         )
           return false;
 
-        // Label filtering
         if (listFilterLabel && listFilterLabel !== "All") {
           if (!t.labels || !Array.isArray(t.labels) || !t.labels.includes(listFilterLabel))
             return false;
         }
 
-        // Date Range filtering
+        if (listFilterOverdue && !isIssueOverdue(t, mArr)) return false;
+
         if (listFilterStartDate || listFilterEndDate) {
           const col = listFilterDateType;
           const checkDateValue = (columnKey: string, taskItem: Task): boolean => {
@@ -193,15 +278,11 @@ export const useIssueList = (props: IssueListViewProps) => {
         return true;
       };
 
-      // Does the root task itself match?
       const rootMatches = matchesFiltersAndSearch(root);
-
-      // Do any of its subtasks match? (direct subtasks or nested)
       const subtasks = tArr.filter((c) => c.parentId === root.id);
       const childMatches = subtasks.some((child) => matchesFiltersAndSearch(child));
 
       if (childMatches && query) {
-        // Auto expand this root task so matching subtasks are instantly visible
         setExpandedTasks((prev) => {
           if (prev.has(root.id)) return prev;
           const next = new Set(prev);
@@ -229,6 +310,8 @@ export const useIssueList = (props: IssueListViewProps) => {
     listFilterDateType,
     listFilterStartDate,
     listFilterEndDate,
+    listFilterOverdue,
+    mArr,
   ]);
 
   const handleToggleSelectAll = () => {
@@ -295,7 +378,6 @@ export const useIssueList = (props: IssueListViewProps) => {
 
     setTasks((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
 
-    // Tahan refetch socket sebelum POST — data_changed terbit saat res.finish, bukan setelah await.
     suppressTaskDataRefresh(8000);
     createInFlightRef.current = false;
     setIsCreating(false);
@@ -394,6 +476,10 @@ export const useIssueList = (props: IssueListViewProps) => {
     setListFilterStartDate,
     listFilterEndDate,
     setListFilterEndDate,
+    listFilterOverdue,
+    setListFilterOverdue,
+    currentFilterSnapshot,
+    applyFilterSnapshot,
     issueSearch,
     setIssueSearch,
     listPage,
@@ -435,5 +521,7 @@ export const useIssueList = (props: IssueListViewProps) => {
     handleInlineAdd,
     handleReorderColumns,
     handleColumnResize,
+    validIdentifiers,
+    isAdminOrManager,
   };
 };

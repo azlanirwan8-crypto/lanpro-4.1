@@ -612,7 +612,7 @@ jadi §1.1 tetap sumber kebenarannya; halaman itu acuan, bukan pengganti.
 
 ---
 
-## §1 PAPAN PRIORITAS — 6 BELUM · 457 SELESAI · 4 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 6 BELUM · 458 SELESAI · 4 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -627,7 +627,7 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
 **Sebaran per fase:** F0 0 · F1 0 · F2 0 · F3 0 · F4 0 · F5 1 · F6 1 · F7 0 · F8 0 · F9 0 · F10 2 · F11 1 · F12 0 · F13 1
 
-**Dihitung ulang 06 Sep 2026 (pasca #335 tutup):** F5 #305 · F6 #290 · F11 #30 · F13 #320 · F10 #433 #434. **#335 → §1.2**. **#459–#465 → §1.2** (#346 sudah SELESAI lama). Rekap: **§24.9**.
+**Dihitung ulang 06 Sep 2026 (pasca #468 tutup kode):** F5 #305 · F6 #290 · F11 #30 · F13 #320 · F10 #433 #434. **#468 → §1.2**. Rekap: **§24.9**.
 
 Catatan: #465 waterfall kanonik (copy Sprint + nav dual-mode ala Jira) + #463 FK QA `linkedTaskId` SELESAI kode 06 Sep. #346 dihormati (iris tipis, bukan marketplace). #335 tetap checklist visual.
 
@@ -661,9 +661,9 @@ Sumber: probe Chrome CDP 06 Sep 2026 (sesi Administrator, proyek Personal Channe
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
 
-#### F4 tambahan — Iris PM sisa usulan (§3 product review; 0 terbuka; #463 #465 → §1.2)
+#### F4 tambahan — Iris PM sisa usulan (§3 product review; 0 terbuka; #463 #465 #468 → §1.2)
 
-Sumber: canvas Product Review §3 (06 Sep). #461 #462 #464 #463 #465 SELESAI kode. #346 dihormati (iris).
+Sumber: canvas Product Review §3 (06 Sep). #461 #462 #464 #463 #465 SELESAI kode. #346 dihormati (iris). #468 DITUTUP kode 06 Sep (Opsi 1 pemilik).
 
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
@@ -836,7 +836,7 @@ Sumber: sisir ulang setelah `45ae6e9`. **DITUTUP kode 04 Sep 2026.** E2E lapanga
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
 
-### 1.2 SUDAH SELESAI — 457 item
+### 1.2 SUDAH SELESAI — 458 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -845,6 +845,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | --- | ------ | :--: | :-: | ----- | :----------------: | ------ | ------ |
 
 | 335 | **Checklist visual tab bersih (#335).** DITUTUP 06 Sep 2026 (keputusan pemilik: tutup): probe CDP 11/11 modul light+dark OK (Administrator · Personal Channel & Services); dashboard recheck setelah Memuat; rose=0; PageHeader #467 terbukti. Artefak .tmp-335/*.png. Gerbang ≠ pengganti; bukti lapangan dicentang pemilik. | **F0** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (visual pemilik) | §1.1 |
+| 468 | **Iris issue tracker (#468).** DITUTUP 06 Sep 2026 (opsi 1 pemilik): dropdown Assignee+unassigned; saved filters named + session localStorage/proyek; bulk priority+sprint; chip Overdue (dueDate+non-terminal). Lib issueFilterSnapshot + tes. Bukan JQL/SLA penuh. UI tab bersih Issues belum. | **F4** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
 | 467 | **Tipografi gemuk & penempatan (#467).** DITUTUP 06 Sep 2026 (keputusan pemilik: hasil maksimal): PageHeader/DetailViewChrome font-medium + tracking-normal + leading-snug; sapuan uppercase+tracking-wide→normal di ±64 berkas; Login/Register h-11 + label medium; soften bold Sessions. UI tab bersih → #335. | **F3** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
 | 466 | **Dokumen gabungan BRD+FSD+TSD v3.1 (#466).** DITUTUP 06 Sep 2026 (keputusan pemilik 1-4): rewrite docs/SYSTEM_DOCUMENTATION_BRD_FSD_TSD.md — BRD/FSD/TSD, flowchart per role, Agile/Waterfall, spesifikasi per modul (swimlane), Meeting AI dalam, Auth/OIDC, matriks RBAC Two-Tier. PDF DRAFT di docs/. Bukan klaim #320/#335 selesai. | **F0** | 🟡 | Sedang | Tidak | SELESAI 06 Sep (dokumen) | §1.1 |
 | 465 | **Waterfall kanonik + copy Sprint bersih (#465).** DITUTUP 06 Sep 2026 (keputusan pemilik: hidupkan dual-mode ala Jira + hormati #346 iris): i18n EN/ID Phase→Sprint untuk dialog/planning; sidebar Waterfall label Roadmap & Milestones; `alurMetodologi` + tes. Nav sembunyikan Sprint (#311) + Milestone (#312) tetap. Bukan CPM/WBS. UI → #335. | **F4** | 🟡 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
