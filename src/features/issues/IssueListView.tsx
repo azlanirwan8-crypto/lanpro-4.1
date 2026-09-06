@@ -437,7 +437,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                             >
                               <div className="flex flex-col items-center gap-3 opacity-40">
                                 <Search className="w-8 h-8 text-content-subtle" />
-                                <p className="text-xs font-normal text-content-muted uppercase tracking-wider">
+                                <p className="text-xs font-normal text-content-muted uppercase tracking-normal">
                                   {t("issues.noMatchingRecordsFound")}
                                 </p>
                               </div>

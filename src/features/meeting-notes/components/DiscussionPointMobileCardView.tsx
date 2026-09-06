@@ -145,7 +145,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
 
             {/* Concern / Issue Title */}
             <div>
-              <span className="text-[10px] font-medium uppercase tracking-wider text-content-subtle block mb-0.5">
+              <span className="text-[10px] font-normal uppercase tracking-normal text-content-subtle block mb-0.5">
                 {t("discussion.thConcern")}
               </span>
               <p
@@ -161,7 +161,7 @@ export const DiscussionPointMobileCardView: React.FC<DiscussionPointMobileCardVi
             {/* Notes / Keterangan */}
             {p.keterangan && (
               <div className="p-2 bg-surface-sunken/60 rounded-md border border-border-subtle/60 text-xs text-content-body leading-relaxed">
-                <span className="text-[10px] font-medium uppercase tracking-wider text-content-subtle block mb-0.5">
+                <span className="text-[10px] font-normal uppercase tracking-normal text-content-subtle block mb-0.5">
                   {t("discussion.thNotes")}
                 </span>
                 <p className="whitespace-pre-wrap">{p.keterangan}</p>

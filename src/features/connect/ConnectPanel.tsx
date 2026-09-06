@@ -119,7 +119,7 @@ export const ConnectPanel = ({ hideHeader }: { hideHeader?: boolean } = {}) => {
             <CheckCircle2 className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-normal text-content-strong uppercase tracking-wide">
+            <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
               {t("connect.mysqlHelp")}
             </h3>
             <p className="text-content-secondary mt-1 text-xs leading-relaxed">
@@ -131,7 +131,7 @@ export const ConnectPanel = ({ hideHeader }: { hideHeader?: boolean } = {}) => {
         {/* Config Form Card — #397 */}
         <Card className="shadow-2xs rounded-lg">
           <CardHeader className="px-4 py-3 bg-surface-sunken/80">
-            <h2 className="text-xs font-normal text-content-strong uppercase tracking-wide flex items-center gap-2">
+            <h2 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
               <Database className="w-4 h-4 text-primary" />
               {t("connect.mysqlConfig")}
             </h2>

@@ -197,7 +197,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                   <div className="p-1.5 bg-danger/10 text-danger-text rounded-md">
                     <Lock className="w-3.5 h-3.5 animate-pulse" />
                   </div>
-                  <span className="text-[10px] text-danger-text font-normal uppercase tracking-wider">
+                  <span className="text-[10px] text-danger-text font-normal uppercase tracking-normal">
                     {t("qaTop.lockedByOther")}
                   </span>
                   <span className="text-xs font-medium text-content-body">
@@ -208,7 +208,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     currentUserRole === "manager") && (
                     <button
                       onClick={handleForceUnlock}
-                      className="ml-1 px-2 py-1 bg-danger-surface hover:bg-danger-hover text-content-inverse text-[10px] font-normal uppercase tracking-wider rounded-md transition-all shadow-xs flex items-center gap-1 cursor-pointer"
+                      className="ml-1 px-2 py-1 bg-danger-surface hover:bg-danger-hover text-content-inverse text-[10px] font-normal uppercase tracking-normal rounded-md transition-all shadow-xs flex items-center gap-1 cursor-pointer"
                     >
                       <ShieldAlert className="w-3 h-3" />
                       {t("qaTop.forceUnlock")}
@@ -220,7 +220,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                   <div className="p-1.5 bg-success/10 text-success-text rounded-md">
                     <Unlock className="w-3.5 h-3.5" />
                   </div>
-                  <span className="text-[10px] text-success-text font-normal uppercase tracking-wider">
+                  <span className="text-[10px] text-success-text font-normal uppercase tracking-normal">
                     {t("qaTop.youHoldLock")}
                   </span>
                   <span className="px-1.5 py-[2px] bg-primary-surface/10 text-primary text-[10px] leading-none font-medium rounded-md">
@@ -228,7 +228,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                   </span>
                   <button
                     onClick={releaseLockManually}
-                    className="ml-1 px-2 py-1 bg-surface hover:bg-surface-sunken text-content-body text-[10px] font-normal uppercase tracking-wider rounded-md transition-all cursor-pointer border border-border-subtle"
+                    className="ml-1 px-2 py-1 bg-surface hover:bg-surface-sunken text-content-body text-[10px] font-normal uppercase tracking-normal rounded-md transition-all cursor-pointer border border-border-subtle"
                   >
                     {t("qaTop.unlockNow")}
                   </button>
@@ -248,7 +248,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-primary-surface text-content-inverse font-normal text-[10px] rounded-md uppercase tracking-wider">
+              <span className="px-2 py-0.5 bg-primary-surface text-content-inverse font-normal text-[10px] rounded-md uppercase tracking-normal">
                 {activeSuite.phase}
               </span>
               <h2 className="text-sm font-semibold text-content-strong tracking-tight">
@@ -438,7 +438,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                     onClick={() => setIsBulkPicDropdownOpen(false)}
                   />
                   <div className="absolute right-0 top-full mt-1.5 w-60 bg-surface text-content-strong rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
-                    <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-wider text-primary border-b border-border-faint mb-1">
+                    <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
                       {t("rakit.assignPicToTasks", { count: selectedCaseIds.length })}
                     </div>
                     <button
@@ -533,7 +533,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
         <div className="hidden sm:block overflow-x-auto">
           <ResponsiveTable className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-primary-surface/5 border-b border-primary/15 text-[10px] font-normal uppercase tracking-wider text-content-subtle">
+              <tr className="bg-primary-surface/5 border-b border-primary/15 text-[10px] font-normal uppercase tracking-normal text-content-subtle">
                 {/* SELECT ALL CHECKBOX (For Admin / Users with edit access) */}
                 <th className="py-2.5 px-3 w-8 text-center" onClick={(e) => e.stopPropagation()}>
                   {(canUpdate || isAdminRole) && (
@@ -618,7 +618,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                       {/* Velzon Priority Compact Pill Badge */}
                       <td className="py-2.5 px-3 text-center">
                         <span
-                          className={`px-2 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-wider inline-block ${
+                          className={`px-2 py-0.5 rounded text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-normal inline-block ${
                             tc.priority === "Critical" || tc.priority === "High"
                               ? "bg-rose-500/10 text-danger-text border border-rose-500/30"
                               : tc.priority === "Low"
@@ -661,7 +661,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                             ]}
                             masterData={[]}
                             className="min-w-[100px]"
-                            buttonClassName={`py-1 px-2.5 rounded-md text-xs sm:text-[10px] font-normal uppercase tracking-wider border shadow-2xs ${
+                            buttonClassName={`py-1 px-2.5 rounded-md text-xs sm:text-[10px] font-normal uppercase tracking-normal border shadow-2xs ${
                               tc.status === "Passed"
                                 ? "bg-emerald-500/10 text-success-text border-emerald-500/30"
                                 : tc.status === "Failed"
@@ -720,7 +720,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                                   }}
                                 />
                                 <div className="absolute right-0 top-full mt-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
-                                  <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-wider text-primary border-b border-border-faint mb-1">
+                                  <div className="px-3.5 py-1.5 text-xs sm:text-[10px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
                                     {t("qa.assignPicTask")}
                                   </div>
                                   <button

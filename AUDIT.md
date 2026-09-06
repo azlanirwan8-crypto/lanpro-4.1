@@ -612,7 +612,7 @@ jadi §1.1 tetap sumber kebenarannya; halaman itu acuan, bukan pengganti.
 
 ---
 
-## §1 PAPAN PRIORITAS — 7 BELUM · 455 SELESAI · 4 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 7 BELUM · 456 SELESAI · 4 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -837,7 +837,7 @@ Sumber: sisir ulang setelah `45ae6e9`. **DITUTUP kode 04 Sep 2026.** E2E lapanga
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
 
-### 1.2 SUDAH SELESAI — 455 item
+### 1.2 SUDAH SELESAI — 456 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -845,6 +845,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | #   | Temuan | Fase | Sev | Biaya | Blokir modul baru? | Status | Detail |
 | --- | ------ | :--: | :-: | ----- | :----------------: | ------ | ------ |
 
+| 467 | **Tipografi gemuk & penempatan (#467).** DITUTUP 06 Sep 2026 (keputusan pemilik: hasil maksimal): PageHeader/DetailViewChrome font-medium + tracking-normal + leading-snug; sapuan uppercase+tracking-wide→normal di ±64 berkas; Login/Register h-11 + label medium; soften bold Sessions. UI tab bersih → #335. | **F3** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
 | 466 | **Dokumen gabungan BRD+FSD+TSD v3.1 (#466).** DITUTUP 06 Sep 2026 (keputusan pemilik 1-4): rewrite docs/SYSTEM_DOCUMENTATION_BRD_FSD_TSD.md — BRD/FSD/TSD, flowchart per role, Agile/Waterfall, spesifikasi per modul (swimlane), Meeting AI dalam, Auth/OIDC, matriks RBAC Two-Tier. PDF DRAFT di docs/. Bukan klaim #320/#335 selesai. | **F0** | 🟡 | Sedang | Tidak | SELESAI 06 Sep (dokumen) | §1.1 |
 | 465 | **Waterfall kanonik + copy Sprint bersih (#465).** DITUTUP 06 Sep 2026 (keputusan pemilik: hidupkan dual-mode ala Jira + hormati #346 iris): i18n EN/ID Phase→Sprint untuk dialog/planning; sidebar Waterfall label Roadmap & Milestones; `alurMetodologi` + tes. Nav sembunyikan Sprint (#311) + Milestone (#312) tetap. Bukan CPM/WBS. UI → #335. | **F4** | 🟡 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
 | 463 | **FK QA case → Task (#463).** DITUTUP 06 Sep 2026: kolom `linkedTaskId` + backfill dari `linkedBugKey`↔taskKey; create-bug menulis keduanya; findLinked by id/key; PUT taut iris `setLinkedTask`; `linkedBugKey` tetap tampilan. Tes qa.linked-task-463. Tanpa sentuh db.ts. UI → #335. | **F4** | 🟡 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |

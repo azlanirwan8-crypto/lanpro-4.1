@@ -76,7 +76,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
   return (
     <div className="space-y-4 pt-4 border-t border-border-faint">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs sm:text-[10px] font-normal uppercase tracking-widest text-content-subtle flex items-center gap-1.5">
+        <h4 className="text-xs sm:text-[10px] font-normal uppercase tracking-normal text-content-subtle flex items-center gap-1.5">
           <GitBranch className="w-3.5 h-3.5 text-primary" />
           {t("issues.dependenciesPanel", t("issues.relatedIssues"))}
         </h4>
@@ -99,7 +99,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
         <div className="space-y-4">
           {grouped.map(({ relation, items }) => (
             <div key={relation} className="space-y-2">
-              <div className="text-[10px] font-medium uppercase tracking-wider text-content-subtle">
+              <div className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
                 {relationLabel(relation)}
                 <span className="ml-1 tabular-nums text-content-muted">({items.length})</span>
               </div>

@@ -53,7 +53,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
           <div className="bg-surface-sunken border border-border-subtle rounded-xl p-4 mb-6">
             <div className="flex items-center gap-2 mb-3">
               <Activity className="w-4 h-4 text-emerald-500" />
-              <span className="text-xs font-normal text-content-secondary uppercase tracking-wider">
+              <span className="text-xs font-normal text-content-secondary uppercase tracking-normal">
                 {t("collision.currentSession")}
               </span>
             </div>
@@ -61,7 +61,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
               <div className="flex items-start gap-3">
                 <Globe className="w-4 h-4 text-content-subtle mt-0.5 shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase">
+                  <div className="text-xs sm:text-[10px] text-content-subtle font-normal uppercase">
                     {t("collision.ipAddress")}
                   </div>
                   <div className="text-sm font-medium text-content-body truncate">
@@ -73,7 +73,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
               <div className="flex items-start gap-3">
                 <Monitor className="w-4 h-4 text-content-subtle mt-0.5 shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs sm:text-[10px] text-content-subtle font-medium uppercase">
+                  <div className="text-xs sm:text-[10px] text-content-subtle font-normal uppercase">
                     {t("collision.deviceBrowser")}
                   </div>
                   <div className="text-sm font-medium text-content-body truncate">

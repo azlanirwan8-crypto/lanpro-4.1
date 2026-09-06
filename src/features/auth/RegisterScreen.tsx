@@ -126,7 +126,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
       <form className="space-y-3" onSubmit={handleRegisterSubmit}>
         {/* FULL NAME INPUT */}
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-content-body tracking-wide block">
+          <label className="text-xs font-medium text-content-body tracking-normal block">
             {t("register.fullName")} <span className="text-danger-text">*</span>
           </label>
           <input
@@ -136,7 +136,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder={t("register.namePlaceholder")}
             className={cn(
-              "w-full px-3.5 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
+              "w-full h-11 px-3.5 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
               fieldErrors.name
                 ? "border-danger focus:ring-danger/20 focus:border-danger"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -152,7 +152,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
 
         {/* EMAIL ADDRESS INPUT */}
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-content-body tracking-wide block">
+          <label className="text-xs font-medium text-content-body tracking-normal block">
             {t("forgotPwd.emailAddress")} <span className="text-danger-text">*</span>
           </label>
           <input
@@ -161,7 +161,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             onChange={(e) => handleEmailChange(e.target.value)}
             placeholder={t("register.emailPlaceholder")}
             className={cn(
-              "w-full px-3.5 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
+              "w-full h-11 px-3.5 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
               fieldErrors.email
                 ? "border-danger focus:ring-danger/20 focus:border-danger"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -177,7 +177,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
 
         {/* USERNAME INPUT */}
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-content-body tracking-wide block">
+          <label className="text-xs font-medium text-content-body tracking-normal block">
             {t("common.username")} <span className="text-danger-text">*</span>{" "}
             <span className="text-xs sm:text-[11px] text-content-subtle font-normal">
               {t("register.lettersOnlyMax10")}
@@ -190,7 +190,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             onChange={handleUsernameChange}
             placeholder={t("register.usernamePlaceholder")}
             className={cn(
-              "w-full px-3.5 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
+              "w-full h-11 px-3.5 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
               fieldErrors.username
                 ? "border-danger focus:ring-danger/20 focus:border-danger"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -206,7 +206,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
 
         {/* PASSWORD INPUT & STRENGTH METER */}
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-content-body tracking-wide block">
+          <label className="text-xs font-medium text-content-body tracking-normal block">
             {t("register.password")} <span className="text-danger-text">*</span>
           </label>
           <div className="relative">
@@ -216,7 +216,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               onChange={(e) => handlePasswordChange(e.target.value)}
               placeholder={t("register.passwordPlaceholder")}
               className={cn(
-                "w-full pl-3.5 pr-10 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
+                "w-full h-11 pl-3.5 pr-10 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
                 fieldErrors.password
                   ? "border-danger focus:ring-danger/20 focus:border-danger"
                   : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -310,7 +310,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         <button
           type="submit"
           disabled={isRegistering}
-          className="w-full bg-primary-surface text-content-inverse py-3 rounded-lg font-normal uppercase tracking-wider text-xs hover:bg-primary-surface-hover transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full bg-primary-surface text-content-inverse py-3 rounded-lg font-normal uppercase tracking-normal text-xs hover:bg-primary-surface-hover transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {isRegistering ? (
             <>

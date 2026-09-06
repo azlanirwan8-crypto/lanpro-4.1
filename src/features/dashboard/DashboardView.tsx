@@ -685,7 +685,7 @@ export function DashboardView(props: DashboardViewProps) {
           >
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
+                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
                   {t("dashboard.totalTasks")}
                 </span>
                 <h3 className="text-2xl font-semibold text-content-strong mt-1">{totalTasks}</h3>
@@ -727,7 +727,7 @@ export function DashboardView(props: DashboardViewProps) {
           >
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-inverse/70">
+                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-inverse/70">
                   {t("dashboard.runningTasks")}
                 </span>
                 <h3 className="text-2xl font-semibold text-content-inverse mt-1">
@@ -758,7 +758,7 @@ export function DashboardView(props: DashboardViewProps) {
           >
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
+                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
                   {t("dashboard.doneTasks")}
                 </span>
                 <h3 className="text-2xl font-semibold text-content-strong mt-1">
@@ -805,7 +805,7 @@ export function DashboardView(props: DashboardViewProps) {
           >
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
+                <span className="text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
                   {t("dashboard.blockedTasks")}
                 </span>
                 {/* #111 — nol berarti TIDAK ADA yang tersumbat, itu kabar baik.
@@ -861,7 +861,7 @@ export function DashboardView(props: DashboardViewProps) {
             <Card hoverLift className="p-5 shadow-2xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
                 <div>
-                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-primary" />
                     {t("dashboard.sprintOverview")}
                   </h3>
@@ -991,7 +991,7 @@ export function DashboardView(props: DashboardViewProps) {
               {/* #342 — Burndown sprint aktif (Ideal vs Remaining) */}
               {burndownData && burndownData.length > 0 && (
                 <div className="mt-6 pt-5 border-t border-border-faint">
-                  <h4 className="text-xs font-normal text-content-strong uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <h4 className="text-xs font-normal text-content-strong uppercase tracking-normal mb-3 flex items-center gap-2">
                     <Target className="w-3.5 h-3.5 text-primary" />
                     {t("dashboard.burndownTitle")}
                   </h4>
@@ -1058,7 +1058,7 @@ export function DashboardView(props: DashboardViewProps) {
 
               {/* #342 — Throughput mingguan */}
               <div className="mt-6 pt-5 border-t border-border-faint">
-                <h4 className="text-xs font-normal text-content-strong uppercase tracking-wider mb-3 flex items-center gap-2">
+                <h4 className="text-xs font-normal text-content-strong uppercase tracking-normal mb-3 flex items-center gap-2">
                   <Activity className="w-3.5 h-3.5 text-success-text" />
                   {t("dashboard.throughputTitle")}
                 </h4>
@@ -1111,7 +1111,7 @@ export function DashboardView(props: DashboardViewProps) {
               {/* {t("dashboard.breakdownByType")} (Epic, Story, Task, Bug, Subtask) */}
               <Card hoverLift className="p-5 shadow-2xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
-                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
                     <LayoutGrid className="w-4 h-4 text-primary" />
                     {t("dashboard.breakdownByType")}
                   </h3>
@@ -1159,7 +1159,7 @@ export function DashboardView(props: DashboardViewProps) {
               {/* {t("dashboard.breakdownByStatus")} (To Do, In Progress, Review, Done, Blocked) */}
               <Card hoverLift className="p-5 shadow-2xs space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
-                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
                     <PieChartIcon className="w-4 h-4 text-success-text" />
                     {t("dashboard.breakdownByStatus")}
                   </h3>
@@ -1205,7 +1205,7 @@ export function DashboardView(props: DashboardViewProps) {
             <Card hoverLift className="p-5 shadow-2xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 border-b border-border-faint pb-3 gap-2">
                 <div>
-                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
                     <Users className="w-4 h-4 text-primary" />
                     {t("dashboard.workloadTitle")}
                   </h3>
@@ -1224,7 +1224,7 @@ export function DashboardView(props: DashboardViewProps) {
               <div className="overflow-x-auto">
                 <ResponsiveTable className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-border-faint text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
+                    <tr className="border-b border-border-faint text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
                       <th className="py-2.5 px-2">{t("dashboard.thMember")}</th>
                       <th className="py-2.5 px-2">{t("dashboard.thRunning")}</th>
                       <th className="py-2.5 px-2">{t("dashboard.thDone")}</th>
@@ -1318,7 +1318,7 @@ export function DashboardView(props: DashboardViewProps) {
             <Card hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <div>
-                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
                     <Target className="w-4 h-4 text-primary" />
                     {t("dashboard.epicTitle")}
                   </h3>
@@ -1378,7 +1378,7 @@ export function DashboardView(props: DashboardViewProps) {
             <Card hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <div>
-                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
                     <Clock className="w-4 h-4 text-info-text" />
                     {t("dashboard.timeTitle")}
                   </h3>
@@ -1393,7 +1393,7 @@ export function DashboardView(props: DashboardViewProps) {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
-                  <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase">
+                  <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase">
                     {t("dashboard.estimatedHours")}
                   </span>
                   <p className="text-lg font-medium text-content-strong mt-0.5">
@@ -1401,7 +1401,7 @@ export function DashboardView(props: DashboardViewProps) {
                   </p>
                 </div>
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
-                  <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase">
+                  <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase">
                     {t("dashboard.loggedHours")}
                   </span>
                   <p className="text-lg font-medium text-primary mt-0.5">
@@ -1409,7 +1409,7 @@ export function DashboardView(props: DashboardViewProps) {
                   </p>
                 </div>
                 <div className="p-3 bg-surface-sunken rounded-lg border border-border-subtle/60 ">
-                  <span className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase">
+                  <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase">
                     {t("dashboard.remainingDiff")}
                   </span>
                   <p className="text-lg font-medium text-success-text mt-0.5">
@@ -1425,7 +1425,7 @@ export function DashboardView(props: DashboardViewProps) {
             <Card hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
                 <div>
-                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
                     <Activity className="w-4 h-4 text-success-text" />
                     {t("dashboard.trendTitle")}
                   </h3>
@@ -1520,7 +1520,7 @@ export function DashboardView(props: DashboardViewProps) {
             {/* Priority Breakdown */}
             <Card hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
-                <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
                   <Zap className="w-4 h-4 text-warning-text" />
                   {t("dashboard.priorityBreakdown")}
                 </h3>
@@ -1570,7 +1570,7 @@ export function DashboardView(props: DashboardViewProps) {
             {/* Blocked & Overdue Watchlist */}
             <Card hoverLift className="p-5 shadow-2xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-border-faint pb-3 gap-2">
-                <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
                   <ShieldAlert className="w-4 h-4 text-danger-text" />
                   {t("dashboard.blockedOverdueTitle")}
                 </h3>
@@ -1591,7 +1591,7 @@ export function DashboardView(props: DashboardViewProps) {
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs sm:text-[10px] font-mono font-medium text-content-subtle uppercase">
+                        <span className="text-xs sm:text-[10px] font-mono font-normal text-content-subtle uppercase">
                           {issue.key}
                         </span>
                         {issue.isBlocked && (

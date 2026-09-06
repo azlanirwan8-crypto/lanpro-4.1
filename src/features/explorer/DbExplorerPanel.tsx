@@ -229,7 +229,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                   sidebarOpen ? "max-md:translate-x-0" : "max-md:-translate-x-full"
                 )}
               >
-                <div className="px-3.5 py-2.5 text-xs sm:text-[11px] font-normal text-content-muted uppercase tracking-wider sticky top-0 bg-surface-sunken border-b border-border-subtle/80 flex justify-between items-center z-10">
+                <div className="px-3.5 py-2.5 text-xs sm:text-[11px] font-normal text-content-muted uppercase tracking-normal sticky top-0 bg-surface-sunken border-b border-border-subtle/80 flex justify-between items-center z-10">
                   <span>{t("dbExplorer.tables")}</span>
                   <button
                     type="button"
@@ -332,7 +332,7 @@ export const DbExplorerPanel: React.FC<any> = ({
                   {!loading && result && Array.isArray(result) && (
                     <div className="border border-border-subtle rounded-lg overflow-x-auto">
                       <ResponsiveTable className="w-full text-left border-collapse text-sm">
-                        <thead className="bg-primary-surface/5 text-primary font-normal uppercase tracking-wider">
+                        <thead className="bg-primary-surface/5 text-primary font-normal uppercase tracking-normal">
                           <tr>
                             {result.length > 0 ? (
                               Object.keys(result[0]).map((key) => (

@@ -66,7 +66,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
             {totalCount} {t("common.entries")}
           </span>
           <div className="flex items-center gap-1.5 pl-2 border-l border-border-subtle">
-            <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-wider">
+            <span className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
               {t("bulkActions.perPage")}
             </span>
             <StyledDropdown
@@ -136,14 +136,14 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
               <span className="bg-primary-surface text-content-inverse text-xs sm:text-[10px] font-medium rounded-full px-2 py-0.5 min-w-[20px] text-center">
                 {selectedTaskIds.size}
               </span>
-              <span className="text-content-subtle font-normal uppercase tracking-wider text-xs sm:text-[10px]">
+              <span className="text-content-subtle font-normal uppercase tracking-normal text-xs sm:text-[10px]">
                 {t("bulkActions.selectedTasks")}
               </span>
             </div>
 
             {/* Change Status Dropdown */}
             <div className="flex items-center gap-2">
-              <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-wider">
+              <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-normal">
                 {t("bulkActions.status")}
               </span>
               <StyledDropdown
@@ -175,7 +175,7 @@ export const IssueBulkActionsBar: React.FC<IssueBulkActionsBarProps> = ({
 
             {/* Change Assignee Dropdown */}
             <div className="flex items-center gap-2">
-              <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-wider">
+              <span className="text-content-subtle text-xs sm:text-[10px] uppercase tracking-normal">
                 {t("bulkActions.assignee")}
               </span>
               <StyledDropdown

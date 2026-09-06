@@ -26,9 +26,10 @@ type PageHeaderProps = {
 };
 
 /**
- * #424/#445 — Velzon page-title: judul UPPERCASE ~15px/semibold di bawah
- * topbar. Tanpa breadcrumb, tanpa subtitle. Topbar punya border-b (garis
- * tengah Velzon); PageHeader punya border-b sebagai batas ke konten.
+ * #424/#445 — Velzon page-title: judul UPPERCASE ~15px di bawah topbar.
+ * #467 — soften “gemuk”: font-medium, tracking-normal, leading-snug, py-2.5;
+ * badge anak pakai items-center (optik lebih tenang dari leading-none).
+ * Tanpa breadcrumb, tanpa subtitle.
  */
 export const PageHeader: React.FC<PageHeaderProps> = ({
   title,
@@ -41,7 +42,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     <div
       className={cn(
         "w-full shrink-0 bg-surface-raised border-b border-border-subtle",
-        "px-4 md:px-5 py-2",
+        "px-4 md:px-5 py-2.5",
         "flex items-center justify-between gap-2 min-h-0",
         "[&_button]:min-h-0 [&_button]:h-7 [&_button]:px-2 [&_button]:text-[11px] [&_button]:rounded-md",
         "[&_input]:h-7 [&_input]:py-1 [&_input]:text-[11px]",
@@ -51,7 +52,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       <div className="min-w-0 flex flex-wrap items-center gap-2">
         <h4
           className={cn(
-            "text-[15px] font-semibold leading-none m-0 text-content-strong font-sans tracking-wide",
+            "text-[15px] font-medium leading-snug m-0 text-content-strong font-sans tracking-normal",
             uppercase && "uppercase"
           )}
         >

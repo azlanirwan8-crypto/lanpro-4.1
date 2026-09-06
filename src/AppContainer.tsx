@@ -2977,7 +2977,7 @@ function AppContainer() {
                 <Bug className="w-5 h-5 animate-bounce text-emerald-400" />
               </div>
               <div className="min-w-0">
-                <p className="text-xs sm:text-[10px] font-normal text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                <p className="text-xs sm:text-[10px] font-normal text-emerald-400 uppercase tracking-normal flex items-center gap-1">
                   <span>🔔</span> {t("appShell.qaNotification")}
                 </p>
                 <p className="text-xs font-medium text-content-inverse-strong mt-0.5 leading-snug">
@@ -2995,7 +2995,7 @@ function AppContainer() {
                   new CustomEvent("lanpro_qa_retest_updated", { detail: { bugKey } })
                 );
               }}
-              className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-content text-xs font-normal rounded-xl uppercase tracking-wider shrink-0 transition-all cursor-pointer shadow-md flex items-center gap-1"
+              className="px-3.5 py-2 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-content text-xs font-normal rounded-xl uppercase tracking-normal shrink-0 transition-all cursor-pointer shadow-md flex items-center gap-1"
             >
               <span>{t("appShell.viewBug")}</span>
             </button>
@@ -4220,7 +4220,7 @@ function AppContainer() {
                                 <ArrowLeft className="w-4 h-4" />
                               </button>
                               <div className="min-w-0">
-                                <div className="text-[11px] font-normal uppercase tracking-wider text-content-subtle">
+                                <div className="text-[11px] font-normal uppercase tracking-normal text-content-subtle">
                                   {t("issues.breadcrumbGroup", "PROJECT")} /{" "}
                                   {t("sidebar.issueList")}
                                 </div>

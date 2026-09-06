@@ -679,10 +679,10 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                     else if (z === "weeks") setPixelsPerDay(24);
                     else if (z === "months") setPixelsPerDay(8);
                   }}
-                  className={`min-h-11 px-2.5 md:px-3 text-[10px] md:text-xs uppercase tracking-wider rounded-md transition-all cursor-pointer ${
+                  className={`min-h-11 px-2.5 md:px-3 text-[10px] md:text-xs uppercase tracking-normal rounded-md transition-all cursor-pointer ${
                     timelineZoom === z
-                      ? "bg-primary-surface text-content-inverse font-semibold shadow-2xs"
-                      : "text-content-muted hover:text-content-strong hover:bg-surface-sunken font-medium"
+                      ? "bg-primary-surface text-content-inverse font-normal shadow-2xs"
+                      : "text-content-muted hover:text-content-strong hover:bg-surface-sunken font-normal"
                   }`}
                 >
                   {z === "days"
@@ -793,7 +793,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
             )}
           >
             <div className="sticky top-0 z-30 h-[73px] bg-surface-sunken/90 backdrop-blur-sm border-b border-border-subtle px-5 flex items-center justify-between">
-              <span className="font-normal text-xs sm:text-[11px] text-content-muted uppercase tracking-widest">
+              <span className="font-normal text-xs sm:text-[11px] text-content-muted uppercase tracking-normal">
                 {t("roadmap.itemHierarchy")}
               </span>
               <button
@@ -974,7 +974,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             className="flex items-center px-2 py-1 border-r border-border-subtle/50"
                             style={{ width: `${actualDays * pixelsPerDay}px` }}
                           >
-                            <span className="text-xs sm:text-[11px] font-normal text-content-secondary uppercase tracking-wider">
+                            <span className="text-xs sm:text-[11px] font-normal text-content-secondary uppercase tracking-normal">
                               {format(m, "MMM yyyy")}
                             </span>
                           </div>
@@ -993,7 +993,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             className="flex items-center px-2 py-1 border-r border-border-subtle/50"
                             style={{ width: `${actualDays * pixelsPerDay}px` }}
                           >
-                            <span className="text-xs sm:text-[11px] font-normal text-content-secondary uppercase tracking-wider">
+                            <span className="text-xs sm:text-[11px] font-normal text-content-secondary uppercase tracking-normal">
                               {format(y, "yyyy")}
                             </span>
                           </div>
@@ -1280,7 +1280,7 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                             >
                               {task.title}
                             </span>
-                            <div className="w-5 h-5 rounded-full bg-primary-surface/90 text-content-inverse font-bold text-[9px] flex items-center justify-center shrink-0 ml-1.5 shadow-xs uppercase">
+                            <div className="w-5 h-5 rounded-full bg-primary-surface/90 text-content-inverse font-normal text-[9px] flex items-center justify-center shrink-0 ml-1.5 shadow-xs uppercase">
                               {task.assigneeId ? task.assigneeId.slice(0, 2) : "AL"}
                             </div>
                           </div>

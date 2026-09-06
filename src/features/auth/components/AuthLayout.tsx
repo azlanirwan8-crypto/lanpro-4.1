@@ -92,7 +92,7 @@ const AuthLayoutSplit = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
         </div>
         <div className="flex flex-col leading-tight">
           <span className="text-base font-semibold text-content tracking-tight">LANPRO</span>
-          <span className="text-[10px] font-medium text-content-muted tracking-wide uppercase">
+          <span className="text-[10px] font-medium text-content-muted tracking-normal uppercase">
             Project Hub
           </span>
         </div>

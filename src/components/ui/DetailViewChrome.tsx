@@ -6,7 +6,8 @@ import { cn } from "../../lib/utils";
 /**
  * #425 — Standar detail shell (U0/U1):
  * satu Card: baris aksi kiri (Back + Edit + Delete) + trailing opsional;
- * di bawahnya meta + judul tipografi Velzon (15px / semibold).
+ * di bawahnya meta + judul tipografi Velzon (15px).
+ * #467 — judul font-medium + tracking-normal (bukan semibold/tracking-wide).
  */
 
 const btnBack =
@@ -83,7 +84,7 @@ export function DetailViewChrome({
           <div className="flex flex-wrap items-center gap-2 select-none mb-2">{meta}</div>
         ) : null}
 
-        <h2 className="text-[15px] font-semibold text-content-strong tracking-wide leading-snug flex items-center gap-2 min-w-0">
+        <h2 className="text-[15px] font-medium text-content-strong tracking-normal leading-snug flex items-center gap-2 min-w-0">
           {titleIcon}
           <span className="truncate">{title}</span>
         </h2>

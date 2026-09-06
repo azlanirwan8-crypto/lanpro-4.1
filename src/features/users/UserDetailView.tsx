@@ -1717,7 +1717,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <User className="w-4.5 h-4.5" />
                         </div>
-                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
+                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
                           {t("userDetail.tabPersonalDetail")}
                         </h3>
                       </div>
@@ -1776,7 +1776,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <Users className="w-4.5 h-4.5" />
                       </div>
                       <div>
-                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
+                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
                           {t("userDetail.teamTitle")} ({teammates.length})
                         </h3>
                         <p className="text-[11px] text-content-muted mt-0.5">
@@ -1816,7 +1816,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Laptop className="w-4.5 h-4.5" />
                         </div>
-                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
+                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
                           {t("userDetail.loginHistory")}
                         </h3>
                       </div>
@@ -1900,7 +1900,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <Folder className="w-6 h-6" />
                       </div>
                       <div>
-                        <span className="text-xs text-content-muted font-normal uppercase tracking-wider block">
+                        <span className="text-xs text-content-muted font-normal uppercase tracking-normal block">
                           Total Related Projects
                         </span>
                         <div className="text-xl font-bold text-content-strong mt-0.5">
@@ -1915,7 +1915,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <CheckCircle className="w-6 h-6" />
                       </div>
                       <div>
-                        <span className="text-xs text-content-muted font-normal uppercase tracking-wider block">
+                        <span className="text-xs text-content-muted font-normal uppercase tracking-normal block">
                           Assigned Tasks
                         </span>
                         <div className="text-xl font-bold text-content-strong mt-0.5">
@@ -1937,7 +1937,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Activity className="w-4.5 h-4.5" />
                         </div>
-                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
+                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
                           {t("userDetail.recentActivityTitle")}
                         </h3>
                       </div>
@@ -2032,7 +2032,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                           <Sparkles className="w-4.5 h-4.5" />
                         </div>
-                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
+                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
                           {t("userDetail.recentlyCreated")} ({userCreatedItems.length})
                         </h3>
                       </div>
@@ -2101,7 +2101,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-surface p-3.5 sm:p-4 rounded-lg border border-border-subtle shadow-xs">
                     <div className="flex items-center gap-2">
                       <Layout className="w-4.5 h-4.5 text-primary" />
-                      <h2 className="text-sm font-normal text-content-strong uppercase tracking-wider">
+                      <h2 className="text-sm font-normal text-content-strong uppercase tracking-normal">
                         {t("userDetail.tabProject", "Project Terkait")} ({userProjectsList.length})
                       </h2>
                     </div>
@@ -2292,7 +2292,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               {/* Sub-Section: Tugas Terdelegasi */}
                               <div className="bg-surface-sunken/60 rounded-xl border border-border-subtle p-3 sm:p-3.5 space-y-2.5">
                                 <div className="flex items-center justify-between">
-                                  <span className="text-xs font-normal text-content-strong uppercase tracking-wider">
+                                  <span className="text-xs font-normal text-content-strong uppercase tracking-normal">
                                     Tugas Terdelegasi ({projTasks.length})
                                   </span>
                                 </div>
@@ -2318,12 +2318,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                               <span className="text-xs font-medium text-content-strong truncate">
                                                 {tItem.title}
                                               </span>
-                                              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-primary/10 text-primary border border-primary/20 uppercase">
+                                              <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-normal bg-primary/10 text-primary border border-primary/20 uppercase">
                                                 {tItem.key || tItem.taskKey || "TASK"}
                                               </span>
                                               <span
                                                 className={cn(
-                                                  "px-1.5 py-0.2 rounded text-[10px] font-semibold uppercase",
+                                                  "px-1.5 py-0.2 rounded text-[10px] font-normal uppercase",
                                                   (tItem.priority || "")
                                                     .toLowerCase()
                                                     .includes("high")
@@ -2373,7 +2373,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="bg-surface p-4 sm:p-5 rounded-xl border border-border-subtle shadow-xs space-y-4">
                     <div className="flex items-center gap-2 border-b border-border-subtle/60 pb-3">
                       <Activity className="w-4 h-4 text-primary" />
-                      <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
+                      <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
                         Ringkasan Project
                       </h3>
                     </div>
@@ -2383,7 +2383,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <div className="text-xl font-bold text-content-strong leading-none">
                           {userProjectsList.length}
                         </div>
-                        <div className="text-[10px] text-content-muted font-medium uppercase mt-1">
+                        <div className="text-[10px] text-content-muted font-normal uppercase mt-1">
                           Total Project
                         </div>
                       </div>
@@ -2391,7 +2391,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                         <div className="text-xl font-bold text-content-strong leading-none">
                           {userTasks.length}
                         </div>
-                        <div className="text-[10px] text-content-muted font-medium uppercase mt-1">
+                        <div className="text-[10px] text-content-muted font-normal uppercase mt-1">
                           Total Tasks
                         </div>
                       </div>
@@ -2462,7 +2462,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="bg-surface p-4 sm:p-5 rounded-xl border border-border-subtle shadow-xs space-y-4">
                     <div className="flex items-center gap-2 border-b border-border-subtle/60 pb-3">
                       <Clock className="w-4 h-4 text-primary" />
-                      <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
+                      <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
                         Timeline Aktivitas
                       </h3>
                     </div>
@@ -2528,7 +2528,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 {activeTab === "personal" && (
                   <div className="bg-surface p-6 sm:p-8 rounded-2xl border border-border-subtle shadow-xs space-y-6">
                     <div className="border-b border-border-subtle/60 pb-4">
-                      <h3 className="text-sm font-normal text-content-strong uppercase tracking-wider">
+                      <h3 className="text-sm font-normal text-content-strong uppercase tracking-normal">
                         {t("userDetail.personalInfoTitle", "PERSONAL DETAILS")}
                       </h3>
                       <p className="text-xs text-content-muted mt-1">
@@ -3007,7 +3007,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                   <div className="space-y-5">
                     <div className="flex items-center justify-between border-b border-border-subtle pb-3.5">
                       <div>
-                        <h4 className="font-normal text-content-strong text-sm uppercase tracking-wider">
+                        <h4 className="font-normal text-content-strong text-sm uppercase tracking-normal">
                           {t("userDetail.activePermissions")}
                         </h4>
                         <p className="text-xs text-content-muted mt-0.5">
@@ -3050,7 +3050,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 ) : (
                                   <Folder className="w-4 h-4 text-content-muted shrink-0" />
                                 )}
-                                <span className="text-xs font-normal text-content-strong uppercase tracking-wider">
+                                <span className="text-xs font-normal text-content-strong uppercase tracking-normal">
                                   {t(section.titleKey)}
                                 </span>
                                 <span className="text-xs sm:text-[10px] text-content-muted font-normal">
@@ -3073,14 +3073,14 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 <ResponsiveTable className="w-full text-left text-xs border-collapse">
                                   <thead className="bg-surface-sunken/40 border-b border-border-subtle text-content-muted">
                                     <tr>
-                                      <th className="py-2.5 px-4 font-semibold text-xs uppercase w-2/5">
+                                      <th className="py-2.5 px-4 font-normal text-xs uppercase w-2/5">
                                         {t("userDetail.module")}
                                       </th>
                                       {(["read", "create", "update", "delete"] as const).map(
                                         (action) => (
                                           <th
                                             key={action}
-                                            className="py-2.5 px-2 font-semibold text-xs uppercase text-center w-20"
+                                            className="py-2.5 px-2 font-normal text-xs uppercase text-center w-20"
                                           >
                                             {action}
                                           </th>
@@ -3191,7 +3191,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 {isAdmin && pageMode === "edit" && (
                   <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 shadow-xs space-y-3">
                     <div className="space-y-0.5">
-                      <h4 className="font-normal text-content-strong text-xs uppercase tracking-wider flex items-center gap-1.5">
+                      <h4 className="font-normal text-content-strong text-xs uppercase tracking-normal flex items-center gap-1.5">
                         <UserPlus className="w-4 h-4 text-primary shrink-0" />
                         {t("userDetail.delegateNewProject")}
                       </h4>
@@ -3259,7 +3259,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       selectedAssignProjectRole.toLowerCase()
                     ) && (
                       <div className="pt-2 space-y-1.5 border-t border-primary/30 ">
-                        <label className="text-xs sm:text-[11px] font-normal text-content-strong uppercase tracking-wider block">
+                        <label className="text-xs sm:text-[11px] font-normal text-content-strong uppercase tracking-normal block">
                           {t("userDetail.selectSubTeam")}
                         </label>
                         <div className="max-h-36 overflow-y-auto bg-surface border border-border-subtle rounded-md p-2 space-y-1 custom-scrollbar">
@@ -3308,7 +3308,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Layout className="w-4 h-4 text-primary " />
-                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
+                        <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
                           Proyek Terkait ({userProjectsList.length})
                         </h3>
                       </div>
@@ -3381,7 +3381,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 <div className="flex items-center gap-1.5 shrink-0">
                                   <span
                                     className={cn(
-                                      "text-xs sm:text-[10px] font-medium uppercase px-2 py-0.5 rounded-md border",
+                                      "text-xs sm:text-[10px] font-normal uppercase px-2 py-0.5 rounded-md border",
                                       peranDikenal
                                         ? "bg-primary/15 text-primary border-primary/30 "
                                         : "bg-amber-500/15 text-amber-800 border-amber-500/30 "
@@ -3427,7 +3427,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               {/* Tasks in project (Collapsable via Dropdown icon) */}
                               {projectTasks.length > 0 && isExpanded && (
                                 <div className="pt-2 border-t border-border-subtle/60 space-y-1.5">
-                                  <div className="flex items-center justify-between text-xs sm:text-[10px] text-content-subtle font-normal uppercase tracking-wider">
+                                  <div className="flex items-center justify-between text-xs sm:text-[10px] text-content-subtle font-normal uppercase tracking-normal">
                                     <span>Tugas Terdelegasi ({projectTasks.length}):</span>
                                   </div>
                                   <div className="space-y-1 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
@@ -3444,7 +3444,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                             {t.key || "TASK"}
                                           </div>
                                         </div>
-                                        <span className="text-xs sm:text-[10px] font-medium px-2 py-0.5 rounded bg-surface-muted text-content-secondary uppercase shrink-0">
+                                        <span className="text-xs sm:text-[10px] font-normal px-2 py-0.5 rounded bg-surface-muted text-content-secondary uppercase shrink-0">
                                           {t.status || "todo"}
                                         </span>
                                       </div>
@@ -3468,7 +3468,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                 <div className="flex items-center justify-between border-b border-border-subtle/60 pb-3">
                   <div className="flex items-center gap-2">
                     <FileText className="w-4 h-4 text-primary" />
-                    <h3 className="text-xs font-normal text-content-strong uppercase tracking-wider">
+                    <h3 className="text-xs font-normal text-content-strong uppercase tracking-normal">
                       {t("userDetail.documentTitle")} ({userDocuments.length})
                     </h3>
                   </div>
@@ -3484,19 +3484,19 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       <ResponsiveTable className="w-full text-left text-xs border-collapse">
                         <thead className="bg-surface-sunken/40 border-b border-border-subtle text-content-muted">
                           <tr>
-                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-wider">
+                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">
                               File Name
                             </th>
-                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-wider">
+                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">
                               Type
                             </th>
-                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-wider">
+                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">
                               Size
                             </th>
-                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-wider">
+                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal">
                               Upload Date
                             </th>
-                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-wider text-right">
+                            <th className="py-3 px-4 font-normal text-xs uppercase tracking-normal text-right">
                               Action
                             </th>
                           </tr>

@@ -14,10 +14,10 @@ export const styles = {
   logoWrapper: "p-5 flex items-center shrink-0 border-b border-sidebar-border",
   logoIcon:
     "w-8 h-8 bg-primary-surface rounded-md flex items-center justify-center shrink-0 shadow-md",
-  logoText: "font-bold text-lg tracking-wider text-sidebar-text-active uppercase font-sans",
+  logoText: "font-bold text-lg tracking-normal text-sidebar-text-active uppercase font-sans",
   nav: "flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar py-3",
   sectionLabelWrapper: "flex items-center justify-between mb-1.5 px-3 mt-5 group",
-  sectionLabel: "text-[11px] font-normal text-sidebar-title uppercase tracking-wider",
+  sectionLabel: "text-[11px] font-normal text-sidebar-title uppercase tracking-normal",
   newButton:
     "p-2 min-w-9 min-h-9 justify-center text-xs text-sidebar-text hover:text-sidebar-text-active hover:bg-sidebar-item-hover rounded transition-all flex items-center gap-1",
   projectButton: "w-full flex items-center py-2.5 min-h-11 rounded-md transition-all text-xs",

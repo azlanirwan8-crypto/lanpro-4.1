@@ -2535,22 +2535,22 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                   meta={
                     <>
                       {currentFlowMetadata?.category === "PRD" && (
-                        <span className="px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-surface-muted text-content-body border border-border-subtle/80 rounded-full">
+                        <span className="px-2.5 py-1 text-[10px] font-normal uppercase tracking-normal bg-surface-muted text-content-body border border-border-subtle/80 rounded-full">
                           {t("flowchart.prd")}
                         </span>
                       )}
                       {currentFlowMetadata?.category === "Panduan" && (
-                        <span className="px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-blue-500/10 text-blue-700 border border-blue-500/30 rounded-full">
+                        <span className="px-2.5 py-1 text-[10px] font-normal uppercase tracking-normal bg-blue-500/10 text-blue-700 border border-blue-500/30 rounded-full">
                           {t("flowchart.guideline")}
                         </span>
                       )}
                       {currentFlowMetadata?.category === "Laporan" && (
-                        <span className="px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 rounded-full">
+                        <span className="px-2.5 py-1 text-[10px] font-normal uppercase tracking-normal bg-emerald-500/10 text-emerald-700 border border-emerald-500/30 rounded-full">
                           {t("flowchart.report")}
                         </span>
                       )}
                       {!currentFlowMetadata?.category && (
-                        <span className="px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-primary/10 text-primary border border-primary/30 rounded-full">
+                        <span className="px-2.5 py-1 text-[10px] font-normal uppercase tracking-normal bg-primary/10 text-primary border border-primary/30 rounded-full">
                           {t("flowchart.general")}
                         </span>
                       )}
@@ -2917,7 +2917,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             )}>
               <span className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs sm:text-[11px] text-emerald-400 font-normal uppercase tracking-wider">{t("flowchart.canvas")}</span>
+                <span className="text-xs sm:text-[11px] text-emerald-400 font-normal uppercase tracking-normal">{t("flowchart.canvas")}</span>
               </span>
               <div className="w-px h-3.5" />
               <span className="font-medium">X: <span className="text-content-inverse-strong">{hoverCoords.x}</span> Y: <span className="text-content-inverse-strong">{hoverCoords.y}</span></span>

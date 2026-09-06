@@ -87,7 +87,7 @@ export const ActivityLogPanel = ({
             <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4">
               <Activity className="w-32 h-32" />
             </div>
-            <div className="text-[10px] sm:text-[10px] font-medium tracking-[0.15em] uppercase text-content-subtle z-10 flex items-center gap-1.5 sm:gap-2">
+            <div className="text-[10px] sm:text-[10px] font-normal tracking-[0.15em] uppercase text-content-subtle z-10 flex items-center gap-1.5 sm:gap-2">
               <Zap className="w-3.5 h-3.5" /> {t("activityLog.totalEvents")}
             </div>
             <div className="text-2xl sm:text-4xl font-medium text-content-strong z-10">
@@ -98,7 +98,7 @@ export const ActivityLogPanel = ({
             <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4">
               <Users className="w-32 h-32" />
             </div>
-            <div className="text-[10px] font-medium tracking-[0.15em] uppercase text-content-subtle z-10 flex items-center gap-1.5 sm:gap-2">
+            <div className="text-[10px] font-normal tracking-[0.15em] uppercase text-content-subtle z-10 flex items-center gap-1.5 sm:gap-2">
               <Users className="w-3.5 h-3.5" /> {t("activityLog.activeActors24h")}
             </div>
             <div className="text-2xl sm:text-4xl font-medium text-content-strong z-10">
@@ -109,7 +109,7 @@ export const ActivityLogPanel = ({
             <div className="absolute right-0 top-0 opacity-[0.03] scale-150 -translate-y-4 translate-x-4">
               <Clock className="w-32 h-32" />
             </div>
-            <div className="text-[10px] font-medium tracking-[0.15em] uppercase text-content-subtle z-10 flex items-center gap-1.5 sm:gap-2">
+            <div className="text-[10px] font-normal tracking-[0.15em] uppercase text-content-subtle z-10 flex items-center gap-1.5 sm:gap-2">
               <Clock className="w-3.5 h-3.5" /> {t("activityLog.lastEvent")}
             </div>
             <div className="text-base sm:text-xl font-medium text-content-strong tracking-tight z-10 flex flex-col">
@@ -142,7 +142,7 @@ export const ActivityLogPanel = ({
             <button
               onClick={exportTasksToCSV}
               title={t("activityLog.exportCsv")}
-              className="shrink-0 px-2.5 sm:px-4 py-2 bg-primary-surface border border-primary text-content-inverse rounded-lg text-xs font-medium shadow-soft transition-all flex items-center gap-2 tracking-wider hover:bg-primary-surface-hover active:scale-95 uppercase"
+              className="shrink-0 px-2.5 sm:px-4 py-2 bg-primary-surface border border-primary text-content-inverse rounded-lg text-xs font-normal shadow-soft transition-all flex items-center gap-2 tracking-normal hover:bg-primary-surface-hover active:scale-95 uppercase"
             >
               <DownloadCloud className="w-4 h-4" />
               <span className="hidden sm:inline">{t("activityLog.exportCsv")}</span>
@@ -176,7 +176,7 @@ export const ActivityLogPanel = ({
                             <div className="text-sm font-medium text-content-strong tabular-nums tracking-tight">
                               {safeFormat(log.createdAt, "MMM dd, yyyy")}
                             </div>
-                            <div className="text-xs sm:text-[10px] font-normal text-content-subtle tabular-nums uppercase mt-1 tracking-widest">
+                            <div className="text-xs sm:text-[10px] font-normal text-content-subtle tabular-nums uppercase mt-1 tracking-normal">
                               {safeFormat(log.createdAt, "HH:mm:ss.SSS")}
                             </div>
                           </td>
@@ -231,7 +231,7 @@ export const ActivityLogPanel = ({
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center gap-2 flex-wrap mb-2">
                                         <span
-                                          className={`text-xs sm:text-[11px] sm:text-[9px] font-medium tracking-[0.15em] uppercase px-2 py-0.5 rounded shadow-soft ${badgeClass}`}
+                                          className={`text-xs sm:text-[11px] sm:text-[9px] font-normal tracking-[0.15em] uppercase px-2 py-0.5 rounded shadow-soft ${badgeClass}`}
                                         >
                                           {log.action?.replace(/_/g, " ") || "ACTION_EXECUTED"}
                                         </span>
@@ -274,7 +274,7 @@ export const ActivityLogPanel = ({
                           <td className="px-8 py-5 text-right w-48 align-middle">
                             <div className="flex flex-col items-end gap-1.5">
                               <div
-                                className="font-mono text-xs sm:text-[11px] sm:text-[9px] bg-surface-muted text-content-muted px-2 py-1 rounded border border-border-subtle uppercase font-normal tracking-widest select-all opacity-70 group-hover:opacity-100 transition-opacity"
+                                className="font-mono text-xs sm:text-[11px] sm:text-[9px] bg-surface-muted text-content-muted px-2 py-1 rounded border border-border-subtle uppercase font-normal tracking-normal select-all opacity-70 group-hover:opacity-100 transition-opacity"
                                 title={log.id}
                               >
                                 ...{log.id?.substring((log.id?.length || 0) - 8)}
@@ -282,7 +282,7 @@ export const ActivityLogPanel = ({
                               <button
                                 type="button"
                                 onClick={() => setInspectedLog(log)}
-                                className="text-xs sm:text-[10px] font-normal text-primary hover:text-primary uppercase tracking-widest flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                                className="text-xs sm:text-[10px] font-normal text-primary hover:text-primary uppercase tracking-normal flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
                               >
                                 {t("activityLog.inspect")} <ChevronRight className="w-3 h-3" />
                               </button>
@@ -307,7 +307,7 @@ export const ActivityLogPanel = ({
                       className="w-full text-left p-3.5 flex flex-col gap-2 bg-surface hover:bg-surface-sunken/60 active:bg-surface-sunken cursor-pointer"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-medium tracking-wider uppercase px-2 py-0.5 rounded bg-surface-muted text-content-secondary border border-border-subtle truncate max-w-[70%]">
+                        <span className="text-[10px] font-normal tracking-normal uppercase px-2 py-0.5 rounded bg-surface-muted text-content-secondary border border-border-subtle truncate max-w-[70%]">
                           {log.action?.replace(/_/g, " ") || "ACTION"}
                         </span>
                         <span className="text-[10px] text-content-subtle tabular-nums shrink-0">
@@ -366,7 +366,7 @@ export const ActivityLogPanel = ({
 
             <dl className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
-                <dt className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
+                <dt className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("activityLog.detailAction")}
                 </dt>
                 <dd className="text-[13px] font-medium text-content-body">
@@ -375,7 +375,7 @@ export const ActivityLogPanel = ({
               </div>
 
               <div className="flex flex-col gap-1">
-                <dt className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
+                <dt className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("activityLog.timestamp")}
                 </dt>
                 <dd className="text-[13px] font-medium text-content-body tabular-nums">
@@ -385,7 +385,7 @@ export const ActivityLogPanel = ({
               </div>
 
               <div className="flex flex-col gap-1">
-                <dt className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
+                <dt className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("activityLog.detailProject")}
                 </dt>
                 <dd className="text-[13px] font-medium text-content-body">
@@ -394,7 +394,7 @@ export const ActivityLogPanel = ({
               </div>
 
               <div className="flex flex-col gap-1">
-                <dt className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
+                <dt className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("activityLog.auditTrailId")}
                 </dt>
                 <dd className="font-mono text-xs text-content-body select-all break-all">
@@ -403,7 +403,7 @@ export const ActivityLogPanel = ({
               </div>
 
               <div className="flex flex-col gap-1">
-                <dt className="text-xs sm:text-[10px] font-medium text-content-subtle uppercase tracking-widest">
+                <dt className="text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
                   {t("activityLog.detailDetails")}
                 </dt>
                 <dd className="font-mono text-xs text-content-body bg-surface-sunken border border-border-subtle p-2.5 rounded-lg whitespace-pre-wrap break-words">

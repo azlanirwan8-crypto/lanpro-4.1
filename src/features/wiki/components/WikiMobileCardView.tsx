@@ -172,7 +172,7 @@ export const WikiMobileCardView: React.FC<WikiMobileCardViewProps> = ({
             {/* Category badge, Attachment, External Link */}
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <span
-                className={`inline-flex items-center gap-1 text-[10px] leading-none font-semibold px-2 py-1 rounded-md uppercase tracking-wider ${badgeClass}`}
+                className={`inline-flex items-center gap-1 text-[10px] leading-none font-normal px-2 py-1 rounded-md uppercase tracking-normal ${badgeClass}`}
               >
                 {getCategoryIcon(doc.type)}
                 {doc.type || "DOC"}

@@ -61,7 +61,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
     return (
       <span
         className={cn(
-          "text-xs sm:text-[10px] font-normal px-1.5 py-0.5 rounded shadow-xs uppercase tracking-wider shrink-0",
+          "text-xs sm:text-[10px] font-normal px-1.5 py-0.5 rounded shadow-xs uppercase tracking-normal shrink-0",
           colorClasses
         )}
       >
@@ -116,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 className="flex flex-col"
               >
                 <span className={styles.logoText}>LANPRO</span>
-                <span className="text-[10px] font-normal text-sidebar-title tracking-wider uppercase whitespace-nowrap block mt-0.5">
+                <span className="text-[10px] font-normal text-sidebar-title tracking-normal uppercase whitespace-nowrap block mt-0.5">
                   {t("sidebar.projectManagement2")}
                 </span>
               </motion.div>
@@ -143,7 +143,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 title={t("sidebar.newProject")}
               >
                 <Plus className="w-3.5 h-3.5 text-sidebar-text" />
-                <span className="text-xs sm:text-[10px] font-medium uppercase text-sidebar-text">
+                <span className="text-xs sm:text-[10px] font-normal uppercase text-sidebar-text">
                   {t("sidebar.new")}
                 </span>
               </motion.button>
@@ -271,7 +271,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
             <React.Fragment key={section.id}>
               {!isSidebarCollapsed && (
                 <div className="flex items-center justify-between px-3 mt-5 mb-1.5">
-                  <div className="text-xs sm:text-[11px] font-normal text-sidebar-title uppercase tracking-wider">
+                  <div className="text-xs sm:text-[11px] font-normal text-sidebar-title uppercase tracking-normal">
                     {t(section.title)}
                   </div>
                 </div>

@@ -181,7 +181,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                   {/* Phase Pill Badge */}
                   <div className="flex items-center gap-1.5">
                     <span
-                      className={`px-2 py-0.2 text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase rounded-full tracking-wider ${
+                      className={`px-2 py-0.2 text-xs sm:text-[10px] sm:text-[8px] font-normal uppercase rounded-full tracking-normal ${
                         suite.phase === "SIT"
                           ? "bg-amber-500/10 text-amber-700 border border-amber-500/30"
                           : suite.phase === "UAT"
@@ -261,7 +261,7 @@ export const QASuiteSidebar: React.FC<QASuiteSidebarProps> = ({
                             }}
                           />
                           <div className="absolute right-0 bottom-full mb-1.5 w-56 bg-surface rounded-md shadow-2xl border border-border-subtle py-2 z-50 animate-dropdown">
-                            <div className="px-3 py-1 text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-wider text-primary border-b border-border-faint mb-1">
+                            <div className="px-3 py-1 text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-normal text-primary border-b border-border-faint mb-1">
                               {t("qa.assignModulePicProjectTeam")}
                             </div>
                             <button

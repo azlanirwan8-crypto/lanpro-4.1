@@ -107,7 +107,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
 
       <form id="create-bug-ticket-form" onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider block">
+          <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-normal block">
             {t("bugTicket.ticketTitle")}
           </label>
           <input
@@ -121,7 +121,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
 
         {/* Parent Task Searchable Combobox */}
         <div className="space-y-1.5 relative">
-          <label className="text-xs sm:text-[10px] font-normal text-danger-text uppercase tracking-wider block">
+          <label className="text-xs sm:text-[10px] font-normal text-danger-text uppercase tracking-normal block">
             {t("bugTicket.targetEpicParentTaskRequired")}
           </label>
 
@@ -190,7 +190,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider block">
+            <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-normal block">
               {t("bugTicket.severity")}
             </label>
             <StyledDropdown
@@ -209,7 +209,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider block">
+            <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-normal block">
               {t("bugTicket.assigneeDev")}
             </label>
             <StyledDropdown
@@ -237,7 +237,7 @@ export const CreateBugTicketModal: React.FC<CreateBugTicketModalProps> = ({
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider block">
+          <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-normal block">
             {t("bugTicket.description")}
           </label>
           <textarea

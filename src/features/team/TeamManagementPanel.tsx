@@ -537,7 +537,7 @@ export const TeamManagementPanel = ({
                           <span className="block font-medium text-content-strong text-xs md:text-sm">
                             {userAssignedTasks.length}
                           </span>
-                          <span className="text-[9px] md:text-[10px] text-content-subtle font-normal uppercase tracking-wider truncate block">
+                          <span className="text-[9px] md:text-[10px] text-content-subtle font-normal uppercase tracking-normal truncate block">
                             {t("teamPanel.assigned")}
                           </span>
                         </div>
@@ -545,7 +545,7 @@ export const TeamManagementPanel = ({
                           <span className="block font-medium text-content-strong text-xs md:text-sm">
                             {completedTasks.length}
                           </span>
-                          <span className="text-[9px] md:text-[10px] text-content-subtle font-normal uppercase tracking-wider truncate block">
+                          <span className="text-[9px] md:text-[10px] text-content-subtle font-normal uppercase tracking-normal truncate block">
                             {t("teamPanel.done")}
                           </span>
                         </div>
@@ -796,7 +796,7 @@ export const TeamManagementPanel = ({
 
                     {/* Task list preview */}
                     <div className="mt-4">
-                      <h4 className="text-xs font-normal text-content-body uppercase tracking-wider mb-2">
+                      <h4 className="text-xs font-normal text-content-body uppercase tracking-normal mb-2">
                         {t("teamPanel.assignedTasksTitle")}
                       </h4>
                       <div className="max-h-40 overflow-y-auto space-y-1.5 custom-scrollbar pr-1">

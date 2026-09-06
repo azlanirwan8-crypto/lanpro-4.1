@@ -11,7 +11,7 @@ import { cn } from "../../lib/utils";
  */
 
 export interface StatWidgetProps {
-  /** Label deskriptif (uppercase tracking-wider otomatis) */
+  /** Label deskriptif (uppercase tracking-normal otomatis) */
   label: string;
   /** Nilai angka atau teks */
   value: React.ReactNode;
@@ -74,7 +74,7 @@ export const StatWidget: React.FC<StatWidgetProps> = ({
       >
         <div className="flex justify-between items-start">
           <div>
-            <span className="text-xs sm:text-xsm font-normal uppercase tracking-wider text-content-subtle">
+            <span className="text-xs sm:text-xsm font-normal uppercase tracking-normal text-content-subtle">
               {label}
             </span>
             <h3 className="text-2xl font-semibold text-content-strong mt-1">{value}</h3>
@@ -121,7 +121,7 @@ export const StatWidget: React.FC<StatWidgetProps> = ({
           </div>
         )}
         <div className="min-w-0">
-          <div className="text-2xs md:text-xs font-normal text-content-subtle uppercase tracking-wider truncate">
+          <div className="text-2xs md:text-xs font-normal text-content-subtle uppercase tracking-normal truncate">
             {label}
           </div>
           <div className="text-lg md:text-xl font-medium text-content-strong mt-0.5">{value}</div>

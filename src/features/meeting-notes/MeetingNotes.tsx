@@ -959,7 +959,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
             <div className="space-y-4 mb-5">
               <div>
-                <label className="block text-content-body font-normal text-xs tracking-wider uppercase mb-1.5">
+                <label className="block text-content-body font-normal text-xs tracking-normal uppercase mb-1.5">
                   {t("meetings.meetingTitle")} <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -973,7 +973,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-content-body font-normal text-xs tracking-wider uppercase mb-1.5 flex items-center gap-1.5">
+                  <label className="block text-content-body font-normal text-xs tracking-normal uppercase mb-1.5 flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-content-subtle" />
                     {t("meetings.meetingDate")}
                   </label>
@@ -985,7 +985,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-content-body font-normal text-xs tracking-wider uppercase mb-1.5 flex items-center gap-1.5">
+                  <label className="block text-content-body font-normal text-xs tracking-normal uppercase mb-1.5 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-content-subtle" />
                     {t("meetings.meetingTime")}
                   </label>
@@ -998,7 +998,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
               </div>
 
               <div>
-                <label className="block text-content-body font-normal text-xs tracking-wider uppercase mb-1.5 flex items-center gap-1.5">
+                <label className="block text-content-body font-normal text-xs tracking-normal uppercase mb-1.5 flex items-center gap-1.5">
                   <Video className="w-3.5 h-3.5 text-content-subtle" />
                   {t("meetings.meetingLink")}
                 </label>
@@ -1017,7 +1017,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
               </div>
 
               <div>
-                <label className="block text-content-body font-normal text-xs tracking-wider uppercase mb-1.5">
+                <label className="block text-content-body font-normal text-xs tracking-normal uppercase mb-1.5">
                   {t("meetings.descriptionAgenda")}
                 </label>
                 <textarea
@@ -1031,7 +1031,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
 
               {/* Upload Document Section */}
               <div>
-                <label className="block text-content-body font-normal text-xs tracking-wider uppercase mb-1.5 flex items-center justify-between">
+                <label className="block text-content-body font-normal text-xs tracking-normal uppercase mb-1.5 flex items-center justify-between">
                   <span>{t("meetings.uploadDocument")}</span>
                   {newMeetingFile && canModify && (
                     <button

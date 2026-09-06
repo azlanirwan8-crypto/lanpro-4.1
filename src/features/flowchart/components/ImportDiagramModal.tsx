@@ -109,7 +109,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
           )}
         >
           <span className="text-xl">📊</span>
-          <div className="text-xs sm:text-[10px] font-normal uppercase tracking-wider">
+          <div className="text-xs sm:text-[10px] font-normal uppercase tracking-normal">
             Draw.io / XML
           </div>
           <div className="text-xs sm:text-[11px] text-content-muted font-medium">
@@ -132,7 +132,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
           )}
         >
           <span className="text-xl">🟡</span>
-          <div className="text-xs sm:text-[10px] font-normal uppercase tracking-wider">
+          <div className="text-xs sm:text-[10px] font-normal uppercase tracking-normal">
             {t("importDiagram.miroBoard")}
           </div>
           <div className="text-xs sm:text-[11px] text-content-muted font-medium">
@@ -155,7 +155,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
           )}
         >
           <span className="text-xl">🔮</span>
-          <div className="text-xs sm:text-[10px] font-normal uppercase tracking-wider">
+          <div className="text-xs sm:text-[10px] font-normal uppercase tracking-normal">
             {t("importDiagram.backupFormat")}
           </div>
           <div className="text-xs sm:text-[11px] text-content-muted font-medium">
@@ -236,7 +236,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
 
         <div className="text-center font-medium font-sans">
           {parsedImportData ? (
-            <span className="text-emerald-700 text-xs sm:text-[11px] uppercase tracking-wider font-normal block mb-1">
+            <span className="text-emerald-700 text-xs sm:text-[11px] uppercase tracking-normal font-normal block mb-1">
               {t("importDiagram.loaded")}
             </span>
           ) : (
@@ -264,7 +264,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
       {/* Analytical preview result of parser */}
       {parsedImportData && (
         <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 space-y-2 text-[10px] leading-none text-emerald-900 leading-relaxed font-sans font-medium">
-          <span className="font-normal uppercase tracking-widest text-xs sm:text-[11px] text-emerald-800 flex items-center gap-1.5 shadow-soft bg-surface p-1 px-2.5 w-fit rounded-full border border-emerald-500/30">
+          <span className="font-normal uppercase tracking-normal text-xs sm:text-[11px] text-emerald-800 flex items-center gap-1.5 shadow-soft bg-surface p-1 px-2.5 w-fit rounded-full border border-emerald-500/30">
             {t("importDiagram.diagramReadinessReview")}
           </span>
 
@@ -275,7 +275,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                 <div className="font-medium text-content text-xs">
                   {parsedImportData.nodes.length}
                 </div>
-                <div className="text-xs sm:text-[11px] text-content-muted font-normal uppercase tracking-wider">
+                <div className="text-xs sm:text-[11px] text-content-muted font-normal uppercase tracking-normal">
                   {t("importDiagram.shapesOrnamentsNodes")}
                 </div>
               </div>
@@ -287,7 +287,7 @@ export const ImportDiagramModal: React.FC<ImportDiagramModalProps> = ({
                 <div className="font-medium text-content text-xs">
                   {parsedImportData.edges.length}
                 </div>
-                <div className="text-xs sm:text-[11px] text-content-muted font-normal uppercase tracking-wider">
+                <div className="text-xs sm:text-[11px] text-content-muted font-normal uppercase tracking-normal">
                   {t("importDiagram.connectingArrowsEdges")}
                 </div>
               </div>

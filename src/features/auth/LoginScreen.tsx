@@ -139,12 +139,12 @@ export const LoginScreen = ({
               <div className="space-y-1.5">
                 <label
                   htmlFor="lanpro-login-username"
-                  className="text-xs font-semibold text-content-body tracking-wide block"
+                  className="text-xs font-medium text-content-body tracking-normal block"
                 >
                   {t("common.username")} <span className="text-danger-text">*</span>
                 </label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <div className="relative flex items-center">
+                  <User className="w-4 h-4 text-content-subtle absolute left-3.5 pointer-events-none" />
                   <input
                     id="lanpro-login-username"
                     type="text"
@@ -153,7 +153,7 @@ export const LoginScreen = ({
                     value={username}
                     onChange={(e) => handleUsernameChange(e.target.value)}
                     className={cn(
-                      "w-full pl-10 pr-4 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-base font-normal text-content placeholder:text-content-subtle hover:border-border-subtle",
+                      "w-full h-11 pl-11 pr-4 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-base font-normal leading-normal text-content placeholder:text-content-subtle placeholder:leading-normal hover:border-border-subtle",
                       fieldErrors.username
                         ? "border-danger focus:ring-danger/20 focus:border-danger"
                         : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -172,12 +172,12 @@ export const LoginScreen = ({
               <div className="space-y-1.5">
                 <label
                   htmlFor="lanpro-login-password"
-                  className="text-xs font-semibold text-content-body tracking-wide block"
+                  className="text-xs font-medium text-content-body tracking-normal block"
                 >
                   {t("login.password")} <span className="text-danger-text">*</span>
                 </label>
-                <div className="relative">
-                  <Lock className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <div className="relative flex items-center">
+                  <Lock className="w-4 h-4 text-content-subtle absolute left-3.5 pointer-events-none" />
                   <input
                     id="lanpro-login-password"
                     type={showPassword ? "text" : "password"}
@@ -186,7 +186,7 @@ export const LoginScreen = ({
                     value={password}
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     className={cn(
-                      "w-full pl-10 pr-11 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-base font-normal text-content placeholder:text-content-subtle hover:border-border-subtle",
+                      "w-full h-11 pl-11 pr-11 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-base font-normal leading-normal text-content placeholder:text-content-subtle placeholder:leading-normal hover:border-border-subtle",
                       fieldErrors.password
                         ? "border-danger focus:ring-danger/20 focus:border-danger"
                         : "border-border-subtle focus:ring-primary/20 focus:border-primary"
@@ -236,7 +236,7 @@ export const LoginScreen = ({
               <button
                 type="submit"
                 disabled={loading || !username.trim() || !password.trim()}
-                className="w-full bg-primary-surface text-content-inverse py-3 rounded-lg font-normal uppercase tracking-wider text-xs hover:bg-primary-surface-hover transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2.5 group cursor-pointer disabled:bg-primary-surface/60 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full bg-primary-surface text-content-inverse py-3 rounded-lg font-normal uppercase tracking-normal text-xs hover:bg-primary-surface-hover transition-all shadow-md shadow-primary/20 active:scale-[0.99] mt-3 flex items-center justify-center gap-2.5 group cursor-pointer disabled:bg-primary-surface/60 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <span>{t("login.signIn")}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

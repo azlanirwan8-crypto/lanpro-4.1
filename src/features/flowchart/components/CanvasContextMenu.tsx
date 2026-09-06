@@ -145,7 +145,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
       onContextMenu={(e) => e.preventDefault()}
     >
       {/* Title */}
-      <div className="px-3 py-1.5 text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle border-b border-border-faint mb-1 flex items-center justify-between">
+      <div className="px-3 py-1.5 text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle border-b border-border-faint mb-1 flex items-center justify-between">
         <span>{t("canvasMenu.title")}</span>
         <span className="text-primary font-mono text-xs sm:text-[10px] flex items-center gap-0.5">
           <MapPin className="w-2 h-2 text-primary" />
@@ -154,7 +154,7 @@ export const CanvasContextMenu: React.FC<CanvasContextMenuProps> = ({
       </div>
 
       {/* Shapes Subheader */}
-      <div className="px-3 py-1 flex items-center gap-1.5 text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
+      <div className="px-3 py-1 flex items-center gap-1.5 text-xs sm:text-[11px] font-normal uppercase tracking-normal text-content-subtle">
         <Plus className="w-3 h-3 text-content-subtle" />
         <span>{t("canvasMenu.addComponent")}</span>
       </div>

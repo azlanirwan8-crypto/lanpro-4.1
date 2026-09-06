@@ -258,10 +258,10 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           <div className="bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-emerald-500/30">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[10px] font-normal uppercase tracking-wider text-content-subtle">
+                <p className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
                   {t("sessionMonitor.activeSessions", "Sesi Aktif Sekarang")}
                 </p>
-                <h3 className="text-xl font-bold text-content-strong mt-0.5">
+                <h3 className="text-xl font-semibold text-content-strong mt-0.5">
                   {stats.activeSessions}
                 </h3>
               </div>
@@ -281,10 +281,10 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           <div className="bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-primary/30">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[10px] font-normal uppercase tracking-wider text-content-subtle">
+                <p className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
                   {t("sessionMonitor.onlineUsers", "Pengguna Online")}
                 </p>
-                <h3 className="text-xl font-bold text-content-strong mt-0.5">
+                <h3 className="text-xl font-semibold text-content-strong mt-0.5">
                   {stats.activeUsersCount}
                 </h3>
               </div>
@@ -303,10 +303,10 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           <div className="bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-amber-500/30">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[10px] font-normal uppercase tracking-wider text-content-subtle">
+                <p className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
                   {t("sessionMonitor.todayLogins", "Login Hari Ini")}
                 </p>
-                <h3 className="text-xl font-bold text-content-strong mt-0.5">
+                <h3 className="text-xl font-semibold text-content-strong mt-0.5">
                   {stats.todaySessions}
                 </h3>
               </div>
@@ -325,10 +325,10 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
           <div className="bg-surface border border-border-subtle rounded-xl p-3 shadow-xs flex flex-col justify-between transition-all hover:border-info/30">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-[10px] font-normal uppercase tracking-wider text-content-subtle">
+                <p className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
                   {t("sessionMonitor.totalHistory", "Total Riwayat Sesi")}
                 </p>
-                <h3 className="text-xl font-bold text-content-strong mt-0.5">
+                <h3 className="text-xl font-semibold text-content-strong mt-0.5">
                   {stats.totalSessions}
                 </h3>
               </div>
@@ -556,14 +556,14 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                         {/* Status / Waktu Logout */}
                         <td className="py-2 px-3 whitespace-nowrap">
                           {isActive ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                               {t("sessionMonitor.statusActive", "Sesi Aktif")}
                             </span>
                           ) : session.status === "FORCE_LOGOUT" ||
                             session.status === "TERMINATED" ? (
                             <div>
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-danger/10 text-danger border border-danger/20">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-danger/10 text-danger border border-danger/20">
                                 <XCircle className="w-2.5 h-2.5" />
                                 {t("sessionMonitor.statusForceLogout", "Diputus Admin")}
                               </span>
@@ -573,7 +573,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                             </div>
                           ) : (
                             <div>
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-sunken text-content-muted border border-border-subtle">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-sunken text-content-muted border border-border-subtle">
                                 <LogOut className="w-2.5 h-2.5 text-content-subtle" />
                                 {t("sessionMonitor.statusLoggedOut", "Sudah Keluar")}
                               </span>
@@ -682,16 +682,16 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                         </div>
                       </div>
                       {isActive ? (
-                        <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                        <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                           {t("sessionMonitor.statusActive", "Sesi Aktif")}
                         </span>
                       ) : session.status === "FORCE_LOGOUT" || session.status === "TERMINATED" ? (
-                        <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-danger/10 text-danger border border-danger/20">
+                        <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-danger/10 text-danger border border-danger/20">
                           {t("sessionMonitor.statusForceLogout", "Diputus Admin")}
                         </span>
                       ) : (
-                        <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface-sunken text-content-muted border border-border-subtle">
+                        <span className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-surface-sunken text-content-muted border border-border-subtle">
                           {t("sessionMonitor.statusLoggedOut", "Sudah Keluar")}
                         </span>
                       )}
@@ -776,7 +776,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                 <span>{t("sessionMonitor.prev", "Sebelumnya")}</span>
               </button>
 
-              <span className="px-3 py-1 bg-surface-sunken border border-border-subtle rounded-lg text-xs font-bold text-content-strong">
+              <span className="px-3 py-1 bg-surface-sunken border border-border-subtle rounded-lg text-xs font-medium text-content-strong">
                 {page}
               </span>
 
@@ -806,11 +806,11 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                   />
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-base font-bold text-content-strong">
+                      <h2 className="text-base font-semibold text-content-strong">
                         {selectedUserForActivity.name}
                       </h2>
                       {selectedUserForActivity.role && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-normal uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-normal uppercase tracking-normal bg-primary/10 text-primary border border-primary/20">
                           {selectedUserForActivity.role}
                         </span>
                       )}
@@ -830,7 +830,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
               {/* Modal Body: Activity Log Timeline */}
               <div className="p-6 overflow-y-auto flex-1 bg-surface-sunken space-y-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xs font-normal uppercase tracking-wider text-content-subtle flex items-center gap-2">
+                  <h3 className="text-xs font-normal uppercase tracking-normal text-content-subtle flex items-center gap-2">
                     <Activity className="w-4 h-4 text-primary" />
                     {t("sessionMonitor.activityFeedTitle", "Riwayat Aktivitas & Audit Log")}
                   </h3>
@@ -971,7 +971,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 pb-2 border-b border-border-subtle">
                               <div className="flex items-center gap-2">
                                 <span
-                                  className={`px-2 py-0.5 rounded text-xs font-normal border uppercase tracking-wider ${actionBadgeBg}`}
+                                  className={`px-2 py-0.5 rounded text-xs font-normal border uppercase tracking-normal ${actionBadgeBg}`}
                                 >
                                   {act.action}
                                 </span>
@@ -1002,7 +1002,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                               <div className="mt-3 overflow-x-auto border border-border-subtle rounded-lg bg-surface-sunken">
                                 <table className="w-full text-left text-xs">
                                   <thead>
-                                    <tr className="border-b border-border-subtle text-[11px] font-normal uppercase tracking-wider text-content-subtle bg-surface/50">
+                                    <tr className="border-b border-border-subtle text-[11px] font-normal uppercase tracking-normal text-content-subtle bg-surface/50">
                                       <th className="py-1.5 px-3">
                                         {t("sessionMonitor.fieldHeader", "Properti")}
                                       </th>
@@ -1073,7 +1073,7 @@ export const UserSessionsPanel: React.FC<UserSessionsPanelProps> = () => {
                                   </span>
                                 )}
                               </div>
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-normal uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-normal uppercase tracking-normal bg-primary/10 text-primary border border-primary/20">
                                 {act.source}
                               </span>
                             </div>

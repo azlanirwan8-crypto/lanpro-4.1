@@ -37,6 +37,7 @@ describe("DetailViewChrome #425", () => {
     );
     const h2 = container.querySelector("h2");
     expect(h2?.className).toMatch(/text-\[15px]/);
-    expect(h2?.className).toMatch(/font-semibold/);
+    expect(h2?.className).toMatch(/font-medium/);
+    expect(h2?.className).toMatch(/tracking-normal/);
   });
 });

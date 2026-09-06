@@ -606,7 +606,7 @@ export const MasterDataPanel = ({
         >
           <div className="p-3.5 border-b border-border-faint flex items-center justify-between bg-surface-sunken/50">
             <div>
-              <h3 className="font-normal text-content-strong text-xs uppercase tracking-wider">
+              <h3 className="font-normal text-content-strong text-xs uppercase tracking-normal">
                 {t("master.masterDatabase")}
               </h3>
               <p className="text-xs sm:text-[10px] text-content-subtle mt-0.5">
@@ -1078,11 +1078,11 @@ export const MasterDataPanel = ({
                                                 return (
                                                   <div className="flex items-center gap-1 shrink-0 select-none">
                                                     {rType === "PROJECT" ? (
-                                                      <span className="text-[10px] leading-none sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-blue-500/10 text-blue-700 border border-blue-500/30 uppercase">
+                                                      <span className="text-[10px] leading-none sm:text-[9px] font-normal px-2 py-0.2 rounded-md bg-blue-500/10 text-blue-700 border border-blue-500/30 uppercase">
                                                         {t("master.projectRole")}
                                                       </span>
                                                     ) : (
-                                                      <span className="text-[10px] leading-none sm:text-[9px] font-medium px-2 py-0.2 rounded-md bg-purple-500/10 text-purple-700 border border-purple-500/30 uppercase">
+                                                      <span className="text-[10px] leading-none sm:text-[9px] font-normal px-2 py-0.2 rounded-md bg-purple-500/10 text-purple-700 border border-purple-500/30 uppercase">
                                                         {t("master.systemRole")}
                                                       </span>
                                                     )}
@@ -1194,7 +1194,7 @@ export const MasterDataPanel = ({
                   {newMasterLabel || t("master.labelMasterData")}
                 </span>
                 {selectedType === "project_role" && (
-                  <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-widest text-primary mt-0.5">
+                  <span className="text-xs sm:text-[11px] sm:text-[9px] font-normal uppercase tracking-normal text-primary mt-0.5">
                     {newMasterRoleType === "PROJECT"
                       ? "Project Role (Tim Proyek)"
                       : "System Role (Akses Platform)"}
@@ -1206,7 +1206,7 @@ export const MasterDataPanel = ({
 
           {selectedType === "project_role" && (
             <div className="space-y-2">
-              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest ml-1">
+              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal ml-1">
                 {t("master.roleTypeScope")}
               </label>
               <div className="grid grid-cols-2 gap-2 p-1.5 bg-surface-muted rounded-xl border border-border-subtle">
@@ -1245,7 +1245,7 @@ export const MasterDataPanel = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                 {t("master.labelName")}
               </label>
               <Input
@@ -1263,7 +1263,7 @@ export const MasterDataPanel = ({
             {/* Dynamic Contextual Fields */}
             {selectedType === "priority" && (
               <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                   {t("master.shortCode")}
                 </label>
                 <Input
@@ -1277,7 +1277,7 @@ export const MasterDataPanel = ({
 
             {selectedType === "issue_type" && (
               <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                   {t("master.hierarchyLevel")}
                 </label>
                 <StyledDropdown
@@ -1296,7 +1296,7 @@ export const MasterDataPanel = ({
             {selectedType === "status" && (
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+                  <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                     {t("master.statusGroup")}
                   </label>
                   <StyledDropdown
@@ -1327,7 +1327,7 @@ export const MasterDataPanel = ({
 
             {selectedType === "environment" && (
               <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                   {t("master.endpointBaseUrl")}
                 </label>
                 <Input
@@ -1340,7 +1340,7 @@ export const MasterDataPanel = ({
             )}
 
             <div>
-              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
                 {t("master.colorAccent")}
               </label>
               <div className="flex gap-2">
@@ -1368,7 +1368,7 @@ export const MasterDataPanel = ({
                         setNewMasterColor("#" + val);
                       }
                     }}
-                    className="w-full h-12 px-3 bg-surface border border-border-subtle rounded-xl text-xs font-mono font-medium text-content-body outline-none focus:border-primary transition-all uppercase"
+                    className="w-full h-12 px-3 bg-surface border border-border-subtle rounded-xl text-xs font-mono font-normal text-content-body outline-none focus:border-primary transition-all uppercase"
                     placeholder="#3b82f6"
                   />
                 </div>
@@ -1377,7 +1377,7 @@ export const MasterDataPanel = ({
           </div>
 
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.colorPalette")}
             </label>
             <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-xl">
@@ -1413,7 +1413,7 @@ export const MasterDataPanel = ({
 
           <div>
             <div className="flex items-center justify-between mb-1.5 ml-1">
-              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest">
+              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal">
                 {t("master.pickIcon", { count: filteredNewIcons.length })}
               </label>
             </div>
@@ -1509,7 +1509,7 @@ export const MasterDataPanel = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normalst mb-1.5 ml-1">
                   {t("master.labelName")}
                 </label>
                 <Input
@@ -1521,7 +1521,7 @@ export const MasterDataPanel = ({
                 />
               </div>
               <div>
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normalst mb-1.5 ml-1">
                   {t("master.colorAccent")}
                 </label>
                 <div className="flex gap-2">
@@ -1560,7 +1560,7 @@ export const MasterDataPanel = ({
             </div>
 
             <div>
-              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+              <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normalst mb-1.5 ml-1">
                 {t("master.colorPalette")}
               </label>
               <div className="flex flex-wrap gap-2 p-2.5 bg-surface-sunken border border-border-subtle rounded-xl">
@@ -1610,7 +1610,7 @@ export const MasterDataPanel = ({
 
             <div>
               <div className="flex items-center justify-between mb-1.5 ml-1">
-                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest">
+                <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normalst">
                   Ikon ({filteredEditIcons.length} tersedia)
                 </label>
               </div>
@@ -1685,7 +1685,7 @@ export const MasterDataPanel = ({
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.projectName")}
             </label>
             <StyledDropdown
@@ -1700,7 +1700,7 @@ export const MasterDataPanel = ({
           </div>
 
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.moduleName")}
             </label>
             <Input
@@ -1712,7 +1712,7 @@ export const MasterDataPanel = ({
           </div>
 
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.remarks")}
             </label>
             <textarea
@@ -1752,7 +1752,7 @@ export const MasterDataPanel = ({
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.projectName")}
             </label>
             <StyledDropdown
@@ -1767,7 +1767,7 @@ export const MasterDataPanel = ({
           </div>
 
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.moduleName")}
             </label>
             <Input
@@ -1779,7 +1779,7 @@ export const MasterDataPanel = ({
           </div>
 
           <div>
-            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-widest mb-1.5 ml-1">
+            <label className="block text-xs sm:text-[10px] font-normal text-content-subtle uppercase tracking-normal mb-1.5 ml-1">
               {t("master.remarks")}
             </label>
             <textarea

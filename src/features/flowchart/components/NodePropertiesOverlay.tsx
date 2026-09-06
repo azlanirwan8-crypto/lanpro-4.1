@@ -131,7 +131,7 @@ export const NodePropertiesOverlay: React.FC<NodePropertiesOverlayProps> = ({
             node.fontStyle === "sans" ? "serif" : node.fontStyle === "serif" ? "mono" : "sans";
           handleUpdateActiveNode({ fontStyle: nextStyle });
         }}
-        className="p-1 px-1.5 hover:bg-surface-muted text-xs sm:text-[10px] rounded font-medium uppercase"
+        className="p-1 px-1.5 hover:bg-surface-muted text-xs sm:text-[10px] rounded font-normal uppercase"
         title={t("shapes.fontFamily")}
       >
         {node.fontStyle || "sans"}

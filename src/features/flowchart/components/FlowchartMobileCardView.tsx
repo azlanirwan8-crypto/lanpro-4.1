@@ -124,7 +124,7 @@ export const FlowchartMobileCardView: React.FC<FlowchartMobileCardViewProps> = (
             {/* Category badge & Linked Epic */}
             <div className="flex flex-wrap items-center gap-2 text-xs">
               {flow.category && (
-                <span className="inline-flex items-center gap-1 text-[10px] leading-none font-semibold px-2 py-1 rounded-md bg-primary/10 text-primary border border-primary/30 uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1 text-[10px] leading-none font-normal px-2 py-1 rounded-md bg-primary/10 text-primary border border-primary/30 uppercase tracking-normal">
                   {flow.category}
                 </span>
               )}

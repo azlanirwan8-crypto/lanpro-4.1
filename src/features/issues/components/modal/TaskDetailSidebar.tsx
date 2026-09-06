@@ -130,7 +130,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
     >
       {/* Header Title */}
       <div className="flex items-center justify-between pb-2.5 border-b border-border-subtle/80">
-        <h4 className="text-[11px] font-normal text-content-strong uppercase tracking-wider flex items-center gap-2">
+        <h4 className="text-[11px] font-normal text-content-strong uppercase tracking-normal flex items-center gap-2">
           <Activity className="w-3.5 h-3.5 text-primary" />
           {t("issueDetail.issueAttributes")}
         </h4>
@@ -141,7 +141,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
 
       {/* Main Lifecycle Status Select */}
       <div className="space-y-1">
-        <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+        <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
           <Activity className="w-3 h-3 text-content-subtle" />
           {t("issueDetail.lifecycleStatus")}
         </label>
@@ -165,7 +165,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
       <div className="space-y-3">
         {/* Assignee */}
         <div className="space-y-1">
-          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
             <User className="w-3 h-3 text-content-subtle" />
             {t("issueDetail.assignee")}
           </label>
@@ -190,7 +190,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
 
         {/* Reporter */}
         <div className="space-y-1">
-          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
             <User className="w-3 h-3 text-content-subtle" />
             {t("issueDetail.reporter")}
           </label>
@@ -216,7 +216,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
         {/* Priority & Points Grid */}
         <div className="grid grid-cols-2 gap-2.5">
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
               <Zap className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.priority")}
             </label>
@@ -240,7 +240,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           </div>
           <div className="space-y-1">
             <div className="flex items-center justify-between mb-0.5">
-              <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider">
+              <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal">
                 {t("issueDetail.points")}
               </label>
               {isEditable && (!isProjectMember || isReporter) && (
@@ -265,7 +265,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
 
         {/* Blocked Status */}
         <div className="space-y-1">
-          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
             <ShieldAlert className="w-3 h-3 text-content-subtle" />
             {t("issueDetail.blockedStatus")}
           </label>
@@ -297,7 +297,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
 
         {/* Current Sprint */}
         <div className="space-y-1">
-          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
             <Layers className="w-3 h-3 text-content-subtle" />
             {t("issueDetail.currentSprint")}
           </label>
@@ -322,7 +322,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
 
         {/* Release (MasterData) — terpisah dari Milestone tabel */}
         <div className="space-y-1">
-          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
             <Tag className="w-3 h-3 text-content-subtle" />
             {t("issueDetail.releaseMilestone")}
           </label>
@@ -349,7 +349,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
 
         {/* Milestone (tabel Milestones / #312) */}
         <div className="space-y-1">
-          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+          <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
             <Flag className="w-3 h-3 text-content-subtle" />
             {t("issueDetail.milestone")}
           </label>
@@ -375,7 +375,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
         {/* Dates Grid */}
         <div className="grid grid-cols-2 gap-2.5">
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
               <Calendar className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.startDate")}
             </label>
@@ -390,7 +390,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
               <Calendar className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.endDate")}
             </label>
@@ -411,7 +411,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
 
         <div className="grid grid-cols-2 gap-2.5">
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
               <Calendar className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.dueDate")}
             </label>
@@ -429,7 +429,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
               <Tag className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.labels")}
             </label>
@@ -455,7 +455,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
         {/* Time Tracking Grid */}
         <div className="grid grid-cols-2 gap-2.5">
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
               <Clock className="w-3 h-3 text-content-subtle" />
               {t("issueDetail.estHours")}
             </label>
@@ -473,7 +473,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-wider flex items-center gap-1.5">
+            <label className="text-[10px] font-normal text-content-subtle uppercase tracking-normal flex items-center gap-1.5">
               <LineChart className="w-3 h-3 text-primary" />
               {t("issueDetail.loggedHours")}
             </label>
@@ -493,7 +493,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
         {/* #343 — entri jam kerja sederhana */}
         {isEditable && (
           <div className="mt-3 space-y-2 rounded-md border border-border-subtle/80 bg-surface p-2.5">
-            <div className="text-[10px] font-medium uppercase tracking-wider text-content-subtle">
+            <div className="text-[10px] font-normal uppercase tracking-normal text-content-subtle">
               {t("issueDetail.workLogTitle", "Catat jam kerja")}
             </div>
             <div className="flex gap-2">

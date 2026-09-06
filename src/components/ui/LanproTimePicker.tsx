@@ -190,7 +190,7 @@ export const LanproTimePicker: React.FC<LanproTimePickerProps> = ({
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-border-faint">
-                <span className="text-[11px] font-medium text-content-muted uppercase tracking-wider">
+                <span className="text-[11px] font-normal text-content-muted uppercase tracking-normal">
                   {isId ? "Pilih Waktu" : "Select Time"}
                 </span>
                 <span className="text-xs font-mono font-semibold text-primary">

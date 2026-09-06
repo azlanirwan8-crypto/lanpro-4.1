@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { PageHeader } from "./PageHeader";
 
 describe("PageHeader (#424)", () => {
-  it("judul 15px semibold, tanpa breadcrumb dan tanpa subtitle", () => {
+  it("judul 15px medium (#467), tanpa breadcrumb dan tanpa subtitle", () => {
     render(
       <PageHeader
         breadcrumbs={[{ label: "PROJECT" }, { label: "Daftar Isu", current: true }]}
@@ -14,7 +14,8 @@ describe("PageHeader (#424)", () => {
 
     const judul = screen.getByRole("heading", { name: "Daftar Isu" });
     expect(judul).toHaveClass("text-[15px]");
-    expect(judul).toHaveClass("font-semibold");
+    expect(judul).toHaveClass("font-medium");
+    expect(judul).toHaveClass("tracking-normal");
     expect(judul).toHaveClass("uppercase");
     expect(screen.queryByLabelText("Breadcrumb")).not.toBeInTheDocument();
     expect(screen.queryByText("Proyek Uji (UJI)")).not.toBeInTheDocument();

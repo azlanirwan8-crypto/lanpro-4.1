@@ -227,7 +227,7 @@ export const QATestCaseMobileCardView: React.FC<QATestCaseMobileCardViewProps> =
 
               {/* Priority badge */}
               <span
-                className={`inline-flex items-center text-[10px] leading-none font-semibold px-2 py-1 rounded-md border uppercase tracking-wider ${priorityClass}`}
+                className={`inline-flex items-center text-[10px] leading-none font-normal px-2 py-1 rounded-md border uppercase tracking-normal ${priorityClass}`}
               >
                 {tc.priority || "Medium"}
               </span>

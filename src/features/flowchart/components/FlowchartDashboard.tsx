@@ -192,7 +192,7 @@ export const FlowchartDashboard: React.FC<FlowchartDashboardProps> = ({
                       {fw.name}
                     </td>
                     <td className="py-3 px-4 whitespace-nowrap">
-                      <span className="inline-block px-2.5 py-1 bg-primary/10 text-primary border border-primary/30 text-[10px] leading-none font-medium rounded-md uppercase">
+                      <span className="inline-block px-2.5 py-1 bg-primary/10 text-primary border border-primary/30 text-[10px] leading-none font-normal rounded-md uppercase">
                         {fw.category || t("flowchart.uncategorized")}
                       </span>
                     </td>

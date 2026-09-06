@@ -63,7 +63,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
       {editingSprint && (
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
+            <label className="block text-xs font-normal text-content-subtle uppercase tracking-normal mb-1">
               {t("editSprint.name")}
             </label>
             <Input
@@ -72,7 +72,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
             />
           </div>
           <div>
-            <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
+            <label className="block text-xs font-normal text-content-subtle uppercase tracking-normal mb-1">
               {t("ui.goal")}
             </label>
             <Textarea
@@ -81,7 +81,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
             />
           </div>
           <div>
-            <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
+            <label className="block text-xs font-normal text-content-subtle uppercase tracking-normal mb-1">
               {t("editSprint.status")}
             </label>
             <StyledDropdown
@@ -96,7 +96,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-normal mb-1">
                 {t("editSprint.startDate")}
               </label>
               <LanproDatePicker
@@ -116,7 +116,7 @@ export const EditSprintModal: React.FC<EditSprintModalProps> = ({
               />
             </div>
             <div>
-              <label className="block text-xs font-normal text-content-subtle uppercase tracking-wider mb-1">
+              <label className="block text-xs font-normal text-content-subtle uppercase tracking-normal mb-1">
                 {t("editSprint.endDate")}
               </label>
               <LanproDatePicker
