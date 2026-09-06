@@ -1,0 +1,2160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>LanPro — Dokumen Gabungan BRD · FSD · TSD</title>
+<style>
+@page {
+  size: letter;
+  margin: 1in;
+  @top-center { content: "LanPro — Dokumen Gabungan BRD · FSD · TSD"; font-family: Helvetica, "Liberation Sans", Arial, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 9pt; color: #666; }
+  @bottom-center { content: counter(page) " of " counter(pages); font-family: Helvetica, "Liberation Sans", Arial, sans-serif; font-size: 9pt; color: #666; }
+  @bottom-right { content: "CONFIDENTIAL"; font-family: Helvetica, "Liberation Sans", Arial, sans-serif; font-size: 8pt; color: #aaa; letter-spacing: 0.05em; }
+}
+@page :first {
+  @top-center { content: none; }
+  @bottom-center { content: none; }
+  @bottom-right { content: none; }
+}
+@page wide {
+  size: letter landscape;
+  margin: 1in;
+}
+.page-wide {
+  page: wide;
+  text-align: center;
+}
+.page-wide img, .page-wide svg { width: 100%; height: auto; max-width: none; }
+.page-wide figure.diagram > svg { max-width: none; }
+
+html { lang: en; }
+img { max-width: 100%; height: auto; }
+body {
+  font-family: Helvetica, "Liberation Sans", Arial, "PingFang SC", "Heiti SC", "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", "Hiragino Kaku Gothic ProN", "Noto Sans CJK JP", "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  font-size: 12pt;
+  line-height: 1.5;
+  color: #111;
+  background: white;
+  hyphens: manual;
+  font-variant-ligatures: common-ligatures;
+  font-kerning: normal;
+  text-rendering: geometricPrecision;
+  margin: 0;
+  padding: 0;
+}
+
+.cover {
+  page: first;
+  page-break-after: always;
+  break-after: page;
+  text-align: left;
+  padding-top: 1.4in;
+}
+.cover .eyebrow {
+  font-size: 11pt;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #666;
+  margin: 0 0 36pt;
+}
+.cover h1.cover-title {
+  font-size: 56pt;
+  line-height: 1.08;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 24pt;
+  max-width: 6in;
+  text-align: left;
+}
+.cover .cover-subtitle {
+  font-size: 18pt;
+  line-height: 1.35;
+  font-weight: 400;
+  color: #333;
+  margin: 0 0 36pt;
+  max-width: 5.5in;
+  text-align: left;
+}
+.cover hr.rule {
+  width: 2.5in;
+  height: 0;
+  border: 0;
+  border-top: 1.5px solid #111;
+  margin: 0 0 24pt 0;
+}
+.cover .cover-meta { font-size: 13pt; line-height: 1.6; color: #333; text-align: left; }
+.cover .cover-meta strong { font-weight: 700; }
+
+.toc { page-break-after: always; break-after: page; }
+.toc h2 {
+  font-size: 16pt;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #444;
+  font-weight: 700;
+  margin: 0 0 0.4in;
+}
+.toc ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.toc li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25in;
+  font-size: 12pt;
+  line-height: 1.7;
+  padding: 3pt 0;
+}
+.toc li .toc-title { flex: 0 0 auto; }
+.toc li .toc-dots { flex: 1 1 auto; border-bottom: 1px dotted #aaa; margin: 0 6pt; transform: translateY(-4pt); }
+.toc li .toc-page { flex: 0 0 auto; color: #666; font-variant-numeric: tabular-nums; }
+.toc li.level-2 { padding-left: 0.35in; font-size: 11pt; }
+.toc li a { color: inherit; text-decoration: none; }
+
+.chapter { break-before: page; page-break-before: always; }
+.chapter:first-of-type { break-before: auto; page-break-before: auto; }
+h1 {
+  font-size: 26pt;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.25in;
+  break-after: avoid;
+  page-break-after: avoid;
+}
+h2 { font-size: 18pt; line-height: 1.3; font-weight: 700; margin: 26pt 0 8pt; break-after: avoid; page-break-after: avoid; }
+h3 { font-size: 13.5pt; line-height: 1.4; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #333; margin: 20pt 0 5pt; break-after: avoid; page-break-after: avoid; }
+h4 { font-size: 12pt; font-weight: 700; margin: 14pt 0 5pt; break-after: avoid; page-break-after: avoid; }
+
+p {
+  margin: 0 0 12pt;
+  text-align: left;
+  widows: 3;
+  orphans: 3;
+}
+p:first-child { margin-top: 0; }
+p.lead { font-size: 14pt; line-height: 1.45; color: #222; margin: 0 0 18pt; }
+
+a {
+  color: #0055cc;
+  text-decoration: underline;
+  text-decoration-thickness: 0.5pt;
+  text-underline-offset: 1.5pt;
+}
+strong { font-weight: 700; }
+em { font-style: italic; }
+
+code {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 10.5pt;
+  background: #f4f4f4;
+  padding: 1pt 3pt;
+  border-radius: 2pt;
+  border: 0.5pt solid #e4e4e4;
+}
+pre {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 10pt;
+  line-height: 1.4;
+  background: #f7f7f5;
+  padding: 10pt 12pt;
+  border: 0.5pt solid #e0e0e0;
+  border-radius: 3pt;
+  margin: 12pt 0;
+  overflow: hidden;
+  white-space: pre-wrap;
+}
+pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+.hljs-keyword { color: #8b0000; font-weight: 500; }
+.hljs-string { color: #0d6608; }
+.hljs-comment { color: #888; font-style: italic; }
+.hljs-function, .hljs-title { color: #0044aa; }
+.hljs-number { color: #a64d00; }
+
+blockquote {
+  margin: 12pt 0;
+  padding: 0 0 0 18pt;
+  border-left: 2pt solid #111;
+  color: #333;
+  font-size: 12pt;
+  line-height: 1.5;
+}
+blockquote p { margin-bottom: 6pt; text-align: left; }
+blockquote cite { display: block; margin-top: 6pt; font-style: normal; font-size: 10pt; color: #666; letter-spacing: 0.02em; }
+blockquote cite::before { content: "— "; }
+
+figure { margin: 12pt 0; }
+figure img { display: block; max-width: 100%; height: auto; }
+figcaption { font-size: 10pt; color: #666; margin-top: 6pt; font-style: italic; }
+figure.diagram { break-inside: avoid; text-align: center; }
+figure.diagram > svg { max-width: 100%; height: auto; }
+figure.diagram .diagram-caption { text-align: center; }
+figure.diagram-error { border: 1.5pt solid #b00020; padding: 8pt 10pt; text-align: left; }
+figure.diagram-error .diagram-error-title { font-weight: 700; color: #b00020; font-style: normal; margin: 0 0 6pt; }
+figure.diagram-error .diagram-error-detail { font-size: 8.5pt; white-space: pre-wrap; margin: 0; }
+.image-missing { display: inline-block; border: 1pt dashed #b00020; color: #b00020; padding: 4pt 8pt; font-size: 9pt; }
+
+table { width: 100%; border-collapse: collapse; margin: 12pt 0; font-size: 11pt; }
+th, td { border-bottom: 0.5pt solid #ccc; padding: 5pt 8pt; text-align: left; vertical-align: top; }
+th { font-weight: 700; border-bottom: 1pt solid #111; background: transparent; }
+
+ul, ol { margin: 0 0 12pt 0; padding-left: 20pt; }
+li { margin-bottom: 3pt; line-height: 1.45; }
+li > ul, li > ol { margin-top: 3pt; margin-bottom: 0; }
+
+.footnote-ref { font-size: 0.75em; vertical-align: super; line-height: 0; text-decoration: none; color: #0055cc; }
+.footnotes { margin-top: 24pt; padding-top: 12pt; border-top: 0.5pt solid #ccc; font-size: 10pt; line-height: 1.4; }
+.footnotes ol { padding-left: 18pt; }
+
+.watermark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-size: 140pt;
+  font-weight: 700;
+  color: rgba(200, 0, 0, 0.06);
+  letter-spacing: 0.08em;
+  pointer-events: none;
+  z-index: 9999;
+  user-select: none;
+  white-space: nowrap;
+}
+
+blockquote, pre, code, table, figure, li, .keep-together { break-inside: avoid; page-break-inside: avoid; }
+</style>
+<style>
+@media screen {
+  body { max-width: 42em; margin: 0 auto; padding: 2.5em 1.5em; }
+  .chapter { break-before: auto; }
+  .watermark { display: none; }
+  figure.diagram { overflow-x: auto; }
+  .toc li .toc-page, .toc li .toc-dots { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="watermark">DRAFT</div>
+<section class="cover">
+  <h1 class="cover-title">LanPro — Dokumen Gabungan BRD · FSD · TSD</h1>
+  <hr class="rule">
+  <div class="cover-meta">
+    <div>September 6, 2026</div>
+  </div>
+</section>
+<section class="toc">
+  <h2>Contents</h2>
+  <ol>
+  <li class="level-1">
+    <span class="toc-title"><a href="#toc-0">LanPro — Dokumen Gabungan BRD · FSD · TSD</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-0"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-1">Daftar isi</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-1"></span>
+  </li>
+  <li class="level-1">
+    <span class="toc-title"><a href="#toc-2">1. BRD — Business Requirements</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-2"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-3">1.1 Masalah bisnis</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-3"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-4">1.2 Solusi produk (posisi resmi §24.2 / #346)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-4"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-5">1.3 Tujuan &amp; KPI</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-5"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-6">1.4 Pemangku kepentingan &amp; persona</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-6"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-7">Tier A — Peran sistem (Users.role)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-7"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-8">Tier B — Peran proyek (ProjectMembers.role)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-8"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-9">1.5 Ruang lingkup</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-9"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-10">1.6 Asumsi, risiko, ketergantungan</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-10"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-11">1.7 Aturan bisnis lintas-produk (katalog BR-*)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-11"></span>
+  </li>
+  <li class="level-1">
+    <span class="toc-title"><a href="#toc-12">2. FSD — Functional Specification</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-12"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-13">2.1 Modul fungsional (sidebar)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-13"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-14">2.2 Persyaratan non-fungsional</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-14"></span>
+  </li>
+  <li class="level-1">
+    <span class="toc-title"><a href="#toc-15">3. TSD — Technical Specification</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-15"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-16">3.1 Arsitektur runtime</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-16"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-17">3.2 Lapisan penting</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-17"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-18">3.3 Alur request otorisasi</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-18"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-19">3.4 Stack &amp; gerbang</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-19"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-20">3.5 Integrasi</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-20"></span>
+  </li>
+  <li class="level-1">
+    <span class="toc-title"><a href="#toc-21">4. Flowchart — Alur sistem LanPro</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-21"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-22">4.1 Peta modul end-to-end</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-22"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-23">4.2 Siklus hidup akun</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-23"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-24">4.3 Siklus hidup isu</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-24"></span>
+  </li>
+  <li class="level-1">
+    <span class="toc-title"><a href="#toc-25">5. Flowchart — Agile vs Waterfall</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-25"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-26">5.1 Pemilihan metodologi</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-26"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-27">5.2 Alur Agile</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-27"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-28">5.3 Alur Waterfall</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-28"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-29">5.4 Perbandingan cepat</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-29"></span>
+  </li>
+  <li class="level-1">
+    <span class="toc-title"><a href="#toc-30">6. Flowchart — Per peran sistem</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-30"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-31">6.1 Administrator (admin)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-31"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-32">6.2 Department Head (head sistem)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-32"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-33">6.3 Standard User &amp; Observer sistem</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-33"></span>
+  </li>
+  <li class="level-1">
+    <span class="toc-title"><a href="#toc-34">7. Flowchart — Per peran proyek</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-34"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-35">7.1 Owner / Project Admin / Manager</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-35"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-36">7.2 System Analyst / Business Analyst</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-36"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-37">7.3 Developer / QA / Head / Viewer</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-37"></span>
+  </li>
+  <li class="level-1">
+    <span class="toc-title"><a href="#toc-38">8. Matriks akses</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-38"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-39">8.1 Sistem</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-39"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-40">8.2 Proyek (cuplikan)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-40"></span>
+  </li>
+  <li class="level-1">
+    <span class="toc-title"><a href="#toc-41">9. Spesifikasi per modul</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-41"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-42">9.1 Auth &amp; akun</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-42"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-43">9.2 Proyek (buat, setelan, metodologi)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-43"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-44">9.3 Dashboard</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-44"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-45">9.4 Daftar Isu / Task</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-45"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-46">9.5 Planning &amp; Sprint (Agile)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-46"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-47">9.6 Papan Kanban</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-47"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-48">9.7 Timeline / Roadmap / Milestone</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-48"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-49">9.8 QA</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-49"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-50">9.9 Wiki (Dokumentasi)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-50"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-51">9.10 Flowchart</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-51"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-52">9.11 Tim / Access</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-52"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-53">9.12 Administrasi sistem</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-53"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-54">9.13 Catatan Rapat (modul induk Meeting AI)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-54"></span>
+  </li>
+  <li class="level-1">
+    <span class="toc-title"><a href="#toc-55">10. Meeting AI — spesifikasi dalam</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-55"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-56">10.1 BRD Meeting AI</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-56"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-57">10.2 FSD — tiga jalur input</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-57"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-58">10.3 TSD — komponen &amp; API</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-58"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-59">API utama</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-59"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-60">Env &amp; dependensi</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-60"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-61">10.4 State machine pipeline</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-61"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-62">10.5 Swimlane end-to-end (live/upload)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-62"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-63">10.6 Swimlane manuscript (paste)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-63"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-64">10.7 Progress &amp; kegagalan</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-64"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-65">10.8 Gap &amp; risiko (#320)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-65"></span>
+  </li>
+  <li class="level-1">
+    <span class="toc-title"><a href="#toc-66">11. Auth &amp; OIDC — spesifikasi dalam</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-66"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-67">11.1 BRD Auth</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-67"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-68">11.2 FSD Auth</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-68"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-69">11.3 TSD Auth</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-69"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-70">OIDC flow</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-70"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-71">Password forgot (ringkas terkini)</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-71"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-72">11.4 Gap Auth</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-72"></span>
+  </li>
+  <li class="level-1">
+    <span class="toc-title"><a href="#toc-73">12. Lampiran</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-73"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-74">12.1 Artefak terkait</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-74"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-75">12.2 Yang dokumen ini bukan</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-75"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-76">12.3 Riwayat versi</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-76"></span>
+  </li>
+  <li class="level-2">
+    <span class="toc-title"><a href="#toc-77">12.4 Keputusan review tersisa</a></span>
+    <span class="toc-dots"></span>
+    <span class="toc-page" data-toc-target="toc-77"></span>
+  </li>
+  </ol>
+</section>
+<section class="chapter"><h1 id="toc-0">LanPro — Dokumen Gabungan BRD · FSD · TSD</h1>
+<table>
+<thead>
+<tr>
+<th>Meta</th>
+<th>Nilai</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Produk</strong></td>
+<td>LanPro — manajemen proyek + kolaborasi (Issue, Sprint/Milestone, Kanban, QA, Wiki, Flowchart, Meeting AI)</td>
+</tr>
+<tr>
+<td><strong>Versi dokumen</strong></td>
+<td><strong>3.1.0</strong> (06 Sep 2026)</td>
+</tr>
+<tr>
+<td><strong>Status</strong></td>
+<td><strong>DRAFT review pemilik</strong> — selaras kode + <code>AUDIT.md</code> §19 + papan 7 BELUM · 454 SELESAI (+ item <strong>#466</strong>)</td>
+</tr>
+<tr>
+<td><strong>Tiket papan</strong></td>
+<td><strong>#466</strong> — dokumentasi BRD/FSD/TSD lengkap (per modul, Meeting AI, OIDC, flowchart)</td>
+</tr>
+<tr>
+<td><strong>Keputusan pemilik</strong></td>
+<td>(1) setujui #466 · (2) flowchart <strong>per modul</strong> · (3) PDF · (4) alur Meeting AI + detail bisnis/teknis</td>
+</tr>
+<tr>
+<td><strong>Sumber RBAC</strong></td>
+<td><code>src/lib/matriksAkses.ts</code> ↔ <code>AUDIT.md</code> §19.4 / §19.5</td>
+</tr>
+<tr>
+<td><strong>Metodologi</strong></td>
+<td>Dual-mode Agile / Waterfall (#311, #312, #465)</td>
+</tr>
+<tr>
+<td><strong>Bahasa</strong></td>
+<td>Indonesia (istilah teknis EN dipertahankan)</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>v2.5 diganti (RBAC basi). v3.0 = kerangka. <strong>v3.1</strong> = detail per modul + Meeting AI + Auth/OIDC + swimlane.</p>
+</blockquote>
+<hr>
+<h2 id="toc-1">Daftar isi</h2>
+<ol>
+<li><a href="#1-brd--business-requirements">BRD — Business Requirements</a></li>
+<li><a href="#2-fsd--functional-specification">FSD — Functional Specification (ringkas lintas modul)</a></li>
+<li><a href="#3-tsd--technical-specification">TSD — Technical Specification</a></li>
+<li><a href="#4-flowchart--alur-sistem-lanpro">Flowchart — Alur sistem LanPro</a></li>
+<li><a href="#5-flowchart--agile-vs-waterfall">Flowchart — Agile vs Waterfall</a></li>
+<li><a href="#6-flowchart--per-peran-sistem">Flowchart — Per peran sistem</a></li>
+<li><a href="#7-flowchart--per-peran-proyek">Flowchart — Per peran proyek</a></li>
+<li><a href="#8-matriks-akses">Matriks akses</a></li>
+<li><a href="#9-spesifikasi-per-modul"><strong>Spesifikasi per modul (BRD+FSD+TSD+flow)</strong></a></li>
+<li><a href="#10-meeting-ai--spesifikasi-dalam"><strong>Meeting AI — spesifikasi dalam</strong></a></li>
+<li><a href="#11-auth--oidc--spesifikasi-dalam"><strong>Auth &amp; OIDC — spesifikasi dalam</strong></a></li>
+<li><a href="#12-lampiran">Lampiran</a></li>
+</ol>
+<hr>
+</section>
+<section class="chapter"><h1 id="toc-2">1. BRD — Business Requirements</h1>
+<h2 id="toc-3">1.1 Masalah bisnis</h2>
+<p>Organisasi engineering sering memakai <strong>4–6 tool terpisah</strong> (tracker, board, dokumen, QA spreadsheet, notulen, diagram). Akibatnya:</p>
+<ol>
+<li>Silo requirement ↔ development ↔ QA ↔ notulen.</li>
+<li>Hak akses tidak seragam (risiko IDOR / over-permission).</li>
+<li>Master data (status, peran, departemen) tidak kanonik — label vs code bercampur.</li>
+<li>Metodologi <strong>Agile</strong> dan <strong>Waterfall</strong> dicampur tanpa aturan navigasi yang jernih.</li>
+<li>Notulen rapat tidak otomatis menjadi poin diskusi / kandidat isu.</li>
+</ol>
+<h2 id="toc-4">1.2 Solusi produk (posisi resmi §24.2 / #346)</h2>
+<p>LanPro = <strong>pelacak agile-first</strong> (backlog, sprint, kanban, poin, burndown) <strong>plus</strong> Gantt/milestone, wiki, rapat AI, QA, flowchart — <strong>bukan</strong> hibrida Jira + MS Project penuh.</p>
+<table>
+<thead>
+<tr>
+<th>Metodologi</th>
+<th>Perilaku produk</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Agile</strong></td>
+<td>Menu Planning &amp; Sprint; scope lock; satu sprint aktif; burndown hybrid poin|tugas</td>
+</tr>
+<tr>
+<td><strong>Waterfall</strong></td>
+<td>Menu Sprint <strong>disembunyikan</strong>; Roadmap &amp; Milestones; create sprint API ditolak</td>
+</tr>
+</tbody></table>
+<p><strong>Ditolak secara produk (#346):</strong> CPM/critical path, WBS penuh, timesheet kapasitas, marketplace automation Jira-class.</p>
+<h2 id="toc-5">1.3 Tujuan &amp; KPI</h2>
+<table>
+<thead>
+<tr>
+<th>Tujuan</th>
+<th>KPI</th>
+<th>Status / catatan</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Satu workspace SDLC</td>
+<td>Modul inti dipakai 1 org</td>
+<td>Issues + Sprint/Roadmap + Meeting + Wiki + QA</td>
+</tr>
+<tr>
+<td>Keamanan deny-by-default</td>
+<td>0 rute proyek tanpa <code>jagaProyek</code></td>
+<td>Two-Tier RBAC F7</td>
+</tr>
+<tr>
+<td>Dual-mode bersih</td>
+<td>Copy Sprint ≠ Phase; nav berubah</td>
+<td>#465 SELESAI kode</td>
+</tr>
+<tr>
+<td>Meeting → insight</td>
+<td>Pipeline sampai COMPLETED</td>
+<td>#320 BELUM E2E pemilik</td>
+</tr>
+<tr>
+<td>Durabilitas unggahan</td>
+<td>Storage bukan ephemeral di production</td>
+<td>#30 terbuka</td>
+</tr>
+</tbody></table>
+<h2 id="toc-6">1.4 Pemangku kepentingan &amp; persona</h2>
+<h3 id="toc-7">Tier A — Peran sistem (<code>Users.role</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Label</th>
+<th>Tanggung jawab bisnis</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>admin</code></td>
+<td>Administrator</td>
+<td>Onboarding user, master data, audit, buat proyek, <strong>God Mode</strong> lintas proyek</td>
+</tr>
+<tr>
+<td><code>head</code></td>
+<td>Department Head</td>
+<td>Baca admin terbatas; daftar proyek se-departemen</td>
+</tr>
+<tr>
+<td><code>user</code></td>
+<td>Standard User</td>
+<td>Anggota proyek sesuai <code>ProjectMembers</code></td>
+</tr>
+<tr>
+<td><code>viewer</code></td>
+<td>Observer (sistem)</td>
+<td>Baca terbatas di lingkup sistem</td>
+</tr>
+</tbody></table>
+<h3 id="toc-8">Tier B — Peran proyek (<code>ProjectMembers.role</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Label</th>
+<th>Wilayah kuasa bisnis</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>owner</code></td>
+<td>Project Owner</td>
+<td>Pemilik; hapus proyek; setelan</td>
+</tr>
+<tr>
+<td><code>admin</code></td>
+<td>Project Admin</td>
+<td>Administrasi proyek (<strong>bukan</strong> God Mode sistem)</td>
+</tr>
+<tr>
+<td><code>manager</code></td>
+<td>Project Manager</td>
+<td>Perencanaan, isu, board, sprint/timeline</td>
+</tr>
+<tr>
+<td><code>head</code></td>
+<td>Department Head (proyek)</td>
+<td>Baca seluruh modul proyek</td>
+</tr>
+<tr>
+<td><code>system_analyst</code></td>
+<td>System Analyst</td>
+<td><strong>CRUD</strong> Wiki + Flowchart</td>
+</tr>
+<tr>
+<td><code>business_analyst</code></td>
+<td>Business Analyst</td>
+<td><strong>CRUD</strong> Meeting Notes + AI</td>
+</tr>
+<tr>
+<td><code>developer</code></td>
+<td>Developer</td>
+<td>CRU isu; RU board/QA</td>
+</tr>
+<tr>
+<td><code>qa</code></td>
+<td>QA</td>
+<td><strong>CRUD</strong> modul QA; taut bug → Task</td>
+</tr>
+<tr>
+<td><code>viewer</code></td>
+<td>Viewer (proyek)</td>
+<td>Baca saja</td>
+</tr>
+</tbody></table>
+<h2 id="toc-9">1.5 Ruang lingkup</h2>
+<p><strong>In scope:</strong> auth (email/OIDC), proyek, isu/task, sprint/milestone, kanban, roadmap/Gantt, QA, wiki, flowchart, meeting (+ AI pipeline), tim/akses, master data, audit, dual-mode, RBAC dua tingkat.</p>
+<p><strong>Out of scope:</strong> CPM, WBS penuh, timesheet, marketplace automation, parity Otter.ai penuh (diarization speaker masih gap #320).</p>
+<h2 id="toc-10">1.6 Asumsi, risiko, ketergantungan</h2>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Risiko / asumsi</th>
+<th>Tiket</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Storage local di Vercel</td>
+<td>File ephemeral</td>
+<td>#30 · #290</td>
+</tr>
+<tr>
+<td>Meeting recording lokal</td>
+<td>Tidak memakai <code>STORAGE_DRIVER</code> S3</td>
+<td>#30 · #320</td>
+</tr>
+<tr>
+<td>Bukti visual tab bersih</td>
+<td>Gerbang ≠ bukti UI</td>
+<td>#335</td>
+</tr>
+<tr>
+<td>Meeting AI COMPLETED</td>
+<td>Butuh Gemini + ffmpeg + E2E pemilik</td>
+<td>#320</td>
+</tr>
+<tr>
+<td>SSO Microsoft lapangan</td>
+<td>Adaptor ada; verifikasi domain</td>
+<td>#305</td>
+</tr>
+<tr>
+<td>Soft-delete</td>
+<td><strong>Ditolak</strong> — hanya hard-delete + konfirmasi</td>
+<td>#394</td>
+</tr>
+</tbody></table>
+<h2 id="toc-11">1.7 Aturan bisnis lintas-produk (katalog BR-*)</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Aturan</th>
+<th>Referensi</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BR-RBAC-01</td>
+<td>Deny-by-default; God Mode hanya <code>Users.role=admin</code> + audit</td>
+<td>§19.6</td>
+</tr>
+<tr>
+<td>BR-METH-01</td>
+<td>Waterfall: POST sprint ditolak; menu Sprint disembunyikan</td>
+<td>#311 #465</td>
+</tr>
+<tr>
+<td>BR-SPR-01</td>
+<td>Lingkup sprint aktif/selesai terkunci kecuali <code>unlockScope</code></td>
+<td>#461</td>
+</tr>
+<tr>
+<td>BR-SPR-02</td>
+<td>Maksimal satu sprint <code>active</code> per proyek</td>
+<td>#462</td>
+</tr>
+<tr>
+<td>BR-MET-01</td>
+<td>Burndown: poin bila totalPoints&gt;0 else hitungan tugas</td>
+<td>#464</td>
+</tr>
+<tr>
+<td>BR-QA-01</td>
+<td>Bug QA: <code>linkedTaskId</code> + <code>linkedBugKey</code> tampilan</td>
+<td>#463</td>
+</tr>
+<tr>
+<td>BR-DEL-01</td>
+<td>Soft-delete ditolak; hard-delete + konfirmasi + cascade</td>
+<td>#394 #444</td>
+</tr>
+<tr>
+<td>BR-IRIS-01</td>
+<td>Tidak membangun CPM/timesheet marketplace</td>
+<td>#346</td>
+</tr>
+<tr>
+<td>BR-MD-01</td>
+<td>Yang disimpan ke DB adalah <strong>code</strong> MasterData, bukan label</td>
+<td>AGENTS.md</td>
+</tr>
+<tr>
+<td>BR-MEET-01</td>
+<td>Rekaman hanya untuk analisis; hapus file setelah COMPLETED</td>
+<td>#320</td>
+</tr>
+<tr>
+<td>BR-MEET-02</td>
+<td>PUT/DELETE meeting: author <strong>atau</strong> system ADMIN (lebih ketat dari matriks)</td>
+<td>meetings.routes</td>
+</tr>
+</tbody></table>
+<hr>
+</section>
+<section class="chapter"><h1 id="toc-12">2. FSD — Functional Specification</h1>
+<h2 id="toc-13">2.1 Modul fungsional (sidebar)</h2>
+<table>
+<thead>
+<tr>
+<th>Modul UI</th>
+<th>Key matriks</th>
+<th>Fungsi utama</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Dashboard</td>
+<td><code>dashboard</code></td>
+<td>KPI, burndown/velocity (Agile), ringkasan</td>
+</tr>
+<tr>
+<td>Daftar Isu</td>
+<td><code>list</code></td>
+<td>CRUD isu, History, lampiran, komentar</td>
+</tr>
+<tr>
+<td>Perencanaan &amp; Sprint</td>
+<td><code>sprints</code></td>
+<td>Backlog ↔ sprint, start/complete, scope lock</td>
+</tr>
+<tr>
+<td>Papan Kanban</td>
+<td><code>board</code></td>
+<td>DnD status MasterData, WIP lunak</td>
+</tr>
+<tr>
+<td>Peta Jalan &amp; Linimasa</td>
+<td><code>timeline</code></td>
+<td>Gantt, milestone, garis <code>blocks</code></td>
+</tr>
+<tr>
+<td>Penilaian Kualitas</td>
+<td><code>qa</code></td>
+<td>Suite/case, eksekusi, bug → Task</td>
+</tr>
+<tr>
+<td>Dokumentasi</td>
+<td><code>wiki</code></td>
+<td>Dokumen proyek</td>
+</tr>
+<tr>
+<td>Editor Diagram Alur</td>
+<td><code>flowchart</code></td>
+<td>Kanvas flowchart</td>
+</tr>
+<tr>
+<td>Catatan Rapat</td>
+<td><code>meetingNotes</code></td>
+<td>Notulen + Meeting AI</td>
+</tr>
+<tr>
+<td>Tim</td>
+<td><code>access</code></td>
+<td>Anggota &amp; peran proyek</td>
+</tr>
+<tr>
+<td>Master / Users / Audit / DB / Settings</td>
+<td>modul sistem</td>
+<td>Administrasi</td>
+</tr>
+</tbody></table>
+<p>Detail per modul: <strong>§9</strong>. Meeting AI: <strong>§10</strong>. Auth: <strong>§11</strong>.</p>
+<h2 id="toc-14">2.2 Persyaratan non-fungsional</h2>
+<ul>
+<li>UI token <code>surface-*</code> / <code>content-*</code> / <code>border-*</code> (§22); gerbang <code>audit:tema</code> / <code>audit:warna</code>.</li>
+<li>i18n ID/EN.</li>
+<li>PostgreSQL saja (Neon pooler); identifier camelCase dikutip.</li>
+<li>JWT di klien (arah httpOnly terkait #30).</li>
+<li>Hard-delete saja (#394).</li>
+</ul>
+<hr>
+</section>
+<section class="chapter"><h1 id="toc-15">3. TSD — Technical Specification</h1>
+<h2 id="toc-16">3.1 Arsitektur runtime</h2>
+<pre><code class="language-text">Browser (React 19 + Vite + Tailwind v4)
+        | HTTPS + Socket.IO
+Express (server.ts) :3000
+        | jagaProyek / verifyGlobalAdmin / JWT
+Routes → Controllers/Services → Repositories → PostgreSQL (Neon)
+        | optional Redis (Socket.IO adapter)
+        | Gemini (Meeting AI) · FFmpeg · local uploads · Resend/SMTP
+</code></pre>
+<h2 id="toc-17">3.2 Lapisan penting</h2>
+<table>
+<thead>
+<tr>
+<th>Lapisan</th>
+<th>Path</th>
+<th>Catatan</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Fitur UI</td>
+<td><code>src/features/*</code></td>
+<td>Satu folder per domain</td>
+</tr>
+<tr>
+<td>Primif UI</td>
+<td><code>src/components/</code></td>
+<td>Stateless lintas fitur</td>
+</tr>
+<tr>
+<td>Matriks RBAC</td>
+<td><code>src/lib/matriksAkses.ts</code></td>
+<td>Sinkron AUDIT §19</td>
+</tr>
+<tr>
+<td>Peran</td>
+<td><code>src/types/roles.ts</code></td>
+<td>Dua enum SYSTEM/PROJECT</td>
+</tr>
+<tr>
+<td>Metodologi</td>
+<td><code>src/lib/methodology.ts</code>, <code>alurMetodologi.ts</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Sprint lingkup</td>
+<td><code>server/lib/sprintLingkup.ts</code></td>
+<td>#461</td>
+</tr>
+<tr>
+<td>Migrasi</td>
+<td><code>src/lib/pg-migrate.ts</code></td>
+<td><strong>Jangan sentuh <code>src/lib/db.ts</code> sembarangan</strong></td>
+</tr>
+<tr>
+<td>Penjaga proyek</td>
+<td><code>server/middleware/jagaProyek.ts</code></td>
+<td></td>
+</tr>
+</tbody></table>
+<h2 id="toc-18">3.3 Alur request otorisasi</h2>
+<pre><code class="language-mermaid">flowchart TD
+  A[HTTP /api/...] --&gt; B{Rute publik?}
+  B --&gt;|Ya| C[Handler]
+  B --&gt;|Tidak| D[authenticateJWT]
+  D --&gt; E{God Mode admin sistem?}
+  E --&gt;|Ya + audit| C
+  E --&gt;|Tidak| F{Anggota proyek?}
+  F --&gt;|Tidak| G[403]
+  F --&gt;|Ya| H[jagaProyek modul,aksi]
+  H --&gt; I{bolehDiProyek?}
+  I --&gt;|Tidak| G
+  I --&gt;|Ya| C
+</code></pre>
+<h2 id="toc-19">3.4 Stack &amp; gerbang</h2>
+<ul>
+<li>Dev: <code>npm run dev</code> → <code>tsx watch server.ts</code></li>
+<li>Build: Vite FE + esbuild <code>dist/server.cjs</code></li>
+<li>Gerbang: <code>doctor</code>, <code>lint</code>, <code>test</code>, <code>build</code>, <code>audit:papan|warna|tema</code></li>
+<li>UI benar = <strong>tab peramban bersih</strong>, bukan hanya build hijau (§15.3)</li>
+</ul>
+<h2 id="toc-20">3.5 Integrasi</h2>
+<table>
+<thead>
+<tr>
+<th>Integrasi</th>
+<th>Fungsi</th>
+<th>Env kunci</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Neon PostgreSQL</td>
+<td>Data primer</td>
+<td><code>DATABASE_URL</code> (pooler)</td>
+</tr>
+<tr>
+<td>Google Gemini</td>
+<td>Meeting AI STT + LLM</td>
+<td><code>GEMINI_API_KEY</code></td>
+</tr>
+<tr>
+<td>OIDC Google / Microsoft</td>
+<td>SSO</td>
+<td><code>OIDC_GOOGLE_*</code>, <code>OIDC_MICROSOFT_*</code></td>
+</tr>
+<tr>
+<td>Resend / SMTP</td>
+<td>Email</td>
+<td><code>EMAIL_*</code> / IntegrationSettings</td>
+</tr>
+<tr>
+<td>FFmpeg</td>
+<td>Transcode rekaman</td>
+<td>binary di PATH</td>
+</tr>
+<tr>
+<td>Storage local</td>
+<td>Unggahan + rekaman meeting</td>
+<td><code>uploads/</code> (meeting <strong>belum</strong> S3)</td>
+</tr>
+</tbody></table>
+<hr>
+</section>
+<section class="chapter"><h1 id="toc-21">4. Flowchart — Alur sistem LanPro</h1>
+<h2 id="toc-22">4.1 Peta modul end-to-end</h2>
+<pre><code class="language-mermaid">flowchart LR
+  subgraph Auth
+    REG[Daftar] --&gt; PEND[Pending]
+    PEND --&gt; APPR[Approve Admin]
+    APPR --&gt; LOGIN[Login / OIDC]
+  end
+  LOGIN --&gt; HOME{Punya proyek?}
+  HOME --&gt;|Tidak| WEL[WelcomeScreen]
+  HOME --&gt;|Ya| DASH[Dashboard]
+  DASH --&gt; ISS[Daftar Isu]
+  DASH --&gt; PLAN[Planning / Roadmap]
+  DASH --&gt; KAN[Kanban]
+  DASH --&gt; QA[QA]
+  DASH --&gt; WIKI[Wiki]
+  DASH --&gt; FLOW[Flowchart]
+  DASH --&gt; MEET[Meeting]
+  DASH --&gt; TEAM[Tim]
+  ISS --&gt; DETAIL[Detail Isu + History]
+  QA --&gt; BUG[Bug Task linkedTaskId]
+  MEET --&gt; AI[Pipeline AI]
+</code></pre>
+<h2 id="toc-23">4.2 Siklus hidup akun</h2>
+<pre><code class="language-mermaid">stateDiagram-v2
+  [*] --&gt; Registered: POST register
+  Registered --&gt; Pending: status pending
+  Pending --&gt; Approved: Admin approve + email
+  Pending --&gt; Rejected: Admin reject
+  Approved --&gt; ActiveSession: Login JWT
+  ActiveSession --&gt; ForcePasswordChange: Temp password / policy
+  ForcePasswordChange --&gt; ActiveSession: Ganti sandi
+  ActiveSession --&gt; LoggedOut: Logout / blacklist
+</code></pre>
+<h2 id="toc-24">4.3 Siklus hidup isu</h2>
+<pre><code class="language-mermaid">flowchart TD
+  A[Buat isu / quick create] --&gt; B[Backlog atau Sprint/Milestone]
+  B --&gt; C[Kanban: status MasterData code]
+  C --&gt; D{Done / Closed?}
+  D --&gt;|Ya| E[History + notifikasi]
+  D --&gt;|Tidak| C
+  F[QA FAIL] --&gt; G[Bug Task]
+  G --&gt; H[linkedTaskId + linkedBugKey]
+  H --&gt; I[Bug Done → QA Retest]
+</code></pre>
+<hr>
+</section>
+<section class="chapter"><h1 id="toc-25">5. Flowchart — Agile vs Waterfall</h1>
+<h2 id="toc-26">5.1 Pemilihan metodologi</h2>
+<pre><code class="language-mermaid">flowchart TD
+  A[Buat / Edit Proyek] --&gt; B[Pilih methodology]
+  B --&gt; C{normalisasi UPPERCASE}
+  C --&gt;|AGILE / SCRUM / ...| D[Mode Agile]
+  C --&gt;|WATERFALL| E[Mode Waterfall]
+  D --&gt; D1[Tampil menu Planning &amp; Sprint]
+  D --&gt; D2[Label Roadmap &amp; Timeline]
+  D --&gt; D3[Burndown + satu sprint aktif + scope lock]
+  E --&gt; E1[Sembunyikan menu Sprint]
+  E --&gt; E2[Label Roadmap &amp; Milestones]
+  E --&gt; E3[API create sprint ditolak]
+  E --&gt; E4[Redirect view sprints → timeline]
+</code></pre>
+<h2 id="toc-27">5.2 Alur Agile</h2>
+<pre><code class="language-mermaid">flowchart TD
+  A[Backlog berisi isu] --&gt; B[Buat Sprint planned]
+  B --&gt; C[DnD isu ke sprint planned]
+  C --&gt; D[Start Sprint → status active]
+  D --&gt; E[Demote sprint aktif lain → planned]
+  D --&gt; F[Lingkup terkunci]
+  F --&gt; G{User DnD masuk/keluar?}
+  G --&gt;|Tanpa unlockScope| H[Tolak 400]
+  G --&gt;|Complete + unlockScope| I[Pindah sisa: backlog / next / leave]
+  I --&gt; J[Sprint completed terkunci]
+  D --&gt; K[Dashboard burndown hybrid]
+</code></pre>
+<h2 id="toc-28">5.3 Alur Waterfall</h2>
+<pre><code class="language-mermaid">flowchart TD
+  A[Proyek WATERFALL] --&gt; B[Tidak ada Planning Sprint di nav]
+  B --&gt; C[Roadmap &amp; Milestones]
+  C --&gt; D[CRUD Milestone]
+  D --&gt; E[Taut isu via milestoneId]
+  E --&gt; F[Gantt + garis blocks]
+  A --&gt; G[POST /sprints]
+  G --&gt; H[Error metodologi_waterfall_tidak_mendukung]
+</code></pre>
+<h2 id="toc-29">5.4 Perbandingan cepat</h2>
+<table>
+<thead>
+<tr>
+<th>Aspek</th>
+<th>Agile LanPro</th>
+<th>Waterfall LanPro</th>
+<th>Jira (kasar)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Unit perencanaan</td>
+<td>Sprint</td>
+<td>Milestone + Gantt</td>
+<td>Sprint / Version</td>
+</tr>
+<tr>
+<td>Board</td>
+<td>Kanban status dinamis</td>
+<td>Kanban sama</td>
+<td>Board</td>
+</tr>
+<tr>
+<td>Scope lock</td>
+<td>Ya (#461)</td>
+<td>N/A</td>
+<td>Sprint incomplete</td>
+</tr>
+<tr>
+<td>Satu aktif</td>
+<td>Ya (#462)</td>
+<td>N/A</td>
+<td>Umum praktik</td>
+</tr>
+<tr>
+<td>CPM / baseline</td>
+<td>Tidak</td>
+<td>Tidak</td>
+<td>Add-on</td>
+</tr>
+</tbody></table>
+<hr>
+</section>
+<section class="chapter"><h1 id="toc-30">6. Flowchart — Per peran sistem</h1>
+<h2 id="toc-31">6.1 Administrator (<code>admin</code>)</h2>
+<pre><code class="language-mermaid">flowchart TD
+  L[Login] --&gt; A[God Mode semua proyek]
+  A --&gt; B[User Management CRUD]
+  A --&gt; C[Master Data CRUD]
+  A --&gt; D[Audit / DB Explorer / Settings]
+  A --&gt; E[Buat proyek]
+  E --&gt; F[Assign anggota]
+  A --&gt; G[Masuk modul proyek apa pun]
+</code></pre>
+<h2 id="toc-32">6.2 Department Head (<code>head</code> sistem)</h2>
+<pre><code class="language-mermaid">flowchart TD
+  L[Login] --&gt; A[Lihat user/master/audit/settings: R]
+  A --&gt; B[Daftar proyek se-departemen]
+  B --&gt; C[Hak di dalam proyek = peran ProjectMembers]
+</code></pre>
+<h2 id="toc-33">6.3 Standard User &amp; Observer sistem</h2>
+<pre><code class="language-mermaid">flowchart TD
+  L[Login] --&gt; A{Anggota proyek?}
+  A --&gt;|Tidak| W[WelcomeScreen]
+  A --&gt;|Ya| P[Hak mengikuti peran proyek]
+</code></pre>
+<hr>
+</section>
+<section class="chapter"><h1 id="toc-34">7. Flowchart — Per peran proyek</h1>
+<h2 id="toc-35">7.1 Owner / Project Admin / Manager</h2>
+<pre><code class="language-mermaid">flowchart TD
+  O[Owner] --&gt; O1[CRUD hampir semua + hapus proyek + setelan]
+  A[Project Admin] --&gt; A1[CRUD modul + setelan + Tim CRUD]
+  A --&gt; A2[Bukan God Mode sistem]
+  M[Manager] --&gt; M1[CRUD operasional + Tim R+U]
+  M --&gt; M2[Start/Complete sprint Agile]
+</code></pre>
+<h2 id="toc-36">7.2 System Analyst / Business Analyst</h2>
+<pre><code class="language-mermaid">flowchart TD
+  SA[System Analyst] --&gt; W[Wiki CRUD + Flowchart CRUD]
+  SA --&gt; S2[List CRU · Board RU · Meeting CRU]
+  BA[Business Analyst] --&gt; M[Meeting Notes CRUD + AI]
+  BA --&gt; B2[Wiki/Flowchart CRU · List CRU]
+</code></pre>
+<h2 id="toc-37">7.3 Developer / QA / Head / Viewer</h2>
+<pre><code class="language-mermaid">flowchart TD
+  DEV[Developer] --&gt; D1[List CRU · Board RU · QA RU]
+  QA[QA] --&gt; Q1[QA CRUD · List CRU · Meeting CRU]
+  QA --&gt; Q2[Fail → Bug Task linkedTaskId]
+  H[head/viewer proyek] --&gt; R[R semua modul]
+</code></pre>
+<hr>
+</section>
+<section class="chapter"><h1 id="toc-38">8. Matriks akses</h1>
+<p>Sumber: <code>MATRIKS_PROYEK</code> / <code>MATRIKS_SISTEM</code>. Huruf = C R U D.</p>
+<h3 id="toc-39">8.1 Sistem</h3>
+<table>
+<thead>
+<tr>
+<th>Modul</th>
+<th align="center">admin</th>
+<th align="center">head</th>
+<th align="center">user</th>
+<th align="center">viewer</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>userManagement</td>
+<td align="center">CRUD</td>
+<td align="center">R</td>
+<td align="center">—</td>
+<td align="center">—</td>
+</tr>
+<tr>
+<td>masterData</td>
+<td align="center">CRUD</td>
+<td align="center">R</td>
+<td align="center">—</td>
+<td align="center">—</td>
+</tr>
+<tr>
+<td>auditLog</td>
+<td align="center">CRUD</td>
+<td align="center">R</td>
+<td align="center">—</td>
+<td align="center">—</td>
+</tr>
+<tr>
+<td>dbExplorer</td>
+<td align="center">CRUD</td>
+<td align="center">—</td>
+<td align="center">—</td>
+<td align="center">—</td>
+</tr>
+<tr>
+<td>settings</td>
+<td align="center">CRUD</td>
+<td align="center">R</td>
+<td align="center">—</td>
+<td align="center">—</td>
+</tr>
+<tr>
+<td>buat proyek</td>
+<td align="center">C</td>
+<td align="center">—</td>
+<td align="center">—</td>
+<td align="center">—</td>
+</tr>
+</tbody></table>
+<h3 id="toc-40">8.2 Proyek (cuplikan)</h3>
+<table>
+<thead>
+<tr>
+<th>Modul</th>
+<th>owner/admin/manager</th>
+<th>SA</th>
+<th>BA</th>
+<th>developer</th>
+<th>qa</th>
+<th>head/viewer</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>dashboard</td>
+<td>R</td>
+<td>R</td>
+<td>R</td>
+<td>R</td>
+<td>R</td>
+<td>R</td>
+</tr>
+<tr>
+<td>list</td>
+<td>CRUD*</td>
+<td>CRU</td>
+<td>CRU</td>
+<td>CRU</td>
+<td>CRU</td>
+<td>R</td>
+</tr>
+<tr>
+<td>board</td>
+<td>CRUD*</td>
+<td>RU</td>
+<td>RU</td>
+<td>RU</td>
+<td>RU</td>
+<td>R</td>
+</tr>
+<tr>
+<td>sprints / timeline</td>
+<td>CRUD*</td>
+<td>R</td>
+<td>R</td>
+<td>R</td>
+<td>R</td>
+<td>R</td>
+</tr>
+<tr>
+<td>wiki</td>
+<td>CRUD*</td>
+<td><strong>CRUD</strong></td>
+<td>CRU</td>
+<td>R</td>
+<td>R</td>
+<td>R</td>
+</tr>
+<tr>
+<td>flowchart</td>
+<td>CRUD*</td>
+<td><strong>CRUD</strong></td>
+<td>CRU</td>
+<td>R</td>
+<td>R</td>
+<td>R</td>
+</tr>
+<tr>
+<td>meetingNotes</td>
+<td>CRUD*</td>
+<td>CRU</td>
+<td><strong>CRUD</strong></td>
+<td>R</td>
+<td>CRU</td>
+<td>R</td>
+</tr>
+<tr>
+<td>qa</td>
+<td>CRUD*</td>
+<td>RU</td>
+<td>RU</td>
+<td>RU</td>
+<td><strong>CRUD</strong></td>
+<td>R</td>
+</tr>
+<tr>
+<td>access</td>
+<td>CRUD / RU†</td>
+<td>R</td>
+<td>R</td>
+<td>R</td>
+<td>R</td>
+<td>R</td>
+</tr>
+</tbody></table>
+<p>* manager = CRUD operasional sesuai matriks penuh.<br>† access: owner/admin CRUD; manager R+U.<br>Setelan proyek: owner + project admin. Hapus proyek: owner saja.</p>
+<hr>
+</section>
+<section class="chapter"><h1 id="toc-41">9. Spesifikasi per modul</h1>
+<p>Setiap subbagian mengikuti pola: <strong>Bisnis → Fungsional → Teknis → Swimlane → Aturan</strong>.</p>
+<hr>
+<h2 id="toc-42">9.1 Auth &amp; akun</h2>
+<p><strong>Bisnis.</strong> Hanya akun <strong>approved/active</strong> yang boleh masuk. Admin menyetujui pendaftar. SSO Google/Microsoft setara password untuk domain yang dikonfigurasi.</p>
+<p><strong>Fungsional.</strong> Register, approve/reject, login, logout, forgot/reset password (kata sandi sementara 2 jam — #448/#451), wajib ganti sandi, lengkapi pendaftaran OIDC.</p>
+<p><strong>Teknis.</strong> <code>src/features/auth/</code> · <code>server/routes/auth.routes.ts</code> · <code>auth-oidc.routes.ts</code> · approve via <code>user.routes.ts</code> PUT status. JWT di klien; blacklist saat logout/forgot.</p>
+<pre><code class="language-mermaid">sequenceDiagram
+  participant U as User
+  participant A as Auth API
+  participant Adm as Admin Users
+  U-&gt;&gt;A: POST /register
+  A--&gt;&gt;U: pending
+  Adm-&gt;&gt;A: PUT /users/:id approved
+  U-&gt;&gt;A: POST /login ATAU OIDC start→callback
+  A--&gt;&gt;U: JWT
+</code></pre>
+<p>Detail penuh: <strong>§11</strong>.</p>
+<hr>
+<h2 id="toc-43">9.2 Proyek (buat, setelan, metodologi)</h2>
+<p><strong>Bisnis.</strong> Hanya Administrator sistem yang membuat proyek. Owner/Admin proyek mengubah setelan &amp; metodologi. Hapus proyek = hard cascade, owner saja.</p>
+<p><strong>Fungsional.</strong> Create project, set <code>category</code>/methodology (code MasterData, UPPERCASE), invite anggota, dashboard layout, delete.</p>
+<p><strong>Teknis.</strong> <code>server/routes/project.routes.ts</code> · <code>project-modules.routes.ts</code> · UI di <code>AppContainer</code> + chrome proyek. <code>bolehBuatProyek</code> / <code>bolehUbahSetelanProyek</code> / <code>bolehHapusProyek</code>.</p>
+<pre><code class="language-mermaid">flowchart TD
+  Admin[System admin] --&gt; Create[POST /projects]
+  Create --&gt; Meth[Set AGILE atau WATERFALL]
+  Meth --&gt; Members[Invite + ProjectMembers.role]
+  Members --&gt; Work[Masuk modul]
+  Owner --&gt; Del[DELETE hard cascade]
+</code></pre>
+<hr>
+<h2 id="toc-44">9.3 Dashboard</h2>
+<p><strong>Bisnis.</strong> Ringkasan kesehatan proyek: KPI isu, sprint aktif (Agile), aktivitas.</p>
+<p><strong>Fungsional.</strong> Widget KPI, filter sprint, burndown hybrid (#464), layout tersimpan.</p>
+<p><strong>Teknis.</strong> <code>src/features/dashboard/</code> · data agregat dari tasks/sprints/meetings · <code>PUT .../dashboard-layout</code> · guard <code>dashboard</code> R.</p>
+<pre><code class="language-mermaid">flowchart LR
+  Open[Buka proyek] --&gt; Dash[Dashboard]
+  Dash --&gt; Agg[Agregasi tasks/sprints/meetings]
+  Agg --&gt; KPI[KPI]
+  Agg --&gt; Burn{Agile + points?}
+  Burn --&gt;|Ya| Pts[Burndown poin]
+  Burn --&gt;|Tidak| Cnt[Burndown jumlah tugas]
+</code></pre>
+<hr>
+<h2 id="toc-45">9.4 Daftar Isu / Task</h2>
+<p><strong>Bisnis.</strong> Sumber kebenaran pekerjaan. Status/prioritas/tipe dari MasterData <strong>code</strong>. History field-diff ala Jira (#452/#456). Hapus permanen (#394) + cascade (#444).</p>
+<p><strong>Fungsional.</strong> List, filter, quick create, detail modal, komentar, lampiran, subtask/link, activity history, bulk delete.</p>
+<p><strong>Teknis.</strong> <code>src/features/issues/</code> · <code>server/routes/task.routes.ts</code> · upload <code>file.routes.ts</code> · Soft FK sprint/milestone; scope lock berlaku saat pindah sprint aktif/selesai.</p>
+<pre><code class="language-mermaid">flowchart TD
+  List[Issue list / quick create] --&gt; Detail[Task detail]
+  Detail --&gt; Fields[Update field + code MasterData]
+  Detail --&gt; Att[Attachments]
+  Detail --&gt; Hist[Activity History]
+  Detail --&gt; Del[Hard delete + Swal]
+  Fields --&gt; Board[Status juga di Kanban]
+</code></pre>
+<p><strong>Swimlane peran (ringkas).</strong></p>
+<pre><code class="language-mermaid">flowchart LR
+  subgraph Manage[owner/admin/manager]
+    M1[CRUD penuh]
+  end
+  subgraph Build[SA/BA/dev/qa]
+    B1[CRU list]
+  end
+  subgraph Read[head/viewer]
+    R1[R saja]
+  end
+</code></pre>
+<hr>
+<h2 id="toc-46">9.5 Planning &amp; Sprint (Agile)</h2>
+<p><strong>Bisnis.</strong> Rencanakan iterasi; setelah start, lingkup terkunci agar burndown bermakna; hanya satu sprint aktif.</p>
+<p><strong>Fungsional.</strong> Backlog, buat sprint planned, DnD, Start, Complete (backlog/next/leave), badge terkunci, hapus sprint → tugas ke backlog dengan unlock.</p>
+<p><strong>Teknis.</strong> <code>src/features/planning/</code> · <code>sprints.routes.ts</code> · <code>sprintLingkup.ts</code> · Waterfall: UI disembunyikan + POST ditolak.</p>
+<pre><code class="language-mermaid">flowchart TD
+  Backlog --&gt; Plan[Sprint planned]
+  Plan --&gt; DnD[DnD tugas]
+  DnD --&gt; Start[active + demote lain]
+  Start --&gt; Lock[Scope lock]
+  Lock --&gt; Complete[unlockScope + move sisa]
+  Complete --&gt; Done[completed terkunci]
+</code></pre>
+<hr>
+<h2 id="toc-47">9.6 Papan Kanban</h2>
+<p><strong>Bisnis.</strong> Visualisasi alur status kerja harian; WIP lunak sebagai sinyal overload (#455); blocker mencegah Done.</p>
+<p><strong>Fungsional.</strong> Kolom dari MasterData status; DnD; WIP badge; Socket.IO refresh.</p>
+<p><strong>Teknis.</strong> <code>src/features/kanban/</code> · PUT task status · normalisasi code case-insensitive (#459).</p>
+<pre><code class="language-mermaid">flowchart LR
+  Card[Kartu] --&gt; Drag[DnD ke kolom status]
+  Drag --&gt; Check{Blockers selesai?}
+  Check --&gt;|Tidak + Done| Reject[Toast tolak]
+  Check --&gt;|Ya| Save[PUT status code]
+</code></pre>
+<hr>
+<h2 id="toc-48">9.7 Timeline / Roadmap / Milestone</h2>
+<p><strong>Bisnis.</strong> Perencanaan berbasis tanggal &amp; milestone — permukaan utama Waterfall; tetap ada di Agile sebagai Roadmap &amp; Timeline.</p>
+<p><strong>Fungsional.</strong> CRUD milestone, taut tugas (<code>milestoneId</code>), Gantt, garis dependensi <code>blocks</code> (#457). Bukan CPM.</p>
+<p><strong>Teknis.</strong> <code>src/features/timeline/</code> · <code>milestones.routes.ts</code> · label sidebar via <code>alurMetodologi</code> (#465).</p>
+<pre><code class="language-mermaid">flowchart TD
+  WF[Proyek] --&gt; TL[Timeline]
+  TL --&gt; MS[CRUD milestones]
+  MS --&gt; Link[Assign milestoneId]
+  Link --&gt; Gantt[Gantt + edges blocks]
+</code></pre>
+<hr>
+<h2 id="toc-49">9.8 QA</h2>
+<p><strong>Bisnis.</strong> Suite uji → eksekusi → gagal menjadi bug yang dilacak sebagai Task agar Dev/QA satu rantai.</p>
+<p><strong>Fungsional.</strong> Suite/case CRUD, eksekusi Pass/Fail/…, history, generate AI (opsional), create bug Task, retest.</p>
+<p><strong>Teknis.</strong> <code>src/features/qa/</code> · <code>qa.routes.ts</code> · <code>linkedTaskId</code> + <code>linkedBugKey</code> (#463).</p>
+<pre><code class="language-mermaid">flowchart TD
+  Suite --&gt; Case
+  Case --&gt; Exec[Eksekusi]
+  Exec --&gt;|FAIL| Bug[Create Task bug]
+  Bug --&gt; FK[linkedTaskId + linkedBugKey]
+  FK --&gt; Dev[Dev di Board/List]
+  Dev --&gt; Retest[QA retest]
+</code></pre>
+<p><strong>RBAC:</strong> peran <code>qa</code> = CRUD modul <code>qa</code>.</p>
+<hr>
+<h2 id="toc-50">9.9 Wiki (Dokumentasi)</h2>
+<p><strong>Bisnis.</strong> Basis pengetahuan proyek; System Analyst pemilik domain CRUD.</p>
+<p><strong>Fungsional.</strong> CRUD dokumen (teks/file/link), download, hard delete, sanitasi teks (#348).</p>
+<p><strong>Teknis.</strong> <code>src/features/wiki/</code> · <code>documents.routes.ts</code> dengan guard modul <strong><code>wiki</code></strong>.</p>
+<pre><code class="language-mermaid">flowchart LR
+  List[Wiki list] --&gt; Create[POST document]
+  Create --&gt; Edit[PUT content/file]
+  Edit --&gt; DL[Download]
+  Edit --&gt; Del[DELETE hard]
+</code></pre>
+<hr>
+<h2 id="toc-51">9.10 Flowchart</h2>
+<p><strong>Bisnis.</strong> Diagram alur requirement/proses; System Analyst pemilik CRUD.</p>
+<p><strong>Fungsional.</strong> Buat diagram, edit nodes/edges, import, simpan <code>canvasData</code> JSON (#136), hapus.</p>
+<p><strong>Teknis.</strong> <code>src/features/flowchart/</code> · penyimpanan lewat Documents API (<code>type: flowchart</code>).<br><strong>Catatan teknis (utang):</strong> UI matriks memakai modul <code>flowchart</code>; guard server dokumen saat ini berkunci ke <code>wiki</code>. Perilaku efektif: SA tetap lolos CRUD dokumen; pemisahan guard flowchart vs wiki belum sempurna di API.</p>
+<pre><code class="language-mermaid">flowchart TD
+  Dash[Flowchart dashboard] --&gt; New[POST type=flowchart]
+  New --&gt; Canvas[Edit nodes/edges]
+  Canvas --&gt; Save[PUT canvasData]
+  Save --&gt; Del[DELETE]
+</code></pre>
+<hr>
+<h2 id="toc-52">9.11 Tim / Access</h2>
+<p><strong>Bisnis.</strong> Siapa anggota proyek dan peran apa — mengunci seluruh matriks modul.</p>
+<p><strong>Fungsional.</strong> Invite, ubah role (code MasterData <code>project_role</code>), hapus anggota.</p>
+<p><strong>Teknis.</strong> <code>src/features/team/</code> · members/invites di <code>project.routes.ts</code> · modul matriks <code>access</code>.</p>
+<pre><code class="language-mermaid">flowchart TD
+  Team[Panel Tim] --&gt; Invite
+  Invite --&gt; Role[Set ProjectMembers.role code]
+  Role --&gt; Matrix[jagaProyek enforce matriks]
+</code></pre>
+<hr>
+<h2 id="toc-53">9.12 Administrasi sistem</h2>
+<table>
+<thead>
+<tr>
+<th>Submodul</th>
+<th>Bisnis</th>
+<th>UI</th>
+<th>API</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Master Data</td>
+<td>Katalog status/peran/dept/methodology</td>
+<td><code>features/master</code></td>
+<td><code>master-data.routes.ts</code></td>
+</tr>
+<tr>
+<td>Users</td>
+<td>Approve, CRUD user, sesi</td>
+<td><code>features/users</code></td>
+<td><code>user.routes.ts</code>, <code>session.routes.ts</code></td>
+</tr>
+<tr>
+<td>Audit</td>
+<td>Jejak immutable</td>
+<td><code>features/enterprise-audit</code></td>
+<td><code>audit.routes.ts</code></td>
+</tr>
+<tr>
+<td>Settings</td>
+<td>Email/WA/sistem</td>
+<td><code>features/settings</code></td>
+<td><code>system.routes.ts</code></td>
+</tr>
+<tr>
+<td>DB Explorer</td>
+<td>Baca skema/SQL admin</td>
+<td><code>features/explorer</code></td>
+<td><code>db-admin.routes.ts</code></td>
+</tr>
+</tbody></table>
+<pre><code class="language-mermaid">flowchart TD
+  SysAdmin[Users.role=admin] --&gt; MD[Master Data]
+  SysAdmin --&gt; US[Users + sessions]
+  SysAdmin --&gt; AU[Audit]
+  SysAdmin --&gt; ST[Settings]
+  SysAdmin --&gt; DB[DB Explorer]
+  Head[head sistem] --&gt; R[Read-only admin surfaces]
+</code></pre>
+<hr>
+<h2 id="toc-54">9.13 Catatan Rapat (modul induk Meeting AI)</h2>
+<p><strong>Bisnis.</strong> BA mengelola notulen; poin diskusi; AI mengubah rekaman/teks → ringkasan terstruktur. Detail pipeline: <strong>§10</strong>.</p>
+<p><strong>Fungsional.</strong> CRUD meeting, discussion points + komentar, AI companion (live/upload/paste), unduh lampiran.</p>
+<p><strong>Teknis.</strong> <code>src/features/meeting-notes/</code> · <code>meetings.routes.ts</code> · <code>discussion-points.routes.ts</code>. List <strong>tidak</strong> boleh import berat FFmpeg (#460).</p>
+<hr>
+</section>
+<section class="chapter"><h1 id="toc-55">10. Meeting AI — spesifikasi dalam</h1>
+<h2 id="toc-56">10.1 BRD Meeting AI</h2>
+<table>
+<thead>
+<tr>
+<th>Aspek</th>
+<th>Isi</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Nilai bisnis</strong></td>
+<td>Mengurangi waktu BA menulis notulen; mengekstrak keputusan/action item dari audio/video/teks</td>
+</tr>
+<tr>
+<td><strong>Pengguna utama</strong></td>
+<td><code>business_analyst</code> (CRUD); owner/admin/manager CRUD; SA/qa CRU; dev/head/viewer R</td>
+</tr>
+<tr>
+<td><strong>Input</strong></td>
+<td>(1) rekam live mic (2) unggah audio/video ≤120MB (3) paste / <code>.txt</code> manuscript</td>
+</tr>
+<tr>
+<td><strong>Output</strong></td>
+<td>Transcript + <code>aiSummary</code> terstruktur; file rekaman <strong>dihapus</strong> setelah sukses</td>
+</tr>
+<tr>
+<td><strong>Bukan janji</strong></td>
+<td>Parity Otter (diarization speaker belum); SLA waktu real-time tetap</td>
+</tr>
+<tr>
+<td><strong>Status produk</strong></td>
+<td>Kode gelombang 1 + hardening ada; <strong>E2E COMPLETED pemilik = #320 BELUM</strong></td>
+</tr>
+</tbody></table>
+<h2 id="toc-57">10.2 FSD — tiga jalur input</h2>
+<table>
+<thead>
+<tr>
+<th>Jalur</th>
+<th>Langkah pengguna</th>
+<th>Hasil</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Live</td>
+<td>Buka detail → AiMeetingCompanion → rekam ≥5s ≥1KB → proses</td>
+<td>Pipeline async</td>
+</tr>
+<tr>
+<td>Upload</td>
+<td>Pilih media → (opsional) FFmpeg.wasm → MP3 → chunk upload</td>
+<td>Pipeline auto-start</td>
+</tr>
+<tr>
+<td>Manuscript</td>
+<td>Paste / <code>.txt</code> ≤5MB</td>
+<td><code>analyze-transcript</code> sync (tanpa STT file)</td>
+</tr>
+</tbody></table>
+<p><strong>Poin diskusi:</strong> CRUD terpisah; authorId dari JWT (#251). Hapus meeting cascade points + file (#444).</p>
+<p><strong>Aturan ekstra:</strong> PUT/DELETE meeting hanya <strong>author atau system ADMIN</strong> (ketat vs matriks U/D).</p>
+<h2 id="toc-58">10.3 TSD — komponen &amp; API</h2>
+<table>
+<thead>
+<tr>
+<th>Lapisan</th>
+<th>Path</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>List shell</td>
+<td><code>MeetingNotes.tsx</code></td>
+</tr>
+<tr>
+<td>Detail + points</td>
+<td><code>DiscussionPointsTable.tsx</code> (lazy #460)</td>
+</tr>
+<tr>
+<td>AI UI</td>
+<td><code>AiMeetingCompanion.tsx</code></td>
+</tr>
+<tr>
+<td>Live helpers</td>
+<td><code>lib/liveRecording.ts</code></td>
+</tr>
+<tr>
+<td>Pipeline server</td>
+<td><code>server/services/meeting.service.ts</code> (<code>runAIPipeline</code>)</td>
+</tr>
+<tr>
+<td>Transcode</td>
+<td><code>server/services/meeting-transcode.ts</code></td>
+</tr>
+<tr>
+<td>Filter anti-halusinasi</td>
+<td><code>server/services/meeting-ai-filter.ts</code></td>
+</tr>
+<tr>
+<td>Gemini wrapper</td>
+<td><code>server/services/ai.service.ts</code></td>
+</tr>
+</tbody></table>
+<h3 id="toc-59">API utama</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Guard</th>
+<th>Catatan</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>POST</td>
+<td><code>/api/v1/meetings/:id/upload-recording</code></td>
+<td>meetingNotes U</td>
+<td>Chunk merge; <strong>auto</strong> <code>runAIPipeline</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/v1/meetings/:id/status</code></td>
+<td>R</td>
+<td>Poll progress</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/meetings/:id/cancel</code></td>
+<td>U</td>
+<td>Hapus file → IDLE</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/v1/meetings/:id/analyze</code></td>
+<td>U</td>
+<td>Manual 202 (jarang dipakai UI)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>.../analyze-transcript</code></td>
+<td>U</td>
+<td>Paste path</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>.../analyze-video</code></td>
+<td>U</td>
+<td>Multimodal 2.5 Pro (UI belum panggil)</td>
+</tr>
+<tr>
+<td>CRUD</td>
+<td><code>/api/projects/:pid/meetings</code></td>
+<td>C/R/U/D</td>
+<td>+ discussion points</td>
+</tr>
+</tbody></table>
+<h3 id="toc-60">Env &amp; dependensi</h3>
+<table>
+<thead>
+<tr>
+<th>Var / dep</th>
+<th>Fungsi</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GEMINI_API_KEY</code></td>
+<td>STT + LLM</td>
+</tr>
+<tr>
+<td><code>AI_PIPELINE_MAX_CONCURRENT</code></td>
+<td>Default 2 (clamp 1–4), in-process (#322)</td>
+</tr>
+<tr>
+<td><code>ffmpeg</code> di PATH</td>
+<td>Transcode server</td>
+</tr>
+<tr>
+<td>Disk <code>uploads/</code></td>
+<td>Rekaman lokal — <strong>bukan</strong> <code>STORAGE_DRIVER</code> S3</td>
+</tr>
+</tbody></table>
+<h2 id="toc-61">10.4 State machine pipeline</h2>
+<pre><code class="language-mermaid">stateDiagram-v2
+  [*] --&gt; IDLE
+  IDLE --&gt; UPLOAD_SUCCESS: upload selesai
+  UPLOAD_SUCCESS --&gt; EXTRACTING_AUDIO: ~15%
+  EXTRACTING_AUDIO --&gt; TRANSCRIBING_STT: ~60%
+  TRANSCRIBING_STT --&gt; ANALYZING_LLM: ~90%
+  ANALYZING_LLM --&gt; COMPLETED: hapus file disk
+  ANALYZING_LLM --&gt; FAILED: file dipertahankan
+  IDLE --&gt; IDLE: cancel
+  EXTRACTING_AUDIO --&gt; IDLE: cancel
+  TRANSCRIBING_STT --&gt; IDLE: cancel
+  ANALYZING_LLM --&gt; IDLE: cancel
+</code></pre>
+<p>Alias legacy: <code>PROCESSING_AI</code> → dipetakan ke EXTRACTING_AUDIO di GET status; <code>TRANSCRIBING</code> → TRANSCRIBING_STT.</p>
+<h2 id="toc-62">10.5 Swimlane end-to-end (live/upload)</h2>
+<pre><code class="language-mermaid">sequenceDiagram
+  participant BA as BA / User
+  participant UI as AiMeetingCompanion
+  participant FE as FFmpeg.wasm
+  participant API as meetings.routes
+  participant Pipe as runAIPipeline
+  participant FF as FFmpeg CLI
+  participant G as Gemini
+  participant DB as PostgreSQL
+  participant Disk as uploads/
+
+  BA-&gt;&gt;UI: Rekam / pilih file
+  UI-&gt;&gt;FE: Transcode MP3 (best effort)
+  FE--&gt;&gt;UI: MP3 atau raw fallback #447
+  UI-&gt;&gt;API: POST upload-recording chunks
+  API-&gt;&gt;Disk: merge file
+  API-&gt;&gt;DB: UPLOAD_SUCCESS + recording_url
+  API-&gt;&gt;Pipe: fire-and-forget
+  Pipe-&gt;&gt;FF: extract audio MP3
+  Pipe-&gt;&gt;DB: EXTRACTING_AUDIO
+  Pipe-&gt;&gt;G: STT
+  Pipe-&gt;&gt;DB: TRANSCRIBING_STT
+  Pipe-&gt;&gt;G: structured LLM
+  Pipe-&gt;&gt;DB: ANALYZING_LLM → COMPLETED + aiSummary
+  Pipe-&gt;&gt;Disk: delete recording
+  Pipe--&gt;&gt;UI: Socket meeting_ai_completed / poll status
+  BA-&gt;&gt;UI: Baca ringkasan + transcript
+</code></pre>
+<h2 id="toc-63">10.6 Swimlane manuscript (paste)</h2>
+<pre><code class="language-mermaid">sequenceDiagram
+  participant BA as BA
+  participant UI as UI
+  participant API as analyze-transcript
+  participant G as Gemini flash
+  participant DB as DB
+  BA-&gt;&gt;UI: Paste / .txt
+  UI-&gt;&gt;API: POST analyze-transcript
+  API-&gt;&gt;G: analisis + filter UNVERIFIED
+  API-&gt;&gt;DB: transcript + aiSummary
+  API--&gt;&gt;UI: hasil sync
+</code></pre>
+<h2 id="toc-64">10.7 Progress &amp; kegagalan</h2>
+<ul>
+<li>Socket: <code>meeting_ai_status</code>, <code>meeting_ai_completed</code>, <code>meeting_ai_failed</code></li>
+<li>Fallback poll 3s pada <code>/status</code> setelah upload yang memulai pipeline</li>
+<li>Cancel: hapus disk dulu, lalu <code>IDLE</code> (#441) — pipeline berhenti antar tahap</li>
+<li>FAILED: file tetap untuk retry</li>
+<li>COMPLETED: file dihapus (retensi #320)</li>
+</ul>
+<h2 id="toc-65">10.8 Gap &amp; risiko (#320)</h2>
+<table>
+<thead>
+<tr>
+<th>Gap</th>
+<th>Dampak</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>E2E pemilik belum COMPLETED</td>
+<td>Jangan klaim production-ready Meeting AI</td>
+</tr>
+<tr>
+<td>Tanpa diarization</td>
+<td>Speaker tidak terpisah</td>
+</tr>
+<tr>
+<td>Disk lokal / Vercel ephemeral</td>
+<td>Benturan #30</td>
+</tr>
+<tr>
+<td>Semaphore in-process saja</td>
+<td>Bukan antrian durable multi-instance</td>
+</tr>
+<tr>
+<td><code>analyze-video</code> belum di UI</td>
+<td>Kapabilitas server idle</td>
+</tr>
+</tbody></table>
+<hr>
+</section>
+<section class="chapter"><h1 id="toc-66">11. Auth &amp; OIDC — spesifikasi dalam</h1>
+<h2 id="toc-67">11.1 BRD Auth</h2>
+<table>
+<thead>
+<tr>
+<th>Aspek</th>
+<th>Isi</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Tujuan</strong></td>
+<td>Identitas terpercaya sebelum akses proyek</td>
+</tr>
+<tr>
+<td><strong>Saluran</strong></td>
+<td>Email+password · Google OIDC · Microsoft OIDC (<code>bni.co.id</code> target #305)</td>
+</tr>
+<tr>
+<td><strong>Onboarding</strong></td>
+<td>Self-register → pending → admin approve → email aktif (#261 terkait)</td>
+</tr>
+<tr>
+<td><strong>Pemulihan</strong></td>
+<td>Forgot → kata sandi sementara berbatas waktu → wajib ganti</td>
+</tr>
+</tbody></table>
+<h2 id="toc-68">11.2 FSD Auth</h2>
+<ol>
+<li>Register → <code>pending</code></li>
+<li>Admin set <code>approved</code>/<code>active</code>/<code>rejected</code></li>
+<li>Login password ATAU SSO</li>
+<li>SSO user baru → lengkapi pendaftaran bila perlu</li>
+<li>Forgot password → email → login temp → force change</li>
+<li>Logout → blacklist JWT</li>
+</ol>
+<h2 id="toc-69">11.3 TSD Auth</h2>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Path</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>UI</td>
+<td><code>src/features/auth/</code> (<code>LoginScreen</code>, <code>RegisterScreen</code>, <code>SsoButtons</code>, forgot/reset modals)</td>
+</tr>
+<tr>
+<td>Password API</td>
+<td><code>server/routes/auth.routes.ts</code></td>
+</tr>
+<tr>
+<td>OIDC API</td>
+<td><code>server/routes/auth-oidc.routes.ts</code></td>
+</tr>
+<tr>
+<td>Adaptor</td>
+<td><code>server/services/oidc.service.ts</code> (discovery Microsoft/Google)</td>
+</tr>
+<tr>
+<td>Approve</td>
+<td><code>server/routes/user.routes.ts</code></td>
+</tr>
+</tbody></table>
+<h3 id="toc-70">OIDC flow</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+  participant U as User
+  participant FE as SsoButtons
+  participant API as auth-oidc
+  participant IdP as Google/Microsoft
+  U-&gt;&gt;FE: Klik provider
+  FE-&gt;&gt;API: GET /:provider/start
+  API--&gt;&gt;U: Redirect IdP
+  U-&gt;&gt;IdP: Login consent
+  IdP-&gt;&gt;API: callback + code
+  API-&gt;&gt;IdP: token + claims
+  API-&gt;&gt;API: upsert/link user
+  API--&gt;&gt;FE: sso_token / session
+  Note over API,FE: Microsoft: OIDC_MICROSOFT_* + tenant (#305 verifikasi lapangan)
+</code></pre>
+<h3 id="toc-71">Password forgot (ringkas terkini)</h3>
+<pre><code class="language-mermaid">flowchart TD
+  A[Forgot password] --&gt; B[Email terdaftar?]
+  B --&gt;|Tidak| C[404 email_tidak_terdaftar]
+  B --&gt;|Ya| D[Set passwordHash sementara + blacklist sesi]
+  D --&gt; E[Email kata sandi temp 2 jam]
+  E --&gt; F[Login → wajib ganti sandi]
+</code></pre>
+<h2 id="toc-72">11.4 Gap Auth</h2>
+<table>
+<thead>
+<tr>
+<th>Gap</th>
+<th>Tiket</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Verifikasi login Microsoft sungguhan domain BNI</td>
+<td>#305</td>
+</tr>
+<tr>
+<td>Arah httpOnly cookie vs localStorage JWT</td>
+<td>terkait #30 keamanan</td>
+</tr>
+</tbody></table>
+<hr>
+</section>
+<section class="chapter"><h1 id="toc-73">12. Lampiran</h1>
+<h2 id="toc-74">12.1 Artefak terkait</h2>
+<table>
+<thead>
+<tr>
+<th>Artefak</th>
+<th>Path</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Skema DB</td>
+<td><code>docs/DATABASE_SCHEMA.md</code></td>
+</tr>
+<tr>
+<td>API</td>
+<td><code>docs/API-SURFACE.md</code>, <code>docs/openapi.json</code></td>
+</tr>
+<tr>
+<td>Keamanan</td>
+<td><code>docs/security_spec.md</code></td>
+</tr>
+<tr>
+<td>Papan</td>
+<td><code>AUDIT.md</code> §1, §19, §24</td>
+</tr>
+<tr>
+<td>Aturan agen</td>
+<td><code>AGENTS.md</code></td>
+</tr>
+<tr>
+<td>PDF (setelah generate)</td>
+<td><code>docs/LanPro-BRD-FSD-TSD-v3.1.pdf</code></td>
+</tr>
+</tbody></table>
+<h2 id="toc-75">12.2 Yang dokumen ini bukan</h2>
+<ul>
+<li>Bukan kontrak hukum / SLA pelanggan.</li>
+<li>Bukan OpenAPI penuh setiap rute.</li>
+<li>Bukan janji fitur out-of-scope (#346) atau parity Otter.</li>
+</ul>
+<h2 id="toc-76">12.3 Riwayat versi</h2>
+<table>
+<thead>
+<tr>
+<th>Ver</th>
+<th>Tanggal</th>
+<th>Perubahan</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2.5</td>
+<td>sebelumnya</td>
+<td>Draft enterprise; RBAC satu tingkat — <strong>basi</strong></td>
+</tr>
+<tr>
+<td>3.0</td>
+<td>06 Sep 2026</td>
+<td>Two-Tier RBAC, dual-mode, flowchart per role</td>
+</tr>
+<tr>
+<td><strong>3.1</strong></td>
+<td><strong>06 Sep 2026</strong></td>
+<td>Per modul BRD+FSD+TSD+swimlane; Meeting AI dalam; Auth/OIDC dalam; #466</td>
+</tr>
+</tbody></table>
+<h2 id="toc-77">12.4 Keputusan review tersisa</h2>
+<ol>
+<li>Apakah utang guard Flowchart=<code>wiki</code> di API perlu tiket baru (mis. #467)?</li>
+<li>Setelah review teks: cabut watermark DRAFT pada PDF berikutnya?</li>
+<li>Tutup formal #466 di papan setelah Anda setujui isi?</li>
+</ol>
+<hr>
+<p><em>Akhir dokumen v3.1.0 — siap review pemilik · tiket #466.</em></p>
+</section>
+</body>
+</html>
