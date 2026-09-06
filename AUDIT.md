@@ -612,7 +612,7 @@ jadi §1.1 tetap sumber kebenarannya; halaman itu acuan, bukan pengganti.
 
 ---
 
-## §1 PAPAN PRIORITAS — 13 BELUM · 425 SELESAI · 4 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 7 BELUM · 454 SELESAI · 4 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -623,13 +623,13 @@ bercampur membuat pertanyaan paling sering — _apa yang belum?_ — hanya bisa
 dijawab dengan membaca seluruhnya. Urutan bagiannya disengaja: **yang belum
 dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
-### 1.1 BELUM SELESAI — 12 item
+### 1.1 BELUM SELESAI — 7 item
 
-**Sebaran per fase:** F0 2 · F1 1 · F2 0 · F3 1 · F4 0 · F5 1 · F6 1 · F7 1 · F8 0 · F9 0 · F10 3 · F11 1 · F12 0 · F13 1
+**Sebaran per fase:** F0 1 · F1 0 · F2 0 · F3 0 · F4 0 · F5 1 · F6 1 · F7 0 · F8 0 · F9 0 · F10 2 · F11 1 · F12 0 · F13 1
 
-**Dihitung ulang 04 Sep 2026 (pasca #424 SELESAI kode):** F0 #335 #394 · F1 #351 · F3 #425 · F5 #305 · F6 #290 · F7 #354 · F11 #30 · F13 #320. **Jangan digandakan:** #335 #339 #348 #355–#424. Rekap: **§24.9**.
+**Dihitung ulang 06 Sep 2026 (pasca #463/#465):** F0 #335 · F5 #305 · F6 #290 · F11 #30 · F13 #320 · F10 #433 #434. **#459–#465 → §1.2** (#346 sudah SELESAI lama). Rekap: **§24.9**.
 
-Catatan: **#405–#424** SELESAI kode. **#425** (detail 1 panel + aksi kiri) BELUM. UI tab bersih tetap **#335**.
+Catatan: #465 waterfall kanonik (copy Sprint + nav dual-mode ala Jira) + #463 FK QA `linkedTaskId` SELESAI kode 06 Sep. #346 dihormati (iris tipis, bukan marketplace). #335 tetap checklist visual.
 
 **Format baris diubah 29 Agu 2026 (item #255, dikerjakan atas keputusan pemilik proyek hari yang sama):** kolom lama `Temuan` (satu paragraf gabungan) dipecah jadi `Isi` / `Solusi masalah` / `Proses perbaikan` / `Catatan jika dikerjakan oleh AI lain`, dan baris dikelompokkan per fase dengan subjudul. Kolom `Fase` dan `Blokir modul baru?` **dipertahankan** sebagai kolom tambahan (keputusan pemilik: bukan dipindah/dihapus). Format baru ini **hanya berlaku untuk §1.1** — §1.2 (255 item SELESAI) dan §1.3 (DITAHAN/DIBATALKAN) **tetap format lama** (kolom `Temuan` tunggal), sebab mengisi tiga kolom baru retroaktif untuk ratusan item tertutup tidak sepadan (keputusan pemilik proyek). Gerbang `scripts/validate/papan-audit.cjs` sudah diperbarui membaca kolom lewat NAMA header per tabel, bukan posisi tetap — dua format berbeda di §1.1 vs §1.2/§1.3 aman terhadap gerbang ini.
 
@@ -647,22 +647,41 @@ Sebaran di baris ini sebelumnya tertulis `F0 1 · F12 10` — keliru sejak sebel
 
 **Baru dari QA menu User Management (26 Agu 2026, `/qa` + `/design-review` mode laporan-saja, TIDAK ada kode yang diubah):** #188, #189, #190, #191, #192 — diuji sebagai admin lewat browser (Claude Browser pane) di `http://localhost:3000`, dev server sudah berjalan sebelum sesi ini mulai (proses `node.exe` lain di port 3000, kemungkinan sesi Antigravity berjalan paralel — beberapa hot-reload `UserDetailView.tsx` teramati selama pengujian). Sesuai aturan `/qa`: **tidak membaca kode sumber**, jadi tidak ada rujukan file:baris — itu pekerjaan Antigravity berikutnya.
 
-#### F0 tambahan — Penilaian produk 02–03 Sep 2026 (2 item; #335; #346 #383 #399 ditutup; #394; #396–#398 → §1.2)
+#### F0 tambahan — Penilaian produk 02–03 Sep 2026 (1 item; #335; #394 → §1.2; #346 #383 #399 ditutup)
 
 Sumber: pertanyaan pemilik + audit residual mobile/tema/CRUD 03 Sep (kode; UI tab bersih tetap #335). Audit fidelity Velzon 03 Sep → #396–#399 (kode SELESAI).
 
-| No tiket | Sev | Biaya  | Status                     | Isi                                                                                                                                                                                                                                                                                                                             | Solusi masalah                         | Proses perbaikan                            | Catatan jika dikerjakan oleh AI lain        |  Fase  | Blokir modul baru? |
-| :------: | :-: | ------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------------------------- | ------------------------------------------- | :----: | :----------------: |
-|   335    | 🟠  | Sedang | `BELUM` verifikasi pemilik | **Bukan zero-bug — verifikasi kontras gelap/terang + sisa QA.** Checklist #383/#399. **Sisa #335:** tab bersih Login+modul terang+gelap. Velzon #395–#424 kode SELESAI; sisa #425. Gerbang ≠ bukti visual. **04 Sep:** token tidak diubah; Login memakai content-subtle (kontras terang lemah, §21). Tetap butuh login pemilik. | Checklist §15.3; temuan baru bernomor. | Jangan ubah nilai token tanpa `--perbarui`. | Butuh login pemilik.                        | **F0** |       Tidak        |
-|   394    | 🟡  | Tinggi | `MENUNGGU` keputusan       | **Kebijakan hapus: soft-delete vs hard-delete.** Audit CRUD 03 Sep: Master/Users/Meeting/Wiki/Discussion memakai hapus permanen (Swal). Belum ada trash/restore. Ambigu produk — bukan sapuan kode tanpa keputusan.                                                                                                             | Keputusan cakupan modul + retensi.     | Setelah keputusan; jangan tebak.            | Bukan mengganti seluruh CRUD tanpa jawaban. | **F0** |       Tidak        |
+| No tiket | Sev | Biaya  | Status                     | Isi                                                                                                                                                                                                                                                                      | Solusi masalah                         | Proses perbaikan                            | Catatan jika dikerjakan oleh AI lain |  Fase  | Blokir modul baru? |
+| :------: | :-: | ------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- | ------------------------------------------- | ------------------------------------ | :----: | :----------------: |
+|   335    | 🟠  | Sedang | `BELUM` verifikasi pemilik | **Bukan zero-bug — verifikasi kontras gelap/terang + sisa QA.** Checklist #383/#399. Probe CDP 06 Sep: Issues/Roadmap/Tim/Flowchart sehat; Kanban → #459 SELESAI; Meeting blank → #460 SELESAI kode. **Sisa #335:** checklist visual tab bersih. Gerbang ≠ bukti visual. | Checklist §15.3; temuan baru bernomor. | Jangan ubah nilai token tanpa `--perbarui`. | Butuh login pemilik.                 | **F0** |       Tidak        |
 
-#### F3 tambahan — Header Velzon list + detail shell (#425; 1 terbuka; #424 → §1.2)
+#### F3/F4 tambahan — Temuan probe #335 lapangan (0 terbuka; #459 #460 → §1.2)
 
-Sumber: revisi pemilik 03 Sep 2026 (screenshot Velzon FORM SELECT + Catatan Rapat + detail Wiki/Flowchart).
+Sumber: probe Chrome CDP 06 Sep 2026 (sesi Administrator, proyek Personal Channel & Services). Artefak `.tmp-335/*.png`. Persetujuan nomor: pemilik "ok". **#460 DITUTUP kode 06 Sep** (opsi A).
 
-| No tiket | Sev | Biaya  | Status  | Isi                                                                                                                                                                                                                                                   | Solusi masalah                                                                                                                                        | Proses perbaikan         | Catatan jika dikerjakan oleh AI lain        |  Fase  | Blokir modul baru? |
-| :------: | :-: | ------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------------------------- | :----: | :----------------: |
-|   425    | 🟠  | Sedang | `BELUM` | **Detail view multi-panel + aksi terpisah.** Wiki/Meeting/Flowchart: panel aksi terpisah dari meta/konten; Back kiri, Edit/Delete kanan. Pemilik: **1 panel** gabungan; tombol **Back + Edit + Delete sejajar kiri**. Font/ukuran judul belum Velzon. | Satukan toolbar+meta(+preview bila perlu) jadi satu Card; baris aksi kiri; cek semua modul detail; tipografi title/section = token PageHeader/Velzon. | Jangan ubah logika CRUD. | UI → #335. Cek Wiki/Meeting/Flowchart dulu. | **F3** |       Tidak        |
+| No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
+| :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
+
+#### F4 tambahan — Iris PM sisa usulan (§3 product review; 0 terbuka; #463 #465 → §1.2)
+
+Sumber: canvas Product Review §3 (06 Sep). #461 #462 #464 #463 #465 SELESAI kode. #346 dihormati (iris).
+
+| No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
+| :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
+
+#### F3 tambahan — Header Velzon list + detail shell (#425 → §1.2; 0 terbuka di sini)
+
+Sumber: revisi pemilik 03 Sep 2026. **DITUTUP kode 06 Sep 2026** — `DetailViewChrome` + tipografi 15px. UI tab bersih → #335.
+
+| No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
+| :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
+
+#### F3/F4 tambahan — Residual review produk UI (U3/U4; 0 terbuka; #453–#458 → §1.2)
+
+Sumber: canvas product-review fase U0–U4 (06 Sep 2026). #453–#458 SELESAI. Temuan lapangan baru → bagian #459/#460 di atas.
+
+| No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
+| :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
 
 #### F3 tambahan — PageHeader flat residual (#423 → §1.2; 0 terbuka)
 
@@ -704,9 +723,9 @@ Sumber: inventaris 03 Sep. **DITUTUP 03 Sep 2026** bersama gelombang residual; U
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
 
-#### F0 tambahan — Audit CRUD menyeluruh (1 item hidup #394 di F0 di atas; sisanya tertutup)
+#### F0 tambahan — Audit CRUD menyeluruh (0 item hidup; #394 → §1.2)
 
-**Dipicu 29 Agu 2026** (Flowchart edit→detail) + **residual 03 Sep 2026** (Team invite mati, empty CTA Meeting/Users, kebijakan soft/hard delete → #384 #389 #394). Sebagian besar modul CRUD tetap bersih di tingkat API.
+**Dipicu 29 Agu 2026** (Flowchart edit→detail) + **residual 03 Sep 2026** (Team invite mati, empty CTA Meeting/Users, kebijakan soft/hard delete → #384 #389 #394). Sebagian besar modul CRUD tetap bersih di tingkat API. **#394 ditutup 04 Sep: hard-delete; cascade → #444.**
 
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
@@ -776,9 +795,9 @@ Dibuktikan dari kode 01 Sep 2026, bukan dari UI.
 
 #### F13 — Produk AI Meeting Notes (1 item; #439–#441 di §1.2)
 
-| No tiket | Sev | Biaya  | Status              | Isi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Solusi masalah                                              | Proses perbaikan                                                 | Catatan jika dikerjakan oleh AI lain                              |  Fase   | Blokir modul baru? |
-| :------: | :-: | ------ | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------- | :-----: | :----------------: |
-|   320    | 🟡  | Tinggi | `BELUM` gelombang 1 | **Asisten AI Meeting Notes.** Gelombang 1 kode (02 Sep): live MediaRecorder + unggah + retensi COMPLETED + anti-halu di runAIPipeline + mapping PIC. **04 Sep `45ae6e9`:** meter mikrofon, timeslice 1 dtk, WebM live = audio (bukan video), tolak rekaman kurang dari 5 dtk. **04 Sep tes retensi:** clearRecordingFile mengosongkan recording_url dan file_size tanpa menimpa upload_status. **04 Sep transcode:** WebM/M4A diubah ke MP3 sebelum Gemini (klien ffmpeg.wasm + server FFmpeg, dua percobaan vn). Analisis gagal setelah rekam live: Gemini menolak audio/webm. **Belum terverifikasi pemilik:** rekam ulang sampai COMPLETED dan recording_url NULL di DB. Sisa produk: diarization, UX Otter. | Jangan klaim parity Otter. Upload besar = job async (#322). | Live+upload; berkas dihapus setelah OK. E2E Gemini oleh pemilik. | Verifikasi UI salinan OK 02 Sep. Jangan pakai kredensial pemilik. | **F13** |       Tidak        |
+| No tiket | Sev | Biaya  | Status              | Isi                                                                                                                                                                                                                                                                                                                                                           | Solusi masalah                                              | Proses perbaikan                                                 | Catatan jika dikerjakan oleh AI lain                              |  Fase   | Blokir modul baru? |
+| :------: | :-: | ------ | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------- | :-----: | :----------------: |
+|   320    | 🟡  | Tinggi | `BELUM` E2E pemilik | **Asisten AI Meeting Notes.** Gelombang 1 + hardening C + **#447 B1** (05 Sep): Vite exclude `@ffmpeg/*`; fallback unggah mentah bila FFmpeg.wasm gagal; poll tidak memicu toast FAILED basi. Progress MP3; cancel disk; analyze-video MP3; doctor ffmpeg. **Belum terverifikasi pemilik:** rekam ulang sampai COMPLETED. Sisa produk: diarization, UX Otter. | Jangan klaim parity Otter. Upload besar = job async (#322). | Live+upload; berkas dihapus setelah OK. E2E Gemini oleh pemilik. | Verifikasi UI salinan OK 02 Sep. Jangan pakai kredensial pemilik. | **F13** |       Tidak        |
 
 #### F4 tambahan — concurrent load (0 item; #322 ditutup)
 
@@ -795,24 +814,21 @@ Dibuktikan dari kode 01 Sep 2026, bukan dari UI.
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
 
-#### F0/F1/F6/F7 — Audit enterprise 02 Sep 2026 (#347–#354; #347+#348+#349+#350+#352+#353 → §1.2)
+#### F0/F1/F6/F7 — Audit enterprise 02 Sep 2026 (#347–#354 → §1.2; 0 terbuka di sini)
 
-Sumber: laporan audit arsitektur/keamanan. **#347/#348/#349/#350/#352/#353 ditutup** (lihat §1.2).
+Sumber: laporan audit arsitektur/keamanan. **#347/#348/#349/#350/#351/#352/#353/#354 ditutup** (lihat §1.2).
 
-| No tiket | Sev | Biaya  | Status               | Isi                                                                                                                                                       | Solusi masalah                                                                                                   | Proses perbaikan                           | Catatan jika dikerjakan oleh AI lain                    |  Fase  | Blokir modul baru? |
-| :------: | :-: | ------ | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------- | :----: | :----------------: |
-|   351    | 🟡  | Sedang | `MENUNGGU` keputusan | **TLS pool Neon `rejectUnauthorized: false` di `src/lib/db.ts`.** Mitigasi pool 5–20 bagus; verifikasi sertifikat longgar. **`db.ts` dikunci AGENTS.md.** | Keputusan: biarkan (dokumentasikan alasan Neon) vs ketatkan CA — hanya setelah izin eksplisit menyentuh `db.ts`. | Jangan edit `db.ts` tanpa jawaban pemilik. | Bukan antrian kode biasa.                               | **F1** |       Tidak        |
-|   354    | 🟡  | Tinggi | `MENUNGGU` keputusan | **Maker-checker / approval chain formal.** Matriks `jagaProyek` kuat; belum alur approval dua tahap lintas modul untuk compliance.                        | Keputusan cakupan (modul mana) dulu; jangan bangun engine workflow besar.                                        | Setelah keputusan.                         | Bukan clone Jira Automation (#341 sudah tipis SELESAI). | **F7** |       Tidak        |
+| No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
+| :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
 
-#### F3/F10 — Audit Total LanPro 04 Sep 2026 (10 item baru; sumber: audit Velzon 88%, font, warna, struktur, berkas)
+#### F3/F10 — Audit Total LanPro 04 Sep 2026 (#433 #434 terbuka; #438 → §1.2)
 
 Sumber: audit total 04 Sep 2026 — 4 agen paralel memindai 543 berkas TypeScript. Temuan dikelompokkan: UI/gaya (F3) dan utang teknis (F10). **AppContainer.tsx pecah sudah tercatat di #7 (F10), AiMeetingCompanion di #182 (F13) — tidak diduplikasi.**
 
-| No tiket | Sev | Biaya  | Status               | Isi                                                                                                                                                                                                                                                                                                         | Solusi masalah                                                                                                         | Proses perbaikan                                                                                   | Catatan jika dikerjakan oleh AI lain                                                                                               |  Fase   | Blokir modul baru? |
-| :------: | :-: | ------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | :-----: | :----------------: |
-|   433    | 🟠  | Tinggi | BELUM                | **Pecah komponen raksasa gelombang (6 berkas melebihi 800 baris).** Gelombang 1 (04 Sep): FlowchartContainer — CanvasToolRail + FlowchartDocumentModal diekstrak (render saja). Sisa: UserDetailView, WikiView, MasterDataPanel, DashboardView, AdminUserPanel + sisa JSX Flowchart.                        | Per berkas: identifikasi sub-domain, ekstrak ke komponen anak + hook. Jangan refaktor logika bisnis sekaligus.         | Satu berkas per commit. Mulai dari yang paling besar (FlowchartContainer). Tes regresi per berkas. | Berkas-berkas ini saling independen — bisa dikerjakan paralel. Jangan pindahkan pengelolaan state sekaligus; cukup ekstrak render. | **F10** |       Tidak        |
-|   434    | 🟠  | Sedang | BELUM                | **Backend: tipiskan rute gemuk + terapkan pola controller.** task.routes.ts (1230 baris) mencampur routing, validasi, dan logika. Hanya 1 dari 65 berkas rute punya controller. AGENTS.md mendokumentasikan routes-controllers-services tapi aktualnya routes-services.                                     | Opsi A: pindahkan logika ke controllers (sesuai AGENTS.md). Opsi B: perbarui AGENTS.md — akui services-as-controllers. | Keputusan pemilik: A atau B. Jangan campurkan. task.routes.ts dan meetings.routes.ts prioritas.    | Mulai dari task.routes.ts. Jangan rename service; ekstrak handler dari rute ke controller atau service. Tes supertest tetap jalan. | **F10** |       Tidak        |
-|   438    | 🟡  | Tinggi | `MENUNGGU` keputusan | **Evaluasi TanStack Query (selesai tulis 04 Sep) — implementasi menunggu keputusan.** Data server kini useState+useEffect+fetch di AppContainer (#7). Rekomendasi: Opsi A adopsi bertahap (pilot issues/team); Opsi B tetap fetch manual + perketat invalidasi di #7. Jangan install paket sebelum jawaban. | Evaluasi tertulis 04 Sep: lihat baris ini. Implementasi HANYA setelah Opsi A/B. Pilot 1-2 fitur jika A.                | Jangan langsung `npm i @tanstack/react-query`. Zustand tetap untuk state UI.                       | Terkait #7. Jangan migrasi semua fetch sekaligus.                                                                                  | **F10** |       Tidak        |
+| No tiket | Sev | Biaya  | Status | Isi                                                                                                                                                                                                                                                                                  | Solusi masalah                                                                                                         | Proses perbaikan                                                                                   | Catatan jika dikerjakan oleh AI lain                                                                                               |  Fase   | Blokir modul baru? |
+| :------: | :-: | ------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | :-----: | :----------------: |
+|   433    | 🟠  | Tinggi | BELUM  | **Pecah komponen raksasa gelombang (6 berkas melebihi 800 baris).** Gelombang 1 (04 Sep): FlowchartContainer — CanvasToolRail + FlowchartDocumentModal diekstrak (render saja). Sisa: UserDetailView, WikiView, MasterDataPanel, DashboardView, AdminUserPanel + sisa JSX Flowchart. | Per berkas: identifikasi sub-domain, ekstrak ke komponen anak + hook. Jangan refaktor logika bisnis sekaligus.         | Satu berkas per commit. Mulai dari yang paling besar (FlowchartContainer). Tes regresi per berkas. | Berkas-berkas ini saling independen — bisa dikerjakan paralel. Jangan pindahkan pengelolaan state sekaligus; cukup ekstrak render. | **F10** |       Tidak        |
+|   434    | 🟠  | Sedang | BELUM  | **Backend: tipiskan rute gemuk + terapkan pola controller.** task.routes.ts (1230 baris) mencampur routing, validasi, dan logika. Hanya 1 dari 65 berkas rute punya controller. AGENTS.md mendokumentasikan routes-controllers-services tapi aktualnya routes-services.              | Opsi A: pindahkan logika ke controllers (sesuai AGENTS.md). Opsi B: perbarui AGENTS.md — akui services-as-controllers. | Keputusan pemilik: A atau B. Jangan campurkan. task.routes.ts dan meetings.routes.ts prioritas.    | Mulai dari task.routes.ts. Jangan rename service; ekstrak handler dari rute ke controller atau service. Tes supertest tetap jalan. | **F10** |       Tidak        |
 
 #### F13/F7 — Audit logika rekam live + keamanan 04 Sep 2026 (#439–#442 → §1.2; 0 terbuka)
 
@@ -821,7 +837,7 @@ Sumber: sisir ulang setelah `45ae6e9`. **DITUTUP kode 04 Sep 2026.** E2E lapanga
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
 
-### 1.2 SUDAH SELESAI — 426 item
+### 1.2 SUDAH SELESAI — 454 item
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -829,7 +845,35 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | #   | Temuan | Fase | Sev | Biaya | Blokir modul baru? | Status | Detail |
 | --- | ------ | :--: | :-: | ----- | :----------------: | ------ | ------ |
 
-| 424 | **List chrome Velzon (#424).** DITUTUP 04 Sep 2026: PageHeader judul UPPERCASE 15px/semibold tanpa breadcrumb/subtitle; topbar tanpa border-b supaya nempel; Search+Tambah di toolbar kartu Issues; Planning Add Sprint sejajar badge h-7. Tes PageHeader + IssueAdvancedFiltersPanel. UI belum terverifikasi (ikut #335). | **F3** | 🟠 | Sedang | Tidak | SELESAI 04 Sep (kode) | §1.1 |
+| 465 | **Waterfall kanonik + copy Sprint bersih (#465).** DITUTUP 06 Sep 2026 (keputusan pemilik: hidupkan dual-mode ala Jira + hormati #346 iris): i18n EN/ID Phase→Sprint untuk dialog/planning; sidebar Waterfall label Roadmap & Milestones; `alurMetodologi` + tes. Nav sembunyikan Sprint (#311) + Milestone (#312) tetap. Bukan CPM/WBS. UI → #335. | **F4** | 🟡 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 463 | **FK QA case → Task (#463).** DITUTUP 06 Sep 2026: kolom `linkedTaskId` + backfill dari `linkedBugKey`↔taskKey; create-bug menulis keduanya; findLinked by id/key; PUT taut iris `setLinkedTask`; `linkedBugKey` tetap tampilan. Tes qa.linked-task-463. Tanpa sentuh db.ts. UI → #335. | **F4** | 🟡 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 464 | **Burndown satuan seragam (#464).** DITUTUP 06 Sep 2026: `metrikSprintHybrid` — burndown + progres sprint aktif Dashboard memakai poin story bila totalPoints>0, else hitungan tugas (sama Planning #313). i18n burndownHint. Tes metrikSprint + hooks. Probe API: satuan hybrid OK (sprint uji tanpa poin → tasks). UI chart → #335. | **F4** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode+API) | §1.1 |
+| 462 | **Satu sprint aktif (#462).** DITUTUP 06 Sep 2026: PUT sprint ke active memanggil `demoteOtherActives` (alias in_progress/ongoing); Start Sprint di klien men-demote yang lain ke planned. Tes sprintLingkup. **Probe API 06 Sep:** start B → A `planned`, `activeCount=1`. UI → #335. | **F4** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode+API) | §1.1 |
+| 461 | **Penguncian lingkup sprint (#461).** DITUTUP 06 Sep 2026: task create/update menolak pindah ke/dari sprint active atau completed kecuali `unlockScope` (tutup/hapus sprint). Badge Planning + toast. Tes sprintLingkup. **Probe API 06 Sep:** PUT backlog→aktif `400` `srv.sprint_lingkup_terkunci_tujuan`. UI badge → #335. | **F4** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode+API) | §1.1 |
+| 460 | **Meeting blank daftar (#460).** DITUTUP 06 Sep 2026 (opsi A pemilik): (1) detail ID basi tidak lagi `null` — spinner / empty+Kembali + reset ID setelah load; (2) `DiscussionPointsTable` lazy lewat `lazyWithRetry` agar daftar tidak menarik `@ffmpeg`/AiMeetingCompanion. Tes meeting-list-chunk-460. UI tab bersih → #335. | **F3** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 459 | **Kanban kunci status (#459).** DITUTUP 06 Sep 2026 (opsi A pemilik): `groupedTasks` menormalisasi status lewat `resolveStatusWriteValue` (case-insensitive → code); `tasksForStatusLane` lookup lane case-insensitive. Tes statusKolom + useKanbanLogic. UI tab bersih → #335. | **F4** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 458 | **A11y axe CI auth + alur isu (#458).** DITUTUP 06 Sep 2026: jest-axe pada LoginScreen + IssueQuickCreateBar; color-contrast off di jsdom (token/brand dilindungi); label htmlFor login; aria-label tipe isu + fokus visible. Tes a11y-458. UI → #335. | **F3** | 🟡 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 457 | **Gantt garis blocks (#457).** DITUTUP 06 Sep 2026: overlay SVG siku blocker→blocked di TimelinePanel dari LinkedTasks `blocks`/`is_blocked_by`; dedup; hanya bar bertanggal & terlihat. Helper ganttDependencyEdges + tes. Bukan CPM. UI → #335. | **F4** | 🟡 | Tinggi | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 456 | **History field-diff (#456).** DITUTUP 06 Sep 2026 (opsi 2 pemilik): log `Field: from → to` untuk status/assignee/priority/storyPoints; tampilan History label + coret from + to; parseActivityUntukTampilan; tanpa tabel baru. Tes formatActivityHistory. UI → #335. | **F3** | 🟡 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 455 | **Kanban WIP lunak (#455).** DITUTUP 06 Sep 2026 (U4 iris): badge `n/limit` (default 8); border warning saat over; tidak memblokir DnD. i18n `kanban.wipCount`. Tes KanbanColumn.wip-455. UI → #335. | **F4** | 🟡 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 454 | **Empty Meeting + CTA (#454).** DITUTUP 06 Sep 2026 (U3): baris kosong daftar rapat menampilkan tombol Tambah bila `canAdd`. Pola empty→1 CTA berizin. UI → #335. | **F3** | 🟢 | Kecil | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 453 | **Auth form centering (#453).** DITUTUP 06 Sep 2026 (U3 U-08): AuthLayout split — padding kiri/kanan simetris (`md:px-12 lg:px-16`) agar kartu login tidak condong kanan. UI → #335. | **F3** | 🟢 | Kecil | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 425 | **Detail shell Wiki/Meeting/Flowchart (#425).** DITUTUP 06 Sep 2026 (U0/U1): komponen bersama `DetailViewChrome` — satu Card; Back+Edit+Delete sejajar kiri; judul `text-[15px] font-semibold` Velzon; danger token (bukan rose). Tes DetailViewChrome. CRUD tidak diubah. UI → #335. | **F3** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 452 | **History isu ala Jira (#452).** DITUTUP 06 Sep 2026 (opsi A pemilik): log baru tanpa id internal (`Status updated to…` / `Assigned to Nama` / `Unassigned`); formatter tampilan membersihkan log lama + resolve UUID→nama; `ActivityLogs.taskId` diisi dari API; filter History memakai taskId. Tes formatActivityHistory. UI tab bersih → #335. | **F3** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 451 | **Forgot-password 500 + pesan eksplisit (#451).** DITUTUP 06 Sep 2026 (opsi B pemilik): `setTemporaryPassword`/`updateUserPassword` hanya `passwordHash` (kolom `password` tidak ada → 500); email tidak terdaftar → 404 `srv.email_tidak_terdaftar_lupa_sandi`; terdaftar → sukses `srv.kata_sandi_sementara_dikirim`. Membatalkan balasan netral #121 untuk alur ini. Tes auth-reset-password + auth-password-kolom-451. | **F6** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 450 | **Forgot-password footer tombol (#450).** DITUTUP 06 Sep 2026: hapus ArrowRight yang menumpuk vertikal di bawah label (wrapper span CoreUI Button); Cancel `outline` + Send `primary` sejajar `whitespace-nowrap` dalam baris flex. Koreksi #449. | **F6** | 🟢 | Kecil | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 449 | **Forgot-password tombol teks terpotong (#449).** DITUTUP 06 Sep 2026: label EN/ID dipendekkan (`Send password` / `Kirim sandi`); footer Button `h-auto min-h-9` agar wrap tidak dipotong oleh `h-9` CoreUI. Sisa #448. **Dikoreksi lanjut #450.** | **F6** | 🟢 | Kecil | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 448 | **Forgot-password copy + cabut sesi (#448).** DITUTUP 06 Sep 2026 (keputusan pemilik opsi B): i18n forgotPwd ID/EN — kata sandi sementara 2 jam (bukan tautan 15 menit); `forgot-password` blacklist JWT sesi + `clearSessionToken` (selaras #347/#262). Tes auth-reset-password + forgotPwd-copy-448. Verifikasi email sungguhan tetap lapangan. | **F6** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
+| 447 | **Live rekam: FFmpeg.wasm Vite + fallback server (#447).** DITUTUP 05 Sep 2026 (keputusan pemilik B1): `optimizeDeps.exclude` `@ffmpeg/*`; klien retry tanpa `-vn`; bila transcode klien gagal unggah WebM mentah ke server FFmpeg; `sesiPipelineRef` cegah poll FAILED basi saat EXTRACTING_AUDIO; toast gagal pakai detail bila ada. E2E COMPLETED tetap #320. | **F13** | 🟠 | Sedang | Tidak | SELESAI 05 Sep (kode) | §1.1 |
+| 446 | **Dashboard filter di atas KPI (#446).** DITUTUP 05 Sep 2026 (keputusan pemilik opsi B): hapus baris TASK SUMMARY / Epics excluded; pindahkan dropdown sprint + chip Active dari PageHeader.actions ke atas grid KPI; PageHeader hanya salam. Kunci i18n taskSummary/epicExcluded tetap di kamus. UI tab bersih tetap #335. | **F3** | 🟢 | Kecil | Tidak | SELESAI 05 Sep (kode) | §1.1 |
+| 445 | **Garis tengah topbar Velzon (#445).** DITUTUP 05 Sep 2026 (keputusan pemilik opsi A): AppContainer `<header>` menambah `border-b border-border-subtle` antara topbar dan PageHeader (pola Velzon). Koreksi #424 yang sengaja menghapus border itu. Tes chrome-424 diperbarui. UI tab bersih tetap #335. | **F3** | 🟢 | Kecil | Tidak | SELESAI 05 Sep (kode) | §1.1 |
+| 444 | **Cascade hapus (#444).** DITUTUP 04 Sep 2026: bulk task cascade Comments/Attachments/LinkedTasks/CustomFields/WorkLogs/ExternalLinks; meeting delete cascade discussion points+komentar+berkas; deletePoint cascade komentar; QA bulk delete memanggil API server. Kebijakan tetap hard-delete (#394). Tes task-bulk-cascade-444. | **F0** | 🟠 | Sedang | Tidak | SELESAI 04 Sep (kode) | §1.1 |
+| 443 | _*Auth rose-* → token danger (#443)._* DITUTUP 04 Sep 2026 (bagian #335 opsi B): Login/Register/Forgot/Reset — `text-rose-500` → `text-danger-text`; border error → `border-danger`. Nilai token content-subtle TIDAK diubah. UI tab bersih tetap #335. | **F0** | 🟠 | Rendah | Tidak | SELESAI 04 Sep (kode) | §1.1 |
+| 438 | **TanStack Query ditunda (#438).** DITUTUP 04 Sep 2026 (keputusan pemilik opsi B/C): jangan `npm i @tanstack/react-query`. Tetap fetch manual + Zustand + moduleDataCache; perketat invalidasi saat pecah AppContainer (#7/#433). Review ulang setelah hooks diekstrak. | **F10** | 🟡 | Tinggi | Tidak | SELESAI 04 Sep (keputusan) | §1.1 |
+| 394 | **Kebijakan hapus = hard-delete (#394).** DITUTUP 04 Sep 2026 (keputusan pemilik opsi A): tetap hapus permanen + Swal confirm. Soft-delete/trash ditolak untuk sekarang. Perbaikan orphan cascade → #444. | **F0** | 🟡 | Tinggi | Tidak | SELESAI 04 Sep (keputusan) | §1.1 |
+| 354 | **SoD tipis siklus user (#354).** DITUTUP 04 Sep 2026 (keputusan pemilik opsi A): bukan engine maker-checker. Admin create default `pending`; PUT status hanya admin; tolak ubah status akun sendiri. Tes user-sod-354. Engine lintas-modul TIDAK dibangun. | **F7** | 🟡 | Tinggi | Tidak | SELESAI 04 Sep (kode) | §1.1 |
+| 351 | **TLS Neon tetap rejectUnauthorized false (#351).** DITUTUP 04 Sep 2026 (keputusan pemilik opsi A): biarkan; dokumentasikan di §4.3 bahwa URL `sslmode=require` TIDAK memverifikasi sertifikat karena `createPgPool` memasang `ssl: { rejectUnauthorized: false }` yang mengalahkan URL. `db.ts` tidak disentuh. Ketatkan hanya setelah izin eksplisit. | **F1** | 🟡 | Sedang | Tidak | SELESAI 04 Sep (keputusan+dok) | §1.1 |
+| 424 | **List chrome Velzon (#424).** DITUTUP 04 Sep 2026: PageHeader judul UPPERCASE 15px/semibold tanpa breadcrumb/subtitle; Search+Tambah di toolbar kartu Issues; Planning Add Sprint sejajar badge h-7. **Catatan 05 Sep:** bagian “topbar tanpa border-b” dikoreksi #445 (opsi A pemilik — ikuti Velzon). Tes PageHeader + IssueAdvancedFiltersPanel. UI belum terverifikasi (ikut #335). | **F3** | 🟠 | Sedang | Tidak | SELESAI 04 Sep (kode) | §1.1 |
 | 442 | **GET /metrics kembar tanpa token (#442).** DITUTUP 04 Sep 2026: handler telanjang di server.ts dihapus. Hanya health.routes dengan METRIK_TOKEN. Tes metrics-server-ts-442 (sumber + urutan mount). | **F7** | 🟠 | Sedang | Tidak | SELESAI 04 Sep (kode) | §1.1 |
 | 441 | **Batal analisis vs pipeline (#441).** DITUTUP 04 Sep 2026: cek upload_status di tiap tahap; IDLE melempar PipelineDibatalkanError; COMPLETED/FAILED memakai WHERE status bukan IDLE. Retensi berkas tidak dihapus dari kebijakan #320. | **F13** | 🟡 | Sedang | Tidak | SELESAI 04 Sep (kode) | §1.1 |
 | 440 | **analyze-transcript tanpa filterVerified (#440).** DITUTUP 04 Sep 2026: filterKlaimTerverifikasi diekstrak bersama; jalur tempel memakai saringHasilAnalisisTempel + skema bukti. Tes: klaim UNVERIFIED tanpa kutipan dibuang. | **F13** | 🟡 | Sedang | Tidak | SELESAI 04 Sep (kode) | §1.1 |
@@ -2471,12 +2515,12 @@ diputuskan sekali, lalu ditulis di sini.
 
 ### 4.3 Yang sudah sehat di database
 
-| Hal                                             | Status             |
-| ----------------------------------------------- | ------------------ |
-| Neon PostgreSQL, satu adapter (`src/lib/db.ts`) | ✅ tidak ada MySQL |
-| Connection pooling Neon                         | ✅                 |
-| `sslmode=require`                               | ✅                 |
-| Password lama sudah dirotasi & terbukti mati    | ✅                 |
+| Hal                                             | Status                                             |
+| ----------------------------------------------- | -------------------------------------------------- |
+| Neon PostgreSQL, satu adapter (`src/lib/db.ts`) | ✅ tidak ada MySQL                                 |
+| Connection pooling Neon                         | ✅                                                 |
+| `sslmode=require` di URL                        | ⚠️ terenkripsi, **bukan** verify-full — lihat #351 |
+| Password lama sudah dirotasi & terbukti mati    | ✅                                                 |
 
 ⛔ **`src/lib/db.ts` tidak boleh disentuh.**
 
@@ -7418,35 +7462,25 @@ Nomor item mengikuti §1 — jangan menomori ulang.
 
 ### 20.2 Pembagian Status Pekerjaan Saat Ini (Per 02 Sep 2026)
 
-Daftar lengkap **13 item terbuka** ada di **§1.1** (`BELUM`/`MENUNGGU`). Rekap cepat: **§24.9**. **4 DITAHAN** di §1.3 (termasuk **#332** Idempotency). Jangan mengerjakan item `MENUNGGU` sebagai kode.
+Daftar lengkap **8 item terbuka** ada di **§1.1** (`BELUM`/`MENUNGGU`). Rekap cepat: **§24.9**. **4 DITAHAN** di §1.3 (termasuk **#332** Idempotency). Jangan mengerjakan item `MENUNGGU` sebagai kode.
 
 1. **Item MENUNGGU KEPUTUSAN ATAU TINDAKAN PEMILIK (bukan antrian kode):**
 
 - **#30** (F11, 🔴): D1b dan D3b storage drive-per-user. Penahan rilis utama.
 - **#290** (F6, 🟡): Sisa peringatan doctor `STORAGE_DRIVER=local`. Ikut #30.
-- **#305** (F5, 🟠): SSO Microsoft — undangan tamu B2B + login sungguhan oleh pemilik.
-- **#351** (F1, 🟡): TLS `rejectUnauthorized` — menyentuh `db.ts` butuh izin.
-- **#354** (F7, 🟡): Maker-checker formal — keputusan cakupan dulu.
-- ~~**#346** / **#341–#345**~~ — DITUTUP 02 Sep (gelombang produk MVP iris tipis).
+- ~~**#351** / **#354** / **#394** / **#438**~~ — DITUTUP 04 Sep (keputusan + SoD tipis + cascade #444).
 
 2. **Item yang menahan janji production:**
 
 - **#30** unggahan hilang tiap deploy.
-- ~~#304~~ / ~~#314~~ DITUTUP sebelumnya.
 
 3. **Item BELUM (boleh dikerjakan setelah cap; ukur dulu):**
 
-- **#320** (F13): AI Meeting Notes — sisa E2E Gemini + diarization.
-- **#339** (F3): Utang warna keras (baseline 41 setelah gelombang 3).
-- **#335** (F0): QA kontras gelap/terang + checklist tab bersih (bukan zero-bug).
-- **#347** (F7): TokenBlacklist runtime — **SELESAI 03 Sep 2026** (denylist di authenticateJWT + logout/reset).
-- **#348** (F7): Inventaris XSS / CSP residual.
-- **#349** (F6): Harden secrets IntegrationSettings (lanjutan #264).
-- **#353** (F6): UI/alert gagal kirim notifikasi (sisa #345).
-- **#384–#390** (F12): Gelombang A — Team invite, auth zoom, sheet residual, bulk bar, Backup cards, empty CTA, dvh+viewport-fit. **SELESAI kode 03 Sep**; UI → #335.
-- **#391–#392** (F12): Residual chrome — notif sheet + header densitas.
-- **#393** (F3): SweetAlert sheet parity.
-- **#394** (F0): Soft vs hard delete — `MENUNGGU` keputusan.
+- **#320** (F13): AI Meeting Notes — E2E Gemini oleh pemilik (hardening C sudah).
+- **#335** (F0): QA kontras gelap/terang + checklist tab bersih (auth rose→token sudah).
+- **#305** (F5, 🟠): SSO Microsoft — undangan tamu B2B + login sungguhan oleh pemilik.
+- **#425** (F3): Detail 1 panel; Back+Edit+Delete kiri.
+- **#433** / **#434** (F10): Pecah berkas raksasa; pola controller.
 - ~~**#371–#381**~~ (F12): Mobile wave 4 — SELESAI 02 Sep (kode; UI belum terverifikasi).
 - ~~**#382**~~ (F3): MasterData/Kanban `code` — SELESAI 02 Sep.
 - ~~**#383**~~ (F0): Checklist formal visual — SELESAI 02 Sep (artefak; centang pemilik = #335).
@@ -8296,13 +8330,13 @@ LanPro adalah **pelacak agile-first** (backlog, sprint, papan, poin, velocity) p
 
 **Ambigu yang terbukti:**
 
-1. Casing metodologi — #311.
+1. ~~Casing metodologi — #311~~ DITUTUP.
 2. ~~Milestone UI — #312~~ DITUTUP 01 Sep.
-3. Issue List = Task; QA case terpisah; bug dari QA lewat `linkedBugKey` string.
-4. Sprint dialog memakai kata Phase.
+3. ~~Issue List = Task; QA case terpisah; bug dari QA lewat `linkedBugKey` string~~ → **#463** `linkedTaskId` (+ key tampilan) DITUTUP 06 Sep.
+4. ~~Sprint dialog memakai kata Phase~~ → **#465** copy Sprint untuk Agile DITUTUP 06 Sep.
 5. ~~Status selesai hardcoded — #313~~ DITUTUP 01 Sep.
 6. Tutup sprint membuang tugas terbuka ke backlog tanpa pilihan.
-7. Metodologi tidak mengubah navigasi.
+7. ~~Metodologi tidak mengubah navigasi~~ → Sprint disembunyikan di Waterfall (#311/#465); label Roadmap & Milestones.
 
 **Jangan dibangun ulang:** Task terpadu, MasterData, matriks RBAC, planning drag, kanban swimlane, Gantt yang ada, backend milestone, LinkedTasks.
 
@@ -8376,102 +8410,62 @@ D. Storage #30: Drive-per-user tetap, atau blob sementara supaya unggahan tidak 
 
 Ini **User Challenge** di gerbang akhir: pemilik minta catat semua dan audit 6 poin; CEO merekomendasikan hanya mengerjakan #314 plus penahan rilis lama. Arah pemilik yang tercatat adalah default sampai diubah eksplisit.
 
-### 24.9 Rekap tabel item terbuka per fase (04 Sep 2026, pasca #424 SELESAI kode)
+### 24.9 Rekap tabel item terbuka per fase (06 Sep 2026, pasca #463/#465 SELESAI)
 
-Sumber baris: §1.1. **Terbuka 12:** #30 #290 #305 #320 #335 #351 #354 #394 #425 #433 #434 #438.
+Sumber baris: §1.1. **Terbuka 7:** #30 #290 #305 #320 #335 #433 #434. **SELESAI 454.**
 
-**Sebaran terbuka:** F0 2 · F1 1 · F3 1 · F5 1 · F6 1 · F7 1 · F10 3 · F11 1 · F13 1.
+**Sebaran terbuka:** F0 1 · F4 0 · F5 1 · F6 1 · F10 2 · F11 1 · F13 1.
 
-**Fidelity kode (estimasi):** ~88–90% Velzon-inspired + list shell seragam. Bukti visual = #335.
+**Ditutup 06 Sep:** #425 · #453–#460 · #461 · #462 · #464 · #463 · #465. Iris PM + waterfall kanonik dual-mode + FK QA (hormati #346).
 
-**Logika (04 Sep, kode):** RBAC rute memakai `jagaProyek`; `verifyProjectAccess` nol di rute produksi; live WebM = audio; retensi COMPLETED ada di kode + tes `clearRecordingFile`. Rekaman live ditranscode ke MP3 sebelum Gemini (klien + server). **#424, #439–#442 SELESAI kode.** **Belum diukur di lapangan:** rekam ulang sampai COMPLETED (#320); unggah mp4 sungguhan (#439); tab bersih #335.
+**Fidelity kode:** + Meeting list chunk + sprint lingkup/aktif + burndown hybrid + copy Sprint + linkedTaskId. Bukti visual = #335. E2E Meeting = #320.
 
 **Cara baca kolom Blokir rilis?** Ya = janji production rusak selama item ini terbuka. Tidak = boleh rilis produk inti, item tetap utang.
 
-#### F0 — Kejelasan / peta produk (2 item; #335 #394; #399 ditutup)
+#### F0 — Kejelasan / peta produk (1 item; #335)
 
-| No  | Fase | Sev | Status     | Isi singkat                                                      | Bukti (berkas/perilaku)             | Dampak pengguna          | Usulan                        | Syarat sebelum dikerjakan             | Blokir rilis? |
-| :-: | :--: | :-: | ---------- | ---------------------------------------------------------------- | ----------------------------------- | ------------------------ | ----------------------------- | ------------------------------------- | :-----------: |
-| 335 |  F0  | 🟠  | `BELUM`    | QA kontras gelap/terang + checklist tab bersih (#395–#415 kode). | Artefak #383/#399; centang pemilik. | Bug visual bisa lolos.   | Checklist §15.3 terang+gelap. | Jangan ubah token tanpa `--perbarui`. |     Tidak     |
-| 394 |  F0  | 🟡  | `MENUNGGU` | Soft-delete vs hard-delete policy.                               | Hapus permanen di banyak modul.     | Data hilang tanpa trash. | Keputusan cakupan dulu.       | Jangan tebak.                         |     Tidak     |
+| No  | Fase | Sev | Status  | Isi singkat                                     | Bukti (berkas/perilaku)        | Dampak pengguna        | Usulan                              | Syarat sebelum dikerjakan           | Blokir rilis? |
+| :-: | :--: | :-: | ------- | ----------------------------------------------- | ------------------------------ | ---------------------- | ----------------------------------- | ----------------------------------- | :-----------: |
+| 335 |  F0  | 🟠  | `BELUM` | QA visual tab bersih; probe 06 Sep → #459/#460. | Checklist #383/#399; .tmp-335. | Bug visual bisa lolos. | Lanjut checklist setelah #459/#460. | Jangan ubah token tanpa --perbarui. |     Tidak     |
 
-#### F2 — Logika metodologi dan status (0 item)
+#### F3 — UI (0 item terbuka; #460 → §1.2)
 
-| No  | Fase | Sev | Status | Isi singkat | Bukti (berkas/perilaku) | Dampak pengguna | Usulan | Syarat sebelum dikerjakan | Blokir rilis? |
-| :-: | :--: | :-: | ------ | ----------- | ----------------------- | --------------- | ------ | ------------------------- | :-----------: |
+#### F4 — Board (0 item terbuka; #459 → §1.2)
 
 #### F5 — SSO Microsoft (1 item)
 
-| No  | Fase | Sev | Status                             | Isi singkat                                                                     | Bukti (berkas/perilaku)                                                                                                                                                                             | Dampak pengguna                                                                                                               | Usulan                                                                                                                                                                       | Syarat sebelum dikerjakan                                                                                                                                   | Blokir rilis? |
-| :-: | :--: | :-: | ---------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----------: |
-| 305 |  F5  | 🟠  | `BELUM` verifikasi login sungguhan | Login Microsoft untuk tamu B2B belum pernah tuntas; adaptor OIDC sudah generik. | Tombol dan 307 ke login.microsoftonline.com hidup. Tanpa undangan: AADSTS50020. emailBolehDipercaya untuk tenant spesifik sudah dilonggarkan. Domain sungguhan hq.bni.co.id, bukan hanya bni.co.id. | Akun tamu BNI tidak bisa masuk SSO. Email ke alamat itu tetap jalan tanpa Microsoft (alamat sebagai kunci, bukan cara masuk). | Tetap opsi A: undang tamu B2B ke tenant unsia. Pastikan kolom domain SSO di Settings memuat hq.bni.co.id (database mengalahkan daftar kode). Pemilik yang menuntaskan login. | Bukan sapuan kode adaptor. Jangan multi-tenant (mematikan kelonggaran email_verified). Jangan sentuh jalur Google. Jangan pakai kredensial pemilik (§23.1). |     Tidak     |
+| No  | Fase | Sev | Status  | Isi singkat                          | Bukti      | Dampak             | Usulan     | Syarat              | Blokir rilis? |
+| :-: | :--: | :-: | ------- | ------------------------------------ | ---------- | ------------------ | ---------- | ------------------- | :-----------: |
+| 305 |  F5  | 🟠  | `BELUM` | SSO Microsoft tamu B2B belum tuntas. | Adaptor OK | Tamu BNI gagal SSO | Invite B2B | Jangan multi-tenant |     Tidak     |
 
-#### F6 — Email / doctor / secrets (1 item; #345 #349 #353 ditutup di §1.2)
+#### F6 — (1 item; #290)
 
-| No  | Fase | Sev | Status                   | Isi singkat                                                                                           | Bukti (berkas/perilaku)                                                                                           | Dampak pengguna                                                                     | Usulan                                                                                                              | Syarat sebelum dikerjakan                 |  Blokir rilis?   |
-| :-: | :--: | :-: | ------------------------ | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | :--------------: |
-| 290 |  F6  | 🟡  | `MENUNGGU` keputusan #30 | Sisa satu peringatan doctor: STORAGE_DRIVER=local. Bagian domain Resend rajonet sudah ditutup 31 Agu. | Doctor 6b OK untuk lanpro.my.id. EMAIL_FROM basi hanya di .env lokal. Pengirim produksi dari IntegrationSettings. | Peringatan mengingatkan unggahan lokal akan hilang — gejala #30, bukan cacat email. | Ikut keputusan #30. Jangan diputus terpisah. Jangan menyuruh ubah EMAIL_FROM di Vercel; nilai database yang menang. | Menunggu #30. Bukan antrian kode sendiri. | Tidak (ikut #30) |
+| No  | Fase | Sev | Status     | Isi singkat                  | Bukti  | Dampak   | Usulan   | Syarat       | Blokir rilis? |
+| :-: | :--: | :-: | ---------- | ---------------------------- | ------ | -------- | -------- | ------------ | :-----------: |
+| 290 |  F6  | 🟡  | `MENUNGGU` | Doctor STORAGE_DRIVER=local. | Doctor | Ikut #30 | Ikut #30 | Menunggu #30 |     Tidak     |
 
-#### F7 — Keamanan / otorisasi sisa (1 item; #347 #348 #350 #352 #442 ditutup)
+#### F11 — (1 item; #30)
 
-| No  | Fase | Sev | Status     | Isi singkat           | Bukti (berkas/perilaku)                        | Dampak pengguna | Usulan                        | Syarat sebelum dikerjakan    | Blokir rilis? |
-| :-: | :--: | :-: | ---------- | --------------------- | ---------------------------------------------- | --------------- | ----------------------------- | ---------------------------- | :-----------: |
-| 354 |  F7  | 🟡  | `MENUNGGU` | Maker-checker formal. | Matriks jagaProyek kuat; belum approval chain. | Compliance gap. | Keputusan cakupan modul dulu. | Bukan clone Jira Automation. |     Tidak     |
+| No  | Fase | Sev | Status     | Isi singkat               | Bukti                | Dampak        | Usulan     | Syarat            | Blokir rilis? |
+| :-: | :--: | :-: | ---------- | ------------------------- | -------------------- | ------------- | ---------- | ----------------- | :-----------: |
+| 30  | F11  | 🔴  | `MENUNGGU` | Storage ephemeral Vercel. | STORAGE_DRIVER=local | Unggah hilang | Drive/blob | Keputusan D1b/D3b |      Ya       |
 
-#### F8 — API dan cakupan tes (0 terbuka; #315 SELESAI; #332 DITAHAN di §1.3)
+#### F13 — (1 item; #320)
 
-| No  | Fase | Sev | Status           | Isi singkat                                              | Bukti (berkas/perilaku)                          | Dampak pengguna        | Usulan                       | Syarat sebelum dikerjakan | Blokir rilis? |
-| :-: | :--: | :-: | ---------------- | -------------------------------------------------------- | ------------------------------------------------ | ---------------------- | ---------------------------- | ------------------------- | :-----------: |
-| 315 |  F8  | 🟡  | `SELESAI` 02 Sep | OpenAPI dari Zod + envelope; Idempotency → #332 DITAHAN. | `docs/openapi.json`, `npm run openapi:generate`. | Integrator punya spek. | Regenerasi setelah ubah Zod. | —                         |     Tidak     |
+| No  | Fase | Sev | Status  | Isi singkat            | Bukti       | Dampak                  | Usulan                 | Syarat        | Blokir rilis? |
+| :-: | :--: | :-: | ------- | ---------------------- | ----------- | ----------------------- | ---------------------- | ------------- | :-----------: |
+| 320 | F13  | 🟡  | `BELUM` | Meeting E2E COMPLETED. | #447 harden | Klaim AI belum terbukti | Rekam sampai COMPLETED | Login pemilik |     Tidak     |
 
-#### F4 — Performa + gap Jira (0 terbuka; #341–#343 ditutup gelombang MVP)
+#### F10 — (2 item)
 
-| No  | Fase | Sev | Status | Isi singkat | Bukti (berkas/perilaku) | Dampak pengguna | Usulan | Syarat sebelum dikerjakan | Blokir rilis? |
-| :-: | :--: | :-: | ------ | ----------- | ----------------------- | --------------- | ------ | ------------------------- | :-----------: |
+| No  | Fase | Sev | Status  | Isi singkat               | Bukti             | Dampak           | Usulan             | Syarat                 | Blokir rilis? |
+| :-: | :--: | :-: | ------- | ------------------------- | ----------------- | ---------------- | ------------------ | ---------------------- | :-----------: |
+| 433 | F10  | 🟠  | `BELUM` | Pecah berkas raksasa.     | Flowchart sisa    | Maintainability  | Satu berkas/commit | Jangan refaktor bisnis |     Tidak     |
+| 434 | F10  | 🟠  | `BELUM` | Rute gemuk vs controller. | task.routes gemuk | Utang arsitektur | Opsi A atau B      | Keputusan pemilik      |     Tidak     |
 
-#### F3 — UI/UX tampilan (1 terbuka; #405–#424 SELESAI kode; sisa #425)
+#### Urutan kerja yang disarankan
 
-| No  | Fase | Sev | Status  | Isi singkat                            | Bukti (berkas/perilaku)             | Dampak pengguna            | Usulan                          | Syarat sebelum dikerjakan | Blokir rilis? |
-| :-: | :--: | :-: | ------- | -------------------------------------- | ----------------------------------- | -------------------------- | ------------------------------- | ------------------------- | :-----------: |
-| 425 |  F3  | 🟠  | `BELUM` | Detail 1 panel; Back+Edit+Delete kiri. | Wiki/Meeting/Flowchart multi-panel. | Aksi terpisah dari konten. | Satukan Card; jangan ubah CRUD. | UI → #335.                |     Tidak     |
-
-#### F13 — AI Meeting Notes (1 item; #439–#441 SELESAI kode)
-
-| No  | Fase | Sev | Status              | Isi singkat                               | Bukti (berkas/perilaku)                                             | Dampak pengguna                    | Usulan                                | Syarat sebelum dikerjakan           | Blokir rilis? |
-| :-: | :--: | :-: | ------------------- | ----------------------------------------- | ------------------------------------------------------------------- | ---------------------------------- | ------------------------------------- | ----------------------------------- | :-----------: |
-| 320 | F13  | 🟡  | `BELUM` gelombang 1 | Live+upload+retensi+transcode MP3 04 Sep. | Gemini menolak WebM; klien+server ubah ke MP3. E2E COMPLETED belum. | Sisa lapangan + diarization/Otter. | Pemilik rekam ulang sampai COMPLETED. | Keputusan live+upload+hapus: sudah. |     Tidak     |
-
-#### F0 tambahan — sisir residual (masuk hitungan F0)
-
-| No  | Fase | Sev | Status | Isi singkat | Bukti (berkas/perilaku) | Dampak pengguna | Usulan | Syarat sebelum dikerjakan | Blokir rilis? |
-| :-: | :--: | :-: | ------ | ----------- | ----------------------- | --------------- | ------ | ------------------------- | :-----------: |
-
-#### F11 — Drive-per-user, jalur rilis (1 item)
-
-| No  | Fase | Sev | Status            | Isi singkat                                                                    | Bukti (berkas/perilaku)                                                                                                                                            | Dampak pengguna                                                                                  | Usulan                                                                                                                                                                                                                                                 | Syarat sebelum dikerjakan                                                                                                                              | Blokir rilis? |
-| :-: | :--: | :-: | ----------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | :-----------: |
-| 30  | F11  | 🔴  | `MENUNGGU` desain | Berkas unggahan hilang tiap deploy Vercel; disk lokal di filesystem ephemeral. | STORAGE_DRIVER=local. Doctor 1 peringatan. storage.service menulis disk instance serverless. Gejala lengkap §0.4. D1–D6 sebagian dijawab 16 Agu di §1.5 baris F11. | Unggahan pengguna hilang saat instance mati. Rilis production berbohong soal penyimpanan berkas. | Drive-per-user (Google Drive/OneDrive milik organisasi) tanpa storage server terpusat. Sisa keputusan: D1b (server perantara izin, bukan tautan publik) dan D3b (tiga keadaan berkas hilang). Alternatif: blob sementara supaya unggahan tidak bohong. | Bukan pekerjaan kode sampai D1b dan D3b dijawab. SSO_ALLOWED_DOMAINS=gmail.com bertabrakan dengan asumsi kuota corporate (#46). Jangan menebak desain. |      Ya       |
-
-#### F12 — Desain dan responsif (0 terbuka; #355–#393 SELESAI kode)
-
-| No  | Fase | Sev | Status | Isi singkat | Bukti (berkas/perilaku) | Dampak pengguna | Usulan | Syarat sebelum dikerjakan | Blokir rilis? |
-| :-: | :--: | :-: | ------ | ----------- | ----------------------- | --------------- | ------ | ------------------------- | :-----------: |
-
-#### F10 — Utang teknis (3 terbuka; #7 AppContainer tetap utang lama)
-
-| No  | Fase | Sev | Status     | Isi singkat                                  | Bukti (berkas/perilaku)                          | Dampak pengguna   | Usulan                         | Syarat sebelum dikerjakan | Blokir rilis? |
-| :-: | :--: | :-: | ---------- | -------------------------------------------- | ------------------------------------------------ | ----------------- | ------------------------------ | ------------------------- | :-----------: |
-| 433 | F10  | 🟠  | `BELUM`    | Pecah berkas raksasa; gelombang 1 Flowchart. | CanvasToolRail + modal diekstrak. Sisa 5 berkas. | Maintainability.  | Satu berkas per commit.        | Jangan refaktor bisnis.   |     Tidak     |
-| 434 | F10  | 🟠  | `BELUM`    | Rute gemuk vs pola controller.               | task.routes 1230 baris; 1/65 punya controller.   | Utang arsitektur. | Opsi A atau B — jangan campur. | Keputusan pemilik.        |     Tidak     |
-| 438 | F10  | 🟡  | `MENUNGGU` | TanStack Query vs fetch manual.              | Evaluasi tertulis 04 Sep.                        | Cache/invalidasi. | Jangan `npm i` sebelum A/B.    | Terkait #7.               |     Tidak     |
-
-#### Urutan kerja yang disarankan (bukan antrian otomatis)
-
-Ketetapan lama §1.4 (murah dulu) tetap berlaku sebagai **prinsip**. Untuk **12 item terbuka 04 Sep** (pasca #424 SELESAI kode):
-
-1. **Jangan kode** #30, #290, #351, #354, #394, #438 (`MENUNGGU`). #434 tunggu Opsi A/B.
-2. **Chrome UI:** #425. Verifikasi tab bersih **#335**.
-3. **Lapangan pemilik:** #305 SSO · #320 rekam sampai COMPLETED.
-4. **#433** pecah berkas — satu commit per berkas. **#332** Idempotency tetap DITAHAN.
-
-**#405–#432, #435–#437, #439–#442, #424: SELESAI kode.** UI → #335. Jangan menebak MENUNGGU.
+1. Jangan kode #30/#290 (`MENUNGGU`). #434 tunggu A/B.
+2. #335 checklist visual tab bersih (bukti #459/#460 di UI).
+3. Lapangan: #305 · #320.
+4. #433 bertahap. #332 tetap DITAHAN.

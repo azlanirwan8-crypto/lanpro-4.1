@@ -534,6 +534,26 @@ router.put(
       // aksi lain di aplikasi, bukan tabel baru.
       const oldUser = await userRepository.findByIdOrUid(id);
 
+      // #354 — SoD tipis siklus user: status hanya boleh diubah admin, dan
+      // bukan untuk akun sendiri (maker ≠ checker / self-approve).
+      if (status !== undefined) {
+        if (!isAdmin) {
+          return res.status(403).json({
+            status: "error",
+            code: "srv.akses_ditolak_status_hanya_admin",
+            message: "Hanya administrator yang dapat mengubah status akun.",
+          });
+        }
+        const targetIds = [oldUser?.id, oldUser?.uid].filter(Boolean).map(String);
+        if (targetIds.includes(String(currentUserId))) {
+          return res.status(400).json({
+            status: "error",
+            code: "srv.tidak_bisa_ubah_status_akun_sendiri",
+            message: "Anda tidak dapat mengubah status akun Anda sendiri.",
+          });
+        }
+      }
+
       await userRepository.updateUser(
         id,
         {

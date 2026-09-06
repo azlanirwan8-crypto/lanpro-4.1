@@ -643,6 +643,7 @@ export function DashboardView(props: DashboardViewProps) {
 
   return (
     <div className={styles.container}>
+      {/* #446 — PageHeader hanya salam; filter sprint di bawah (bukan TASK SUMMARY) */}
       <PageHeader
         uppercase={false}
         breadcrumbs={[
@@ -650,45 +651,31 @@ export function DashboardView(props: DashboardViewProps) {
           { label: t("nav.dashboard", "Dashboard"), current: true },
         ]}
         title={`${getGreeting()}, ${currentUser?.displayName || "Administrator"}!`}
-        actions={
-          <>
-            {/* Global Filter by Sprint */}
-            <div className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[240px] min-w-0 flex-1 md:flex-none">
-              <StyledDropdown
-                value={selectedSprintFilter}
-                onChange={(val) => setSelectedSprintFilter(val)}
-                options={sprintFilterOptions}
-                masterData={[]}
-                className="w-full min-w-0"
-                buttonClassName="h-10 w-full min-w-0 bg-surface-muted rounded-lg border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 bg-info/10 px-3 py-2 rounded-lg border border-info/20 text-xs font-medium text-info-text min-w-0 max-w-full">
-              <Zap className="w-3.5 h-3.5 text-info-text shrink-0" />
-              <span className="truncate">
-                {t("dashboard.activeSprintChip", {
-                  name: activeSprint?.name || t("dashboard.noActiveSprint"),
-                  days: sprintDaysLeft,
-                })}
-              </span>
-            </div>
-          </>
-        }
       />
       <div className={styles.wrapper}>
-        {/* Real-time Agile Top 4 KPI Metric Cards
-            #129 — keempat kartu ini menghitung `nonEpicTasks`, sedangkan
-            dropdown sprint dan kedua kartu "Rincian Tugas" menghitung `tasks`
-            (Epic ikut). Selisihnya nyata (3 lawan 12) dan sebelumnya tidak
-            berlabel, sehingga terbaca sebagai angka yang bertentangan. */}
-        <div className="flex items-baseline justify-between mb-2">
-          <span className="text-xs sm:text-[11px] font-normal uppercase tracking-wider text-content-subtle">
-            {t("dashboard.taskSummary")}
-          </span>
-          <span className="text-xs sm:text-[11px] font-normal text-content-muted">
-            {t("dashboard.epicExcluded")}
-          </span>
+        {/* #446 — dropdown + chip Active di bekas posisi TASK SUMMARY / Epics excluded.
+            #129 — KPI di bawah tetap `nonEpicTasks`; chip/filter memakai ruang lingkup sprint. */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+          <div className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[240px] min-w-0 flex-1 md:flex-none">
+            <StyledDropdown
+              value={selectedSprintFilter}
+              onChange={(val) => setSelectedSprintFilter(val)}
+              options={sprintFilterOptions}
+              masterData={[]}
+              className="w-full min-w-0"
+              buttonClassName="h-10 w-full min-w-0 bg-surface-muted rounded-lg border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 bg-info/10 px-3 py-2 rounded-lg border border-info/20 text-xs font-medium text-info-text min-w-0 max-w-full">
+            <Zap className="w-3.5 h-3.5 text-info-text shrink-0" />
+            <span className="truncate">
+              {t("dashboard.activeSprintChip", {
+                name: activeSprint?.name || t("dashboard.noActiveSprint"),
+                days: sprintDaysLeft,
+              })}
+            </span>
+          </div>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
           {/* Card 1: Total Tasks — putih + soft icon + hover lift (#415) */}

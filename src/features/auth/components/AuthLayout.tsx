@@ -68,12 +68,10 @@ const AuthLayoutSplit = ({ children, overlays }: Omit<AuthLayoutProps, "variant"
     <AuthHeroPanel />
 
     {/*
-      Sisi form. #309 — form sempat terbaca menempel di tepi kanan panel gelap
-      karena setengah-kanan viewport tanpa pembatas lebar yang jelas. Kartu
-      dibatasi max-w-md dan dipusatkan di kolom terang; padding kiri md+
-      memberi napas dari lengkung clip-path hero.
+      Sisi form. #453 — padding kiri/kanan simetris agar kartu login benar-benar
+      di tengah kolom terang (bukan condong kanan karena padding tidak seimbang).
     */}
-    <div className="w-full md:w-1/2 flex items-center justify-center px-6 pt-24 pb-10 sm:px-10 md:pl-14 md:pr-10 lg:pl-20 lg:pr-14 md:pt-10 bg-surface-muted relative overflow-y-auto min-h-dvh">
+    <div className="w-full md:w-1/2 flex items-center justify-center px-6 pt-24 pb-10 sm:px-10 md:px-12 lg:px-16 md:pt-10 bg-surface-muted relative overflow-y-auto min-h-dvh">
       {/*
         #231 — "watermark" sisi terang, sesuai gambar acuan pemilik proyek:
         BUKAN motif batik/kanban (itu ditolak), melainkan kartu placeholder

@@ -26,9 +26,9 @@ type PageHeaderProps = {
 };
 
 /**
- * #424 — Velzon page-title: judul UPPERCASE ~15px/semibold, nempel di bawah
- * topbar. Tanpa breadcrumb, tanpa subtitle. Visual-merge: topbar tanpa
- * border-b; PageHeader punya border-b sebagai batas bawah panel gabungan.
+ * #424/#445 — Velzon page-title: judul UPPERCASE ~15px/semibold di bawah
+ * topbar. Tanpa breadcrumb, tanpa subtitle. Topbar punya border-b (garis
+ * tengah Velzon); PageHeader punya border-b sebagai batas ke konten.
  */
 export const PageHeader: React.FC<PageHeaderProps> = ({
   title,

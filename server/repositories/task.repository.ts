@@ -509,12 +509,36 @@ export class TaskRepository {
   }
 
   async deleteTasksByIds(taskIds: string[], projectId: string): Promise<void> {
+    // #444 — bulk harus cascade sama seperti delete satuan; sebelumnya hanya
+    // DELETE Tasks sehingga Comments/Attachments/LinkedTasks/WorkLogs orphan.
     const connection = await db.getConnection();
     try {
+      await connection.beginTransaction();
+      await connection.query("DELETE FROM Comments WHERE taskId IN (?)", [taskIds]);
+      await connection.query("DELETE FROM Attachments WHERE taskId IN (?)", [taskIds]);
+      await connection.query(
+        "DELETE FROM LinkedTasks WHERE sourceTaskId IN (?) OR targetTaskId IN (?)",
+        [taskIds, taskIds]
+      );
+      await connection.query("DELETE FROM TaskCustomFields WHERE taskId IN (?)", [taskIds]);
+      try {
+        await connection.query("DELETE FROM TaskWorkLogs WHERE task_id IN (?)", [taskIds]);
+      } catch {
+        // Tabel mungkin belum ada di lingkungan lama — jangan gagalkan bulk.
+      }
+      try {
+        await connection.query("DELETE FROM TaskExternalLinks WHERE taskId IN (?)", [taskIds]);
+      } catch {
+        // sama
+      }
       await connection.query("DELETE FROM Tasks WHERE id IN (?) AND projectId = ?", [
         taskIds,
         projectId,
       ]);
+      await connection.commit();
+    } catch (err) {
+      await connection.rollback();
+      throw err;
     } finally {
       connection.release();
     }
@@ -531,6 +555,16 @@ export class TaskRepository {
         id,
       ]);
       await connection.query("DELETE FROM TaskCustomFields WHERE taskId = ?", [id]);
+      try {
+        await connection.query("DELETE FROM TaskWorkLogs WHERE task_id = ?", [id]);
+      } catch {
+        // opsional
+      }
+      try {
+        await connection.query("DELETE FROM TaskExternalLinks WHERE taskId = ?", [id]);
+      } catch {
+        // opsional
+      }
       await connection.query("DELETE FROM Tasks WHERE id = ? AND projectId = ?", [id, projectId]);
       await connection.commit();
     } catch (err) {
@@ -611,18 +645,20 @@ export class TaskRepository {
     userId?: string | null;
     action: string;
     details?: string;
+    taskId?: string | null;
   }): Promise<void> {
     const connection = await db.getConnection();
     try {
       await connection.query(
-        `INSERT INTO ActivityLogs (id, projectId, userId, action, details)
-         VALUES (?, ?, ?, ?, ?)`,
+        `INSERT INTO ActivityLogs (id, projectId, userId, action, details, "taskId")
+         VALUES (?, ?, ?, ?, ?, ?)`,
         [
           activity.id,
           activity.projectId,
           activity.userId || null,
           activity.action,
           activity.details || "",
+          activity.taskId || null,
         ]
       );
     } finally {

@@ -53,8 +53,12 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
         <div className="flex items-center gap-2 w-full sm:w-auto flex-1 min-w-0">
           <div className="relative pl-1 shrink-0">
             <button
+              type="button"
               onClick={() => setIsInlineTypeOpen(isInlineTypeOpen === "global" ? null : "global")}
-              className="flex items-center justify-center p-1.5 hover:bg-surface-strong rounded transition-colors text-content-secondary outline-none"
+              className="flex items-center justify-center p-1.5 hover:bg-surface-strong rounded transition-colors text-content-secondary outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              aria-label={t("issueQuick.pickType")}
+              aria-expanded={isInlineTypeOpen === "global"}
+              aria-haspopup="listbox"
             >
               {(() => {
                 const typeData = mArr.find(
@@ -108,8 +112,9 @@ export const IssueQuickCreateBar: React.FC<IssueQuickCreateBarProps> = ({
             value={quickCreateTitle}
             onChange={(e) => setQuickCreateTitle(e.target.value)}
             placeholder={t("issueQuick.placeholder")}
+            aria-label={t("issueQuick.placeholder")}
             onKeyDown={(e) => e.key === "Enter" && createGlobalIssue()}
-            className="flex-1 min-w-0 bg-transparent border-none text-xs font-normal text-content-body placeholder:text-content-subtle focus:ring-0 outline-none px-2"
+            className="flex-1 min-w-0 bg-transparent border-none text-xs font-normal text-content-body placeholder:text-content-subtle focus:ring-0 outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded px-2"
           />
         </div>
 

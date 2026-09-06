@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { MilestonePanel } from "./MilestonePanel";
+import { GANTT_ROW_PX, kumpulkanEdgeBlocks, pathSikuDep } from "./ganttDependencyEdges";
 import { can } from "../../lib/permissions";
 import { PageHeader } from "../../components/ui/PageHeader";
 
@@ -563,6 +564,28 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
   if (today >= minDate) {
     todayLeft = (differenceInDays(today, minDate) / (totalDays || 1)) * 100;
   }
+
+  /** #457 — geometri bar + edge blocks untuk overlay SVG */
+  const ganttDepOverlay = React.useMemo(() => {
+    const bars = renderedRows.map(({ task }) => {
+      const dates = tempDates[task.id] || {
+        startDate: task.startDate,
+        endDate: task.endDate,
+      };
+      if (!dates.startDate || !dates.endDate) {
+        return { left: 0, width: 0, hasDates: false as const };
+      }
+      const start = ensureDate(dates.startDate);
+      const end = ensureDate(dates.endDate);
+      const left = (differenceInDays(start, minDate) / (totalDays || 1)) * 100;
+      const width = Math.max(0.5, ((differenceInDays(end, start) + 1) / (totalDays || 1)) * 100);
+      return { left, width, hasDates: true as const };
+    });
+    const edges = kumpulkanEdgeBlocks(renderedRows, tasks || []).filter(
+      (e) => bars[e.fromIndex]?.hasDates && bars[e.toIndex]?.hasDates
+    );
+    return { bars, edges, heightPx: renderedRows.length * GANTT_ROW_PX };
+  }, [renderedRows, tasks, tempDates, minDate, totalDays]);
 
   const getEarliestTaskDate = () => {
     let earliest: Date | null = null;
@@ -1293,6 +1316,51 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                     );
                   })}
                 </AnimatePresence>
+                {/* #457 — garis dependency blocks (iris tipis, bukan CPM) */}
+                {ganttDepOverlay.edges.length > 0 && ganttDepOverlay.heightPx > 0 && (
+                  <svg
+                    className="absolute left-0 right-0 top-4 pointer-events-none z-[25] overflow-visible"
+                    style={{ height: ganttDepOverlay.heightPx }}
+                    viewBox={`0 0 100 ${ganttDepOverlay.heightPx}`}
+                    preserveAspectRatio="none"
+                    aria-hidden
+                  >
+                    <defs>
+                      <marker
+                        id="gantt-dep-arrow-457"
+                        markerWidth="6"
+                        markerHeight="6"
+                        refX="5"
+                        refY="3"
+                        orient="auto"
+                        markerUnits="strokeWidth"
+                      >
+                        <path d="M0,0 L6,3 L0,6 Z" fill="var(--color-primary)" />
+                      </marker>
+                    </defs>
+                    {ganttDepOverlay.edges.map((edge) => {
+                      const from = ganttDepOverlay.bars[edge.fromIndex];
+                      const to = ganttDepOverlay.bars[edge.toIndex];
+                      if (!from?.hasDates || !to?.hasDates) return null;
+                      const x1 = from.left + from.width;
+                      const x2 = to.left;
+                      const y1 = edge.fromIndex * GANTT_ROW_PX + GANTT_ROW_PX / 2;
+                      const y2 = edge.toIndex * GANTT_ROW_PX + GANTT_ROW_PX / 2;
+                      return (
+                        <path
+                          key={edge.id}
+                          d={pathSikuDep(x1, y1, x2, y2)}
+                          fill="none"
+                          stroke="var(--color-primary)"
+                          strokeWidth={1.25}
+                          strokeOpacity={0.55}
+                          vectorEffect="non-scaling-stroke"
+                          markerEnd="url(#gantt-dep-arrow-457)"
+                        />
+                      );
+                    })}
+                  </svg>
+                )}
               </div>
               {todayLeft >= 0 && todayLeft <= 100 && (
                 <div

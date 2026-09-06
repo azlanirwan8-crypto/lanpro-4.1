@@ -79,6 +79,7 @@ export interface ActivityLog {
   userId: string;
   action: string;
   details: string;
+  taskId?: string | null;
   createdAt: any;
 }
 

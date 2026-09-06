@@ -109,6 +109,15 @@ export default defineConfig(() => {
         },
       },
     },
+    /**
+     * #447 — @ffmpeg/ffmpeg membawa worker.js yang tidak cocok dengan
+     * pre-bundle Vite (error: .vite/deps/worker.js hilang). Exclude supaya
+     * browser memuat paket apa adanya; transcode gagal → fallback unggah
+     * mentah ke server FFmpeg.
+     */
+    optimizeDeps: {
+      exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util"],
+    },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.

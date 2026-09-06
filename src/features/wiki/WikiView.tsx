@@ -7,7 +7,6 @@ import {
   Edit2,
   Trash2,
   FileText,
-  ChevronLeft,
   ChevronRight,
   Save,
   Upload,
@@ -39,6 +38,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { StyledDropdown } from "../../components/ui/CommonComponents";
 import { Card } from "../../components/ui/CoreUI";
+import { DetailViewChrome } from "../../components/ui/DetailViewChrome";
 import { PageHeader } from "../../components/ui/PageHeader";
 import {
   ListPageShell,
@@ -1162,39 +1162,43 @@ export const WikiView: React.FC<WikiViewProps> = ({
           <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4">
             {activeDoc ? (
               <>
-                {/* #425 — satu panel: aksi kiri + meta judul */}
-                <Card className="p-4 md:p-5 shadow-2xs shrink-0 rounded-lg space-y-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      onClick={() => setActiveDocId(null)}
-                      className="flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
-                      title={t("wiki.backToList")}
-                    >
-                      <ChevronLeft className="w-4 h-4" /> {t("wiki.list")}
-                    </button>
-
-                    {activeDoc && canModifyDoc(activeDoc) && (
-                      <>
-                        <button
-                          onClick={(e) => handleEditClick(activeDoc, e)}
-                          className="p-1.5 text-content-muted hover:text-primary hover:bg-primary/10 rounded-md transition-all cursor-pointer border border-border-subtle bg-surface shadow-2xs"
-                          title={t("wiki.editTitleCategory")}
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteClick(activeDoc, e)}
-                          className="p-1.5 text-content-muted hover:text-rose-600 hover:bg-rose-500/10 rounded-md transition-all cursor-pointer border border-border-subtle bg-surface shadow-2xs"
-                          title={t("wiki.deleteDoc")}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </>
-                    )}
-
-                    <div className="flex items-center gap-2 shrink-0 ml-auto">
+                {/* #425 — DetailViewChrome: Back+Edit+Delete kiri, judul Velzon 15px */}
+                <DetailViewChrome
+                  backLabel={t("wiki.list")}
+                  onBack={() => setActiveDocId(null)}
+                  title={activeDoc.title}
+                  titleIcon={<FileText className="w-4 h-4 text-primary shrink-0" />}
+                  canEdit={canModifyDoc(activeDoc)}
+                  canDelete={canModifyDoc(activeDoc)}
+                  onEdit={(e) => handleEditClick(activeDoc, e)}
+                  onDelete={(e) => handleDeleteClick(activeDoc, e)}
+                  editTitle={t("wiki.editTitleCategory")}
+                  deleteTitle={t("wiki.deleteDoc")}
+                  meta={
+                    <>
+                      <span className={getCategoryStyles(activeDoc.type).badge}>
+                        {activeDoc.type}
+                      </span>
+                      <span className="text-xs text-content-subtle font-medium flex items-center gap-1">
+                        <User className="w-3 h-3 text-content-subtle" />{" "}
+                        {getUserName(activeDoc.createdBy)}
+                      </span>
+                      <span className="text-content-subtle">•</span>
+                      <span className="text-xs text-content-subtle font-medium flex items-center gap-1">
+                        <Calendar className="w-3 h-3 text-content-subtle" />
+                        {new Date(activeDoc.createdAt).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </>
+                  }
+                  trailing={
+                    <>
                       {activeDoc.fileName && (
                         <button
+                          type="button"
                           onClick={() => handleDownload(activeDoc.id, activeDoc.fileName)}
                           className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/15 text-emerald-700 font-medium text-xs border border-emerald-500/30 rounded-md transition-all cursor-pointer whitespace-nowrap shadow-2xs"
                           title={t("wiki.downloadAttachment")}
@@ -1203,9 +1207,9 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           <span className="hidden sm:inline">{t("wiki.download")}</span>
                         </button>
                       )}
-
                       {(activeDoc.fileName || activeDoc.link) && (
                         <button
+                          type="button"
                           onClick={() => setIsFullscreenPreview(!isFullscreenPreview)}
                           className={cn(
                             "flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs border rounded-md transition-all cursor-pointer whitespace-nowrap shadow-2xs",
@@ -1229,35 +1233,9 @@ export const WikiView: React.FC<WikiViewProps> = ({
                           </span>
                         </button>
                       )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2 select-none mb-2">
-                      <span className={getCategoryStyles(activeDoc.type).badge}>
-                        {activeDoc.type}
-                      </span>
-                      <span className="text-xs text-content-subtle font-medium flex items-center gap-1">
-                        <User className="w-3 h-3 text-content-subtle" />{" "}
-                        {getUserName(activeDoc.createdBy)}
-                      </span>
-                      <span className="text-content-subtle">•</span>
-                      <span className="text-xs text-content-subtle font-medium flex items-center gap-1">
-                        <Calendar className="w-3 h-3 text-content-subtle" />
-                        {new Date(activeDoc.createdAt).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </span>
-                    </div>
-
-                    <h2 className="text-lg font-semibold text-content-strong tracking-tight leading-snug flex items-center gap-2.5">
-                      <FileText className="w-5 h-5 text-primary shrink-0" />
-                      <span className="truncate">{activeDoc.title}</span>
-                    </h2>
-                  </div>
-                </Card>
+                    </>
+                  }
+                />
 
                 {/* Mobile Tab Switcher (< 768px) — #406 Card */}
                 <Card className="md:hidden flex items-center p-1 shadow-2xs shrink-0 rounded-lg">
@@ -1632,7 +1610,7 @@ export const WikiView: React.FC<WikiViewProps> = ({
                 {/* Title Input */}
                 <div className="space-y-1">
                   <label className="text-xs sm:text-[10px] font-normal text-content-muted uppercase tracking-wider block">
-                    {t("wiki.docTitleLabel")} <span className="text-rose-500">*</span>
+                    {t("wiki.docTitleLabel")} <span className="text-danger-text">*</span>
                   </label>
                   <input
                     type="text"

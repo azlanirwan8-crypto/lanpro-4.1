@@ -190,7 +190,14 @@ export class DiscussionPointsRepository {
   async deletePoint(pointId: string): Promise<void> {
     const connection = await db.getConnection();
     try {
+      await connection.beginTransaction();
+      // #444 — komentar thread ikut hilang; sebelumnya orphan di discussion_point_comments
+      await connection.query("DELETE FROM discussion_point_comments WHERE pointId = ?", [pointId]);
       await connection.query("DELETE FROM DiscussionPoints WHERE id = ?", [pointId]);
+      await connection.commit();
+    } catch (err) {
+      await connection.rollback();
+      throw err;
     } finally {
       connection.release();
     }

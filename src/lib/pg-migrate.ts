@@ -540,6 +540,7 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "evidenceType"    VARCHAR(50),
         "evidenceName"    VARCHAR(255),
         "linkedBugKey"    VARCHAR(50),
+        "linkedTaskId"    VARCHAR(36),
         "commentsList"    JSONB,
         evidences         JSONB,
         "modulId"         VARCHAR(36),
@@ -549,6 +550,20 @@ export async function runMigrations(pool: Pool): Promise<void> {
     await client.query(
       `ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "assignedTo" VARCHAR(255);`
     );
+    // #463 — FK lunak ke Tasks.id; linkedBugKey tetap untuk tampilan/kunci isu.
+    await client.query(
+      `ALTER TABLE "QATestCases" ADD COLUMN IF NOT EXISTS "linkedTaskId" VARCHAR(36);`
+    );
+    await client.query(`
+      UPDATE "QATestCases" q
+      SET "linkedTaskId" = t.id
+      FROM "Tasks" t
+      WHERE q."linkedTaskId" IS NULL
+        AND q."linkedBugKey" IS NOT NULL
+        AND q."linkedBugKey" <> ''
+        AND q."projectId" = t."projectId"
+        AND (q."linkedBugKey" = t."taskKey" OR q."linkedBugKey" = t.id)
+    `);
 
     // ── QATestCaseExecutionLogs ───────────────────────────────────────────────
     await client.query(`

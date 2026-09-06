@@ -13,6 +13,10 @@ import { cn } from "../../../../lib/utils";
 import { UserAvatar } from "../../../../components/ui/UserAvatar";
 import { Button, Textarea } from "./TaskDetailPrimitives";
 import { UserProfile, ActivityLog } from "../../../../types";
+import {
+  formatActivityDetailsUntukTampilan,
+  parseActivityUntukTampilan,
+} from "../../lib/formatActivityHistory";
 
 interface TaskCommentsSectionProps {
   comments: any[];
@@ -284,9 +288,40 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                       {safeFormat(log.createdAt, "MMM d, HH:mm")}
                     </span>
                   </div>
-                  <p className="text-xs text-content-secondary font-normal leading-relaxed group-hover:text-content transition-colors">
-                    {log.details || log.action}
-                  </p>
+                  <div className="text-xs text-content-secondary font-normal leading-relaxed group-hover:text-content transition-colors">
+                    {(() => {
+                      const tampilan = parseActivityUntukTampilan(
+                        log.details || log.action,
+                        projectMembers || []
+                      );
+                      if (tampilan.kind === "diff") {
+                        return (
+                          <div className="space-y-0.5">
+                            <span className="text-[10px] font-medium uppercase tracking-wide text-content-subtle">
+                              {tampilan.label}
+                            </span>
+                            <p className="flex flex-wrap items-center gap-1.5 text-xs">
+                              <span className="text-content-muted line-through decoration-content-subtle/60">
+                                {tampilan.from}
+                              </span>
+                              <span className="text-content-subtle" aria-hidden>
+                                →
+                              </span>
+                              <span className="font-medium text-content-strong">{tampilan.to}</span>
+                            </p>
+                          </div>
+                        );
+                      }
+                      return (
+                        <p>
+                          {formatActivityDetailsUntukTampilan(
+                            log.details || log.action,
+                            projectMembers || []
+                          )}
+                        </p>
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             );

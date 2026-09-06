@@ -142,6 +142,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const filteredLogs = activityLogs
     .filter(
       (log) =>
+        (log as any).taskId === task.id ||
         log.action?.includes(task.key) ||
         log.action?.includes(task.id) ||
         log.details?.includes(task.id) ||

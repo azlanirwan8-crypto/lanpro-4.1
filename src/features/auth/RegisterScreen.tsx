@@ -127,7 +127,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* FULL NAME INPUT */}
         <div className="space-y-1">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            {t("register.fullName")} <span className="text-rose-500">*</span>
+            {t("register.fullName")} <span className="text-danger-text">*</span>
           </label>
           <input
             type="text"
@@ -138,12 +138,12 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             className={cn(
               "w-full px-3.5 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
               fieldErrors.name
-                ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                ? "border-danger focus:ring-danger/20 focus:border-danger"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
             )}
           />
           {fieldErrors.name && (
-            <p className="text-xs sm:text-[11px] font-medium text-rose-500 flex items-center gap-1 mt-1">
+            <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{fieldErrors.name}</span>
             </p>
@@ -153,7 +153,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* EMAIL ADDRESS INPUT */}
         <div className="space-y-1">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            {t("forgotPwd.emailAddress")} <span className="text-rose-500">*</span>
+            {t("forgotPwd.emailAddress")} <span className="text-danger-text">*</span>
           </label>
           <input
             type="email"
@@ -163,12 +163,12 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             className={cn(
               "w-full px-3.5 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
               fieldErrors.email
-                ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                ? "border-danger focus:ring-danger/20 focus:border-danger"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
             )}
           />
           {fieldErrors.email && (
-            <p className="text-xs sm:text-[11px] font-medium text-rose-500 flex items-center gap-1 mt-1">
+            <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{fieldErrors.email}</span>
             </p>
@@ -178,7 +178,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* USERNAME INPUT */}
         <div className="space-y-1">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            {t("common.username")} <span className="text-rose-500">*</span>{" "}
+            {t("common.username")} <span className="text-danger-text">*</span>{" "}
             <span className="text-xs sm:text-[11px] text-content-subtle font-normal">
               {t("register.lettersOnlyMax10")}
             </span>
@@ -192,12 +192,12 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
             className={cn(
               "w-full px-3.5 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
               fieldErrors.username
-                ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                ? "border-danger focus:ring-danger/20 focus:border-danger"
                 : "border-border-subtle focus:ring-primary/20 focus:border-primary"
             )}
           />
           {fieldErrors.username && (
-            <p className="text-xs sm:text-[11px] font-medium text-rose-500 flex items-center gap-1 mt-1">
+            <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{fieldErrors.username}</span>
             </p>
@@ -207,7 +207,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         {/* PASSWORD INPUT & STRENGTH METER */}
         <div className="space-y-1">
           <label className="text-xs font-semibold text-content-body tracking-wide block">
-            {t("register.password")} <span className="text-rose-500">*</span>
+            {t("register.password")} <span className="text-danger-text">*</span>
           </label>
           <div className="relative">
             <input
@@ -218,7 +218,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
               className={cn(
                 "w-full pl-3.5 pr-10 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
                 fieldErrors.password
-                  ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                  ? "border-danger focus:ring-danger/20 focus:border-danger"
                   : "border-border-subtle focus:ring-primary/20 focus:border-primary"
               )}
             />
@@ -300,7 +300,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
           )}
 
           {fieldErrors.password && (
-            <p className="text-xs sm:text-[11px] font-medium text-rose-500 flex items-center gap-1 mt-1">
+            <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
               <AlertCircle className="w-3.5 h-3.5 shrink-0" />
               <span>{fieldErrors.password}</span>
             </p>

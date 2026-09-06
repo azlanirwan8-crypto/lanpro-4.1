@@ -129,13 +129,19 @@ export const SprintSection: React.FC<SprintSectionProps> = ({
                           )}
                         >
                           {sprint.status === "active"
-                            ? isOverdue
-                              ? "Overdue"
-                              : "Active"
+                            ? t("planning.active")
                             : sprint.status === "planned"
-                              ? "Planned"
-                              : "Completed"}
+                              ? t("planning.planned")
+                              : t("planning.completed")}
                         </span>
+                        {(sprint.status === "active" || sprint.status === "completed") && (
+                          <span
+                            className="text-[10px] font-normal px-2 py-0.5 rounded-full border shrink-0 bg-warning-surface/20 text-warning-text border-warning/30"
+                            title={t("toast.sprintScopeLocked")}
+                          >
+                            {t("planning.scopeLocked", "Lingkup terkunci")}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-1.5 text-xs text-content-subtle font-normal mt-0.5 min-w-0">
                         <Calendar className="w-3.5 h-3.5 text-content-subtle shrink-0" />

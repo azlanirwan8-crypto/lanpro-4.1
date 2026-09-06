@@ -133,7 +133,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
         <form id="reset-password-form" onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-content-body block">
-              {t("resetPwd.newPassword")} <span className="text-rose-500">*</span>
+              {t("resetPwd.newPassword")} <span className="text-danger-text">*</span>
             </label>
             <div className="relative">
               <input
@@ -148,7 +148,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
                 className={cn(
                   "w-full pl-3.5 pr-10 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
                   error
-                    ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                    ? "border-danger focus:ring-danger/20 focus:border-danger"
                     : "border-border-subtle focus:ring-primary/20 focus:border-primary"
                 )}
               />
@@ -164,7 +164,7 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
 
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-content-body block">
-              {t("resetPwd.confirmNewPassword")} <span className="text-rose-500">*</span>
+              {t("resetPwd.confirmNewPassword")} <span className="text-danger-text">*</span>
             </label>
             <input
               type={showPassword ? "text" : "password"}
@@ -178,12 +178,12 @@ export const ResetPasswordModal: React.FC<ResetPasswordModalProps> = ({
               className={cn(
                 "w-full px-3.5 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
                 error
-                  ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                  ? "border-danger focus:ring-danger/20 focus:border-danger"
                   : "border-border-subtle focus:ring-primary/20 focus:border-primary"
               )}
             />
             {error && (
-              <p className="text-xs font-medium text-rose-500 flex items-center gap-1 mt-1">
+              <p className="text-xs font-medium text-danger-text flex items-center gap-1 mt-1">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{error}</span>
               </p>

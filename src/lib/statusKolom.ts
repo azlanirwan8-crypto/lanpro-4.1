@@ -1,6 +1,6 @@
 /**
- * #382 — kunci kolom status ke `code` bila ada, tetap cocok dengan `label`
- * lama di task.status (data warisan).
+ * #382 / #459 — kunci kolom status ke `code` bila ada, tetap cocok dengan
+ * `label` lama di task.status (data warisan). Lookup lane case-insensitive.
  */
 export type StatusLike = { code?: string | null; label?: string | null };
 
@@ -25,10 +25,15 @@ export function tasksForStatusLane<T extends { id: string }>(
   laneKey: string,
   status: StatusLike
 ): T[] {
+  const wanted = new Set(statusKeysForLookup(status).map((k) => k.toLowerCase()));
+  const prefix = `${laneKey}:`;
   const seen = new Set<string>();
   const out: T[] = [];
-  for (const k of statusKeysForLookup(status)) {
-    for (const t of grouped[`${laneKey}:${k}`] || []) {
+  for (const [fullKey, list] of Object.entries(grouped)) {
+    if (!fullKey.startsWith(prefix)) continue;
+    const statusPart = fullKey.slice(prefix.length);
+    if (!wanted.has(statusPart.toLowerCase())) continue;
+    for (const t of list) {
       if (seen.has(t.id)) continue;
       seen.add(t.id);
       out.push(t);
@@ -46,16 +51,18 @@ export function taskMatchesStatus(
   return statusKeysForLookup(status).some((k) => k.toLowerCase() === ts);
 }
 
-/** Saat drop, tulis `code` bila MasterData punya; fallback label/raw. */
+/** Saat drop / grouping: tulis `code` bila MasterData punya; fallback label/raw. */
 export function resolveStatusWriteValue(
   rawFromDroppable: string,
   masterStatuses: StatusLike[]
 ): string {
   const raw = (rawFromDroppable || "").trim();
+  if (!raw) return raw;
+  const rawLower = raw.toLowerCase();
   const hit = masterStatuses.find((s) => {
     const code = (s.code || "").trim();
     const label = (s.label || "").trim();
-    return code === raw || label === raw;
+    return code.toLowerCase() === rawLower || label.toLowerCase() === rawLower;
   });
   if (!hit) return raw;
   return (hit.code || hit.label || raw).trim();

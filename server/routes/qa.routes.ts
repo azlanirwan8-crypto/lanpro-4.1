@@ -349,6 +349,7 @@ export function setupQARoutes(
           evidenceType: tc.evidenceType || null,
           evidenceName: tc.evidenceName || null,
           linkedBugKey: tc.linkedBugKey || null,
+          linkedTaskId: tc.linkedTaskId || null,
           commentsList: tc.commentsList || [],
           evidences: tc.evidences || [],
           assignedTo: tc.assignedTo || null,
@@ -379,7 +380,22 @@ export function setupQARoutes(
       try {
         const { projectId, id } = req.params;
         const tc = req.body;
-        await qaRepository.updateTestCase(id, projectId, tc);
+        // #463 — iris taut saja: jangan timpa seluruh baris
+        if (
+          (tc.linkedTaskId !== undefined || tc.linkedBugKey !== undefined) &&
+          tc.judul === undefined &&
+          tc.title === undefined &&
+          tc.status === undefined
+        ) {
+          await qaRepository.setLinkedTask(
+            id,
+            projectId,
+            tc.linkedTaskId ?? null,
+            tc.linkedBugKey ?? null
+          );
+        } else {
+          await qaRepository.updateTestCase(id, projectId, tc);
+        }
         res.json({
           status: "success",
           code: "srv.test_case_updated",
@@ -404,8 +420,15 @@ export function setupQARoutes(
     async (req, res) => {
       try {
         const { projectId, id } = req.params;
-        const { comment, commentsList, evidences, status, linkedBugKey, currentUserName } =
-          req.body;
+        const {
+          comment,
+          commentsList,
+          evidences,
+          status,
+          linkedBugKey,
+          linkedTaskId,
+          currentUserName,
+        } = req.body;
         const file = req.file;
 
         const tc = await qaRepository.findTestCaseById(id, projectId);
@@ -505,6 +528,7 @@ export function setupQARoutes(
           evidences: parsedEvidences,
           status: status || tc.status,
           linkedBugKey: linkedBugKey || tc.linkedBugKey || null,
+          linkedTaskId: linkedTaskId || tc.linkedTaskId || null,
         });
 
         res.json({
@@ -521,6 +545,7 @@ export function setupQARoutes(
             evidences: parsedEvidences,
             status: status || tc.status,
             linkedBugKey: linkedBugKey || tc.linkedBugKey,
+            linkedTaskId: linkedTaskId || tc.linkedTaskId || null,
           },
         });
       } catch (error: any) {

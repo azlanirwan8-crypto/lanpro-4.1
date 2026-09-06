@@ -63,6 +63,7 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
 
   const groupedTasks = useMemo(() => {
     const epicIds = new Set(epics.map((e) => e.id));
+    const statusMaster = mArr.filter((d) => d.type === "status");
     const groups: Record<string, typeof tArr> = {};
 
     tArr.forEach((task) => {
@@ -84,7 +85,9 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
             : "unassigned";
       }
 
-      const key = `${laneKey}:${task.status}`;
+      // #459 — samakan kunci dengan code MasterData (case-insensitive), bukan raw task.status
+      const statusKey = resolveStatusWriteValue(String(task.status ?? ""), statusMaster);
+      const key = `${laneKey}:${statusKey}`;
 
       if (!groups[key]) {
         groups[key] = [];
@@ -92,7 +95,7 @@ export const useBoard = (props: KanbanBoardProps, groupBy: "epic" | "assignee" =
       groups[key].push(task);
     });
     return groups;
-  }, [tArr, epics, groupBy]);
+  }, [tArr, epics, groupBy, mArr]);
 
   const handleDragEndBoard = async (result: any) => {
     if (!result.destination || !selectedProject) return;

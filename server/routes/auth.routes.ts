@@ -568,16 +568,15 @@ router.post("/api/auth/forgot-password", async (req, res) => {
       });
     }
 
-    const balasanNetral = {
-      status: "success",
-      code: "srv.bila_alamat_email_itu",
-      message:
-        "Bila alamat email terdaftar, instruksi dan kata sandi sementara baru telah dikirimkan ke alamat email tersebut.",
-    };
-
     const user = await authRepository.findUserByEmail(email);
+    // #451 — keputusan pemilik: pesan eksplisit (bukan balasan netral #121).
     if (!user) {
-      return res.json(balasanNetral);
+      return res.status(404).json({
+        status: "error",
+        code: "srv.email_tidak_terdaftar_lupa_sandi",
+        message:
+          "Alamat email ini tidak terdaftar. Periksa ejaan atau hubungi admin bila Anda yakin punya akun.",
+      });
     }
 
     // Item #262 — Buat password acak sementara, hash ke DB, dan kirim via email
@@ -589,13 +588,24 @@ router.post("/api/auth/forgot-password", async (req, res) => {
 
     await authRepository.setTemporaryPassword(userId, newPasswordHash, berlakuSampai);
 
-    // Cabut sesi aktif lama
+    // #448 — cabut sesi DB + denylist JWT (sama pola #347 di reset-password bertoken).
+    // Hanya menghapus Map memori membuat login sandi sementara kena 409 "masih aktif".
+    const idSesi = String(userId);
     if (user.id) {
       activeUserSessions.delete(user.id);
     }
     if (user.uid) {
       activeUserSessions.delete(user.uid);
     }
+    try {
+      const sesi = await authRepository.findSessionData(idSesi);
+      if (sesi?.currentSessionToken) {
+        await authRepository.addToTokenBlacklist(sesi.currentSessionToken);
+      }
+    } catch (blErr) {
+      console.error("[forgot-password] Gagal menulis TokenBlacklist:", blErr);
+    }
+    await authRepository.clearSessionToken(idSesi);
 
     await kirimEmailLatarBelakang(
       kirimEmailPasswordBaru({
@@ -608,7 +618,12 @@ router.post("/api/auth/forgot-password", async (req, res) => {
       `Kata sandi sementara untuk ${user.email}`
     );
 
-    return res.json(balasanNetral);
+    return res.json({
+      status: "success",
+      code: "srv.kata_sandi_sementara_dikirim",
+      message:
+        "Kata sandi sementara telah dikirim ke email Anda. Periksa kotak masuk (dan folder spam). Sandi berlaku 2 jam.",
+    });
   } catch (error: any) {
     console.error("LOG ANOMALI: forgot-password error:", error);
     return res.status(500).json({

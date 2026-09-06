@@ -228,10 +228,10 @@ export class AuthRepository {
     try {
       const [rows]: any = await connection.query(
         `UPDATE "Users"
-            SET "passwordHash" = ?, password = ?,
+            SET "passwordHash" = ?,
                 "tempPasswordExpiresAt" = NULL, "mustChangePassword" = false
           WHERE id = ? OR uid = ? RETURNING id`,
-        [passwordHash, passwordHash, userId, userId]
+        [passwordHash, userId, userId]
       );
       return Array.isArray(rows) && rows.length > 0;
     } finally {
@@ -258,10 +258,10 @@ export class AuthRepository {
     try {
       const [rows]: any = await connection.query(
         `UPDATE "Users"
-            SET "passwordHash" = ?, password = ?,
+            SET "passwordHash" = ?,
                 "tempPasswordExpiresAt" = ?, "mustChangePassword" = true
           WHERE id = ? OR uid = ? RETURNING id`,
-        [passwordHash, passwordHash, expiresAt, userId, userId]
+        [passwordHash, expiresAt, userId, userId]
       );
       return Array.isArray(rows) && rows.length > 0;
     } finally {

@@ -280,6 +280,11 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                 const isActive = currentView === item.id;
                 const hasChildren = Boolean(item.children && item.children.length > 0);
                 const isExpanded = Boolean(expandedItems[item.id]);
+                // #465 — Waterfall: label Roadmap menekankan Milestone (bukan Sprint).
+                const labelKey =
+                  item.id === "timeline" && adalahWaterfall(selectedProject?.category)
+                    ? "sidebar.roadmapTimelineWaterfall"
+                    : item.label;
 
                 return (
                   <div key={item.id} className="my-0.5">
@@ -297,14 +302,14 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
                           ? "bg-sidebar-item-active text-sidebar-text-active font-medium shadow-xs"
                           : "text-sidebar-text hover:bg-sidebar-item-hover hover:text-sidebar-text-active"
                       )}
-                      title={isSidebarCollapsed ? t(item.label) : undefined}
+                      title={isSidebarCollapsed ? t(labelKey) : undefined}
                     >
                       <div className="shrink-0 text-sidebar-text group-hover:text-sidebar-text-active transition-colors">
                         {item.icon}
                       </div>
                       {!isSidebarCollapsed && (
                         <>
-                          <span className="flex-1 text-left truncate">{t(item.label)}</span>
+                          <span className="flex-1 text-left truncate">{t(labelKey)}</span>
                           {item.badge && renderBadge(item.badge, item.badgeColor)}
                           {hasChildren && (
                             <div

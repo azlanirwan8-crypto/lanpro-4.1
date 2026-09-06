@@ -137,26 +137,31 @@ export const LoginScreen = ({
             <form className="space-y-4" onSubmit={handleLoginSubmit}>
               {/* USERNAME FIELD */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-content-body tracking-wide block">
-                  {t("common.username")} <span className="text-rose-500">*</span>
+                <label
+                  htmlFor="lanpro-login-username"
+                  className="text-xs font-semibold text-content-body tracking-wide block"
+                >
+                  {t("common.username")} <span className="text-danger-text">*</span>
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
+                    id="lanpro-login-username"
                     type="text"
+                    autoComplete="username"
                     placeholder={t("login.usernamePlaceholder")}
                     value={username}
                     onChange={(e) => handleUsernameChange(e.target.value)}
                     className={cn(
                       "w-full pl-10 pr-4 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-base font-normal text-content placeholder:text-content-subtle hover:border-border-subtle",
                       fieldErrors.username
-                        ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                        ? "border-danger focus:ring-danger/20 focus:border-danger"
                         : "border-border-subtle focus:ring-primary/20 focus:border-primary"
                     )}
                   />
                 </div>
                 {fieldErrors.username && (
-                  <p className="text-xs sm:text-[11px] font-medium text-rose-500 flex items-center gap-1 mt-1">
+                  <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                     <span>{fieldErrors.username}</span>
                   </p>
@@ -165,34 +170,40 @@ export const LoginScreen = ({
 
               {/* PASSWORD FIELD */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-content-body tracking-wide block">
-                  {t("login.password")} <span className="text-rose-500">*</span>
+                <label
+                  htmlFor="lanpro-login-password"
+                  className="text-xs font-semibold text-content-body tracking-wide block"
+                >
+                  {t("login.password")} <span className="text-danger-text">*</span>
                 </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-content-subtle absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
+                    id="lanpro-login-password"
                     type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
                     placeholder={t("login.passwordPlaceholder")}
                     value={password}
                     onChange={(e) => handlePasswordChange(e.target.value)}
                     className={cn(
                       "w-full pl-10 pr-11 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all duration-200 outline-none text-base font-normal text-content placeholder:text-content-subtle hover:border-border-subtle",
                       fieldErrors.password
-                        ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                        ? "border-danger focus:ring-danger/20 focus:border-danger"
                         : "border-border-subtle focus:ring-primary/20 focus:border-primary"
                     )}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-content-subtle hover:text-primary focus:outline-none cursor-pointer transition-colors"
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-content-subtle hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 cursor-pointer transition-colors"
                     title={showPassword ? t("common.hidePassword") : t("common.showPassword")}
+                    aria-label={showPassword ? t("common.hidePassword") : t("common.showPassword")}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
                 {fieldErrors.password && (
-                  <p className="text-xs sm:text-[11px] font-medium text-rose-500 flex items-center gap-1 mt-1">
+                  <p className="text-xs sm:text-[11px] font-medium text-danger-text flex items-center gap-1 mt-1">
                     <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                     <span>{fieldErrors.password}</span>
                   </p>

@@ -42,6 +42,7 @@ export const updateQATestCaseSchema = z.object({
   evidenceType: z.string().optional().nullable(),
   evidenceName: z.string().optional().nullable(),
   linkedBugKey: z.string().optional().nullable(),
+  linkedTaskId: z.string().optional().nullable(),
   caseId: z.string().optional().nullable(),
   rowNum: z.number().optional().nullable(),
   modulId: z.string().optional().nullable(),

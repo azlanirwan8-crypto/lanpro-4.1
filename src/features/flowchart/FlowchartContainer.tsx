@@ -42,6 +42,7 @@ import { Task, Project } from "../../types";
 import { cn } from "../../lib/utils";
 import { toast } from "sonner";
 import { ConfirmationModal } from "../../components/ui/ConfirmationModal";
+import { DetailViewChrome } from "../../components/ui/DetailViewChrome";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
 import { FlowchartDashboard } from "./components/FlowchartDashboard";
 import { CanvasToolRail } from "./components/CanvasToolRail";
@@ -2513,67 +2514,26 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               </div>
             ) : (
               <div className="flex-1 flex flex-col min-h-0 relative space-y-4">
-                {/* #425 — satu panel: aksi kiri + meta */}
-                <div className="bg-surface border border-border-subtle rounded-lg p-4 md:p-5 shadow-2xs shrink-0 space-y-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      onClick={() => {
-                        setIsEditorActive(false);
-                        setSelectedFlowId(null);
-                        setCurrentPage(1);
-                      }}
-                      className="flex items-center justify-center gap-1.5 text-xs font-medium text-primary bg-primary-surface/10 hover:bg-primary-surface/15 border border-primary/20 px-3 py-1.5 rounded-md transition-all cursor-pointer shrink-0 shadow-2xs"
-                    >
-                      <ChevronLeft className="w-4 h-4" /> {t("flowchart.backToList")}
-                    </button>
-
-                    {currentFlowMetadata && canModifyFlowchart(currentFlowMetadata) && (
-                      <>
-                        <button
-                          onClick={(e) => openEditModal(currentFlowMetadata, e)}
-                          className="p-1.5 bg-surface hover:bg-surface-sunken text-content-secondary hover:text-primary rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"
-                          title={t("flowchart.editMetadata")}
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteFlowchart(currentFlowMetadata.id, e)}
-                          className="p-1.5 bg-surface hover:bg-rose-500/10 text-content-secondary hover:text-rose-600 rounded-md transition-all cursor-pointer shadow-2xs border border-border-subtle/80"
-                          title={t("flowchart.deleteDocument")}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </>
-                    )}
-
-                    <div className="bg-surface-muted p-1 rounded-md flex items-center border border-border-subtle/60 shadow-inner ml-auto">
-                      <button
-                        onClick={() => setRightViewMode("embed")}
-                        className={cn(
-                          "px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
-                          rightViewMode === "embed"
-                            ? "bg-surface text-content shadow-2xs font-semibold"
-                            : "text-content-muted hover:text-content-strong"
-                        )}
-                      >
-                        <BookOpen className="w-3.5 h-3.5" /> {t("flowchart.documentList")}
-                      </button>
-                      <button
-                        onClick={() => setRightViewMode("canvas")}
-                        className={cn(
-                          "px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
-                          rightViewMode === "canvas"
-                            ? "bg-surface text-content shadow-2xs font-semibold"
-                            : "text-content-muted hover:text-content-strong"
-                        )}
-                      >
-                        <Workflow className="w-3.5 h-3.5" /> {t("flowchart.flowDiagram")}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2 select-none mb-2">
+                {/* #425 — DetailViewChrome: Back+Edit+Delete kiri, judul Velzon 15px */}
+                <DetailViewChrome
+                  backLabel={t("flowchart.backToList")}
+                  onBack={() => {
+                    setIsEditorActive(false);
+                    setSelectedFlowId(null);
+                    setCurrentPage(1);
+                  }}
+                  title={currentFlowMetadata?.name}
+                  titleIcon={<Workflow className="w-4 h-4 text-primary shrink-0" />}
+                  canEdit={!!(currentFlowMetadata && canModifyFlowchart(currentFlowMetadata))}
+                  canDelete={!!(currentFlowMetadata && canModifyFlowchart(currentFlowMetadata))}
+                  onEdit={(e) => currentFlowMetadata && openEditModal(currentFlowMetadata, e)}
+                  onDelete={(e) =>
+                    currentFlowMetadata && handleDeleteFlowchart(currentFlowMetadata.id, e)
+                  }
+                  editTitle={t("flowchart.editMetadata")}
+                  deleteTitle={t("flowchart.deleteDocument")}
+                  meta={
+                    <>
                       {currentFlowMetadata?.category === "PRD" && (
                         <span className="px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider bg-surface-muted text-content-body border border-border-subtle/80 rounded-full">
                           {t("flowchart.prd")}
@@ -2620,20 +2580,44 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           </span>
                         </>
                       )}
-                    </div>
-
-                    <h2 className="text-lg font-semibold text-content-strong tracking-tight leading-snug flex items-center gap-2">
-                      <Workflow className="w-5 h-5 text-primary shrink-0" />
-                      <span className="truncate">{currentFlowMetadata?.name}</span>
-                    </h2>
-
-                    {currentFlowMetadata?.description && (
+                    </>
+                  }
+                  description={
+                    currentFlowMetadata?.description ? (
                       <p className="text-xs text-content-muted font-medium max-w-3xl leading-relaxed mt-2">
                         {currentFlowMetadata.description}
                       </p>
-                    )}
-                  </div>
-                </div>
+                    ) : undefined
+                  }
+                  trailing={
+                    <div className="bg-surface-muted p-1 rounded-md flex items-center border border-border-subtle/60 shadow-inner">
+                      <button
+                        type="button"
+                        onClick={() => setRightViewMode("embed")}
+                        className={cn(
+                          "px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
+                          rightViewMode === "embed"
+                            ? "bg-surface text-content shadow-2xs font-semibold"
+                            : "text-content-muted hover:text-content-strong"
+                        )}
+                      >
+                        <BookOpen className="w-3.5 h-3.5" /> {t("flowchart.documentList")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRightViewMode("canvas")}
+                        className={cn(
+                          "px-2.5 sm:px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
+                          rightViewMode === "canvas"
+                            ? "bg-surface text-content shadow-2xs font-semibold"
+                            : "text-content-muted hover:text-content-strong"
+                        )}
+                      >
+                        <Workflow className="w-3.5 h-3.5" /> {t("flowchart.flowDiagram")}
+                      </button>
+                    </div>
+                  }
+                />
 
                 {/* Main Viewport (Canvas / Viewer) */}
                 <div className="bg-surface border border-border-subtle rounded-lg shadow-soft flex-1 min-h-[600px] relative flex flex-col overflow-hidden">

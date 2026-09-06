@@ -209,7 +209,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
   const [addPeopleJabatan, setAddPeopleJabatan] = React.useState("");
   const [addPeopleRole, setAddPeopleRole] = React.useState<AppRole>("user");
   const [addPeopleStatus, setAddPeopleStatus] = React.useState<"approved" | "pending" | "rejected">(
-    "approved"
+    "pending"
   );
   const [successEmail, setSuccessEmail] = React.useState("");
 
@@ -285,7 +285,7 @@ export const AdminUserPanel: React.FC<AdminUserPanelProps> = (props) => {
       setAddPeopleDepartment("");
       setAddPeopleJabatan("");
       setAddPeopleRole("user");
-      setAddPeopleStatus("approved");
+      setAddPeopleStatus("pending");
     } catch (e) {
       console.error("Error adding user:", e);
       toast.error(t("toast.addUserFailed"));

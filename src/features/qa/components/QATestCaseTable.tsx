@@ -604,7 +604,10 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
                             {tc.title}
                           </span>
                           {tc.linkedBugKey && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.2 bg-rose-500/10 border border-rose-500/30 rounded text-[10px] leading-none sm:text-[9px] font-medium text-danger-text shrink-0">
+                            <span
+                              className="inline-flex items-center gap-1 px-1.5 py-0.2 bg-danger-surface/40 border border-danger/30 rounded text-[10px] leading-none sm:text-[9px] font-medium text-danger-text shrink-0"
+                              title={tc.linkedTaskId ? `Task ${tc.linkedTaskId}` : tc.linkedBugKey}
+                            >
                               <Bug className="w-2.5 h-2.5" />
                               {tc.linkedBugKey}
                             </span>

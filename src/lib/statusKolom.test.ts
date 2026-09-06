@@ -6,7 +6,7 @@ import {
   resolveStatusWriteValue,
 } from "./statusKolom";
 
-describe("statusKolom #382", () => {
+describe("statusKolom #382 / #459", () => {
   it("lebih suka code untuk kunci kolom", () => {
     expect(statusColumnKey({ code: "todo", label: "TO DO" })).toBe("todo");
     expect(statusColumnKey({ label: "TO DO" })).toBe("TO DO");
@@ -27,9 +27,26 @@ describe("statusKolom #382", () => {
     expect(tasks.map((t) => t.id).sort()).toEqual(["a", "b"]);
   });
 
-  it("resolve tulis code bila ada di master", () => {
-    const master = [{ code: "todo", label: "TO DO" }];
+  it("#459 lane lookup case-insensitive terhadap kunci grouped", () => {
+    const grouped = {
+      "standalone:TO DO": [{ id: "x" }],
+      "standalone:In Progress": [{ id: "y" }],
+    };
+    expect(
+      tasksForStatusLane(grouped, "standalone", { code: "todo", label: "To Do" }).map((t) => t.id)
+    ).toEqual(["x"]);
+    expect(
+      tasksForStatusLane(grouped, "standalone", {
+        code: "in_progress",
+        label: "IN PROGRESS",
+      }).map((t) => t.id)
+    ).toEqual(["y"]);
+  });
+
+  it("resolve tulis code bila ada di master (case-insensitive)", () => {
+    const master = [{ code: "todo", label: "To Do" }];
     expect(resolveStatusWriteValue("TO DO", master)).toBe("todo");
+    expect(resolveStatusWriteValue("to do", master)).toBe("todo");
     expect(resolveStatusWriteValue("todo", master)).toBe("todo");
     expect(resolveStatusWriteValue("UNKNOWN", master)).toBe("UNKNOWN");
   });

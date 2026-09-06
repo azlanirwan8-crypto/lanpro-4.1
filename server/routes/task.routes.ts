@@ -26,6 +26,8 @@ import { userRepository } from "../repositories/user.repository";
 import { qaRepository } from "../repositories/qa.repository";
 import { adalahWaterfall } from "../lib/methodology";
 import { statusSelesai } from "../lib/statusSelesai";
+import { cekPindahLingkupSprint } from "../lib/sprintLingkup";
+import { sprintRepository } from "../repositories/sprint.repository";
 import { masterDataRepository } from "../repositories/master-data.repository";
 
 const router = express.Router();
@@ -243,6 +245,25 @@ router.post(
 
       const authenticatedUserStr =
         (req as any).user?.uid || (req as any).user?.id || req.headers["x-user-id"];
+
+      // #461 — jangan buat tugas langsung ke sprint aktif/selesai
+      if (sprintId) {
+        const target = await sprintRepository.findById(sprintId);
+        const cek = cekPindahLingkupSprint({
+          statusLama: null,
+          statusBaru: target?.status ?? null,
+          sprintIdLama: null,
+          sprintIdBaru: sprintId,
+          unlockScope: false,
+        });
+        if (!cek.ok) {
+          return res.status(400).json({
+            status: "error",
+            code: cek.code,
+            message: cek.message,
+          });
+        }
+      }
 
       const {
         id: newId,
@@ -480,6 +501,7 @@ router.put(
         category,
         environment,
         projectRisk,
+        unlockScope,
       } = req.body;
       const title = req.body.title !== undefined ? xss(req.body.title || "") : undefined;
       const description =
@@ -564,6 +586,32 @@ router.put(
             status: "error",
             code: "srv.akses_ditolak_anda_tidak_2",
             message: "Akses ditolak: Anda tidak memiliki wewenang untuk memindahkan task ini.",
+          });
+        }
+
+        // #461 — penguncian lingkup sprint aktif/selesai
+        let statusLama: string | null = null;
+        let statusBaru: string | null = null;
+        if (oldTask.sprintId) {
+          const sprintLama = await sprintRepository.findById(oldTask.sprintId);
+          statusLama = sprintLama?.status ?? null;
+        }
+        if (sprintId) {
+          const sprintBaru = await sprintRepository.findById(sprintId);
+          statusBaru = sprintBaru?.status ?? null;
+        }
+        const cek = cekPindahLingkupSprint({
+          statusLama,
+          statusBaru,
+          sprintIdLama: oldTask.sprintId,
+          sprintIdBaru: sprintId,
+          unlockScope: unlockScope === true,
+        });
+        if (!cek.ok) {
+          return res.status(400).json({
+            status: "error",
+            code: cek.code,
+            message: cek.message,
           });
         }
       } else {
@@ -1177,7 +1225,7 @@ router.get(
 router.post("/api/projects/:projectId/activity", jagaProyek("list", "U"), async (req, res) => {
   try {
     const { projectId } = req.params;
-    const { action, details, userId } = req.body;
+    const { action, details, userId, taskId } = req.body;
     const newId = crypto.randomUUID();
 
     await taskRepository.createActivityLog({
@@ -1186,6 +1234,7 @@ router.post("/api/projects/:projectId/activity", jagaProyek("list", "U"), async 
       userId: userId || null,
       action,
       details: details || "",
+      taskId: taskId || null,
     });
 
     const notificationTitle = `Aktivitas Proyek: ${action}`;

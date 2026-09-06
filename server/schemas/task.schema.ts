@@ -42,6 +42,8 @@ export const updateTaskSchema = z.object({
   acceptanceCriteria: z.any().optional(),
   version: z.any().optional(),
   isBlocked: z.boolean().optional(),
+  /** #461 — izinkan pindah dari sprint aktif saat tutup sprint */
+  unlockScope: z.boolean().optional(),
   tags: z.array(z.string()).optional(),
   labels: z.array(z.string()).optional(),
   orderIndex: z.number().optional(),

@@ -17,8 +17,14 @@ import { GLOBAL_UPLOADS_DIR } from "../config/uploads";
 import { runAIPipeline } from "../services/meeting.service";
 import { saringHasilAnalisisTempel } from "../services/meeting-ai-filter";
 import { MULTIMODAL_ANALYSIS_SCHEMA } from "../services/meeting-ai.schema";
+import { ekstensiPerluMp3UntukGemini, perintahFfmpegKeMp3 } from "../services/meeting-transcode";
 import { jagaProyek } from "../middleware/jagaProyek";
 import { meetingRepository } from "../repositories/meeting.repository";
+import { discussionPointsRepository } from "../repositories/discussion-points.repository";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
 import { validasiBody, validasiQuery } from "../middleware/validate";
 import { listSearchQuerySchema } from "../schemas/pagination.schema";
 import { respondWithProjectList } from "../lib/listResponse";
@@ -387,6 +393,20 @@ router.post(
   async (req, res) => {
     try {
       const { meetingId } = req.params;
+      // #320 — hapus berkas disk SEBELUM reset DB, supaya batal tidak
+      // meninggalkan orphan di uploads/ (retensi COMPLETED sudah bersih;
+      // jalur batal sebelumnya hanya NULL-kan kolom).
+      const meeting = await meetingRepository.findById(meetingId);
+      const recordingUrl = meeting?.recording_url;
+      if (recordingUrl) {
+        try {
+          const safeFileName = path.basename(recordingUrl);
+          const filePath = path.join(GLOBAL_UPLOADS_DIR, safeFileName);
+          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        } catch (cleanupErr) {
+          console.warn("[CANCEL] Gagal menghapus berkas rekaman:", cleanupErr);
+        }
+      }
       await meetingRepository.resetMeetingState(meetingId);
 
       io.emit("meeting_ai_status", {
@@ -549,21 +569,43 @@ router.post(
           .json({ status: "error", message: `File rekaman tidak ditemukan di path: ${filePath}` });
       }
 
+      // #320 — sama seperti runAIPipeline: Gemini menolak audio/webm.
+      // Transcode ke MP3 bila ekstensi tidak aman, sebelum inlineData.
+      let analysisPath = filePath;
+      let mimeType = "audio/mp3";
       const fileExt = path.extname(filePath).toLowerCase();
-      let mimeType = "video/mp4";
-      if (fileExt === ".webm") mimeType = "video/webm";
-      else if (fileExt === ".avi") mimeType = "video/x-msvideo";
-      else if (fileExt === ".mov") mimeType = "video/quicktime";
-      else if (fileExt === ".mkv") mimeType = "video/x-matroska";
-      else if (fileExt === ".mp3" || fileExt === ".wav" || fileExt === ".m4a") {
-        mimeType =
-          fileExt === ".mp3" ? "audio/mp3" : fileExt === ".wav" ? "audio/wav" : "audio/x-m4a";
-      }
+      let extractedPath: string | null = null;
+      if (ekstensiPerluMp3UntukGemini(fileExt)) {
+        extractedPath = path.join(
+          GLOBAL_UPLOADS_DIR,
+          `extracted_multimodal_${meetingId}_${Date.now()}.mp3`
+        );
+        try {
+          try {
+            await execAsync(perintahFfmpegKeMp3(filePath, extractedPath, true));
+          } catch {
+            await execAsync(perintahFfmpegKeMp3(filePath, extractedPath, false));
+          }
+          analysisPath = extractedPath;
+          mimeType = "audio/mp3";
+        } catch {
+          return res.status(500).json({
+            status: "error",
+            code: "srv.rekaman_tidak_bisa_diubah_ke_mp3",
+            message:
+              "Rekaman WebM/MP4 tidak bisa diubah ke MP3. Pasang FFmpeg di server, atau unggah berkas MP3.",
+          });
+        }
+      } else if (fileExt === ".wav") mimeType = "audio/wav";
+      else if (fileExt === ".aac") mimeType = "audio/aac";
+      else if (fileExt === ".ogg") mimeType = "audio/ogg";
+      else if (fileExt === ".flac") mimeType = "audio/flac";
+      else mimeType = "audio/mp3";
 
       console.log(
-        `[MULTIMODAL AI] Reading file for multimodal analysis: ${filePath} (${mimeType})`
+        `[MULTIMODAL AI] Reading file for multimodal analysis: ${analysisPath} (${mimeType})`
       );
-      const fileBuffer = fs.readFileSync(filePath);
+      const fileBuffer = fs.readFileSync(analysisPath);
       const base64File = fileBuffer.toString("base64");
 
       const apiKey = process.env.GEMINI_API_KEY;
@@ -735,6 +777,7 @@ ${learningSection}`;
       // (disk lokal di serverless bersifat sementara, lihat npm run doctor §6).
       try {
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        if (extractedPath && fs.existsSync(extractedPath)) fs.unlinkSync(extractedPath);
         await meetingRepository.clearRecordingFile(meetingId);
       } catch (cleanupErr) {
         console.warn("[MULTIMODAL AI] Gagal menghapus berkas rekaman pasca-analisis:", cleanupErr);
@@ -1265,6 +1308,26 @@ router.delete(
           status: "error",
           error: "Akses ditolak: Anda hanya diizinkan untuk melihat data ini.",
         });
+      }
+
+      // #444 — cascade: titik diskusi (+ komentar via deletePoint) → berkas → meeting
+      try {
+        const points = await discussionPointsRepository.findByMeetingId(id);
+        for (const point of points) {
+          await discussionPointsRepository.deletePoint(point.id);
+        }
+      } catch (cascadeErr) {
+        console.warn("[MEETING DELETE] Cascade discussion gagal:", cascadeErr);
+      }
+      const recordingUrl = item.recording_url || (item as any).recordingUrl;
+      if (recordingUrl) {
+        try {
+          const safeFileName = path.basename(String(recordingUrl));
+          const filePath = path.join(GLOBAL_UPLOADS_DIR, safeFileName);
+          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        } catch (diskErr) {
+          console.warn("[MEETING DELETE] Gagal hapus berkas rekaman:", diskErr);
+        }
       }
 
       await meetingRepository.delete(id);

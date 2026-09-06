@@ -51,6 +51,8 @@ export interface QATestCaseEntity {
   evidenceType?: string | null;
   evidenceName?: string | null;
   linkedBugKey?: string | null;
+  /** #463 — id Tasks (FK lunak); linkedBugKey tetap untuk tampilan taskKey */
+  linkedTaskId?: string | null;
   commentsList?: any;
   evidences?: any;
   assignedTo?: string | null;
@@ -310,6 +312,7 @@ export class QaRepository {
       evidenceType: row.evidenceType,
       evidenceName: row.evidenceName,
       linkedBugKey: row.linkedBugKey,
+      linkedTaskId: row.linkedTaskId || null,
       commentsList: safeParse(row.commentsList, []),
       evidences: safeParse(row.evidences, []),
       assignedTo: row.assignedTo,
@@ -326,8 +329,8 @@ export class QaRepository {
       await connection.query(
         `INSERT INTO QATestCases (
           id, projectId, judul, deskripsi, tipeTesting, prioritas, caseId, expected, status, steps, history, createdAt, activeTesterId, activeTesterName, lockedAt, modulId,
-          suiteId, rowNum, comment, evidenceUrl, evidenceType, evidenceName, linkedBugKey, commentsList, evidences, assignedTo
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          suiteId, rowNum, comment, evidenceUrl, evidenceType, evidenceName, linkedBugKey, "linkedTaskId", commentsList, evidences, assignedTo
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           tc.id,
           tc.projectId,
@@ -352,6 +355,7 @@ export class QaRepository {
           tc.evidenceType || null,
           tc.evidenceName || null,
           tc.linkedBugKey || null,
+          tc.linkedTaskId || null,
           JSON.stringify(tc.commentsList || []),
           JSON.stringify(tc.evidences || []),
           tc.assignedTo || null,
@@ -391,6 +395,7 @@ export class QaRepository {
           evidenceType = ?,
           evidenceName = ?,
           linkedBugKey = ?,
+          "linkedTaskId" = ?,
           commentsList = ?,
           evidences = ?,
           assignedTo = ?
@@ -416,6 +421,7 @@ export class QaRepository {
           tc.evidenceType || null,
           tc.evidenceName || null,
           tc.linkedBugKey || null,
+          tc.linkedTaskId || null,
           JSON.stringify(tc.commentsList || []),
           JSON.stringify(tc.evidences || []),
           tc.assignedTo || null,
@@ -441,6 +447,24 @@ export class QaRepository {
     }
   }
 
+  /** #463 — tautkan bug Task tanpa menimpa field lain. */
+  async setLinkedTask(
+    id: string,
+    projectId: string,
+    linkedTaskId: string | null,
+    linkedBugKey: string | null
+  ): Promise<void> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query(
+        `UPDATE QATestCases SET "linkedTaskId" = ?, linkedBugKey = ? WHERE id = ? AND projectId = ?`,
+        [linkedTaskId, linkedBugKey, id, projectId]
+      );
+    } finally {
+      connection.release();
+    }
+  }
+
   async saveTestCaseEvidence(
     id: string,
     projectId: string,
@@ -453,6 +477,7 @@ export class QaRepository {
       evidences: any[];
       status: string;
       linkedBugKey: string | null;
+      linkedTaskId?: string | null;
     }
   ): Promise<void> {
     const connection = await db.getConnection();
@@ -466,7 +491,8 @@ export class QaRepository {
           evidenceType = ?,
           evidences = ?,
           status = ?,
-          linkedBugKey = ?
+          linkedBugKey = ?,
+          "linkedTaskId" = COALESCE(?, "linkedTaskId")
          WHERE id = ? AND projectId = ?`,
         [
           data.comment,
@@ -477,6 +503,7 @@ export class QaRepository {
           JSON.stringify(data.evidences),
           data.status,
           data.linkedBugKey,
+          data.linkedTaskId ?? null,
           id,
           projectId,
         ]
@@ -684,8 +711,8 @@ export class QaRepository {
           createdBugKey = taskKey;
 
           await connection.query(
-            "UPDATE QATestCases SET status = ?, linkedBugKey = ? WHERE id = ? AND projectId = ?",
-            [status, createdBugKey, id, projectId]
+            'UPDATE QATestCases SET status = ?, linkedBugKey = ?, "linkedTaskId" = ? WHERE id = ? AND projectId = ?',
+            [status, createdBugKey, bugId, id, projectId]
           );
 
           try {
@@ -771,6 +798,7 @@ export class QaRepository {
             evidenceType = ?,
             evidenceName = ?,
             linkedBugKey = ?,
+            "linkedTaskId" = ?,
             commentsList = ?,
             evidences = ?
            WHERE id = ? AND projectId = ?`,
@@ -795,6 +823,7 @@ export class QaRepository {
               tc.evidenceType || null,
               tc.evidenceName || null,
               tc.linkedBugKey || null,
+              tc.linkedTaskId || null,
               JSON.stringify(tc.commentsList || []),
               JSON.stringify(tc.evidences || []),
               tc.id,
@@ -805,8 +834,8 @@ export class QaRepository {
           await connection.query(
             `INSERT INTO QATestCases (
             id, projectId, judul, deskripsi, tipeTesting, prioritas, caseId, expected, status, steps, history, createdAt, activeTesterId, activeTesterName, lockedAt, modulId,
-            suiteId, rowNum, comment, evidenceUrl, evidenceType, evidenceName, linkedBugKey, commentsList, evidences
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            suiteId, rowNum, comment, evidenceUrl, evidenceType, evidenceName, linkedBugKey, "linkedTaskId", commentsList, evidences
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
               tc.id,
               projectId,
@@ -831,6 +860,7 @@ export class QaRepository {
               tc.evidenceType || null,
               tc.evidenceName || null,
               tc.linkedBugKey || null,
+              tc.linkedTaskId || null,
               JSON.stringify(tc.commentsList || []),
               JSON.stringify(tc.evidences || []),
             ]
@@ -883,8 +913,13 @@ export class QaRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        "SELECT * FROM QATestCases WHERE (linkedBugKey = ? OR linkedBugKey = ?) AND projectId = ?",
-        [taskKey, taskId, projectId]
+        `SELECT * FROM QATestCases
+         WHERE projectId = ?
+           AND (
+             linkedBugKey = ? OR linkedBugKey = ?
+             OR "linkedTaskId" = ? OR "linkedTaskId" = ?
+           )`,
+        [projectId, taskKey, taskId, taskId, taskKey]
       );
       return rows || [];
     } finally {

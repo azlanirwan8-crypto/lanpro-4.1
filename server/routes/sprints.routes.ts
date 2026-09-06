@@ -8,6 +8,7 @@ import { paginationQuerySchema } from "../schemas/pagination.schema";
 import { respondWithProjectList } from "../lib/listResponse";
 import { createSprintSchema, updateSprintSchema } from "../schemas/sprint.schema";
 import { adalahWaterfall } from "../lib/methodology";
+import { adalahSprintAktif } from "../lib/sprintLingkup";
 
 export function setupSprintsRoutes(
   app: Express,
@@ -130,6 +131,11 @@ export function setupSprintsRoutes(
           ? req.body.endDate
           : existing.endDate;
         const finalStatus = req.body.hasOwnProperty("status") ? req.body.status : existing.status;
+
+        // #462 — paling banyak satu sprint aktif per proyek
+        if (adalahSprintAktif(finalStatus)) {
+          await sprintRepository.demoteOtherActives(req.params.projectId, id);
+        }
 
         await sprintRepository.update(id, {
           name: finalName,

@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import React, { useState } from "react";
-import { Mail, AlertCircle, CheckCircle2, ArrowRight } from "lucide-react";
+import { Mail, AlertCircle, CheckCircle2 } from "lucide-react";
 import { cn } from "../../../lib/utils";
 import { Modal } from "../../../components/ui/Modal";
 import { Button } from "../../../components/ui/CoreUI";
@@ -71,13 +71,13 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
             {t("forgotPwd.backToLogin")}
           </Button>
         ) : (
-          <>
+          <div className="flex w-full gap-2">
             <Button
               type="button"
-              variant="secondary"
+              variant="outline"
               onClick={handleModalClose}
               disabled={loading}
-              className="flex-1 justify-center"
+              className="flex-1 justify-center whitespace-nowrap"
             >
               {t("forgotPwd.cancel")}
             </Button>
@@ -85,12 +85,11 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
               type="submit"
               form="forgot-password-form"
               disabled={loading || !email.trim()}
-              className="flex-1 justify-center gap-1.5"
+              className="flex-1 justify-center whitespace-nowrap"
             >
-              <span>{loading ? t("common.sending") : t("forgotPwd.sendLink")}</span>
-              {!loading && <ArrowRight className="w-3.5 h-3.5" />}
+              {loading ? t("common.sending") : t("forgotPwd.sendLink")}
             </Button>
-          </>
+          </div>
         )
       }
     >
@@ -106,9 +105,6 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
           <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
           <div className="text-xs leading-relaxed">
             <p className="font-semibold mb-0.5">{t("forgotPwd.checkInbox")}</p>
-            {/* #121 — Pesan ini SENGAJA netral. Menyebut "berhasil dikirim ke
-                alamat ini" akan mengonfirmasi bahwa alamat itu punya akun,
-                dan membocorkan lagi hal yang baru saja ditutup di backend. */}
             <p className="text-content-muted">
               {t("forgotPwd.fpSentPrefix")} <strong>{email}</strong> {t("forgotPwd.fpSentSuffix")}
             </p>
@@ -118,7 +114,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
         <form id="forgot-password-form" onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-content-body block">
-              {t("forgotPwd.emailAddress")} <span className="text-rose-500">*</span>
+              {t("forgotPwd.emailAddress")} <span className="text-danger-text">*</span>
             </label>
             <input
               type="email"
@@ -132,12 +128,12 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
               className={cn(
                 "w-full px-3.5 py-3 bg-surface-sunken border rounded-lg focus:bg-surface focus:ring-2 transition-all outline-none text-base font-normal text-content placeholder:text-content-subtle",
                 error
-                  ? "border-rose-400 focus:ring-rose-500/20 focus:border-rose-600"
+                  ? "border-danger focus:ring-danger/20 focus:border-danger"
                   : "border-border-subtle focus:ring-primary/20 focus:border-primary"
               )}
             />
             {error && (
-              <p className="text-xs font-medium text-rose-500 flex items-center gap-1 mt-1">
+              <p className="text-xs font-medium text-danger-text flex items-center gap-1 mt-1">
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{error}</span>
               </p>

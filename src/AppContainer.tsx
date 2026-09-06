@@ -35,6 +35,12 @@ import {
   showErrorAlert,
 } from "./lib/sweetalert";
 import { statusSelesai } from "./lib/statusSelesai";
+import { adalahLingkupTerkunci } from "./lib/sprintLingkup";
+import {
+  buatDetailAssignee,
+  buatDetailFieldDiff,
+  buatDetailStatusDiperbarui,
+} from "./features/issues/lib/formatActivityHistory";
 import { useAppStore } from "./store/useAppStore";
 import { CacheManager } from "./lib/cache";
 import { useMasterData } from "./hooks/useMasterData";
@@ -1906,8 +1912,19 @@ function AppContainer() {
     }
 
     suppressSprintDataRefresh(8000);
+    // #462 — satu aktif: turunkan yang lain di UI lebih dulu
     setSprints((prev) =>
-      prev.map((s) => (s.id === sprintId ? { ...s, status: "active" as const } : s))
+      prev.map((s) => {
+        if (s.id === sprintId) return { ...s, status: "active" as const };
+        if (
+          ["active", "in_progress", "ongoing", "in progress"].includes(
+            String(s.status || "").toLowerCase()
+          )
+        ) {
+          return { ...s, status: "planned" as const };
+        }
+        return s;
+      })
     );
     toast.success(t("toast.sprintStarted"));
 
@@ -1984,7 +2001,10 @@ function AppContainer() {
     try {
       if (undoneTasks.length > 0 && targetSprintId !== undefined) {
         const promises = undoneTasks.map((t) =>
-          updateTask(selectedProject.id, t.id, { sprintId: targetSprintId })
+          updateTask(selectedProject.id, t.id, {
+            sprintId: targetSprintId,
+            unlockScope: true,
+          })
         );
         await Promise.all(promises);
       }
@@ -2032,7 +2052,7 @@ function AppContainer() {
 
     try {
       const promises = sprintTasks.map((t) =>
-        updateTask(selectedProject.id, t.id, { sprintId: null })
+        updateTask(selectedProject.id, t.id, { sprintId: null, unlockScope: true })
       );
       await Promise.all(promises);
       await deleteSprint(selectedProject.id, sprintId);
@@ -2080,6 +2100,17 @@ function AppContainer() {
 
       if (!isAuthorizedSprint) {
         toast.error(t("toast.noPermMoveTask"));
+        return;
+      }
+
+      // #461 — cek lingkup di klien (server tetap berwenang)
+      const fromSprint = task.sprintId ? sprints.find((s) => s.id === task.sprintId) : null;
+      const toSprint = sprintId ? sprints.find((s) => s.id === sprintId) : null;
+      if (
+        (fromSprint && adalahLingkupTerkunci(fromSprint.status)) ||
+        (toSprint && adalahLingkupTerkunci(toSprint.status))
+      ) {
+        toast.error(t("toast.sprintScopeLocked"));
         return;
       }
 
@@ -2562,10 +2593,15 @@ function AppContainer() {
         // tidak pernah menyala karena modal edit task tak terjangkau, dan ikut
         // dihapus bersama modalnya.
         const effectiveUserId = currentUser?.uid || user?.uid || "guest";
+        const poinLama = task.storyPoints;
         await updateTask(selectedProject!.id, task.id, { storyPoints: result.points });
         setTasks((prev) =>
           prev.map((t) => (t.id === task.id ? { ...t, storyPoints: result.points } : t))
         );
+        const detailPoin = buatDetailFieldDiff("storyPoints", poinLama, result.points);
+        if (detailPoin) {
+          await logActivity("task_points_updated", detailPoin, task.id);
+        }
       } else {
         throw new Error(t("appShell.aiInvalidResponse"));
       }
@@ -2872,6 +2908,7 @@ function AppContainer() {
           ...suite,
           cases: suite.cases.map((c: any) => {
             if (
+              c.linkedTaskId === taskToUpdate.id ||
               c.linkedBugKey === bugKey ||
               c.linkedBugKey === taskToUpdate.id ||
               c.linkedBugKey === taskToUpdate.key ||
@@ -3175,13 +3212,30 @@ function AppContainer() {
       // Explicit refresh removed to prevent UI freezing. Real-time updates handled by socket.
 
       if (field === "status") {
-        await logActivity("task_status_updated", `Task ${taskId} status updated to ${value}`);
-        // Notify blocked tasks if status is Done
+        // #456 — field-diff before/after; taskId di kolom terpisah
+        const detail =
+          buatDetailFieldDiff("status", taskToUpdate.status, value) ||
+          buatDetailStatusDiperbarui(String(value), taskToUpdate.status);
+        await logActivity("task_status_updated", detail, taskId);
         if (value === "Done") {
           await handleTaskCompletionDependencies(taskId);
         }
       } else if (field === "assigneeId") {
-        await logActivity("task_assigned", `Task ${taskId} assigned to ${value}`);
+        const sebelumnya = taskToUpdate.assigneeId || taskToUpdate.assigneeEmail || null;
+        const detail =
+          buatDetailFieldDiff(
+            "assignee",
+            sebelumnya,
+            value as string | null,
+            projectMembers || []
+          ) || buatDetailAssignee(value as string | null, projectMembers || [], sebelumnya);
+        await logActivity("task_assigned", detail, taskId);
+      } else if (field === "priority") {
+        const detail = buatDetailFieldDiff("priority", taskToUpdate.priority, value);
+        if (detail) await logActivity("task_priority_updated", detail, taskId);
+      } else if (field === "storyPoints") {
+        const detail = buatDetailFieldDiff("storyPoints", taskToUpdate.storyPoints, value);
+        if (detail) await logActivity("task_points_updated", detail, taskId);
       }
 
       if (selectedTaskForDetail?.id === taskId) {
@@ -3856,8 +3910,8 @@ function AppContainer() {
           <div className="absolute inset-0 bg-surface-sunken/50 backdrop-blur-3xl z-[-1]" />
 
           {/* Global Top Header Bar */}
-          {/* #424 — tanpa border-b: PageHeader (border-b) nempel sebagai 1 panel */}
-          <header className="flex items-center justify-between w-full px-4 md:px-5 py-2 bg-surface-raised shrink-0 pl-14 md:pl-5 text-content-strong transition-all z-20">
+          {/* #445 — border-b seperti Velzon: garis antara topbar dan PageHeader */}
+          <header className="flex items-center justify-between w-full px-4 md:px-5 py-2 bg-surface-raised border-b border-border-subtle shrink-0 pl-14 md:pl-5 text-content-strong transition-all z-20">
             <div className="flex items-center gap-3 min-w-0">
               {selectedProject &&
               ![

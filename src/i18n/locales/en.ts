@@ -111,6 +111,10 @@ export const en = {
     "srv.test_case_deleted": "Test case deleted",
     "srv.body_must_be_an": "The request body must be an array",
     "srv.sprint_tidak_ditemukan": "Sprint not found",
+    "srv.sprint_lingkup_terkunci":
+      "Sprint scope is locked (active/completed). Move tasks when completing the sprint, or set the sprint back to planned.",
+    "srv.sprint_lingkup_terkunci_tujuan":
+      "Cannot add tasks to an active or completed sprint (scope lock).",
     "srv.sprint_updated": "Sprint updated",
     "srv.sprint_deleted": "Sprint deleted",
     "srv.migrasi_database_berhasil_dijalankan":
@@ -128,6 +132,10 @@ export const en = {
     "srv.user_not_found": "User not found",
     "srv.user_updated": "User updated",
     "srv.user_deleted": "User deleted",
+    "srv.akses_ditolak_status_hanya_admin": "Only an administrator can change account status.",
+    "srv.tidak_bisa_ubah_status_akun_sendiri": "You cannot change your own account status.",
+    "srv.rekaman_tidak_bisa_diubah_ke_mp3":
+      "The WebM/MP4 recording could not be converted to MP3. Install FFmpeg on the server, or upload an MP3 file.",
     "srv.tidak_bisa_hapus_akun_sendiri": "You cannot delete your own account.",
     "srv.tidak_bisa_hapus_admin_terakhir": "Cannot delete the last remaining administrator.",
     "srv.sesi_tidak_valid": "Invalid session.",
@@ -154,6 +162,10 @@ export const en = {
     "srv.alamat_email_tidak_valid": "Invalid email address.",
     "srv.bila_alamat_email_itu":
       "If that email address is registered, a password reset link has been sent to it. The link is valid for 15 minutes.",
+    "srv.email_tidak_terdaftar_lupa_sandi":
+      "This email address is not registered. Check the spelling or contact an admin if you believe you have an account.",
+    "srv.kata_sandi_sementara_dikirim":
+      "A temporary password has been sent to your email. Check your inbox (and spam). It is valid for 2 hours.",
     "srv.token_pengaturan_ulang_kata": "The password reset token is invalid or missing.",
     "srv.token_pengaturan_ulang_kata_2":
       "The password reset token has expired or is invalid. Please request a new one.",
@@ -687,6 +699,8 @@ export const en = {
     sprintUpdateFailed: "Failed to update sprint: ",
     noPermStartSprint: "You do not have permission to start a sprint.",
     sprintStarted: "Sprint successfully started.",
+    sprintScopeLocked:
+      "Sprint scope is locked (active/completed). Complete the sprint to move remaining work, or set it back to planned.",
     noPermCompleteSprint: "You do not have permission to complete a sprint.",
     completingSprint: "Completing sprint...",
     deletingSprint: "Deleting sprint...",
@@ -757,6 +771,7 @@ export const en = {
     kanbanBoard: "Kanban Board",
     qualityAssessment: "Quality Assessment",
     roadmapTimeline: "Roadmap & Timeline",
+    roadmapTimelineWaterfall: "Roadmap & Milestones",
     team: "Team",
     administration: "Administration",
     masterData: "Master Data",
@@ -810,7 +825,8 @@ export const en = {
     viewDoneListLink: "View done list",
     sprintOverview: "Sprint Progress & Velocity Overview",
     burndownTitle: "Active sprint burndown",
-    burndownHint: "Remaining tasks vs ideal line. Completion date approximated from updatedAt.",
+    burndownHint:
+      "Remaining work vs ideal line (story points when set, otherwise task count). Completion date approximated from updatedAt.",
     burndownIdeal: "Ideal",
     burndownActual: "Actual (remaining)",
     throughputTitle: "Weekly throughput",
@@ -1387,6 +1403,7 @@ export const en = {
     title: "Kanban Board",
     subtitle: "Drag cards across status columns. Group by epic or assignee.",
     dragHandle: "Drag card",
+    wipCount: "{{count}} / {{limit}} WIP",
   },
   flowchart: {
     breadcrumbGroup: "PROJECT",
@@ -1546,7 +1563,7 @@ export const en = {
     terminate: "Terminate Project (Permanent Delete)",
   },
   editSprint: {
-    title: "Edit Phase",
+    title: "Edit Sprint",
     name: "Name",
     startDate: "Start Date",
     endDate: "End Date",
@@ -1752,7 +1769,7 @@ export const en = {
     actionImportedCount: "Imported {{count}} action items into the official Discussion Points.",
     statusChanged: "Status changed to {{status}}",
     cannotSignIn: "Cannot Sign In",
-    completeSprintTitle: "Complete Phase?",
+    completeSprintTitle: "Complete Sprint?",
     completeSprintText:
       'Are you sure you want to complete "{{name}}"? Choose what happens to unfinished tasks.',
     sprintUndoneToBacklog: "Move open tasks to backlog",
@@ -1760,11 +1777,11 @@ export const en = {
     sprintNoNext: "No next sprint (planned/active)",
     sprintUndoneLeave: "Leave tasks on this sprint",
     yesCompleteSprint: "Yes, complete",
-    sprintCompleted: 'Phase "{{name}}" completed successfully.',
-    deleteSprintTitle: "Delete Phase?",
-    deleteSprintText: "Are you sure you want to delete this phase? {{extra}}",
+    sprintCompleted: 'Sprint "{{name}}" completed successfully.',
+    deleteSprintTitle: "Delete Sprint?",
+    deleteSprintText: "Are you sure you want to delete this sprint? {{extra}}",
     deleteSprintExtra: "{{count}} tasks inside it will be moved back to the backlog.",
-    sprintDeleted: "Phase deleted successfully.",
+    sprintDeleted: "Sprint deleted successfully.",
     deleteAttachmentTitle: "Delete Attachment?",
     deleteAttachmentText: 'Are you sure you want to delete the attachment "{{name}}"?',
     attachmentDeleted: "Attachment deleted successfully.",
@@ -1773,7 +1790,7 @@ export const en = {
     taskLinkDeleted: "Task relationship deleted successfully.",
     deleteProjectTitle: "Delete Project Permanently?",
     deleteProjectText:
-      'You are about to PERMANENTLY delete "{{name}}" along with ALL of its data (tasks, comments, phases, logs). This action cannot be undone.',
+      'You are about to PERMANENTLY delete "{{name}}" along with ALL of its data (tasks, comments, sprints, logs). This action cannot be undone.',
     projectDeleted: 'Project "{{name}}" and all related data have been deleted successfully.',
     taskDeleted: 'Task "{{title}}" has been deleted successfully.',
     deleteSuiteText: 'Test suite "{{name}}" will be permanently deleted and cannot be recovered!',
@@ -1864,7 +1881,7 @@ export const en = {
     createSprint: "Create New Sprint",
     issueCount: "{{count}} Issues",
     allPriorities: "All Priorities",
-    untitledSprint: "Untitled Phase",
+    untitledSprint: "Untitled Sprint",
     sprintEmptyDrag:
       "No tasks in this sprint yet. Drag tasks from the Backlog on the left to here.",
     issues: "Issues",
@@ -1886,6 +1903,9 @@ export const en = {
     deleteSprint: "Delete Sprint",
     progress: "Progress",
     completed: "Completed",
+    active: "Active",
+    planned: "Planned",
+    scopeLocked: "Scope locked",
     standaloneTasks: "Standalone tasks",
   },
   roadmap: {
@@ -2024,6 +2044,8 @@ export const en = {
     startRecording: "Start recording",
     micLevelHint: "Speak now — this bar must move if the microphone is capturing audio.",
     ffmpegFailed: "FFmpeg failed to extract audio.",
+    clientTranscodeFallback:
+      "Browser could not convert the recording; uploading the original file for server FFmpeg…",
     recordingRetentionNote:
       "Recordings are used for analysis only. After minutes succeed, the audio/video file is deleted; analysis results are kept.",
     processingTitle: "Preparing temporary file...",
@@ -2601,14 +2623,14 @@ export const en = {
     allPic: "All PIC",
   },
   newSprint: {
-    title: "Create New Phase",
-    name: "Phase Name",
-    namePlaceholder: "e.g. Phase 1 - Foundation",
-    goal: "Phase Goal",
+    title: "Create New Sprint",
+    name: "Sprint Name",
+    namePlaceholder: "e.g. Sprint 1 - Foundation",
+    goal: "Sprint Goal",
     goalPlaceholder: "What do you want to achieve in this sprint?",
     startDate: "Start Date",
     endDate: "End Date",
-    createAssign: "Create Phase & Assign Tasks",
+    createAssign: "Create Sprint & Assign Tasks",
   },
   activityLog: {
     title: "System Audit Log",
@@ -2969,12 +2991,11 @@ export const en = {
     emailPlaceholder: "name@company.com",
     cancel: "Cancel",
     fpIntro:
-      "Enter your account email address. We will send a link to reset your password. The link is valid for 15 minutes.",
-    fpSentPrefix: "If",
-    fpSentSuffix:
-      "is registered, a password reset link has been sent there. The link is valid for 15 minutes.",
+      "Enter your account email. We will send a temporary password to that address. It is valid for 2 hours; after you sign in you must set a new password.",
+    fpSentPrefix: "A temporary password has been sent to",
+    fpSentSuffix: "(valid for 2 hours). Check spam too.",
     emailAddress: "Email address",
-    sendLink: "Send link",
+    sendLink: "Send password",
   },
   nodeMenu: {
     title: "Component Actions",
@@ -2995,6 +3016,7 @@ export const en = {
   issueQuick: {
     add: "Add",
     placeholder: "What needs to be done? Type and press Enter to save...",
+    pickType: "Issue type",
   },
   ui: {
     loading: "Loading...",

@@ -502,6 +502,32 @@ section('6. Penyimpanan berkas unggahan');
     }
   }
 
+  // ── 9. FFmpeg (AI Meeting Notes #320) ─────────────────────────────
+  //
+  // Jalur live rekaman WebM → Gemini membutuhkan `ffmpeg` di PATH server.
+  // Tanpa itu, analisis gagal dengan pesan yang terlihat seperti bug AI,
+  // bukan ketiadaan binary. Pemeriksaan ini WARN (bukan GAGAL): aplikasi
+  // tetap jalan tanpa Meeting AI, dan Windows lokal sering belum memasang
+  // FFmpeg.
+  section('9. FFmpeg (transcode rekaman Meeting AI)');
+
+  try {
+    const { execSync } = require('child_process');
+    const out = execSync('ffmpeg -version', {
+      encoding: 'utf8',
+      timeout: 5000,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const baris = String(out).split('\n')[0] || 'ffmpeg';
+    ok('ffmpeg tersedia di PATH', baris.slice(0, 80));
+  } catch {
+    warn(
+      'ffmpeg tidak ditemukan di PATH',
+      'Item #320: rekaman live WebM/MP4 gagal dianalisis sampai FFmpeg terpasang. ' +
+        'Pasang dari https://ffmpeg.org lalu pastikan `ffmpeg -version` jalan di shell yang sama'
+    );
+  }
+
   // ── Ringkasan ───────────────────────────────────────────────────
   console.log('\n' + '─'.repeat(58));
   if (failed === 0 && warned === 0) {

@@ -379,13 +379,30 @@ export function TestQAPanel({
     );
     if (!isConfirmed) return;
 
+    // #444 — sebelumnya hanya localStorage; server tetap punya baris.
+    const gagal: string[] = [];
+    for (const caseId of selectedCaseIds) {
+      try {
+        const res = await deleteCase(selectedProject.id, caseId);
+        if (!res.ok) gagal.push(caseId);
+      } catch {
+        gagal.push(caseId);
+      }
+    }
+
     const updatedSuites = suites.map((suite) => ({
       ...suite,
-      cases: suite.cases.filter((c) => !selectedCaseIds.includes(c.id)),
+      cases: suite.cases.filter((c) => !selectedCaseIds.includes(c.id) || gagal.includes(c.id)),
     }));
     saveSuitesToStorage(updatedSuites);
     setSelectedCaseIds([]);
-    showSuccessAlert("Berhasil!", `${selectedCaseIds.length} test case berhasil dihapus.`);
+    if (gagal.length === 0) {
+      showSuccessAlert("Berhasil!", `${selectedCaseIds.length} test case berhasil dihapus.`);
+    } else {
+      toast.error(
+        `${selectedCaseIds.length - gagal.length} terhapus, ${gagal.length} gagal di server.`
+      );
+    }
   };
 
   // Add Suite Handler
@@ -599,10 +616,25 @@ export function TestQAPanel({
 
       if (response && response.status === "success") {
         const createdKey = response.data.key || `BUG-${Date.now()}`;
+        const createdTaskId = response.data.id || response.data.taskId || null;
+        try {
+          await updateCase(selectedProject.id, bugModalTestCase.id, {
+            linkedBugKey: createdKey,
+            linkedTaskId: createdTaskId,
+          });
+        } catch (_) {
+          /* taut lokal tetap; server bisa diulang */
+        }
         const updatedSuites = suites.map((s) => ({
           ...s,
           cases: s.cases.map((c) =>
-            c.id === bugModalTestCase.id ? { ...c, linkedBugKey: createdKey } : c
+            c.id === bugModalTestCase.id
+              ? {
+                  ...c,
+                  linkedBugKey: createdKey,
+                  linkedTaskId: createdTaskId,
+                }
+              : c
           ),
         }));
         saveSuitesToStorage(updatedSuites);

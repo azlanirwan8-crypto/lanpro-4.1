@@ -1,10 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { confirmDeleteAlert, showSuccessAlert } from "../../lib/sweetalert";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import {
   Plus,
   Trash2,
-  ChevronLeft,
   Edit2,
   MessageSquare,
   Calendar,
@@ -16,6 +15,7 @@ import {
   X,
   Eye,
   Download,
+  ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -31,7 +31,6 @@ import {
   type PeranEfektif,
   type UserPermissions,
 } from "../../types";
-import { DiscussionPointsTable } from "./DiscussionPointsTable";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { downloadMeetingFile, resolveUserId } from "./services/meeting.service";
 import { hasPermission } from "../../lib/permissions";
@@ -41,6 +40,7 @@ import { LanproTimePicker } from "../../components/ui/LanproTimePicker";
 import { MeetingMobileCardView } from "./components/MeetingMobileCardView";
 import { useMobileAction } from "../../contexts/MobileActionContext";
 import { PageHeader } from "../../components/ui/PageHeader";
+import { DetailViewChrome } from "../../components/ui/DetailViewChrome";
 import {
   ListPageShell,
   LIST_SEARCH_INPUT_CLASS,
@@ -53,6 +53,16 @@ import {
   writeProjectMeetings,
   invalidateProjectMeetings,
 } from "../../lib/moduleDataCache";
+import { lazyWithRetry } from "../../lib/lazyWithRetry";
+
+/**
+ * #460 — DiscussionPointsTable (beserta AI/FFmpeg di dalamnya)
+ * hanya dibutuhkan di detail. Impor statis membuat daftar ikut menunggu
+ * chunk FFmpeg dan bisa meninggalkan area utama putih.
+ */
+const DiscussionPointsTable = lazyWithRetry(() =>
+  import("./DiscussionPointsTable").then((m) => ({ default: m.DiscussionPointsTable }))
+);
 
 interface MeetingNotesProps {
   projectId: string;
@@ -211,6 +221,10 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   }, [searchQuery, projectId]);
 
   useEffect(() => {
+    setActiveMeetingId(null);
+  }, [projectId]);
+
+  useEffect(() => {
     fetchMeetings();
     if (projectMembers.length > 0) {
       setUsers(projectMembers);
@@ -222,6 +236,15 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
   useEffect(() => {
     setWorkspaceTab("manual");
   }, [activeMeetingId]);
+
+  // #460 — ID detail basi (hapus / halaman berubah / cache tidak punya baris)
+  // sebelumnya merender `null` → area utama putih tanpa PageHeader.
+  useEffect(() => {
+    if (loading || activeMeetingId === null) return;
+    if (!meetings.some((m) => m.id === activeMeetingId)) {
+      setActiveMeetingId(null);
+    }
+  }, [loading, activeMeetingId, meetings]);
 
   const fetchUsers = async () => {
     try {
@@ -586,6 +609,15 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                         {t("meetings.emptyTitle")}
                       </p>
                       <p className="text-xs text-content-subtle mt-1">{t("meetings.emptyHint")}</p>
+                      {canAdd && (
+                        <button
+                          type="button"
+                          onClick={startAddMeeting}
+                          className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium shadow-xs cursor-pointer"
+                        >
+                          <Plus className="w-4 h-4" /> {t("meetings.addMeeting")}
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ) : (
@@ -769,54 +801,19 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
             <div className="flex-1 flex flex-col min-h-0 bg-surface-sunken/50 w-full">
               {activeMeeting ? (
                 <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 md:p-6 space-y-4">
-                  {/* #425 — satu panel: aksi kiri + meta */}
-                  <div className="bg-surface border border-border-subtle/80 rounded-lg p-4 md:p-5 shadow-2xs shrink-0 space-y-4">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button
-                        onClick={() => setActiveMeetingId(null)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken rounded-md text-xs font-medium text-content-body transition-all cursor-pointer shadow-2xs"
-                      >
-                        <ChevronLeft className="w-4 h-4" /> {t("meetings.backToList")}
-                      </button>
-                      {(isUserAdmin || isMeetingAuthor(activeMeeting)) && (
-                        <button
-                          onClick={() => startEdit(activeMeeting)}
-                          className="px-3.5 py-1.5 bg-surface border border-border-subtle hover:bg-surface-sunken text-content-body rounded-md text-xs font-medium transition-all cursor-pointer shadow-2xs flex items-center gap-1.5"
-                        >
-                          <Edit2 className="w-3.5 h-3.5 text-primary" /> {t("meetings.edit")}
-                        </button>
-                      )}
-                      {canDeleteMeeting(activeMeeting) && (
-                        <button
-                          onClick={() => handleDeleteMeeting(activeMeeting.id!)}
-                          className="px-3 py-1.5 bg-rose-500/10 hover:bg-rose-500/15 text-rose-700 rounded-md text-xs font-medium transition-all cursor-pointer border border-rose-500/30 flex items-center gap-1.5"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" /> {t("meetings.delete")}
-                        </button>
-                      )}
-                      {activeMeeting.meetingLink && (
-                        <a
-                          href={
-                            activeMeeting.meetingLink.startsWith("http")
-                              ? activeMeeting.meetingLink
-                              : `https://${activeMeeting.meetingLink}`
-                          }
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer ml-auto"
-                        >
-                          <Video className="w-3.5 h-3.5" /> {t("rakit.joinMeeting")}{" "}
-                          <ExternalLink className="w-3 h-3 opacity-80" />
-                        </a>
-                      )}
-                    </div>
-
-                    <div>
-                      <h2 className="text-lg font-semibold text-content-strong tracking-tight">
-                        {activeMeeting.title}
-                      </h2>
-
-                      {activeMeeting.description && (
+                  {/* #425 — DetailViewChrome: Back+Edit+Delete kiri, judul Velzon 15px */}
+                  <DetailViewChrome
+                    backLabel={t("meetings.backToList")}
+                    onBack={() => setActiveMeetingId(null)}
+                    title={activeMeeting.title}
+                    canEdit={isUserAdmin || isMeetingAuthor(activeMeeting)}
+                    canDelete={canDeleteMeeting(activeMeeting)}
+                    onEdit={() => startEdit(activeMeeting)}
+                    onDelete={() => handleDeleteMeeting(activeMeeting.id!)}
+                    editTitle={t("meetings.edit")}
+                    deleteTitle={t("meetings.delete")}
+                    description={
+                      activeMeeting.description ? (
                         <div className="mt-3 p-4 border border-primary/30 bg-primary/10 rounded-lg border-l-4 border-l-primary flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <span className="text-xs font-medium text-primary block mb-1">
@@ -834,6 +831,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                           </div>
                           {activeMeeting.fileName && (
                             <button
+                              type="button"
                               onClick={() =>
                                 handleDownloadMeeting(activeMeeting.id!, activeMeeting.fileName!)
                               }
@@ -850,24 +848,78 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                             </button>
                           )}
                         </div>
-                      )}
-                    </div>
-                  </div>
+                      ) : undefined
+                    }
+                    trailing={
+                      activeMeeting.meetingLink ? (
+                        <a
+                          href={
+                            activeMeeting.meetingLink.startsWith("http")
+                              ? activeMeeting.meetingLink
+                              : `https://${activeMeeting.meetingLink}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium transition-all shadow-xs cursor-pointer"
+                        >
+                          <Video className="w-3.5 h-3.5" /> {t("rakit.joinMeeting")}{" "}
+                          <ExternalLink className="w-3 h-3 opacity-80" />
+                        </a>
+                      ) : undefined
+                    }
+                  />
 
-                  {/* Discussion Points Table */}
+                  {/* Discussion Points Table — lazy (#460): FFmpeg/AI tidak masuk chunk daftar */}
                   <div className="flex-1 flex flex-col min-h-0">
-                    <DiscussionPointsTable
-                      projectId={projectId}
-                      meetingId={activeMeeting.id!}
-                      userRole={userRole}
-                      currentUser={currentUser}
-                      permissions={permissions}
-                      projectMembers={projectMembers}
-                      masterData={masterData}
-                    />
+                    <Suspense
+                      fallback={
+                        <div className="flex-1 flex flex-col items-center justify-center p-8">
+                          <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
+                          <p className="mt-3 text-sm text-content-muted">{t("appShell.loading")}</p>
+                        </div>
+                      }
+                    >
+                      <DiscussionPointsTable
+                        projectId={projectId}
+                        meetingId={activeMeeting.id!}
+                        userRole={userRole}
+                        currentUser={currentUser}
+                        permissions={permissions}
+                        projectMembers={projectMembers}
+                        masterData={masterData}
+                      />
+                    </Suspense>
                   </div>
                 </div>
-              ) : null}
+              ) : (
+                /* #460 — jangan `null`: putih tanpa chrome saat ID basi / masih memuat */
+                <div className="flex-1 flex flex-col items-center justify-center gap-3 p-8 text-center">
+                  {loading ? (
+                    <>
+                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-border-subtle border-t-primary" />
+                      <p className="text-sm text-content-muted">{t("appShell.loading")}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-medium text-content-strong text-sm">
+                        {t("meetings.emptyTitle")}
+                      </p>
+                      <p className="text-xs text-content-subtle">{t("meetings.emptyHint")}</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveMeetingId(null);
+                          setMobileViewMode("list");
+                        }}
+                        className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse rounded-md text-xs font-medium shadow-xs cursor-pointer"
+                      >
+                        <ArrowLeft className="w-3.5 h-3.5" />
+                        {t("meetings.backToList")}
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

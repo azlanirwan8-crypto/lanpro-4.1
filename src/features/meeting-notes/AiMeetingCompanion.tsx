@@ -211,6 +211,8 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
   const recordingStartedAtRef = useRef(0);
   const meterStopRef = useRef<(() => void) | null>(null);
   const liveStreamRef = useRef<MediaStream | null>(null);
+  /** True hanya setelah unggah sukses memicu pipeline server — cegah poll FAILED basi (#447). */
+  const sesiPipelineRef = useRef(false);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | undefined;
@@ -344,26 +346,41 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       await ffmpeg.load();
       await ffmpeg.writeFile(file.name, await fetchFile(file));
 
-      // Extract audio to mp3
       const outputFileName = "extracted_audio.mp3";
-      // -vn: no video, -acodec libmp3lame: mp3 codec, -ar 16000: 16khz (sufficient for voice), -ac 1: mono (sufficient for voice)
-      // -map a: ensures we only take the audio stream, fails if none
-      const exitCode = await ffmpeg.exec([
-        "-i",
-        file.name,
-        "-vn",
-        "-acodec",
-        "libmp3lame",
-        "-ar",
-        "16000",
-        "-ac",
-        "1",
-        "-map",
-        "a",
-        outputFileName,
-      ]);
+      // Percobaan 1: -vn + -map a (video). Percobaan 2: tanpa keduanya (webm audio-only live).
+      const percobaanArgumen: string[][] = [
+        [
+          "-i",
+          file.name,
+          "-vn",
+          "-acodec",
+          "libmp3lame",
+          "-ar",
+          "16000",
+          "-ac",
+          "1",
+          "-map",
+          "a",
+          outputFileName,
+        ],
+        ["-i", file.name, "-acodec", "libmp3lame", "-ar", "16000", "-ac", "1", outputFileName],
+      ];
 
-      if (exitCode !== 0) {
+      let berhasil = false;
+      for (const args of percobaanArgumen) {
+        try {
+          await ffmpeg.deleteFile(outputFileName);
+        } catch {
+          /* belum ada */
+        }
+        const exitCode = await ffmpeg.exec(args);
+        if (exitCode === 0) {
+          berhasil = true;
+          break;
+        }
+      }
+
+      if (!berhasil) {
         throw new Error(t("aiMeeting.ffmpegFailed"));
       }
 
@@ -373,9 +390,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       return new File([audioBlob], outputFileName, { type: "audio/mp3" });
     } catch (error) {
       console.error("Audio extraction failed:", error);
-      throw new Error(
-        "Gagal mengekstrak audio. Pastikan file video memiliki track audio atau format tidak rusak."
-      );
+      throw error instanceof Error ? error : new Error(t("aiMeeting.ffmpegFailed"));
     }
   };
 
@@ -391,15 +406,17 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
     }
 
     let fileToUpload = file;
+    sesiPipelineRef.current = false;
 
-    // Gemini menolak audio/webm live. Video dan webm/m4a → MP3 dulu (#320).
+    // Gemini menolak audio/webm live. Coba MP3 di klien; gagal → unggah mentah, server FFmpeg (#447).
     if (rekamanPerluTranscodeKeMp3(file)) {
       try {
         fileToUpload = await extractAudioFromVideo(file);
       } catch (err: unknown) {
-        const pesan = err instanceof Error ? err.message : String(err);
-        toast.error(pesan);
-        return;
+        console.warn("[#447] FFmpeg klien gagal; unggah mentah ke server:", err);
+        toast.info(t("aiMeeting.clientTranscodeFallback"));
+        fileToUpload = file;
+        setUploadState("IDLE");
       }
     }
 
@@ -444,7 +461,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
                 // Calculate the overall progress of the entire file
                 const chunkProgress = progressEvent.loaded / progressEvent.total;
                 const overallUploadedBytes = start + chunkProgress * (end - start);
-                const percentage = Math.round((overallUploadedBytes * 100) / file.size);
+                const percentage = Math.round((overallUploadedBytes * 100) / fileToUpload.size);
 
                 setUploadPercentage(percentage);
                 setUploadedBytes(Math.round(overallUploadedBytes));
@@ -465,6 +482,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
           (lastResponse.data && lastResponse.data.status === "success"))
       ) {
         setUploadState("PROCESSING_AI");
+        sesiPipelineRef.current = true;
         toast.success(t("toast.recordingUploaded"));
         toast.loading(t("toast.extractingAudio"), {
           id: "ai-analyze-toast",
@@ -474,10 +492,12 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
         }, 3000);
       } else {
         setUploadState("IDLE");
+        sesiPipelineRef.current = false;
         toast.error(lastResponse?.data?.message || "Gagal memproses rekaman.");
       }
     } catch (err: any) {
       setUploadState("IDLE");
+      sesiPipelineRef.current = false;
       console.error("Error uploading file:", err);
       toast.error(t("toast.uploadFailed") + (err.response?.data?.message || err.message));
     } finally {
@@ -536,6 +556,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
       setUploadState("IDLE");
       setUploadPercentage(0);
       setUploading(false);
+      sesiPipelineRef.current = false;
       toast.success(t("toast.processingCancelled"));
     } catch (err: any) {
       console.error("Cancel processing error:", err);
@@ -629,6 +650,7 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
           setUploadPercentage(100);
           setUploadState("IDLE");
           setUploading(false);
+          sesiPipelineRef.current = false;
           toast.success(t("toast.minutesSynced"));
           setActiveTab("summary");
         }
@@ -641,14 +663,16 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
           setUploadPercentage(0);
           setUploadState("IDLE");
           setUploading(false);
+          sesiPipelineRef.current = false;
         }
       });
     }
 
-    // 2. Short-polling fallback to guarantee UI sync even with network glitches (polling every 3 seconds)
+    // 2. Short-polling fallback — hanya setelah unggah memicu pipeline (#447)
     let pollInterval: NodeJS.Timeout | null = null;
 
-    const isProcessingState = uploadState !== "IDLE" && uploadState !== "IS_UPLOADING";
+    const isProcessingState =
+      sesiPipelineRef.current && uploadState !== "IDLE" && uploadState !== "IS_UPLOADING";
 
     if (isProcessingState) {
       pollInterval = setInterval(async () => {
@@ -678,19 +702,30 @@ export const AiMeetingCompanion: React.FC<AiMeetingCompanionProps> = ({
               setUploadPercentage(100);
               setUploadState("IDLE");
               setUploading(false);
+              sesiPipelineRef.current = false;
               toast.success(t("toast.minutesLoaded"));
               setActiveTab("summary");
               if (pollInterval) clearInterval(pollInterval);
             } else if (status === "FAILED") {
-              toast.error(t("toast.autoAnalysisFailed"));
+              const detail =
+                typeof mData.message === "string" && mData.message.trim()
+                  ? mData.message
+                  : undefined;
+              toast.error(
+                detail
+                  ? t("toast.meetingAnalysisFailed", { pesan: detail })
+                  : t("toast.autoAnalysisFailed")
+              );
               setUploadPercentage(0);
               setUploadState("IDLE");
               setUploading(false);
+              sesiPipelineRef.current = false;
               if (pollInterval) clearInterval(pollInterval);
             } else if (status === "IDLE") {
               setUploadPercentage(0);
               setUploadState("IDLE");
               setUploading(false);
+              sesiPipelineRef.current = false;
               if (pollInterval) clearInterval(pollInterval);
             }
           }

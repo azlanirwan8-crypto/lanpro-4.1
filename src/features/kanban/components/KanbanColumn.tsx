@@ -18,19 +18,36 @@ interface KanbanColumnProps {
   columnId?: string;
   showHeader?: boolean;
   shakingTaskId?: string | null;
+  /** #455 — batas WIP lunak (peringatan visual; tidak memblokir DnD). */
+  wipLimit?: number;
 }
 
+/** Default WIP lunak per kolom (#455). */
+export const DEFAULT_KANBAN_WIP_LIMIT = 8;
+
 export const KanbanColumn = React.memo<KanbanColumnProps>(
-  ({ status, tasks, mArr, pArr, onTaskClick, columnId, showHeader = true, shakingTaskId }) => {
+  ({
+    status,
+    tasks,
+    mArr,
+    pArr,
+    onTaskClick,
+    columnId,
+    showHeader = true,
+    shakingTaskId,
+    wipLimit = DEFAULT_KANBAN_WIP_LIMIT,
+  }) => {
     const { t } = useTranslation();
     const { density } = useAppStore();
     const isCompact = density === "compact";
+    const overWip = typeof wipLimit === "number" && wipLimit > 0 && tasks.length > wipLimit;
 
     return (
       <div
         className={cn(
           "shrink-0 flex flex-col h-full rounded-md transition-all duration-200 group/col relative bg-surface-muted/50 border border-border-subtle/70",
-          isCompact ? "w-[240px]" : "w-[270px]"
+          isCompact ? "w-[240px]" : "w-[270px]",
+          overWip && "border-warning/50"
         )}
       >
         {showHeader && (
@@ -50,8 +67,20 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
               )}
               <span className="text-xs font-normal text-content-strong">{status.label}</span>
             </div>
-            <span className="bg-surface-muted text-content-secondary px-2 py-0.5 rounded-md text-[10px] font-normal border border-border-subtle/60">
-              {tasks.length}
+            <span
+              className={cn(
+                "px-2 py-0.5 rounded-md text-[10px] font-normal border",
+                overWip
+                  ? "bg-warning/15 text-warning-text border-warning/40"
+                  : "bg-surface-muted text-content-secondary border-border-subtle/60"
+              )}
+              title={
+                wipLimit > 0
+                  ? t("kanban.wipCount", { count: tasks.length, limit: wipLimit })
+                  : String(tasks.length)
+              }
+            >
+              {wipLimit > 0 ? `${tasks.length}/${wipLimit}` : tasks.length}
             </span>
           </div>
         )}

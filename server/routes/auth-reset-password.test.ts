@@ -76,24 +76,21 @@ describe("Auth Routes - Forgot Password & Reset Password (Item #27)", () => {
     });
 
     /**
-     * #121 — Balasan untuk alamat yang TIDAK terdaftar harus sama persis dengan
-     * balasan untuk yang terdaftar. Versi lama menjawab 404 "tidak terdaftar",
-     * yang mengubah formulir ini jadi alat untuk menguji satu per satu apakah
-     * sebuah email punya akun di sini.
+     * #451 — keputusan pemilik: email tidak terdaftar → 404 eksplisit
+     * (membatalkan balasan netral #121 untuk alur sandi sementara).
      */
-    it("membalas netral tanpa membocorkan apakah email terdaftar", async () => {
+    it("menolak dengan pesan jelas bila email tidak terdaftar", async () => {
       mockKueri.mockResolvedValueOnce([[]]); // tidak ada pengguna
 
       const res = await request(buatApp())
         .post("/api/auth/forgot-password")
         .send({ email: "unknown@lanpro.my.id" });
 
-      expect(res.status).toBe(200);
-      expect(res.body.status).toBe("success");
-      expect(res.body.message).toContain("Bila alamat email terdaftar");
-      expect(res.body.message).not.toContain("tidak terdaftar dalam sistem");
+      expect(res.status).toBe(404);
+      expect(res.body.status).toBe("error");
+      expect(res.body.code).toBe("srv.email_tidak_terdaftar_lupa_sandi");
+      expect(res.body.message).toMatch(/tidak terdaftar/i);
 
-      // Tidak ada email apa pun yang dikirim ke alamat yang tidak dikenal.
       expect(kirimEmailResetPassword).not.toHaveBeenCalled();
       expect(kirimEmailPasswordBaru).not.toHaveBeenCalled();
     });
@@ -110,9 +107,16 @@ describe("Auth Routes - Forgot Password & Reset Password (Item #27)", () => {
         displayName: "Member Satu",
       };
 
+      const tokenLama = jwt.sign({ id: "usr-100", email: "member@lanpro.my.id" }, getJwtSecret(), {
+        expiresIn: "1h",
+      });
+
       mockKueri
         .mockResolvedValueOnce([[mockUser]]) // findUserByEmail
-        .mockResolvedValueOnce([{ affectedRows: 1 }]); // updateUserPassword
+        .mockResolvedValueOnce([[{ id: "usr-100" }]]) // setTemporaryPassword RETURNING
+        .mockResolvedValueOnce([[{ currentSessionToken: tokenLama }]]) // findSessionData
+        .mockResolvedValueOnce([]) // addToTokenBlacklist INSERT
+        .mockResolvedValueOnce([]); // clearSessionToken UPDATE
 
       const res = await request(buatApp())
         .post("/api/auth/forgot-password")
@@ -120,7 +124,8 @@ describe("Auth Routes - Forgot Password & Reset Password (Item #27)", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.status).toBe("success");
-      expect(res.body.message).toContain("Bila alamat email terdaftar");
+      expect(res.body.code).toBe("srv.kata_sandi_sementara_dikirim");
+      expect(res.body.message).toMatch(/Kata sandi sementara/i);
 
       // Jalur kata sandi sementara baru dipanggil
       expect(kirimEmailPasswordBaru).toHaveBeenCalledTimes(1);
@@ -130,6 +135,13 @@ describe("Auth Routes - Forgot Password & Reset Password (Item #27)", () => {
       expect(arg.temporaryPassword).toBeDefined();
       expect(typeof arg.temporaryPassword).toBe("string");
       expect(arg.temporaryPassword.length).toBeGreaterThanOrEqual(8);
+
+      // #448 — sesi DB dicabut + JWT lama masuk denylist
+      const sqlSemua = mockKueri.mock.calls.map((c) => String(c[0]));
+      expect(sqlSemua.some((s) => s.includes("TokenBlacklist"))).toBe(true);
+      expect(sqlSemua.some((s) => /currentSessionToken\s*=\s*NULL/i.test(s))).toBe(true);
+      // #451 — tidak menulis kolom password yang tidak ada di skema
+      expect(sqlSemua.some((s) => /SET[\s\S]*\bpassword\s*=/i.test(s))).toBe(false);
     });
   });
 

@@ -113,6 +113,10 @@ export const id = {
     "srv.test_case_deleted": "Kasus uji dihapus",
     "srv.body_must_be_an": "Body permintaan harus berupa array",
     "srv.sprint_tidak_ditemukan": "Fase tidak ditemukan",
+    "srv.sprint_lingkup_terkunci":
+      "Lingkup sprint terkunci (aktif/selesai). Pindahkan tugas saat menutup sprint, atau kembalikan sprint ke planned.",
+    "srv.sprint_lingkup_terkunci_tujuan":
+      "Tidak bisa menambah tugas ke sprint yang sedang aktif atau sudah selesai (penguncian lingkup).",
     "srv.sprint_updated": "Fase diperbarui",
     "srv.sprint_deleted": "Fase dihapus",
     "srv.migrasi_database_berhasil_dijalankan":
@@ -130,6 +134,11 @@ export const id = {
     "srv.user_not_found": "Pengguna tidak ditemukan",
     "srv.user_updated": "Pengguna diperbarui",
     "srv.user_deleted": "Pengguna dihapus",
+    "srv.akses_ditolak_status_hanya_admin": "Hanya administrator yang dapat mengubah status akun.",
+    "srv.tidak_bisa_ubah_status_akun_sendiri":
+      "Anda tidak dapat mengubah status akun Anda sendiri.",
+    "srv.rekaman_tidak_bisa_diubah_ke_mp3":
+      "Rekaman WebM/MP4 tidak bisa diubah ke MP3. Pasang FFmpeg di server, atau unggah berkas MP3.",
     "srv.tidak_bisa_hapus_akun_sendiri": "Anda tidak bisa menghapus akun Anda sendiri.",
     "srv.tidak_bisa_hapus_admin_terakhir":
       "Tidak bisa menghapus administrator terakhir yang tersisa.",
@@ -156,6 +165,10 @@ export const id = {
     "srv.alamat_email_tidak_valid": "Alamat email tidak valid.",
     "srv.bila_alamat_email_itu":
       "Bila alamat email itu terdaftar, tautan pengaturan ulang kata sandi sudah dikirim ke sana. Tautannya berlaku 15 menit.",
+    "srv.email_tidak_terdaftar_lupa_sandi":
+      "Alamat email ini tidak terdaftar. Periksa ejaan atau hubungi admin bila Anda yakin punya akun.",
+    "srv.kata_sandi_sementara_dikirim":
+      "Kata sandi sementara telah dikirim ke email Anda. Periksa kotak masuk (dan folder spam). Sandi berlaku 2 jam.",
     "srv.token_pengaturan_ulang_kata": "Token pengaturan ulang kata sandi tidak valid atau hilang.",
     "srv.token_pengaturan_ulang_kata_2":
       "Token pengaturan ulang kata sandi sudah kedaluwarsa atau tidak valid. Silakan ajukan permohonan baru.",
@@ -696,6 +709,8 @@ export const id = {
     sprintUpdateFailed: "Gagal memperbarui fase: ",
     noPermStartSprint: "Anda tidak memiliki izin untuk memulai sprint.",
     sprintStarted: "Fase berhasil dimulai.",
+    sprintScopeLocked:
+      "Lingkup sprint terkunci (aktif/selesai). Tutup sprint untuk memindahkan sisa tugas, atau kembalikan ke planned.",
     noPermCompleteSprint: "Anda tidak memiliki izin untuk menyelesaikan sprint.",
     completingSprint: "Sedang menyelesaikan fase...",
     deletingSprint: "Sedang menghapus fase...",
@@ -767,6 +782,7 @@ export const id = {
     kanbanBoard: "Papan Kanban",
     qualityAssessment: "Penilaian Kualitas",
     roadmapTimeline: "Peta Jalan & Linimasa",
+    roadmapTimelineWaterfall: "Peta Jalan & Milestone",
     team: "Tim",
     administration: "Administrasi",
     masterData: "Master Data",
@@ -820,7 +836,8 @@ export const id = {
     viewDoneListLink: "Lihat daftar selesai",
     sprintOverview: "Ringkasan Progres & Kecepatan Sprint",
     burndownTitle: "Burndown sprint aktif",
-    burndownHint: "Sisa tugas vs garis ideal. Tanggal selesai diperkirakan dari updatedAt.",
+    burndownHint:
+      "Sisa pekerjaan vs garis ideal (poin story bila ada, selain itu hitungan tugas). Tanggal selesai diperkirakan dari updatedAt.",
     burndownIdeal: "Ideal",
     burndownActual: "Aktual (sisa)",
     throughputTitle: "Throughput mingguan",
@@ -1397,6 +1414,7 @@ export const id = {
     swimlanes: "Jalur",
     dropHere: "Lepaskan di sini",
     dragHandle: "Geser kartu",
+    wipCount: "{{count}} / {{limit}} WIP",
   },
   flowchart: {
     breadcrumbGroup: "PROYEK",
@@ -1556,7 +1574,7 @@ export const id = {
     terminate: "Hentikan Proyek (Hapus Permanen)",
   },
   editSprint: {
-    title: "Ubah Fase",
+    title: "Ubah Sprint",
     name: "Nama",
     startDate: "Tanggal Mulai",
     endDate: "Tanggal Selesai",
@@ -1765,7 +1783,7 @@ export const id = {
     actionImportedCount: "Berhasil mengimpor {{count}} butir tindak lanjut ke Poin Diskusi resmi.",
     statusChanged: "Status diubah menjadi {{status}}",
     cannotSignIn: "Tidak Dapat Masuk",
-    completeSprintTitle: "Selesaikan Fase?",
+    completeSprintTitle: "Selesaikan Sprint?",
     completeSprintText:
       'Apakah Anda yakin ingin menyelesaikan "{{name}}"? Pilih nasib tugas yang belum selesai.',
     sprintUndoneToBacklog: "Pindahkan tugas terbuka ke backlog",
@@ -1773,11 +1791,11 @@ export const id = {
     sprintNoNext: "Tidak ada sprint berikutnya (planned/active)",
     sprintUndoneLeave: "Biarkan tugas di sprint ini",
     yesCompleteSprint: "Ya, selesaikan",
-    sprintCompleted: 'Fase "{{name}}" berhasil diselesaikan.',
-    deleteSprintTitle: "Hapus Fase?",
-    deleteSprintText: "Apakah Anda yakin ingin menghapus fase ini? {{extra}}",
+    sprintCompleted: 'Sprint "{{name}}" berhasil diselesaikan.',
+    deleteSprintTitle: "Hapus Sprint?",
+    deleteSprintText: "Apakah Anda yakin ingin menghapus sprint ini? {{extra}}",
     deleteSprintExtra: "{{count}} tugas di dalamnya akan dipindahkan kembali ke backlog.",
-    sprintDeleted: "Fase berhasil dihapus.",
+    sprintDeleted: "Sprint berhasil dihapus.",
     deleteAttachmentTitle: "Hapus Lampiran?",
     deleteAttachmentText: 'Apakah Anda yakin ingin menghapus lampiran "{{name}}"?',
     attachmentDeleted: "Lampiran berhasil dihapus.",
@@ -1786,7 +1804,7 @@ export const id = {
     taskLinkDeleted: "Hubungan tugas berhasil dihapus.",
     deleteProjectTitle: "Hapus Proyek Secara Permanen?",
     deleteProjectText:
-      'Anda akan menghapus "{{name}}" secara PERMANEN beserta SELURUH datanya (tugas, komentar, fase, log). Tindakan ini tidak dapat dibatalkan.',
+      'Anda akan menghapus "{{name}}" secara PERMANEN beserta SELURUH datanya (tugas, komentar, sprint, log). Tindakan ini tidak dapat dibatalkan.',
     projectDeleted: 'Proyek "{{name}}" dan seluruh data terkait telah berhasil dihapus.',
     taskDeleted: 'Tugas "{{title}}" telah berhasil dihapus.',
     deleteSuiteText:
@@ -1881,7 +1899,7 @@ export const id = {
     createSprint: "Buat Sprint Baru",
     issueCount: "{{count}} Isu",
     allPriorities: "Semua Prioritas",
-    untitledSprint: "Fase Tanpa Judul",
+    untitledSprint: "Sprint Tanpa Judul",
     sprintEmptyDrag:
       "Belum ada task di sprint ini. Tarik task dari Backlog di sebelah kiri ke sini.",
     issues: "Isu",
@@ -1903,6 +1921,9 @@ export const id = {
     deleteSprint: "Hapus Sprint",
     progress: "Kemajuan",
     completed: "Selesai",
+    active: "Aktif",
+    planned: "Direncanakan",
+    scopeLocked: "Lingkup terkunci",
     standaloneTasks: "Tugas Mandiri",
   },
   roadmap: {
@@ -2042,6 +2063,8 @@ export const id = {
     startRecording: "Mulai Merekam",
     micLevelHint: "Bicara sekarang — batang ini harus bergerak jika mikrofon menangkap suara.",
     ffmpegFailed: "FFmpeg gagal mengekstrak audio.",
+    clientTranscodeFallback:
+      "Peramban gagal mengonversi rekaman; mengunggah berkas asli agar server FFmpeg yang memproses…",
     recordingRetentionNote:
       "Rekaman hanya dipakai untuk analisis sementara. Setelah notulen berhasil, berkas audio/video dihapus; hasil analisis tetap disimpan.",
     processingTitle: "Menyiapkan berkas sementara...",
@@ -2622,14 +2645,14 @@ export const id = {
     allPic: "Semua PIC",
   },
   newSprint: {
-    title: "Buat Fase Baru",
-    name: "Nama Fase",
-    namePlaceholder: "contoh: Fase 1 - Fondasi",
-    goal: "Tujuan Fase",
+    title: "Buat Sprint Baru",
+    name: "Nama Sprint",
+    namePlaceholder: "contoh: Sprint 1 - Fondasi",
+    goal: "Tujuan Sprint",
     goalPlaceholder: "Apa yang ingin dicapai dalam sprint ini?",
     startDate: "Tanggal Mulai",
     endDate: "Tanggal Selesai",
-    createAssign: "Buat Fase & Tugaskan Pekerjaan",
+    createAssign: "Buat Sprint & Tugaskan Pekerjaan",
   },
   activityLog: {
     title: "Log Audit Sistem",
@@ -2993,12 +3016,11 @@ export const id = {
     emailPlaceholder: "nama@perusahaan.com",
     cancel: "Batal",
     fpIntro:
-      "Masukkan alamat email akun Anda. Kami akan mengirim tautan untuk mengatur ulang kata sandi. Tautannya berlaku 15 menit.",
-    fpSentPrefix: "Bila",
-    fpSentSuffix:
-      "terdaftar, tautan untuk mengatur ulang kata sandi sudah dikirim ke sana. Tautannya berlaku 15 menit.",
+      "Masukkan alamat email akun Anda. Kami akan mengirim kata sandi sementara ke email itu. Sandi berlaku 2 jam; setelah masuk Anda wajib membuat kata sandi baru.",
+    fpSentPrefix: "Kata sandi sementara telah dikirim ke",
+    fpSentSuffix: "(berlaku 2 jam). Periksa juga folder spam.",
     emailAddress: "Alamat Email",
-    sendLink: "Kirim Tautan",
+    sendLink: "Kirim sandi",
   },
   nodeMenu: {
     title: "Aksi Komponen",
@@ -3019,6 +3041,7 @@ export const id = {
   issueQuick: {
     add: "Tambah",
     placeholder: "Apa yang perlu dikerjakan? Ketik lalu tekan Enter untuk menyimpan...",
+    pickType: "Tipe isu",
   },
   ui: {
     loading: "Memuat...",

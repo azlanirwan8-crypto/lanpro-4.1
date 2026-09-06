@@ -3,6 +3,7 @@ import { DashboardViewProps } from "./types";
 import { ensureDate } from "../../lib/utils";
 import { Task, MasterData } from "../../types";
 import { statusSelesai } from "../../lib/statusSelesai";
+import { bobotTugasBurndown, metrikSprintHybrid } from "../../lib/metrikSprint";
 
 export const COLORS = ["#F97316", "#3B82F6", "#10B981", "#EC4899", "#8B5CF6"];
 
@@ -62,10 +63,15 @@ export const useDashboard = (props: DashboardViewProps) => {
 
   if (activeSprint) {
     const sTasks = nonEpicTasks.filter((t) => t.sprintId === activeSprint.id);
-    sprintTotalTasks = sTasks.length;
-    sprintCompletedTasks = sTasks.filter((t) => statusSelesai(t.status, masterData)).length;
-    sprintProgress =
-      sprintTotalTasks === 0 ? 0 : Math.round((sprintCompletedTasks / sprintTotalTasks) * 100);
+    const metrik = metrikSprintHybrid(
+      sTasks.map((t) => ({
+        storyPoints: t.storyPoints,
+        done: statusSelesai(t.status, masterData),
+      }))
+    );
+    sprintTotalTasks = metrik.total;
+    sprintCompletedTasks = metrik.done;
+    sprintProgress = metrik.progressPct;
     if (activeSprint.endDate) {
       sprintDaysLeft = Math.max(0, differenceInDays(ensureDate(activeSprint.endDate), now));
     }
@@ -191,20 +197,30 @@ export const useDashboard = (props: DashboardViewProps) => {
     if (totalDays <= 0 || totalDays > 100) return [];
 
     const sprintTasks = nonEpicTasks.filter((t) => t.sprintId === activeSprint.id);
-    const totalTaskCount = sprintTasks.length;
-    if (totalTaskCount === 0) return [];
+    if (sprintTasks.length === 0) return [];
+
+    // #464 — satuan sama dengan Planning: poin bila ada, else tugas
+    const metrik = metrikSprintHybrid(
+      sprintTasks.map((t) => ({
+        storyPoints: t.storyPoints,
+        done: statusSelesai(t.status, masterData),
+      }))
+    );
+    const totalWork = metrik.total;
+    if (totalWork === 0) return [];
+    const satuan = metrik.satuan;
 
     const data = [];
     for (let i = 0; i <= totalDays; i++) {
       const currentDate = addDays(start, i);
-      const idealRemaining = Math.max(0, totalTaskCount - (totalTaskCount / totalDays) * i);
+      const idealRemaining = Math.max(0, totalWork - (totalWork / totalDays) * i);
 
-      let completedTasksAsOfDate = 0;
+      let completedAsOfDate = 0;
       sprintTasks.forEach((t) => {
         if (statusSelesai(t.status, masterData)) {
           const taskDate = t.updatedAt ? ensureDate(t.updatedAt) : new Date();
           if (taskDate.getTime() <= currentDate.getTime() || isSameDay(taskDate, currentDate)) {
-            completedTasksAsOfDate++;
+            completedAsOfDate += bobotTugasBurndown(t, satuan);
           }
         }
       });
@@ -214,7 +230,7 @@ export const useDashboard = (props: DashboardViewProps) => {
       data.push({
         date: format(currentDate, "MMM d"),
         Ideal: Number(idealRemaining.toFixed(1)),
-        Actual: isFuture ? null : totalTaskCount - completedTasksAsOfDate,
+        Actual: isFuture ? null : totalWork - completedAsOfDate,
       });
     }
     return data;

@@ -96,6 +96,26 @@ export class SprintRepository {
     }
   }
 
+  /**
+   * #462 — turunkan sprint aktif lain di proyek yang sama menjadi planned
+   * sebelum mengaktifkan `exceptId`.
+   */
+  async demoteOtherActives(projectId: string, exceptId: string): Promise<number> {
+    const connection = await db.getConnection();
+    try {
+      const [result]: any = await connection.query(
+        `UPDATE Sprints SET status = 'planned'
+         WHERE projectId = ?
+           AND id <> ?
+           AND LOWER(TRIM(status)) IN ('active', 'in_progress', 'ongoing', 'in progress')`,
+        [projectId, exceptId]
+      );
+      return result?.rowCount ?? result?.affectedRows ?? 0;
+    } finally {
+      connection.release();
+    }
+  }
+
   async delete(id: string, projectId: string): Promise<void> {
     const connection = await db.getConnection();
     try {
