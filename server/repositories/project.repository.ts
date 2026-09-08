@@ -313,7 +313,7 @@ export class ProjectRepository {
         ],
         // #469 — WorkLogs dikutip (tidak di auto-quote db.ts)
         [
-          'DELETE FROM "TaskWorkLogs" WHERE task_id IN (SELECT id FROM "Tasks" WHERE "projectId" = ?)',
+          'DELETE FROM "TaskWorkLogs" WHERE "taskId" IN (SELECT id FROM Tasks WHERE projectId = ?)',
           [projectId],
         ],
         [

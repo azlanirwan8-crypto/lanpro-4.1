@@ -39,6 +39,13 @@ describe("#469 deleteTaskCascade TaskWorkLogs", () => {
   it("listWorkLogs / createWorkLog mengutip TaskWorkLogs", () => {
     expect(sumber).toContain('SELECT * FROM "TaskWorkLogs"');
     expect(sumber).toContain('INSERT INTO "TaskWorkLogs"');
-    expect(sumber).toContain('FROM "TaskWorkLogs" WHERE task_id = ?');
+    expect(sumber).toContain('FROM "TaskWorkLogs" WHERE "taskId" = ?');
+    expect(sumber).toContain('"taskId"');
+  });
+
+  it("helper mengabaikan kolom tidak ada (42703) selain tabel tidak ada", () => {
+    const mulai = sumber.indexOf("async function hapusAnakOpsional");
+    const blok = sumber.slice(mulai, mulai + 900);
+    expect(blok).toContain("adalahKolomTidakAda");
   });
 });

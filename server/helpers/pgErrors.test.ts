@@ -11,14 +11,16 @@
 import {
   adalahDuplikat,
   adalahTabelTidakAda,
+  adalahKolomTidakAda,
   KODE_DUPLIKAT,
   KODE_TABEL_TIDAK_ADA,
+  KODE_KOLOM_TIDAK_ADA,
 } from "./pgErrors";
 
 describe("#63 pelanggaran keunikan — SQLSTATE 23505", () => {
   it("mengenali galat duplikat sungguhan dari PostgreSQL", () => {
     // Bentuk galat node-postgres: `code` berisi SQLSTATE.
-    const galat = Object.assign(new Error('duplicate key value violates unique constraint'), {
+    const galat = Object.assign(new Error("duplicate key value violates unique constraint"), {
       code: "23505",
       constraint: "Users_email_key",
     });
@@ -71,5 +73,20 @@ describe("#62 tabel tidak ada — SQLSTATE 42P01", () => {
   it("aman terhadap masukan kosong", () => {
     expect(adalahTabelTidakAda(null)).toBe(false);
     expect(adalahTabelTidakAda({})).toBe(false);
+  });
+});
+
+describe("#469 kolom tidak ada — SQLSTATE 42703", () => {
+  it("mengenali undefined_column dari PostgreSQL", () => {
+    const galat = Object.assign(new Error('column "task_id" does not exist'), {
+      code: "42703",
+    });
+    expect(adalahKolomTidakAda(galat)).toBe(true);
+    expect(KODE_KOLOM_TIDAK_ADA).toBe("42703");
+  });
+
+  it("tidak menyamakan dengan tabel tidak ada", () => {
+    expect(adalahKolomTidakAda({ code: "42P01" })).toBe(false);
+    expect(adalahTabelTidakAda({ code: "42703" })).toBe(false);
   });
 });

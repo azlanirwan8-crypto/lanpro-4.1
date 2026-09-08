@@ -2,12 +2,14 @@ import db from "../../src/lib/db";
 import { BATAS_DAFTAR_TANPA_PAGINATION, type PaginationParams } from "../lib/pagination";
 import crypto from "crypto";
 import { validateTimelineBoundaries } from "../services/task.service";
-import { adalahTabelTidakAda } from "../helpers/pgErrors";
+import { adalahTabelTidakAda, adalahKolomTidakAda } from "../helpers/pgErrors";
 
 /**
  * #469 — hapus anak opsional di dalam transaksi PG.
  * try/catch biasa tidak cukup: error SQL meng-abort transaksi (25P02).
  * Tabel "TaskWorkLogs" tidak di auto-quote db.ts — wajib dikutip di SQL.
+ * Kolom live = "taskId" (camelCase); migrate lama sempat snake_case — hapus
+ * tetap tidak boleh gagalkan delete Tasks.
  */
 async function hapusAnakOpsional(
   connection: { query: (sql: string, params?: unknown) => Promise<unknown> },
@@ -21,7 +23,7 @@ async function hapusAnakOpsional(
     await connection.query(`RELEASE SAVEPOINT ${savepoint}`);
   } catch (err) {
     await connection.query(`ROLLBACK TO SAVEPOINT ${savepoint}`);
-    if (!adalahTabelTidakAda(err)) throw err;
+    if (!adalahTabelTidakAda(err) && !adalahKolomTidakAda(err)) throw err;
   }
 }
 
@@ -547,7 +549,7 @@ export class TaskRepository {
       await hapusAnakOpsional(
         connection,
         "sp_worklogs",
-        'DELETE FROM "TaskWorkLogs" WHERE task_id IN (?)',
+        'DELETE FROM "TaskWorkLogs" WHERE "taskId" IN (?)',
         [taskIds]
       );
       await hapusAnakOpsional(
@@ -584,7 +586,7 @@ export class TaskRepository {
       await hapusAnakOpsional(
         connection,
         "sp_worklogs",
-        'DELETE FROM "TaskWorkLogs" WHERE task_id = ?',
+        'DELETE FROM "TaskWorkLogs" WHERE "taskId" = ?',
         [id]
       );
       await hapusAnakOpsional(
@@ -763,7 +765,7 @@ export class TaskRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        'SELECT * FROM "TaskWorkLogs" WHERE task_id = ? ORDER BY logged_at DESC LIMIT 100',
+        'SELECT * FROM "TaskWorkLogs" WHERE "taskId" = ? ORDER BY "loggedAt" DESC LIMIT 100',
         [taskId]
       );
       return rows || [];
@@ -783,11 +785,11 @@ export class TaskRepository {
     const connection = await db.getConnection();
     try {
       await connection.query(
-        'INSERT INTO "TaskWorkLogs" (id, task_id, user_id, hours, note, logged_at) VALUES (?, ?, ?, ?, ?, ?)',
+        'INSERT INTO "TaskWorkLogs" (id, "taskId", "userId", hours, note, "loggedAt") VALUES (?, ?, ?, ?, ?, ?)',
         [entry.id, entry.taskId, entry.userId, entry.hours, entry.note, entry.loggedAt]
       );
       const [sumRows]: any = await connection.query(
-        'SELECT COALESCE(SUM(hours), 0) AS total FROM "TaskWorkLogs" WHERE task_id = ?',
+        'SELECT COALESCE(SUM(hours), 0) AS total FROM "TaskWorkLogs" WHERE "taskId" = ?',
         [entry.taskId]
       );
       const total = Number(sumRows?.[0]?.total || 0);

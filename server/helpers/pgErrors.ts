@@ -20,6 +20,9 @@ export const KODE_DUPLIKAT = "23505";
 /** 42P01 undefined_table — tabel yang dirujuk tidak ada. */
 export const KODE_TABEL_TIDAK_ADA = "42P01";
 
+/** 42703 undefined_column — kolom yang dirujuk tidak ada. */
+export const KODE_KOLOM_TIDAK_ADA = "42703";
+
 const kodeDari = (error: any): string | null => {
   if (!error) return null;
   if (typeof error.code === "string") return error.code;
@@ -39,3 +42,7 @@ export const adalahDuplikat = (error: any): boolean => kodeDari(error) === KODE_
  */
 export const adalahTabelTidakAda = (error: any): boolean =>
   kodeDari(error) === KODE_TABEL_TIDAK_ADA;
+
+/** #469 — kolom tidak ada (schema drift snake vs camel). */
+export const adalahKolomTidakAda = (error: any): boolean =>
+  kodeDari(error) === KODE_KOLOM_TIDAK_ADA;

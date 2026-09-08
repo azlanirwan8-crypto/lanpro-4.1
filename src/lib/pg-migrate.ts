@@ -299,18 +299,18 @@ export async function runMigrations(pool: Pool): Promise<void> {
       );
     `);
 
-    // ── TaskWorkLogs (#343 MVP) — snake_case agar tidak butuh ubah db.ts ──
+    // ── TaskWorkLogs (#343 MVP; #469 selaras camelCase live Neon) ───────────
     await client.query(`
       CREATE TABLE IF NOT EXISTS "TaskWorkLogs" (
         id           VARCHAR(36) PRIMARY KEY,
-        task_id      VARCHAR(36) NOT NULL,
-        user_id      VARCHAR(36),
+        "taskId"     VARCHAR(36) NOT NULL,
+        "userId"     VARCHAR(36),
         hours        DOUBLE PRECISION NOT NULL DEFAULT 0,
         note         TEXT,
-        logged_at    TIMESTAMP DEFAULT NOW(),
-        created_at   TIMESTAMP DEFAULT NOW()
+        "loggedAt"   TIMESTAMP DEFAULT NOW(),
+        "createdAt"  TIMESTAMP DEFAULT NOW()
       );
-      CREATE INDEX IF NOT EXISTS idx_task_work_logs_task ON "TaskWorkLogs" (task_id);
+      CREATE INDEX IF NOT EXISTS idx_task_work_logs_task ON "TaskWorkLogs" ("taskId");
     `);
 
     // ── NotificationDeliveryFailures (#345) — log gagal kirim in-app ──
