@@ -19,5 +19,7 @@ describe("#444 deleteTasksByIds cascade", () => {
     expect(blok).toContain("DELETE FROM LinkedTasks");
     expect(blok).toContain("DELETE FROM TaskCustomFields");
     expect(blok).toMatch(/DELETE FROM Tasks WHERE id IN/);
+    // #469 — WorkLogs wajib dikutip; jangan kembalikan unquoted
+    expect(blok).toContain('DELETE FROM "TaskWorkLogs"');
   });
 });

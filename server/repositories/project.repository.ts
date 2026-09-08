@@ -311,6 +311,11 @@ export class ProjectRepository {
           "DELETE FROM TaskCustomFields WHERE taskId IN (SELECT id FROM Tasks WHERE projectId = ?)",
           [projectId],
         ],
+        // #469 — WorkLogs dikutip (tidak di auto-quote db.ts)
+        [
+          'DELETE FROM "TaskWorkLogs" WHERE task_id IN (SELECT id FROM "Tasks" WHERE "projectId" = ?)',
+          [projectId],
+        ],
         [
           "DELETE FROM DiscussionPoints WHERE meetingId IN (SELECT id FROM Meetings WHERE projectId = ?)",
           [projectId],
