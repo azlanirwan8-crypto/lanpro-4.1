@@ -1310,14 +1310,11 @@ router.delete(
         });
       }
 
-      // #444 — cascade: titik diskusi (+ komentar via deletePoint) → berkas → meeting
-      try {
-        const points = await discussionPointsRepository.findByMeetingId(id);
-        for (const point of points) {
-          await discussionPointsRepository.deletePoint(point.id);
-        }
-      } catch (cascadeErr) {
-        console.warn("[MEETING DELETE] Cascade discussion gagal:", cascadeErr);
+      // #444 / #472 — cascade wajib: titik diskusi (+ komentar) lalu meeting_details
+      // di repository.delete. Jangan swallow: gagal cascade → 500, parent tetap utuh.
+      const points = await discussionPointsRepository.findByMeetingId(id);
+      for (const point of points) {
+        await discussionPointsRepository.deletePoint(point.id);
       }
       const recordingUrl = item.recording_url || (item as any).recordingUrl;
       if (recordingUrl) {

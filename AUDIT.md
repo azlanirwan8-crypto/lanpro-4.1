@@ -612,7 +612,7 @@ jadi §1.1 tetap sumber kebenarannya; halaman itu acuan, bukan pengganti.
 
 ---
 
-## §1 PAPAN PRIORITAS — 6 BELUM · 459 SELESAI · 4 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 6 BELUM · 470 SELESAI · 4 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -627,7 +627,9 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
 **Sebaran per fase:** F0 0 · F1 0 · F2 0 · F3 0 · F4 0 · F5 1 · F6 1 · F7 0 · F8 0 · F9 0 · F10 2 · F11 1 · F12 0 · F13 1
 
-**Dihitung ulang 09 Sep 2026 (pasca #469):** F5 #305 · F6 #290 · F11 #30 · F13 #320 · F10 #433 #434. **#468 #469 → §1.2**. Rekap: **§24.9**.
+**Dihitung ulang 09 Sep 2026 (pasca #480 SELESAI):** F5 #305 · F6 #290 · F10 #433 #434 · F11 #30 · F13 #320. **#470–#480 → §1.2**. Rekap: **§24.9**.
+
+**Keputusan pemilik 09 Sep 2026:** kerjakan **#470** lalu **#471–#476** lalu **#477–#479**. **#480** (Login History) ditutup dari screenshot lapangan.
 
 Catatan: #465 waterfall kanonik (copy Sprint + nav dual-mode ala Jira) + #463 FK QA `linkedTaskId` SELESAI kode 06 Sep. #346 dihormati (iris tipis, bukan marketplace). #335 tetap checklist visual.
 
@@ -647,7 +649,28 @@ Sebaran di baris ini sebelumnya tertulis `F0 1 · F12 10` — keliru sejak sebel
 
 **Baru dari QA menu User Management (26 Agu 2026, `/qa` + `/design-review` mode laporan-saja, TIDAK ada kode yang diubah):** #188, #189, #190, #191, #192 — diuji sebagai admin lewat browser (Claude Browser pane) di `http://localhost:3000`, dev server sudah berjalan sebelum sesi ini mulai (proses `node.exe` lain di port 3000, kemungkinan sesi Antigravity berjalan paralel — beberapa hot-reload `UserDetailView.tsx` teramati selama pengujian). Sesuai aturan `/qa`: **tidak membaca kode sumber**, jadi tidak ada rujukan file:baris — itu pekerjaan Antigravity berikutnya.
 
-#### F0 tambahan — Penilaian produk 02–03 Sep 2026 (1 item; #335; #394 → §1.2; #346 #383 #399 ditutup)
+#### F3 tambahan — Tab Project profil pengguna (0 terbuka; #470 → §1.2)
+
+Sumber: screenshot pemilik 09 Sep 2026. **DITUTUP kode 09 Sep 2026.**
+
+| No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
+| :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
+
+#### F3 tambahan — Login History regresi #191 (0 terbuka; #480 → §1.2)
+
+Sumber: screenshot pemilik 09 Sep 2026. **DITUTUP kode 09 Sep 2026.**
+
+| No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
+| :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
+
+#### F0 tambahan — Residual kelas #469 cascade/kutip (0 terbuka; #471–#479 → §1.2)
+
+Sumber: audit read-only 09 Sep 2026 pasca #469. Keputusan pemilik: #471–#476 iris dulu, #477–#479 later. **Jangan sentuh `src/lib/db.ts`.** **DITUTUP kode 09 Sep 2026** (#471–#479).
+
+| No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
+| :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
+
+#### F0 tambahan — Penilaian produk 02–03 Sep 2026 (0 item; #335; #394 → §1.2; #346 #383 #399 ditutup)
 
 Sumber: pertanyaan pemilik + audit residual mobile/tema/CRUD 03 Sep (kode; UI tab bersih tetap #335). Audit fidelity Velzon 03 Sep → #396–#399 (kode SELESAI).
 
@@ -836,7 +859,22 @@ Sumber: sisir ulang setelah `45ae6e9`. **DITUTUP kode 04 Sep 2026.** E2E lapanga
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
 
-### 1.2 SUDAH SELESAI — 459 item
+### 1.2 SUDAH SELESAI — 470 item
+
+|  No | Temuan                                                                                                                                                                                                                                                                                                                        |  Fase  | Sev | Biaya  | Blokir? | Status                          | Asal |
+| --: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----: | :-: | ------ | :-----: | ------------------------------- | ---- |
+| 480 | **Login History regresi #191 (#480).** DITUTUP 09 Sep 2026: hapus inventaris navigator/GPS/localStorage admin; hanya `/api/admin/sessions?userId=`; empty state bila kosong; Current Device/Active Now hanya `isSelf`.                                                                                                        | **F3** | 🔴  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
+| 479 | **Lint txn SAVEPOINT (#479).** DITUTUP 09 Sep 2026: `audit-txn-savepoint.cjs` + tes txn-savepoint-479 — larang try/catch `query` setelah `beginTransaction` tanpa SAVEPOINT (regresi #469).                                                                                                                                   | **F0** | 🟡  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
+| 478 | **Cascade hapus user ProjectMembers (#478).** DITUTUP 09 Sep 2026: `user.repository.delete` txn — resolve id/uid, `DELETE ProjectMembers` lalu Users. Identities/Sessions CASCADE di migrate. Tes user-delete-cascade-478.                                                                                                    | **F7** | 🟡  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
+| 477 | **Cascade task ActivityLogs/Notifications (#477).** DITUTUP 09 Sep 2026: hapus ActivityLogs by taskId + Notifications by relatedId (SAVEPOINT opsional notif); buang `recordExecutionRunLog` mati di task.service (kolom evaluationNotes salah). Tes task-delete-cascade-477.                                                 | **F9** | 🟡  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
+| 476 | **DiscussionPoints UPDATE kutip camelCase (#476).** DITUTUP 09 Sep 2026: UPDATE mengutip `"parentPointId"`/`"assignTo"`/`"tindakanLanjut"`/`"targetDate"`/`"tanggalUpdateStatus"` — hindari twin lowercase (#79). Tes discussion-points-update-476. Tanpa sentuh db.ts.                                                       | **F0** | 🔴  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
+| 475 | **Hapus sprint cascade (#475).** DITUTUP 09 Sep 2026: `UPDATE Tasks SET sprintId=NULL` + `DELETE MilestoneSprints` lalu Sprints (txn). Unlock #461 via SQL langsung di repo (bukan PUT task). Tes sprint-delete-cascade-475.                                                                                                  | **F4** | 🔴  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
+| 474 | **Cascade QA execution logs (#474).** DITUTUP 09 Sep 2026: DELETE `QATestCaseExecutionLogs` sebelum case/suite/modul di qa.repository + project-module.repository. Tes qa-delete-cascade-474.                                                                                                                                 | **F0** | 🔴  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
+| 473 | **Cascade proyek comments (#473).** DITUTUP 09 Sep 2026: `discussion_point_comments` sebelum DiscussionPoints; opsional `ai_learning_logs` by project_id (SAVEPOINT). Tes project-delete-cascade-473.                                                                                                                         | **F0** | 🔴  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
+| 472 | **Cascade hapus meeting (#472).** DITUTUP 09 Sep 2026: `meeting_details` by meeting_id di repository.delete (txn); rute tidak swallow cascade discussion. Tes meeting-delete-cascade-472.                                                                                                                                     | **F0** | 🔴  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
+| 471 | **Gerbang pgTables ↔ migrate PascalCase (#471).** DITUTUP 09 Sep 2026: skrip `audit-pg-tables-kutip.cjs` + tes pg-migrate-kutip-471 — 6 tabel non-pgTables wajib dikutip di call site SQL. Tanpa menambah ke db.ts.                                                                                                           | **F0** | 🔴  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
+| 470 | **Tab Project profil (#470).** DITUTUP 09 Sep 2026: klik Tugas Terdelegasi → issueDetail (`onOpenTask`); Timeline dari activityLogs nyata (bukan dummy); badge `X assigned · Y total`; % Complete via `statusSelesai`+MasterData.                                                                                             | **F3** | 🟠  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
+| 335 | **Checklist visual tab bersih (#335).** DITUTUP 06 Sep 2026 (keputusan pemilik: tutup): probe CDP 11/11 modul light+dark OK (Administrator · Personal Channel & Services); dashboard recheck setelah Memuat; rose=0; PageHeader #467 terbukti. Artefak .tmp-335/*.png. Gerbang ≠ pengganti; bukti lapangan dicentang pemilik. | **F0** | 🟠  | Sedang |  Tidak  | SELESAI 06 Sep (visual pemilik) | §1.1 |
 
 Disimpan, tidak dihapus: §10 mencatat bahwa riwayat perbaikan berulang kali
 jadi satu-satunya bukti kenapa sebuah keputusan diambil.
@@ -844,7 +882,6 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | #   | Temuan | Fase | Sev | Biaya | Blokir modul baru? | Status | Detail |
 | --- | ------ | :--: | :-: | ----- | :----------------: | ------ | ------ |
 
-| 335 | **Checklist visual tab bersih (#335).** DITUTUP 06 Sep 2026 (keputusan pemilik: tutup): probe CDP 11/11 modul light+dark OK (Administrator · Personal Channel & Services); dashboard recheck setelah Memuat; rose=0; PageHeader #467 terbukti. Artefak .tmp-335/*.png. Gerbang ≠ pengganti; bukti lapangan dicentang pemilik. | **F0** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (visual pemilik) | §1.1 |
 | 469 | **Cascade hapus task 500 (#469).** DITUTUP 09 Sep 2026: `DELETE FROM TaskWorkLogs` tanpa kutip → `taskworklogs` tidak ada; try/catch abort transaksi PG (25P02). Perbaikan: SQL `"TaskWorkLogs"` + SAVEPOINT `hapusAnakOpsional`; work-log R/W ikut dikutip. Tes task-delete-cascade-469. Tanpa sentuh db.ts. | **F0** | 🔴 | Sedang | Tidak | SELESAI 09 Sep (kode) | §1.1 |
 | 468 | **Iris issue tracker (#468).** DITUTUP 06 Sep 2026 (opsi 1 pemilik): dropdown Assignee+unassigned; saved filters named + session localStorage/proyek; bulk priority+sprint; chip Overdue (dueDate+non-terminal). Lib issueFilterSnapshot + tes. Bukan JQL/SLA penuh. UI tab bersih Issues belum. | **F4** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
 | 467 | **Tipografi gemuk & penempatan (#467).** DITUTUP 06 Sep 2026 (keputusan pemilik: hasil maksimal): PageHeader/DetailViewChrome font-medium + tracking-normal + leading-snug; sapuan uppercase+tracking-wide→normal di ±64 berkas; Login/Register h-11 + label medium; soften bold Sessions. UI tab bersih → #335. | **F3** | 🟠 | Sedang | Tidak | SELESAI 06 Sep (kode) | §1.1 |
@@ -1100,7 +1137,7 @@ jadi satu-satunya bukti kenapa sebuah keputusan diambil.
 | 218 | **Penyelarasan Layout & Visual Tab "Project" di Profil Pengguna (`UserDetailView.tsx`) sesuai Desain Referensi** — **DIKERJAKAN 28 Agu 2026:** Memperbarui antarmuka tab Project di `UserDetailView.tsx` menjadi layout 2-kolom modern (Kolom Kiri: kartu proyek terkait dengan badges meta, % progress bar, dan sub-daftar tugas terdelegasi; Kolom Kanan: 3 widget sidebar Ringkasan Project, Timeline Aktivitas, dan Card Banner Stay Productive). Dikunci 91 test pass, tsc/eslint/build 100% hijau. | **F12** | 🟢 | Rendah | Tidak | `SELESAI 28 Agu 2026` | §1.2 |
 | 220 | **Penegakan Sempurna Force Logout di Middleware Auth Backend & Pembaruan Real-Time (Auto-Refresh) pada Monitoring Sesi Pengguna (`UserSessionsPanel.tsx`)** — **DIKERJAKAN 28 Agu 2026:** Memperbaiki `session.repository.ts` untuk mengosongkan `Users.currentSessionToken` saat sesi di-terminate, memperketat `authenticateJWT` di `server/middleware/auth.ts` agar menolak HTTP request token non-ACTIVE/null dengan 401, serta menambahkan auto-refresh polling 10s di `UserSessionsPanel.tsx`. Dikunci 91 test pass, tsc/eslint/build 100% hijau. | **F7** | 🔴 | Rendah | Tidak | `SELESAI 28 Agu 2026` | §1.2 |
 | 219 | **Endpoint update task (`PUT /api/tasks/:id`) mengabaikan field `reporterId` saat disimpan** — **DIKERJAKAN 28 Agu 2026:** Memperbaiki `server/routes/task.routes.ts` dengan menyertakan `reporterId` pada pemetikan `req.body` dan memanggil `checkUpdate("reporterId", reporterId)`. Pengubahan Reporter di dropdown tabel/sidebar kini secara resmi tersimpan ke basis data PostgreSQL. Dikunci 91 test pass, tsc/eslint/build 100% hijau. | **F2** | 🔴 | Rendah | Tidak | `SELESAI 28 Agu 2026` | §1.2 |
-| 217 | **Dropdown (`StyledDropdown` & `StatusDropdown`) melayang jauh di atas tombol saat terbuka ke atas (_upward placement_)** — **DIKERJAKAN 28 Agu 2026:** Memperbaiki logika perenderan portal pada `StyledDropdown` & `StatusDropdown` di `src/components/ui/CommonComponents.tsx`. Saat posisi mengarah ke atas (`placement === 'top'`), portal di-anchor menggunakan `bottom: (window.innerHeight - rect.top) + 4` (bukan `top: rect.top - dropdownHeight`). Tepi bawah dropdown kini menempel rapat & presisi 4px di atas tombol trigger di seluruh >50 lokasi pemakaian. Dikunci 91 test pass, tsc/eslint/build 100% hijau. | **F12** | 🟠 | Rendah | Tidak | `SELESAI 28 Agu 2026` | §1.2 |
+| 217 | **Dropdown (`StyledDropdown` & `StatusDropdown`) melayang jauh di atas tombol saat terbuka ke atas (*upward placement*)** — **DIKERJAKAN 28 Agu 2026:** Memperbaiki logika perenderan portal pada `StyledDropdown` & `StatusDropdown` di `src/components/ui/CommonComponents.tsx`. Saat posisi mengarah ke atas (`placement === 'top'`), portal di-anchor menggunakan `bottom: (window.innerHeight - rect.top) + 4` (bukan `top: rect.top - dropdownHeight`). Tepi bawah dropdown kini menempel rapat & presisi 4px di atas tombol trigger di seluruh >50 lokasi pemakaian. Dikunci 91 test pass, tsc/eslint/build 100% hijau. | **F12** | 🟠 | Rendah | Tidak | `SELESAI 28 Agu 2026` | §1.2 |
 | 216 | **Tampilan Geolocation IP Publik (`223.27.149.98`, `103.114.111.26`, dll.) di panel sesi terkeliru menjadi "Local Network"** — **DIKERJAKAN 28 Agu 2026:** Perbaikan logika perenderan lokasi di `UserSessionsPanel.tsx` membedakan IP Publik vs IP Privat LAN/localhost. Label "Local Network" kini khusus untuk IP lokal/LAN (`127.0.0.1`, `192.168.x`), sedangkan IP Publik selalu merender detail lokasi kota & negara ("East Jakarta, ID" / "Jakarta, Indonesia"). Dikunci 91 test pass, tsc/eslint/build 100% hijau. | **F12** | 🟠 | Sangat rendah | Tidak | `SELESAI` 28 Agu, terverifikasi build & test | §1.2 |
 | 215 | **Jabatan di kartu Team Members profil (`UserDetailView.tsx`) merender kode mentah (`jab-2`, UUID)** — **DIKERJAKAN 28 Agu 2026:** Pemanggilan `tm.position` di kartu TEAM dibungkus helper `getPosName()` sehingga kode mentah database (`jab-2`, ID UUID) terkonversi ke label Jabatan MasterData yang manusiawi. Dikunci 91 test pass, tsc/eslint/build 100% hijau. | **F12** | 🟡 | Sangat rendah | Tidak | `SELESAI` 28 Agu, terverifikasi build & test | §1.2 |
 | 214 | **Batas panjang username pendaftaran SSO Google/Microsoft dilonggarkan dari 10 menjadi 25 huruf** — **DIKERJAKAN 28 Agu 2026:** UI modal Complete Registration (`CompleteRegistrationScreen.tsx`), helper `ssoUsername.ts`, kamus terjemahan `en.ts` & `id.ts` (`usernameHint`), backend validator (`sso.service.ts`), serta unit test suite diperbarui ke max 25 huruf. Dikunci 91 test pass, tsc/eslint/build 100% hijau. | **F5** | 🟡 | Sangat rendah | Tidak | `SELESAI` 28 Agu, terverifikasi build & test | §1.2 |

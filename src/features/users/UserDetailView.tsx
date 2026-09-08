@@ -60,9 +60,10 @@ import {
   UserCheck,
   LogOut,
 } from "lucide-react";
-import { formatDistanceToNow, isToday, isThisWeek, isThisMonth } from "date-fns";
+import { format, formatDistanceToNow, isToday, isThisWeek, isThisMonth } from "date-fns";
 import { ResponsiveTable } from "../../components/ResponsiveTable";
 import { cn, ensureDate, humanizeActivityAction } from "../../lib/utils";
+import { statusSelesai } from "../../lib/statusSelesai";
 import { apiRequest, apiClient } from "../../lib/api";
 import {
   katalogPeranSistem,
@@ -96,6 +97,8 @@ interface UserDetailViewProps {
   onUserUpdated?: () => void;
   currentUser?: UserProfile | null;
   activityLogs?: ActivityLog[];
+  /** #470 — buka detail tugas dari Tugas Terdelegasi */
+  onOpenTask?: (task: Task) => void;
 }
 
 /**
@@ -193,6 +196,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   onUserUpdated,
   currentUser,
   activityLogs = [],
+  onOpenTask,
 }) => {
   const { t } = useTranslation();
   const effectiveCurrentUser =
@@ -283,7 +287,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  // Login Sessions State (Real interactive tracking per user)
+  // #480 — Login History HANYA dari UserSessions pemilik profil (regresi #191).
+  // Jangan mengarang dari navigator/GPS admin atau localStorage.
   interface SessionItem {
     id: string;
     device: string;
@@ -294,235 +299,91 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     isCurrent: boolean;
   }
 
-  const [userSessions, setUserSessions] = useState<SessionItem[]>(() => {
-    const uId = user?.id || user?.uid || "current";
-    const saved = safeLocalStorage.getItem(`user_sessions_${uId}`);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch {}
-    }
+  const [userSessions, setUserSessions] = useState<SessionItem[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
 
-    // Deteksi browser / OS nyata pengguna saat ini
-    const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
-    let detectedBrowser = "Browser";
-    if (ua.includes("Chrome") && !ua.includes("Edg")) detectedBrowser = "Chrome";
-    else if (ua.includes("Edg")) detectedBrowser = "Edge";
-    else if (ua.includes("Safari") && !ua.includes("Chrome")) detectedBrowser = "Safari";
-    else if (ua.includes("Firefox")) detectedBrowser = "Firefox";
-
-    let detectedOS = "PC";
-    let isMobile = false;
-    let isTablet = false;
-    if (ua.includes("Windows")) detectedOS = "Windows";
-    else if (ua.includes("Macintosh")) detectedOS = "macOS";
-    else if (ua.includes("iPhone")) {
-      detectedOS = "iPhone";
-      isMobile = true;
-    } else if (ua.includes("Android")) {
-      detectedOS = "Android";
-      isMobile = true;
-    } else if (ua.includes("iPad")) {
-      detectedOS = "iPad";
-      isTablet = true;
-    } else if (ua.includes("Linux")) detectedOS = "Linux";
-
-    // Deteksi nama kota spesifik berdasarkan TimeZone sistem pengguna nyata
-    let detectedCity = "Jakarta, Indonesia";
-    try {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-      if (tz.includes("/")) {
-        const parts = tz.split("/");
-        const cityPart = parts[parts.length - 1].replace(/_/g, " ");
-        const regionPart = parts[0];
-        if (tz === "Asia/Jakarta") detectedCity = "Jakarta, Indonesia";
-        else if (tz === "Asia/Pontianak") detectedCity = "Pontianak, Indonesia";
-        else if (tz === "Asia/Makassar") detectedCity = "Makassar, Indonesia";
-        else if (tz === "Asia/Jayapura") detectedCity = "Jayapura, Indonesia";
-        else if (tz === "Asia/Singapore") detectedCity = "Singapore";
-        else if (tz === "Asia/Kuala_Lumpur") detectedCity = "Kuala Lumpur, Malaysia";
-        else if (regionPart === "Asia") detectedCity = `${cityPart}, Asia`;
-        else detectedCity = `${cityPart}, ${regionPart}`;
-      }
-    } catch {}
-
-    const currentSession: SessionItem = {
-      id: "s-current",
-      device: `${detectedBrowser} on ${detectedOS}`,
-      deviceType: isMobile ? "smartphone" : isTablet ? "tablet" : "laptop",
-      location: detectedCity,
-      ip: "127.0.0.1 (Local)",
-      time: "Active Now",
-      isCurrent: true,
-    };
-
-    const initialSessions: SessionItem[] = [currentSession];
-    safeLocalStorage.setItem(`user_sessions_${uId}`, JSON.stringify(initialSessions));
-    return initialSessions;
-  });
-
-  // Item #187 — Real GPS Device Geolocation + Reverse Geocode (Bogor/lokasi fisik nyata) dengan IP Fallback
   useEffect(() => {
     let isMounted = true;
+    const targetId = user?.id || user?.uid;
+    if (!targetId) {
+      setUserSessions([]);
+      return;
+    }
 
-    const updateSessionLocation = (realLocation: string, realIp?: string) => {
-      if (!isMounted) return;
-      setUserSessions((prev) => {
-        const updated = prev.map((s) =>
-          s.isCurrent
-            ? {
-                ...s,
-                location: realLocation,
-                ip: realIp || s.ip || "127.0.0.1",
-              }
-            : s
-        );
-        const uId = user?.id || user?.uid || "current";
-        safeLocalStorage.setItem(`user_sessions_${uId}`, JSON.stringify(updated));
-        return updated;
-      });
-    };
-
-    const fetchGpsLocation = () => {
-      if (typeof navigator !== "undefined" && "geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          async (pos) => {
-            const { latitude, longitude } = pos.coords;
-            try {
-              // Reverse Geocoding via OpenStreetMap Nominatim
-              const geoRes = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`,
-                { headers: { "Accept-Language": "id,en" } }
-              ).then((r) => r.json());
-
-              if (geoRes && geoRes.address && isMounted) {
-                const addr = geoRes.address;
-                const cityName =
-                  addr.city ||
-                  addr.town ||
-                  addr.municipality ||
-                  addr.regency ||
-                  addr.county ||
-                  addr.state_district ||
-                  addr.state ||
-                  "Bogor";
-                const countryName = addr.country || "Indonesia";
-                const preciseLocation = `${cityName}, ${countryName}`;
-                updateSessionLocation(preciseLocation);
-              }
-            } catch {
-              // Fallback BigDataCloud client-side reverse geocode
-              try {
-                const bdcRes = await fetch(
-                  `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=id`
-                ).then((r) => r.json());
-                if (bdcRes && bdcRes.city && isMounted) {
-                  const preciseLocation = `${bdcRes.city || bdcRes.locality}, ${bdcRes.countryName || "Indonesia"}`;
-                  updateSessionLocation(preciseLocation);
-                }
-              } catch {}
-            }
-          },
-          () => {
-            // Pengguna menolak izin GPS atau timeout -> IP fallback
-          },
-          { timeout: 8000, enableHighAccuracy: true }
-        );
-      }
-    };
-
-    const fetchRealGeoLocation = async () => {
-      // 1. Ambil IPv4 publik bersih pengguna (angka standar, bukan IPv6 panjang)
-      let detectedIp = "";
-      try {
-        const ip4Res = await fetch("https://api4.ipify.org?format=json").then((r) => r.json());
-        if (ip4Res && ip4Res.ip && isMounted) {
-          detectedIp = ip4Res.ip;
-        }
-      } catch {}
-
-      try {
-        const res = await fetch("https://ipwho.is/").then((r) => r.json());
-        if (res && res.success !== false && isMounted) {
-          if (!detectedIp) detectedIp = res.ip || "";
-          const fallbackLoc = `${res.city || "Bogor"}, ${res.country || "Indonesia"}`;
-          updateSessionLocation(fallbackLoc, detectedIp);
-        }
-      } catch {
-        try {
-          const res2 = await fetch("https://ipapi.co/json/").then((r) => r.json());
-          if (res2 && res2.city && isMounted) {
-            if (!detectedIp) detectedIp = res2.ip || "";
-            const fallbackLoc = `${res2.city || "Bogor"}, ${res2.country_name || "Indonesia"}`;
-            updateSessionLocation(fallbackLoc, detectedIp);
-          }
-        } catch {
-          if (detectedIp) {
-            updateSessionLocation("Bogor, Indonesia", detectedIp);
-          }
-        }
-      }
-
-      // 2. Minta koordinat GPS fisik nyata perangkat (Tajurhalang/Bogor)
-      fetchGpsLocation();
-    };
+    try {
+      safeLocalStorage.removeItem(`user_sessions_${targetId}`);
+    } catch {}
 
     const fetchUserDbSessions = async () => {
-      const targetId = user?.id || user?.uid;
-      if (!targetId) return;
+      setSessionsLoading(true);
       try {
-        const res = await apiClient.get(`/api/admin/sessions?userId=${targetId}&limit=10`);
-        if (
-          res.data?.status === "success" &&
-          Array.isArray(res.data.data) &&
-          res.data.data.length > 0 &&
-          isMounted
-        ) {
+        const res = await apiClient.get(
+          `/api/admin/sessions?userId=${encodeURIComponent(targetId)}&limit=10`
+        );
+        if (!isMounted) return;
+        if (res.data?.status === "success" && Array.isArray(res.data.data)) {
+          const viewingSelf = Boolean(
+            curId &&
+            (curId === user?.id ||
+              curId === user?.uid ||
+              (effectiveCurrentUser?.email && effectiveCurrentUser.email === user?.email))
+          );
           const formatted: SessionItem[] = res.data.data.map((item: any) => {
             const isMobile =
               (item.device || item.os || "").toLowerCase().includes("android") ||
               (item.device || item.os || "").toLowerCase().includes("iphone");
             const isTablet = (item.device || item.os || "").toLowerCase().includes("ipad");
+            const aktif = String(item.status || "").toUpperCase() === "ACTIVE";
+            const loginAt = item.loginAt ? ensureDate(item.loginAt) : null;
             return {
               id: item.id,
               device: `${item.browser || "Browser"} on ${item.os || "Device"}`,
-              deviceType: isMobile ? "smartphone" : isTablet ? "tablet" : "laptop",
+              deviceType: (isMobile
+                ? "smartphone"
+                : isTablet
+                  ? "tablet"
+                  : "laptop") as SessionItem["deviceType"],
               location: item.location || item.city || "Unknown Location",
-              ip: item.ipAddress || "127.0.0.1",
-              time:
-                item.status === "ACTIVE" ? "Active Now" : new Date(item.loginAt).toLocaleString(),
-              isCurrent: item.status === "ACTIVE",
+              ip: item.ipAddress || "—",
+              time: aktif && viewingSelf ? "Active Now" : loginAt ? loginAt.toLocaleString() : "—",
+              isCurrent: viewingSelf && aktif,
             };
           });
           setUserSessions(formatted);
-          return;
+        } else {
+          setUserSessions([]);
         }
       } catch {
-        // Fallback ke deteksi lokal jika gagal atau bukan admin
+        if (isMounted) setUserSessions([]);
+      } finally {
+        if (isMounted) setSessionsLoading(false);
       }
-      fetchRealGeoLocation();
     };
 
     fetchUserDbSessions();
     return () => {
       isMounted = false;
     };
-  }, [user?.id, user?.uid]);
+  }, [user?.id, user?.uid, user?.email, curId, effectiveCurrentUser?.email]);
 
-  const handleRevokeSession = (sessionId: string) => {
-    const updated = userSessions.filter((s) => s.id !== sessionId);
-    setUserSessions(updated);
-    const uId = user?.id || user?.uid || "current";
-    safeLocalStorage.setItem(`user_sessions_${uId}`, JSON.stringify(updated));
+  const handleRevokeSession = async (sessionId: string) => {
+    try {
+      await apiClient.post(`/api/admin/sessions/${sessionId}/terminate`);
+    } catch {}
+    setUserSessions((prev) => prev.filter((s) => s.id !== sessionId));
     toast.success(t("userDetail.deviceLoggedOut"));
   };
 
-  const handleRevokeAllOtherSessions = () => {
-    const currentOnly = userSessions.filter((s) => s.isCurrent);
-    setUserSessions(currentOnly);
-    const uId = user?.id || user?.uid || "current";
-    safeLocalStorage.setItem(`user_sessions_${uId}`, JSON.stringify(currentOnly));
+  const handleRevokeAllOtherSessions = async () => {
+    const others = userSessions.filter((s) => !s.isCurrent);
+    await Promise.all(
+      others.map(async (s) => {
+        try {
+          await apiClient.post(`/api/admin/sessions/${s.id}/terminate`);
+        } catch {}
+      })
+    );
+    setUserSessions((prev) => prev.filter((s) => s.isCurrent));
     toast.success(t("userDetail.allLoggedOutSuccess"));
   };
 
@@ -900,6 +761,12 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
       (a, b) => ensureDate(b.createdAt).getTime() - ensureDate(a.createdAt).getTime()
     );
   }, [activityLogs, userAuditActivityLogs, userId, user.uid]);
+
+  // #470 — Timeline tab Project: jejak nyata (bukan dummy), max 8 entri terbaru
+  const projectTabTimeline = React.useMemo(() => {
+    return userActivityLogsAll.slice(0, 8);
+  }, [userActivityLogsAll]);
+
   const userActivityLogsFiltered = React.useMemo(() => {
     return userActivityLogsAll.filter((log) => {
       const d = ensureDate(log.createdAt);
@@ -1832,59 +1699,72 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                     </div>
 
                     <div className="divide-y divide-border-faint max-h-[250px] overflow-y-auto pr-1 custom-scrollbar">
-                      {userSessions.map((item) => {
-                        const DeviceIcon =
-                          item.deviceType === "smartphone"
-                            ? Smartphone
-                            : item.deviceType === "tablet"
-                              ? Tablet
-                              : Laptop;
+                      {sessionsLoading ? (
+                        <p className="text-xs text-content-subtle italic py-4 text-center">
+                          {t("userDetail.loadingSessions", "Memuat riwayat masuk...")}
+                        </p>
+                      ) : userSessions.length === 0 ? (
+                        <p className="text-xs text-content-subtle italic py-4 text-center">
+                          {t(
+                            "userDetail.noLoginHistory",
+                            "Belum ada riwayat login untuk pengguna ini."
+                          )}
+                        </p>
+                      ) : (
+                        userSessions.map((item) => {
+                          const DeviceIcon =
+                            item.deviceType === "smartphone"
+                              ? Smartphone
+                              : item.deviceType === "tablet"
+                                ? Tablet
+                                : Laptop;
 
-                        return (
-                          <div
-                            key={item.id}
-                            className="py-3 first:pt-1 last:pb-0 flex items-center justify-between gap-3"
-                          >
-                            <div className="flex items-center gap-3 min-w-0 flex-1">
-                              <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                <DeviceIcon className="w-4.5 h-4.5" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs font-medium text-content-strong truncate">
-                                    {item.device}
-                                  </span>
-                                  {item.isCurrent && (
-                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 shrink-0">
-                                      {t("userDetail.currentDevice")}
+                          return (
+                            <div
+                              key={item.id}
+                              className="py-3 first:pt-1 last:pb-0 flex items-center justify-between gap-3"
+                            >
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                  <DeviceIcon className="w-4.5 h-4.5" />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-medium text-content-strong truncate">
+                                      {item.device}
                                     </span>
-                                  )}
-                                </div>
-                                <div className="text-xs text-content-subtle truncate mt-0.5 flex items-center gap-1.5">
-                                  <span>{item.location}</span>
-                                  <span>•</span>
-                                  <span>{item.ip}</span>
+                                    {item.isCurrent && (
+                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-700 shrink-0">
+                                        {t("userDetail.currentDevice")}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-xs text-content-subtle truncate mt-0.5 flex items-center gap-1.5">
+                                    <span>{item.location}</span>
+                                    <span>•</span>
+                                    <span>{item.ip}</span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
 
-                            <div className="shrink-0 text-right">
-                              <div className="text-xs text-content-subtle font-medium">
-                                {item.time}
+                              <div className="shrink-0 text-right">
+                                <div className="text-xs text-content-subtle font-medium">
+                                  {item.time}
+                                </div>
+                                {!item.isCurrent && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRevokeSession(item.id)}
+                                    className="text-[10px] text-rose-600 hover:bg-rose-500/10 px-2 py-0.5 rounded transition cursor-pointer mt-0.5 inline-block font-semibold"
+                                  >
+                                    Logout
+                                  </button>
+                                )}
                               </div>
-                              {!item.isCurrent && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleRevokeSession(item.id)}
-                                  className="text-[10px] text-rose-600 hover:bg-rose-500/10 px-2 py-0.5 rounded transition cursor-pointer mt-0.5 inline-block font-semibold"
-                                >
-                                  Logout
-                                </button>
-                              )}
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })
+                      )}
                     </div>
                   </div>
                 </div>
@@ -2191,8 +2071,8 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               (tItem as any).projectKey === p.key
                           );
 
-                          const completedTasks = allProjTasks.filter(
-                            (tItem) => tItem.status === "Done" || tItem.status === "Selesai"
+                          const completedTasks = allProjTasks.filter((tItem) =>
+                            statusSelesai(tItem.status, masterData)
                           );
                           const progressPercent =
                             allProjTasks.length > 0
@@ -2270,7 +2150,9 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
 
                                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-surface-sunken text-content-body font-medium border border-border-subtle">
                                   <FileText className="w-3 h-3 text-content-subtle" />
-                                  <span>{allProjTasks.length} Tasks</span>
+                                  <span>
+                                    {projTasks.length} assigned · {allProjTasks.length} total
+                                  </span>
                                 </span>
                               </div>
 
@@ -2309,6 +2191,15 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                     projTasks.map((tItem: any) => (
                                       <div
                                         key={tItem.id || tItem.key}
+                                        role="button"
+                                        tabIndex={0}
+                                        onClick={() => onOpenTask?.(tItem as Task)}
+                                        onKeyDown={(e) => {
+                                          if (e.key === "Enter" || e.key === " ") {
+                                            e.preventDefault();
+                                            onOpenTask?.(tItem as Task);
+                                          }
+                                        }}
                                         className="flex items-center justify-between gap-3 p-2.5 bg-surface hover:bg-surface-muted/60 rounded-lg border border-border-subtle transition cursor-pointer"
                                       >
                                         <div className="flex items-center gap-2.5 min-w-0">
@@ -2449,10 +2340,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           <span className="text-content-body font-medium">Done</span>
                         </div>
                         <span className="font-semibold text-content-strong">
-                          {
-                            userTasks.filter((t) => t.status === "Done" || t.status === "Selesai")
-                              .length
-                          }
+                          {userTasks.filter((t) => statusSelesai(t.status, masterData)).length}
                         </span>
                       </div>
                     </div>
@@ -2467,27 +2355,52 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       </h3>
                     </div>
 
-                    <div className="relative pl-5 space-y-4 border-l-2 border-primary/20 ml-2 py-1 text-xs">
-                      <div className="relative">
-                        <div className="absolute -left-[27px] top-0.5 w-3 h-3 rounded-full bg-primary-surface ring-4 ring-surface" />
-                        <div className="font-medium text-content-strong">Project created</div>
-                        <div className="text-[11px] text-content-muted mt-0.5">
-                          Word Merchant & Issue Resolution
-                        </div>
-                        <div className="text-[10px] text-content-subtle mt-0.5">Jan 10, 2025</div>
+                    {projectTabTimeline.length === 0 ? (
+                      <p className="text-xs text-content-subtle italic py-4 text-center">
+                        {t("userDetail.noActivity")}
+                      </p>
+                    ) : (
+                      <div className="relative pl-5 space-y-4 border-l-2 border-primary/20 ml-2 py-1 text-xs">
+                        {projectTabTimeline.map((log, idx) => {
+                          const actDate = ensureDate(log.createdAt);
+                          let formattedDetails = log.details || "";
+                          if (formattedDetails) {
+                            (tasks || []).forEach((t) => {
+                              if (formattedDetails.includes(t.id)) {
+                                formattedDetails = formattedDetails.replace(
+                                  t.id,
+                                  `"${t.title}" (${t.key || "TASK"})`
+                                );
+                              }
+                            });
+                          }
+                          const headline = humanizeActivityAction(log.action, formattedDetails);
+                          return (
+                            <div key={log.id || `tl-${idx}`} className="relative">
+                              <div
+                                className={cn(
+                                  "absolute -left-[27px] top-0.5 w-3 h-3 rounded-full ring-4 ring-surface",
+                                  idx === 0 ? "bg-primary-surface" : "bg-emerald-500"
+                                )}
+                              />
+                              <div className="font-medium text-content-strong line-clamp-2">
+                                {headline}
+                              </div>
+                              {formattedDetails && formattedDetails !== log.action ? (
+                                <div className="text-[11px] text-content-muted mt-0.5 line-clamp-2">
+                                  {formattedDetails}
+                                </div>
+                              ) : null}
+                              <div className="text-[10px] text-content-subtle mt-0.5">
+                                {format(actDate, "MMM d, yyyy")}
+                                {" · "}
+                                {formatDistanceToNow(actDate, { addSuffix: true })}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
-
-                      <div className="relative">
-                        <div className="absolute -left-[27px] top-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-surface" />
-                        <div className="font-medium text-content-strong">Last activity</div>
-                        <div className="text-[11px] text-content-muted mt-0.5">
-                          Onboarding NTB - task updated
-                        </div>
-                        <div className="text-[10px] text-content-subtle mt-0.5">
-                          Aug 27, 2025 • 10:24 AM
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Widget 3: Stay Productive Card Banner */}
@@ -2938,65 +2851,78 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                       </div>
 
                       <div className="space-y-3">
-                        {userSessions.map((item) => {
-                          const DeviceIcon =
-                            item.deviceType === "smartphone"
-                              ? Smartphone
-                              : item.deviceType === "tablet"
-                                ? Tablet
-                                : Laptop;
+                        {sessionsLoading ? (
+                          <p className="text-xs text-content-subtle italic py-6 text-center">
+                            {t("userDetail.loadingSessions", "Memuat riwayat masuk...")}
+                          </p>
+                        ) : userSessions.length === 0 ? (
+                          <p className="text-xs text-content-subtle italic py-6 text-center">
+                            {t(
+                              "userDetail.noLoginHistory",
+                              "Belum ada riwayat login untuk pengguna ini."
+                            )}
+                          </p>
+                        ) : (
+                          userSessions.map((item) => {
+                            const DeviceIcon =
+                              item.deviceType === "smartphone"
+                                ? Smartphone
+                                : item.deviceType === "tablet"
+                                  ? Tablet
+                                  : Laptop;
 
-                          return (
-                            <div
-                              key={item.id}
-                              className="flex items-center justify-between p-4 bg-surface-sunken/60 rounded-xl border border-border-subtle/50 hover:border-primary/30 transition-all"
-                            >
-                              <div className="flex items-center gap-3.5">
-                                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                  <DeviceIcon className="w-5 h-5" />
-                                </div>
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs font-semibold text-content-strong">
-                                      {item.device}
-                                    </span>
+                            return (
+                              <div
+                                key={item.id}
+                                className="flex items-center justify-between p-4 bg-surface-sunken/60 rounded-xl border border-border-subtle/50 hover:border-primary/30 transition-all"
+                              >
+                                <div className="flex items-center gap-3.5">
+                                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                    <DeviceIcon className="w-5 h-5" />
                                   </div>
-                                  <div className="flex flex-wrap items-center gap-2 text-xs text-content-subtle mt-0.5">
-                                    <span>{item.location}</span>
-                                    <span>•</span>
-                                    <span className="font-mono">{item.ip}</span>
-                                    <span>•</span>
-                                    <span>🕒 {item.time}</span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-2">
-                                {item.isCurrent ? (
-                                  <>
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
-                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-                                      <span>
-                                        {t("userDetail.currentDevice", "Current Session")}
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-semibold text-content-strong">
+                                        {item.device}
                                       </span>
-                                    </span>
-                                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700">
-                                      {t("userDetail.active", "Active")}
-                                    </span>
-                                  </>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRevokeSession(item.id)}
-                                    className="px-4 py-1.5 rounded-full text-xs font-semibold text-rose-600 bg-rose-50/50 hover:bg-rose-100 border border-rose-200 transition cursor-pointer"
-                                  >
-                                    {t("userDetail.logoutAction", "Log out")}
-                                  </button>
-                                )}
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-2 text-xs text-content-subtle mt-0.5">
+                                      <span>{item.location}</span>
+                                      <span>•</span>
+                                      <span className="font-mono">{item.ip}</span>
+                                      <span>•</span>
+                                      <span>🕒 {item.time}</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  {item.isCurrent ? (
+                                    <>
+                                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                                        <span>
+                                          {t("userDetail.currentDevice", "Current Session")}
+                                        </span>
+                                      </span>
+                                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700">
+                                        {t("userDetail.active", "Active")}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRevokeSession(item.id)}
+                                      className="px-4 py-1.5 rounded-full text-xs font-semibold text-rose-600 bg-rose-50/50 hover:bg-rose-100 border border-rose-200 transition cursor-pointer"
+                                    >
+                                      {t("userDetail.logoutAction", "Log out")}
+                                    </button>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })
+                        )}
                       </div>
                     </div>
                   </div>

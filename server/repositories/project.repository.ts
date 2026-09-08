@@ -316,6 +316,11 @@ export class ProjectRepository {
           'DELETE FROM "TaskWorkLogs" WHERE "taskId" IN (SELECT id FROM Tasks WHERE projectId = ?)',
           [projectId],
         ],
+        // #473 — komentar thread sebelum DiscussionPoints (hindari orphan)
+        [
+          "DELETE FROM discussion_point_comments WHERE pointId IN (SELECT id FROM DiscussionPoints WHERE meetingId IN (SELECT id FROM Meetings WHERE projectId = ?))",
+          [projectId],
+        ],
         [
           "DELETE FROM DiscussionPoints WHERE meetingId IN (SELECT id FROM Meetings WHERE projectId = ?)",
           [projectId],
@@ -328,6 +333,8 @@ export class ProjectRepository {
           "DELETE FROM meeting_details WHERE meeting_id IN (SELECT id FROM Meetings WHERE projectId = ?)",
           [projectId],
         ],
+        // #473 — opsional; tabel snake_case, SAVEPOINT sudah melewati bila tidak ada
+        ["DELETE FROM ai_learning_logs WHERE project_id = ?", [projectId]],
         ["DELETE FROM QATestCaseExecutionLogs WHERE projectId = ?", [projectId]],
         ["DELETE FROM Tasks WHERE projectId = ?", [projectId]],
         ["DELETE FROM Sprints WHERE projectId = ?", [projectId]],

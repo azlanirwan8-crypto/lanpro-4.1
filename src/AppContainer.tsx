@@ -4126,6 +4126,10 @@ function AppContainer() {
                 masterData={masterData}
                 currentUser={currentUser || currentUserProfile}
                 activityLogs={activityLogs || []}
+                onOpenTask={(task) => {
+                  setSelectedTaskForDetail(task);
+                  setCurrentView("issueDetail" as any);
+                }}
                 onUserUpdated={() => {
                   fetchProjects();
                 }}

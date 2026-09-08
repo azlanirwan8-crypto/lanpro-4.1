@@ -52,7 +52,10 @@ export class ProjectModuleRepository {
     }
   }
 
-  async update(id: string, updates: { projectId: string; namaModul: string; keterangan?: string | null }): Promise<void> {
+  async update(
+    id: string,
+    updates: { projectId: string; namaModul: string; keterangan?: string | null }
+  ): Promise<void> {
     const connection = await db.getConnection();
     try {
       await connection.query(
@@ -68,6 +71,13 @@ export class ProjectModuleRepository {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
+      // #474 — execution logs sebelum cases/modul
+      await connection.query(
+        `DELETE FROM QATestCaseExecutionLogs WHERE "testCaseId" IN (
+          SELECT id FROM QATestCases WHERE modulId = ?
+        )`,
+        [id]
+      );
       await connection.query("DELETE FROM QATestCases WHERE modulId = ?", [id]);
       await connection.query("DELETE FROM ProjectModules WHERE id = ?", [id]);
       await connection.commit();

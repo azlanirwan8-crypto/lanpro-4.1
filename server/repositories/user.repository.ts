@@ -476,10 +476,32 @@ export class UserRepository {
     }
   }
 
+  /**
+   * #478 — hapus ProjectMembers (id + uid) sebelum Users, supaya membership tidak yatim.
+   * UserIdentities/UserSessions punya ON DELETE CASCADE di migrate — ikut hilang.
+   */
   async delete(id: string): Promise<void> {
     const connection = await db.getConnection();
     try {
-      await connection.query("DELETE FROM Users WHERE id = ?", [id]);
+      await connection.beginTransaction();
+      const [rows]: any = await connection.query(
+        "SELECT id, uid FROM Users WHERE id = ? OR uid = ?",
+        [id, id]
+      );
+      if (!rows || rows.length === 0) {
+        await connection.commit();
+        return;
+      }
+      const userId = rows[0].id;
+      const uid = rows[0].uid || null;
+      const ids = uid && String(uid) !== String(userId) ? [userId, uid] : [userId];
+
+      await connection.query("DELETE FROM ProjectMembers WHERE userId IN (?)", [ids]);
+      await connection.query("DELETE FROM Users WHERE id = ?", [userId]);
+      await connection.commit();
+    } catch (err) {
+      await connection.rollback();
+      throw err;
     } finally {
       connection.release();
     }

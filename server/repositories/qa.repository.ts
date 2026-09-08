@@ -139,6 +139,14 @@ export class QaRepository {
     const connection = await db.getConnection();
     try {
       await connection.beginTransaction();
+      // #474 — execution logs sebelum case/suite (hindari orphan)
+      await connection.query(
+        `DELETE FROM QATestCaseExecutionLogs WHERE projectId = ? AND (
+          "testCaseId" IN (SELECT id FROM QATestCases WHERE suiteId = ? AND projectId = ?)
+          OR "testCaseId" IN (SELECT id FROM QATestCases WHERE modulId = ? AND projectId = ?)
+        )`,
+        [projectId, id, projectId, id, projectId]
+      );
       await connection.query("DELETE FROM QATestCases WHERE suiteId = ? AND projectId = ?", [
         id,
         projectId,
@@ -758,10 +766,20 @@ export class QaRepository {
   async deleteTestCase(id: string, projectId: string): Promise<void> {
     const connection = await db.getConnection();
     try {
+      await connection.beginTransaction();
+      // #474 — logs sebelum case
+      await connection.query(
+        'DELETE FROM QATestCaseExecutionLogs WHERE "testCaseId" = ? AND projectId = ?',
+        [id, projectId]
+      );
       await connection.query("DELETE FROM QATestCases WHERE id = ? AND projectId = ?", [
         id,
         projectId,
       ]);
+      await connection.commit();
+    } catch (err) {
+      await connection.rollback();
+      throw err;
     } finally {
       connection.release();
     }

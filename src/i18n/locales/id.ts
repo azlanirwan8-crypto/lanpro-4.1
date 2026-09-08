@@ -1301,6 +1301,8 @@ export const id = {
     forgotPasswordNote: "Silakan hubungi Super Admin untuk mereset kata sandi Anda.",
     loginHistory: "Riwayat Masuk Perangkat",
     loginHistoryHint: "Daftar sesi perangkat dan lokasi yang baru-baru ini mengakses akun Anda.",
+    noLoginHistory: "Belum ada riwayat login untuk pengguna ini.",
+    loadingSessions: "Memuat riwayat masuk...",
     allLogout: "Keluarkan Semua Sesi",
     allLoggedOutSuccess: "Seluruh sesi perangkat lain telah berhasil dikeluarkan.",
     currentDevice: "Perangkat Saat Ini",

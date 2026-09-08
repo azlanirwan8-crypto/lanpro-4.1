@@ -1290,6 +1290,8 @@ export const en = {
     forgotPasswordNote: "Please contact Super Admin to reset your password.",
     loginHistory: "Login History",
     loginHistoryHint: "List of devices and locations that recently accessed your account.",
+    noLoginHistory: "No login history for this user yet.",
+    loadingSessions: "Loading login history...",
     allLogout: "All Logout",
     allLoggedOutSuccess: "All other device sessions have been logged out.",
     currentDevice: "Current Device",

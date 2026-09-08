@@ -6,8 +6,6 @@
  * menerima argumen biasa dan mengembalikan nilai — sehingga tempatnya di
  * lapisan services. Dipindah apa adanya, tanpa perubahan logika.
  */
-import crypto from "crypto";
-
 // True if `val` (a client-supplied id, e.g. senderId/receiverId/userId in a chat or
 // notification request) actually identifies the authenticated caller — checked
 // against both `id` and `uid` since different tables/flows use either as the
@@ -17,34 +15,8 @@ export function matchesCaller(reqUser: any, val: any): boolean {
   return String(val) === String(reqUser?.id) || String(val) === String(reqUser?.uid);
 }
 
-export async function recordExecutionRunLog(
-  connection: any,
-  projectId: string,
-  caseId: string,
-  executionStatus: string,
-  linkedIssueKey: string,
-  executedByUserId: string,
-  executedByName: string,
-  evaluationNotes: string,
-  evidences: any[]
-) {
-  const logId = crypto.randomUUID();
-  await connection.query(
-    `INSERT INTO QATestCaseExecutionLogs (id, projectId, caseId, executionStatus, linkedIssueKey, executedByUserId, executedByName, evaluationNotes, evidences)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      logId,
-      projectId,
-      caseId,
-      executionStatus,
-      linkedIssueKey,
-      executedByUserId,
-      executedByName,
-      evaluationNotes,
-      JSON.stringify(evidences || []),
-    ]
-  );
-}
+// #477 — recordExecutionRunLog di sini dihapus: mati + kolom evaluationNotes
+// salah vs skema QATestCaseExecutionLogs. Jalur hidup ada di qa.repository.
 
 export async function validateTimelineBoundaries(
   connection: any,

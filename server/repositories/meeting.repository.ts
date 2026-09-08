@@ -327,10 +327,21 @@ export class MeetingRepository {
     }
   }
 
+  /**
+   * #472 — hapus meeting_details dulu; jangan biarkan orphan setelah parent DELETE.
+   * Cascade discussion points tetap di rute (deletePoint + komentar); di sini
+   * hanya anak langsung meeting_details + Meetings.
+   */
   async delete(id: string): Promise<void> {
     const connection = await db.getConnection();
     try {
+      await connection.beginTransaction();
+      await connection.query("DELETE FROM meeting_details WHERE meeting_id = ?", [id]);
       await connection.query("DELETE FROM Meetings WHERE id = ?", [id]);
+      await connection.commit();
+    } catch (err) {
+      await connection.rollback();
+      throw err;
     } finally {
       connection.release();
     }

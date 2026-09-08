@@ -558,6 +558,14 @@ export class TaskRepository {
         "DELETE FROM TaskExternalLinks WHERE taskId IN (?)",
         [taskIds]
       );
+      // #477 — ActivityLogs by taskId; Notifications terkait task (relatedId)
+      await connection.query('DELETE FROM ActivityLogs WHERE "taskId" IN (?)', [taskIds]);
+      await hapusAnakOpsional(
+        connection,
+        "sp_notif_task",
+        "DELETE FROM Notifications WHERE relatedId IN (?)",
+        [taskIds]
+      );
       await connection.query("DELETE FROM Tasks WHERE id IN (?) AND projectId = ?", [
         taskIds,
         projectId,
@@ -593,6 +601,14 @@ export class TaskRepository {
         connection,
         "sp_extlinks",
         "DELETE FROM TaskExternalLinks WHERE taskId = ?",
+        [id]
+      );
+      // #477 — bersihkan ActivityLogs + notifikasi terkait task
+      await connection.query('DELETE FROM ActivityLogs WHERE "taskId" = ?', [id]);
+      await hapusAnakOpsional(
+        connection,
+        "sp_notif_task",
+        "DELETE FROM Notifications WHERE relatedId = ?",
         [id]
       );
       await connection.query("DELETE FROM Tasks WHERE id = ? AND projectId = ?", [id, projectId]);

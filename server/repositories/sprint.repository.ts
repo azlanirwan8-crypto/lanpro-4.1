@@ -116,10 +116,25 @@ export class SprintRepository {
     }
   }
 
+  /**
+   * #475 — hapus sprint: null-kan Tasks.sprintId + MilestoneSprints, lalu Sprints.
+   * UPDATE langsung di repo = jalur unlock (#461): bukan PUT task per baris,
+   * jadi cekPindahLingkupSprint tidak menolak saat lingkup aktif/selesai.
+   */
   async delete(id: string, projectId: string): Promise<void> {
     const connection = await db.getConnection();
     try {
+      await connection.beginTransaction();
+      await connection.query(
+        "UPDATE Tasks SET sprintId = NULL WHERE sprintId = ? AND projectId = ?",
+        [id, projectId]
+      );
+      await connection.query("DELETE FROM MilestoneSprints WHERE sprintId = ?", [id]);
       await connection.query("DELETE FROM Sprints WHERE id = ? AND projectId = ?", [id, projectId]);
+      await connection.commit();
+    } catch (err) {
+      await connection.rollback();
+      throw err;
     } finally {
       connection.release();
     }

@@ -130,12 +130,14 @@ export class DiscussionPointsRepository {
       const sqlUpdates: string[] = [];
       const values: any[] = [];
 
+      // #476 — kolom camelCase DiscussionPoints TIDAK di auto-quote db.ts;
+      // tanpa kutip PG menulis twin lowercase (parentpointid, …).
       if (updates.parentPointId !== undefined) {
-        sqlUpdates.push("parentPointId = ?");
+        sqlUpdates.push('"parentPointId" = ?');
         values.push(updates.parentPointId);
       }
       if (updates.assignTo !== undefined) {
-        sqlUpdates.push("assignTo = ?");
+        sqlUpdates.push('"assignTo" = ?');
         values.push(updates.assignTo);
       }
       if (updates.concern !== undefined) {
@@ -159,7 +161,7 @@ export class DiscussionPointsRepository {
         values.push(updates.keterangan);
       }
       if (updates.tindakanLanjut !== undefined) {
-        sqlUpdates.push("tindakanLanjut = ?");
+        sqlUpdates.push('"tindakanLanjut" = ?');
         values.push(updates.tindakanLanjut);
       }
       if (updates.status !== undefined) {
@@ -167,11 +169,11 @@ export class DiscussionPointsRepository {
         values.push(updates.status);
       }
       if (updates.targetDate !== undefined) {
-        sqlUpdates.push("targetDate = ?");
+        sqlUpdates.push('"targetDate" = ?');
         values.push(updates.targetDate);
       }
       if (updates.tanggalUpdateStatus !== undefined) {
-        sqlUpdates.push("tanggalUpdateStatus = ?");
+        sqlUpdates.push('"tanggalUpdateStatus" = ?');
         values.push(updates.tanggalUpdateStatus);
       }
 
