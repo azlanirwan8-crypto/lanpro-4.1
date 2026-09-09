@@ -96,6 +96,7 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadCount, setUploadCount] = useState({ current: 0, total: 0 });
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [brokenImages, setBrokenImages] = useState<Record<string, boolean>>({});
   const [previewImage, setPreviewImage] = useState<{
     url: string;
     title: string;
@@ -103,9 +104,15 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
   } | null>(null);
 
   const handleDownloadAttachment = (att: Attachment) => {
+    let downloadUrl = att.url;
+    const fileName = att.name || att.filename || "download";
+    if (downloadUrl.startsWith("/api/v1/files/secure-stream")) {
+      const sep = downloadUrl.includes("?") ? "&" : "?";
+      downloadUrl = `${downloadUrl}${sep}download=1&name=${encodeURIComponent(fileName)}`;
+    }
     const a = document.createElement("a");
-    a.href = att.url;
-    a.download = att.name || att.filename || "download";
+    a.href = downloadUrl;
+    a.download = fileName;
     a.target = "_blank";
     a.rel = "noopener noreferrer";
     document.body.appendChild(a);
@@ -344,13 +351,16 @@ export const TaskAttachmentsSection: React.FC<TaskAttachmentsSectionProps> = ({
                   className="w-8 h-8 rounded-md bg-surface flex items-center justify-center shrink-0 border border-border-subtle/80 overflow-hidden cursor-pointer"
                   onClick={() => handleEyeClick(att)}
                 >
-                  {isImg ? (
+                  {isImg && !brokenImages[att.id || String(attIdx)] ? (
                     <img
                       src={att.url}
-                      alt={att.name}
+                      alt={att.name || att.filename}
                       className="w-full h-full object-cover"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLElement).style.display = "none";
+                      onError={() => {
+                        setBrokenImages((prev) => ({
+                          ...prev,
+                          [att.id || String(attIdx)]: true,
+                        }));
                       }}
                     />
                   ) : (

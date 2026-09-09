@@ -24,6 +24,35 @@ const isServerless =
 const GLOBAL_UPLOADS_DIR = isServerless ? "/tmp/uploads" : path.join(process.cwd(), "uploads");
 const upload = multer({ dest: GLOBAL_UPLOADS_DIR });
 
+const MIME_TYPES: Record<string, string> = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  webp: "image/webp",
+  gif: "image/gif",
+  svg: "image/svg+xml",
+  pdf: "application/pdf",
+  doc: "application/msword",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  xls: "application/vnd.ms-excel",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  csv: "text/csv",
+  txt: "text/plain",
+  zip: "application/zip",
+  rar: "application/x-rar-compressed",
+  "7z": "application/x-7z-compressed",
+  mp4: "video/mp4",
+  webm: "video/webm",
+  mp3: "audio/mpeg",
+  wav: "audio/wav",
+  m4a: "audio/mp4",
+};
+
+function resolveContentType(filename: string): string {
+  const ext = path.extname(filename).toLowerCase().replace(/^\./, "");
+  return MIME_TYPES[ext] || "application/octet-stream";
+}
+
 if (!fs.existsSync(GLOBAL_UPLOADS_DIR)) {
   fs.mkdirSync(GLOBAL_UPLOADS_DIR, { recursive: true });
 }
@@ -69,7 +98,8 @@ router.post(
       }
 
       const userId = req.user?.id || req.user?.uid || "guest";
-      const presignedUrl = generatePresignedUrl(safeFilename, userId, 60);
+      // #490 — masa berlaku lampiran dokumen 1 tahun (525600 menit) agar tidak kadaluarsa dalam 1 jam
+      const presignedUrl = generatePresignedUrl(safeFilename, userId, 525600);
 
       const tokenParts = presignedUrl.split("token=");
       const tokenValue = tokenParts.length > 1 ? tokenParts[1] : "";
@@ -154,6 +184,16 @@ router.get(
         });
       }
 
+      const contentType = resolveContentType(safeFilename);
+      const isDownload = req.query.download === "1";
+      const rawName = (req.query.name as string) || safeFilename;
+      const sanitizedName = rawName.replace(/["\r\n]/g, "_");
+
+      res.setHeader("Content-Type", contentType);
+      res.setHeader(
+        "Content-Disposition",
+        `${isDownload ? "attachment" : "inline"}; filename="${sanitizedName}"`
+      );
       res.setHeader("X-Content-Type-Options", "nosniff");
       res.setHeader(
         "Content-Security-Policy",

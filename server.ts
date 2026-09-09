@@ -517,6 +517,8 @@ async function startServer() {
     // #304 — Vercel Cron / pemicu luar memakai CRON_SECRET, bukan JWT.
     "/api/cron/tick",
     "/api/cron/task-digest",
+    // #490 — stream berkas aman via presigned query token (token/expires/uid)
+    "/api/v1/files/secure-stream",
   ]);
 
   /**
