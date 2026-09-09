@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React from "react";
+import React, { useState } from "react";
 import {
   Sparkles,
   Layout,
@@ -7,6 +7,8 @@ import {
   Paperclip as AttachmentIcon,
   MessageSquare,
   History,
+  Reply,
+  X,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "../../../../lib/utils";
@@ -54,6 +56,28 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
   safeFormat,
 }) => {
   const { t } = useTranslation();
+  const [replyTo, setReplyTo] = useState<{
+    id: string;
+    authorName: string;
+    username?: string;
+    snippet: string;
+  } | null>(null);
+
+  const onReplyClick = (c: any, name: string, uname: string) => {
+    setReplyTo({
+      id: c.id,
+      authorName: name,
+      username: uname,
+      snippet: (c.text || c.content || "").slice(0, 50),
+    });
+    const tag = uname ? `@${uname} ` : `@${name} `;
+    if (!newCommentText.includes(tag.trim())) {
+      handleCommentChange({
+        target: { value: `${tag}${newCommentText}` },
+      } as any);
+    }
+  };
+
   return (
     <div className="space-y-6 pt-6 border-t border-border-faint">
       <div className="flex items-center gap-6 border-b border-border-faint">
@@ -94,17 +118,43 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
       </div>
 
       {activeTab === "comments" && (
-        <div className="space-y-8">
-          {/* Add Comment */}
-          <div className="flex gap-4 p-2">
+        <div className="space-y-6">
+          {/* New Comment Box */}
+          <div className="flex gap-3">
             <UserAvatar
-              uid={user?.uid || ""}
-              members={projectMembers}
-              className="w-9 h-9 border-2 border-surface shadow-md shrink-0"
+              user={user}
+              uid={user?.uid || user?.id}
+              className="w-8 h-8 border border-surface shadow-2xs shrink-0"
             />
-            <div className="flex-1 relative group">
-              <div className="border border-border-subtle rounded-xl bg-surface overflow-hidden focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/30 transition-all shadow-soft">
-                <div className="flex items-center gap-1 p-1.5 border-b border-border-faint bg-surface-sunken/50 text-content-muted overflow-x-auto custom-scrollbar">
+            <div className="flex-1 relative">
+              {replyTo && (
+                <div className="flex items-center justify-between px-3 py-1.5 mb-2 bg-surface-raised border border-border-subtle rounded-lg text-xs text-content-body shadow-2xs">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Reply className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="truncate">
+                      Membalas{" "}
+                      <strong className="font-semibold text-content-strong">
+                        @{replyTo.username || replyTo.authorName}
+                      </strong>
+                      {replyTo.snippet && (
+                        <span className="text-content-subtle ml-1.5 italic truncate">
+                          &ldquo;{replyTo.snippet}&rdquo;
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setReplyTo(null)}
+                    className="text-content-subtle hover:text-content-body p-0.5 rounded transition-colors ml-2 shrink-0"
+                    title="Batal balas"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+              <div className="border border-border-subtle rounded-xl bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-xs overflow-hidden">
+                <div className="flex items-center gap-1 p-2 border-b border-border-faint bg-surface-sunken/40 overflow-x-auto">
                   <button className="flex items-center gap-1.5 px-2 py-1 hover:bg-surface-strong rounded text-xs sm:text-[11px] font-normal text-content-secondary transition-colors shrink-0">
                     <Sparkles className="w-3 h-3 text-primary" />
                     {t("comments.improveWriting")}
@@ -191,7 +241,10 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
               <div className="flex justify-end pt-3">
                 <Button
                   size="sm"
-                  onClick={wrapSubmit("addComment", handleAddComment)}
+                  onClick={wrapSubmit("addComment", async () => {
+                    await handleAddComment();
+                    setReplyTo(null);
+                  })}
                   disabled={isSubmitting["addComment"] || !newCommentText.trim() || !isLoggedIn}
                   className="shadow-soft-lg shadow-primary/20 px-6 font-normal uppercase tracking-normal text-xs sm:text-[10px]"
                 >
@@ -204,7 +257,15 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
           {/* Comment List */}
           <div className="space-y-4">
             {comments.map((comment, i) => {
-              const author = (projectMembers || []).find((m) => m.uid === comment.authorId);
+              const author = (projectMembers || []).find(
+                (m) => (m.uid && m.uid === comment.authorId) || (m.id && m.id === comment.authorId)
+              );
+              const authorDisplayName =
+                author?.displayName || author?.name || comment.authorName || "Pengguna";
+              const authorAvatar =
+                author?.photoURL || (author as any)?.avatar_url || comment.authorAvatar;
+              const authorUsername = author?.username || comment.authorUsername || "";
+
               return (
                 <motion.div
                   initial={{ opacity: 0, x: -10 }}
@@ -214,33 +275,49 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                   className="flex gap-3 group"
                 >
                   <UserAvatar
+                    name={authorDisplayName}
+                    src={authorAvatar}
                     uid={comment.authorId}
                     members={projectMembers}
                     className="w-8 h-8 border border-surface shadow-2xs shrink-0"
                   />
                   <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-content-strong tracking-tight">
-                        {author?.displayName || "Unknown User"}
-                      </span>
-                      <div className="w-1 h-1 bg-surface-marker rounded-full" />
-                      <span className="text-xs sm:text-[10px] font-medium text-content-subtle">
-                        {safeFormat(comment.createdAt, "MMM d, h:mm a", "Just now")}
-                      </span>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-xs font-medium text-content-strong tracking-tight truncate">
+                          {authorDisplayName}
+                        </span>
+                        <div className="w-1 h-1 bg-surface-marker rounded-full shrink-0" />
+                        <span className="text-xs sm:text-[10px] font-medium text-content-subtle shrink-0">
+                          {safeFormat(comment.createdAt, "MMM d, h:mm a", "Just now")}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => onReplyClick(comment, authorDisplayName, authorUsername)}
+                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity flex items-center gap-1 text-[11px] text-content-subtle hover:text-primary px-1.5 py-0.5 rounded hover:bg-surface-raised cursor-pointer"
+                        title="Balas komentar ini"
+                      >
+                        <Reply className="w-3 h-3" />
+                        <span>Reply</span>
+                      </button>
                     </div>
                     <div className="text-xs text-content-body bg-surface-sunken/70 p-3 rounded-lg border border-border-subtle/60 leading-relaxed font-normal">
-                      {comment.text?.split(/(@\w+)/g).map((part: string, idx: number) =>
-                        part.startsWith("@") ? (
-                          <span
-                            key={idx}
-                            className="text-primary font-medium bg-primary/10 px-1 rounded shadow-2xs border border-primary/30"
-                          >
-                            {part}
-                          </span>
-                        ) : (
-                          part
-                        )
-                      )}
+                      {(comment.text || comment.content || "")
+                        .split(/(@\w+)/g)
+                        .map((part: string, idx: number) =>
+                          part.startsWith("@") ? (
+                            <span
+                              key={idx}
+                              className="text-primary font-medium bg-primary/10 px-1 rounded shadow-2xs border border-primary/30 inline-flex items-center gap-0.5"
+                            >
+                              <Reply className="w-2.5 h-2.5 inline opacity-75" />
+                              {part}
+                            </span>
+                          ) : (
+                            part
+                          )
+                        )}
                     </div>
                   </div>
                 </motion.div>

@@ -669,7 +669,15 @@ export class TaskRepository {
     const connection = await db.getConnection();
     try {
       const [rows]: any = await connection.query(
-        "SELECT * FROM Comments WHERE taskId = ? ORDER BY createdAt ASC LIMIT 200",
+        `SELECT c.*, 
+                COALESCE(u."displayName", u.username, 'Pengguna') AS "authorName", 
+                COALESCE(u.avatar_url, u."photoURL") AS "authorAvatar",
+                COALESCE(u.username, '') AS "authorUsername"
+         FROM Comments c
+         LEFT JOIN Users u ON (c."authorId" = u.uid OR c."authorId" = u.id OR c."userId" = u.uid OR c."userId" = u.id)
+         WHERE c.taskId = ? 
+         ORDER BY c.createdAt ASC 
+         LIMIT 200`,
         [taskId]
       );
       return rows || [];
