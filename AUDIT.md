@@ -612,7 +612,7 @@ jadi §1.1 tetap sumber kebenarannya; halaman itu acuan, bukan pengganti.
 
 ---
 
-## §1 PAPAN PRIORITAS — 6 BELUM · 470 SELESAI · 4 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 6 BELUM · 471 SELESAI · 4 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -627,9 +627,9 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
 **Sebaran per fase:** F0 0 · F1 0 · F2 0 · F3 0 · F4 0 · F5 1 · F6 1 · F7 0 · F8 0 · F9 0 · F10 2 · F11 1 · F12 0 · F13 1
 
-**Dihitung ulang 09 Sep 2026 (pasca #480 SELESAI):** F5 #305 · F6 #290 · F10 #433 #434 · F11 #30 · F13 #320. **#470–#480 → §1.2**. Rekap: **§24.9**.
+**Dihitung ulang 09 Sep 2026 (pasca #481 SELESAI):** F5 #305 · F6 #290 · F10 #433 #434 · F11 #30 · F13 #320. **#470–#481 → §1.2**. Rekap: **§24.9**.
 
-**Keputusan pemilik 09 Sep 2026:** kerjakan **#470** lalu **#471–#476** lalu **#477–#479**. **#480** (Login History) ditutup dari screenshot lapangan.
+**Keputusan pemilik 09 Sep 2026:** kerjakan **#470** lalu **#471–#476** lalu **#477–#479**. **#480/#481** Login History.
 
 Catatan: #465 waterfall kanonik (copy Sprint + nav dual-mode ala Jira) + #463 FK QA `linkedTaskId` SELESAI kode 06 Sep. #346 dihormati (iris tipis, bukan marketplace). #335 tetap checklist visual.
 
@@ -656,9 +656,9 @@ Sumber: screenshot pemilik 09 Sep 2026. **DITUTUP kode 09 Sep 2026.**
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
 
-#### F3 tambahan — Login History regresi #191 (0 terbuka; #480 → §1.2)
+#### F3 tambahan — Login History regresi #191 (0 terbuka; #480 #481 → §1.2)
 
-Sumber: screenshot pemilik 09 Sep 2026. **DITUTUP kode 09 Sep 2026.**
+Sumber: screenshot pemilik 09 Sep 2026. **#480 + #481 DITUTUP kode 09 Sep 2026.**
 
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
@@ -859,10 +859,11 @@ Sumber: sisir ulang setelah `45ae6e9`. **DITUTUP kode 04 Sep 2026.** E2E lapanga
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
 
-### 1.2 SUDAH SELESAI — 470 item
+### 1.2 SUDAH SELESAI — 471 item
 
 |  No | Temuan                                                                                                                                                                                                                                                                                                                        |  Fase  | Sev | Biaya  | Blokir? | Status                          | Asal |
 | --: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----: | :-: | ------ | :-----: | ------------------------------- | ---- |
+| 481 | **Login History tampilkan login terakhir (#481).** DITUTUP 09 Sep 2026: getSessions resolve id+uid; JOIN Users by id/uid; label chip "Login terakhir"; fallback `Users.lastSeen` tanpa `— · —` / tanpa tombol Logout palsu. Tes session-userid-alias-481.                                                                     | **F3** | 🟠  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
 | 480 | **Login History regresi #191 (#480).** DITUTUP 09 Sep 2026: hapus inventaris navigator/GPS/localStorage admin; hanya `/api/admin/sessions?userId=`; empty state bila kosong; Current Device/Active Now hanya `isSelf`.                                                                                                        | **F3** | 🔴  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
 | 479 | **Lint txn SAVEPOINT (#479).** DITUTUP 09 Sep 2026: `audit-txn-savepoint.cjs` + tes txn-savepoint-479 — larang try/catch `query` setelah `beginTransaction` tanpa SAVEPOINT (regresi #469).                                                                                                                                   | **F0** | 🟡  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
 | 478 | **Cascade hapus user ProjectMembers (#478).** DITUTUP 09 Sep 2026: `user.repository.delete` txn — resolve id/uid, `DELETE ProjectMembers` lalu Users. Identities/Sessions CASCADE di migrate. Tes user-delete-cascade-478.                                                                                                    | **F7** | 🟡  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |

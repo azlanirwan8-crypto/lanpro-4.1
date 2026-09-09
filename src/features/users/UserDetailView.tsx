@@ -297,6 +297,9 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     ip: string;
     time: string;
     isCurrent: boolean;
+    /** false untuk cadangan lastSeen — bukan sesi yang bisa di-terminate */
+    canRevoke: boolean;
+    isLatest?: boolean;
   }
 
   const [userSessions, setUserSessions] = useState<SessionItem[]>([]);
@@ -314,47 +317,107 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
       safeLocalStorage.removeItem(`user_sessions_${targetId}`);
     } catch {}
 
+    const mapSessionRows = (rows: any[], viewingSelf: boolean): SessionItem[] => {
+      return (rows || []).map((item: any, idx: number) => {
+        const uaBlob =
+          `${item.device || ""} ${item.os || ""} ${item.userAgent || ""}`.toLowerCase();
+        const isMobile = uaBlob.includes("android") || uaBlob.includes("iphone");
+        const isTablet = uaBlob.includes("ipad");
+        const aktif = String(item.status || "").toUpperCase() === "ACTIVE";
+        const loginAt = item.loginAt ? ensureDate(item.loginAt) : null;
+        const browserOs =
+          item.browser || item.os
+            ? `${item.browser || "Browser"} on ${item.os || "Device"}`
+            : item.device ||
+              (item.userAgent ? String(item.userAgent).slice(0, 72) : null) ||
+              t("userDetail.unknownDevice", "Perangkat tidak diketahui");
+        return {
+          id: item.id,
+          device: browserOs,
+          deviceType: (isMobile
+            ? "smartphone"
+            : isTablet
+              ? "tablet"
+              : "laptop") as SessionItem["deviceType"],
+          location: item.location || item.city || "",
+          ip: item.ipAddress || "",
+          time: aktif && viewingSelf ? "Active Now" : loginAt ? loginAt.toLocaleString() : "—",
+          isCurrent: viewingSelf && aktif,
+          canRevoke: !(viewingSelf && aktif),
+          isLatest: idx === 0 && !(viewingSelf && aktif),
+        };
+      });
+    };
+
+    const lastSeenFallback = (): SessionItem[] => {
+      if (!user?.lastSeen) return [];
+      const raw = user.lastSeen;
+      const ms = /^\d+$/.test(String(raw).trim()) ? Number(raw) : ensureDate(raw).getTime();
+      if (!Number.isFinite(ms) || ms <= 0) return [];
+      return [
+        {
+          id: "last-seen",
+          device: t("userDetail.lastLogin", "Login terakhir"),
+          deviceType: "laptop",
+          location: t(
+            "userDetail.lastSeenNoDevice",
+            "Detail perangkat/IP belum tercatat di riwayat sesi"
+          ),
+          ip: "",
+          time: new Date(ms).toLocaleString(),
+          isCurrent: false,
+          canRevoke: false,
+          isLatest: false,
+        },
+      ];
+    };
+
     const fetchUserDbSessions = async () => {
       setSessionsLoading(true);
       try {
-        const res = await apiClient.get(
-          `/api/admin/sessions?userId=${encodeURIComponent(targetId)}&limit=10`
+        const viewingSelf = Boolean(
+          curId &&
+          (curId === user?.id ||
+            curId === user?.uid ||
+            (effectiveCurrentUser?.email && effectiveCurrentUser.email === user?.email))
         );
-        if (!isMounted) return;
-        if (res.data?.status === "success" && Array.isArray(res.data.data)) {
-          const viewingSelf = Boolean(
-            curId &&
-            (curId === user?.id ||
-              curId === user?.uid ||
-              (effectiveCurrentUser?.email && effectiveCurrentUser.email === user?.email))
+
+        const candidates = [user?.id, user?.uid, user?.email].filter(Boolean).map(String);
+        const unique = [...new Set(candidates)];
+        let rows: any[] = [];
+        for (const key of unique) {
+          const res = await apiClient.get(
+            `/api/admin/sessions?userId=${encodeURIComponent(key)}&limit=10`
           );
-          const formatted: SessionItem[] = res.data.data.map((item: any) => {
-            const isMobile =
-              (item.device || item.os || "").toLowerCase().includes("android") ||
-              (item.device || item.os || "").toLowerCase().includes("iphone");
-            const isTablet = (item.device || item.os || "").toLowerCase().includes("ipad");
-            const aktif = String(item.status || "").toUpperCase() === "ACTIVE";
-            const loginAt = item.loginAt ? ensureDate(item.loginAt) : null;
-            return {
-              id: item.id,
-              device: `${item.browser || "Browser"} on ${item.os || "Device"}`,
-              deviceType: (isMobile
-                ? "smartphone"
-                : isTablet
-                  ? "tablet"
-                  : "laptop") as SessionItem["deviceType"],
-              location: item.location || item.city || "Unknown Location",
-              ip: item.ipAddress || "—",
-              time: aktif && viewingSelf ? "Active Now" : loginAt ? loginAt.toLocaleString() : "—",
-              isCurrent: viewingSelf && aktif,
-            };
-          });
-          setUserSessions(formatted);
-        } else {
-          setUserSessions([]);
+          if (
+            res.data?.status === "success" &&
+            Array.isArray(res.data.data) &&
+            res.data.data.length
+          ) {
+            rows = res.data.data;
+            break;
+          }
         }
+
+        if (!rows.length && user?.email) {
+          const res = await apiClient.get(
+            `/api/admin/sessions?search=${encodeURIComponent(user.email)}&limit=10`
+          );
+          if (res.data?.status === "success" && Array.isArray(res.data.data)) {
+            const emailLower = String(user.email).toLowerCase();
+            rows = res.data.data.filter(
+              (r: any) => String(r.email || "").toLowerCase() === emailLower
+            );
+          }
+        }
+
+        if (!isMounted) return;
+        let formatted = mapSessionRows(rows, viewingSelf);
+        if (formatted.length === 0) formatted = lastSeenFallback();
+        setUserSessions(formatted);
       } catch {
-        if (isMounted) setUserSessions([]);
+        if (!isMounted) return;
+        setUserSessions(lastSeenFallback());
       } finally {
         if (isMounted) setSessionsLoading(false);
       }
@@ -364,7 +427,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [user?.id, user?.uid, user?.email, curId, effectiveCurrentUser?.email]);
+  }, [user?.id, user?.uid, user?.email, user?.lastSeen, curId, effectiveCurrentUser?.email, t]);
 
   const handleRevokeSession = async (sessionId: string) => {
     try {
@@ -375,7 +438,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
   };
 
   const handleRevokeAllOtherSessions = async () => {
-    const others = userSessions.filter((s) => !s.isCurrent);
+    const others = userSessions.filter((s) => s.canRevoke);
     await Promise.all(
       others.map(async (s) => {
         try {
@@ -383,7 +446,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
         } catch {}
       })
     );
-    setUserSessions((prev) => prev.filter((s) => s.isCurrent));
+    setUserSessions((prev) => prev.filter((s) => !s.canRevoke));
     toast.success(t("userDetail.allLoggedOutSuccess"));
   };
 
@@ -1687,7 +1750,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                           {t("userDetail.loginHistory")}
                         </h3>
                       </div>
-                      {userSessions.filter((s) => !s.isCurrent).length > 0 && (
+                      {userSessions.filter((s) => s.canRevoke).length > 0 && (
                         <button
                           type="button"
                           onClick={handleRevokeAllOtherSessions}
@@ -1718,6 +1781,9 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                               : item.deviceType === "tablet"
                                 ? Tablet
                                 : Laptop;
+                          const metaParts = [item.location, item.ip].filter(
+                            (p) => p && p !== "—" && p.trim()
+                          );
 
                           return (
                             <div
@@ -1729,7 +1795,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                   <DeviceIcon className="w-4.5 h-4.5" />
                                 </div>
                                 <div className="min-w-0">
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2 flex-wrap">
                                     <span className="text-xs font-medium text-content-strong truncate">
                                       {item.device}
                                     </span>
@@ -1738,20 +1804,25 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                         {t("userDetail.currentDevice")}
                                       </span>
                                     )}
+                                    {item.isLatest && !item.isCurrent && (
+                                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary shrink-0">
+                                        {t("userDetail.lastLogin", "Login terakhir")}
+                                      </span>
+                                    )}
                                   </div>
-                                  <div className="text-xs text-content-subtle truncate mt-0.5 flex items-center gap-1.5">
-                                    <span>{item.location}</span>
-                                    <span>•</span>
-                                    <span>{item.ip}</span>
-                                  </div>
+                                  {metaParts.length > 0 && (
+                                    <div className="text-xs text-content-subtle truncate mt-0.5">
+                                      {metaParts.join(" · ")}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
 
-                              <div className="shrink-0 text-right">
-                                <div className="text-xs text-content-subtle font-medium">
+                              <div className="shrink-0 text-right max-w-[40%]">
+                                <div className="text-xs text-content-subtle font-medium whitespace-nowrap">
                                   {item.time}
                                 </div>
-                                {!item.isCurrent && (
+                                {item.canRevoke && (
                                   <button
                                     type="button"
                                     onClick={() => handleRevokeSession(item.id)}
@@ -2838,7 +2909,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                             </p>
                           </div>
                         </div>
-                        {userSessions.filter((s) => !s.isCurrent).length > 0 && (
+                        {userSessions.filter((s) => s.canRevoke).length > 0 && (
                           <button
                             type="button"
                             onClick={handleRevokeAllOtherSessions}
@@ -2870,33 +2941,39 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                 : item.deviceType === "tablet"
                                   ? Tablet
                                   : Laptop;
+                            const metaParts = [item.location, item.ip, item.time].filter(
+                              (p) => p && p !== "—" && String(p).trim()
+                            );
 
                             return (
                               <div
                                 key={item.id}
-                                className="flex items-center justify-between p-4 bg-surface-sunken/60 rounded-xl border border-border-subtle/50 hover:border-primary/30 transition-all"
+                                className="flex items-center justify-between gap-3 p-4 bg-surface-sunken/60 rounded-xl border border-border-subtle/50 hover:border-primary/30 transition-all"
                               >
-                                <div className="flex items-center gap-3.5">
+                                <div className="flex items-center gap-3.5 min-w-0">
                                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                     <DeviceIcon className="w-5 h-5" />
                                   </div>
-                                  <div>
-                                    <div className="flex items-center gap-2">
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2 flex-wrap">
                                       <span className="text-xs font-semibold text-content-strong">
                                         {item.device}
                                       </span>
+                                      {item.isLatest && !item.isCurrent && (
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary">
+                                          {t("userDetail.lastLogin", "Login terakhir")}
+                                        </span>
+                                      )}
                                     </div>
-                                    <div className="flex flex-wrap items-center gap-2 text-xs text-content-subtle mt-0.5">
-                                      <span>{item.location}</span>
-                                      <span>•</span>
-                                      <span className="font-mono">{item.ip}</span>
-                                      <span>•</span>
-                                      <span>🕒 {item.time}</span>
-                                    </div>
+                                    {metaParts.length > 0 && (
+                                      <div className="text-xs text-content-subtle mt-0.5 truncate">
+                                        {metaParts.join(" · ")}
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 shrink-0">
                                   {item.isCurrent ? (
                                     <>
                                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">
@@ -2909,7 +2986,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                         {t("userDetail.active", "Active")}
                                       </span>
                                     </>
-                                  ) : (
+                                  ) : item.canRevoke ? (
                                     <button
                                       type="button"
                                       onClick={() => handleRevokeSession(item.id)}
@@ -2917,7 +2994,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                     >
                                       {t("userDetail.logoutAction", "Log out")}
                                     </button>
-                                  )}
+                                  ) : null}
                                 </div>
                               </div>
                             );

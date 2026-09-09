@@ -20,8 +20,20 @@ export class SessionRepository {
       const params: any[] = [];
 
       if (filter.userId) {
-        conditions.push('us."userId" = ?');
-        params.push(filter.userId);
+        // #481 — sesi bisa tersimpan dengan Users.id ATAU uid; cocokkan keduanya
+        const [uRows]: any = await connection.query(
+          `SELECT id, uid FROM "Users" WHERE id = ? OR uid = ? OR email = ? OR username = ? LIMIT 1`,
+          [filter.userId, filter.userId, filter.userId, filter.userId]
+        );
+        const ids = new Set<string>([String(filter.userId)]);
+        if (uRows?.[0]) {
+          if (uRows[0].id) ids.add(String(uRows[0].id));
+          if (uRows[0].uid) ids.add(String(uRows[0].uid));
+        }
+        const idList = Array.from(ids);
+        const placeholders = idList.map(() => "?").join(",");
+        conditions.push(`us."userId" IN (${placeholders})`);
+        params.push(...idList);
       }
 
       if (filter.status && filter.status !== "ALL") {
@@ -42,7 +54,7 @@ export class SessionRepository {
       const countSql = `
         SELECT COUNT(*)::int as total
         FROM "UserSessions" us
-        LEFT JOIN "Users" u ON us."userId" = u.id
+        LEFT JOIN "Users" u ON us."userId" = u.id OR us."userId" = u.uid
         ${whereClause}
       `;
       const [countRows]: any = await connection.query(countSql, params);
@@ -71,7 +83,7 @@ export class SessionRepository {
           u.role,
           COALESCE(u.avatar_url, u."avatarUrl", u."photoURL", u."photoUrl") as avatar
         FROM "UserSessions" us
-        LEFT JOIN "Users" u ON us."userId" = u.id
+        LEFT JOIN "Users" u ON us."userId" = u.id OR us."userId" = u.uid
         ${whereClause}
         ORDER BY us."loginAt" DESC
         LIMIT ? OFFSET ?
