@@ -188,7 +188,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
     return (
       <div className="relative w-fit min-w-full pb-16">
         {/* Header Bar - Static Sidebar and Scrollable Status Headers */}
-        <div className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[240px_1fr] sticky top-0 z-30 bg-surface border-b border-border-subtle/80">
+        <div className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[260px_1fr] sticky top-0 z-30 bg-surface border-b border-border-subtle/80">
           {/* Bagian A Header */}
           <div className="sticky left-0 z-50 bg-surface border-r border-border-subtle/80 h-11 flex items-center px-3 relative">
             <div className="text-[11px] font-medium text-content-body tracking-wide flex items-center justify-between w-full gap-1.5">
@@ -221,7 +221,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
             </div>
           </div>
           {/* Bagian B Header - Scrollable */}
-          <div className="flex overflow-x-auto items-center px-3 py-2 gap-2.5 sm:gap-3 bg-surface custom-scrollbar snap-x snap-mandatory md:snap-none">
+          <div className="flex items-center px-4 py-2 gap-3 sm:gap-4 bg-surface snap-x snap-mandatory md:snap-none">
             {boardStatuses.map((status, index) => {
               const statusStyle = getStatusStyle(status.label || status.code || "");
               const taskCount = tArr.filter((t: any) => taskMatchesStatus(t.status, status)).length;
@@ -268,7 +268,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
               {filteredEpics.map((epic, epicIndex) => (
                 <div
                   key={epic.id}
-                  className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[280px_1fr] items-stretch border-b border-border-subtle/70 min-h-[110px]"
+                  className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[260px_1fr] items-stretch border-b border-border-subtle/70 min-h-[110px]"
                 >
                   {/* Bagian A Row Cell - Sticky Sidebar */}
                   <div className="sticky left-0 z-50 bg-surface border-r border-border-subtle/80 px-3.5 py-3 relative">
@@ -330,7 +330,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
               ))}
               {/* Standalone Tasks when Epic grouped */}
               {standaloneTasks.length > 0 && (
-                <div className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[280px_1fr] items-stretch border-b border-border-subtle/70 min-h-[110px]">
+                <div className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[260px_1fr] items-stretch border-b border-border-subtle/70 min-h-[110px]">
                   {/* Bagian A Row Cell - Sticky Sidebar */}
                   <div className="sticky left-0 z-50 bg-surface border-r border-border-subtle/80 px-3.5 py-3 relative">
                     <div
@@ -349,7 +349,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                   </div>
 
                   {/* Bagian B Row Cells - Columns */}
-                  <div className="flex gap-3 sm:gap-4 px-4 py-3">
+                  <div className="flex gap-3 sm:gap-4 px-4 py-3 snap-x snap-mandatory md:snap-none overflow-x-visible">
                     {boardStatuses.map((status, index) => (
                       <div
                         key={`standalone-${status.id || statusColumnKey(status)}-${index}`}
@@ -390,7 +390,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                 return (
                   <div
                     key={uId}
-                    className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[280px_1fr] items-stretch border-b border-border-subtle/70 min-h-[110px]"
+                    className="grid grid-cols-[140px_1fr] sm:grid-cols-[180px_1fr] md:grid-cols-[260px_1fr] items-stretch border-b border-border-subtle/70 min-h-[110px]"
                   >
                     {/* Bagian A Row Cell - Sticky Sidebar */}
                     <div className="sticky left-0 z-50 bg-surface border-r border-border-subtle/80 px-3.5 py-3 relative">
@@ -425,7 +425,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                     </div>
 
                     {/* Bagian B Row Cells - Columns */}
-                    <div className="flex gap-3 sm:gap-4 px-4 py-3">
+                    <div className="flex gap-3 sm:gap-4 px-4 py-3 snap-x snap-mandatory md:snap-none overflow-x-visible">
                       {boardStatuses.map((status, index) => (
                         <div
                           key={`${uId}-${status.id || statusColumnKey(status)}-${index}`}
