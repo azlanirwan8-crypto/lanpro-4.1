@@ -3742,14 +3742,18 @@ function AppContainer() {
   };
 
   const handleAddComment = async () => {
-    const activeUid = currentUser?.uid || user?.uid;
-    const authorName = currentUser?.displayName || user?.displayName || "Seseorang";
-    if (!selectedProject || !selectedTaskForDetail || !newCommentText.trim() || !activeUid) return;
+    const activeUid =
+      currentUser?.uid || (currentUser as any)?.id || user?.uid || (user as any)?.id;
+    const authorName =
+      currentUser?.displayName || (currentUser as any)?.name || user?.displayName || "Seseorang";
+    if (!selectedProject || !selectedTaskForDetail) return;
+    if (!newCommentText.trim()) return;
 
     try {
       await createTaskComment(selectedProject.id, selectedTaskForDetail.id, {
         text: newCommentText.trim(),
-        authorId: activeUid,
+        content: newCommentText.trim(),
+        authorId: activeUid || "guest",
       });
 
       // Parse mentions
@@ -3757,7 +3761,7 @@ function AppContainer() {
       const mentions = Array.from(newCommentText.matchAll(mentionRegex)).map((m) =>
         m[1].toLowerCase()
       );
-      if (mentions.length > 0) {
+      if (mentions.length > 0 && activeUid) {
         const mentionedUsers = projectMembers.filter(
           (m) => m?.username && mentions.includes(m?.username.toLowerCase()) && m.uid !== activeUid
         );
@@ -3782,8 +3786,9 @@ function AppContainer() {
             : t
         )
       );
-    } catch (e) {
+    } catch (e: any) {
       console.error("Failed to add comment", e);
+      toast.error(e?.message || "Gagal menambahkan komentar");
     }
   };
 

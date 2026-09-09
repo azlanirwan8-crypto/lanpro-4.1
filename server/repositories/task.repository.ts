@@ -687,8 +687,8 @@ export class TaskRepository {
     const connection = await db.getConnection();
     try {
       await connection.query(
-        "INSERT INTO Comments (id, taskId, content, authorId) VALUES (?, ?, ?, ?)",
-        [comment.id, comment.taskId, comment.content, comment.userId]
+        "INSERT INTO Comments (id, taskId, text, content, authorId) VALUES (?, ?, ?, ?, ?)",
+        [comment.id, comment.taskId, comment.content, comment.content, comment.userId]
       );
     } finally {
       connection.release();

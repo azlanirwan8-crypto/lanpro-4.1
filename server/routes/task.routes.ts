@@ -1260,7 +1260,14 @@ router.post(
   async (req, res) => {
     try {
       const { projectId, taskId } = req.params;
-      const { content, authorId } = req.body;
+      const rawContent = req.body.text ?? req.body.content ?? "";
+      const content =
+        typeof rawContent === "string" ? rawContent.trim() : String(rawContent || "").trim();
+      if (!content) {
+        return res.status(400).json({ status: "fail", message: "Comment text is required" });
+      }
+
+      const { authorId } = req.body;
       const effectiveAuthorId =
         authorId ||
         (req as any).user?.uid ||
@@ -1283,7 +1290,7 @@ router.post(
 
       res.json({
         status: "success",
-        data: { id: newId, taskId, content, authorId: effectiveAuthorId },
+        data: { id: newId, taskId, content, text: content, authorId: effectiveAuthorId },
       });
     } catch (error: any) {
       console.error(
