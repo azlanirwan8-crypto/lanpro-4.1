@@ -21,6 +21,7 @@ import {
   isUserReporter as isUserReporterFn,
   canDeleteIssue as canDeleteIssueFn,
   canManageIssue as canManageIssueFn,
+  canChangeReporter as canChangeReporterFn,
   canEditIssue as canEditIssueFn,
   IssuePermissionContext,
 } from "./issuePermissions";
@@ -150,17 +151,14 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
 
   const [inlineAddSprintId, setInlineAddSprintId] = useState("");
 
-  // Item #200/#201 — aturan izin (Delete/Assignee/Reporter hanya
-  // Admin/Manager/Head atau Reporter; Assignee cuma boleh edit field lain
-  // di task yang diberikan ke mereka) dipindah ke modul murni
-  // `issuePermissions.ts` yang terkunci test (`issuePermissions.test.ts`) —
-  // JANGAN tulis ulang logikanya di sini. Riwayat lengkap kenapa (termasuk
-  // bug #200 yang sempat salah memakai `hasPermission("list","update")` yang
-  // ternyata selalu `true` untuk role "user") ada di komentar modul itu.
+  // Item #200/#201 — Assignee: Admin/Manager/Head atau Reporter.
+  // Item #482 — Reporter: hanya Administrator sistem.
+  // Item #483 — Hapus: admin sistem full; non-admin ikut checklist list.delete.
   const permCtx: IssuePermissionContext = { userRole, currentUserProfile, user, hasPermission };
   const isUserReporter = (issue: Task) => isUserReporterFn(issue, permCtx);
   const canDeleteIssue = (issue: Task) => canDeleteIssueFn(issue, permCtx);
   const canManageIssue = (issue: Task) => canManageIssueFn(issue, permCtx);
+  const canChangeReporter = (issue: Task) => canChangeReporterFn(issue, permCtx);
   const canEditIssue = (issue: Task) => canEditIssueFn(issue, permCtx);
 
   const canCreateIssue = hasPermission ? hasPermission(userRole, "list", "create") : true;
@@ -506,6 +504,7 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
                                     canDeleteIssue={canDeleteIssue}
                                     canEditIssue={canEditIssue}
                                     canManageIssue={canManageIssue}
+                                    canChangeReporter={canChangeReporter}
                                     deleteTask={deleteTask}
                                     setSelectedTaskForDetail={setSelectedTaskForDetail}
                                     setIsTaskDetailModalOpen={setIsTaskDetailModalOpen}

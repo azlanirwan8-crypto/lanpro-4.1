@@ -133,6 +133,7 @@ export const en = {
     "srv.user_updated": "User updated",
     "srv.user_deleted": "User deleted",
     "srv.akses_ditolak_status_hanya_admin": "Only an administrator can change account status.",
+    "srv.reporter_hanya_admin": "Only an Administrator may change the Reporter.",
     "srv.tidak_bisa_ubah_status_akun_sendiri": "You cannot change your own account status.",
     "srv.rekaman_tidak_bisa_diubah_ke_mp3":
       "The WebM/MP4 recording could not be converted to MP3. Install FFmpeg on the server, or upload an MP3 file.",

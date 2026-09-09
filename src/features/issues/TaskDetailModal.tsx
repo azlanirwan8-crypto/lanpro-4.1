@@ -32,6 +32,7 @@ import {
   isUserReporter as isUserReporterFn,
   canDeleteIssue as canDeleteIssueFn,
   canManageIssue as canManageIssueFn,
+  canChangeReporter as canChangeReporterFn,
   canEditIssue as canEditIssueFn,
   IssuePermissionContext,
 } from "./issuePermissions";
@@ -107,6 +108,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   const isDirectOwner = task ? isUserReporter(task) : false;
   const isEditable = task ? canEditIssueFn(task, permCtx) : false;
   const canManage = task ? canManageIssueFn(task, permCtx) : false;
+  const canChangeReporter = task ? canChangeReporterFn(task, permCtx) : false;
   const canDelete = task ? canDeleteIssueFn(task, permCtx) : false;
   const blockMember = !isEditable;
   const isProjectMember = false;
@@ -469,6 +471,7 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
               isProjectMember={isProjectMember}
               isReporter={isReporter}
               canManage={canManage}
+              canChangeReporter={canChangeReporter}
               canDelete={canDelete}
               isUpdatingTask={isUpdatingTask}
               updateTaskField={updateTaskField}

@@ -34,8 +34,10 @@ interface TaskDetailSidebarProps {
   blockMember: boolean;
   isProjectMember: boolean;
   isReporter: boolean;
-  /** Item #201 — hanya Admin/Manager/Head atau Reporter: menggerbangi Assignee & Reporter. */
+  /** Item #201 — Admin/Manager/Head atau Reporter: Assignee. */
   canManage: boolean;
+  /** #482 — hanya Administrator sistem: Reporter. */
+  canChangeReporter: boolean;
   canDelete: boolean;
   isUpdatingTask?: Record<string, boolean>;
   updateTaskField: (id: string, field: string, value: any) => Promise<any> | void;
@@ -56,6 +58,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
   isProjectMember,
   isReporter,
   canManage,
+  canChangeReporter,
   canDelete,
   isUpdatingTask,
   updateTaskField,
@@ -207,9 +210,9 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
             members={projectMembers}
             type="member"
             masterData={[]}
-            className={cn("w-full", !canManage && "pointer-events-none opacity-80")}
+            className={cn("w-full", !canChangeReporter && "pointer-events-none opacity-80")}
             buttonClassName="h-[32px] bg-surface rounded-md border border-border-subtle/80 hover:border-border-subtle shadow-2xs px-2.5 text-xs font-normal text-content-body"
-            disabled={!canManage}
+            disabled={!canChangeReporter}
           />
         </div>
 

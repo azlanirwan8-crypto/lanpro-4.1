@@ -1,22 +1,14 @@
 /**
- * Item #200/#201 — mengunci aturan izin Daftar Isu yang disepakati pemilik
- * proyek: Delete + melimpahkan tanggung jawab (Assignee/Reporter) HANYA
- * Admin/Manager/Head atau Reporter; Assignee (bukan reporter) HANYA boleh
- * mengedit task yang diberikan ke mereka, TIDAK boleh melimpahkan/menghapus.
- *
- * Ditulis setelah #200 sempat SALAH mengimplementasikan ini lewat
- * `hasPermission(userRole, "list", "update", ...)` — fungsi itu ternyata
- * SELALU `true` untuk role "user" pada modul "list" (pengecualian sengaja
- * di `src/lib/permissions.ts:365-372`), jadi siapa pun bisa mengedit issue
- * siapa pun. Test ini memakai `hasPermission` PALSU yang selalu `true`
- * untuk membuktikan bug itu TIDAK BISA terulang — fungsi di sini tidak
- * boleh bergantung padanya sama sekali untuk keputusan izin.
+ * Item #200/#201 — manage/Assignee.
+ * Item #482 — Reporter hanya Administrator sistem.
+ * Item #483 — Hapus: admin sistem full · user ikut checklist.
  */
 import { Task } from "../../types";
 import {
   isUserReporter,
   isUserAssignee,
   canManageIssue,
+  canChangeReporter,
   canEditIssue,
   canDeleteIssue,
   IssuePermissionContext,
@@ -30,17 +22,15 @@ const buatIssue = (over: Partial<Task> = {}): Task =>
     ...over,
   }) as Task;
 
-// Selalu `true` -- meniru bug #200 (hasPermission "list"+"update" selalu
-// true untuk role "user"). Test-test di bawah membuktikan fungsi izin di
-// sini TIDAK terpengaruh oleh ini untuk keputusan manage/delete-nya.
-const hasPermissionSelaluTrue = jest.fn().mockReturnValue(true);
-const hasPermissionSelaluFalse = jest.fn().mockReturnValue(false);
+const hasPermissionSelaluTrue = (..._args: any[]) => true;
+const hasPermissionSelaluFalse = (..._args: any[]) => false;
 
-function ctx(userId: string, userRole: string): IssuePermissionContext {
+function ctx(userId: string, userRole: string, systemRole?: string): IssuePermissionContext {
+  const roleSistem = systemRole ?? userRole;
   return {
     userRole,
-    currentUserProfile: { uid: userId, id: userId } as any,
-    user: { uid: userId, id: userId },
+    currentUserProfile: { uid: userId, id: userId, role: roleSistem } as any,
+    user: { uid: userId, id: userId, role: roleSistem },
     hasPermission: hasPermissionSelaluTrue,
   };
 }
@@ -56,94 +46,109 @@ describe("issuePermissions", () => {
     });
   });
 
-  describe("canManageIssue (gerbang Delete + Assignee + Reporter)", () => {
+  describe("canManageIssue (gerbang Delete + Assignee)", () => {
     it("admin selalu bisa manage, walau bukan reporter/assignee", () => {
-      const issue = buatIssue();
-      expect(canManageIssue(issue, ctx("orang-lain", "admin"))).toBe(true);
+      expect(canManageIssue(buatIssue(), ctx("orang-lain", "admin"))).toBe(true);
     });
 
     it("manager dan head selalu bisa manage", () => {
-      const issue = buatIssue();
-      expect(canManageIssue(issue, ctx("orang-lain", "manager"))).toBe(true);
-      expect(canManageIssue(issue, ctx("orang-lain", "head"))).toBe(true);
+      expect(canManageIssue(buatIssue(), ctx("orang-lain", "manager"))).toBe(true);
+      expect(canManageIssue(buatIssue(), ctx("orang-lain", "head"))).toBe(true);
     });
 
     it("reporter bisa manage issue-nya sendiri", () => {
-      const issue = buatIssue();
-      expect(canManageIssue(issue, ctx("user-reporter", "user"))).toBe(true);
+      expect(canManageIssue(buatIssue(), ctx("user-reporter", "user"))).toBe(true);
     });
 
-    it("assignee (BUKAN reporter) TIDAK bisa manage -- tidak boleh melimpahkan/menghapus", () => {
-      const issue = buatIssue();
-      expect(canManageIssue(issue, ctx("user-assignee", "user"))).toBe(false);
+    it("assignee (BUKAN reporter) TIDAK bisa manage", () => {
+      expect(canManageIssue(buatIssue(), ctx("user-assignee", "user"))).toBe(false);
     });
 
     it("user tak terkait TIDAK bisa manage", () => {
-      const issue = buatIssue();
-      expect(canManageIssue(issue, ctx("orang-lain", "user"))).toBe(false);
+      expect(canManageIssue(buatIssue(), ctx("orang-lain", "user"))).toBe(false);
+    });
+  });
+
+  describe("canChangeReporter (#482 — hanya Administrator sistem)", () => {
+    it("system admin bisa ganti reporter", () => {
+      expect(canChangeReporter(buatIssue(), ctx("orang-lain", "user", "admin"))).toBe(true);
+    });
+
+    it("project admin (effectiveRole admin, Users.role user) TIDAK bisa", () => {
+      expect(canChangeReporter(buatIssue(), ctx("orang-lain", "admin", "user"))).toBe(false);
+    });
+
+    it("manager / head / reporter / assignee TIDAK bisa", () => {
+      expect(canChangeReporter(buatIssue(), ctx("orang-lain", "manager", "manager"))).toBe(false);
+      expect(canChangeReporter(buatIssue(), ctx("orang-lain", "head", "head"))).toBe(false);
+      expect(canChangeReporter(buatIssue(), ctx("user-reporter", "user", "user"))).toBe(false);
+      expect(canChangeReporter(buatIssue(), ctx("user-assignee", "user", "user"))).toBe(false);
+    });
+
+    it("issue null → false", () => {
+      expect(canChangeReporter(null, ctx("x", "admin", "admin"))).toBe(false);
     });
   });
 
   describe("canEditIssue (gerbang field umum: Status, Priority, dst.)", () => {
-    it("admin/manager/head/reporter tetap bisa edit (implikasi dari canManageIssue)", () => {
-      const issue = buatIssue();
-      expect(canEditIssue(issue, ctx("orang-lain", "admin"))).toBe(true);
-      expect(canEditIssue(issue, ctx("user-reporter", "user"))).toBe(true);
+    it("admin/manager/head/reporter tetap bisa edit", () => {
+      expect(canEditIssue(buatIssue(), ctx("orang-lain", "admin"))).toBe(true);
+      expect(canEditIssue(buatIssue(), ctx("user-reporter", "user"))).toBe(true);
     });
 
-    it("assignee (BUKAN reporter) BISA edit task yang diberikan ke mereka", () => {
-      const issue = buatIssue();
-      expect(canEditIssue(issue, ctx("user-assignee", "user"))).toBe(true);
+    it("assignee (BUKAN reporter) BISA edit task yang diberikan", () => {
+      expect(canEditIssue(buatIssue(), ctx("user-assignee", "user"))).toBe(true);
     });
 
-    it("user tak terkait TIDAK bisa edit, walau hasPermission('list','update') selalu true", () => {
-      const issue = buatIssue();
+    it("user tak terkait TIDAK bisa edit walau hasPermission selalu true", () => {
       const c = ctx("orang-lain", "user");
-      c.hasPermission = hasPermissionSelaluTrue; // simulasi bug #200
-      expect(canEditIssue(issue, c)).toBe(false);
+      c.hasPermission = hasPermissionSelaluTrue;
+      expect(canEditIssue(buatIssue(), c)).toBe(false);
     });
   });
 
-  describe("canDeleteIssue", () => {
-    it("admin selalu bisa delete", () => {
-      const issue = buatIssue();
-      expect(canDeleteIssue(issue, ctx("orang-lain", "admin"))).toBe(true);
-    });
-
-    it("reporter bisa delete issue-nya sendiri", () => {
-      const issue = buatIssue();
-      expect(canDeleteIssue(issue, ctx("user-reporter", "user"))).toBe(true);
-    });
-
-    it("assignee (BUKAN reporter) TIDAK bisa delete, walau hasPermission dipaksa false", () => {
-      const issue = buatIssue();
-      const c = ctx("user-assignee", "user");
+  describe("canDeleteIssue (#483 — admin full · user checklist)", () => {
+    it("system admin selalu bisa delete (abaikan checklist)", () => {
+      const c = ctx("orang-lain", "user", "admin");
       c.hasPermission = hasPermissionSelaluFalse;
-      expect(canDeleteIssue(issue, c)).toBe(false);
+      expect(canDeleteIssue(buatIssue(), c)).toBe(true);
     });
 
-    it("#202 — user tak terkait TIDAK bisa delete walau hasPermission (custom permission) selalu true", () => {
-      // Mengunci bug nyata: akun "user" dengan custom permission list.delete
-      // tersimpan di profilnya (dari pengujian sebelumnya) sempat membuat
-      // ikon Hapus tampil di Daftar Isu, padahal ia bukan reporter/admin.
-      const issue = buatIssue();
-      const c = ctx("orang-lain", "user");
-      c.hasPermission = hasPermissionSelaluTrue;
-      expect(canDeleteIssue(issue, c)).toBe(false);
-    });
-
-    it("#202 — assignee (BUKAN reporter) TIDAK bisa delete walau hasPermission selalu true", () => {
-      const issue = buatIssue();
-      const c = ctx("user-assignee", "user");
-      c.hasPermission = hasPermissionSelaluTrue;
-      expect(canDeleteIssue(issue, c)).toBe(false);
-    });
-
-    it("user tak terkait TIDAK bisa delete bila hasPermission menolak", () => {
-      const issue = buatIssue();
-      const c = ctx("orang-lain", "user");
+    it("project admin (Users.role user) TIDAK bisa bila checklist menolak", () => {
+      const c = ctx("orang-lain", "admin", "user");
       c.hasPermission = hasPermissionSelaluFalse;
-      expect(canDeleteIssue(issue, c)).toBe(false);
+      expect(canDeleteIssue(buatIssue(), c)).toBe(false);
+    });
+
+    it("non-admin boleh delete bila checklist list.delete mengizinkan", () => {
+      const c = ctx("orang-lain", "user", "user");
+      c.hasPermission = hasPermissionSelaluTrue;
+      expect(canDeleteIssue(buatIssue(), c)).toBe(true);
+    });
+
+    it("reporter TIDAK otomatis boleh bila checklist menolak", () => {
+      const c = ctx("user-reporter", "user", "user");
+      c.hasPermission = hasPermissionSelaluFalse;
+      expect(canDeleteIssue(buatIssue(), c)).toBe(false);
+    });
+
+    it("memanggil hasPermission dengan peran SISTEM + permissions profil", () => {
+      const calls: any[] = [];
+      const c = ctx("orang-lain", "admin", "user");
+      c.currentUserProfile = {
+        ...c.currentUserProfile!,
+        permissions: { list: { delete: true } },
+      } as any;
+      c.hasPermission = (...args: any[]) => {
+        calls.push(args);
+        return true;
+      };
+      expect(canDeleteIssue(buatIssue(), c)).toBe(true);
+      expect(calls[0][0]).toBe("user");
+      expect(calls[0][1]).toBe("list");
+      expect(calls[0][2]).toBe("delete");
+      expect(calls[0][3]).toBe(false);
+      expect(calls[0][4]).toEqual(expect.objectContaining({ list: expect.anything() }));
     });
   });
 });

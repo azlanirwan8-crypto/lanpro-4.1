@@ -57,6 +57,8 @@ interface IssueTableRowProps {
   canDeleteIssue: (issue: Task) => boolean;
   canEditIssue: (issue: Task) => boolean;
   canManageIssue: (issue: Task) => boolean;
+  /** #482 — hanya Administrator sistem */
+  canChangeReporter: (issue: Task) => boolean;
   deleteTask?: (id: string) => void;
   setSelectedTaskForDetail: (task: Task) => void;
   setIsTaskDetailModalOpen: (open: boolean) => void;
@@ -115,6 +117,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
     canDeleteIssue,
     canEditIssue,
     canManageIssue,
+    canChangeReporter,
     deleteTask,
     setSelectedTaskForDetail,
     setIsTaskDetailModalOpen,
@@ -238,6 +241,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
   // umum, supaya assignee yang cuma diberi tugas TIDAK bisa melimpahkannya
   // ke orang lain.
   const canManage = canManageIssue(task);
+  const canEditReporter = canChangeReporter(task);
 
   return (
     <React.Fragment key={task.id ? `tr-${task.id}-${depth}` : `tr-rnd-${Math.random()}`}>
@@ -406,11 +410,7 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                 break;
 
               case "reporter": {
-                // Item #205 — sebelumnya kolom ini cuma teks statis (avatar +
-                // nama), TIDAK bisa diklik sama sekali — beda dengan Assignee
-                // yang sudah dropdown. Disamakan: dropdown yang sama, digerbangi
-                // `canManage` (Admin/Manager/Head atau Reporter task ini),
-                // sama seperti dropdown Reporter di sidebar detail issue.
+                // #482 — hanya Administrator sistem (Users.role), bukan canManage
                 const reporterOptions = [
                   { id: "", label: t("common.linkNone") },
                   ...projectMembers.map((m) => ({
@@ -426,8 +426,11 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                     members={projectMembers}
                     type="member"
                     masterData={mArr}
-                    disabled={!canManage}
-                    className={cn("max-w-[150px]", !canManage && "pointer-events-none opacity-85")}
+                    disabled={!canEditReporter}
+                    className={cn(
+                      "max-w-[150px]",
+                      !canEditReporter && "pointer-events-none opacity-85"
+                    )}
                   />
                 );
                 break;

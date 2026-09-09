@@ -1,26 +1,21 @@
-import { Task, UserProfile, PeranEfektif } from "../../types";
-
 /**
- * Item #200/#201 — aturan izin edit/hapus Daftar Isu, disepakati pemilik
- * proyek: Delete dan melimpahkan tanggung jawab (Assignee/Reporter) HANYA
- * boleh Admin/Manager/Head atau Reporter task itu; Assignee (bukan
- * reporter) HANYA boleh mengedit task yang DIBERIKAN ke mereka — tidak
- * boleh melimpahkannya ke orang lain atau menghapusnya.
+ * Item #200/#201 — Assignee/manage: Admin/Manager/Head atau Reporter task;
+ * Assignee (bukan reporter) hanya edit field lain di task yang diberikan.
  *
- * Ditulis sebagai modul murni terpisah (bukan closure di dalam komponen,
- * seperti sebelumnya) sebab logikanya sudah SEKALI salah diimplementasikan
- * (item #200 sempat memakai `hasPermission(userRole, "list", "update", ...)`
- * yang ternyata SELALU `true` untuk role "user" apa pun hubungannya dengan
- * task — lihat `src/lib/permissions.ts:365-372` — melanggar aturan di atas).
- * Fungsi murni di sini bisa diuji langsung tanpa me-mount komponen React.
+ * Item #482 — field Reporter: hanya Administrator SISTEM (`Users.role ===
+ * admin`), bukan project admin/manager/head/reporter.
  *
- * `canDeleteIssue` SEMPAT memakai `hasPermission()` supaya custom permission
- * per-user dihormati — TERNYATA itu sendiri celah lain (item #202): custom
- * permission bisa membuat tombol Hapus tampil untuk "user" biasa yang bukan
- * reporter/admin, melanggar aturan di atas yang TEGAS tanpa pengecualian.
- * Sekarang `canDeleteIssue` sama sekali tidak memakai `hasPermission` —
- * murni Admin/Manager/Head atau Reporter, sama seperti `canManageIssue`.
+ * Item #483 — Hapus issue (keputusan pemilik): Administrator sistem = full
+ * akses; user non-admin = ikut checklist `list.delete` di Users.permissions
+ * (Issue Management). Jangan memakai `effectiveRole` proyek untuk gerbang
+ * Hapus — project admin dengan role sistem `user` harus ikut checklist,
+ * sama seperti API `checkUserPermissionBackend`.
+ *
+ * Ditulis sebagai modul murni terpisah supaya bisa diuji tanpa React.
  */
+
+import { Task, UserProfile, PeranEfektif } from "../../types";
+import { normalkanPeran } from "../../types/roles";
 
 export interface IssuePermissionContext {
   userRole?: PeranEfektif | string | null;
@@ -45,6 +40,11 @@ function currentUserIdOf(ctx: IssuePermissionContext): string | undefined {
     ctx.user?.id ||
     undefined
   );
+}
+
+/** Peran SISTEM dari profil Users — jangan pakai effectiveRole proyek. */
+function systemRoleOf(ctx: IssuePermissionContext): string {
+  return normalkanPeran(ctx.currentUserProfile?.role ?? ctx.user?.role ?? null);
 }
 
 export function isUserReporter(
@@ -83,13 +83,25 @@ function isLeadOrAdmin(ctx: IssuePermissionContext): boolean {
   return LEAD_ROLES.includes(String(ctx.userRole || ""));
 }
 
-/** Delete, dan field Assignee/Reporter (melimpahkan tanggung jawab). */
+/** Delete, dan field Assignee (melimpahkan tanggung jawab). Reporter → #482. */
 export function canManageIssue(
   issue: Task | null | undefined,
   ctx: IssuePermissionContext
 ): boolean {
   if (!issue) return false;
   return isLeadOrAdmin(ctx) || isUserReporter(issue, ctx);
+}
+
+/**
+ * #482 — ubah Reporter hanya Administrator sistem (`Users.role === admin`).
+ * Project admin / manager / head / reporter TIDAK boleh.
+ */
+export function canChangeReporter(
+  issue: Task | null | undefined,
+  ctx: IssuePermissionContext
+): boolean {
+  if (!issue) return false;
+  return systemRoleOf(ctx) === "admin";
 }
 
 /** Field lain (Status, Priority, dst.) — tambah Assignee task ini sendiri. */
@@ -99,21 +111,24 @@ export function canEditIssue(issue: Task | null | undefined, ctx: IssuePermissio
 }
 
 /**
- * Item #202 — SEBELUMNYA fungsi ini juga memakai `hasPermission(...)`, yang
- * menghormati custom permission per-user (mis. admin memberi akses "list"
- * eksplisit ke satu akun). Itu membuka celah: seorang "user" biasa yang
- * kebetulan punya custom permission `list.delete = true` tersimpan di
- * profilnya (dari pengujian sebelumnya) melihat ikon Hapus tampil — padahal
- * aturan yang disepakati pemilik proyek TEGAS: **hapus issue hanya boleh
- * Admin/Manager/Head atau Reporter, TANPA pengecualian lewat custom
- * permission apa pun.** Jadi TIDAK lagi memakai `hasPermission` sama sekali
- * di sini — persis logika `canManageIssue`, sengaja tidak digabung jadi
- * satu nama supaya niatnya (izin utk aksi DELETE) tetap jelas dibaca.
+ * #483 — Hapus: Administrator sistem selalu boleh; selain itu HANYA checklist
+ * `list.delete` (Users.permissions). Peran proyek TIDAK membuka tombol.
+ * Memakai `systemRoleOf` saat memanggil `hasPermission` supaya project
+ * `admin` tidak kena short-circuit God Mode di permissions.ts.
  */
 export function canDeleteIssue(
   issue: Task | null | undefined,
   ctx: IssuePermissionContext
 ): boolean {
   if (!issue) return false;
-  return isLeadOrAdmin(ctx) || isUserReporter(issue, ctx);
+  if (systemRoleOf(ctx) === "admin") return true;
+  const custom = ctx.currentUserProfile?.permissions ?? ctx.user?.permissions ?? undefined;
+  const allowed = ctx.hasPermission(
+    (systemRoleOf(ctx) || "user") as any,
+    "list",
+    "delete",
+    false,
+    custom
+  );
+  return Boolean(allowed);
 }

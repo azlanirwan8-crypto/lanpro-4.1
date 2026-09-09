@@ -3611,23 +3611,20 @@ function AppContainer() {
     const taskToDelete = tasks.find((t) => t.id === taskId);
     if (!taskToDelete) return;
 
-    const effectiveUserId =
-      currentUser?.uid || user?.uid || currentUserProfile?.uid || currentUserProfile?.id;
-    const effectiveUsername =
-      currentUser?.username || user?.username || currentUserProfile?.username;
-    const isReporter =
-      taskToDelete.reporterId === effectiveUserId || taskToDelete.reporterId === effectiveUsername;
-    // Item #206 — jalur KETIGA dari bug #202/#204: fungsi ini (dipanggil
-    // langsung saat ikon Hapus diklik, di TENGAH antara tombol dan API) juga
-    // punya pengecekan reporter-only-nya sendiri, TANPA jalur admin/manager/
-    // head — jadi walau tombolnya sudah benar tampil untuk Admin (#202) dan
-    // backend sudah benar mengizinkan (#204), klik-nya tetap gagal di sini,
-    // di tengah jalan, sebelum sempat memanggil API sama sekali.
-    const isLeadOrAdmin = ["admin", "manager", "head"].includes(
-      String(effectiveRole || "").toLowerCase()
+    // #483 — Administrator sistem full akses; non-admin ikut checklist list.delete
+    const systemRole = String(
+      currentUserProfile?.role || user?.role || currentUser?.role || ""
+    ).toLowerCase();
+    const isSystemAdmin = systemRole === "admin";
+    const mayDeleteByChecklist = hasPermission(
+      (systemRole || "user") as PeranEfektif,
+      "list",
+      "delete",
+      false,
+      currentUserProfile?.permissions
     );
-    if (!isReporter && !isLeadOrAdmin) {
-      toast.error(t("toast.onlyReporterDeleteTask"));
+    if (!isSystemAdmin && !mayDeleteByChecklist) {
+      toast.error(t("toast.taskDeleteFailed") + t("serverErr.srv.role_anda_tidak_memiliki"));
       return;
     }
 

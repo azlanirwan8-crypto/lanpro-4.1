@@ -570,6 +570,20 @@ router.put(
       const isWorkspaceAdmin = (userRole || "").toLowerCase() === "admin";
       const isAdmin = isWorkspaceAdmin;
 
+      // #482 — ganti Reporter hanya Administrator sistem (Users.role)
+      if (
+        reporterId !== undefined &&
+        String(reporterId ?? "") !== String(oldTask.reporterId ?? "")
+      ) {
+        if (!isAdmin) {
+          return res.status(403).json({
+            status: "error",
+            code: "srv.reporter_hanya_admin",
+            message: "Hanya Administrator yang boleh mengubah Reporter.",
+          });
+        }
+      }
+
       const hasRolePermission = checkUserPermissionBackend(userRole, userPerms, "update");
       if (!hasRolePermission) {
         return res.status(403).json({
@@ -983,46 +997,19 @@ router.delete(
       const user = await userRepository.findByIdOrUid(userId);
       const userRole = user?.role || "viewer";
       const userPerms = user?.permissions || null;
-      const dbUserId = user?.id;
-      const dbUserUid = user?.uid;
-      const dbUsername = user?.username;
 
-      const isReporter =
-        task.reporterId === userId ||
-        task.reporterId === (req as any).user?.uid ||
-        task.reporterId === (req as any).user?.username ||
-        (dbUserId && task.reporterId === dbUserId) ||
-        (dbUserUid && task.reporterId === dbUserUid) ||
-        (dbUsername && task.reporterId === dbUsername);
-
-      // Item #202 — sebelumnya baris ini TIDAK PUNYA jalur untuk
-      // Admin/Manager/Head sama sekali, jadi bahkan Admin diblokir menghapus
-      // task yang bukan mereka laporkan — bertentangan dengan #200/#201
-      // (frontend `src/features/issues/issuePermissions.ts`, sudah benar).
-      // `checkUserPermissionBackend` di atas MASIH bisa lolos lewat custom
-      // permission per-user, tapi gerbang di bawah ini TETAP mewajibkan
-      // Reporter ATAU Admin/Manager/Head — custom permission TIDAK cukup
-      // sendirian, menyamakan aturan dengan frontend.
-      const isLeadOrAdmin = ["admin", "manager", "head"].includes(
-        String(userRole || "").toLowerCase()
-      );
-
-      const hasRolePermission = checkUserPermissionBackend(userRole, userPerms, "delete");
-      if (!hasRolePermission && !isLeadOrAdmin) {
-        return res.status(403).json({
-          status: "error",
-          code: "srv.role_anda_tidak_memiliki",
-          message: "Role Anda tidak memiliki akses untuk tindakan ini",
-        });
-      }
-
-      if (!isReporter && !isLeadOrAdmin) {
-        return res.status(403).json({
-          status: "error",
-          code: "srv.hanya_reporter_pembuat_task_2",
-          message:
-            "Hanya Reporter pembuat task ini atau Admin/Manager yang diizinkan melakukan perubahan/penghapusan",
-        });
+      const isWorkspaceAdmin = (userRole || "").toLowerCase() === "admin";
+      // #483 — Administrator sistem full akses; non-admin wajib checklist list.delete
+      // (bukan jalur project lead / reporter yang mengabaikan Users.permissions).
+      if (!isWorkspaceAdmin) {
+        const hasRolePermission = checkUserPermissionBackend(userRole, userPerms, "delete");
+        if (!hasRolePermission) {
+          return res.status(403).json({
+            status: "error",
+            code: "srv.role_anda_tidak_memiliki",
+            message: "Role Anda tidak memiliki akses untuk tindakan ini",
+          });
+        }
       }
 
       await createAuditLog(userId as string, projectId, "DELETE", "Tasks", id, null, null);
@@ -1068,33 +1055,24 @@ router.post(
       }
 
       const user = await userRepository.findByIdOrUid(userId);
-      const dbUserId = user?.id;
-      const dbUserUid = user?.uid;
-      // Item #204 — sama seperti #202 (delete satuan): bulk-delete di sini
-      // TIDAK PUNYA jalur Admin/Manager/Head sama sekali, jadi task yang
-      // bukan dilaporkan Admin sendiri diam-diam TERSARING KELUAR dari
-      // `deletableTaskIds` tanpa pesan galat apa pun — kelihatan seperti
-      // "berhasil sebagian" padahal aslinya Admin diblokir seperti user
-      // biasa.
-      const isLeadOrAdmin = ["admin", "manager", "head"].includes(
-        String(user?.role || "").toLowerCase()
-      );
+      const userRole = user?.role || "viewer";
+      const userPerms = user?.permissions || null;
+      const isWorkspaceAdmin = (userRole || "").toLowerCase() === "admin";
 
-      const taskRows = await taskRepository.findTasksByIds(taskIds, projectId);
-
-      const deletableTaskIds: string[] = [];
-      for (const t of taskRows) {
-        const isReporter =
-          t.reporterId === userId ||
-          t.reporterId === (req as any).user?.uid ||
-          t.reporterId === (req as any).user?.username ||
-          (dbUserId && t.reporterId === dbUserId) ||
-          (dbUserUid && t.reporterId === dbUserUid);
-
-        if (isReporter || isLeadOrAdmin) {
-          deletableTaskIds.push(t.id);
+      // #483 — selaras delete satuan: admin sistem full; non-admin wajib checklist
+      if (!isWorkspaceAdmin) {
+        const hasRolePermission = checkUserPermissionBackend(userRole, userPerms, "delete");
+        if (!hasRolePermission) {
+          return res.status(403).json({
+            status: "error",
+            code: "srv.role_anda_tidak_memiliki",
+            message: "Role Anda tidak memiliki akses untuk tindakan ini",
+          });
         }
       }
+
+      const taskRows = await taskRepository.findTasksByIds(taskIds, projectId);
+      const deletableTaskIds = taskRows.map((t: { id: string }) => t.id);
 
       if (deletableTaskIds.length === 0) {
         return res.status(403).json({

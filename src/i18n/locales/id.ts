@@ -135,6 +135,7 @@ export const id = {
     "srv.user_updated": "Pengguna diperbarui",
     "srv.user_deleted": "Pengguna dihapus",
     "srv.akses_ditolak_status_hanya_admin": "Hanya administrator yang dapat mengubah status akun.",
+    "srv.reporter_hanya_admin": "Hanya Administrator yang boleh mengubah Reporter.",
     "srv.tidak_bisa_ubah_status_akun_sendiri":
       "Anda tidak dapat mengubah status akun Anda sendiri.",
     "srv.rekaman_tidak_bisa_diubah_ke_mp3":
