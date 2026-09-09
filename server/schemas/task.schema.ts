@@ -69,3 +69,13 @@ export const addTaskCommentSchema = z.object({
   userId: z.string().optional(),
   authorId: z.string().optional(),
 });
+
+export const addAttachmentSchema = z.object({
+  filename: z.string().min(1, "Nama file tidak boleh kosong"),
+  name: z.string().min(1, "Nama tampilan tidak boleh kosong"),
+  originalName: z.string().optional(),
+  mimetype: z.string().optional(),
+  type: z.string().optional(),
+  size: z.number().optional(),
+  url: z.string().min(1, "URL file tidak boleh kosong"),
+});

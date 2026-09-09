@@ -19,7 +19,12 @@ import { validasiBody, validasiQuery } from "../middleware/validate";
 import { paginationQuerySchema, taskListQuerySchema } from "../schemas/pagination.schema";
 import { respondWithProjectList } from "../lib/listResponse";
 import { listSuccessPayload, parsePaginationQuery } from "../lib/pagination";
-import { createTaskSchema, updateTaskSchema, reorderTaskIdsSchema } from "../schemas/task.schema";
+import {
+  createTaskSchema,
+  updateTaskSchema,
+  reorderTaskIdsSchema,
+  addAttachmentSchema,
+} from "../schemas/task.schema";
 import { AuthenticatedRequest } from "../types/express";
 import { taskRepository } from "../repositories/task.repository";
 import { userRepository } from "../repositories/user.repository";
@@ -970,6 +975,125 @@ router.put(
     } catch (error: any) {
       console.error("LOG ANOMALI CRITICAL: PUT /api/projects/:projectId/tasks/:id error:", error);
       res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
+  }
+);
+
+router.post(
+  "/api/projects/:projectId/tasks/:id/attachments",
+  authenticateJWT,
+  jagaProyek("list", "U"),
+  validasiBody(addAttachmentSchema),
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id, projectId } = req.params;
+      const userId = req.user?.id || req.user?.uid;
+      const user = userId ? await userRepository.findByIdOrUid(String(userId)) : null;
+      const uploadedByName =
+        user?.displayName || user?.nama_lengkap || user?.username || req.user?.name || "User";
+
+      const task = await taskRepository.findTaskWithProjectCategory(id, projectId);
+      if (!task) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.tugas_tidak_ditemukan",
+          message: "Tugas tidak ditemukan.",
+        });
+      }
+
+      const { filename, name, originalName, mimetype, type, size, url } = req.body;
+      const attachmentId = crypto.randomUUID();
+
+      const created = await taskRepository.addAttachment({
+        id: attachmentId,
+        taskId: id,
+        filename,
+        name,
+        originalName: originalName || name || filename,
+        mimetype: mimetype || "application/octet-stream",
+        type: type || "file",
+        size: Number(size || 0),
+        url,
+        uploadedByName,
+        uploadedByUserId: userId ? String(userId) : undefined,
+      });
+
+      await createAuditLog(
+        userId as string,
+        projectId,
+        "UPDATE",
+        "Tasks",
+        id,
+        { action: "add_attachment", name },
+        null
+      );
+
+      return res.status(201).json({
+        status: "success",
+        data: created,
+      });
+    } catch (error: any) {
+      console.error("POST /api/projects/:projectId/tasks/:id/attachments error:", error);
+      return res.status(500).json({
+        status: "error",
+        code: "srv.terjadi_kesalahan_internal_server",
+        message: "Terjadi kesalahan internal server",
+      });
+    }
+  }
+);
+
+router.delete(
+  "/api/projects/:projectId/tasks/:id/attachments/:attachmentId",
+  authenticateJWT,
+  jagaProyek("list", "D"),
+  async (req: AuthenticatedRequest, res) => {
+    try {
+      const { id, projectId, attachmentId } = req.params;
+      const userId = req.user?.id || req.user?.uid;
+
+      const task = await taskRepository.findTaskWithProjectCategory(id, projectId);
+      if (!task) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.tugas_tidak_ditemukan",
+          message: "Tugas tidak ditemukan.",
+        });
+      }
+
+      const deleted = await taskRepository.deleteAttachment(attachmentId, id);
+      if (!deleted) {
+        return res.status(404).json({
+          status: "error",
+          code: "srv.lampiran_tidak_ditemukan",
+          message: "Lampiran tidak ditemukan.",
+        });
+      }
+
+      await createAuditLog(
+        userId as string,
+        projectId,
+        "UPDATE",
+        "Tasks",
+        id,
+        { action: "delete_attachment", attachmentId },
+        null
+      );
+
+      return res.json({
+        status: "success",
+        message: "Lampiran berhasil dihapus.",
+      });
+    } catch (error: any) {
+      console.error(
+        "DELETE /api/projects/:projectId/tasks/:id/attachments/:attachmentId error:",
+        error
+      );
+      return res.status(500).json({
         status: "error",
         code: "srv.terjadi_kesalahan_internal_server",
         message: "Terjadi kesalahan internal server",

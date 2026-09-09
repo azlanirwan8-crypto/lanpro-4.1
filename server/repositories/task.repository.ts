@@ -81,6 +81,33 @@ export class TaskRepository {
         linksMap.get(link.sourceTaskId)!.push(link);
       });
 
+      const [attachmentsRows]: any = await connection.query(
+        'SELECT * FROM Attachments WHERE "taskId" IN (SELECT id FROM Tasks WHERE projectId = ?) ORDER BY "createdAt" ASC',
+        [projectId]
+      );
+
+      const attachmentsMap = new Map<string, any[]>();
+      (attachmentsRows || []).forEach((att: any) => {
+        const tId = att.taskId || att.taskid;
+        if (!attachmentsMap.has(tId)) {
+          attachmentsMap.set(tId, []);
+        }
+        attachmentsMap.get(tId)!.push({
+          id: att.id,
+          taskId: tId,
+          name: att.name || att.filename || "Attachment",
+          originalName: att.originalName || att.name || att.filename,
+          filename: att.filename,
+          url: att.url,
+          type: att.type || att.fileType || "file",
+          fileType: att.fileType || att.type || "file",
+          size: Number(att.size || att.fileSize || 0),
+          uploadedByName: att.uploadedByName || null,
+          uploadedByUserId: att.uploadedByUserId || null,
+          createdAt: att.createdAt || att.uploadedAt || new Date().toISOString(),
+        });
+      });
+
       const subtasksMap = new Map<string, any[]>();
       (filteredTasks || []).forEach((t: any) => {
         if (t.parentId) {
@@ -131,6 +158,7 @@ export class TaskRepository {
           reporter: reporterUser || null,
           linkedTasks: linksMap.get(t.id) || [],
           subtasks: subtasksMap.get(t.id) || [],
+          attachments: attachmentsMap.get(t.id) || [],
         };
       });
     } finally {
@@ -365,15 +393,18 @@ export class TaskRepository {
             urlLampiran.split("?")[0].split("/").filter(Boolean).pop() || att.name || "lampiran";
 
           await connection.query(
-            `INSERT INTO Attachments (id, taskId, filename, name, url, fileType, uploadedByName, createdAt)
-             VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+            `INSERT INTO Attachments (id, "taskId", filename, name, "originalName", url, "fileType", type, size, "uploadedByName", "createdAt")
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
             [
               att.id || crypto.randomUUID(),
               newId,
               namaTersimpan,
               att.name || "Attachment",
+              att.originalName || att.name || namaTersimpan,
               urlLampiran,
               att.type || "file",
+              att.type || "file",
+              att.size || 0,
               att.uploadedByName || "User",
             ]
           );
@@ -813,6 +844,82 @@ export class TaskRepository {
         total,
         entry.taskId,
       ]);
+    } finally {
+      connection.release();
+    }
+  }
+
+  async addAttachment(data: {
+    id: string;
+    taskId: string;
+    filename: string;
+    name: string;
+    originalName?: string;
+    mimetype?: string;
+    type?: string;
+    size?: number;
+    url: string;
+    uploadedByName?: string;
+    uploadedByUserId?: string;
+  }): Promise<any> {
+    const connection = await db.getConnection();
+    try {
+      await connection.query(
+        `INSERT INTO Attachments (id, "taskId", filename, name, "originalName", mimetype, type, size, url, "uploadedByName", "uploadedByUserId", "createdAt")
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+        [
+          data.id,
+          data.taskId,
+          data.filename,
+          data.name,
+          data.originalName || data.name,
+          data.mimetype || "application/octet-stream",
+          data.type || "file",
+          data.size || 0,
+          data.url,
+          data.uploadedByName || "User",
+          data.uploadedByUserId || null,
+        ]
+      );
+      return {
+        id: data.id,
+        taskId: data.taskId,
+        filename: data.filename,
+        name: data.name,
+        originalName: data.originalName || data.name,
+        type: data.type || "file",
+        size: data.size || 0,
+        url: data.url,
+        uploadedByName: data.uploadedByName || "User",
+        createdAt: new Date().toISOString(),
+      };
+    } finally {
+      connection.release();
+    }
+  }
+
+  async deleteAttachment(attachmentId: string, taskId: string): Promise<boolean> {
+    const connection = await db.getConnection();
+    try {
+      const [result]: any = await connection.query(
+        'DELETE FROM Attachments WHERE id = ? AND "taskId" = ?',
+        [attachmentId, taskId]
+      );
+      return (
+        result?.affectedRows > 0 || (typeof result?.rowCount === "number" && result.rowCount > 0)
+      );
+    } finally {
+      connection.release();
+    }
+  }
+
+  async findAttachmentById(attachmentId: string): Promise<any | null> {
+    const connection = await db.getConnection();
+    try {
+      const [rows]: any = await connection.query("SELECT * FROM Attachments WHERE id = ? LIMIT 1", [
+        attachmentId,
+      ]);
+      return rows && rows.length > 0 ? rows[0] : null;
     } finally {
       connection.release();
     }

@@ -8,6 +8,9 @@ export interface Attachment {
   name: string;
   url: string;
   type: string; // 'link' | 'image' | 'pdf' | 'doc' | 'file'
+  filename?: string;
+  originalName?: string;
+  size?: number;
   fileRef?: string; // Optional path in storage if it's an uploaded file
   createdAt: any;
   uploadedByUserId?: string;

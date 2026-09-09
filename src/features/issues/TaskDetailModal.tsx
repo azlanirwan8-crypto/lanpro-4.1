@@ -362,6 +362,27 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                 </div>
               </div>
 
+              {/* Section: Attachments & Files */}
+              <TaskAttachmentsSection
+                task={task}
+                isEditable={isEditable}
+                isAddingLink={isAddingLink}
+                setIsAddingLinkLocal={setIsAddingLinkLocal}
+                newLinkTitle={newLinkTitle}
+                setNewLinkTitle={setNewLinkTitle}
+                newLinkUrl={newLinkUrl}
+                setNewLinkUrl={setNewLinkUrl}
+                handleAddLink={handleAddLink}
+                handleRemoveAttachment={handleRemoveAttachment}
+                onAttachmentAdded={(newAtt) => {
+                  const current = task.attachments || [];
+                  updateTaskField(task.id, "attachments", [...current, newAtt]);
+                }}
+                safeFormat={safeFormat}
+                wrapSubmit={wrapSubmit}
+                isSubmitting={isSubmitting}
+              />
+
               {/* Figma Design Section */}
               {task.figmaUrl?.includes("figma.com") && (
                 <div className="space-y-4 pt-4">
@@ -392,23 +413,6 @@ export const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
                   </div>
                 </div>
               )}
-
-              {/* Section: Attachments */}
-              <TaskAttachmentsSection
-                task={task}
-                isEditable={isEditable}
-                isAddingLink={isAddingLink}
-                setIsAddingLinkLocal={setIsAddingLinkLocal}
-                newLinkTitle={newLinkTitle}
-                setNewLinkTitle={setNewLinkTitle}
-                newLinkUrl={newLinkUrl}
-                setNewLinkUrl={setNewLinkUrl}
-                handleAddLink={handleAddLink}
-                handleRemoveAttachment={handleRemoveAttachment}
-                safeFormat={safeFormat}
-                wrapSubmit={wrapSubmit}
-                isSubmitting={isSubmitting}
-              />
 
               {/* Section: Linked Tasks */}
               <TaskLinksSection

@@ -2838,6 +2838,12 @@ function AppContainer() {
     if (!isConfirmed) return;
 
     try {
+      if (selectedProject?.id) {
+        await apiRequest(
+          `/api/projects/${selectedProject.id}/tasks/${selectedTaskForDetail.id}/attachments/${attachmentId}`,
+          { method: "DELETE" }
+        ).catch((err) => console.warn("Delete attachment API warning:", err));
+      }
       const updatedAttachments = (selectedTaskForDetail.attachments || []).filter(
         (a) => a.id !== attachmentId
       );
