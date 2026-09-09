@@ -643,7 +643,7 @@ export function DashboardView(props: DashboardViewProps) {
 
   return (
     <div className={styles.container}>
-      {/* #446 — PageHeader hanya salam; filter sprint di bawah (bukan TASK SUMMARY) */}
+      {/* #446/#485 — PageHeader salam kiri; filter sprint + chip Active di pojok kanan (actions) */}
       <PageHeader
         uppercase={false}
         breadcrumbs={[
@@ -651,32 +651,32 @@ export function DashboardView(props: DashboardViewProps) {
           { label: t("nav.dashboard", "Dashboard"), current: true },
         ]}
         title={`${getGreeting()}, ${currentUser?.displayName || "Administrator"}!`}
+        actions={
+          <div className="flex flex-wrap items-center justify-end gap-2 min-w-0">
+            <div className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[240px] min-w-0 shrink-0">
+              <StyledDropdown
+                value={selectedSprintFilter}
+                onChange={(val) => setSelectedSprintFilter(val)}
+                options={sprintFilterOptions}
+                masterData={[]}
+                className="w-full min-w-0"
+                buttonClassName="h-7 w-full min-w-0 bg-surface-muted rounded-md border border-border-subtle hover:border-border-subtle shadow-2xs px-2 text-[11px] font-medium text-content-body"
+              />
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-info/10 px-2 py-1 rounded-md border border-info/20 text-[11px] font-medium text-info-text min-w-0 max-w-full">
+              <Zap className="w-3.5 h-3.5 text-info-text shrink-0" />
+              <span className="truncate">
+                {t("dashboard.activeSprintChip", {
+                  name: activeSprint?.name || t("dashboard.noActiveSprint"),
+                  days: sprintDaysLeft,
+                })}
+              </span>
+            </div>
+          </div>
+        }
       />
       <div className={styles.wrapper}>
-        {/* #446 — dropdown + chip Active di bekas posisi TASK SUMMARY / Epics excluded.
-            #129 — KPI di bawah tetap `nonEpicTasks`; chip/filter memakai ruang lingkup sprint. */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
-          <div className="w-full sm:w-auto sm:min-w-[180px] sm:max-w-[240px] min-w-0 flex-1 md:flex-none">
-            <StyledDropdown
-              value={selectedSprintFilter}
-              onChange={(val) => setSelectedSprintFilter(val)}
-              options={sprintFilterOptions}
-              masterData={[]}
-              className="w-full min-w-0"
-              buttonClassName="h-10 w-full min-w-0 bg-surface-muted rounded-lg border border-border-subtle hover:border-border-subtle shadow-2xs px-3 text-xs font-medium text-content-body"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 bg-info/10 px-3 py-2 rounded-lg border border-info/20 text-xs font-medium text-info-text min-w-0 max-w-full">
-            <Zap className="w-3.5 h-3.5 text-info-text shrink-0" />
-            <span className="truncate">
-              {t("dashboard.activeSprintChip", {
-                name: activeSprint?.name || t("dashboard.noActiveSprint"),
-                days: sprintDaysLeft,
-              })}
-            </span>
-          </div>
-        </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
           {/* Card 1: Total Tasks — putih + soft icon + hover lift (#415) */}
           <Card

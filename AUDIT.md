@@ -612,7 +612,7 @@ jadi §1.1 tetap sumber kebenarannya; halaman itu acuan, bukan pengganti.
 
 ---
 
-## §1 PAPAN PRIORITAS — 6 BELUM · 474 SELESAI · 4 ditahan/dibatalkan
+## §1 PAPAN PRIORITAS — 6 BELUM · 475 SELESAI · 4 ditahan/dibatalkan
 
 Tidak ada item yang berada di luar fase. Bila muncul temuan baru, ia **wajib**
 diberi nomor dan dimasukkan ke salah satu fase — bukan ditulis sebagai catatan
@@ -627,9 +627,9 @@ dikerjakan lebih dulu**, sebab itu yang dicari saat membuka dokumen ini.
 
 **Sebaran per fase:** F0 0 · F1 0 · F2 0 · F3 0 · F4 0 · F5 1 · F6 1 · F7 0 · F8 0 · F9 0 · F10 2 · F11 1 · F12 0 · F13 1
 
-**Dihitung ulang 09 Sep 2026 (pasca #484 SELESAI):** F5 #305 · F6 #290 · F10 #433 #434 · F11 #30 · F13 #320. **#470–#484 → §1.2**. Rekap: **§24.9**.
+**Dihitung ulang 09 Sep 2026 (pasca #485 SELESAI):** F5 #305 · F6 #290 · F10 #433 #434 · F11 #30 · F13 #320. **#470–#485 → §1.2**. Rekap: **§24.9**.
 
-**Keputusan pemilik 09 Sep 2026:** #482 opsi 1 — hanya system Administrator yang boleh ubah Reporter. **#483** — Hapus issue: Administrator sistem full akses; user non-admin mengikuti checklist `list.delete` (Issue Management). **#484** opsi A — hapus tombol Create Issue di toolbar Daftar Isu; sisakan quick-add bawah (+ modal lewat aksi mobile).
+**Keputusan pemilik 09 Sep 2026:** #482 opsi 1 — hanya system Administrator yang boleh ubah Reporter. **#483** — Hapus issue: Administrator sistem full akses; user non-admin mengikuti checklist `list.delete` (Issue Management). **#484** opsi A — hapus tombol Create Issue di toolbar Daftar Isu; sisakan quick-add bawah (+ modal lewat aksi mobile). **#485** — All Sprints dropdown (+ chip Active) di **pojok kanan** PageHeader Dashboard (`actions`), salam tetap kiri.
 
 Catatan: #465 waterfall kanonik (copy Sprint + nav dual-mode ala Jira) + #463 FK QA `linkedTaskId` SELESAI kode 06 Sep. #346 dihormati (iris tipis, bukan marketplace). #335 tetap checklist visual.
 
@@ -701,6 +701,13 @@ Sumber: pemilik 09 Sep 2026 — tombol Hapus tampil meski checklist Delete Issue
 #### F3 tambahan — Daftar Isu tanpa Create di toolbar (#484 → §1.2)
 
 Sumber: pemilik 09 Sep 2026 — dua jalur Create (toolbar + bar bawah) membingungkan; banding Jira → opsi A. **DITUTUP kode 09 Sep 2026.**
+
+| No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
+| :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
+
+#### F3 tambahan — Dashboard All Sprints di pojok kanan (#485 → §1.2)
+
+Sumber: screenshot pemilik 09 Sep 2026 — minta dropdown/chip di pojok kanan (koreksi posisi kiri). **DITUTUP kode 09 Sep 2026:** `PageHeader.actions` kanan; salam kiri; tanpa baris filter terpisah di atas KPI.
 
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
@@ -880,10 +887,11 @@ Sumber: sisir ulang setelah `45ae6e9`. **DITUTUP kode 04 Sep 2026.** E2E lapanga
 | No tiket | Sev | Biaya | Status | Isi | Solusi masalah | Proses perbaikan | Catatan jika dikerjakan oleh AI lain | Fase | Blokir modul baru? |
 | :------: | :-: | ----- | ------ | --- | -------------- | ---------------- | ------------------------------------ | :--: | :----------------: |
 
-### 1.2 SUDAH SELESAI — 474 item
+### 1.2 SUDAH SELESAI — 475 item
 
 |  No | Temuan                                                                                                                                                                                                                                                                                                                                             |  Fase  | Sev | Biaya  | Blokir? | Status                          | Asal |
 | --: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----: | :-: | ------ | :-----: | ------------------------------- | ---- |
+| 485 | **Dashboard All Sprints di pojok kanan (#485).** DITUTUP 09 Sep 2026: dropdown All Sprints + chip Active di `PageHeader.actions` (kanan); salam kiri; baris filter terpisah di atas KPI dihapus. Koreksi posisi setelah permintaan kanan pojok.                                                                                                    | **F3** | 🟡  | Kecil  |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
 | 484 | **Daftar Isu tanpa Create di toolbar (#484).** DITUTUP 09 Sep 2026 (opsi A pemilik, ala Jira): hapus tombol Create Issue dari `IssueAdvancedFiltersPanel`; sisakan `IssueQuickCreateBar` bawah + aksi mobile `NewTaskModal`. Tes panel diperbarui.                                                                                                 | **F3** | 🟡  | Kecil  |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
 | 483 | **Hapus issue: admin full · user checklist (#483).** DITUTUP 09 Sep 2026: `canDeleteIssue` — `Users.role===admin` selalu boleh; non-admin hanya jika `hasPermission(list,delete)` + `Users.permissions` (bukan peran proyek). AppContainer + API DELETE selaras; hilangkan gerbang lead/reporter yang mengabaikan checklist. Tes issuePermissions. | **F4** | 🔴  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
 | 482 | **Reporter hanya Administrator sistem (#482).** DITUTUP 09 Sep 2026 (opsi 1 pemilik): `canChangeReporter` cek `Users.role===admin` (bukan project admin/reporter); UI tabel+sidebar; API tolak ganti `reporterId` non-admin (`srv.reporter_hanya_admin`). Tes issuePermissions.                                                                    | **F4** | 🔴  | Sedang |  Tidak  | SELESAI 09 Sep (kode)           | §1.1 |
