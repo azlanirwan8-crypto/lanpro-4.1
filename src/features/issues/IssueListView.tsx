@@ -344,10 +344,6 @@ export const IssueListView: React.FC<IssueListViewProps> = (props) => {
           allReleases={allReleases}
           allResolutions={allResolutions}
           setIsConfigureColumnsOpen={setIsConfigureColumnsOpen}
-          canCreateIssue={canCreateIssue}
-          onAddIssue={
-            props.setIsNewTaskModalOpen ? () => props.setIsNewTaskModalOpen?.(true) : undefined
-          }
         />
 
         {/* Mobile View: Card List (< 640px) */}

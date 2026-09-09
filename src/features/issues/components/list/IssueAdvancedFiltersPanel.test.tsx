@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { IssueAdvancedFiltersPanel } from "./IssueAdvancedFiltersPanel";
 
 jest.mock("react-i18next", () => ({
@@ -71,18 +71,11 @@ const dasar = {
   setIsConfigureColumnsOpen: jest.fn(),
 };
 
-describe("IssueAdvancedFiltersPanel (#424)", () => {
-  it("Search + Tambah ada di toolbar kartu", () => {
-    const onAddIssue = jest.fn();
-    render(<IssueAdvancedFiltersPanel {...dasar} canCreateIssue onAddIssue={onAddIssue} />);
+describe("IssueAdvancedFiltersPanel (#484)", () => {
+  it("Search ada di toolbar; Create Issue tidak (opsi A ala Jira)", () => {
+    render(<IssueAdvancedFiltersPanel {...dasar} />);
 
     expect(screen.getByPlaceholderText("filters.searchIssues")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "newTask.createIssue" }));
-    expect(onAddIssue).toHaveBeenCalledTimes(1);
-  });
-
-  it("tanpa izin create, tombol Tambah tidak tampil", () => {
-    render(<IssueAdvancedFiltersPanel {...dasar} />);
     expect(screen.queryByRole("button", { name: "newTask.createIssue" })).not.toBeInTheDocument();
   });
 });
