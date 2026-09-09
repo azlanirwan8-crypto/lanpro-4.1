@@ -23,6 +23,7 @@ interface WhatsAppConfigFormProps {
 
 interface RecipientUser {
   id: string;
+  username: string;
   name: string;
 }
 
@@ -64,6 +65,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
           setRecipientUsers(
             usersRes.data.map((u: any) => ({
               id: String(u.id),
+              username: String(u.username || ""),
               name: u.displayName || u.username || `User ${u.id}`,
             }))
           );
@@ -105,6 +107,14 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
   const scheduleTime: string = formData.scheduleTime || "07:00";
   const recipientIds: string[] = formData.recipientIds || [];
 
+  const isUserSelected = (user: RecipientUser, currentIds: string[]) => {
+    return currentIds.some(
+      (id) =>
+        id.toLowerCase() === user.id.toLowerCase() ||
+        (user.username && id.toLowerCase() === user.username.toLowerCase())
+    );
+  };
+
   const toggleDay = (day: string) => {
     setFormData((prev: any) => {
       const current: string[] = prev.scheduleDays || [];
@@ -113,15 +123,25 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
     });
   };
 
-  const toggleRecipient = (userId: string) => {
+  const toggleRecipient = (user: RecipientUser) => {
     setFormData((prev: any) => {
       const current: string[] = prev.recipientIds || [];
-      const next = current.includes(userId)
-        ? current.filter((id) => id !== userId)
-        : [...current, userId];
+      const selected = isUserSelected(user, current);
+      let next: string[];
+      if (selected) {
+        next = current.filter(
+          (id) =>
+            id.toLowerCase() !== user.id.toLowerCase() &&
+            (!user.username || id.toLowerCase() !== user.username.toLowerCase())
+        );
+      } else {
+        next = [...current, user.id];
+      }
       return { ...prev, recipientIds: next };
     });
   };
+
+  const selectedUsersCount = recipientUsers.filter((u) => isUserSelected(u, recipientIds)).length;
 
   const filteredUsers = recipientUsers.filter((u) =>
     u.name.toLowerCase().includes(recipientSearch.toLowerCase())
@@ -178,7 +198,12 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
       toast.error(t("whatsapp.selectDayError"));
       return;
     }
-    if (!sendToAll && recipientIds.length === 0) {
+
+    const cleanRecipientIds = recipientUsers
+      .filter((u) => isUserSelected(u, recipientIds))
+      .map((u) => u.id);
+
+    if (!sendToAll && cleanRecipientIds.length === 0) {
       toast.error(t("whatsapp.selectRecipientError"));
       return;
     }
@@ -189,7 +214,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
         saveWhatsAppBroadcastConfig({
           scheduleDays,
           scheduleTime,
-          recipientIds: sendToAll ? [] : recipientIds,
+          recipientIds: sendToAll ? [] : cleanRecipientIds,
           messageTemplate: formData.messageTemplate || "",
         }),
         saveWhatsAppConnectionConfig({
@@ -202,6 +227,10 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
       ]);
 
       if (broadcastRes.status === "success" && connRes.status === "success") {
+        setFormData((prev: any) => ({
+          ...prev,
+          recipientIds: sendToAll ? [] : cleanRecipientIds,
+        }));
         toast.success(t("whatsapp.saveSuccess"));
       } else {
         toast.error(broadcastRes.message || connRes.message || t("whatsapp.saveFailed"));
@@ -342,7 +371,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
               className={inputStyle}
             />
             <div className="text-xs text-content-subtle">
-              {t("whatsapp.recipientSelectedCount", { jumlah: recipientIds.length })}
+              {t("whatsapp.recipientSelectedCount", { jumlah: selectedUsersCount })}
             </div>
             <div className="max-h-40 overflow-y-auto custom-scrollbar border border-border-faint rounded-md p-1.5 space-y-0.5 bg-surface-sunken/30">
               {filteredUsers.length === 0 ? (
@@ -357,8 +386,8 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
                   >
                     <input
                       type="checkbox"
-                      checked={recipientIds.includes(user.id)}
-                      onChange={() => toggleRecipient(user.id)}
+                      checked={isUserSelected(user, recipientIds)}
+                      onChange={() => toggleRecipient(user)}
                       className="cursor-pointer"
                     />
                     {user.name}

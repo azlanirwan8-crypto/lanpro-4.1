@@ -117,7 +117,7 @@ export async function sendDailyTaskDigest(
     for (const user of users) {
       const [tasks]: any = await connection.query(
         `
-        SELECT t.title, t.dueDate, t.status, p.name as "projectName"
+        SELECT t.id, t.title, t.dueDate, t.status, t.priority, p.name as "projectName"
         FROM Tasks t
         LEFT JOIN Projects p ON t."projectId" = p.id
         WHERE t.assigneeId = ?
@@ -151,14 +151,6 @@ export function formatTanggal(dueDate: any): string {
   return d.toLocaleDateString("id-ID", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-/** "Tenggat: DD/MM/YYYY", atau "(Tenggat: Belum diatur)" — TIDAK PERNAH "null" literal. */
-function formatTenggat(dueDate: any): string {
-  if (!dueDate) return "(Tenggat: Belum diatur)";
-  const d = new Date(dueDate);
-  if (isNaN(d.getTime())) return "(Tenggat: Belum diatur)";
-  return `Tenggat: ${formatTanggal(dueDate)}`;
-}
-
 /**
  * Template default LAMA yang pernah tersimpan di `BroadcastConfig` sebelum
  * item #193/#194 ada — ditulis untuk SATU tugas (`{{task_key}}`,
@@ -180,24 +172,35 @@ function isTemplateLegacy(template: string): boolean {
 }
 
 /**
- * Menyusun isi pesan (Item #193/#194, format "Daily Stand-up" diminta
- * pemilik proyek 26 Agu 2026). Sapaan pembuka bisa dikustomisasi admin
- * lewat panel Settings → WhatsApp gateway → "Edit Broadcast Template" —
- * mendukung `{{user_name}}` dan `{{project_name}}`; daftar tugas SELALU
- * disusun terprogram — dikelompokkan per STATUS (Sedang Berjalan / Menunggu
- * Eksekusi), sebab itu yang paling relevan dibaca cepat tiap pagi, bukan
- * per project. Nama project ikut disebut per baris tugas hanya bila
- * pengguna punya tugas dari LEBIH dari satu project sekaligus — kalau
- * cuma satu, cukup disebut sekali di header supaya pesan tidak berulang.
- *
- * Jaring pengaman: placeholder APA PUN yang tersisa tak-terganti setelah
- * substitusi (mis. `{{task_key}}` dari template lama yang belum dibersihkan
- * admin) dibuang, bukan dikirim mentah — pesan WhatsApp sungguhan tidak
- * boleh pernah menampilkan `{{...}}` literal.
+ * Format daftar tiket bernomor untuk WhatsApp (Item #499).
+ * Contoh:
+ * 1. Tugas: ( Fix Authentication Flow )
+ *     Status: ( IN_PROGRESS )
+ *     Prioritas: ( high )
+ *     Tanggal Terakhir : ( 10/09/2026 )
  */
-// Item #278: `appUrl` diterima sebagai parameter, bukan dibaca dari env di
-// dalam fungsi ini, supaya sumber URL aplikasi tunggal (basis data) dan
-// fungsi ini tetap murni serta mudah diuji.
+export function formatTaskList(tasks: any[]): string {
+  return tasks
+    .map((t, idx) => {
+      const title = t.title || "Tanpa Judul";
+      const status = t.status || "-";
+      const priority = t.priority || "-";
+      const tanggal = formatTanggal(t.dueDate);
+      return (
+        `${idx + 1}. Tugas: ( ${title} )\n` +
+        `    Status: ( ${status} )\n` +
+        `    Prioritas: ( ${priority} )\n` +
+        `    Tanggal Terakhir : ( ${tanggal} )`
+      );
+    })
+    .join("\n");
+}
+
+/**
+ * Menyusun isi pesan WhatsApp Task Assignment (Item #499).
+ * Mendukung kustomisasi template melalui BroadcastConfig.
+ * Placeholder yang didukung: {{user_name}}, {{task_list}}, {{app_url}}, {{project_name}}.
+ */
 export function formatMessage(
   name: string,
   tasks: any[],
@@ -205,18 +208,31 @@ export function formatMessage(
   appUrlOverride?: string
 ) {
   const projectNames = Array.from(new Set(tasks.map((t) => t.projectName || "Tanpa Project")));
-  const headerProject = projectNames.length === 1 ? ` - ${projectNames[0]}` : "";
   const projectNameUntukTemplate = projectNames.length === 1 ? projectNames[0] : "beberapa project";
   const appUrl = (appUrlOverride || process.env.APP_URL || "http://localhost:3000").replace(
     /\/+$/,
     ""
   );
 
+  const taskListText = formatTaskList(tasks);
+
   const templateBersih =
     messageTemplate && messageTemplate.trim() && !isTemplateLegacy(messageTemplate)
       ? messageTemplate
       : null;
 
+  // Jika template kustom mengandung {{task_list}}
+  if (templateBersih && templateBersih.includes("{{task_list}}")) {
+    return templateBersih
+      .replace(/\{\{user_name\}\}/g, name)
+      .replace(/\{\{task_list\}\}/g, taskListText)
+      .replace(/\{\{app_url\}\}/g, appUrl)
+      .replace(/\{\{project_name\}\}/g, projectNameUntukTemplate)
+      .replace(/\{\{[a-zA-Z0-9_]+\}\}/g, "")
+      .trim();
+  }
+
+  // Jika template kustom hanya berisi salam/sapaan kustom
   const greeting = templateBersih
     ? templateBersih
         .replace(/\{\{user_name\}\}/g, name)
@@ -225,29 +241,13 @@ export function formatMessage(
         .trim()
     : `Halo ${name},`;
 
-  const bulletLine = (t: any) => {
-    const proyek = projectNames.length > 1 ? ` (${t.projectName || "Tanpa Project"})` : "";
-    return `• ${t.title}${proyek} — ${formatTenggat(t.dueDate)}`;
-  };
-
-  const sedangBerjalan = tasks.filter(
-    (t) => String(t.status || "").toLowerCase() === "in progress"
-  );
-  const menungguEksekusi = tasks.filter(
-    (t) => String(t.status || "").toLowerCase() !== "in progress"
-  );
-
-  let msg = `*[LanPro] 📊 Ringkasan Tugas${headerProject}*\n\n`;
-  msg += `${greeting}\nBerikut adalah ringkasan tugas Anda:\n`;
-
-  if (sedangBerjalan.length > 0) {
-    msg += `\n🚀 *SEDANG BERJALAN (In Progress)*\n${sedangBerjalan.map(bulletLine).join("\n")}\n`;
-  }
-  if (menungguEksekusi.length > 0) {
-    msg += `\n📋 *MENUNGGU EKSEKUSI (Pending/To Do)*\n${menungguEksekusi.map(bulletLine).join("\n")}\n`;
-  }
-
-  msg += `\nMohon perbarui status tugas Anda jika ada progres terbaru.\nCek detail selengkapnya di: ${appUrl}`;
+  let msg = `[LanPro] Task Assignment\n`;
+  msg += `${greeting}\n`;
+  msg += `Kamu telah ditugaskan untuk tiket berikut:\n`;
+  msg += `${taskListText}\n\n`;
+  msg += `Silakan cek detail tugas melalui tautan berikut:\n`;
+  msg += `${appUrl}\n\n`;
+  msg += `Terima kasih.`;
   return msg;
 }
 

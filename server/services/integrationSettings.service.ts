@@ -352,13 +352,21 @@ const DEFAULT_WHATSAPP_CONFIG: WhatsAppIntegrationConfig = {
 
 function toWhatsAppConfigRow(data: any): WhatsAppIntegrationConfig {
   if (!data) return DEFAULT_WHATSAPP_CONFIG;
+  const token =
+    (data.apiKey && data.apiKey.trim()) || (process.env.WHATSAPP_API_TOKEN || "").trim();
+  const senderNumber =
+    (data.senderNumber && data.senderNumber.trim()) ||
+    (process.env.WHATSAPP_SENDER_NUMBER || "").trim();
+  const deviceId =
+    (data.deviceId && data.deviceId.trim()) || (process.env.WHATSAPP_DEVICE_ID || "").trim();
+
   return {
     channel: "whatsapp",
     provider: data.provider || DEFAULT_WHATSAPP_CONFIG.provider,
     endpoint: data.endpoint || DEFAULT_WHATSAPP_CONFIG.endpoint,
-    token: data.apiKey || "",
-    senderNumber: data.senderNumber || "",
-    deviceId: data.deviceId || "",
+    token,
+    senderNumber,
+    deviceId,
     updatedAt: data.updatedAt,
   };
 }

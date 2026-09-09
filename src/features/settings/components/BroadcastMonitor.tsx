@@ -121,6 +121,12 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
       .replace(/\{\{task_key\}\}/g, "PROJ-102")
       .replace(/\{\{task_title\}\}/g, "Fix Authentication Flow")
       .replace(/\{\{status\}\}/g, "IN_PROGRESS")
+      .replace(/\{\{priority\}\}/g, "high")
+      .replace(
+        /\{\{task_list\}\}/g,
+        "1. Tugas: ( Fix Authentication Flow )\n    Status: ( IN_PROGRESS )\n    Prioritas: ( high )\n    Tanggal Terakhir : ( 10/09/2026 )"
+      )
+      .replace(/\{\{app_url\}\}/g, "http://localhost:3000")
       .replace(/\{\{project_name\}\}/g, "LanPro Development");
   };
 

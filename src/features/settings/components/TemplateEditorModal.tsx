@@ -11,13 +11,15 @@ interface TemplateEditorModalProps {
   onSave: (subject: string, body: string) => void;
 }
 
-const VARIABLES = [
+const EMAIL_VARIABLES = [
   "{{user_name}}",
   "{{task_key}}",
   "{{task_title}}",
   "{{status}}",
   "{{project_name}}",
 ];
+
+const WA_VARIABLES = ["{{user_name}}", "{{task_list}}", "{{app_url}}", "{{project_name}}"];
 
 export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   isOpen,
@@ -140,7 +142,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
               {t("template.availableVariables")}
             </label>
             <div className="flex flex-wrap gap-1.5">
-              {VARIABLES.map((variable) => (
+              {(mode === "whatsapp" ? WA_VARIABLES : EMAIL_VARIABLES).map((variable) => (
                 <button
                   key={variable}
                   onClick={() => insertAtCursor(variable)}

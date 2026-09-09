@@ -91,33 +91,51 @@ describe("whatsapp.service", () => {
       expect(pesan).not.toContain("{{task_title}}");
     });
 
-    it("mengelompokkan per status (Sedang Berjalan / Menunggu Eksekusi), tanpa 'null' literal", async () => {
+    it("memformat pesan Task Assignment dengan penomoran tiket, status, prioritas, dan tanggal (Item #499)", async () => {
       const wa = await import("./whatsapp.service");
-      const pesan = wa.formatMessage("Budi", [
-        { title: "Tugas A", status: "To Do", dueDate: null, projectName: "Proyek X" },
-        { title: "Tugas B", status: "In Progress", dueDate: "2026-08-30", projectName: "Proyek X" },
+      const pesan = wa.formatMessage("Azlan Irwan", [
+        {
+          title: "Fix Authentication Flow",
+          status: "IN_PROGRESS",
+          priority: "high",
+          dueDate: "2026-09-10",
+          projectName: "LanPro",
+        },
       ]);
 
-      expect(pesan).toContain("[LanPro] 📊 Ringkasan Tugas - Proyek X");
-      expect(pesan).toContain("Halo Budi,");
-      expect(pesan).toContain("🚀 *SEDANG BERJALAN (In Progress)*");
-      expect(pesan).toContain("• Tugas B — Tenggat: 30/08/2026");
-      expect(pesan).toContain("📋 *MENUNGGU EKSEKUSI (Pending/To Do)*");
-      expect(pesan).toContain("• Tugas A — (Tenggat: Belum diatur)");
+      expect(pesan).toContain("[LanPro] Task Assignment");
+      expect(pesan).toContain("Halo Azlan Irwan,");
+      expect(pesan).toContain("Kamu telah ditugaskan untuk tiket berikut:");
+      expect(pesan).toContain("1. Tugas: ( Fix Authentication Flow )");
+      expect(pesan).toContain("    Status: ( IN_PROGRESS )");
+      expect(pesan).toContain("    Prioritas: ( high )");
+      expect(pesan).toContain("    Tanggal Terakhir : ( 10/09/2026 )");
+      expect(pesan).toContain("Silakan cek detail tugas melalui tautan berikut:");
+      expect(pesan).toContain("Terima kasih.");
       expect(pesan).not.toContain("null");
-      expect(pesan).toContain("Cek detail selengkapnya di:");
     });
 
-    it("menyebut nama project per baris hanya bila tugas berasal dari lebih dari satu project", async () => {
+    it("mendukung template kustom dengan {{task_list}}, {{app_url}}, dan {{user_name}}", async () => {
       const wa = await import("./whatsapp.service");
-      const pesan = wa.formatMessage("Budi", [
-        { title: "Tugas A", status: "To Do", dueDate: null, projectName: "Proyek X" },
-        { title: "Tugas B", status: "To Do", dueDate: null, projectName: "Proyek Y" },
-      ]);
-
-      expect(pesan).not.toContain(" - Proyek X\n"); // header tidak menyebut satu project spesifik
-      expect(pesan).toContain("• Tugas A (Proyek X)");
-      expect(pesan).toContain("• Tugas B (Proyek Y)");
+      const kustom =
+        "Pemberitahuan Tugas untuk {{user_name}}:\n{{task_list}}\nBuka di: {{app_url}}";
+      const pesan = wa.formatMessage(
+        "Azlan",
+        [
+          {
+            title: "Task 1",
+            status: "To Do",
+            priority: "low",
+            dueDate: null,
+            projectName: "Proyek X",
+          },
+        ],
+        kustom,
+        "https://app.lanpro.id"
+      );
+      expect(pesan).toContain("Pemberitahuan Tugas untuk Azlan:");
+      expect(pesan).toContain("1. Tugas: ( Task 1 )");
+      expect(pesan).toContain("Buka di: https://app.lanpro.id");
     });
 
     it("memakai template kustom untuk sapaan, mengganti {{user_name}}", async () => {

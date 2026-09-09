@@ -19,8 +19,18 @@ export interface BroadcastConfigData {
 }
 
 const DEFAULT_TEMPLATE = "Halo {{user_name}},";
+export const DEFAULT_WHATSAPP_TEMPLATE =
+  `[LanPro] Task Assignment\n` +
+  `Halo {{user_name}},\n` +
+  `Kamu telah ditugaskan untuk tiket berikut:\n` +
+  `{{task_list}}\n\n` +
+  `Silakan cek detail tugas melalui tautan berikut:\n` +
+  `{{app_url}}\n\n` +
+  `Terima kasih.`;
 
 function toRow(data: any): BroadcastConfigData {
+  const defaultTemplate =
+    data.channel === "whatsapp" ? DEFAULT_WHATSAPP_TEMPLATE : DEFAULT_TEMPLATE;
   return {
     channel: data.channel,
     scheduleDays: String(data.scheduleDays || "")
@@ -32,7 +42,7 @@ function toRow(data: any): BroadcastConfigData {
       .split(",")
       .map((id) => id.trim())
       .filter(Boolean),
-    messageTemplate: data.messageTemplate ?? DEFAULT_TEMPLATE,
+    messageTemplate: data.messageTemplate ?? defaultTemplate,
   };
 }
 
