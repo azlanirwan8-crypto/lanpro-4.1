@@ -365,7 +365,14 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
 
                     {!!task.parentId && (
                       <span className="text-xs sm:text-[10px] text-content-subtle font-normal bg-surface-muted px-1.5 py-0.5 rounded border border-border-subtle shrink-0">
-                        {t("issueRow.subtask")}
+                        {t(
+                          `issueRow.type${
+                            task.type
+                              ? task.type.charAt(0).toUpperCase() + task.type.slice(1).toLowerCase()
+                              : "Subtask"
+                          }`,
+                          { defaultValue: task.type || "Subtask" }
+                        )}
                       </span>
                     )}
 
