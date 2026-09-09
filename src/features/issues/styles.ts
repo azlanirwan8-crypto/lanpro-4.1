@@ -24,7 +24,8 @@ export const styles = {
     "group hover:bg-surface-sunken/70 transition-all duration-150 cursor-default border-b border-border-faint",
   selectedTableRow: "bg-primary-surface/5",
   inlineAddRow: "bg-surface group/inline-add relative overflow-visible",
-  inlineAddBorderedCell: "p-0 border-r border-border-faint relative border-y-2 border-primary",
+  // #486 — tanpa border-y-2 border-primary (terlalu tebal); cukup pemisah kolom tipis
+  inlineAddBorderedCell: "p-0 border-r border-border-faint relative",
   inlineAddInput:
     "w-full bg-transparent border-none text-xs font-normal text-content-strong placeholder:text-content-subtle focus:ring-0 outline-none",
 };
