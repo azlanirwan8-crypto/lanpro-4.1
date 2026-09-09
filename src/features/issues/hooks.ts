@@ -358,7 +358,7 @@ export const useIssueList = (props: IssueListViewProps) => {
       projectId: selectedProject.id,
       title: titleToUse,
       status: inlineAddStatus || "To Do",
-      type: (parentId ? "subtask" : inlineAddType.toLowerCase()) as Task["type"],
+      type: inlineAddType.toLowerCase() as Task["type"],
       parentId: parentId || undefined,
       priority: inlineAddPriority || "Medium",
       assigneeId: inlineAddAssigneeId || undefined,
@@ -383,7 +383,7 @@ export const useIssueList = (props: IssueListViewProps) => {
     setIsCreating(false);
     toast.success(i18n.t("toast.taskAdded"));
 
-    const taskType = parentId ? "subtask" : inlineAddType.toLowerCase();
+    const taskType = inlineAddType.toLowerCase();
 
     try {
       const response = await createTask(selectedProject.id, effectiveUserId, {
