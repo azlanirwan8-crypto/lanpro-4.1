@@ -92,11 +92,26 @@ export const initWhatsAppScheduler = () => {
   );
 };
 
+export interface WhatsAppDigestFailure {
+  userId: string;
+  name: string;
+  phone: string;
+  reason: string;
+}
+
+export interface WhatsAppDigestResult {
+  totalDikirim: number;
+  totalPenerima: number;
+  totalGagal: number;
+  totalTanpaTugas: number;
+  kegagalan: WhatsAppDigestFailure[];
+}
+
 export async function sendDailyTaskDigest(
   targetUserId?: number | string,
   recipientIds?: string[],
   messageTemplate?: string | null
-): Promise<{ totalDikirim: number; totalPenerima: number }> {
+): Promise<WhatsAppDigestResult> {
   const connection = await dbPool.getConnection();
   try {
     let query =
@@ -116,11 +131,15 @@ export async function sendDailyTaskDigest(
     // basis data (UI Settings), dengan env APP_URL sebagai cadangan.
     const appUrlAktif = await ambilAppUrl();
     let totalDikirim = 0;
+    let totalGagal = 0;
+    let totalTanpaTugas = 0;
+    const kegagalan: WhatsAppDigestFailure[] = [];
 
     for (const user of users) {
       const uId = String(user.id);
       const uUid = String(user.uid || user.id);
       const uUsername = String(user.username || "");
+      const recipientName = user.displayName || user.username || "User";
 
       const [tasks]: any = await connection.query(
         `
@@ -135,42 +154,45 @@ export async function sendDailyTaskDigest(
       );
 
       if (tasks.length > 0) {
-        const message = formatMessage(
-          user.displayName || user.username || "Rekan Tim",
-          tasks,
-          messageTemplate,
-          appUrlAktif
-        );
+        const message = formatMessage(recipientName, tasks, messageTemplate, appUrlAktif);
         try {
           await sendToWhatsApp(user.phone, message);
           totalDikirim++;
           await recordBroadcastLog({
             channel: "whatsapp",
             userId: uId,
-            recipientName: user.displayName || user.username || "User",
+            recipientName,
             recipientTarget: user.phone,
             status: "success",
             taskCount: tasks.length,
             details: `Berhasil dikirim (${tasks.length} tugas aktif)`,
           });
         } catch (kirimErr: any) {
+          totalGagal++;
+          const reason = kirimErr?.message || "Gagal mengirim ke gateway WhatsApp";
+          kegagalan.push({
+            userId: uId,
+            name: recipientName,
+            phone: user.phone,
+            reason,
+          });
           console.error(`[WHATSAPP] Gagal mengirim pesan ke ${user.phone}:`, kirimErr);
           await recordBroadcastLog({
             channel: "whatsapp",
             userId: uId,
-            recipientName: user.displayName || user.username || "User",
+            recipientName,
             recipientTarget: user.phone,
             status: "failed",
             taskCount: tasks.length,
-            details: kirimErr?.message || "Gagal mengirim ke gateway WhatsApp",
+            details: reason,
           });
         }
       } else {
-        // User tidak memiliki tugas aktif
+        totalTanpaTugas++;
         await recordBroadcastLog({
           channel: "whatsapp",
           userId: uId,
-          recipientName: user.displayName || user.username || "User",
+          recipientName,
           recipientTarget: user.phone,
           status: "skipped_no_tasks",
           taskCount: 0,
@@ -179,7 +201,7 @@ export async function sendDailyTaskDigest(
       }
     }
 
-    return { totalDikirim, totalPenerima: users.length };
+    return { totalDikirim, totalPenerima: users.length, totalGagal, totalTanpaTugas, kegagalan };
   } catch (error) {
     console.error("[DEBUG] Error in daily task digest:", error);
     throw error;

@@ -369,20 +369,33 @@ router.post("/api/settings/whatsapp/broadcast-now", verifyGlobalAdmin, async (re
     const hasil = await sendDailyTaskDigest(undefined, config.recipientIds, config.messageTemplate);
 
     let message = "";
-    if (hasil.totalDikirim > 0) {
+    let isError = false;
+
+    if (hasil.totalGagal > 0 && hasil.totalDikirim === 0) {
+      // Seluruh pengiriman gagal (misal token kosong atau Fonnte error)
+      const firstReason = hasil.kegagalan?.[0]?.reason || "Gagal menghubungi gateway WhatsApp";
+      message = `Gagal mengirim broadcast WhatsApp: ${firstReason}`;
+      isError = true;
+    } else if (hasil.totalGagal > 0 && hasil.totalDikirim > 0) {
+      // Sebagian terkirim, sebagian gagal
+      message = `Broadcast WhatsApp sebagian berhasil: ${hasil.totalDikirim} terkirim, ${hasil.totalGagal} gagal (${hasil.kegagalan?.[0]?.reason || ""}).`;
+    } else if (hasil.totalDikirim > 0) {
       message = `Broadcast WhatsApp berhasil diproses. ${hasil.totalDikirim} pesan dikirim ke penerima dengan tugas aktif.`;
-    } else if (hasil.totalPenerima > 0) {
-      message = `Broadcast selesai: 0 pesan dikirim karena ${hasil.totalPenerima} penerima yang diperiksa tidak memiliki tugas aktif (To Do, In Progress, Testing). Silakan tugaskan tiket ke pengguna terlebih dahulu.`;
+    } else if (hasil.totalTanpaTugas > 0) {
+      message = `Broadcast selesai: 0 pesan dikirim karena ${hasil.totalTanpaTugas} penerima yang diperiksa tidak memiliki tugas aktif (To Do, In Progress, Testing). Silakan tugaskan tiket ke pengguna terlebih dahulu.`;
     } else {
       message = "Broadcast selesai: Tidak ada penerima yang memiliki nomor WhatsApp terdaftar.";
     }
 
     res.json({
-      status: "success",
+      status: isError ? "error" : "success",
       message,
       data: {
         penerimaDiperiksa: hasil.totalPenerima,
         pesanDikirim: hasil.totalDikirim,
+        pesanGagal: hasil.totalGagal || 0,
+        tanpaTugas: hasil.totalTanpaTugas || 0,
+        kegagalan: hasil.kegagalan || [],
       },
     });
   } catch (error: any) {

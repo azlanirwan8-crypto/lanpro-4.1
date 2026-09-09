@@ -181,9 +181,11 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
         window.dispatchEvent(new CustomEvent("broadcast-logs-updated"));
       } else {
         toast.error(res.message || "Gagal memproses broadcast WhatsApp");
+        window.dispatchEvent(new CustomEvent("broadcast-logs-updated"));
       }
     } catch (err: any) {
       toast.error(err?.message || "Gagal memproses broadcast WhatsApp");
+      window.dispatchEvent(new CustomEvent("broadcast-logs-updated"));
     } finally {
       setIsBroadcasting(false);
     }
