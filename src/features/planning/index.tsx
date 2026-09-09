@@ -111,35 +111,46 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
               className={cn(
                 "transition-all duration-200 ease-out select-none",
                 variant === "card"
-                  ? "group bg-surface p-3 rounded-lg border border-border-subtle/80 shadow-2xs cursor-pointer hover:border-primary/40 hover:shadow-xs"
-                  : "group bg-surface flex items-center justify-between p-2.5 px-3 rounded-lg border border-border-subtle/80 shadow-2xs cursor-pointer hover:bg-surface-sunken/70 hover:border-primary/40",
-                task.isBlocked && "ring-1 ring-red-500/50 bg-red-500/10 border-red-500/30",
+                  ? cn(
+                      "group p-3 rounded-lg shadow-2xs cursor-pointer hover:shadow-xs",
+                      (() => {
+                        if (task.isBlocked)
+                          return "border-l-4 border-l-danger bg-danger/5 border border-danger/30 hover:border-danger";
+                        const p = (task.priority || "").toLowerCase();
+                        if (p === "highest" || p === "high")
+                          return "border-l-4 border-l-danger bg-danger/5 border border-border-subtle/80 hover:border-danger/60";
+                        if (p === "medium")
+                          return "border-l-4 border-l-warning bg-warning/5 border border-border-subtle/80 hover:border-warning/60";
+                        return "border-l-4 border-l-primary bg-primary/5 border border-border-subtle/80 hover:border-primary/60";
+                      })()
+                    )
+                  : cn(
+                      "group flex items-center justify-between p-2.5 px-3 rounded-lg shadow-2xs cursor-pointer hover:bg-surface-sunken/70",
+                      (() => {
+                        if (task.isBlocked)
+                          return "border-l-4 border-l-danger bg-danger/5 border border-danger/30";
+                        const s = (task.status || "").toLowerCase();
+                        if (s === "done" || s === "completed" || s === "selesai")
+                          return "border-l-4 border-l-success bg-success/5 border border-border-subtle/80";
+                        if (s === "in progress" || s === "in_progress" || s === "sedang dikerjakan")
+                          return "border-l-4 border-l-primary bg-primary/5 border border-border-subtle/80";
+                        if (s === "in review" || s === "testing" || s === "qa")
+                          return "border-l-4 border-l-info bg-info/5 border border-border-subtle/80";
+                        const p = (task.priority || "").toLowerCase();
+                        if (p === "highest" || p === "high")
+                          return "border-l-4 border-l-danger bg-danger/5 border border-border-subtle/80";
+                        if (p === "medium")
+                          return "border-l-4 border-l-warning bg-warning/5 border border-border-subtle/80";
+                        return "border-l-4 border-l-border-subtle bg-surface border border-border-subtle/80";
+                      })()
+                    ),
+                task.isBlocked && "ring-1 ring-danger/50",
                 snapshot.isDragging &&
                   "shadow-xl ring-2 ring-primary/20 scale-[1.02] z-50 bg-surface border-primary"
               )}
             >
               {variant === "card" ? (
                 <div className="flex flex-col gap-1.5">
-                  <div className="flex justify-between items-center">
-                    <div className="flex gap-2 items-center">
-                      {task.priority && (
-                        <span
-                          className={cn(
-                            "text-[10px] font-normal",
-                            task.priority === "Highest"
-                              ? "text-red-600"
-                              : task.priority === "High"
-                                ? "text-amber-600"
-                                : task.priority === "Medium"
-                                  ? "text-yellow-600"
-                                  : "text-content-muted"
-                          )}
-                        >
-                          {task.priority}
-                        </span>
-                      )}
-                    </div>
-                  </div>
                   <h4 className="text-xs font-normal text-content-body leading-snug line-clamp-2">
                     {task.title}
                   </h4>
@@ -163,7 +174,7 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                           className={cn(
                             "flex items-center gap-1 text-xs sm:text-[10px] font-medium px-1.5 py-0.5 rounded-md",
                             ensureDate(task.dueDate) < new Date(new Date().setHours(0, 0, 0, 0))
-                              ? "bg-red-500/10 text-red-600 border border-red-500/30"
+                              ? "bg-danger/10 text-danger-text border border-danger/30"
                               : "bg-surface-sunken text-content-muted border border-border-subtle/60"
                           )}
                         >
@@ -172,9 +183,28 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                         </div>
                       )}
                     </div>
-                    <span className="text-[10px] leading-none font-medium text-primary bg-primary/10 px-1.5 py-[3px] rounded border border-primary/30">
-                      {task.status}
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {task.priority && (
+                        <span
+                          className={cn(
+                            "text-[10px] leading-none font-medium px-1.5 py-[3px] rounded border",
+                            (() => {
+                              const p = (task.priority || "").toLowerCase();
+                              if (p === "highest" || p === "high")
+                                return "text-danger-text bg-danger/10 border-danger/30";
+                              if (p === "medium")
+                                return "text-warning-text bg-warning/10 border-warning/30";
+                              return "text-primary bg-primary/10 border-primary/30";
+                            })()
+                          )}
+                        >
+                          {task.priority}
+                        </span>
+                      )}
+                      <span className="text-[10px] leading-none font-medium text-content-body bg-surface-sunken px-1.5 py-[3px] rounded border border-border-subtle">
+                        {task.status}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -184,19 +214,36 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                       {task.title}
                     </h4>
                   </div>
-                  <div className="flex items-center gap-2.5 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     {task.dueDate && (
                       <div
                         className={cn(
                           "flex items-center gap-1 text-xs sm:text-[10px] font-medium px-1.5 py-0.5 rounded-md border",
                           ensureDate(task.dueDate) < new Date(new Date().setHours(0, 0, 0, 0))
-                            ? "bg-red-500/10 text-red-600 border-red-500/30"
+                            ? "bg-danger/10 text-danger-text border-danger/30"
                             : "bg-surface-sunken text-content-muted border-border-subtle/60"
                         )}
                       >
                         <Clock className="w-3 h-3" />
                         {format(ensureDate(task.dueDate), "MMM d")}
                       </div>
+                    )}
+                    {task.priority && (
+                      <span
+                        className={cn(
+                          "text-[10px] leading-none font-medium px-1.5 py-[3px] rounded border",
+                          (() => {
+                            const p = (task.priority || "").toLowerCase();
+                            if (p === "highest" || p === "high")
+                              return "text-danger-text bg-danger/10 border-danger/30";
+                            if (p === "medium")
+                              return "text-warning-text bg-warning/10 border-warning/30";
+                            return "text-primary bg-primary/10 border-primary/30";
+                          })()
+                        )}
+                      >
+                        {task.priority}
+                      </span>
                     )}
                     <span className="px-2 py-0.5 bg-surface-sunken border border-border-subtle/70 rounded-md text-xs sm:text-[10px] font-medium text-content-body">
                       {task.status}

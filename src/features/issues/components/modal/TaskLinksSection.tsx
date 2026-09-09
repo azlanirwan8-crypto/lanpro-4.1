@@ -112,21 +112,18 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
                     className="p-3 bg-surface rounded-xl border border-border-faint shadow-soft space-y-2 group/link relative"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs sm:text-[10px] font-mono font-medium text-content-subtle">
-                        {target.key}
-                      </span>
+                      <div className="text-xs font-medium text-content-body truncate flex-1">
+                        {target.title}
+                      </div>
                       {isEditable && (
                         <button
                           type="button"
                           onClick={() => handleRemoveLinkedTask(task.id, link.id)}
-                          className="text-content-subtle hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors opacity-0 group-hover/link:opacity-100"
+                          className="text-content-subtle hover:text-danger hover:bg-danger/10 p-1.5 rounded-lg transition-colors opacity-0 group-hover/link:opacity-100 shrink-0"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       )}
-                    </div>
-                    <div className="text-xs font-medium text-content-body truncate">
-                      {target.title}
                     </div>
                   </div>
                 );
@@ -163,7 +160,7 @@ export const TaskLinksSection: React.FC<TaskLinksSectionProps> = ({
                 .filter((t) => t.id !== task.id)
                 .map((t) => ({
                   id: t.id,
-                  label: `${t.key}: ${t.title}`,
+                  label: t.title,
                 })),
             ]}
             masterData={masterData}
