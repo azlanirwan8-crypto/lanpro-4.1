@@ -144,6 +144,27 @@ export async function saveWhatsAppBroadcastConfig(
   });
 }
 
+/** Menguji pengiriman pesan WhatsApp tunggal (Item #498). */
+export async function testWhatsAppConnection(
+  targetPhone: string
+): Promise<SettingsApiResponse<any>> {
+  return apiRequest("/api/settings/whatsapp/test", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ targetPhone }),
+  });
+}
+
+/** Mengirim broadcast task WhatsApp SEKARANG, di luar jadwal (Item #498). */
+export async function sendWhatsAppBroadcastNow(): Promise<
+  SettingsApiResponse<{ penerimaDiperiksa: number; pesanDikirim: number }>
+> {
+  return apiRequest("/api/settings/whatsapp/broadcast-now", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Item #279: Konfigurasi Sistem Operasional & Koneksi WhatsApp
 // ─────────────────────────────────────────────────────────────────────────────

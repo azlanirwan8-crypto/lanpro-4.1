@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import React, { useState, useEffect } from "react";
-import { TestTube, Loader2, Save, FileEdit } from "lucide-react";
+import { TestTube, Loader2, Save, FileEdit, Send } from "lucide-react";
 import { toast } from "sonner";
 import { PasswordInput } from "./PasswordInput";
 import { StyledDropdown } from "../../../components/ui/CommonComponents";
@@ -12,6 +12,8 @@ import {
   saveWhatsAppBroadcastConfig,
   fetchWhatsAppConnectionConfig,
   saveWhatsAppConnectionConfig,
+  testWhatsAppConnection,
+  sendWhatsAppBroadcastNow,
 } from "../services/settings.service";
 
 interface WhatsAppConfigFormProps {
@@ -44,6 +46,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
   const [testTargetNumber, setTestTargetNumber] = useState("");
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
   const [recipientUsers, setRecipientUsers] = useState<RecipientUser[]>([]);
   const [recipientSearch, setRecipientSearch] = useState("");
   const [sendToAll, setSendToAll] = useState(true);
@@ -125,12 +128,40 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
   );
 
   const handleTestWhatsApp = async (targetNumber: string) => {
+    if (!targetNumber || !targetNumber.trim()) {
+      toast.error(t("whatsapp.targetNumberRequired", "Nomor WhatsApp tujuan wajib diisi"));
+      return;
+    }
     setIsTesting(true);
     setIsTestModalOpen(false);
-    // Mock API Call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsTesting(false);
-    toast.success(t("toast.waTestOk", { nomor: targetNumber }));
+    try {
+      const res = await testWhatsAppConnection(targetNumber.trim());
+      if (res.status === "success") {
+        toast.success(res.message || t("toast.waTestOk", { nomor: targetNumber }));
+      } else {
+        toast.error(res.message || "Gagal mengirim pesan uji WhatsApp");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Gagal menghubungi server");
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  const handleBroadcastNow = async () => {
+    setIsBroadcasting(true);
+    try {
+      const res = await sendWhatsAppBroadcastNow();
+      if (res.status === "success") {
+        toast.success(res.message || "Broadcast WhatsApp berhasil diproses");
+      } else {
+        toast.error(res.message || "Gagal memproses broadcast WhatsApp");
+      }
+    } catch (err: any) {
+      toast.error(err?.message || "Gagal memproses broadcast WhatsApp");
+    } finally {
+      setIsBroadcasting(false);
+    }
   };
 
   const handleSaveTemplate = (subject: string, body: string) => {
@@ -349,8 +380,9 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
         </button>
 
         <button
+          type="button"
           onClick={() => setIsTestModalOpen(true)}
-          disabled={isTesting}
+          disabled={isTesting || isBroadcasting}
           className="flex items-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs"
         >
           {isTesting ? <Loader2 size={14} className="animate-spin" /> : <TestTube size={14} />}
@@ -358,8 +390,19 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
         </button>
 
         <button
+          type="button"
+          onClick={handleBroadcastNow}
+          disabled={isBroadcasting || isTesting}
+          className="flex items-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs"
+        >
+          {isBroadcasting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+          {isBroadcasting ? "Mengirim..." : t("taskBroadcast.kirimSekarang", "Kirim Sekarang")}
+        </button>
+
+        <button
+          type="button"
           onClick={handleSaveConfig}
-          disabled={isSaving}
+          disabled={isSaving || isBroadcasting}
           className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse px-3.5 py-1.5 rounded-md text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50"
         >
           {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}

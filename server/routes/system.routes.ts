@@ -8,7 +8,9 @@ import {
   kirimEmail,
   validasiFormatEmail,
   ambilApiKey,
+  ambilAppUrl,
 } from "../services/email.service";
+import { sendSingleWhatsAppMessage, sendDailyTaskDigest } from "../services/whatsapp.service";
 import {
   getEmailIntegrationConfig,
   saveEmailIntegrationConfig,
@@ -322,6 +324,65 @@ router.post(
     }
   }
 );
+
+/**
+ * Item #498: Endpoint uji coba kirim pesan WhatsApp tunggal (Khusus Global Admin)
+ */
+router.post("/api/settings/whatsapp/test", verifyGlobalAdmin, async (req, res) => {
+  try {
+    const { targetPhone } = req.body || {};
+    if (!targetPhone || typeof targetPhone !== "string" || targetPhone.trim().length < 8) {
+      return res.status(400).json({
+        status: "error",
+        code: "srv.nomor_tujuan_tidak_valid",
+        message: "Nomor WhatsApp tujuan tidak valid atau kosong (minimal 8 digit)",
+      });
+    }
+
+    const cleanPhone = targetPhone.replace(/[^0-9]/g, "");
+    const appUrl = await ambilAppUrl();
+    const pesanUji = `*[LanPro] 🚀 Uji Coba WhatsApp Gateway*\n\nPesan ini dikirim untuk memverifikasi bahwa integrasi WhatsApp (Fonnte) pada sistem LanPro telah terhubung dengan baik.\n\nWaktu pengujian: ${new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" })} WIB\nSistem: ${appUrl}`;
+
+    await sendSingleWhatsAppMessage(cleanPhone, pesanUji);
+
+    res.json({
+      status: "success",
+      message: `Pesan uji coba WhatsApp berhasil dikirim ke ${cleanPhone}`,
+    });
+  } catch (error: any) {
+    console.error("[SETTINGS] Gagal mengirim pesan uji WhatsApp:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_mengirim_pesan_uji_wa",
+      message: error?.message || "Gagal mengirim pesan uji WhatsApp",
+    });
+  }
+});
+
+/**
+ * Item #498: Kirim broadcast ringkasan task WhatsApp SEKARANG (Khusus Global Admin)
+ */
+router.post("/api/settings/whatsapp/broadcast-now", verifyGlobalAdmin, async (req, res) => {
+  try {
+    const config = await getBroadcastConfig("whatsapp");
+    const hasil = await sendDailyTaskDigest(undefined, config.recipientIds, config.messageTemplate);
+    res.json({
+      status: "success",
+      message: `Broadcast WhatsApp berhasil diproses. ${hasil.totalDikirim} pesan dikirim dari ${hasil.totalPenerima} penerima yang diperiksa.`,
+      data: {
+        penerimaDiperiksa: hasil.totalPenerima,
+        pesanDikirim: hasil.totalDikirim,
+      },
+    });
+  } catch (error: any) {
+    console.error("[SETTINGS] Gagal memproses broadcast WhatsApp sekarang:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_mengirim_broadcast_wa",
+      message: error?.message || "Gagal memproses broadcast WhatsApp",
+    });
+  }
+});
 
 /**
  * Item #297: Konfigurasi jadwal broadcast ringkasan task lewat EMAIL.

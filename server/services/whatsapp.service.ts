@@ -92,26 +92,27 @@ export const initWhatsAppScheduler = () => {
 };
 
 export async function sendDailyTaskDigest(
-  targetUserId?: number,
+  targetUserId?: number | string,
   recipientIds?: string[],
   messageTemplate?: string | null
-) {
+): Promise<{ totalDikirim: number; totalPenerima: number }> {
   const connection = await dbPool.getConnection();
   try {
-    let query = "SELECT id, displayName, phone FROM Users WHERE phone IS NOT NULL";
+    let query = 'SELECT id, "displayName", phone FROM "Users" WHERE phone IS NOT NULL';
     const params: any[] = [];
     if (targetUserId) {
-      query += " AND id = ?";
-      params.push(targetUserId);
+      query += " AND (id = ? OR username = ? OR uid = ?)";
+      params.push(targetUserId, targetUserId, targetUserId);
     } else if (recipientIds && recipientIds.length > 0) {
-      query += ` AND id IN (${recipientIds.map(() => "?").join(",")})`;
-      params.push(...recipientIds);
+      query += ` AND (id IN (${recipientIds.map(() => "?").join(",")}) OR username IN (${recipientIds.map(() => "?").join(",")}) OR uid IN (${recipientIds.map(() => "?").join(",")}))`;
+      params.push(...recipientIds, ...recipientIds, ...recipientIds);
     }
     const [users]: any = await connection.query(query, params);
 
     // Item #278: dibaca sekali per digest, bukan per pesan — sumbernya
     // basis data (UI Settings), dengan env APP_URL sebagai cadangan.
     const appUrlAktif = await ambilAppUrl();
+    let totalDikirim = 0;
 
     for (const user of users) {
       const [tasks]: any = await connection.query(
@@ -129,8 +130,11 @@ export async function sendDailyTaskDigest(
       if (tasks.length > 0) {
         const message = formatMessage(user.displayName, tasks, messageTemplate, appUrlAktif);
         await sendToWhatsApp(user.phone, message);
+        totalDikirim++;
       }
     }
+
+    return { totalDikirim, totalPenerima: users.length };
   } catch (error) {
     console.error("[DEBUG] Error in daily task digest:", error);
     throw error;
@@ -274,8 +278,13 @@ async function sendToWhatsApp(phone: string, message: string) {
     if (!responseData.status) {
       throw new Error(responseData.reason || "Failed to send WhatsApp message");
     }
+    return responseData;
   } catch (err) {
     console.error(`[DEBUG] Failed to send WA to ${phone}:`, err);
     throw err;
   }
+}
+
+export async function sendSingleWhatsAppMessage(phone: string, message: string) {
+  return sendToWhatsApp(phone, message);
 }
