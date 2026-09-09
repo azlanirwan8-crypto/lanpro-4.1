@@ -471,7 +471,7 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
         title={t("kanban.title", t("sidebar.kanbanBoard"))}
       />
       {/* #417/#421 — Card board shell */}
-      <div className="flex-1 flex flex-col min-h-0 px-3 md:px-4 pt-3 pb-3">
+      <div className="flex-1 flex flex-col min-h-0 px-3 md:px-4 pt-3 pb-20 md:pb-3">
         <Card className="flex-1 flex flex-col rounded-lg overflow-hidden min-h-0">
           <DragDropContext onDragEnd={handleDragEndBoard}>
             <div className="flex-1 overflow-auto bg-transparent relative z-10 custom-scrollbar">

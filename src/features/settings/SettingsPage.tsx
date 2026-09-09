@@ -69,7 +69,7 @@ export const SettingsPage: React.FC = () => {
         title={t("settings.systemIntegrationConfiguration")}
       />
 
-      <div className="flex-1 flex flex-col min-h-0 px-3 md:px-5 pt-3 md:pt-4 pb-3 md:pb-5">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3.5 sm:p-6 pb-24 sm:pb-8">
         <div className="flex-1 flex flex-col min-h-0 bg-surface border border-border-subtle/80 rounded-lg shadow-2xs overflow-hidden">
           <div className="flex-1 overflow-auto flex flex-col">
             {/* Tabs — #368 scroll HP + #432 komponen bersama */}
@@ -102,7 +102,7 @@ export const SettingsPage: React.FC = () => {
             />
 
             {/* Grid Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 p-5 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 p-3.5 sm:p-5 items-start">
               {activeTab === "konfigurasi" ? (
                 /*
                 #303: tab Konfigurasi dibagi dua kolom atas permintaan pemilik
@@ -147,7 +147,7 @@ export const SettingsPage: React.FC = () => {
               menempelkan monitor di sana hanya mengisi ruang.
             */}
               {activeTab !== "konfigurasi" && (
-                <div className="lg:col-span-7 border-l border-border-subtle/80 pl-5">
+                <div className="lg:col-span-7 border-t border-border-subtle/80 pt-5 lg:border-t-0 lg:border-l lg:pl-5 lg:pt-0">
                   <BroadcastMonitor
                     channel={activeTab === "taskBroadcast" ? "email" : "whatsapp"}
                     emailTemplate={{

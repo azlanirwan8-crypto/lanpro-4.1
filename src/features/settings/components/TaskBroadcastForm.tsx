@@ -281,7 +281,7 @@ export const TaskBroadcastForm: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-3 pt-3 border-t border-border-faint">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 pt-3 border-t border-border-faint">
         {/*
           Tombol kirim-sekarang ada supaya jadwalnya bisa dibuktikan tanpa
           menunggu hari dan jamnya tiba. Tanpa ini, satu-satunya cara memastikan
@@ -293,7 +293,7 @@ export const TaskBroadcastForm: React.FC = () => {
           type="button"
           onClick={kirimSekarang}
           disabled={mengirim || penerima.length === 0}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium border border-border-subtle text-content-body hover:bg-surface-sunken disabled:opacity-50 disabled:cursor-not-allowed transition"
+          className="inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium border border-border-subtle text-content-body hover:bg-surface-sunken disabled:opacity-50 disabled:cursor-not-allowed transition w-full sm:w-auto"
         >
           {mengirim ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -307,7 +307,7 @@ export const TaskBroadcastForm: React.FC = () => {
           type="button"
           onClick={simpan}
           disabled={menyimpan}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition w-full sm:w-auto"
         >
           {menyimpan ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />

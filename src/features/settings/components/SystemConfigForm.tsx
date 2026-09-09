@@ -233,7 +233,7 @@ export const SystemConfigForm: React.FC = () => {
           type="button"
           onClick={handleSave}
           disabled={isSaving}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 bg-success-surface hover:bg-success-surface/90 text-content-inverse rounded-md text-xs font-medium transition shadow-2xs disabled:opacity-50 cursor-pointer active:scale-95"
+          className="flex items-center justify-center gap-1.5 px-3.5 py-1.5 bg-success-surface hover:bg-success-surface/90 text-content-inverse rounded-md text-xs font-medium transition shadow-2xs disabled:opacity-50 cursor-pointer active:scale-95 w-full sm:w-auto"
         >
           {isSaving ? (
             <Loader2 className="w-3.5 h-3.5 animate-spin" />

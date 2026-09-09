@@ -287,7 +287,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="space-y-1">
             <label className="text-xs font-medium text-content-body">
               {t("whatsapp.senderNumber")}
@@ -404,48 +404,65 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2.5 items-center mt-4 pt-3 border-t border-border-faint">
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-2.5 items-center mt-4 pt-3 border-t border-border-faint">
         <button
+          type="button"
           onClick={() => setIsTemplateModalOpen(true)}
-          className="flex items-center gap-1.5 border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/15 px-3 py-1.5 rounded-md text-xs font-medium transition mr-auto shadow-2xs cursor-pointer active:scale-95"
+          className="flex items-center justify-center gap-1.5 border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/15 px-3 py-2 sm:py-1.5 rounded-md text-xs font-medium transition sm:mr-auto shadow-2xs cursor-pointer active:scale-95 w-full sm:w-auto"
         >
-          <FileEdit size={14} />
-          {t("whatsapp.editTemplate")}
+          <FileEdit size={14} className="shrink-0" />
+          <span className="truncate">{t("whatsapp.editTemplate")}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setIsTestModalOpen(true)}
           disabled={isTesting || isBroadcasting}
-          className="flex items-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs"
+          className="flex items-center justify-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-2 sm:py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs w-full sm:w-auto"
         >
-          {isTesting ? <Loader2 size={14} className="animate-spin" /> : <TestTube size={14} />}
-          Test Connection
+          {isTesting ? (
+            <Loader2 size={14} className="animate-spin shrink-0" />
+          ) : (
+            <TestTube size={14} className="shrink-0" />
+          )}
+          <span className="truncate">Test Connection</span>
         </button>
 
         <button
           type="button"
           onClick={handleBroadcastNow}
           disabled={isBroadcasting || isTesting}
-          className="flex items-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs"
+          className="flex items-center justify-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-2 sm:py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs w-full sm:w-auto"
         >
-          {isBroadcasting ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-          {isBroadcasting ? "Mengirim..." : t("taskBroadcast.kirimSekarang", "Kirim Sekarang")}
+          {isBroadcasting ? (
+            <Loader2 size={14} className="animate-spin shrink-0" />
+          ) : (
+            <Send size={14} className="shrink-0" />
+          )}
+          <span className="truncate">
+            {isBroadcasting ? "Mengirim..." : t("taskBroadcast.kirimSekarang", "Kirim Sekarang")}
+          </span>
         </button>
 
         <button
           type="button"
           onClick={handleSaveConfig}
           disabled={isSaving || isBroadcasting}
-          className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse px-3.5 py-1.5 rounded-md text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50"
+          className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-content-inverse px-3.5 py-2 sm:py-1.5 rounded-md text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50 w-full sm:w-auto"
         >
-          {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-          {isSaving ? t("whatsapp.saving") : t("whatsapp.saveConfig")}
+          {isSaving ? (
+            <Loader2 size={14} className="animate-spin shrink-0" />
+          ) : (
+            <Save size={14} className="shrink-0" />
+          )}
+          <span className="truncate">
+            {isSaving ? t("whatsapp.saving") : t("whatsapp.saveConfig")}
+          </span>
         </button>
       </div>
 
       {isTestModalOpen && (
-        <div className="absolute inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 rounded-lg">
+        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-surface p-5 rounded-lg shadow-xl max-w-sm w-full space-y-3 border border-border-subtle">
             <h3 className="font-medium text-sm text-content-strong">
               {t("whatsapp.testConnection")}

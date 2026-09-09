@@ -473,11 +473,11 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
       */}
 
       {/* Tombol Aksi */}
-      <div className="flex flex-wrap gap-2.5 items-center mt-4 pt-3 border-t border-border-faint">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-2.5 items-stretch sm:items-center mt-4 pt-3 border-t border-border-faint">
         <button
           type="button"
           onClick={() => setIsTemplateModalOpen(true)}
-          className="flex items-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-1.5 rounded-md text-xs font-medium transition mr-auto shadow-2xs cursor-pointer active:scale-95"
+          className="flex items-center justify-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-1.5 rounded-md text-xs font-medium transition sm:mr-auto shadow-2xs cursor-pointer active:scale-95 w-full sm:w-auto"
         >
           <FileEdit size={14} />
           {t("emailCfg.advancedEditor")}
@@ -487,7 +487,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
           type="button"
           onClick={() => setIsTestModalOpen(true)}
           disabled={isTesting || isSaving}
-          className="flex items-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs"
+          className="flex items-center justify-center gap-1.5 border border-border-subtle hover:bg-surface-sunken text-content-body px-3 py-1.5 rounded-md text-xs font-medium disabled:opacity-50 transition cursor-pointer active:scale-95 shadow-2xs w-full sm:w-auto"
         >
           {isTesting ? <Loader2 size={14} className="animate-spin" /> : <TestTube size={14} />}
           Uji Coba Kirim Email
@@ -497,7 +497,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
           type="button"
           onClick={handleSaveConfig}
           disabled={isSaving}
-          className="flex items-center gap-1.5 bg-success-surface hover:bg-success-surface/90 text-content-inverse px-3.5 py-1.5 rounded-md text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50"
+          className="flex items-center justify-center gap-1.5 bg-success-surface hover:bg-success-surface/90 text-content-inverse px-3.5 py-1.5 rounded-md text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95 disabled:opacity-50 w-full sm:w-auto"
         >
           {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
           Simpan Konfigurasi Email
@@ -506,7 +506,7 @@ export const EmailConfigForm: React.FC<EmailConfigFormProps> = ({ formData, setF
 
       {/* Modal Uji Coba Kirim Email */}
       {isTestModalOpen && (
-        <div className="absolute inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 rounded-lg">
+        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-surface p-5 rounded-lg shadow-xl max-w-sm w-full space-y-3 border border-border-subtle">
             <div className="flex items-center gap-2">
               <ShieldCheck size={18} className="text-emerald-600" />

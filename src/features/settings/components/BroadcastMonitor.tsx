@@ -158,13 +158,13 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-start">
-        <div className="space-y-2 flex-1 pr-4">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+        <div className="space-y-2 flex-1">
           <div className="flex items-center gap-2.5">
             <h2 className="text-base font-medium text-content-strong">
               {t("settings.liveDailyBroadcastMonitor")}
             </h2>
-            <span className="relative flex h-2.5 w-2.5">
+            <span className="relative flex h-2.5 w-2.5 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
@@ -188,7 +188,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
 
         <button
           onClick={() => setIsPreviewOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-surface/10 text-primary hover:bg-primary-surface/15 rounded-md text-xs font-medium transition border border-primary/20 shadow-xs"
+          className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-surface/10 text-primary hover:bg-primary-surface/15 rounded-md text-xs font-medium transition border border-primary/20 shadow-xs shrink-0 w-full sm:w-auto"
         >
           <Eye size={14} />
           {t("broadcast.previewTemplate")}
@@ -265,7 +265,7 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
 
       {/* Preview Modal */}
       {isPreviewOpen && (
-        <div className="absolute inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 rounded-lg transition-all">
+        <div className="fixed inset-0 bg-overlay/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 transition-all">
           <div className="bg-surface rounded-lg shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[85vh] border border-border-subtle">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border-subtle shrink-0">
               <h3 className="font-medium text-sm text-content-strong flex items-center gap-2">
