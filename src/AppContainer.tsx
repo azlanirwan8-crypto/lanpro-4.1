@@ -3741,26 +3741,26 @@ function AppContainer() {
     setMentionState({ active: false, query: "", index: -1 });
   };
 
-  const handleAddComment = async () => {
+  const handleAddComment = async (customText?: string, parentId?: string) => {
     const activeUid =
       currentUser?.uid || (currentUser as any)?.id || user?.uid || (user as any)?.id;
     const authorName =
       currentUser?.displayName || (currentUser as any)?.name || user?.displayName || "Seseorang";
     if (!selectedProject || !selectedTaskForDetail) return;
-    if (!newCommentText.trim()) return;
+    const textToSend = (typeof customText === "string" ? customText : newCommentText).trim();
+    if (!textToSend) return;
 
     try {
       await createTaskComment(selectedProject.id, selectedTaskForDetail.id, {
-        text: newCommentText.trim(),
-        content: newCommentText.trim(),
+        text: textToSend,
+        content: textToSend,
         authorId: activeUid || "guest",
+        parentId: parentId || null,
       });
 
       // Parse mentions
       const mentionRegex = /@(\w+)/g;
-      const mentions = Array.from(newCommentText.matchAll(mentionRegex)).map((m) =>
-        m[1].toLowerCase()
-      );
+      const mentions = Array.from(textToSend.matchAll(mentionRegex)).map((m) => m[1].toLowerCase());
       if (mentions.length > 0 && activeUid) {
         const mentionedUsers = projectMembers.filter(
           (m) => m?.username && mentions.includes(m?.username.toLowerCase()) && m.uid !== activeUid
@@ -3777,7 +3777,9 @@ function AppContainer() {
         }
       }
 
-      setNewCommentText("");
+      if (!customText) {
+        setNewCommentText("");
+      }
       fetchComments();
       setTasks((prev) =>
         prev.map((t) =>

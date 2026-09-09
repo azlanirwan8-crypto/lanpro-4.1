@@ -19,9 +19,7 @@ describe("Item #495: Task Comments Save & Payload Compatibility", () => {
   const appContainerContent = fs.readFileSync(appContainerPath, "utf8");
 
   it("taskRepository.createComment menyertakan kolom text dan content pada INSERT INTO Comments", () => {
-    expect(repoContent).toContain(
-      "INSERT INTO Comments (id, taskId, text, content, authorId) VALUES (?, ?, ?, ?, ?)"
-    );
+    expect(repoContent).toMatch(/INSERT INTO Comments \([^)]*text[^)]*content[^)]*\) VALUES/);
   });
 
   it("task.routes.ts menerima req.body.text dan req.body.content serta memvalidasi isinya", () => {
@@ -32,7 +30,7 @@ describe("Item #495: Task Comments Save & Payload Compatibility", () => {
 
   it("AppContainer.tsx mengirimkan text & content dan menangani error dengan toast.error", () => {
     expect(appContainerContent).toMatch(/import\s*\{[^}]*toast[^}]*\}\s*from\s*["']sonner["']/);
-    expect(appContainerContent).toContain("content: newCommentText.trim()");
+    expect(appContainerContent).toMatch(/content:\s*(?:newCommentText\.trim\(\)|textToSend)/);
     expect(appContainerContent).toMatch(/toast\.error\(.+Gagal menambahkan komentar/);
   });
 });

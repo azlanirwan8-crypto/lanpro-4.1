@@ -27,15 +27,14 @@ describe("Item #496: Comment Author Resolution & Reply Feature", () => {
   });
 
   it("TaskCommentsSection.tsx meresolusi author dengan uid dan id serta fallback authorName", () => {
-    expect(sectionContent).toMatch(/m\.uid === comment\.authorId.*m\.id === comment\.authorId/);
-    expect(sectionContent).toContain("authorDisplayName");
-    expect(sectionContent).toContain("comment.authorName");
+    expect(sectionContent).toMatch(/m\.uid.*===.*authorId/);
+    expect(sectionContent).toMatch(/authorDisplayName|rootDisplayName|replyDisplayName/);
+    expect(sectionContent).toMatch(/(?:comment|root|reply)\.authorName/);
   });
 
-  it("TaskCommentsSection.tsx memiliki fungsionalitas Reply dengan tombol dan banner balas", () => {
-    expect(sectionContent).toContain("onReplyClick");
-    expect(sectionContent).toContain("replyTo");
-    expect(sectionContent).toContain("Membalas");
-    expect(sectionContent).toContain("<span>Reply</span>");
+  it("TaskCommentsSection.tsx memiliki fungsionalitas Reply dengan tombol dan alur balas", () => {
+    expect(sectionContent).toMatch(/handleOpenReply|onReplyClick/);
+    expect(sectionContent).toMatch(/activeReplyId|replyTo/);
+    expect(sectionContent).toMatch(/Balas|Reply/);
   });
 });

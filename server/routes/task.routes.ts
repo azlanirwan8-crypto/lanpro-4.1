@@ -1267,7 +1267,7 @@ router.post(
         return res.status(400).json({ status: "fail", message: "Comment text is required" });
       }
 
-      const { authorId } = req.body;
+      const { authorId, parentId } = req.body;
       const effectiveAuthorId =
         authorId ||
         (req as any).user?.uid ||
@@ -1281,6 +1281,7 @@ router.post(
         taskId,
         userId: effectiveAuthorId,
         content,
+        parentId: parentId || null,
       });
 
       sendProjectActivityNotification(projectId, effectiveAuthorId as string, "comment_task", {
@@ -1290,7 +1291,14 @@ router.post(
 
       res.json({
         status: "success",
-        data: { id: newId, taskId, content, text: content, authorId: effectiveAuthorId },
+        data: {
+          id: newId,
+          taskId,
+          content,
+          text: content,
+          authorId: effectiveAuthorId,
+          parentId: parentId || null,
+        },
       });
     } catch (error: any) {
       console.error(

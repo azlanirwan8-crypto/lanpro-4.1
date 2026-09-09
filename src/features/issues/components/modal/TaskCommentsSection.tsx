@@ -29,7 +29,7 @@ interface TaskCommentsSectionProps {
   projectMembers: UserProfile[];
   newCommentText: string;
   handleCommentChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  handleAddComment: () => void;
+  handleAddComment: (customText?: string, parentId?: string) => Promise<void> | void;
   mentionState: { active: boolean; query: string };
   handleSelectMention: (username: string) => void;
   wrapSubmit: (key: string, fn: () => Promise<void> | void) => () => Promise<void>;
@@ -56,25 +56,38 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
   safeFormat,
 }) => {
   const { t } = useTranslation();
-  const [replyTo, setReplyTo] = useState<{
-    id: string;
-    authorName: string;
-    username?: string;
-    snippet: string;
-  } | null>(null);
+  const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
+  const [replyTextMap, setReplyTextMap] = useState<Record<string, string>>({});
+  const [isSubmittingReply, setIsSubmittingReply] = useState<Record<string, boolean>>({});
 
-  const onReplyClick = (c: any, name: string, uname: string) => {
-    setReplyTo({
-      id: c.id,
-      authorName: name,
-      username: uname,
-      snippet: (c.text || c.content || "").slice(0, 50),
-    });
-    const tag = uname ? `@${uname} ` : `@${name} `;
-    if (!newCommentText.includes(tag.trim())) {
-      handleCommentChange({
-        target: { value: `${tag}${newCommentText}` },
-      } as any);
+  const rootComments = comments.filter((c) => !c.parentId);
+  const getReplies = (parentId: string) => comments.filter((c) => c.parentId === parentId);
+
+  const handleOpenReply = (parentId: string, targetUsername?: string) => {
+    setActiveReplyId(parentId);
+    if (targetUsername) {
+      setReplyTextMap((prev) => {
+        const current = prev[parentId] || "";
+        const tag = `@${targetUsername} `;
+        return {
+          ...prev,
+          [parentId]: current.includes(tag.trim()) ? current : `${tag}${current}`,
+        };
+      });
+    }
+  };
+
+  const handleSendReply = async (parentId: string) => {
+    const text = (replyTextMap[parentId] || "").trim();
+    if (!text) return;
+
+    setIsSubmittingReply((prev) => ({ ...prev, [parentId]: true }));
+    try {
+      await handleAddComment(text, parentId);
+      setReplyTextMap((prev) => ({ ...prev, [parentId]: "" }));
+      setActiveReplyId(null);
+    } finally {
+      setIsSubmittingReply((prev) => ({ ...prev, [parentId]: false }));
     }
   };
 
@@ -119,7 +132,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
 
       {activeTab === "comments" && (
         <div className="space-y-6">
-          {/* New Comment Box */}
+          {/* New Comment Box (Top Level) */}
           <div className="flex gap-3">
             <UserAvatar
               user={user}
@@ -127,32 +140,6 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
               className="w-8 h-8 border border-surface shadow-2xs shrink-0"
             />
             <div className="flex-1 relative">
-              {replyTo && (
-                <div className="flex items-center justify-between px-3 py-1.5 mb-2 bg-surface-raised border border-border-subtle rounded-lg text-xs text-content-body shadow-2xs">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <Reply className="w-3.5 h-3.5 text-primary shrink-0" />
-                    <span className="truncate">
-                      Membalas{" "}
-                      <strong className="font-semibold text-content-strong">
-                        @{replyTo.username || replyTo.authorName}
-                      </strong>
-                      {replyTo.snippet && (
-                        <span className="text-content-subtle ml-1.5 italic truncate">
-                          &ldquo;{replyTo.snippet}&rdquo;
-                        </span>
-                      )}
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setReplyTo(null)}
-                    className="text-content-subtle hover:text-content-body p-0.5 rounded transition-colors ml-2 shrink-0"
-                    title="Batal balas"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
               <div className="border border-border-subtle rounded-xl bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-xs overflow-hidden">
                 <div className="flex items-center gap-1 p-2 border-b border-border-faint bg-surface-sunken/40 overflow-x-auto">
                   <button className="flex items-center gap-1.5 px-2 py-1 hover:bg-surface-strong rounded text-xs sm:text-[11px] font-normal text-content-secondary transition-colors shrink-0">
@@ -198,7 +185,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                   value={newCommentText}
                   onChange={handleCommentChange}
                   placeholder={t("comments.editorPlaceholder")}
-                  className="border-none shadow-none focus:ring-0 !ring-0 !outline-none p-4 resize-none bg-surface text-[13px] font-normal leading-relaxed min-h-[100px] w-full"
+                  className="border-none shadow-none focus:ring-0 !ring-0 !outline-none p-4 resize-none bg-surface text-[13px] font-normal leading-relaxed min-h-[90px] w-full"
                 />
               </div>
 
@@ -241,10 +228,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
               <div className="flex justify-end pt-3">
                 <Button
                   size="sm"
-                  onClick={wrapSubmit("addComment", async () => {
-                    await handleAddComment();
-                    setReplyTo(null);
-                  })}
+                  onClick={wrapSubmit("addComment", () => handleAddComment())}
                   disabled={isSubmitting["addComment"] || !newCommentText.trim() || !isLoggedIn}
                   className="shadow-soft-lg shadow-primary/20 px-6 font-normal uppercase tracking-normal text-xs sm:text-[10px]"
                 >
@@ -254,76 +238,201 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
             </div>
           </div>
 
-          {/* Comment List */}
-          <div className="space-y-4">
-            {comments.map((comment, i) => {
-              const author = (projectMembers || []).find(
-                (m) => (m.uid && m.uid === comment.authorId) || (m.id && m.id === comment.authorId)
+          {/* Facebook-style Threaded Comment List */}
+          <div className="space-y-5">
+            {rootComments.map((root, i) => {
+              const rootAuthor = (projectMembers || []).find(
+                (m) => (m.uid && m.uid === root.authorId) || (m.id && m.id === root.authorId)
               );
-              const authorDisplayName =
-                author?.displayName || author?.name || comment.authorName || "Pengguna";
-              const authorAvatar =
-                author?.photoURL || (author as any)?.avatar_url || comment.authorAvatar;
-              const authorUsername = author?.username || comment.authorUsername || "";
+              const rootDisplayName =
+                rootAuthor?.displayName || rootAuthor?.name || root.authorName || "Pengguna";
+              const rootAvatar =
+                rootAuthor?.photoURL || (rootAuthor as any)?.avatar_url || root.authorAvatar;
+              const rootUsername = rootAuthor?.username || root.authorUsername || "";
+              const replies = getReplies(root.id);
 
               return (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  key={comment.id ? `${comment.id}-${i}` : `comm-${i}`}
-                  className="flex gap-3 group"
-                >
-                  <UserAvatar
-                    name={authorDisplayName}
-                    src={authorAvatar}
-                    uid={comment.authorId}
-                    members={projectMembers}
-                    className="w-8 h-8 border border-surface shadow-2xs shrink-0"
-                  />
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-xs font-medium text-content-strong tracking-tight truncate">
-                          {authorDisplayName}
-                        </span>
-                        <div className="w-1 h-1 bg-surface-marker rounded-full shrink-0" />
-                        <span className="text-xs sm:text-[10px] font-medium text-content-subtle shrink-0">
-                          {safeFormat(comment.createdAt, "MMM d, h:mm a", "Just now")}
+                <div key={root.id ? `${root.id}-${i}` : `comm-${i}`} className="space-y-2">
+                  {/* Root Comment Row */}
+                  <div className="flex gap-3 group items-start">
+                    <UserAvatar
+                      name={rootDisplayName}
+                      src={rootAvatar}
+                      uid={root.authorId}
+                      members={projectMembers}
+                      className="w-8 h-8 border border-surface shadow-2xs shrink-0 mt-0.5"
+                    />
+                    <div className="flex-1 min-w-0">
+                      {/* Comment Bubble */}
+                      <div className="inline-block max-w-full bg-surface-sunken/75 px-3.5 py-2.5 rounded-2xl border border-border-subtle/50">
+                        <div className="font-semibold text-xs text-content-strong leading-tight">
+                          {rootDisplayName}
+                        </div>
+                        <div className="text-xs text-content-body mt-1 leading-relaxed break-words whitespace-pre-wrap">
+                          {(root.text || root.content || "")
+                            .split(/(@\w+)/g)
+                            .map((part: string, idx: number) =>
+                              part.startsWith("@") ? (
+                                <span
+                                  key={idx}
+                                  className="text-primary font-medium bg-primary/10 px-1 rounded shadow-2xs border border-primary/20"
+                                >
+                                  {part}
+                                </span>
+                              ) : (
+                                part
+                              )
+                            )}
+                        </div>
+                      </div>
+
+                      {/* Comment Action Footer (Facebook Style: Reply · Timestamp) */}
+                      <div className="flex items-center gap-3 px-2 pt-1 text-[11px] text-content-subtle font-medium">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenReply(root.id, rootUsername)}
+                          className="hover:text-primary transition-colors cursor-pointer"
+                        >
+                          Balas
+                        </button>
+                        <span>·</span>
+                        <span className="text-content-subtle/80">
+                          {safeFormat(root.createdAt, "MMM d, h:mm a", "Baru saja")}
                         </span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => onReplyClick(comment, authorDisplayName, authorUsername)}
-                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity flex items-center gap-1 text-[11px] text-content-subtle hover:text-primary px-1.5 py-0.5 rounded hover:bg-surface-raised cursor-pointer"
-                        title="Balas komentar ini"
-                      >
-                        <Reply className="w-3 h-3" />
-                        <span>Reply</span>
-                      </button>
-                    </div>
-                    <div className="text-xs text-content-body bg-surface-sunken/70 p-3 rounded-lg border border-border-subtle/60 leading-relaxed font-normal">
-                      {(comment.text || comment.content || "")
-                        .split(/(@\w+)/g)
-                        .map((part: string, idx: number) =>
-                          part.startsWith("@") ? (
-                            <span
-                              key={idx}
-                              className="text-primary font-medium bg-primary/10 px-1 rounded shadow-2xs border border-primary/30 inline-flex items-center gap-0.5"
-                            >
-                              <Reply className="w-2.5 h-2.5 inline opacity-75" />
-                              {part}
-                            </span>
-                          ) : (
-                            part
-                          )
-                        )}
+
+                      {/* Nested Replies Thread (Indented with connector border) */}
+                      {(replies.length > 0 || activeReplyId === root.id) && (
+                        <div className="mt-2.5 ml-3 pl-3 border-l-2 border-border-subtle/60 space-y-3">
+                          {/* List of Replies */}
+                          {replies.map((reply, rIdx) => {
+                            const replyAuthor = (projectMembers || []).find(
+                              (m) =>
+                                (m.uid && m.uid === reply.authorId) ||
+                                (m.id && m.id === reply.authorId)
+                            );
+                            const replyDisplayName =
+                              replyAuthor?.displayName ||
+                              replyAuthor?.name ||
+                              reply.authorName ||
+                              "Pengguna";
+                            const replyAvatar =
+                              replyAuthor?.photoURL ||
+                              (replyAuthor as any)?.avatar_url ||
+                              reply.authorAvatar;
+                            const replyUsername =
+                              replyAuthor?.username || reply.authorUsername || "";
+
+                            return (
+                              <div
+                                key={reply.id ? `${reply.id}-${rIdx}` : `reply-${rIdx}`}
+                                className="flex gap-2.5 items-start group/reply"
+                              >
+                                <UserAvatar
+                                  name={replyDisplayName}
+                                  src={replyAvatar}
+                                  uid={reply.authorId}
+                                  members={projectMembers}
+                                  className="w-6 h-6 border border-surface shadow-2xs shrink-0 mt-0.5 text-[10px]"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  {/* Reply Bubble */}
+                                  <div className="inline-block max-w-full bg-surface-sunken/60 px-3 py-2 rounded-2xl border border-border-subtle/40">
+                                    <div className="font-semibold text-xs text-content-strong leading-tight">
+                                      {replyDisplayName}
+                                    </div>
+                                    <div className="text-xs text-content-body mt-1 leading-relaxed break-words whitespace-pre-wrap">
+                                      {(reply.text || reply.content || "")
+                                        .split(/(@\w+)/g)
+                                        .map((part: string, pIdx: number) =>
+                                          part.startsWith("@") ? (
+                                            <span
+                                              key={pIdx}
+                                              className="text-primary font-medium bg-primary/10 px-1 rounded shadow-2xs border border-primary/20"
+                                            >
+                                              {part}
+                                            </span>
+                                          ) : (
+                                            part
+                                          )
+                                        )}
+                                    </div>
+                                  </div>
+
+                                  {/* Reply Actions */}
+                                  <div className="flex items-center gap-3 px-2 pt-1 text-[11px] text-content-subtle font-medium">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleOpenReply(root.id, replyUsername)}
+                                      className="hover:text-primary transition-colors cursor-pointer"
+                                    >
+                                      Balas
+                                    </button>
+                                    <span>·</span>
+                                    <span className="text-content-subtle/80">
+                                      {safeFormat(reply.createdAt, "MMM d, h:mm a", "Baru saja")}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+
+                          {/* Facebook-style Inline Reply Input Box */}
+                          {activeReplyId === root.id && (
+                            <div className="flex gap-2.5 items-start pt-1">
+                              <UserAvatar
+                                user={user}
+                                uid={user?.uid || user?.id}
+                                className="w-6 h-6 border border-surface shadow-2xs shrink-0 mt-1 text-[10px]"
+                              />
+                              <div className="flex-1 min-w-0 space-y-2">
+                                <div className="border border-border-subtle rounded-xl bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-2xs overflow-hidden">
+                                  <Textarea
+                                    value={replyTextMap[root.id] || ""}
+                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                                      setReplyTextMap((prev) => ({
+                                        ...prev,
+                                        [root.id]: e.target.value,
+                                      }))
+                                    }
+                                    placeholder={`Tulis balasan untuk @${rootUsername || rootDisplayName}...`}
+                                    className="border-none shadow-none focus:ring-0 !ring-0 !outline-none px-3 py-2 resize-none bg-surface text-xs leading-relaxed min-h-[60px] w-full"
+                                    autoFocus
+                                  />
+                                </div>
+                                <div className="flex items-center justify-end gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveReplyId(null)}
+                                    className="text-xs text-content-subtle hover:text-content-body px-2.5 py-1 rounded transition-colors"
+                                  >
+                                    Batal
+                                  </button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleSendReply(root.id)}
+                                    disabled={
+                                      isSubmittingReply[root.id] ||
+                                      !(replyTextMap[root.id] || "").trim() ||
+                                      !isLoggedIn
+                                    }
+                                    className="text-xs px-3.5 py-1 h-7"
+                                  >
+                                    {isSubmittingReply[root.id] ? "Mengirim..." : "Balas"}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               );
             })}
-            {comments.length === 0 && (
+            {rootComments.length === 0 && (
               <div className="py-6 px-4 text-center space-y-1.5 bg-surface-sunken/50 rounded-lg border border-dashed border-border-subtle/80">
                 <MessageSquare className="w-6 h-6 mx-auto text-content-subtle" />
                 <p className="text-xs font-medium text-content-subtle">

@@ -337,6 +337,8 @@ export async function runMigrations(pool: Pool): Promise<void> {
         "createdAt" TIMESTAMP DEFAULT NOW(),
         "updatedAt" TIMESTAMP DEFAULT NOW()
       );
+      ALTER TABLE "Comments" ADD COLUMN IF NOT EXISTS "parentId" VARCHAR(36);
+      CREATE INDEX IF NOT EXISTS idx_comments_parent ON "Comments" ("parentId");
     `);
 
     // ── TaskCustomFields ─────────────────────────────────────────────────────

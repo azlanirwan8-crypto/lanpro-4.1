@@ -691,12 +691,20 @@ export class TaskRepository {
     taskId: string;
     userId: string;
     content: string;
+    parentId?: string | null;
   }): Promise<void> {
     const connection = await db.getConnection();
     try {
       await connection.query(
-        "INSERT INTO Comments (id, taskId, text, content, authorId) VALUES (?, ?, ?, ?, ?)",
-        [comment.id, comment.taskId, comment.content, comment.content, comment.userId]
+        'INSERT INTO Comments (id, taskId, text, content, authorId, "parentId") VALUES (?, ?, ?, ?, ?, ?)',
+        [
+          comment.id,
+          comment.taskId,
+          comment.content,
+          comment.content,
+          comment.userId,
+          comment.parentId || null,
+        ]
       );
     } finally {
       connection.release();

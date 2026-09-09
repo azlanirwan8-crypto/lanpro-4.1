@@ -57,7 +57,7 @@ export interface TaskDetailModalProps {
   comments: any[];
   newCommentText: string;
   setNewCommentText: (t: string) => void;
-  handleAddComment: () => void;
+  handleAddComment: (customText?: string, parentId?: string) => Promise<void> | void;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleRemoveAttachment?: (attachmentId: string) => void;
   uploadProgress: Record<string, number>;
