@@ -231,6 +231,7 @@ export function formatTanggal(dueDate: any): string {
 const TEMPLATE_LAMA_DIKENALI = [
   "you have been assigned to task",
   "please check the dashboard for details",
+  "kamu telah ditugaskan untuk tiket berikut",
 ];
 
 function isTemplateLegacy(template: string): boolean {
@@ -274,37 +275,44 @@ function formatPriority(priority?: string | null): string {
 }
 
 /**
- * Format daftar tiket bernomor untuk WhatsApp (Item #499, diperbarui #502).
- * Contoh:
- * 1. Tugas: Whatsapp
- *     Status: To Do
- *     Prioritas: Medium
- *     Tanggal Terakhir : -
+ * Format daftar tiket bernomor untuk WhatsApp (Item #505 - Monospace Ticket).
+ * Menggunakan blok monospace (```...```) agar font berkarakter sama lebar
+ * sehingga titik dua (:) berbaris lurus vertikal sempurna di seluruh tipe ponsel.
  *
- * 2. Tugas: tes lagi
- *     Status: To Do
- *     Prioritas: Medium
- *     Tanggal Terakhir : -
+ * Contoh:
+ * ```
+ * [1] WHATSAPP
+ *     Status    : To Do
+ *     Prioritas : Medium
+ *     Tenggat   : -
+ *
+ * [2] TES LAGI
+ *     Status    : To Do
+ *     Prioritas : Medium
+ *     Tenggat   : -
+ * ```
  */
 export function formatTaskList(tasks: any[]): string {
-  return tasks
+  const inner = tasks
     .map((t, idx) => {
-      const title = t.title || "Tanpa Judul";
+      const title = (t.title || "Tanpa Judul").toUpperCase();
       const status = formatStatus(t.status);
       const priority = formatPriority(t.priority);
       const tanggal = formatTanggal(t.dueDate);
       return (
-        `${idx + 1}. Tugas: ${title}\n` +
-        `    Status: ${status}\n` +
-        `    Prioritas: ${priority}\n` +
-        `    Tanggal Terakhir : ${tanggal}`
+        `[${idx + 1}] ${title}\n` +
+        `    Status    : ${status}\n` +
+        `    Prioritas : ${priority}\n` +
+        `    Tenggat   : ${tanggal}`
       );
     })
     .join("\n\n");
+
+  return `\`\`\`\n${inner}\n\`\`\``;
 }
 
 /**
- * Menyusun isi pesan WhatsApp Task Assignment (Item #499, diperbarui #502).
+ * Menyusun isi pesan WhatsApp Task Assignment (Item #505 - Monospace Ticket).
  * Mendukung kustomisasi template melalui BroadcastConfig.
  * Placeholder yang didukung: {{user_name}}, {{task_list}}, {{app_url}}, {{project_name}}.
  */
@@ -330,17 +338,7 @@ export function formatMessage(
 
   // Jika template kustom mengandung {{task_list}}
   if (templateBersih && templateBersih.includes("{{task_list}}")) {
-    let tpl = templateBersih;
-    if (
-      tpl.startsWith("[LanPro] Task Assignment\n") &&
-      !tpl.startsWith("[LanPro] Task Assignment\n\n")
-    ) {
-      tpl = tpl.replace("[LanPro] Task Assignment\n", "[LanPro] Task Assignment\n\n");
-    }
-    if (tpl.includes("detail tugas melalui")) {
-      tpl = tpl.replace("detail tugas melalui", "detail tugas anda melalui");
-    }
-    return tpl
+    return templateBersih
       .replace(/\{\{user_name\}\}/g, name)
       .replace(/\{\{task_list\}\}/g, taskListText)
       .replace(/\{\{app_url\}\}/g, appUrl)
@@ -349,23 +347,25 @@ export function formatMessage(
       .trim();
   }
 
-  // Jika template kustom hanya berisi salam/sapaan kustom
   const greeting = templateBersih
     ? templateBersih
         .replace(/\{\{user_name\}\}/g, name)
         .replace(/\{\{project_name\}\}/g, projectNameUntukTemplate)
         .replace(/\{\{[a-zA-Z0-9_]+\}\}/g, "")
         .trim()
-    : `Halo ${name},`;
+    : `Halo *${name}*,`;
 
-  let msg = `[LanPro] Task Assignment\n\n`;
-  msg += `${greeting}\n`;
-  msg += `Kamu telah ditugaskan untuk tiket berikut:\n`;
-  msg += `${taskListText}\n\n`;
-  msg += `Silakan cek detail tugas anda melalui tautan berikut:\n`;
-  msg += `${appUrl}\n\n`;
-  msg += `Terima kasih.`;
-  return msg;
+  // Format default Monospace Ticket resmi (#505)
+  return (
+    `*[LanPro] Task Assignment*\n\n` +
+    `${greeting}\n` +
+    `Berikut tiket tugas aktif yang ditugaskan kepada Anda:\n\n` +
+    `${taskListText}\n\n` +
+    `🔗 *Akses Detail Tugas:*\n` +
+    `${appUrl}\n\n` +
+    `─────────────────\n` +
+    `_Pesan otomatis • LanPro Project Management_`
+  );
 }
 
 async function sendToWhatsApp(phone: string, message: string) {

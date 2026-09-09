@@ -91,7 +91,7 @@ describe("whatsapp.service", () => {
       expect(pesan).not.toContain("{{task_title}}");
     });
 
-    it("memformat pesan Task Assignment dengan penomoran tiket, status, prioritas, dan tanggal (Item #499)", async () => {
+    it("memformat pesan Task Assignment dengan format Monospace Ticket presisi (Item #505)", async () => {
       const wa = await import("./whatsapp.service");
       const pesan = wa.formatMessage("Azlan Irwan", [
         {
@@ -103,15 +103,16 @@ describe("whatsapp.service", () => {
         },
       ]);
 
-      expect(pesan).toContain("[LanPro] Task Assignment");
-      expect(pesan).toContain("Halo Azlan Irwan,");
-      expect(pesan).toContain("Kamu telah ditugaskan untuk tiket berikut:");
-      expect(pesan).toContain("1. Tugas: Fix Authentication Flow");
-      expect(pesan).toContain("    Status: In Progress");
-      expect(pesan).toContain("    Prioritas: High");
-      expect(pesan).toContain("    Tanggal Terakhir : 10/09/2026");
-      expect(pesan).toContain("Silakan cek detail tugas anda melalui tautan berikut:");
-      expect(pesan).toContain("Terima kasih.");
+      expect(pesan).toContain("*[LanPro] Task Assignment*");
+      expect(pesan).toContain("Halo *Azlan Irwan*,");
+      expect(pesan).toContain("Berikut tiket tugas aktif yang ditugaskan kepada Anda:");
+      expect(pesan).toContain("```");
+      expect(pesan).toContain("[1] FIX AUTHENTICATION FLOW");
+      expect(pesan).toContain("    Status    : In Progress");
+      expect(pesan).toContain("    Prioritas : High");
+      expect(pesan).toContain("    Tenggat   : 10/09/2026");
+      expect(pesan).toContain("🔗 *Akses Detail Tugas:*");
+      expect(pesan).toContain("_Pesan otomatis • LanPro Project Management_");
       expect(pesan).not.toContain("null");
     });
 
@@ -134,7 +135,8 @@ describe("whatsapp.service", () => {
         "https://app.lanpro.id"
       );
       expect(pesan).toContain("Pemberitahuan Tugas untuk Azlan:");
-      expect(pesan).toContain("1. Tugas: Task 1");
+      expect(pesan).toContain("[1] TASK 1");
+      expect(pesan).toContain("    Status    : To Do");
       expect(pesan).toContain("Buka di: https://app.lanpro.id");
     });
 
@@ -167,7 +169,7 @@ describe("whatsapp.service", () => {
         [{ title: "Tugas A", status: "To Do", dueDate: null, projectName: "Proyek X" }],
         templateLama
       );
-      expect(pesan).toContain("Halo Budi,");
+      expect(pesan).toContain("Halo *Budi*,");
       expect(pesan).not.toContain("{{task_key}}");
       expect(pesan).not.toContain("{{task_title}}");
       expect(pesan).not.toContain("You have been assigned");

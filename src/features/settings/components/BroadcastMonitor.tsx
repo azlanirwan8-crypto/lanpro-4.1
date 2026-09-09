@@ -97,16 +97,24 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
     if (tpl.includes("detail tugas melalui")) {
       tpl = tpl.replace("detail tugas melalui", "detail tugas anda melalui");
     }
+    const mockTaskList =
+      "```\n" +
+      "[1] WHATSAPP\n" +
+      "    Status    : To Do\n" +
+      "    Prioritas : Medium\n" +
+      "    Tenggat   : -\n\n" +
+      "[2] TES LAGI\n" +
+      "    Status    : To Do\n" +
+      "    Prioritas : Medium\n" +
+      "    Tenggat   : -\n" +
+      "```";
     return tpl
       .replace(/\{\{user_name\}\}/g, "AZLAN IRWAN")
       .replace(/\{\{task_key\}\}/g, "PROJ-102")
       .replace(/\{\{task_title\}\}/g, "Whatsapp")
       .replace(/\{\{status\}\}/g, "To Do")
       .replace(/\{\{priority\}\}/g, "Medium")
-      .replace(
-        /\{\{task_list\}\}/g,
-        "1. Tugas: Whatsapp\n    Status: To Do\n    Prioritas: Medium\n    Tanggal Terakhir : -\n\n2. Tugas: tes lagi\n    Status: To Do\n    Prioritas: Medium\n    Tanggal Terakhir : -"
-      )
+      .replace(/\{\{task_list\}\}/g, mockTaskList)
       .replace(/\{\{app_url\}\}/g, "https://lanpro.my.id")
       .replace(/\{\{project_name\}\}/g, "LanPro Development");
   };

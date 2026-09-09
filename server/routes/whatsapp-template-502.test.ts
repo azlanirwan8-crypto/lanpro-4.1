@@ -35,20 +35,23 @@ describe("Item #502 - Format Kustom Template WhatsApp Task Assignment", () => {
     );
 
     const expected =
-      "[LanPro] Task Assignment\n\n" +
-      "Halo AZLAN IRWAN,\n" +
-      "Kamu telah ditugaskan untuk tiket berikut:\n" +
-      "1. Tugas: Whatsapp\n" +
-      "    Status: To Do\n" +
-      "    Prioritas: Medium\n" +
-      "    Tanggal Terakhir : -\n\n" +
-      "2. Tugas: tes lagi\n" +
-      "    Status: To Do\n" +
-      "    Prioritas: Medium\n" +
-      "    Tanggal Terakhir : -\n\n" +
-      "Silakan cek detail tugas anda melalui tautan berikut:\n" +
+      "*[LanPro] Task Assignment*\n\n" +
+      "Halo *AZLAN IRWAN*,\n" +
+      "Berikut tiket tugas aktif yang ditugaskan kepada Anda:\n\n" +
+      "```\n" +
+      "[1] WHATSAPP\n" +
+      "    Status    : To Do\n" +
+      "    Prioritas : Medium\n" +
+      "    Tenggat   : -\n\n" +
+      "[2] TES LAGI\n" +
+      "    Status    : To Do\n" +
+      "    Prioritas : Medium\n" +
+      "    Tenggat   : -\n" +
+      "```\n\n" +
+      "🔗 *Akses Detail Tugas:*\n" +
       "https://lanpro.my.id\n\n" +
-      "Terima kasih.";
+      "─────────────────\n" +
+      "_Pesan otomatis • LanPro Project Management_";
 
     expect(message).toBe(expected);
   });
@@ -71,10 +74,10 @@ describe("Item #502 - Format Kustom Template WhatsApp Task Assignment", () => {
 
     const list = formatTaskList(tasks);
     expect(list).toContain(
-      "1. Tugas: Tugas 1\n    Status: In Progress\n    Prioritas: High\n    Tanggal Terakhir : 12/09/2026"
+      "[1] TUGAS 1\n    Status    : In Progress\n    Prioritas : High\n    Tenggat   : 12/09/2026"
     );
     expect(list).toContain(
-      "\n\n2. Tugas: Tugas 2\n    Status: Done\n    Prioritas: Low\n    Tanggal Terakhir : -"
+      "\n\n[2] TUGAS 2\n    Status    : Done\n    Prioritas : Low\n    Tenggat   : -"
     );
   });
 });

@@ -20,13 +20,14 @@ export interface BroadcastConfigData {
 
 const DEFAULT_TEMPLATE = "Halo {{user_name}},";
 export const DEFAULT_WHATSAPP_TEMPLATE =
-  `[LanPro] Task Assignment\n\n` +
-  `Halo {{user_name}},\n` +
-  `Kamu telah ditugaskan untuk tiket berikut:\n` +
+  `*[LanPro] Task Assignment*\n\n` +
+  `Halo *{{user_name}}*,\n` +
+  `Berikut tiket tugas aktif yang ditugaskan kepada Anda:\n\n` +
   `{{task_list}}\n\n` +
-  `Silakan cek detail tugas anda melalui tautan berikut:\n` +
+  `🔗 *Akses Detail Tugas:*\n` +
   `{{app_url}}\n\n` +
-  `Terima kasih.`;
+  `─────────────────\n` +
+  `_Pesan otomatis • LanPro Project Management_`;
 
 function toRow(data: any): BroadcastConfigData {
   const defaultTemplate =
@@ -36,7 +37,8 @@ function toRow(data: any): BroadcastConfigData {
     data.channel === "whatsapp" &&
     template &&
     (!template.includes("{{task_list}}") ||
-      template.toLowerCase().includes("you have been assigned"))
+      template.toLowerCase().includes("you have been assigned") ||
+      template.includes("Kamu telah ditugaskan untuk tiket berikut"))
   ) {
     template = DEFAULT_WHATSAPP_TEMPLATE;
   }

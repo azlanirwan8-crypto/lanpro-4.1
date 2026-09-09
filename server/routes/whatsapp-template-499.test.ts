@@ -24,24 +24,24 @@ describe("Item #499 - WhatsApp Gateway Template & Configuration Tests", () => {
 
       const listText = formatTaskList(tasks);
       expect(listText).toBe(
-        "1. Tugas: Fix Authentication Flow\n" +
-          "    Status: In Progress\n" +
-          "    Prioritas: High\n" +
-          "    Tanggal Terakhir : 10/09/2026"
+        "```\n" +
+          "[1] FIX AUTHENTICATION FLOW\n" +
+          "    Status    : In Progress\n" +
+          "    Prioritas : High\n" +
+          "    Tenggat   : 10/09/2026\n" +
+          "```"
       );
 
       const message = formatMessage("Azlan Irwan", tasks, null, "http://localhost:3000");
-      expect(message).toContain("[LanPro] Task Assignment\n\n");
-      expect(message).toContain("Halo Azlan Irwan,");
-      expect(message).toContain("Kamu telah ditugaskan untuk tiket berikut:");
-      expect(message).toContain("1. Tugas: Fix Authentication Flow");
-      expect(message).toContain("    Status: In Progress");
-      expect(message).toContain("    Prioritas: High");
-      expect(message).toContain("    Tanggal Terakhir : 10/09/2026");
-      expect(message).toContain(
-        "Silakan cek detail tugas anda melalui tautan berikut:\nhttp://localhost:3000"
-      );
-      expect(message).toContain("Terima kasih.");
+      expect(message).toContain("*[LanPro] Task Assignment*");
+      expect(message).toContain("Halo *Azlan Irwan*,");
+      expect(message).toContain("Berikut tiket tugas aktif yang ditugaskan kepada Anda:");
+      expect(message).toContain("[1] FIX AUTHENTICATION FLOW");
+      expect(message).toContain("    Status    : In Progress");
+      expect(message).toContain("    Prioritas : High");
+      expect(message).toContain("    Tenggat   : 10/09/2026");
+      expect(message).toContain("🔗 *Akses Detail Tugas:*\nhttp://localhost:3000");
+      expect(message).toContain("_Pesan otomatis • LanPro Project Management_");
     });
 
     it("memformat banyak tiket secara berurutan", () => {
@@ -61,11 +61,11 @@ describe("Item #499 - WhatsApp Gateway Template & Configuration Tests", () => {
       ];
 
       const message = formatMessage("Azlan Irwan", tasks, null, "http://localhost:3000");
-      expect(message).toContain("1. Tugas: Fix Authentication Flow");
-      expect(message).toContain("2. Tugas: Refactor Notification Worker");
-      expect(message).toContain("    Status: To Do");
-      expect(message).toContain("    Prioritas: Medium");
-      expect(message).toContain("    Tanggal Terakhir : -");
+      expect(message).toContain("[1] FIX AUTHENTICATION FLOW");
+      expect(message).toContain("[2] REFACTOR NOTIFICATION WORKER");
+      expect(message).toContain("    Status    : To Do");
+      expect(message).toContain("    Prioritas : Medium");
+      expect(message).toContain("    Tenggat   : -");
     });
 
     it("mengganti placeholder {{task_list}} dan {{app_url}} saat custom template digunakan", () => {
@@ -82,13 +82,13 @@ describe("Item #499 - WhatsApp Gateway Template & Configuration Tests", () => {
         "Halo {{user_name}},\nAda tugas mendesak:\n{{task_list}}\nBuka segera di {{app_url}}!";
       const message = formatMessage("Budi", tasks, customTemplate, "https://lanpro.app");
       expect(message).toBe(
-        "Halo Budi,\nAda tugas mendesak:\n1. Tugas: Bug Hotfix\n    Status: Testing\n    Prioritas: Urgent\n    Tanggal Terakhir : 15/09/2026\nBuka segera di https://lanpro.app!"
+        "Halo Budi,\nAda tugas mendesak:\n```\n[1] BUG HOTFIX\n    Status    : Testing\n    Prioritas : Urgent\n    Tenggat   : 15/09/2026\n```\nBuka segera di https://lanpro.app!"
       );
     });
 
     it("mengembalikan default template untuk channel whatsapp di broadcastConfig", () => {
-      expect(DEFAULT_WHATSAPP_TEMPLATE).toContain("[LanPro] Task Assignment");
-      expect(DEFAULT_WHATSAPP_TEMPLATE).toContain("Halo {{user_name}},");
+      expect(DEFAULT_WHATSAPP_TEMPLATE).toContain("*[LanPro] Task Assignment*");
+      expect(DEFAULT_WHATSAPP_TEMPLATE).toContain("Halo *{{user_name}}*,");
       expect(DEFAULT_WHATSAPP_TEMPLATE).toContain("{{task_list}}");
       expect(DEFAULT_WHATSAPP_TEMPLATE).toContain("{{app_url}}");
     });
