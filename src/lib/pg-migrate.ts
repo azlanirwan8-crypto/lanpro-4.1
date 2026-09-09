@@ -851,6 +851,24 @@ export async function runMigrations(pool: Pool): Promise<void> {
         ADD COLUMN IF NOT EXISTS "lastFiredKey" VARCHAR(32);
     `);
 
+    // ── BroadcastLogs (item #501) ──────────────────────────────────────────
+    // Menyimpan log riwayat pengiriman siaran harian (WhatsApp / Email)
+    // agar panel BroadcastMonitor menampilkan waktu & status nyata (bukan mock)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS "BroadcastLogs" (
+        id                SERIAL PRIMARY KEY,
+        channel           VARCHAR(20) NOT NULL,
+        "userId"          VARCHAR(128),
+        "recipientName"   VARCHAR(255),
+        "recipientTarget" VARCHAR(255),
+        status            VARCHAR(30) NOT NULL,
+        "taskCount"       INT DEFAULT 0,
+        details           TEXT,
+        "createdAt"       TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_broadcast_logs_created ON "BroadcastLogs" ("createdAt" DESC);
+    `);
+
     // ── IntegrationSettings (item #264, #270) ─────────────────────────────────
     //
     // Menyimpan konfigurasi integrasi pihak ketiga (email SMTP / Resend, WhatsApp)
@@ -1077,6 +1095,7 @@ export const TABEL_WAJIB: readonly string[] = [
   "Attachments",
   "AuditLogs",
   "BroadcastConfig",
+  "BroadcastLogs",
   "Comments",
   "DiscussionPoints",
   "Documents",

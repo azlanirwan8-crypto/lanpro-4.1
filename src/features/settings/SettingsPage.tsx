@@ -149,6 +149,7 @@ export const SettingsPage: React.FC = () => {
               {activeTab !== "konfigurasi" && (
                 <div className="lg:col-span-7 border-l border-border-subtle/80 pl-5">
                   <BroadcastMonitor
+                    channel={activeTab === "taskBroadcast" ? "email" : "whatsapp"}
                     emailTemplate={{
                       subject: emailConfig.subjectTemplate,
                       body: emailConfig.bodyTemplate,

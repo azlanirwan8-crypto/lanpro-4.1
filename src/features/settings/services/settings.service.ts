@@ -165,6 +165,31 @@ export async function sendWhatsAppBroadcastNow(): Promise<
   });
 }
 
+export interface BroadcastMonitorItem {
+  id: string;
+  userId: string;
+  name: string;
+  target: string;
+  channel: "whatsapp" | "email";
+  time: string;
+  status: "success" | "pending" | "failed" | "skipped_no_tasks" | "not_sent";
+  taskCount: number;
+  details: string | null;
+}
+
+export interface BroadcastMonitorData {
+  items: BroadcastMonitorItem[];
+  totalSentToday: number;
+  totalTarget: number;
+}
+
+/** Mengambil data pemantau broadcast realtime (#501). */
+export async function fetchBroadcastMonitor(
+  channel: string = "whatsapp"
+): Promise<SettingsApiResponse<BroadcastMonitorData>> {
+  return apiRequest(`/api/settings/broadcast-monitor?channel=${encodeURIComponent(channel)}`);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Item #279: Konfigurasi Sistem Operasional & Koneksi WhatsApp
 // ─────────────────────────────────────────────────────────────────────────────

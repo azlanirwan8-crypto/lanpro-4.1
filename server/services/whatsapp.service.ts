@@ -3,6 +3,7 @@ import dbPool from "../../src/lib/db";
 import { getBroadcastConfig, claimBroadcastFire } from "./broadcastConfig.service";
 import { ambilAppUrl } from "./email.service";
 import { ambilWhatsappToken } from "./integrationSettings.service";
+import { recordBroadcastLog } from "./broadcastLog.service";
 
 const WA_API_URL = "https://api.fonnte.com/send";
 
@@ -98,7 +99,8 @@ export async function sendDailyTaskDigest(
 ): Promise<{ totalDikirim: number; totalPenerima: number }> {
   const connection = await dbPool.getConnection();
   try {
-    let query = 'SELECT id, "displayName", phone FROM "Users" WHERE phone IS NOT NULL';
+    let query =
+      'SELECT id, uid, username, "displayName", phone FROM "Users" WHERE phone IS NOT NULL';
     const params: any[] = [];
     if (targetUserId) {
       query += " AND (id = ? OR username = ? OR uid = ?)";
@@ -116,22 +118,64 @@ export async function sendDailyTaskDigest(
     let totalDikirim = 0;
 
     for (const user of users) {
+      const uId = String(user.id);
+      const uUid = String(user.uid || user.id);
+      const uUsername = String(user.username || "");
+
       const [tasks]: any = await connection.query(
         `
         SELECT t.id, t.title, t.dueDate, t.status, t.priority, p.name as "projectName"
         FROM Tasks t
         LEFT JOIN Projects p ON t."projectId" = p.id
-        WHERE t.assigneeId = ?
+        WHERE (t.assigneeId = ? OR t.assigneeId = ? OR t.assigneeId = ?)
         AND t.status IN ('To Do', 'In Progress', 'Testing')
         ORDER BY p.name, t.dueDate
       `,
-        [user.id]
+        [uId, uUid, uUsername]
       );
 
       if (tasks.length > 0) {
-        const message = formatMessage(user.displayName, tasks, messageTemplate, appUrlAktif);
-        await sendToWhatsApp(user.phone, message);
-        totalDikirim++;
+        const message = formatMessage(
+          user.displayName || user.username || "Rekan Tim",
+          tasks,
+          messageTemplate,
+          appUrlAktif
+        );
+        try {
+          await sendToWhatsApp(user.phone, message);
+          totalDikirim++;
+          await recordBroadcastLog({
+            channel: "whatsapp",
+            userId: uId,
+            recipientName: user.displayName || user.username || "User",
+            recipientTarget: user.phone,
+            status: "success",
+            taskCount: tasks.length,
+            details: `Berhasil dikirim (${tasks.length} tugas aktif)`,
+          });
+        } catch (kirimErr: any) {
+          console.error(`[WHATSAPP] Gagal mengirim pesan ke ${user.phone}:`, kirimErr);
+          await recordBroadcastLog({
+            channel: "whatsapp",
+            userId: uId,
+            recipientName: user.displayName || user.username || "User",
+            recipientTarget: user.phone,
+            status: "failed",
+            taskCount: tasks.length,
+            details: kirimErr?.message || "Gagal mengirim ke gateway WhatsApp",
+          });
+        }
+      } else {
+        // User tidak memiliki tugas aktif
+        await recordBroadcastLog({
+          channel: "whatsapp",
+          userId: uId,
+          recipientName: user.displayName || user.username || "User",
+          recipientTarget: user.phone,
+          status: "skipped_no_tasks",
+          taskCount: 0,
+          details: "Dilewati: 0 tiket tugas aktif (To Do / In Progress / Testing)",
+        });
       }
     }
 

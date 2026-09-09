@@ -28,7 +28,9 @@ describe("#500: WhatsApp Broadcast recipientIds query", () => {
     expect(content).not.toContain("...recipientIds, ...recipientIds");
 
     // Memastikan memakai pattern IN (?) dan params.push(recipientIds, ...)
-    expect(content).toContain("query += ' AND (id IN (?) OR username IN (?) OR uid IN (?))';");
+    expect(content).toMatch(
+      /query \+= ['"] AND \(id IN \(\?\) OR username IN \(\?\) OR uid IN \(\?\)\)['"];/
+    );
     expect(content).toContain("params.push(recipientIds, recipientIds, recipientIds);");
   });
 

@@ -24,6 +24,7 @@ import {
 import { systemRepository } from "../repositories/system.repository";
 import { getBroadcastConfig, saveBroadcastConfig } from "../services/broadcastConfig.service";
 import { kirimBroadcastTaskEmail } from "../services/emailBroadcast.service";
+import { getBroadcastMonitorStatus } from "../services/broadcastLog.service";
 import { validasiBody } from "../middleware/validate";
 import {
   testEmailSchema,
@@ -366,9 +367,19 @@ router.post("/api/settings/whatsapp/broadcast-now", verifyGlobalAdmin, async (re
   try {
     const config = await getBroadcastConfig("whatsapp");
     const hasil = await sendDailyTaskDigest(undefined, config.recipientIds, config.messageTemplate);
+
+    let message = "";
+    if (hasil.totalDikirim > 0) {
+      message = `Broadcast WhatsApp berhasil diproses. ${hasil.totalDikirim} pesan dikirim ke penerima dengan tugas aktif.`;
+    } else if (hasil.totalPenerima > 0) {
+      message = `Broadcast selesai: 0 pesan dikirim karena ${hasil.totalPenerima} penerima yang diperiksa tidak memiliki tugas aktif (To Do, In Progress, Testing). Silakan tugaskan tiket ke pengguna terlebih dahulu.`;
+    } else {
+      message = "Broadcast selesai: Tidak ada penerima yang memiliki nomor WhatsApp terdaftar.";
+    }
+
     res.json({
       status: "success",
-      message: `Broadcast WhatsApp berhasil diproses. ${hasil.totalDikirim} pesan dikirim dari ${hasil.totalPenerima} penerima yang diperiksa.`,
+      message,
       data: {
         penerimaDiperiksa: hasil.totalPenerima,
         pesanDikirim: hasil.totalDikirim,
@@ -380,6 +391,27 @@ router.post("/api/settings/whatsapp/broadcast-now", verifyGlobalAdmin, async (re
       status: "error",
       code: "srv.gagal_mengirim_broadcast_wa",
       message: error?.message || "Gagal memproses broadcast WhatsApp",
+    });
+  }
+});
+
+/**
+ * Item #501: Status realtime pengiriman broadcast untuk panel BroadcastMonitor
+ */
+router.get("/api/settings/broadcast-monitor", verifyGlobalAdmin, async (req, res) => {
+  try {
+    const channel = (req.query.channel as string) || "whatsapp";
+    const data = await getBroadcastMonitorStatus(channel);
+    res.json({
+      status: "success",
+      data,
+    });
+  } catch (error: any) {
+    console.error("[SETTINGS] Gagal memuat status monitor broadcast:", error);
+    res.status(500).json({
+      status: "error",
+      code: "srv.gagal_memuat_monitor_broadcast",
+      message: error?.message || "Gagal memuat monitor broadcast",
     });
   }
 });

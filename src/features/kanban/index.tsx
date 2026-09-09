@@ -275,15 +275,21 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                     {/* Epic Card Content */}
                     <div
                       className={cn(
-                        "bg-surface rounded-lg shadow-2xs border border-border-subtle/80 border-l-4 border-l-purple-600 transition-all duration-200 hover:border-purple-500/30 p-3",
-                        isCompact ? "p-2.5" : "p-3"
+                        "bg-surface rounded-lg shadow-2xs border border-border-subtle/80 border-l-4 border-l-purple-600 transition-all duration-200 hover:border-purple-500/30",
+                        isCompact ? "p-2" : "p-2.5"
                       )}
                     >
-                      <div className="flex items-center gap-2 mb-1.5">
+                      <div className="flex items-center gap-2">
                         <div className="w-5 h-5 rounded bg-primary-surface/10 flex items-center justify-center text-primary shrink-0">
                           <Layers className="w-3 h-3" />
                         </div>
-                        <span className="ml-auto bg-primary-surface/10 text-primary px-1.5 py-0.2 rounded text-[10px] leading-none font-medium border border-purple-500/30">
+                        <h3
+                          className="font-normal text-content-strong text-xs leading-snug truncate flex-1 min-w-0"
+                          title={epic.title}
+                        >
+                          {epic.title}
+                        </h3>
+                        <span className="shrink-0 bg-primary-surface/10 text-primary px-1.5 py-0.2 rounded text-[10px] leading-none font-medium border border-purple-500/30">
                           {boardStatuses.reduce(
                             (acc, status) =>
                               acc + tasksForStatusLane(groupedTasks, epic.id, status).length,
@@ -291,9 +297,6 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                           )}
                         </span>
                       </div>
-                      <h3 className="font-normal text-content-strong text-xs leading-snug line-clamp-2">
-                        {epic.title}
-                      </h3>
                     </div>
                   </div>
 

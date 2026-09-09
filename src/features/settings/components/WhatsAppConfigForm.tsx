@@ -173,7 +173,12 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
     try {
       const res = await sendWhatsAppBroadcastNow();
       if (res.status === "success") {
-        toast.success(res.message || "Broadcast WhatsApp berhasil diproses");
+        if (res.data && res.data.pesanDikirim === 0) {
+          toast.warning(res.message || "0 pesan dikirim karena tidak ada tiket tugas aktif.");
+        } else {
+          toast.success(res.message || "Broadcast WhatsApp berhasil diproses");
+        }
+        window.dispatchEvent(new CustomEvent("broadcast-logs-updated"));
       } else {
         toast.error(res.message || "Gagal memproses broadcast WhatsApp");
       }
