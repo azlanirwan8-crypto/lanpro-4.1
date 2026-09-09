@@ -283,9 +283,6 @@ export const BoardView: React.FC<KanbanBoardProps> = (props) => {
                         <div className="w-5 h-5 rounded bg-primary-surface/10 flex items-center justify-center text-primary shrink-0">
                           <Layers className="w-3 h-3" />
                         </div>
-                        <span className="text-[10px] leading-none font-mono font-medium text-purple-600 bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-500/30">
-                          {epic.key || "EPIC"}
-                        </span>
                         <span className="ml-auto bg-primary-surface/10 text-primary px-1.5 py-0.2 rounded text-[10px] leading-none font-medium border border-purple-500/30">
                           {boardStatuses.reduce(
                             (acc, status) =>

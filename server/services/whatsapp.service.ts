@@ -104,8 +104,9 @@ export async function sendDailyTaskDigest(
       query += " AND (id = ? OR username = ? OR uid = ?)";
       params.push(targetUserId, targetUserId, targetUserId);
     } else if (recipientIds && recipientIds.length > 0) {
-      query += ` AND (id IN (${recipientIds.map(() => "?").join(",")}) OR username IN (${recipientIds.map(() => "?").join(",")}) OR uid IN (${recipientIds.map(() => "?").join(",")}))`;
-      params.push(...recipientIds, ...recipientIds, ...recipientIds);
+      // Pakai IN (?) + array JS agar convertToPostgres → ANY($n) benar untuk Postgres pooler (#500)
+      query += " AND (id IN (?) OR username IN (?) OR uid IN (?))";
+      params.push(recipientIds, recipientIds, recipientIds);
     }
     const [users]: any = await connection.query(query, params);
 

@@ -1,3 +1,12 @@
+jest.mock("pg", () => ({
+  Pool: jest.fn().mockImplementation(() => ({
+    query: jest.fn().mockResolvedValue({ rows: [] }),
+    on: jest.fn(),
+    end: jest.fn().mockResolvedValue(undefined),
+    connect: jest.fn(),
+  })),
+}));
+
 import { formatMessage, formatTaskList, formatTanggal } from "../services/whatsapp.service";
 import { DEFAULT_WHATSAPP_TEMPLATE } from "../services/broadcastConfig.service";
 
