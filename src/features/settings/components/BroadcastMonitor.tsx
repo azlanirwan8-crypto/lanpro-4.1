@@ -87,17 +87,27 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
   };
 
   const replaceMockData = (template: string) => {
-    return (template || "")
-      .replace(/\{\{user_name\}\}/g, "Azlan Irwan")
+    let tpl = template || "";
+    if (
+      tpl.startsWith("[LanPro] Task Assignment\n") &&
+      !tpl.startsWith("[LanPro] Task Assignment\n\n")
+    ) {
+      tpl = tpl.replace("[LanPro] Task Assignment\n", "[LanPro] Task Assignment\n\n");
+    }
+    if (tpl.includes("detail tugas melalui")) {
+      tpl = tpl.replace("detail tugas melalui", "detail tugas anda melalui");
+    }
+    return tpl
+      .replace(/\{\{user_name\}\}/g, "AZLAN IRWAN")
       .replace(/\{\{task_key\}\}/g, "PROJ-102")
-      .replace(/\{\{task_title\}\}/g, "Fix Authentication Flow")
-      .replace(/\{\{status\}\}/g, "IN_PROGRESS")
-      .replace(/\{\{priority\}\}/g, "high")
+      .replace(/\{\{task_title\}\}/g, "Whatsapp")
+      .replace(/\{\{status\}\}/g, "To Do")
+      .replace(/\{\{priority\}\}/g, "Medium")
       .replace(
         /\{\{task_list\}\}/g,
-        "1. Tugas: ( Fix Authentication Flow )\n    Status: ( IN_PROGRESS )\n    Prioritas: ( high )\n    Tanggal Terakhir : ( 10/09/2026 )"
+        "1. Tugas: Whatsapp\n    Status: To Do\n    Prioritas: Medium\n    Tanggal Terakhir : -\n\n2. Tugas: tes lagi\n    Status: To Do\n    Prioritas: Medium\n    Tanggal Terakhir : -"
       )
-      .replace(/\{\{app_url\}\}/g, "http://localhost:3000")
+      .replace(/\{\{app_url\}\}/g, "https://lanpro.my.id")
       .replace(/\{\{project_name\}\}/g, "LanPro Development");
   };
 

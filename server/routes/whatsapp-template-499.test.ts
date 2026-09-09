@@ -24,22 +24,22 @@ describe("Item #499 - WhatsApp Gateway Template & Configuration Tests", () => {
 
       const listText = formatTaskList(tasks);
       expect(listText).toBe(
-        "1. Tugas: ( Fix Authentication Flow )\n" +
-          "    Status: ( IN_PROGRESS )\n" +
-          "    Prioritas: ( high )\n" +
-          "    Tanggal Terakhir : ( 10/09/2026 )"
+        "1. Tugas: Fix Authentication Flow\n" +
+          "    Status: In Progress\n" +
+          "    Prioritas: High\n" +
+          "    Tanggal Terakhir : 10/09/2026"
       );
 
       const message = formatMessage("Azlan Irwan", tasks, null, "http://localhost:3000");
-      expect(message).toContain("[LanPro] Task Assignment");
+      expect(message).toContain("[LanPro] Task Assignment\n\n");
       expect(message).toContain("Halo Azlan Irwan,");
       expect(message).toContain("Kamu telah ditugaskan untuk tiket berikut:");
-      expect(message).toContain("1. Tugas: ( Fix Authentication Flow )");
-      expect(message).toContain("    Status: ( IN_PROGRESS )");
-      expect(message).toContain("    Prioritas: ( high )");
-      expect(message).toContain("    Tanggal Terakhir : ( 10/09/2026 )");
+      expect(message).toContain("1. Tugas: Fix Authentication Flow");
+      expect(message).toContain("    Status: In Progress");
+      expect(message).toContain("    Prioritas: High");
+      expect(message).toContain("    Tanggal Terakhir : 10/09/2026");
       expect(message).toContain(
-        "Silakan cek detail tugas melalui tautan berikut:\nhttp://localhost:3000"
+        "Silakan cek detail tugas anda melalui tautan berikut:\nhttp://localhost:3000"
       );
       expect(message).toContain("Terima kasih.");
     });
@@ -61,11 +61,11 @@ describe("Item #499 - WhatsApp Gateway Template & Configuration Tests", () => {
       ];
 
       const message = formatMessage("Azlan Irwan", tasks, null, "http://localhost:3000");
-      expect(message).toContain("1. Tugas: ( Fix Authentication Flow )");
-      expect(message).toContain("2. Tugas: ( Refactor Notification Worker )");
-      expect(message).toContain("    Status: ( To Do )");
-      expect(message).toContain("    Prioritas: ( medium )");
-      expect(message).toContain("    Tanggal Terakhir : ( - )");
+      expect(message).toContain("1. Tugas: Fix Authentication Flow");
+      expect(message).toContain("2. Tugas: Refactor Notification Worker");
+      expect(message).toContain("    Status: To Do");
+      expect(message).toContain("    Prioritas: Medium");
+      expect(message).toContain("    Tanggal Terakhir : -");
     });
 
     it("mengganti placeholder {{task_list}} dan {{app_url}} saat custom template digunakan", () => {
@@ -82,7 +82,7 @@ describe("Item #499 - WhatsApp Gateway Template & Configuration Tests", () => {
         "Halo {{user_name}},\nAda tugas mendesak:\n{{task_list}}\nBuka segera di {{app_url}}!";
       const message = formatMessage("Budi", tasks, customTemplate, "https://lanpro.app");
       expect(message).toBe(
-        "Halo Budi,\nAda tugas mendesak:\n1. Tugas: ( Bug Hotfix )\n    Status: ( Testing )\n    Prioritas: ( urgent )\n    Tanggal Terakhir : ( 15/09/2026 )\nBuka segera di https://lanpro.app!"
+        "Halo Budi,\nAda tugas mendesak:\n1. Tugas: Bug Hotfix\n    Status: Testing\n    Prioritas: Urgent\n    Tanggal Terakhir : 15/09/2026\nBuka segera di https://lanpro.app!"
       );
     });
 

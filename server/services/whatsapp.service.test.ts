@@ -106,11 +106,11 @@ describe("whatsapp.service", () => {
       expect(pesan).toContain("[LanPro] Task Assignment");
       expect(pesan).toContain("Halo Azlan Irwan,");
       expect(pesan).toContain("Kamu telah ditugaskan untuk tiket berikut:");
-      expect(pesan).toContain("1. Tugas: ( Fix Authentication Flow )");
-      expect(pesan).toContain("    Status: ( IN_PROGRESS )");
-      expect(pesan).toContain("    Prioritas: ( high )");
-      expect(pesan).toContain("    Tanggal Terakhir : ( 10/09/2026 )");
-      expect(pesan).toContain("Silakan cek detail tugas melalui tautan berikut:");
+      expect(pesan).toContain("1. Tugas: Fix Authentication Flow");
+      expect(pesan).toContain("    Status: In Progress");
+      expect(pesan).toContain("    Prioritas: High");
+      expect(pesan).toContain("    Tanggal Terakhir : 10/09/2026");
+      expect(pesan).toContain("Silakan cek detail tugas anda melalui tautan berikut:");
       expect(pesan).toContain("Terima kasih.");
       expect(pesan).not.toContain("null");
     });
@@ -134,7 +134,7 @@ describe("whatsapp.service", () => {
         "https://app.lanpro.id"
       );
       expect(pesan).toContain("Pemberitahuan Tugas untuk Azlan:");
-      expect(pesan).toContain("1. Tugas: ( Task 1 )");
+      expect(pesan).toContain("1. Tugas: Task 1");
       expect(pesan).toContain("Buka di: https://app.lanpro.id");
     });
 

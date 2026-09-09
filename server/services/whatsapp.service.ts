@@ -216,33 +216,73 @@ function isTemplateLegacy(template: string): boolean {
   return TEMPLATE_LAMA_DIKENALI.some((penanda) => lower.includes(penanda));
 }
 
+function formatStatus(status?: string | null): string {
+  if (!status || status === "-") return "-";
+  const s = String(status).trim();
+  const map: Record<string, string> = {
+    TODO: "To Do",
+    todo: "To Do",
+    to_do: "To Do",
+    IN_PROGRESS: "In Progress",
+    in_progress: "In Progress",
+    DONE: "Done",
+    done: "Done",
+    BLOCKED: "Blocked",
+    blocked: "Blocked",
+    IN_REVIEW: "In Review",
+    in_review: "In Review",
+    REVIEW: "Review",
+    review: "Review",
+  };
+  if (map[s]) return map[s];
+  return s.replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatPriority(priority?: string | null): string {
+  if (!priority || priority === "-") return "-";
+  const p = String(priority).trim().toLowerCase();
+  const map: Record<string, string> = {
+    urgent: "Urgent",
+    high: "High",
+    medium: "Medium",
+    low: "Low",
+    none: "None",
+  };
+  return map[p] || p.charAt(0).toUpperCase() + p.slice(1);
+}
+
 /**
- * Format daftar tiket bernomor untuk WhatsApp (Item #499).
+ * Format daftar tiket bernomor untuk WhatsApp (Item #499, diperbarui #502).
  * Contoh:
- * 1. Tugas: ( Fix Authentication Flow )
- *     Status: ( IN_PROGRESS )
- *     Prioritas: ( high )
- *     Tanggal Terakhir : ( 10/09/2026 )
+ * 1. Tugas: Whatsapp
+ *     Status: To Do
+ *     Prioritas: Medium
+ *     Tanggal Terakhir : -
+ *
+ * 2. Tugas: tes lagi
+ *     Status: To Do
+ *     Prioritas: Medium
+ *     Tanggal Terakhir : -
  */
 export function formatTaskList(tasks: any[]): string {
   return tasks
     .map((t, idx) => {
       const title = t.title || "Tanpa Judul";
-      const status = t.status || "-";
-      const priority = t.priority || "-";
+      const status = formatStatus(t.status);
+      const priority = formatPriority(t.priority);
       const tanggal = formatTanggal(t.dueDate);
       return (
-        `${idx + 1}. Tugas: ( ${title} )\n` +
-        `    Status: ( ${status} )\n` +
-        `    Prioritas: ( ${priority} )\n` +
-        `    Tanggal Terakhir : ( ${tanggal} )`
+        `${idx + 1}. Tugas: ${title}\n` +
+        `    Status: ${status}\n` +
+        `    Prioritas: ${priority}\n` +
+        `    Tanggal Terakhir : ${tanggal}`
       );
     })
-    .join("\n");
+    .join("\n\n");
 }
 
 /**
- * Menyusun isi pesan WhatsApp Task Assignment (Item #499).
+ * Menyusun isi pesan WhatsApp Task Assignment (Item #499, diperbarui #502).
  * Mendukung kustomisasi template melalui BroadcastConfig.
  * Placeholder yang didukung: {{user_name}}, {{task_list}}, {{app_url}}, {{project_name}}.
  */
@@ -268,7 +308,17 @@ export function formatMessage(
 
   // Jika template kustom mengandung {{task_list}}
   if (templateBersih && templateBersih.includes("{{task_list}}")) {
-    return templateBersih
+    let tpl = templateBersih;
+    if (
+      tpl.startsWith("[LanPro] Task Assignment\n") &&
+      !tpl.startsWith("[LanPro] Task Assignment\n\n")
+    ) {
+      tpl = tpl.replace("[LanPro] Task Assignment\n", "[LanPro] Task Assignment\n\n");
+    }
+    if (tpl.includes("detail tugas melalui")) {
+      tpl = tpl.replace("detail tugas melalui", "detail tugas anda melalui");
+    }
+    return tpl
       .replace(/\{\{user_name\}\}/g, name)
       .replace(/\{\{task_list\}\}/g, taskListText)
       .replace(/\{\{app_url\}\}/g, appUrl)
@@ -286,11 +336,11 @@ export function formatMessage(
         .trim()
     : `Halo ${name},`;
 
-  let msg = `[LanPro] Task Assignment\n`;
+  let msg = `[LanPro] Task Assignment\n\n`;
   msg += `${greeting}\n`;
   msg += `Kamu telah ditugaskan untuk tiket berikut:\n`;
   msg += `${taskListText}\n\n`;
-  msg += `Silakan cek detail tugas melalui tautan berikut:\n`;
+  msg += `Silakan cek detail tugas anda melalui tautan berikut:\n`;
   msg += `${appUrl}\n\n`;
   msg += `Terima kasih.`;
   return msg;
