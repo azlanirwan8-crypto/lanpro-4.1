@@ -3775,6 +3775,13 @@ function AppContainer() {
 
       setNewCommentText("");
       fetchComments();
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === selectedTaskForDetail.id
+            ? { ...t, commentsCount: (t.commentsCount || 0) + 1 }
+            : t
+        )
+      );
     } catch (e) {
       console.error("Failed to add comment", e);
     }

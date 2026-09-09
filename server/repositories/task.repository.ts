@@ -150,6 +150,18 @@ export class TaskRepository {
         if (u.uid) usersMap.set(u.uid, uObj);
       });
 
+      const [commentCountRows]: any = await connection.query(
+        "SELECT taskId, COUNT(*)::int AS count FROM Comments WHERE taskId IN (SELECT id FROM Tasks WHERE projectId = ?) GROUP BY taskId",
+        [projectId]
+      );
+      const commentsCountMap = new Map<string, number>();
+      (commentCountRows || []).forEach((row: any) => {
+        const tId = row.taskId || row.taskid;
+        if (tId) {
+          commentsCountMap.set(tId, Number(row.count || 0));
+        }
+      });
+
       return filteredTasks.map((t: any) => {
         const reporterUser = t.reporterId ? usersMap.get(t.reporterId) : null;
         return {
@@ -159,6 +171,7 @@ export class TaskRepository {
           linkedTasks: linksMap.get(t.id) || [],
           subtasks: subtasksMap.get(t.id) || [],
           attachments: attachmentsMap.get(t.id) || [],
+          commentsCount: commentsCountMap.get(t.id) || 0,
         };
       });
     } finally {

@@ -39,6 +39,7 @@ export interface Task {
   externalLinks?: { id: string; title: string; url: string; createdAt: any }[];
   attachments?: Attachment[];
   linkedTasks?: LinkedTask[];
+  commentsCount?: number;
   status: string;
   type: "epic" | "task" | "subtask" | "bug" | "meeting" | "document" | "approval";
   parentId?: string; // ID of the parent task/epic (Epic Link)

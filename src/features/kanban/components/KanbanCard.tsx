@@ -7,7 +7,14 @@ import { UserAvatar } from "../../../components/ui/UserAvatar";
 import { RenderIcon } from "../../../components/RenderIcon";
 import { useAppStore } from "../../../store/useAppStore";
 import { statusSelesai } from "../../../lib/statusSelesai";
-import { AlertTriangle, ChevronDown, ChevronUp, CheckSquare, Square } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  CheckSquare,
+  Square,
+  MessageSquare,
+} from "lucide-react";
 
 interface KanbanCardProps {
   task: any;
@@ -261,12 +268,23 @@ export const KanbanCard = React.memo<KanbanCardProps>(
               </span>
             )}
           </div>
-          <div className="flex items-center group-hover:scale-105 transition-transform duration-300">
-            <UserAvatar
-              uid={task.assigneeId || ""}
-              members={pArr}
-              className={cn("ring-2 ring-surface shadow-soft", isCompact ? "w-5 h-5" : "w-6 h-6")}
-            />
+          <div className="flex items-center gap-1.5 shrink-0">
+            {Number(task.commentsCount || 0) > 0 && (
+              <div
+                className="flex items-center gap-1 text-content-muted hover:text-content text-[10px] font-normal transition-colors select-none"
+                title={`${task.commentsCount} ${t("comments.tabComments", "Komentar")}`}
+              >
+                <MessageSquare className={cn(isCompact ? "w-2.5 h-2.5" : "w-3 h-3")} />
+                <span>{task.commentsCount}</span>
+              </div>
+            )}
+            <div className="flex items-center group-hover:scale-105 transition-transform duration-300">
+              <UserAvatar
+                uid={task.assigneeId || ""}
+                members={pArr}
+                className={cn("ring-2 ring-surface shadow-soft", isCompact ? "w-5 h-5" : "w-6 h-6")}
+              />
+            </div>
           </div>
         </div>
 
