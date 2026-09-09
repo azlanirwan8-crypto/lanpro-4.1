@@ -741,6 +741,7 @@ export const en = {
     attachmentsDisabled: "File attachments are disabled for MySQL backend.",
     taskUnblocked: "Task {{key}} is now unblocked by completion of {{selesai}}",
     noPermEditTask: "Failed: You do not have permission to edit this task.",
+    noPermDeleteTask: "Failed: You do not have permission to delete this task.",
     noPermAddDoc: "Failed: You do not have permission to create documents in this project.",
     noPermEditDoc: "Failed: You do not have permission to edit this document.",
     relationNeedTask: "Failed to add relation, make sure a task is selected.",

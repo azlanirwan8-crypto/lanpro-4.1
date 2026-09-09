@@ -907,19 +907,6 @@ export const TimelinePanel: React.FC<TimelineProps> = ({
                           {task.title}
                         </span>
                         <div className="flex items-center gap-1 mt-0.5">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedTaskForDetail(task);
-                              setIsTaskDetailModalOpen(true);
-                            }}
-                            className="text-[9px] leading-none font-normal text-primary bg-primary/10 hover:bg-primary/15 border border-primary/30 rounded px-1 py-0.5 tracking-tight text-left uppercase transition-colors shrink-0"
-                          >
-                            {task.key}
-                          </button>
-                          <span className="text-[9px] text-content-subtle font-bold px-0.5 shrink-0">
-                            •
-                          </span>
                           <span
                             className={cn(
                               "text-[10px] font-normal uppercase tracking-tight shrink-0",

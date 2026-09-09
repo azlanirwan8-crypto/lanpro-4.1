@@ -3624,7 +3624,7 @@ function AppContainer() {
       currentUserProfile?.permissions
     );
     if (!isSystemAdmin && !mayDeleteByChecklist) {
-      toast.error(t("toast.taskDeleteFailed") + t("serverErr.srv.role_anda_tidak_memiliki"));
+      toast.error(t("toast.noPermDeleteTask"));
       return;
     }
 

@@ -137,9 +137,6 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
           <Activity className="w-3.5 h-3.5 text-primary" />
           {t("issueDetail.issueAttributes")}
         </h4>
-        <span className="text-[10px] font-normal text-content-muted bg-surface-strong/60 px-2 py-0.5 rounded">
-          {task.key || "ATTR"}
-        </span>
       </div>
 
       {/* Main Lifecycle Status Select */}

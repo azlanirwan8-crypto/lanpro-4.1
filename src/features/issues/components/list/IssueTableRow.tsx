@@ -338,15 +338,6 @@ export const IssueTableRow: React.FC<IssueTableRowProps> = (props) => {
                       )}
                     </div>
 
-                    {task.type !== "epic" && (
-                      <span
-                        className="text-[10px] font-normal text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded select-all shrink-0 uppercase tracking-tighter ml-1"
-                        title={task.key}
-                      >
-                        {task.key}
-                      </span>
-                    )}
-
                     {!!task.isBlocked && (
                       <ShieldAlert className="w-3.5 h-3.5 text-red-500 shrink-0 animate-pulse" />
                     )}

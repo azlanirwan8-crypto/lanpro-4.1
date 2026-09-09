@@ -122,9 +122,6 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
                 <div className="flex flex-col gap-1.5">
                   <div className="flex justify-between items-center">
                     <div className="flex gap-2 items-center">
-                      <span className="text-[10px] leading-none tracking-tight font-mono font-semibold text-primary bg-primary/10 px-1.5 py-[3px] rounded border border-primary/30">
-                        {task.key}
-                      </span>
                       {task.priority && (
                         <span
                           className={cn(
@@ -183,9 +180,6 @@ export const PlanningView: React.FC<PlanningViewProps> = (props) => {
               ) : (
                 <div className="flex items-center gap-3 w-full">
                   <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                    <span className="text-[10px] leading-none tracking-tight font-mono font-semibold text-primary bg-primary/10 px-1.5 py-[3px] rounded border border-primary/30 shrink-0">
-                      {task.key}
-                    </span>
                     <h4 className="text-xs font-medium text-content-strong truncate">
                       {task.title}
                     </h4>

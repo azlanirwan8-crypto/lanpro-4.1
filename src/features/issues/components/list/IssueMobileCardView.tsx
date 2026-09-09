@@ -116,9 +116,7 @@ export const IssueMobileCardView: React.FC<IssueMobileCardViewProps> = ({
                     <CircleDot className="w-4 h-4 text-primary" />
                   )}
                 </div>
-                <span className="text-xs font-semibold text-content-body tracking-wider shrink-0">
-                  {task.key || `#${task.id.slice(0, 5)}`}
-                </span>
+
                 {sprint && (
                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-sunken text-content-muted border border-border-subtle truncate max-w-[90px]">
                     {sprint.name}
