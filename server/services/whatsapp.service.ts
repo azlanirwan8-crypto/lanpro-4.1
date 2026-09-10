@@ -166,12 +166,12 @@ export async function sendDailyTaskDigest(
 
       const [tasks]: any = await connection.query(
         `
-        SELECT t.id, t.title, t.dueDate, t.status, t.priority, p.name as "projectName"
+        SELECT t.id, t.title, t."endDate", t."dueDate", t.status, t.priority, p.name as "projectName"
         FROM Tasks t
         LEFT JOIN Projects p ON t."projectId" = p.id
         WHERE (t.assigneeId = ? OR t.assigneeId = ? OR t.assigneeId = ?)
         AND t.status IN ('To Do', 'In Progress', 'Testing')
-        ORDER BY p.name, t.dueDate
+        ORDER BY p.name, COALESCE(t."endDate", t."dueDate")
       `,
         [uId, uUid, uUsername]
       );
@@ -254,7 +254,6 @@ export function formatTanggal(dueDate: any): string {
 const TEMPLATE_LAMA_DIKENALI = [
   "you have been assigned to task",
   "please check the dashboard for details",
-  "kamu telah ditugaskan untuk tiket berikut",
 ];
 
 function isTemplateLegacy(template: string): boolean {
@@ -321,12 +320,12 @@ export function formatTaskList(tasks: any[]): string {
       const title = (t.title || "Tanpa Judul").toUpperCase();
       const status = formatStatus(t.status);
       const priority = formatPriority(t.priority);
-      const tanggal = formatTanggal(t.dueDate);
+      const tanggal = formatTanggal(t.endDate || t.dueDate);
       return (
         `[${idx + 1}] ${title}\n` +
-        `    Status    : ${status}\n` +
-        `    Prioritas : ${priority}\n` +
-        `    Tenggat   : ${tanggal}`
+        `    Status           : ${status}\n` +
+        `    Prioritas        : ${priority}\n` +
+        `    Tanggal Terakhir : ${tanggal}`
       );
     })
     .join("\n\n");

@@ -100,13 +100,13 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
     const mockTaskList =
       "```\n" +
       "[1] WHATSAPP\n" +
-      "    Status    : To Do\n" +
-      "    Prioritas : Medium\n" +
-      "    Tenggat   : -\n\n" +
+      "    Status           : To Do\n" +
+      "    Prioritas        : Medium\n" +
+      "    Tanggal Terakhir : -\n\n" +
       "[2] TES LAGI\n" +
-      "    Status    : To Do\n" +
-      "    Prioritas : Medium\n" +
-      "    Tenggat   : -\n" +
+      "    Status           : To Do\n" +
+      "    Prioritas        : Medium\n" +
+      "    Tanggal Terakhir : -\n" +
       "```";
     return tpl
       .replace(/\{\{user_name\}\}/g, "AZLAN IRWAN")

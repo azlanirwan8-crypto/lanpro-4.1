@@ -40,13 +40,13 @@ describe("Item #502 - Format Kustom Template WhatsApp Task Assignment", () => {
       "Berikut tiket tugas aktif yang ditugaskan kepada Anda:\n\n" +
       "```\n" +
       "[1] WHATSAPP\n" +
-      "    Status    : To Do\n" +
-      "    Prioritas : Medium\n" +
-      "    Tenggat   : -\n\n" +
+      "    Status           : To Do\n" +
+      "    Prioritas        : Medium\n" +
+      "    Tanggal Terakhir : -\n\n" +
       "[2] TES LAGI\n" +
-      "    Status    : To Do\n" +
-      "    Prioritas : Medium\n" +
-      "    Tenggat   : -\n" +
+      "    Status           : To Do\n" +
+      "    Prioritas        : Medium\n" +
+      "    Tanggal Terakhir : -\n" +
       "```\n\n" +
       "🔗 *Akses Detail Tugas:*\n" +
       "https://lanpro.my.id\n\n" +
@@ -74,10 +74,10 @@ describe("Item #502 - Format Kustom Template WhatsApp Task Assignment", () => {
 
     const list = formatTaskList(tasks);
     expect(list).toContain(
-      "[1] TUGAS 1\n    Status    : In Progress\n    Prioritas : High\n    Tenggat   : 12/09/2026"
+      "[1] TUGAS 1\n    Status           : In Progress\n    Prioritas        : High\n    Tanggal Terakhir : 12/09/2026"
     );
     expect(list).toContain(
-      "\n\n[2] TUGAS 2\n    Status    : Done\n    Prioritas : Low\n    Tenggat   : -"
+      "\n\n[2] TUGAS 2\n    Status           : Done\n    Prioritas        : Low\n    Tanggal Terakhir : -"
     );
   });
 });

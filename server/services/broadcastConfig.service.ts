@@ -37,8 +37,7 @@ function toRow(data: any): BroadcastConfigData {
     data.channel === "whatsapp" &&
     template &&
     (!template.includes("{{task_list}}") ||
-      template.toLowerCase().includes("you have been assigned") ||
-      template.includes("Kamu telah ditugaskan untuk tiket berikut"))
+      template.toLowerCase().includes("you have been assigned"))
   ) {
     template = DEFAULT_WHATSAPP_TEMPLATE;
   }

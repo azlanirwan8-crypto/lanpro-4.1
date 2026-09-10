@@ -45,13 +45,14 @@ export const SettingsPage: React.FC = () => {
     deviceId: "",
     senderNumber: "",
     messageTemplate:
-      "[LanPro] Task Assignment\n" +
-      "Halo {{user_name}},\n" +
-      "Kamu telah ditugaskan untuk tiket berikut:\n" +
+      "*[LanPro] Task Assignment*\n\n" +
+      "Halo *{{user_name}}*,\n" +
+      "Berikut tiket tugas aktif yang ditugaskan kepada Anda:\n\n" +
       "{{task_list}}\n\n" +
-      "Silakan cek detail tugas melalui tautan berikut:\n" +
+      "🔗 *Akses Detail Tugas:*\n" +
       "{{app_url}}\n\n" +
-      "Terima kasih.",
+      "─────────────────\n" +
+      "_Pesan otomatis • LanPro Project Management_",
     scheduleDays: ["1", "2", "3", "4", "5", "6", "7"],
     scheduleTime: "07:00",
     recipientIds: [] as string[],

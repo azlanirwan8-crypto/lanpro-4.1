@@ -108,9 +108,9 @@ describe("whatsapp.service", () => {
       expect(pesan).toContain("Berikut tiket tugas aktif yang ditugaskan kepada Anda:");
       expect(pesan).toContain("```");
       expect(pesan).toContain("[1] FIX AUTHENTICATION FLOW");
-      expect(pesan).toContain("    Status    : In Progress");
-      expect(pesan).toContain("    Prioritas : High");
-      expect(pesan).toContain("    Tenggat   : 10/09/2026");
+      expect(pesan).toContain("    Status           : In Progress");
+      expect(pesan).toContain("    Prioritas        : High");
+      expect(pesan).toContain("    Tanggal Terakhir : 10/09/2026");
       expect(pesan).toContain("🔗 *Akses Detail Tugas:*");
       expect(pesan).toContain("_Pesan otomatis • LanPro Project Management_");
       expect(pesan).not.toContain("null");
@@ -136,7 +136,7 @@ describe("whatsapp.service", () => {
       );
       expect(pesan).toContain("Pemberitahuan Tugas untuk Azlan:");
       expect(pesan).toContain("[1] TASK 1");
-      expect(pesan).toContain("    Status    : To Do");
+      expect(pesan).toContain("    Status           : To Do");
       expect(pesan).toContain("Buka di: https://app.lanpro.id");
     });
 

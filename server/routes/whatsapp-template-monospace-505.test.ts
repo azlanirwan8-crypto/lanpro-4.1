@@ -32,17 +32,17 @@ describe("WhatsApp Template Monospace Ticket (Item #505)", () => {
     expect(list.endsWith("\n```")).toBe(true);
   });
 
-  it("formatTaskList meratakan kolom titik dua (:) pada Status, Prioritas, dan Tenggat", () => {
+  it("formatTaskList meratakan kolom titik dua (:) pada Status, Prioritas, dan Tanggal Terakhir", () => {
     const list = formatTaskList(sampleTasks);
     expect(list).toContain("[1] FIX AUTHENTICATION FLOW");
-    expect(list).toContain("    Status    : In Progress");
-    expect(list).toContain("    Prioritas : High");
-    expect(list).toContain("    Tenggat   : 10/09/2026");
+    expect(list).toContain("    Status           : In Progress");
+    expect(list).toContain("    Prioritas        : High");
+    expect(list).toContain("    Tanggal Terakhir : 10/09/2026");
 
     expect(list).toContain("[2] UJI COBA BROADCAST");
-    expect(list).toContain("    Status    : To Do");
-    expect(list).toContain("    Prioritas : Medium");
-    expect(list).toContain("    Tenggat   : -");
+    expect(list).toContain("    Status           : To Do");
+    expect(list).toContain("    Prioritas        : Medium");
+    expect(list).toContain("    Tanggal Terakhir : -");
   });
 
   it("formatMessage menyusun pesan lengkap dengan header, list monospace, app url, dan footer resmi", () => {
