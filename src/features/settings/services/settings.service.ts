@@ -155,13 +155,14 @@ export async function testWhatsAppConnection(
   });
 }
 
-/** Mengirim broadcast task WhatsApp SEKARANG, di luar jadwal (Item #498). */
-export async function sendWhatsAppBroadcastNow(): Promise<
-  SettingsApiResponse<{ penerimaDiperiksa: number; pesanDikirim: number }>
-> {
+/** Mengirim broadcast task WhatsApp SEKARANG, di luar jadwal (Item #498, #506). */
+export async function sendWhatsAppBroadcastNow(payload?: {
+  recipientIds?: string[];
+}): Promise<SettingsApiResponse<{ penerimaDiperiksa: number; pesanDikirim: number }>> {
   return apiRequest("/api/settings/whatsapp/broadcast-now", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    body: payload ? JSON.stringify(payload) : undefined,
   });
 }
 

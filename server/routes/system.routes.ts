@@ -366,16 +366,36 @@ router.post("/api/settings/whatsapp/test", verifyGlobalAdmin, async (req, res) =
 router.post("/api/settings/whatsapp/broadcast-now", verifyGlobalAdmin, async (req, res) => {
   try {
     const config = await getBroadcastConfig("whatsapp");
-    const hasil = await sendDailyTaskDigest(undefined, config.recipientIds, config.messageTemplate);
+    let targetRecipientIds = config.recipientIds;
+
+    // Item #506: Sinkronkan recipientIds terbaru dari form UI jika dikirim eksplisit
+    if (Array.isArray(req.body?.recipientIds)) {
+      targetRecipientIds = req.body.recipientIds;
+      await saveBroadcastConfig("whatsapp", {
+        scheduleDays: config.scheduleDays,
+        scheduleTime: config.scheduleTime,
+        recipientIds: targetRecipientIds,
+        messageTemplate: config.messageTemplate || "",
+      });
+    }
+
+    const hasil = await sendDailyTaskDigest(undefined, targetRecipientIds, config.messageTemplate);
 
     let message = "";
     let isError = false;
 
     if (hasil.totalGagal > 0 && hasil.totalDikirim === 0) {
-      // Seluruh pengiriman gagal (misal token kosong atau Fonnte error)
+      // Seluruh pengiriman gagal (misal token kosong, Fonnte error, atau no WA kosong)
       const firstReason = hasil.kegagalan?.[0]?.reason || "Gagal menghubungi gateway WhatsApp";
-      message = `Gagal mengirim broadcast WhatsApp: ${firstReason}`;
-      isError = true;
+      const isMissingPhoneOnly = hasil.kegagalan?.every(
+        (k) => k.reason === "Nomor WhatsApp belum terdaftar di profil pengguna"
+      );
+      if (isMissingPhoneOnly) {
+        message = `Broadcast selesai: ${hasil.totalGagal} penerima belum memiliki nomor WhatsApp terdaftar di profil.`;
+      } else {
+        message = `Gagal mengirim broadcast WhatsApp: ${firstReason}`;
+        isError = true;
+      }
     } else if (hasil.totalGagal > 0 && hasil.totalDikirim > 0) {
       // Sebagian terkirim, sebagian gagal
       message = `Broadcast WhatsApp sebagian berhasil: ${hasil.totalDikirim} terkirim, ${hasil.totalGagal} gagal (${hasil.kegagalan?.[0]?.reason || ""}).`;

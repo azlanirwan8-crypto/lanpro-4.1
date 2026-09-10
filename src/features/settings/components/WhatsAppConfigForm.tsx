@@ -25,6 +25,7 @@ interface RecipientUser {
   id: string;
   username: string;
   name: string;
+  phone?: string;
 }
 
 const DAY_OPTIONS: { value: string; labelKey: string }[] = [
@@ -67,6 +68,7 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
               id: String(u.id),
               username: String(u.username || ""),
               name: u.displayName || u.username || `User ${u.id}`,
+              phone: u.phone ? String(u.phone).trim() : "",
             }))
           );
         }
@@ -171,7 +173,12 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
   const handleBroadcastNow = async () => {
     setIsBroadcasting(true);
     try {
-      const res = await sendWhatsAppBroadcastNow();
+      const cleanRecipientIds = recipientUsers
+        .filter((u) => isUserSelected(u, recipientIds))
+        .map((u) => u.id);
+
+      const targetIds = sendToAll ? [] : cleanRecipientIds;
+      const res = await sendWhatsAppBroadcastNow({ recipientIds: targetIds });
       if (res.status === "success") {
         if (res.data && res.data.pesanDikirim === 0) {
           toast.warning(res.message || "0 pesan dikirim karena tidak ada tiket tugas aktif.");
@@ -389,15 +396,26 @@ export const WhatsAppConfigForm: React.FC<WhatsAppConfigFormProps> = ({
                 filteredUsers.map((user) => (
                   <label
                     key={user.id}
-                    className="flex items-center gap-2 text-xs text-content-body px-1.5 py-1 rounded hover:bg-surface-muted cursor-pointer"
+                    className="flex items-center justify-between gap-2 text-xs text-content-body px-1.5 py-1 rounded hover:bg-surface-muted cursor-pointer"
                   >
-                    <input
-                      type="checkbox"
-                      checked={isUserSelected(user, recipientIds)}
-                      onChange={() => toggleRecipient(user)}
-                      className="cursor-pointer"
-                    />
-                    {user.name}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={isUserSelected(user, recipientIds)}
+                        onChange={() => toggleRecipient(user)}
+                        className="cursor-pointer shrink-0"
+                      />
+                      <span className="truncate">{user.name}</span>
+                    </div>
+                    {user.phone ? (
+                      <span className="text-2xs text-content-subtle font-mono shrink-0">
+                        {user.phone}
+                      </span>
+                    ) : (
+                      <span className="text-2xs font-medium text-danger bg-danger/10 px-1.5 py-0.5 rounded shrink-0">
+                        No WA Kosong
+                      </span>
+                    )}
                   </label>
                 ))
               )}

@@ -130,13 +130,21 @@ export const BroadcastMonitor: React.FC<BroadcastMonitorProps> = ({
             Berhasil
           </span>
         );
-      case "failed":
+      case "failed": {
+        const isNoPhone = Boolean(item.details?.includes("Nomor WhatsApp belum terdaftar"));
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[11px] font-medium bg-danger/10 text-danger-text">
-            <AlertCircle size={12} className="text-rose-500" />
-            Gagal
+          <span
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs sm:text-[11px] font-medium bg-danger/10 text-danger-text"
+            title={
+              item.details ||
+              (isNoPhone ? "Nomor WhatsApp belum terdaftar di profil pengguna" : "Gagal")
+            }
+          >
+            <AlertCircle size={12} className="text-danger" />
+            {isNoPhone ? "No WA Kosong" : "Gagal"}
           </span>
         );
+      }
       case "skipped_no_tasks":
         return (
           <span

@@ -72,10 +72,10 @@ export async function getBroadcastMonitorStatus(channel: string = "whatsapp"): P
       .map((s: string) => s.trim())
       .filter(Boolean);
 
-    // 2. Ambil user aktif (jika recipientIds ditentukan, filter user tersebut)
+    // 2. Ambil user aktif (jika recipientIds ditentukan, sertakan seluruh user pilihan)
     let userQuery = 'SELECT id, uid, username, "displayName", phone, email FROM "Users" WHERE 1=1';
     const userParams: any[] = [];
-    if (channel === "whatsapp") {
+    if (channel === "whatsapp" && recipientIdsList.length === 0) {
       userQuery += " AND phone IS NOT NULL";
     }
     if (recipientIdsList.length > 0) {
@@ -115,11 +115,25 @@ export async function getBroadcastMonitorStatus(channel: string = "whatsapp"): P
         if (latestLog.status === "success") {
           totalSentToday++;
         }
-        // Format jam WIB
-        const logDate = new Date(latestLog.createdAt);
-        const hours = String(logDate.getHours()).padStart(2, "0");
-        const minutes = String(logDate.getMinutes()).padStart(2, "0");
-        const timeFormatted = `${hours}:${minutes} WIB`;
+        // Format jam WIB presisi (Asia/Jakarta UTC+7)
+        let timeFormatted = "-";
+        try {
+          const logDate = new Date(latestLog.createdAt);
+          if (!isNaN(logDate.getTime())) {
+            const formatter = new Intl.DateTimeFormat("en-GB", {
+              timeZone: "Asia/Jakarta",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            });
+            timeFormatted = `${formatter.format(logDate)} WIB`;
+          }
+        } catch {
+          const logDate = new Date(latestLog.createdAt);
+          const hours = String(logDate.getHours()).padStart(2, "0");
+          const minutes = String(logDate.getMinutes()).padStart(2, "0");
+          timeFormatted = `${hours}:${minutes} WIB`;
+        }
 
         return {
           id: `log-${latestLog.id || idx}`,
@@ -134,7 +148,21 @@ export async function getBroadcastMonitorStatus(channel: string = "whatsapp"): P
         };
       }
 
-      // Belum ada pengiriman hari ini
+      // Belum ada log pengiriman hari ini
+      if (channel === "whatsapp" && (!u.phone || !String(u.phone).trim())) {
+        return {
+          id: `user-${uId}`,
+          userId: uId,
+          name,
+          target: "-",
+          channel: channel as "whatsapp" | "email",
+          time: "-",
+          status: "failed" as const,
+          taskCount: 0,
+          details: "Nomor WhatsApp belum terdaftar di profil pengguna",
+        };
+      }
+
       return {
         id: `user-${uId}`,
         userId: uId,

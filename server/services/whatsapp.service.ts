@@ -114,8 +114,7 @@ export async function sendDailyTaskDigest(
 ): Promise<WhatsAppDigestResult> {
   const connection = await dbPool.getConnection();
   try {
-    let query =
-      'SELECT id, uid, username, "displayName", phone FROM "Users" WHERE phone IS NOT NULL';
+    let query = 'SELECT id, uid, username, "displayName", phone FROM "Users" WHERE 1=1';
     const params: any[] = [];
     if (targetUserId) {
       query += " AND (id = ? OR username = ? OR uid = ?)";
@@ -124,6 +123,8 @@ export async function sendDailyTaskDigest(
       // Pakai IN (?) + array JS agar convertToPostgres → ANY($n) benar untuk Postgres pooler (#500)
       query += " AND (id IN (?) OR username IN (?) OR uid IN (?))";
       params.push(recipientIds, recipientIds, recipientIds);
+    } else {
+      query += " AND phone IS NOT NULL";
     }
     const [users]: any = await connection.query(query, params);
 
@@ -140,6 +141,28 @@ export async function sendDailyTaskDigest(
       const uUid = String(user.uid || user.id);
       const uUsername = String(user.username || "");
       const recipientName = user.displayName || user.username || "User";
+      const rawPhone = user.phone ? String(user.phone).trim() : "";
+
+      if (!rawPhone) {
+        totalGagal++;
+        const reason = "Nomor WhatsApp belum terdaftar di profil pengguna";
+        kegagalan.push({
+          userId: uId,
+          name: recipientName,
+          phone: "-",
+          reason,
+        });
+        await recordBroadcastLog({
+          channel: "whatsapp",
+          userId: uId,
+          recipientName,
+          recipientTarget: "-",
+          status: "failed",
+          taskCount: 0,
+          details: reason,
+        });
+        continue;
+      }
 
       const [tasks]: any = await connection.query(
         `
