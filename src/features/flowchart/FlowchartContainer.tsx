@@ -55,7 +55,7 @@ import { FlowchartMinimap } from "./components/FlowchartMinimap";
 import { NodeContextMenu } from "./components/NodeContextMenu";
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
 import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData } from "./types";
-import { parseDrawIoXML, parseMiroContent } from "./lib/importers";
+import { parseUniversalDiagram } from "./lib/importers";
 import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
 import { colorPalettes } from "./constants";
 // Diberi akhiran Api karena useFlowchartList() juga mengekspos updateFlowchart
@@ -431,6 +431,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  // Canvas-level drag-drop overlay state (file drop directly onto canvas)
+  const [canvasDragOver, setCanvasDragOver] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleProcessImportFile = (file: File) => {
@@ -438,45 +441,40 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     reader.onload = (e) => {
       try {
         const text = e.target?.result as string;
-        let result: { nodes: FlowNode[]; edges: FlowEdge[] } | null = null;
-        let detectedType: typeof importType = "drawio";
-
         const fileName = file.name.toLowerCase();
         setParsedFilename(file.name);
 
-        if (fileName.endsWith(".xml") || fileName.endsWith(".drawio")) {
-          result = parseDrawIoXML(text);
-          detectedType = "drawio";
-        } else if (fileName.endsWith(".json")) {
+        // Detect import type for display in modal
+        let detectedType: typeof importType = "drawio";
+        if (fileName.endsWith(".json")) detectedType = "miro";
+        else if (fileName.endsWith(".csv")) detectedType = "miro";
+        else if (
+          fileName.endsWith(".mmd") ||
+          fileName.endsWith(".mermaid") ||
+          fileName.endsWith(".txt")
+        )
+          detectedType = "native";
+
+        // Universal parser handles: .drawio, .xml, .json (Miro/LanPro), .csv, .mmd, .mermaid, .txt
+        const result = parseUniversalDiagram(text, file.name);
+
+        // Check for LanPro native JSON (has nodes/edges keys directly)
+        if (fileName.endsWith(".json")) {
           try {
             const parsedJson = JSON.parse(text);
             if (parsedJson && (parsedJson.nodes !== undefined || parsedJson.edges !== undefined)) {
-              result = {
-                nodes: Array.isArray(parsedJson.nodes) ? parsedJson.nodes : [],
-                edges: Array.isArray(parsedJson.edges) ? parsedJson.edges : [],
-              };
               detectedType = "native";
-            } else {
-              result = parseMiroContent(text, false);
-              detectedType = "miro";
             }
-          } catch (e) {
-            throw new Error(t("flowchart.jsonUnreadable"));
+          } catch {
+            /* handled by parseUniversalDiagram */
           }
-        } else if (fileName.endsWith(".csv")) {
-          result = parseMiroContent(text, true);
-          detectedType = "miro";
-        } else {
-          throw new Error(
-            "Format file tidak didukung. Silakan gunakan .xml, .drawio, .json, atau .csv."
-          );
         }
 
         if (result && (result.nodes.length > 0 || result.edges.length > 0)) {
           setParsedImportData(result);
           setImportType(detectedType);
           toast.success(
-            `Berhasil memuat file "${file.name}"! Ditemukan ${result.nodes.length} bentuk & ${result.edges.length} garis.`
+            `Berhasil memuat "${file.name}" — ${result.nodes.length} bentuk, ${result.edges.length} panah.`
           );
         } else {
           toast.error(t("toast.noShapesInFile"));
@@ -484,6 +482,56 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       } catch (err: any) {
         toast.error(t("toast.fileReadFailed", { pesan: err.message || err }));
         console.error(err);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  /**
+   * Handler drag-drop file langsung ke permukaan kanvas (tanpa perlu buka modal impor).
+   * Format yang didukung: .drawio, .xml, .json, .csv, .mmd, .mermaid, .txt
+   */
+  const handleCanvasFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCanvasDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    const allowed = [".drawio", ".xml", ".json", ".csv", ".mmd", ".mermaid", ".txt"];
+    const lowerName = file.name.toLowerCase();
+    if (!allowed.some((ext) => lowerName.endsWith(ext))) {
+      toast.error(
+        `Format file "${file.name}" belum didukung. Gunakan: .drawio, .xml, .json, .csv, .mmd`
+      );
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const text = ev.target?.result as string;
+        const result = parseUniversalDiagram(text, file.name);
+        if (result && (result.nodes.length > 0 || result.edges.length > 0)) {
+          setNodes(result.nodes);
+          setEdges(result.edges);
+          setHistoryStack([
+            {
+              nodes: JSON.parse(JSON.stringify(result.nodes)),
+              edges: JSON.parse(JSON.stringify(result.edges)),
+            },
+          ]);
+          setHistoryIndex(0);
+          setSelectedNodeId(null);
+          setSelectedEdgeId(null);
+          toast.success(
+            `"${file.name}" berhasil dimuat — ${result.nodes.length} bentuk, ${result.edges.length} panah. Langsung siap diedit!`
+          );
+        } else {
+          toast.error(`File "${file.name}" tidak mengandung bentuk yang dapat dibaca.`);
+        }
+      } catch (err: any) {
+        toast.error(`Gagal memuat "${file.name}": ${err.message || err}`);
       }
     };
     reader.readAsText(file);
@@ -2766,6 +2814,20 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             });
                           }
                         }}
+                        onDragOver={(e) => {
+                          // Only activate canvas file-drop overlay when a file is being dragged (not node drag)
+                          if (e.dataTransfer.types.includes("Files")) {
+                            e.preventDefault();
+                            setCanvasDragOver(true);
+                          }
+                        }}
+                        onDragLeave={(e) => {
+                          // Only reset if leaving the canvas boundary (not entering a child element)
+                          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                            setCanvasDragOver(false);
+                          }
+                        }}
+                        onDrop={handleCanvasFileDrop}
                         ref={canvasContainerRef}
                         style={{
                           cursor:
@@ -2781,6 +2843,21 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               : `${30 * zoomLevel}px ${30 * zoomLevel}px`,
                         }}
                       >
+                        {/* Canvas-level file drag-drop overlay */}
+                        {canvasDragOver && (
+                          <div className="absolute inset-0 z-50 pointer-events-none flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-primary/60 bg-primary/5 backdrop-blur-sm transition-all">
+                            <div className="bg-surface/90 backdrop-blur-md border border-border-subtle rounded-2xl px-6 py-5 shadow-xl flex flex-col items-center gap-2 select-none">
+                              <span className="text-4xl">📂</span>
+                              <p className="text-sm font-semibold text-content-strong">
+                                Lepaskan untuk Impor Diagram
+                              </p>
+                              <p className="text-xs text-content-muted text-center">
+                                .drawio &nbsp;·&nbsp; .xml &nbsp;·&nbsp; .json &nbsp;·&nbsp; .csv
+                                &nbsp;·&nbsp; .mmd
+                              </p>
+                            </div>
+                          </div>
+                        )}
                         {/* Custom SVG styling injection */}
                         <style
                           dangerouslySetInnerHTML={{

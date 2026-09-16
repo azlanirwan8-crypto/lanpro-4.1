@@ -2846,6 +2846,7 @@ export const en = {
     youWereMentioned: "You were mentioned",
     toLightMode: "Switch to light mode",
     toDarkMode: "Switch to dark mode",
+    webApps: "Web Apps",
     aiInvalidResponse: "Invalid response from AI.",
   },
   completeReg: {

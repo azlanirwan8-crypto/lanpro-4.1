@@ -2868,6 +2868,7 @@ export const id = {
     youWereMentioned: "Anda di-mention",
     toLightMode: "Beralih ke Mode Terang",
     toDarkMode: "Beralih ke Mode Gelap",
+    webApps: "Web Apps",
     aiInvalidResponse: "Jawaban dari AI tidak valid.",
   },
   completeReg: {

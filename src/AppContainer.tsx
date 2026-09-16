@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "./i18n/LanguageSwitcher";
+import { WebAppsDropdown } from "./components/navigation/WebAppsDropdown";
 import {
   shouldSuppressSprintDataRefresh,
   shouldSuppressTaskDataRefresh,
@@ -3997,6 +3998,8 @@ function AppContainer() {
 
                 <LanguageSwitcher />
 
+                <WebAppsDropdown />
+
                 <button
                   onClick={toggleTheme}
                   className="p-1.5 md:min-w-0 md:min-h-0 min-w-11 min-h-11 flex items-center justify-center text-content-subtle hover:text-content-strong hover:bg-surface-sunken rounded-md transition-all cursor-pointer relative"
@@ -4011,7 +4014,7 @@ function AppContainer() {
                 </button>
               </div>
 
-              {/* HP: satu tombol More untuk Settings / bahasa / tema */}
+              {/* HP: satu tombol More untuk Settings / bahasa / apps / tema */}
               <div className="relative md:hidden" ref={headerMoreRef}>
                 <button
                   type="button"
@@ -4051,6 +4054,12 @@ function AppContainer() {
                         {t("common.language", "Bahasa")}
                       </span>
                       <LanguageSwitcher />
+                    </div>
+                    <div className="flex items-center gap-2.5 px-3 min-h-11">
+                      <span className="text-xs text-content-muted shrink-0 w-16">
+                        {t("appShell.webApps", "Web Apps")}
+                      </span>
+                      <WebAppsDropdown />
                     </div>
                     <button
                       type="button"
