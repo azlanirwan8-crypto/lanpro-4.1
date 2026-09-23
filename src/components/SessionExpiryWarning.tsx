@@ -105,6 +105,8 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
   // References to track simulation states
   const isSimulatingRef = useRef(false);
   const simulatedTimeLeftRef = useRef<number | null>(null);
+  const autoLogoutDipicu = useRef(false);
+  const cekPertama = useRef(true);
 
   // Constants - warning triggers exactly 60 seconds before expiry
   const WARNING_THRESHOLD = 60;
@@ -163,15 +165,21 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
   };
 
   // Handle auto logout when session expires
-  const triggerAutoLogout = async () => {
+  const triggerAutoLogout = async (sudahBerakhirSebelumDibuka = false) => {
+    // Timer berdenyut tiap detik; tanpa penjaga ini toast-nya menumpuk dan
+    // onLogout berjalan lebih dari sekali.
+    if (autoLogoutDipicu.current) return;
+    autoLogoutDipicu.current = true;
     setShowWarningModal(false);
     setIsPopoverOpen(false);
     isSimulatingRef.current = false;
     setSimulatedTimeLeft(null);
     simulatedTimeLeftRef.current = null;
-    toast.error(t("toast.sessionEndedSecurity"), {
-      duration: 5000,
-    });
+    if (sudahBerakhirSebelumDibuka) {
+      toast.info(t("toast.sessionEndedStale"), { duration: 5000 });
+    } else {
+      toast.error(t("toast.sessionEndedSecurity"), { duration: 5000 });
+    }
     await onLogout(true);
   };
 
@@ -189,6 +197,8 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
   // Background timer loop (ticks every 1 second)
   useEffect(() => {
     if (!isLoggedIn) {
+      autoLogoutDipicu.current = false;
+      cekPertama.current = true;
       setRealTimeLeft(null);
       setSimulatedTimeLeft(null);
       isSimulatingRef.current = false;
@@ -222,8 +232,11 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
       const timeLeft = calculateTokenRemainingSeconds(token);
       setRealTimeLeft(timeLeft);
 
+      const pertama = cekPertama.current;
+      cekPertama.current = false;
+
       if (timeLeft <= 0) {
-        triggerAutoLogout();
+        void triggerAutoLogout(pertama);
       } else if (timeLeft <= WARNING_THRESHOLD) {
         setShowWarningModal(true);
       }

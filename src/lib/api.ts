@@ -16,6 +16,21 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Selisih jam perangkat terhadap server, diambil dari header `Date` respons.
+ * Positif = jam perangkat MUNDUR, negatif = jam perangkat MAJU.
+ */
+let selisihJamMs = 0;
+
+export const ambilSelisihJamMs = () => selisihJamMs;
+
+const catatSelisihJam = (response: Response) => {
+  const tanggalServer = response.headers.get("date");
+  if (!tanggalServer) return;
+  const ms = Date.parse(tanggalServer);
+  if (!Number.isNaN(ms)) selisihJamMs = ms - Date.now();
+};
+
 export function isNetworkOrAuthError(e: any): boolean {
   if (!e) return false;
   const msg = e?.message || String(e);
@@ -215,6 +230,8 @@ export async function apiRequest(
       })
     );
   }
+
+  catatSelisihJam(response);
 
   // v1.6 Hardening: Safe JSON / Text parsing with fallback & Vercel error sanitization
   let responseData: any = null;

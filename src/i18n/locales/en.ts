@@ -474,6 +474,12 @@ export const en = {
     sessionExtending: "Extending your active session...",
     sessionExtended: "Your session was extended.",
     sessionEndedSecurity: "Your session ended for data security. Please sign in again.",
+    sessionEndedStale:
+      "Your earlier session had already ended before this page opened. Please sign in again.",
+    deviceClockAhead:
+      "Your device clock is {{jam}} hours ahead of the server. Sync the Windows clock, or session expiry will be miscounted too.",
+    deviceClockBehind:
+      "Your device clock is {{jam}} hours behind the server. Sync the Windows clock, or session expiry will be miscounted too.",
     sessionWarnSimulated: "Session expiry warning simulated (60 seconds).",
     loginFailedTitle: "Sign-in failed",
     passwordUpdated: "Your password was updated. Please sign in.",

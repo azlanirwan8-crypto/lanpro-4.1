@@ -4,7 +4,14 @@ import { toast } from "sonner";
 import type { AppView } from "../store/useAppStore";
 import { showErrorAlert } from "../lib/sweetalert";
 import { UserProfile, AppRole, PeranEfektif } from "../types";
-import { apiRequest, ApiError, setAuthToken, clearAuthToken, getAuthToken } from "../lib/api";
+import {
+  apiRequest,
+  ApiError,
+  setAuthToken,
+  clearAuthToken,
+  getAuthToken,
+  ambilSelisihJamMs,
+} from "../lib/api";
 import { safeLocalStorage, safeSessionStorage } from "../lib/safeStorage";
 
 // Browser session ID for collision detection
@@ -326,6 +333,17 @@ export function useAuth(
       }
 
       toast.success(i18n.t("toast.welcomeBack", { nama: userData?.displayName || username }));
+
+      // Jam perangkat yang menyimpang jauh membuat token terlihat kedaluwarsa
+      // sejak lahir di mata peramban — korbannya sesi yang putus tiba-tiba.
+      const selisihMs = ambilSelisihJamMs();
+      if (Math.abs(selisihMs) >= 5 * 60 * 1000) {
+        const jam = Math.round((Math.abs(selisihMs) / 3600000) * 10) / 10;
+        toast.warning(
+          i18n.t(selisihMs < 0 ? "toast.deviceClockAhead" : "toast.deviceClockBehind", { jam }),
+          { duration: 9000 }
+        );
+      }
     } catch (e: any) {
       if (e instanceof ApiError && e.status === 409) {
         console.warn("Session collision detected");

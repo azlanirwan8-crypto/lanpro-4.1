@@ -484,6 +484,12 @@ export const id = {
     sessionExtending: "Memperpanjang sesi aktif Anda...",
     sessionExtended: "Sesi Anda berhasil diperpanjang!",
     sessionEndedSecurity: "Sesi Anda telah berakhir untuk keamanan data. Silakan login kembali.",
+    sessionEndedStale:
+      "Sesi lama Anda sudah berakhir sebelum halaman ini dibuka. Silakan masuk kembali.",
+    deviceClockAhead:
+      "Jam perangkat Anda {{jam}} jam lebih maju dari server. Sinkronkan jam Windows, kalau tidak masa aktif sesi ikut salah hitung.",
+    deviceClockBehind:
+      "Jam perangkat Anda {{jam}} jam lebih lambat dari server. Sinkronkan jam Windows, kalau tidak masa aktif sesi ikut salah hitung.",
     sessionWarnSimulated: "Peringatan sesi berakhir disimulasikan (60 Detik)!",
     loginFailedTitle: "Gagal Masuk",
     passwordUpdated: "Kata sandi berhasil diperbarui. Silakan masuk.",
