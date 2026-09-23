@@ -379,9 +379,6 @@ export const useIssueList = (props: IssueListViewProps) => {
     setTasks((prev) => [placeholder, ...prev.filter((t) => t.id !== tempId)]);
 
     suppressTaskDataRefresh(8000);
-    createInFlightRef.current = false;
-    setIsCreating(false);
-    toast.success(i18n.t("toast.taskAdded"));
 
     const taskType = inlineAddType.toLowerCase();
 
@@ -409,6 +406,7 @@ export const useIssueList = (props: IssueListViewProps) => {
           t.id === tempId ? { ...created, parentId: parentId || created.parentId } : t
         )
       );
+      toast.success(i18n.t("toast.taskAdded"));
 
       if (customTitle === undefined) {
         setInlineAddTitle("");

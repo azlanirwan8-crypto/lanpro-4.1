@@ -8,6 +8,7 @@ import { toast } from "sonner";
 // terlihat sebagai utang yang diketahui, bukan lolos diam-diam.
 // eslint-disable-next-line no-restricted-imports
 import { apiRequest, setAuthToken, getAuthToken } from "../lib/api";
+import { safeLocalStorage, safeSessionStorage } from "../lib/safeStorage";
 
 interface SessionExpiryWarningProps {
   isLoggedIn: boolean;
@@ -16,14 +17,20 @@ interface SessionExpiryWarningProps {
   onSessionExtended?: (newUser: any) => void;
 }
 
-// Client-side JWT Decoder
+// Universal JWT Decoder (Aman di browser & lingkungan Node/Jest)
 const parseJwt = (token: string) => {
   try {
     const base64Url = token.split(".")[1];
+    if (!base64Url) return null;
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const binaryStr =
+      typeof atob === "function"
+        ? atob(base64)
+        : typeof window !== "undefined" && typeof window.atob === "function"
+          ? window.atob(base64)
+          : Buffer.from(base64, "base64").toString("binary");
     const jsonPayload = decodeURIComponent(
-      window
-        .atob(base64)
+      binaryStr
         .split("")
         .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
         .join("")
@@ -32,6 +39,55 @@ const parseJwt = (token: string) => {
   } catch (e) {
     return null;
   }
+};
+
+/**
+ * #510 — Perhitungan sisa waktu token JWT berbasis TTL relatif.
+ *
+ * Mengapa relatif? Jam laptop pengguna tidak selalu tersinkronisasi otomatis
+ * (baterai CMOS habis, jam diset manual lebih maju/mundur, perbedaan tahun/zona).
+ * Jika kita membandingkan `decoded.exp` (jam server) langsung dengan `Date.now()`
+ * (jam laptop), pengguna yang jam laptopnya maju akan langsung tertendang keluar
+ * ("Sesi Anda telah berakhir") seketika setelah login berhasil.
+ *
+ * Dengan menghitung masa aktif relatif (TTL = exp - iat) dan melacak selisih waktu
+ * sejak token diterima pada jam lokal klien, perhitungan countdown menjadi 100%
+ * kebal terhadap perbedaan jam absolut server vs laptop.
+ */
+export const calculateTokenRemainingSeconds = (
+  token: string,
+  savedAtOverride?: number,
+  nowOverride?: number
+): number => {
+  const decoded = parseJwt(token);
+  if (!decoded || !decoded.exp) return 7200;
+
+  const ttl = decoded.iat && decoded.exp > decoded.iat ? decoded.exp - decoded.iat : 7200;
+
+  const nowMs = nowOverride ?? Date.now();
+  let savedAtMs = savedAtOverride;
+
+  if (savedAtMs === undefined) {
+    const savedAtStr =
+      safeLocalStorage.getItem("lanpro_token_saved_at") ||
+      safeSessionStorage.getItem("lanpro_token_saved_at");
+    savedAtMs = savedAtStr ? parseInt(savedAtStr, 10) : NaN;
+  }
+
+  if (isNaN(savedAtMs) || savedAtMs <= 0) {
+    savedAtMs = nowMs;
+    try {
+      if (safeLocalStorage.getItem("lanpro_jwt_token")) {
+        safeLocalStorage.setItem("lanpro_token_saved_at", savedAtMs.toString());
+      } else {
+        safeSessionStorage.setItem("lanpro_token_saved_at", savedAtMs.toString());
+      }
+    } catch {}
+  }
+
+  const elapsedSec = Math.max(0, Math.floor((nowMs - savedAtMs) / 1000));
+  const timeLeft = Math.max(0, ttl - elapsedSec);
+  return timeLeft;
 };
 
 export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
@@ -84,12 +140,9 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
         setSimulatedTimeLeft(null);
         simulatedTimeLeftRef.current = null;
 
-        // Re-read JWT to update the realTimeLeft state
-        const decoded = parseJwt(data.token);
-        if (decoded && decoded.exp) {
-          const now = Math.floor(Date.now() / 1000);
-          setRealTimeLeft(decoded.exp - now);
-        }
+        // Recalculate remaining seconds using relative TTL
+        const remaining = calculateTokenRemainingSeconds(data.token);
+        setRealTimeLeft(remaining);
 
         if (onSessionExtended && data.user) {
           onSessionExtended(data.user);
@@ -144,7 +197,7 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
       return;
     }
 
-    const interval = setInterval(() => {
+    const checkSession = () => {
       // 1. Handle SIMULATED timer if active
       if (isSimulatingRef.current && simulatedTimeLeftRef.current !== null) {
         const nextSimulated = simulatedTimeLeftRef.current - 1;
@@ -152,7 +205,6 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
         setSimulatedTimeLeft(nextSimulated);
 
         if (nextSimulated <= 0) {
-          clearInterval(interval);
           triggerAutoLogout();
         } else if (nextSimulated <= WARNING_THRESHOLD && !showWarningModal) {
           setShowWarningModal(true);
@@ -160,31 +212,27 @@ export const SessionExpiryWarning: React.FC<SessionExpiryWarningProps> = ({
         return;
       }
 
-      // 2. Handle REAL token checks
+      // 2. Handle REAL token checks via relative countdown
       const token = getAuthToken();
       if (!token) {
         setRealTimeLeft(null);
         return;
       }
 
-      const decoded = parseJwt(token);
-      if (!decoded || !decoded.exp) {
-        setRealTimeLeft(null);
-        return;
-      }
-
-      const now = Math.floor(Date.now() / 1000);
-      const timeLeft = decoded.exp - now;
+      const timeLeft = calculateTokenRemainingSeconds(token);
       setRealTimeLeft(timeLeft);
 
       if (timeLeft <= 0) {
-        clearInterval(interval);
         triggerAutoLogout();
       } else if (timeLeft <= WARNING_THRESHOLD) {
         setShowWarningModal(true);
       }
-    }, 1000);
+    };
 
+    // Run check immediately on mount/token change
+    checkSession();
+
+    const interval = setInterval(checkSession, 1000);
     return () => clearInterval(interval);
   }, [isLoggedIn, showWarningModal]);
 

@@ -101,7 +101,8 @@ export function deleteCase(projectId: string, caseId: string): Promise<Response>
 
 /** Mengambil riwayat eksekusi sebuah test case. */
 export function fetchCaseHistory(projectId: string, caseId: string): Promise<Response> {
-  return qaFetch(`/api/projects/${projectId}/qa-test-cases/${caseId}/history`);
+  // Nama jalur harus sama persis dengan rute terdaftar (qa.routes.ts:564) — `/history` membalas 404.
+  return qaFetch(`/api/projects/${projectId}/qa-test-cases/${caseId}/execution-history`);
 }
 
 /**

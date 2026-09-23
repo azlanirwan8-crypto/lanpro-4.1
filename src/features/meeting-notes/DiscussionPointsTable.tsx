@@ -217,6 +217,7 @@ export const DiscussionPointsTable: React.FC<DiscussionPointsTableProps> = ({
       toast.error(t("toast.concernRequired"));
       return;
     }
+    if (isSaving) return;
 
     setIsSaving(true);
     const tempId = `temp-dp-${crypto.randomUUID()}`;

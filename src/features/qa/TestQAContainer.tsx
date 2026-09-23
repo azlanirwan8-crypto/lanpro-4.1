@@ -717,6 +717,8 @@ export function TestQAPanel({
       if (res.ok) {
         const data = await res.json();
         setExecutionLogs(data.data || []);
+      } else {
+        setExecutionLogs([]);
       }
     } catch (e) {
       setExecutionLogs([]);

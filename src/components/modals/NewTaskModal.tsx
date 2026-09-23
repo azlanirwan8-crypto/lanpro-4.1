@@ -219,6 +219,9 @@ export const NewTaskModal: React.FC<NewTaskModalProps> = ({
               value={newTaskTitle}
               onChange={(e: any) => setNewTaskTitle(e.target.value)}
               placeholder={t("newTask.titlePlaceholder")}
+              onKeyDown={(e: any) => {
+                if (e.key === "Enter" && !isSubmitting && newTaskTitle.trim()) onSubmit();
+              }}
             />
           </div>
           <div className="grid grid-cols-2 gap-4">

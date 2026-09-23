@@ -73,16 +73,21 @@ export const setAuthToken = (token: string, remember?: boolean) => {
   try {
     const diSesi = safeSessionStorage.getItem("lanpro_jwt_token") !== null;
     const permanen = remember === undefined ? !diSesi : remember;
+    const nowStr = Date.now().toString();
 
     if (permanen) {
       safeSessionStorage.removeItem("lanpro_jwt_token");
+      safeSessionStorage.removeItem("lanpro_token_saved_at");
       safeLocalStorage.setItem("lanpro_jwt_token", token);
+      safeLocalStorage.setItem("lanpro_token_saved_at", nowStr);
     } else {
       // Membuang salinan lama WAJIB: `getAuthToken` membaca localStorage
       // lebih dulu, jadi token permanen yang tertinggal akan menutupi token
       // sementara dan mengembalikan persis cacat #93.
       safeLocalStorage.removeItem("lanpro_jwt_token");
+      safeLocalStorage.removeItem("lanpro_token_saved_at");
       safeSessionStorage.setItem("lanpro_jwt_token", token);
+      safeSessionStorage.setItem("lanpro_token_saved_at", nowStr);
     }
   } catch (e) {}
 };
@@ -91,6 +96,8 @@ export const clearAuthToken = () => {
   try {
     safeLocalStorage.removeItem("lanpro_jwt_token");
     safeSessionStorage.removeItem("lanpro_jwt_token");
+    safeLocalStorage.removeItem("lanpro_token_saved_at");
+    safeSessionStorage.removeItem("lanpro_token_saved_at");
     safeLocalStorage.removeItem("sessionUser");
     safeSessionStorage.removeItem("sessionUser");
     safeLocalStorage.removeItem("isAdminMode");

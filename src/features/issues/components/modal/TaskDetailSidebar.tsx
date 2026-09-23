@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Activity,
   User,
@@ -101,9 +101,13 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
     };
   }, [task.projectId, task.id]);
 
+  const logInFlight = useRef(false);
+
   const submitWorkLog = async () => {
+    if (logInFlight.current) return;
     const hours = parseFloat(logHours);
     if (!task.projectId || !Number.isFinite(hours) || hours <= 0 || logSaving) return;
+    logInFlight.current = true;
     setLogSaving(true);
     try {
       const res: any = await createTaskWorkLog(task.projectId, task.id, {
@@ -121,7 +125,12 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
       toast.error(e?.message || t("issueDetail.workLogFailed", "Gagal mencatat jam"));
     } finally {
       setLogSaving(false);
+      logInFlight.current = false;
     }
+  };
+
+  const submitLogOnEnter = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") void submitWorkLog();
   };
 
   return (
@@ -503,6 +512,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
                 step="0.25"
                 value={logHours}
                 onChange={(e) => setLogHours(e.target.value)}
+                onKeyDown={submitLogOnEnter}
                 placeholder="h"
                 className="w-16 h-8 text-xs rounded-md border border-border-subtle bg-surface-muted px-2 text-content"
               />
@@ -510,6 +520,7 @@ export const TaskDetailSidebar: React.FC<TaskDetailSidebarProps> = ({
                 type="text"
                 value={logNote}
                 onChange={(e) => setLogNote(e.target.value)}
+                onKeyDown={submitLogOnEnter}
                 placeholder={t("issueDetail.workLogNote", "Catatan (opsional)")}
                 className="flex-1 min-w-0 h-8 text-xs rounded-md border border-border-subtle bg-surface-muted px-2 text-content"
               />
