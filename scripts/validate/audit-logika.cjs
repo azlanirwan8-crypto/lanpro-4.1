@@ -154,8 +154,18 @@ function kumpulkanImport(daftarBerkas) {
   for (const berkas of daftarBerkas) {
     const isi = fs.readFileSync(berkas, "utf8");
 
-    // import { A, B as C, D } from "..."
-    for (const m of isi.matchAll(/import\s+(?:type\s+)?{([^}]+)}\s+from\s+/g)) {
+    /**
+     * import { A, B as C, D } from "..." — dan bentuk yang bersanding dengan
+     * impor default: import X, { A } from "...".
+     *
+     * Bentuk kedua sempat tidak terbaca sama sekali, sehingga export yang
+     * DIPAKAI dilaporkan mati. Terlihat saat #515 mengimpor `siapBahasa` di
+     * `main.tsx` berdampingan dengan `import i18n`: gerbang menyuruh ekspor itu
+     * dihapus, padahal satu-satunya konsumen produksi persis baris tersebut.
+     */
+    for (const m of isi.matchAll(
+      /import\s+(?:type\s+)?(?:[\w$]+\s*,\s*)?{([^}]+)}\s+from\s+/g
+    )) {
       for (const bagian of m[1].split(",")) {
         // "B as C" -> aslinya "B"
         const nama = bagian.trim().split(/\s+as\s+/)[0].trim();
