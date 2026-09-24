@@ -75,7 +75,6 @@ interface FlowchartViewProps {
   setSelectedTaskForDetail: (task: Task) => void;
   setIsTaskDetailModalOpen: (isOpen: boolean) => void;
   currentUserProfile?: any;
-  onSaveFlowcharts?: (data: any) => Promise<void>;
 }
 
 /**
@@ -96,7 +95,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   setSelectedTaskForDetail,
   setIsTaskDetailModalOpen,
   currentUserProfile,
-  onSaveFlowcharts,
 }) => {
   const { t } = useTranslation();
   // Item #144 — sumber yang SAMA dengan modal Dokumentasi. Sebelumnya modal
@@ -1085,6 +1083,36 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     };
   }, [draggingNodeId !== null, resizingNodeId !== null, isPanning, marqueeBox !== null]);
 
+  // Item #519 — peta kanvas yang isinya belum sampai ke basis data.
+  //
+  // Tanpa penanda ini, efek muat di bawah menimpa cache perangkat dengan
+  // salinan server. Salinan server hanya berisi apa yang terkirim saat flow
+  // DIBUAT — yaitu satu node "Mulai" — sehingga setiap bentuk yang digambar
+  // setelahnya terhapus diam-diam sebelum pernah dikirim ke mana pun.
+  const kunciBelumTersinkron = (projId: string) => `lanpro_flowcharts_unsynced_${projId}`;
+
+  const bacaBelumTersinkron = (projId: string): Record<string, number> => {
+    try {
+      const peta = JSON.parse(safeLocalStorage.getItem(kunciBelumTersinkron(projId)) || "{}");
+      return peta && typeof peta === "object" ? peta : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const tandaiBelumTersinkron = (projId: string, flowId: string) => {
+    const peta = bacaBelumTersinkron(projId);
+    peta[flowId] = Date.now();
+    safeLocalStorage.setItem(kunciBelumTersinkron(projId), JSON.stringify(peta));
+  };
+
+  const bersihkanTandaBelumTersinkron = (projId: string, flowId: string) => {
+    const peta = bacaBelumTersinkron(projId);
+    if (!(flowId in peta)) return;
+    delete peta[flowId];
+    safeLocalStorage.setItem(kunciBelumTersinkron(projId), JSON.stringify(peta));
+  };
+
   // Load flowcharts list scoped by project ID on load
   useEffect(() => {
     const projId = selectedProject?.id || selectedProject?.key || "default";
@@ -1108,9 +1136,19 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     if (selectedProject?.id) {
       fetchFlowcharts(selectedProject.id)
         .then((apiFlowcharts) => {
-          if (apiFlowcharts.length > 0) {
-            setFlowcharts(apiFlowcharts);
-            safeLocalStorage.setItem(listKey, JSON.stringify(apiFlowcharts));
+          // #519 — bekasnya: `if (apiFlowcharts.length > 0)` lalu menimpa
+          // state DAN cache dengan salinan server. Salinan itu tidak pernah
+          // berisi kanvas hasil menggambar, jadi penimpaan buta itulah yang
+          // membuat diagram yang sudah dibuat "hilang". Yang belum
+          // tersinkron dipertahankan; sisanya ikut server.
+          const tertunda = bacaBelumTersinkron(projId);
+          const gabungan = [
+            ...initialList.filter((f) => f.id in tertunda),
+            ...apiFlowcharts.filter((f) => !(f.id in tertunda)),
+          ];
+          if (gabungan.length > 0) {
+            setFlowcharts(gabungan);
+            safeLocalStorage.setItem(listKey, JSON.stringify(gabungan));
           }
         })
         .catch((err) => {
@@ -1312,21 +1350,55 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       return updatedList;
     });
 
-    if (!isAutoSave) {
-      if (onSaveFlowcharts) {
-        try {
-          const workspaceData = {
-            projectId: projId,
-            flowcharts: JSON.parse(safeLocalStorage.getItem(`lanpro_flowcharts_${projId}`) || "[]"),
-          };
-          await onSaveFlowcharts(workspaceData);
-        } catch (err) {
-          console.warn("Could not sync flowchart workspace to API:", err);
-        }
-      }
+    // Setiap perubahan kanvas membuat salinan di perangkat ini mendahului
+    // basis data — termasuk perubahan yang baru menyentuh autosave.
+    tandaiBelumTersinkron(projId, selectedFlowId);
 
-      toast.success(t("toast.schemaSaved"));
+    // Autosave sengaja TIDAK menulis ke server. Efek pemicunya berjalan 1,5
+    // detik setelah setiap perpindahan node, jadi membiarkannya PUT akan
+    // mengirim satu tulisan ke PostgreSQL untuk tiap tarikan garis.
+    if (isAutoSave) return;
+
+    // #519 — di sini letak kerusakan aslinya. Dahulu blok ini memanggil prop
+    // `onSaveFlowcharts`, tetapi tidak ada satu pun pemanggil <FlowchartView>
+    // yang pernah mengirimkannya (diperiksa pada seluruh riwayat git), jadi
+    // pengiriman ke server selalu dilewati sementara toast tetap membunyikan
+    // "berhasil menyimpan".
+    if (!selectedProject?.id || selectedFlowId.startsWith("flow_")) {
+      toast.error(t("flowchart.saveNoServerRow"));
+      return;
     }
+
+    const alur = flowcharts.find((f) => f.id === selectedFlowId);
+    try {
+      await updateFlowchartApi(selectedProject.id, selectedFlowId, {
+        name: alur?.name ?? flowName,
+        nodes,
+        edges,
+        externalUrl: alur?.externalUrl ?? flowExternalUrl,
+        description: alur?.description ?? flowDescription,
+        category: alur?.category ?? flowCategory,
+      });
+      bersihkanTandaBelumTersinkron(projId, selectedFlowId);
+      toast.success(t("flowchart.savedToDb", { shapes: nodes.length, arrows: edges.length }));
+    } catch (apiErr) {
+      console.warn("Could not save flowchart canvas to API:", apiErr);
+      toast.error(
+        t("flowchart.saveToDbFailed", {
+          penyebab: apiErr instanceof Error ? apiErr.message : String(apiErr),
+        })
+      );
+    }
+  };
+
+  // Keluar editor adalah kesempatan terakhir mengirim kanvas: navigasi lewat
+  // menu samping me-mount ulang view ini, dan efek muatnya memakai salinan
+  // server. Hanya dijalankan bila memang ada perubahan yang belum terkirim.
+  const sinkronSaatKeluar = () => {
+    if (!isWorkspaceEditable || !selectedFlowId) return;
+    const projId = selectedProject?.id || selectedProject?.key || "default";
+    if (!(selectedFlowId in bacaBelumTersinkron(projId))) return;
+    void handleSaveWorkspace();
   };
 
   // Delete an entire flowchart diagram
@@ -1344,6 +1416,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     const remaining = flowcharts.filter((f) => f.id !== id);
     setFlowcharts(remaining);
     safeLocalStorage.setItem(`lanpro_flowcharts_${projId}`, JSON.stringify(remaining));
+    bersihkanTandaBelumTersinkron(projId, id);
 
     if (selectedFlowId === id) {
       if (remaining.length > 0) {
@@ -1478,8 +1551,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
             // localStorage dan hilang begitu cache dibersihkan.
             category: flowCategory,
           });
+          // PUT di atas ikut mendorong kanvas yang ada di state, jadi salinan
+          // server kini sama dengan yang di perangkat ini.
+          bersihkanTandaBelumTersinkron(projId, editingFlowId);
         } catch (apiErr) {
           console.warn("API sync error:", apiErr);
+          toast.error(
+            t("flowchart.saveToDbFailed", {
+              penyebab: apiErr instanceof Error ? apiErr.message : String(apiErr),
+            })
+          );
         }
       }
     }
@@ -2566,6 +2647,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                 <DetailViewChrome
                   backLabel={t("flowchart.backToList")}
                   onBack={() => {
+                    sinkronSaatKeluar();
                     setIsEditorActive(false);
                     setSelectedFlowId(null);
                     setCurrentPage(1);

@@ -168,4 +168,96 @@ describe("FlowchartView", () => {
 
     errorSpy.mockRestore();
   });
+
+  // Item #519 — isi kanvas harus benar-benar berangkat ke basis data. Sebelum
+  // perbaikan, tombol Simpan hanya menulis localStorage lalu membunyikan toast
+  // "berhasil menyimpan", sehingga diagram yang baru digambar hilang saat
+  // daftar disegarkan dan pemilik proyek tidak pernah melihat satu pun galat.
+  it("mengirim isi kanvas ke backend saat tombol Simpan ditekan", async () => {
+    const nodes = [
+      { id: "n1", type: "rect", x: 10, y: 20, label: "Proses A", color: "indigo" },
+      { id: "n2", type: "diamond", x: 200, y: 120, label: "Keputusan", color: "amber" },
+    ];
+    const edges = [{ id: "e1", fromNodeId: "n1", toNodeId: "n2", label: "ya" }];
+
+    (fetchFlowcharts as jest.Mock).mockResolvedValue([
+      {
+        id: "fw9",
+        name: "Alur Klaim",
+        description: "",
+        category: "Panduan",
+        nodes,
+        edges,
+        theme: "miro",
+        createdBy: "u1",
+        createdByName: "Administrator",
+      },
+    ]);
+
+    renderView();
+
+    const baris = await screen.findAllByText("Alur Klaim");
+    fireEvent.click(baris[0]);
+    fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
+
+    const tombolSimpan = await screen.findByTitle(/Simpan seluruh diagram alur/i);
+    fireEvent.click(tombolSimpan);
+
+    await waitFor(() =>
+      expect(updateFlowchart).toHaveBeenCalledWith(
+        "p1",
+        "fw9",
+        expect.objectContaining({ name: "Alur Klaim", nodes, edges })
+      )
+    );
+  });
+
+  // Setengah kerusakan lagi: saat view di-mount ulang, salinan server dulu
+  // MENIMPA state dan cache perangkat (`:1111-1113`). Karena salinan server
+  // hanya berisi node seed hasil create, bentuk yang belum sempat terkirim
+  // ikut terhapus. Kanvas yang masih menunggu pengiriman harus bertahan.
+  it("mempertahankan kanvas yang belum terkirim saat daftar disegarkan dari server", async () => {
+    window.localStorage.setItem(
+      "lanpro_flowcharts_p1",
+      JSON.stringify([
+        {
+          id: "fw7",
+          name: "Alur Belum Terkirim",
+          description: "",
+          category: "Panduan",
+          nodes: [{ id: "n9", type: "rect", x: 5, y: 5, label: "Bentuk Lokal", color: "indigo" }],
+          edges: [],
+          theme: "miro",
+          createdBy: "u1",
+          createdByName: "Administrator",
+        },
+      ])
+    );
+    window.localStorage.setItem("lanpro_flowcharts_unsynced_p1", JSON.stringify({ fw7: 1 }));
+
+    // Server memulangkan flow yang sama TANPA bentuk — persis kondisi baris
+    // hasil create yang hanya berisi node "Mulai".
+    (fetchFlowcharts as jest.Mock).mockResolvedValue([
+      {
+        id: "fw7",
+        name: "Alur Belum Terkirim",
+        description: "",
+        category: "Panduan",
+        nodes: [],
+        edges: [],
+        theme: "miro",
+        createdBy: "u1",
+        createdByName: "Administrator",
+      },
+    ]);
+
+    renderView();
+
+    const baris = await screen.findAllByText("Alur Belum Terkirim");
+    fireEvent.click(baris[0]);
+    fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
+
+    const bentuk = await screen.findAllByText("Bentuk Lokal");
+    expect(bentuk.length).toBeGreaterThan(0);
+  });
 });

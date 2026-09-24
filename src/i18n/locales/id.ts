@@ -1494,6 +1494,10 @@ export const id = {
     exportJson: "Ekspor Workspace ke JSON",
     importDiagram: "Impor Diagram (Draw.io, Miro, atau JSON)",
     saveFlowchart: "Simpan seluruh diagram alur ini ke basis data",
+    savedToDb: "Tersimpan di basis data — {{shapes}} bentuk, {{arrows}} panah",
+    saveToDbFailed: "Gagal menyimpan ke basis data: {{penyebab}}",
+    saveNoServerRow:
+      "Diagram ini belum punya baris di server, jadi isinya baru tersimpan di perangkat ini.",
     readOnlyMode: "Mode Baca Saja",
     clearCanvas: "Bersihkan Semua Bentuk dan Garis Kanvas",
     zoomOut: "Perkecil (-)",

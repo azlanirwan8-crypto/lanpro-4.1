@@ -1483,6 +1483,10 @@ export const en = {
     exportJson: "Export workspace to JSON",
     importDiagram: "Import diagram (Draw.io, Miro, or JSON)",
     saveFlowchart: "Save this entire flowchart to the database",
+    savedToDb: "Saved to the database — {{shapes}} shapes, {{arrows}} connectors",
+    saveToDbFailed: "Failed to save to the database: {{penyebab}}",
+    saveNoServerRow:
+      "This diagram has no row on the server yet, so its content is only stored on this device.",
     readOnlyMode: "Read Only Mode",
     clearCanvas: "Clear all canvas shapes and lines",
     zoomOut: "Zoom out (-)",
