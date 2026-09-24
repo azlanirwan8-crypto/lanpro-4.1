@@ -3164,7 +3164,7 @@ export const UserDetailView: React.FC<UserDetailViewProps> = ({
                                                       )}
                                                     />
                                                     {isOverride && (
-                                                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full ring-1 ring-white" />
+                                                      <span className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full ring-1 ring-border-glass" />
                                                     )}
                                                   </div>
                                                 </td>

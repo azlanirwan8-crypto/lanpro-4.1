@@ -101,7 +101,7 @@ export const SingleLoginCollisionModal: React.FC<Props> = ({
               className="flex-1 px-4 py-2.5 bg-rose-500 text-content-inverse rounded-xl font-medium text-sm hover:bg-rose-600 transition-colors shadow-soft shadow-rose-200 flex items-center justify-center gap-2 disabled:opacity-70"
             >
               {isLoading ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-border-glass/30 border-t-border-glass rounded-full animate-spin" />
               ) : (
                 <LogOut className="w-4 h-4" />
               )}

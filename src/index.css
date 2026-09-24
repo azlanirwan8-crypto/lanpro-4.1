@@ -81,6 +81,18 @@
    * (`bg-overlay/60`), sehingga nilainya cukup satu. */
   --color-overlay: #0f172a;
 
+  /* Padanan `overlay` ke arah sebaliknya: lapisan PUTIH transparan di atas
+   * permukaan yang memang gelap di kedua mode — kartu kaca di hero dashboard,
+   * garis rambut spinner pada tombol brand, halo badge avatar.
+   *
+   * `content-inverse` bernilai sama (#ffffff) tapi kosakata itu milik TEKS
+   * (§22): memakainya untuk latar/garis persis kesalahan "terang di atas terang"
+   * yang ditangkap gerbang tema. Karena itu latar dan garis punya tokennya
+   * sendiri. Nilainya SAMA di kedua mode, jadi memindahkan `bg-white/10` dan
+   * `border-white/20` ke sini tidak mengubah satu piksel pun. */
+  --color-surface-glass: #ffffff;
+  --color-border-glass: #ffffff;
+
   /* Permukaan bermerek (sidebar, tombol utama). SENGAJA tetap #405189 di kedua
    * mode, dan itu memperbaiki tabrakan yang terukur di layar.
    *
@@ -224,6 +236,9 @@ html.dark {
 
   /* Sengaja sama dengan mode terang — lihat catatan di `:root`. */
   --color-overlay: #0f172a;
+  /* SAMA di kedua mode, dengan alasan yang sama — lihat catatan di `:root`. */
+  --color-surface-glass: #ffffff;
+  --color-border-glass: #ffffff;
   --color-primary-surface: #405189;
   --color-primary-surface-hover: #364473;
   /* #110 — perhentian ketiga untuk gradasi panel merek layar auth. Peran

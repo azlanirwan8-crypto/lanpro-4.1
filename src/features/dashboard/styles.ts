@@ -42,11 +42,14 @@ export const styles = {
     "relative z-10 flex flex-col md:flex-row gap-8 justify-between items-start md:items-center",
   // Kedua kartu di bawah MENUMPANG di atas `activeSprintCard` yang sengaja
   // bergradasi gelap di kedua mode. Lapisannya karena itu tetap berbasis PUTIH
-  // transparan, bukan token `surface` — di mode gelap `surface` bernilai #121a2a,
-  // sehingga lapisan dan garisnya akan gelap-di-atas-gelap alias hilang.
+  // transparan — `bg-surface-glass/*` dan `border-border-glass/*`, yang nilainya
+  // sama di kedua mode — bukan lapisan `bg-surface`: di mode gelap token itu
+  // bernilai #121a2a, sehingga lapisan dan garisnya jadi gelap-di-atas-gelap
+  // alias hilang.
   activeSprintProgressCard:
-    "bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 min-w-[240px] shadow-lg",
-  burndownCard: "mt-8 bg-white/5 backdrop-blur-md rounded-xl p-6 border border-white/10 shadow-lg",
+    "bg-surface-glass/10 backdrop-blur-md rounded-xl p-6 border border-border-glass/20 min-w-[240px] shadow-lg",
+  burndownCard:
+    "mt-8 bg-surface-glass/5 backdrop-blur-md rounded-xl p-6 border border-border-glass/10 shadow-lg",
   chartGrid: "grid grid-cols-1 lg:grid-cols-2 gap-6",
   chartCard: "bg-surface shadow-sm border border-border-faint/80 rounded-xl p-6 flex flex-col",
   chartTitle:

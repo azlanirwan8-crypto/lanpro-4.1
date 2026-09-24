@@ -314,7 +314,7 @@ export const RegisterScreen = ({ onRegister, onBackToLogin }: RegisterScreenProp
         >
           {isRegistering ? (
             <>
-              <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-border-glass/20 border-t-border-glass rounded-full animate-spin" />
               <span>{t("register.creating")}</span>
             </>
           ) : (

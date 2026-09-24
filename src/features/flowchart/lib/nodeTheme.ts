@@ -7,6 +7,10 @@
  *
  * Pelengkap `lib/shapes.tsx`: berkas itu menggambar bentuk yang butuh SVG
  * presisi, berkas ini memberi gaya bentuk yang cukup diwakili sebuah div.
+ *
+ * Kelas keras yang tersisa di berkas ini (tepi bawah sticky note dan kertas
+ * card) SENGAJA tidak dipindah ke token: kanvas mewakili dokumen, bukan
+ * antarmuka — alasan yang sama dengan entri `slate` di `../constants`.
  */
 import type { FlowNode } from "../types";
 import { colorPalettes } from "../constants";

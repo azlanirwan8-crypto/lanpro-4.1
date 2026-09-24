@@ -424,7 +424,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             <div className="relative">
               <button
                 onClick={() => setIsBulkPicDropdownOpen(!isBulkPicDropdownOpen)}
-                className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-content-inverse text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-white/20"
+                className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-content-inverse text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-border-glass/20"
               >
                 <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
                 <span>{t("qa.bulkAssignPic")}</span>
@@ -483,7 +483,7 @@ export const QATestCaseTable: React.FC<QATestCaseTableProps> = ({
             <div className="relative">
               <button
                 onClick={() => setIsBulkStatusDropdownOpen(!isBulkStatusDropdownOpen)}
-                className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-content-inverse text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-white/20"
+                className="px-3 py-1.5 bg-surface/10 hover:bg-surface/20 text-content-inverse text-xs font-medium rounded-md flex items-center gap-1.5 transition-all cursor-pointer border border-border-glass/20"
               >
                 <Layers className="w-3.5 h-3.5 text-amber-300" />
                 <span>{t("qa.bulkStatus")}</span>

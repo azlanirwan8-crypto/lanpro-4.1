@@ -98,6 +98,10 @@ export const colorPalettes: Record<
     preview: "",
   },
   slate: {
+    // slate-50 di bawah ini SENGAJA masih kelas keras, bukan token: ia pasangan
+    // `colorPaletteHex.slate` (#f8fafc) yang dipakai bentuk SVG, dan kanvas ini
+    // mewakili dokumen, bukan antarmuka — ikut tema aplikasi membuat node "slate"
+    // jadi hitam pekat di mode gelap sementara sebelahnya tetap pastel.
     bg: "bg-slate-50/80 border-border-subtle",
     text: "text-content-strong",
     border: "border-border-subtle",

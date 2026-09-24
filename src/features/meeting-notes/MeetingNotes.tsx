@@ -1141,7 +1141,7 @@ export const MeetingNotes: React.FC<MeetingNotesProps> = ({
                 >
                   {loading ? (
                     <>
-                      <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <div className="w-3.5 h-3.5 border-2 border-border-glass/30 border-t-border-glass rounded-full animate-spin"></div>
                       <span>{t("meetingExtra.saving")}</span>
                     </>
                   ) : (
