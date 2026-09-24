@@ -186,11 +186,18 @@
    * Bukan light-menu putih: referensi pemilik = sidebar brand navy
    * `#405189` (= `--color-primary` / Velzon dark-sidebar) + teks terang,
    * sementara area konten tetap mode terang. Mode gelap = charcoal di
-   * `html.dark` — beda jelas saat toggle. */
+   * `html.dark` — beda jelas saat toggle.
+   *
+   * #524 — permukaannya tetap (#405189 = keputusan merek di atas), nada teksnya
+   * dinaikkan. Yang terukur sebelumnya: teks menu 3,53:1 di atas permukaan dan
+   * 2,87:1 di baris hover, label seksi 3,93:1 — gagal WCAG AA (4,5:1) untuk teks
+   * sekecil ini, di layar yang paling sering dibuka. Dikunci oleh
+   * `src/features/sidebar/kontras-sidebar.test.ts`, jadi nilai yang kembali
+   * merosot memerah di `npm test`, bukan muncul lagi sebagai keluhan visual. */
   --color-sidebar-surface: #405189;
   --color-sidebar-border: #364473;
-  --color-sidebar-title: #abb9e8;
-  --color-sidebar-text: #a6b0cf;
+  --color-sidebar-title: #c4ceef;
+  --color-sidebar-text: #dbdfec;
   --color-sidebar-text-active: #ffffff;
   --color-sidebar-item-active: rgba(255, 255, 255, 0.12);
   --color-sidebar-item-hover: rgba(255, 255, 255, 0.08);
@@ -269,7 +276,9 @@ html.dark {
   /* #427 — Sidebar diselaraskan ke Velzon neutral gray */
   --color-sidebar-surface: #212529; /* = card bg */
   --color-sidebar-border: #32383e; /* = border */
-  --color-sidebar-title: #878a99; /* = muted */
+  /* #524 — label seksi naik dari #878a99 (4,50:1, nyaris tanpa margin) ke
+   * 5,20:1. Teks menu mode ini sudah lolos (7,43:1) dan tidak disentuh. */
+  --color-sidebar-title: #9096a3; /* = muted, AA #524 */
   --color-sidebar-text: #adb5bd; /* = secondary */
   --color-sidebar-text-active: #ffffff;
   --color-sidebar-item-active: rgba(255, 255, 255, 0.08);
