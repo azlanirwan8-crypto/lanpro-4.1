@@ -13,7 +13,6 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { safeLocalStorage } from "../lib/safeStorage";
 import { id } from "./locales/id";
-import { en } from "./locales/en";
 
 export const BAHASA_TERSEDIA = ["id", "en"] as const;
 export type Bahasa = (typeof BAHASA_TERSEDIA)[number];
@@ -38,16 +37,15 @@ export const simpanBahasa = (b: Bahasa) => {
 };
 
 /**
- * #515 — satu pintu untuk memuat kamus sebuah bahasa, dipakai dari pembungkus
- * `changeLanguage` di bawah.
+ * #515 — satu pintu untuk memuat kamus sebuah bahasa.
  *
- * Saat ini `id` dan `en` dua-duanya sudah ikut `init()`, jadi fungsi ini umumnya
- * langsung kembali. Jalur muatnya disiapkan lebih dulu supaya #515 tinggal
- * memindahkan kamus nonaktif ke luar potongan awal — dan supaya test membaca
- * bundel dari keadaan yang sama dengan produksi, bukan dari kebetulan.
+ * Hanya Indonesia yang ikut potongan awal. Inggris berukuran 148 kB mentah dan
+ * separuh pengunjung tidak pernah membukanya, jadi kamusnya diimpor saat
+ * diperlukan: lewat `siapBahasa` di bawah (bahasa pilihan sudah tersimpan) atau
+ * lewat pembungkus `changeLanguage` (pengguna baru saja menekan bendera).
  *
- * SENGAJA tidak diekspor: satu-satunya cara yang benar untuk sampai ke sebuah
- * kamus adalah menukar bahasa, dan pembungkus di bawah sudah menjaganya.
+ * SENGAJA tidak diekspor: jalan masuk yang benar ke sebuah kamus adalah
+ * menukar bahasa, dan pembungkus di bawah sudah menjaganya.
  */
 async function muatKamus(bahasa: Bahasa): Promise<void> {
   if (i18n.hasResourceBundle(bahasa, "translation")) return;
@@ -57,13 +55,11 @@ async function muatKamus(bahasa: Bahasa): Promise<void> {
 }
 
 const bahasaDikenal = new Set<string>(BAHASA_TERSEDIA);
+const bahasaAwal = bacaBahasaTersimpan();
 
 i18n.use(initReactI18next).init({
-  resources: {
-    id: { translation: id },
-    en: { translation: en },
-  },
-  lng: bacaBahasaTersimpan(),
+  resources: { id: { translation: id } },
+  lng: bahasaAwal,
   fallbackLng: "id",
   interpolation: { escapeValue: false },
 });
@@ -83,5 +79,25 @@ i18n.changeLanguage = (async (lng?: string, callback?: (err: unknown, t: unknown
   }
   return gantiBahasaDasar(lng, callback);
 }) as typeof i18n.changeLanguage;
+
+/**
+ * #515 — render baru boleh mulai setelah kamus bahasa pilihan ada di memori.
+ *
+ * Tanpa ini, pengguna Inggris yang membuka aplikasi langsung menerima kalimat
+ * Indonesia sampai kamusnya tiba, dan `fallbackLng` membuat kejadian itu tidak
+ * bersuara: tidak ada nama kunci mentah, tidak ada galat, tidak ada test yang
+ * menangkapnya. Bagi pengguna Indonesia tidak ada yang ditunggu sama sekali:
+ * kamusnya sudah ada sejak `init()`, jadi `siapBahasa` langsung selesai.
+ *
+ * Batas waktunya bukan hiasan: potongan kamus bisa menggantung di jaringan
+ * hotspot. Menampilkan bahasa yang salah lebih murah daripada layar putih
+ * tanpa sebab.
+ */
+export const siapBahasa: Promise<void> = i18n.hasResourceBundle(bahasaAwal, "translation")
+  ? Promise.resolve()
+  : Promise.race([
+      muatKamus(bahasaAwal).catch(() => undefined),
+      new Promise<void>((resolve) => setTimeout(resolve, 2000)),
+    ]);
 
 export default i18n;

@@ -1,10 +1,8 @@
-import i18n from "./i18n";
+import i18n, { siapBahasa } from "./i18n";
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
-// Memuat konfigurasi i18next (item #134). Harus sebelum App dirender.
-import "./i18n";
 
 interface Props {
   children?: ReactNode;
@@ -134,10 +132,15 @@ try {
   console.error("[SSO] Gagal memproses kembalian SSO:", e);
 }
 
-createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary>
-    <AuthNotificationProvider>
-      <App />
-    </AuthNotificationProvider>
-  </ErrorBoundary>
-);
+const pasang = () =>
+  createRoot(document.getElementById("root")!).render(
+    <ErrorBoundary>
+      <AuthNotificationProvider>
+        <App />
+      </AuthNotificationProvider>
+    </ErrorBoundary>
+  );
+
+// #515 — hanya kamus Indonesia yang ikut potongan awal, jadi piksel pertama
+// menunggu kamus bahasa pilihan tiba. Untuk Indonesia tungguannya nol.
+siapBahasa.then(pasang);
