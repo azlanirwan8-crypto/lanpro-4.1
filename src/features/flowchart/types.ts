@@ -142,11 +142,3 @@ export interface Point {
   x: number;
   y: number;
 }
-
-export interface Obstacle {
-  id: string;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-}

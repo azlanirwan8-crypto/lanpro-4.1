@@ -2274,8 +2274,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent) => {
-    // Track cursor coordinates relative to infinite canvas (Miro-style coordinate info HUD)
-    if (canvasContainerRef.current) {
+    // Item #520 — posisi kursor hanya dibutuhkan garis bantu penghubung, yaitu
+    // saat pengguna SEDANG menarik koneksi. Sebelumnya state ini disetel pada
+    // SETIAP event mousemove; karena <FlowchartEdges> menerimanya sebagai props,
+    // satu kibasan mouse memaksa seluruh kanvas render ulang — termasuk rute
+    // tiap garis (terukur 105 ms untuk 25 bentuk / 35 garis sesudah rute
+    // dioptimasi, 298 ms sebelum itu). HUD koordinat yang dulu membaca nilai
+    // ini sudah disembunyikan ("HIDDEN AS REQUESTED" di blok bawah), jadi tidak
+    // ada tampilan yang berubah.
+    if (connectSourceId && canvasContainerRef.current) {
       const rect = canvasContainerRef.current.getBoundingClientRect();
       const relativeX = e.clientX - rect.left;
       const relativeY = e.clientY - rect.top;
@@ -3020,6 +3027,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             hoverCoords={hoverCoords}
                             connectorType={connectorType}
                             getNodeCenter={getNodeCenter}
+                            draggingNodeId={draggingNodeId}
                           />
 
                           {/* RENDER DYNAMIC SHAPES */}

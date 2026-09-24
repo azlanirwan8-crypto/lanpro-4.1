@@ -6,7 +6,7 @@
  * state global. Input sama menghasilkan output sama.
  */
 
-import type { FlowNode, Point, Obstacle } from '../types';
+import type { FlowNode, Point } from "../types";
 
 /** Apakah dua ruas garis saling berpotongan (termasuk kasus kolinear/bersentuhan). */
 export function isSegmentIntersectingSegment(p1: Point, p2: Point, q1: Point, q2: Point): boolean {
@@ -15,8 +15,12 @@ export function isSegmentIntersectingSegment(p1: Point, p2: Point, q1: Point, q2
   };
 
   const onSegment = (p: Point, q: Point, r: Point) => {
-    return q.x >= Math.min(p.x, r.x) && q.x <= Math.max(p.x, r.x) &&
-           q.y >= Math.min(p.y, r.y) && q.y <= Math.max(p.y, r.y);
+    return (
+      q.x >= Math.min(p.x, r.x) &&
+      q.x <= Math.max(p.x, r.x) &&
+      q.y >= Math.min(p.y, r.y) &&
+      q.y <= Math.max(p.y, r.y)
+    );
   };
 
   const d1 = crossProduct(p1, p2, q1);
@@ -25,8 +29,10 @@ export function isSegmentIntersectingSegment(p1: Point, p2: Point, q1: Point, q2
   const d4 = crossProduct(q1, q2, p2);
 
   // General intersection where vectors cross
-  if (((d1 > 0.001 && d2 < -0.001) || (d1 < -0.001 && d2 > 0.001)) &&
-      ((d3 > 0.001 && d4 < -0.001) || (d3 < -0.001 && d4 > 0.001))) {
+  if (
+    ((d1 > 0.001 && d2 < -0.001) || (d1 < -0.001 && d2 > 0.001)) &&
+    ((d3 > 0.001 && d4 < -0.001) || (d3 < -0.001 && d4 > 0.001))
+  ) {
     return true;
   }
 
@@ -40,12 +46,20 @@ export function isSegmentIntersectingSegment(p1: Point, p2: Point, q1: Point, q2
 }
 
 /** Apakah sebuah ruas garis memotong atau berada di dalam sebuah persegi. */
-export function isSegmentIntersectingRect(p1: Point, p2: Point, rect: { x1: number, y1: number, x2: number, y2: number }) {
+export function isSegmentIntersectingRect(
+  p1: Point,
+  p2: Point,
+  rect: { x1: number; y1: number; x2: number; y2: number }
+) {
   // Check if either point is strictly inside the obstacle rectangle with a small inset for safety
   const buffer = 1;
   const isPointInside = (p: Point) => {
-    return p.x >= rect.x1 + buffer && p.x <= rect.x2 - buffer &&
-           p.y >= rect.y1 + buffer && p.y <= rect.y2 - buffer;
+    return (
+      p.x >= rect.x1 + buffer &&
+      p.x <= rect.x2 - buffer &&
+      p.y >= rect.y1 + buffer &&
+      p.y <= rect.y2 - buffer
+    );
   };
 
   if (isPointInside(p1) || isPointInside(p2)) {
@@ -76,6 +90,23 @@ export function isSegmentIntersectingRect(p1: Point, p2: Point, rect: { x1: numb
  * Mencari jalur terpendek antar dua titik sambil menghindari node lain.
  * Memakai Dijkstra di atas graf sudut-sudut rintangan, dengan penalti belokan
  * agar garis tetap rapi dan tidak bergelombang.
+ *
+ * Item #520 — keluaran fungsi ini WAJIB tetap sama persis dengan versi
+ * sebelumnya; yang berubah hanya cara menghitungnya. Dua hal yang membuatnya
+ * mahal pada kanvas berisi puluhan bentuk:
+ *
+ *  1. Setiap tetangga dicari dengan `vertices.find(id)` di dalam loop bersarang
+ *     — pencarian linear O(V) per pasangan, padahal urutan simpul sudah menentukan
+ *     siapa yang menang bila jarak seri.
+ *  2. Setiap uji "ruas ini terhalang?" diperiksa terhadap SEMUA node di kanvas.
+ *
+ * Perbaikan 1: simpul disimpan sebagai array paralel berindeks, dan indeks
+ * pemrosesan dijaga agar sama dengan urutan penyisipan lama (pemilihan simpul
+ * terdekat memakai perbandingan `<` ketat, jadi pemenang seri tetap yang
+ * pertama masuk). Perbaikan 2: kotak pembatas ruas dibandingkan terhadap kotak
+ * pembatas rintangan lebih dulu — bila keduanya terpisah, ruas itu pasti tidak
+ * memotong dan kedua ujungnya pasti di luar, jadi uji potong yang mahal bisa
+ * dilewati tanpa mengubah hasil.
  */
 export function findSmartRoute(
   start: Point & { dir?: { x: number; y: number } },
@@ -86,24 +117,33 @@ export function findSmartRoute(
 ): Point[] {
   // Filter out from/to nodes, define safety boundary margin for shapes
   const padding = 26;
-  const obstacles: Obstacle[] = [];
+  const obX1: number[] = [];
+  const obY1: number[] = [];
+  const obX2: number[] = [];
+  const obY2: number[] = [];
 
   for (const n of nodes) {
     if (n.id === fromNodeId || n.id === toNodeId) continue;
     const w = n.width || 130;
     const h = n.height || 70;
-    obstacles.push({
-      id: n.id,
-      x1: n.x - padding,
-      y1: n.y - padding,
-      x2: n.x + w + padding,
-      y2: n.y + h + padding,
-    });
+    obX1.push(n.x - padding);
+    obY1.push(n.y - padding);
+    obX2.push(n.x + w + padding);
+    obY2.push(n.y + h + padding);
   }
+  const jumlahRintangan = obX1.length;
 
   const isBlocked = (p1: Point, p2: Point) => {
-    for (const o of obstacles) {
-      if (isSegmentIntersectingRect(p1, p2, o)) {
+    const segX1 = p1.x < p2.x ? p1.x : p2.x;
+    const segX2 = p1.x < p2.x ? p2.x : p1.x;
+    const segY1 = p1.y < p2.y ? p1.y : p2.y;
+    const segY2 = p1.y < p2.y ? p2.y : p1.y;
+
+    for (let i = 0; i < jumlahRintangan; i++) {
+      if (segX2 < obX1[i] || segX1 > obX2[i] || segY2 < obY1[i] || segY1 > obY2[i]) continue;
+      if (
+        isSegmentIntersectingRect(p1, p2, { x1: obX1[i], y1: obY1[i], x2: obX2[i], y2: obY2[i] })
+      ) {
         return true;
       }
     }
@@ -119,84 +159,74 @@ export function findSmartRoute(
   const stubOffset = 25;
   const startStub: Point = {
     x: start.x + (start.dir?.x || 0) * stubOffset,
-    y: start.y + (start.dir?.y || 0) * stubOffset
+    y: start.y + (start.dir?.y || 0) * stubOffset,
   };
   const endStub: Point = {
     x: end.x + (end.dir?.x || 0) * stubOffset,
-    y: end.y + (end.dir?.y || 0) * stubOffset
+    y: end.y + (end.dir?.y || 0) * stubOffset,
   };
 
   // Build vertices (Start, Stubs, Corner waypoints of obstacle layout, End)
-  interface Vertex extends Point {
-    id: string;
-  }
-  const vertices: Vertex[] = [
-    { x: start.x, y: start.y, id: "start" },
-    { x: startStub.x, y: startStub.y, id: "startStub" }
-  ];
+  const vx: number[] = [start.x, startStub.x];
+  const vy: number[] = [start.y, startStub.y];
 
-  for (const o of obstacles) {
-    vertices.push(
-      { x: o.x1, y: o.y1, id: `${o.id}_tl` },
-      { x: o.x2, y: o.y1, id: `${o.id}_tr` },
-      { x: o.x2, y: o.y2, id: `${o.id}_br` },
-      { x: o.x1, y: o.y2, id: `${o.id}_bl` }
-    );
+  for (let i = 0; i < jumlahRintangan; i++) {
+    vx.push(obX1[i], obX2[i], obX2[i], obX1[i]);
+    vy.push(obY1[i], obY1[i], obY2[i], obY2[i]);
   }
 
-  vertices.push(
-    { x: endStub.x, y: endStub.y, id: "endStub" },
-    { x: end.x, y: end.y, id: "end" }
-  );
+  vx.push(endStub.x);
+  vy.push(endStub.y);
+  const idxEnd = vx.length;
+  vx.push(end.x);
+  vy.push(end.y);
+
+  const jumlahSimpul = vx.length;
+  const dist = new Float64Array(jumlahSimpul).fill(Infinity);
+  const prev = new Int32Array(jumlahSimpul).fill(-1);
+  const sudah = new Uint8Array(jumlahSimpul);
+  dist[0] = 0;
 
   // Dijkstra Shortest Path Search
-  const dists: Record<string, number> = {};
-  const prevs: Record<string, string | null> = {};
-  const unvisited = new Set<string>();
-
-  for (const v of vertices) {
-    dists[v.id] = Infinity;
-    prevs[v.id] = null;
-    unvisited.add(v.id);
-  }
-  dists["start"] = 0;
-
-  while (unvisited.size > 0) {
-    let uId: string | null = null;
+  for (;;) {
+    let u = -1;
     let minDist = Infinity;
-    for (const vId of unvisited) {
-      if (dists[vId] < minDist) {
-        minDist = dists[vId];
-        uId = vId;
+    for (let i = 0; i < jumlahSimpul; i++) {
+      if (sudah[i]) continue;
+      if (dist[i] < minDist) {
+        minDist = dist[i];
+        u = i;
       }
     }
 
-    if (uId === null || uId === "end") {
+    if (u === -1 || u === idxEnd) {
       break;
     }
 
-    unvisited.delete(uId);
-    if (dists[uId] === Infinity) continue;
-
-    const u = vertices.find(v => v.id === uId)!;
+    sudah[u] = 1;
 
     // Explore neighbors
-    for (const vId of unvisited) {
-      const v = vertices.find(v2 => v2.id === vId)!;
+    for (let v = 0; v < jumlahSimpul; v++) {
+      if (sudah[v]) continue;
+
+      const ux = vx[u];
+      const uy = vy[u];
+      const vkx = vx[v];
+      const vky = vy[v];
 
       // Check direct visibility
-      if (!isBlocked(u, v)) {
-        const d = Math.sqrt((u.x - v.x) ** 2 + (u.y - v.y) ** 2);
+      if (!isBlocked({ x: ux, y: uy }, { x: vkx, y: vky })) {
+        const d = Math.sqrt((ux - vkx) ** 2 + (uy - vky) ** 2);
 
         // Add a slight turn penalty to discourage unnecessary diagonal bends and maintain beautiful rectangular styling
         let penalty = 0;
-        if (prevs[uId]) {
-          const prevU = vertices.find(v2 => v2.id === prevs[uId])!;
+        if (prev[u] !== -1) {
+          const pu = prev[u];
           // Direction vectors
-          const dx1 = u.x - prevU.x;
-          const dy1 = u.y - prevU.y;
-          const dx2 = v.x - u.x;
-          const dy2 = v.y - u.y;
+          const dx1 = ux - vx[pu];
+          const dy1 = uy - vy[pu];
+          const dx2 = vkx - ux;
+          const dy2 = vky - uy;
 
           const mag1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
           const mag2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
@@ -208,26 +238,23 @@ export function findSmartRoute(
           }
         }
 
-        const alt = dists[uId] + d + penalty;
-        if (alt < dists[vId]) {
-          dists[vId] = alt;
-          prevs[vId] = uId;
+        const alt = dist[u] + d + penalty;
+        if (alt < dist[v]) {
+          dist[v] = alt;
+          prev[v] = u;
         }
       }
     }
   }
 
   // Reconstruct Path
-  if (dists["end"] === Infinity) {
+  if (dist[idxEnd] === Infinity) {
     return [start, startStub, endStub, end];
   }
 
   const path: Point[] = [];
-  let currId: string | null = "end";
-  while (currId) {
-    const v = vertices.find(v2 => v2.id === currId)!;
-    path.unshift({ x: v.x, y: v.y });
-    currId = prevs[currId];
+  for (let c = idxEnd; c !== -1; c = prev[c]) {
+    path.unshift({ x: vx[c], y: vy[c] });
   }
 
   return path;

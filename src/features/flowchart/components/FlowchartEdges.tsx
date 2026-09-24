@@ -12,11 +12,45 @@
  * interaksi dengan bentuk; hanya jalur tak terlihat yang lebar di tiap garis
  * yang menerima klik.
  */
-import React from "react";
+import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import { findSmartRoute } from "../lib/routing";
 import { colorPaletteHex } from "../constants";
-import type { FlowNode, FlowEdge } from "../types";
+import type { FlowNode, FlowEdge, Point } from "../types";
+
+type SimpananRute = { sig: string; points: Point[] };
+
+/**
+ * Item #521 — rute garis dihitung ulang HANYA bila geometri yang mempengaruhinya
+ * berubah.
+ *
+ * Dulu setiap render memanggil `findSmartRoute` untuk SETIAP garis. Terukur:
+ * satu lintasan penuh pada 25 bentuk / 35 garis butuh 105 ms, enam kali anggaran
+ * satu frame (16,7 ms), padahal menggeser satu node hanya mengubah garis yang
+ * benar-benar menempel padanya.
+ *
+ * Aturan sapuannya: selama sebuah node diseret (`draggingNodeId` terisi), tanda
+ * tangan sebuah garis hanya memuat kedua ujungnya — jadi garis lain memakai hasil
+ * tadi dan tidak ikut dihitung. Saat seretan berakhir, tanda tangan ditambah
+ * geometri SEMUA node, sehingga seluruh garis dihitung sekali untuk mengoreksi
+ * rute yang ternyata perlu mengitari node yang baru dipindah. Hasilnya: satu
+ * perhitungan penuh per gerakan mouse, bukan per frame.
+ */
+function ruteDenganCache(
+  kunci: string,
+  tandaTangan: string,
+  hitung: () => Point[],
+  simpanan: Map<string, SimpananRute>
+): Point[] {
+  const lama = simpanan.get(kunci);
+  if (lama && lama.sig === tandaTangan) return lama.points;
+  const points = hitung();
+  // Garis yang dihapus tidak pernah dibersihkan; bila simpanan membesar jauh
+  // melebihi jumlah garis, buang seluruhnya daripada menahan rute basi.
+  if (simpanan.size > 400) simpanan.clear();
+  simpanan.set(kunci, { sig: tandaTangan, points });
+  return points;
+}
 
 interface FlowchartEdgesProps {
   edges: FlowEdge[];
@@ -38,6 +72,8 @@ interface FlowchartEdgesProps {
   connectorType: "bezier" | "straight" | "orthogonal";
   /** Titik tengah sebuah node; tinggal di container karena membaca state nodes. */
   getNodeCenter: (nodeId: string) => { x: number; y: number };
+  /** Node yang SEDANG diseret; null bila tidak ada. Paku sapuan cache rute #521. */
+  draggingNodeId: string | null;
 }
 
 export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
@@ -56,7 +92,24 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
   hoverCoords,
   connectorType,
   getNodeCenter,
+  draggingNodeId,
 }) => {
+  const simpananRute = useRef(new Map<string, SimpananRute>()).current;
+
+  // Tanda tangan global (geometri SEMUA node, sumber rintangan rute) dibekukan
+  // selama sebuah node diseret. Bila tidak dibekukan, tanda tangan tiap garis
+  // berubah bentuk antara render terakhir dan render pertama seretan, sehingga
+  // semua garis dianggap basi dan sapuan cache rute (#521) tidak berlaku sama
+  // sekali. Nilainya baru diperbarui pada render pertama setelah seretan usai —
+  // saat itulah seluruh garis memang perlu dikoreksi sekali penuh.
+  const versiGlobal = useRef("");
+  if (!draggingNodeId) {
+    versiGlobal.current = nodes
+      .map((n) => `${n.id}:${n.x},${n.y},${n.width || 130},${n.height || 70}`)
+      .join(";");
+  }
+  const tandaTanganGlobal = versiGlobal.current;
+
   return (
     <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
       <defs>
@@ -170,8 +223,18 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
         const start = startPort;
         const end = endPort;
 
-        // Find smart route path avoiding intermediate node obstacles
-        const pathPoints = findSmartRoute(start, end, edge.fromNodeId, edge.toNodeId, nodes);
+        // Find smart route path avoiding intermediate node obstacles. Item #521:
+        // hasilnya disimpan per garis dan hanya dihitung ulang bila ujungnya
+        // benar-benar bergerak (lihat ruteDenganCache di atas berkas).
+        const tandaTangan =
+          `${start.x},${start.y},${start.dir?.x},${start.dir?.y}|` +
+          `${end.x},${end.y},${end.dir?.x},${end.dir?.y}#${tandaTanganGlobal}`;
+        const pathPoints = ruteDenganCache(
+          `${edge.fromNodeId}>${edge.toNodeId}`,
+          tandaTangan,
+          () => findSmartRoute(start, end, edge.fromNodeId, edge.toNodeId, nodes),
+          simpananRute
+        );
 
         // Compute custom router path based on active routing types (bezier, straight, orthogonal right-angles)
         let pathD = "";

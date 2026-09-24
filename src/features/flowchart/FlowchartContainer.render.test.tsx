@@ -28,6 +28,15 @@ jest.mock("./services/flowchart.service", () => ({
 // dipakai saat pengguna menekan Export JPG.
 jest.mock("html-to-image", () => ({ toJpeg: jest.fn().mockResolvedValue("") }));
 
+// Item #520 — rute garis adalah pekerjaan termahal di kanvas, jadi ia dipasangi
+// spy supaya test bisa membuktikan KAPAN ia boleh dijalankan. Implementasinya
+// asli tetap dipakai (jest.config.cjs mereset mock sebelum tiap test, jadi
+// implementationsya dipasang ulang di beforeEach).
+jest.mock("./lib/routing", () => ({
+  ...jest.requireActual("./lib/routing"),
+  findSmartRoute: jest.fn(),
+}));
+
 /**
  * Item #142 — anggaran waktu untuk suite ini.
  *
@@ -57,6 +66,7 @@ import {
   updateFlowchart,
   deleteFlowchart,
 } from "./services/flowchart.service";
+import { findSmartRoute } from "./lib/routing";
 
 const project = { id: "p1", name: "Proyek Uji" } as Project;
 
@@ -83,6 +93,9 @@ describe("FlowchartView", () => {
     (createFlowchart as jest.Mock).mockResolvedValue({});
     (updateFlowchart as jest.Mock).mockResolvedValue({});
     (deleteFlowchart as jest.Mock).mockResolvedValue(undefined);
+    (findSmartRoute as jest.Mock).mockImplementation(
+      jest.requireActual("./lib/routing").findSmartRoute
+    );
   });
 
   it("ter-mount tanpa melempar dan tanpa memicu error boundary", async () => {
@@ -259,5 +272,62 @@ describe("FlowchartView", () => {
 
     const bentuk = await screen.findAllByText("Bentuk Lokal");
     expect(bentuk.length).toBeGreaterThan(0);
+  });
+
+  // Item #520 — menggerakkan mouse di atas kanvas tanpa menarik koneksi tidak
+  // boleh memicu perhitungan ulang rute garis. Dulu setiap event mousemove
+  // menyetel state posisi kursor, sehingga seluruh kanvas (dan rute semua
+  // garis di dalamnya) dihitung ulang hanya karena pointer bergeser.
+  it("tidak menghitung ulang rute garis saat mouse hanya bergerak", async () => {
+    (fetchFlowcharts as jest.Mock).mockResolvedValue([
+      {
+        id: "fw5",
+        name: "Alur Rute",
+        description: "",
+        category: "Panduan",
+        nodes: [
+          {
+            id: "r1",
+            type: "rect",
+            x: 60,
+            y: 80,
+            label: "Proses A",
+            color: "indigo",
+            width: 155,
+            height: 70,
+          },
+          {
+            id: "r2",
+            type: "rect",
+            x: 420,
+            y: 260,
+            label: "Proses B",
+            color: "sky",
+            width: 155,
+            height: 70,
+          },
+        ],
+        edges: [{ id: "e1", fromNodeId: "r1", toNodeId: "r2", label: "" }],
+        theme: "miro",
+        createdBy: "u1",
+        createdByName: "Administrator",
+      },
+    ]);
+
+    renderView();
+
+    const baris = await screen.findAllByText("Alur Rute");
+    fireEvent.click(baris[0]);
+    fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
+
+    // Garis harus benar-benar terhitung lebih dulu; tanpa ini test bisa hijau
+    // karena spy yang memang tidak pernah aktif.
+    await waitFor(() => expect(findSmartRoute).toHaveBeenCalled());
+
+    (findSmartRoute as jest.Mock).mockClear();
+
+    fireEvent.mouseMove(await screen.findByDisplayValue("Proses A"));
+
+    expect(findSmartRoute).not.toHaveBeenCalled();
   });
 });
