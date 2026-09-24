@@ -28,6 +28,12 @@ npm run audit:navigasi || exit 1
 # berkas. Mekanisme ratchet: jumlah hanya boleh turun, tidak boleh naik.
 npm run audit:logika || exit 1
 
+# Item #525 — ritme radius. `rounded-*` dipakai 1 749 kali di enam langkah
+# berbeda plus 13 nilai arbitrer, dan tidak ada gerbang yang melihatnya:
+# `audit:warna` hanya menghitung warna. Ratchet global jumlah langkah + arbitrer
+# per berkas, supaya "menyeragamkan sudut" tidak bisa lagi diam-diam mundur.
+npm run audit:radius || exit 1
+
 # CATATAN. Ketiga gerbang di atas TIDAK membuktikan aplikasinya benar.
 # `npm test` dan `npm run build` sengaja TIDAK dijalankan di sini agar commit
 # tidak berubah jadi menit-menitan — keduanya tetap WAJIB sebelum merge ke

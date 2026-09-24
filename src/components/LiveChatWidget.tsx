@@ -1011,7 +1011,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           {!isSelf && msg.receiverId === "group" && (
                             <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-muted mb-0.5 ml-1 flex items-center gap-1 select-none">
                               {senderDisplayName}
-                              <span className="px-1 bg-surface-strong text-content-secondary rounded-[3px] text-xs sm:text-[10px] sm:text-[7px] font-medium">
+                              <span className="px-1 bg-surface-strong text-content-secondary rounded text-xs sm:text-[10px] sm:text-[7px] font-medium">
                                 {senderProfile?.role || "anggota"}
                               </span>
                             </span>

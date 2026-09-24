@@ -36,6 +36,7 @@
     "audit:kelas": "node scripts/validate/audit-kelas-token.cjs",
     "audit:navigasi": "node scripts/validate/audit-navigasi.cjs",
     "audit:logika": "node scripts/validate/audit-logika.cjs",
+    "audit:radius": "node scripts/validate/audit-radius.cjs",
     "openapi:generate": "tsx scripts/generate-openapi.ts",
     "test:load": "node scripts/test/load-baseline-322.cjs"
   },

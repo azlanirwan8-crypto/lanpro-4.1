@@ -224,7 +224,7 @@ export const ActivityLogPanel = ({
                                 return (
                                   <>
                                     <div
-                                      className={`mt-0.5 w-10 h-10 rounded-[12px] border flex items-center justify-center shrink-0 transition-all ${colorClass}`}
+                                      className={`mt-0.5 w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 transition-all ${colorClass}`}
                                     >
                                       <Icon className="w-4 h-4" />
                                     </div>
