@@ -43,6 +43,11 @@ function kodePesanServer(): Map<string, string> {
 describe("#150 kode pesan server", () => {
   const kode = kodePesanServer();
 
+  // #515 — bundel Inggris diambil lewat jalur muat produksi lebih dulu.
+  beforeAll(async () => {
+    await i18n.changeLanguage("en");
+  });
+
   it("menemukan kode di kode sumber server", () => {
     expect(kode.size).toBeGreaterThan(150);
   });

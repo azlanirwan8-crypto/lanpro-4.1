@@ -22,8 +22,16 @@ const rata = (o: unknown, awalan = "", keluar: Record<string, string> = {}) => {
 };
 
 describe("paritas kamus", () => {
-  const id = rata(i18n.getResourceBundle("id", "translation"));
-  const en = rata(i18n.getResourceBundle("en", "translation"));
+  let id: Record<string, string>;
+  let en: Record<string, string>;
+
+  // #515 — kamus dimuat lewat jalur produksi (menukar bahasa), bukan diandaikan
+  // sudah ada di potongan awal.
+  beforeAll(async () => {
+    await i18n.changeLanguage("en");
+    id = rata(i18n.getResourceBundle("id", "translation"));
+    en = rata(i18n.getResourceBundle("en", "translation"));
+  });
 
   it("kedua kamus terisi", () => {
     expect(Object.keys(id).length).toBeGreaterThan(1000);

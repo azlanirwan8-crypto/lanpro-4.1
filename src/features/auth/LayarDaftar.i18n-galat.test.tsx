@@ -93,6 +93,11 @@ describe("#171 galat layar Daftar ikut bahasa aktif", () => {
  * mana pun — layar cuma menampilkan "regValidation.nameMin" mentah-mentah.
  */
 describe("#171 kunci pesan skema benar-benar ada di kedua kamus", () => {
+  // #515 — kamus Inggris dimuat lewat jalur produksi sebelum dibedah.
+  beforeAll(async () => {
+    await i18n.changeLanguage("en");
+  });
+
   const adaKunci = (bahasa: "id" | "en", kunci: string) => {
     const bundel = i18n.getResourceBundle(bahasa, "translation") as Record<
       string,

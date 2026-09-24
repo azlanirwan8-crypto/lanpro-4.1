@@ -93,6 +93,11 @@ describe("#164 pesan galat Lengkapi Pendaftaran ikut bahasa aktif", () => {
  * sebab layar lain masih memakainya; yang diperbaiki hanya layar ini.
  */
 describe("#170 layar SSO memakai satu namespace yang bermakna", () => {
+  // #515 — kamus Inggris dimuat lewat jalur produksi sebelum dibedah.
+  beforeAll(async () => {
+    await i18n.changeLanguage("en");
+  });
+
   it("tidak ada lagi kunci jsx/ui2/rakit di berkas layar ini", () => {
     const berkas = fsBerkas(__dirname + "/CompleteRegistrationScreen.tsx");
 

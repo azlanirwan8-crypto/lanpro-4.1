@@ -25,6 +25,11 @@ const adaKunci = (bahasa: "id" | "en", kunci: string) => {
 describe("kunci i18n yang dipakai dinamis", () => {
   const contoh = ["", "abc", "abcdefgh1A", "Abcdefgh1!"];
 
+  // #515 — bundel Inggris diambil lewat jalur muat produksi lebih dulu.
+  beforeAll(async () => {
+    await i18n.changeLanguage("en");
+  });
+
   it("setiap label kekuatan kata sandi memulangkan kunci, bukan teks jadi", () => {
     for (const p of contoh) {
       expect(evaluatePasswordStrength(p).label).toMatch(/^register\.strength[A-Z]/);
