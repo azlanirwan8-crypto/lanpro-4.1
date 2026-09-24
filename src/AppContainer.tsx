@@ -1263,6 +1263,29 @@ function AppContainer() {
     }, 400);
   }, []);
 
+  const projectsRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const usersRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // #516 — daftar proyek dan daftar pengguna dulunya ditarik ulang SETIAP event
+  // realtime, tanpa penggabungan: N rekan kerja yang mengubah apa pun berarti
+  // N permintaan penuh. Polanya disamakan dengan scheduleTaskDataRefresh.
+  const scheduleProjectsRefresh = useCallback(() => {
+    if (projectsRefreshTimerRef.current) clearTimeout(projectsRefreshTimerRef.current);
+    projectsRefreshTimerRef.current = setTimeout(() => {
+      projectsRefreshTimerRef.current = null;
+      realTimeRefs.current.fetchProjects();
+    }, 400);
+  }, []);
+
+  const scheduleUsersRefresh = useCallback(() => {
+    if (usersRefreshTimerRef.current) clearTimeout(usersRefreshTimerRef.current);
+    usersRefreshTimerRef.current = setTimeout(() => {
+      usersRefreshTimerRef.current = null;
+      if (shouldSuppressUsersRefresh()) return;
+      realTimeRefs.current.fetchAllUsers();
+    }, 400);
+  }, []);
+
   useEffect(() => {
     realTimeRefs.current = {
       fetchProjects,
@@ -1275,6 +1298,8 @@ function AppContainer() {
       fetchNotifications,
       scheduleTaskDataRefresh,
       scheduleActivityLogsRefresh,
+      scheduleProjectsRefresh,
+      scheduleUsersRefresh,
       setTasks,
       selectedProject,
       currentUser,
@@ -1455,12 +1480,10 @@ function AppContainer() {
         }
       }
       if (path.includes("/projects") && !path.includes("/tasks") && !path.includes("/sprints")) {
-        refs.fetchProjects();
+        refs.scheduleProjectsRefresh?.();
       }
       if (path.includes("/users") || path.includes("/project-members")) {
-        if (!shouldSuppressUsersRefresh()) {
-          refs.fetchAllUsers();
-        }
+        refs.scheduleUsersRefresh?.();
       }
       if (path.includes("/sprints")) {
         if (refs.selectedProject && !shouldSuppressSprintDataRefresh()) {
@@ -1488,8 +1511,8 @@ function AppContainer() {
       }
       if (path.includes("/db-query")) {
         // A raw query might have modified anything. Safest is to refresh all.
-        refs.fetchProjects();
-        refs.fetchAllUsers();
+        refs.scheduleProjectsRefresh?.();
+        refs.scheduleUsersRefresh?.();
 
         // Debounce master data
         if (!refs.masterDataDebounceTimer) {

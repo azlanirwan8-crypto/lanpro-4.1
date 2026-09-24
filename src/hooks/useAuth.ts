@@ -309,12 +309,6 @@ export function useAuth(
         console.warn("Failed to prefetch data:", e);
       }
 
-      // Security delay for browser password managers
-      if (!force) {
-        setLoginStatusText("Memverifikasi keamanan sesi...");
-        await new Promise((resolve) => setTimeout(resolve, 800));
-      }
-
       setIsAuthLoading(false);
       setIsLoggedIn(true);
       setUserRole(userData.role);
