@@ -58,6 +58,9 @@ const propsUntuk = (nodes: FlowNode[], draggingNodeId: string | null) => ({
   setConnectSourceId: jest.fn(),
   hoverCoords: { x: 0, y: 0 },
   connectorType: "orthogonal" as const,
+  zoomLevel: 1,
+  onEdgePatch: jest.fn(),
+  onDeleteEdge: jest.fn(),
   getNodeCenter: (id: string) => {
     const n = nodes.find((x) => x.id === id);
     return n ? { x: n.x + n.width! / 2, y: n.y + n.height! / 2 } : { x: 0, y: 0 };

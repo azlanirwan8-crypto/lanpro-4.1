@@ -104,6 +104,10 @@ export interface FlowEdge {
   fromNodeId: string;
   toNodeId: string;
   label?: string;
+  /** Bentuk jalur garis satuannya. Kosong = ikut bentuk bawaan papan. */
+  connector?: "bezier" | "straight" | "orthogonal";
+  /** Gaya goresan. Kosong = garis utuh. */
+  strokeStyle?: "solid" | "dashed" | "dotted";
 }
 
 export interface FlowchartDocument {

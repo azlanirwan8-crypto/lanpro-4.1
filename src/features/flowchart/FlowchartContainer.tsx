@@ -150,7 +150,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     panOffset,
     setPanOffset,
     zoomLevel,
-    setZoomLevel,
     isPanning,
     setIsPanning,
     panStart,
@@ -160,17 +159,46 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     isSnapToGrid,
     setIsSnapToGrid,
     canvasContainerRef,
+    pasangKanvas,
     isPanningRef,
     startCanvasPanning,
     updatePanOffset,
     stopCanvasPanning,
     toggleCanvasTheme,
     toggleGridSnap,
+    aturZoom,
+    geserZoom,
     resetZoom,
     resetPan,
     resetCanvas,
     applyGridSnap,
   } = canvasHook;
+
+  // Item #530 — layar penuh KHUSUS PAPAN. Yang diminta masuk fullscreen adalah
+  // pembungkus ruang kerjanya: bilah atas, bilah alat kiri, dock bawah, minimap,
+  // dan panel properti semuanya anak dari elemen itu, jadi semuanya ikut
+  // memenuhi layar. Kalau elemen kanvas yang diminta, chrome papan justru hilang.
+  const papanRef = useRef<HTMLDivElement>(null);
+  const [papanPenuh, setPapanPenuh] = useState(false);
+
+  useEffect(() => {
+    // Pengguna bisa keluar lewat Esc milik peramban atau isyarat sistem lain,
+    // jadi statusnya dibaca dari dokumen - tidak dipercaya dari tombol saja.
+    const sinkron = () => setPapanPenuh(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", sinkron);
+    return () => document.removeEventListener("fullscreenchange", sinkron);
+  }, []);
+
+  const togglePapanPenuh = () => {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen().catch(() => setPapanPenuh(false));
+      return;
+    }
+    if (!papanRef.current) return;
+    void papanRef.current
+      .requestFullscreen()
+      .catch(() => toast.error(t("flowchart.fullscreenGagal")));
+  };
 
   // UI Modals & Sidebars
   const uiHook = useFlowchartUI();
@@ -1024,8 +1052,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       // Add: Ctrl +/- for zooming canvas precisely instead of zooming native browser window
       if ((e.ctrlKey || e.metaKey) && (e.key === "=" || e.key === "+" || e.key === "-")) {
         e.preventDefault();
-        const zoomDelta = e.key === "-" ? -0.1 : 0.1;
-        setZoomLevel((prev) => Math.min(3.0, Math.max(0.2, prev + zoomDelta)));
+        geserZoom(e.key === "-" ? 1 / 1.1 : 1.1);
       }
     };
 
@@ -1196,8 +1223,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       setSelectedNodeId(null);
       setSelectedEdgeId(null);
       setConnectSourceId(null);
-      setPanOffset({ x: 50, y: 50 });
-      setZoomLevel(0.9);
+      resetCanvas();
       setRightViewMode("embed");
     }
   };
@@ -2471,6 +2497,18 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   // Node / Arrow delete handler
+  /**
+   * Simpan bentuk atau gaya goresan satu garis — dikirim bilah gaya yang muncul
+   * saat garis diklik. Dulu tidak mungkin dilakukan sama sekali: FlowEdge tidak
+   * punya field gaya, dan satu-satunya pengatur bentuk jalur (connectorType) tidak
+   * pernah bisa diubah dari antarmuka mana pun.
+   */
+  const handleEdgePatch = (id: string, patch: Partial<FlowEdge>) => {
+    const updatedEdges = edges.map((edge) => (edge.id === id ? { ...edge, ...patch } : edge));
+    setEdges(updatedEdges);
+    recordHistory(nodes, updatedEdges);
+  };
+
   const handleDeleteSelected = () => {
     if (selectedNodeId) {
       const updatedNodes = nodes.filter((n) => n.id !== selectedNodeId);
@@ -2837,7 +2875,10 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     </div>
                   ) : (
                     /* 2. HIGH-FIDELITY MIRO CANVAS WORKSPACE (DIAGRAM ALUR) */
-                    <div className="flex-1 relative overflow-hidden bg-surface flex flex-col h-full min-h-0">
+                    <div
+                      ref={papanRef}
+                      className="flex-1 relative overflow-hidden bg-surface flex flex-col h-full min-h-0"
+                    >
                       {/* FLOATING QUICK CANVAS CONTROL BAR ON TOP OF THE BOARD */}
                       <CanvasToolbar
                         currentFlowMetadata={currentFlowMetadata || undefined}
@@ -2849,6 +2890,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         handleExportJSON={handleExportJSON}
                         isRightSidebarOpen={isRightSidebarOpen}
                         setIsRightSidebarOpen={setIsRightSidebarOpen}
+                        isFullscreen={papanPenuh}
+                        onToggleFullscreen={togglePapanPenuh}
                       />
 
                       {/* FLOATING MIRO TOOLBAR (SISI KIRI) — #321 / #433 */}
@@ -2917,7 +2960,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           }
                         }}
                         onDrop={handleCanvasFileDrop}
-                        ref={canvasContainerRef}
+                        ref={pasangKanvas}
                         style={{
                           cursor:
                             activeTool === "hand" || isSpacePressed || isPanning
@@ -2936,7 +2979,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         {canvasDragOver && (
                           <div className="absolute inset-0 z-50 pointer-events-none flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-primary/60 bg-primary/5 backdrop-blur-sm transition-all">
                             <div className="bg-surface/90 backdrop-blur-md border border-border-subtle rounded-2xl px-6 py-5 shadow-xl flex flex-col items-center gap-2 select-none">
-                              <span className="text-4xl">📂</span>
+                              <Upload className="w-8 h-8 text-primary" aria-hidden="true" />
                               <p className="text-sm font-semibold text-content-strong">
                                 Lepaskan untuk Impor Diagram
                               </p>
@@ -3026,6 +3069,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             setConnectSourceId={setConnectSourceId}
                             hoverCoords={hoverCoords}
                             connectorType={connectorType}
+                            zoomLevel={zoomLevel}
+                            onEdgePatch={handleEdgePatch}
+                            onDeleteEdge={handleDeleteSelected}
                             getNodeCenter={getNodeCenter}
                             draggingNodeId={draggingNodeId}
                           />
@@ -3265,21 +3311,21 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                           {/* Zoom Controls */}
                           <div className="flex items-center gap-0.5 bg-surface-sunken/50 rounded-xl p-0.5 border border-border-subtle/60">
                             <button
-                              onClick={() => setZoomLevel((prev) => Math.max(0.2, prev - 0.1))}
+                              onClick={() => geserZoom(1 / 1.1)}
                               className="p-1.5 text-content-muted hover:bg-surface-strong hover:text-content-strong rounded-lg transition-all active:scale-95"
                               title={t("flowchart.zoomOut")}
                             >
                               <ZoomOut className="w-3.5 h-3.5" />
                             </button>
                             <button
-                              onClick={() => setZoomLevel(1)}
+                              onClick={() => aturZoom(1)}
                               className="px-2 text-xs sm:text-[10px] font-medium text-content-secondary hover:text-primary w-11 text-center font-mono cursor-pointer transition-colors"
                               title={t("flowchart.zoomReset")}
                             >
                               {Math.round(zoomLevel * 100)}%
                             </button>
                             <button
-                              onClick={() => setZoomLevel((prev) => Math.min(3.0, prev + 0.1))}
+                              onClick={() => geserZoom(1.1)}
                               className="p-1.5 text-content-muted hover:bg-surface-strong hover:text-content-strong rounded-lg transition-all active:scale-95"
                               title={t("flowchart.zoomIn")}
                             >
@@ -3378,9 +3424,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             </div>
                             <div className="h-px bg-surface-inverse my-1" />
                             <p className="text-xs sm:text-[10px] text-content-subtle italic font-mono leading-relaxed">
-                              💡 Tips BNI Doc: Aktifkan mode &ldquo;Arrow&rdquo; dari toolbar
-                              sebelah kiri, klik pada komponen awal, lalu klik pada komponen kedua
-                              untuk menyambung koneksi anak panah alur secara instan.
+                              Tips: Aktifkan mode &ldquo;Arrow&rdquo; dari toolbar sebelah kiri,
+                              klik pada komponen awal, lalu klik pada komponen kedua untuk
+                              menyambung koneksi anak panah alur secara instan.
                             </p>
                           </div>
                         )}
@@ -3742,12 +3788,9 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
               canvasContextMenu.y
             )
           }
-          onZoomIn={() => setZoomLevel((prev) => Math.min(3.0, prev + 0.1))}
-          onZoomOut={() => setZoomLevel((prev) => Math.max(0.2, prev - 0.1))}
-          onResetZoom={() => {
-            setZoomLevel(0.9);
-            setPanOffset({ x: 50, y: 50 });
-          }}
+          onZoomIn={() => geserZoom(1.1)}
+          onZoomOut={() => geserZoom(1 / 1.1)}
+          onResetZoom={resetCanvas}
           onUndo={handleUndoClick}
           onRedo={handleRedoClick}
           onClear={handleClearWhiteboard}

@@ -6,7 +6,17 @@
  */
 import { useTranslation } from "react-i18next";
 import React from "react";
-import { Workflow, Sun, Moon, LayoutGrid, Download, Database, Activity } from "lucide-react";
+import {
+  Workflow,
+  Sun,
+  Moon,
+  LayoutGrid,
+  Download,
+  Database,
+  Activity,
+  Maximize2,
+  Minimize2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "../../../lib/utils";
 import type { FlowchartData } from "../types";
@@ -22,6 +32,9 @@ interface CanvasToolbarProps {
   handleExportJSON: () => void;
   isRightSidebarOpen: boolean;
   setIsRightSidebarOpen: (value: boolean) => void;
+  /** Papan sedang tampil layar penuh? Hanya papan, bukan seluruh aplikasi. */
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
 }
 
 export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
@@ -34,6 +47,8 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   handleExportJSON,
   isRightSidebarOpen,
   setIsRightSidebarOpen,
+  isFullscreen,
+  onToggleFullscreen,
 }) => {
   const { t } = useTranslation();
   return (
@@ -122,6 +137,26 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
             <Download className="w-3.5 h-3.5" />
             <span className="hidden md:inline">{t("flowchart.export")}</span>
           </button>
+          <button
+            type="button"
+            onClick={onToggleFullscreen}
+            aria-pressed={isFullscreen}
+            aria-label={t(isFullscreen ? "common.exitFullscreen" : "common.fullscreen")}
+            title={t(isFullscreen ? "common.exitFullscreen" : "common.fullscreen")}
+            className={cn(
+              "p-1.5 rounded-md transition-all cursor-pointer",
+              isFullscreen
+                ? "bg-primary/15 text-primary border border-primary/30"
+                : "text-content-secondary hover:bg-surface-muted hover:text-primary border border-transparent"
+            )}
+          >
+            {isFullscreen ? (
+              <Minimize2 className="w-3.5 h-3.5" />
+            ) : (
+              <Maximize2 className="w-3.5 h-3.5" />
+            )}
+          </button>
+
           <button
             type="button"
             onClick={handleExportJSON}
