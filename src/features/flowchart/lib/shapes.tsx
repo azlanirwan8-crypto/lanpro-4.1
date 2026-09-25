@@ -15,8 +15,10 @@ import { renderUmlShape, renderUmlPreviewIcon } from "./shapes/umlShapes";
 import { renderProcessShape, renderProcessPreviewIcon } from "./shapes/processShapes";
 import { renderAzureShape, renderAzurePreviewIcon } from "./shapes/azureShapes";
 import { renderBpmnShape, renderBpmnPreviewIcon } from "./shapes/bpmnShapes";
+import { ekstraTypes, renderEkstraShape, renderEkstraPreviewIcon } from "./shapes/ekstraShapes";
 
 export const customSvgTypes = [
+  ...ekstraTypes,
   "circle",
   "oval",
   "triangle",
@@ -139,6 +141,7 @@ export function renderCustomSvgShape(
     renderProcessShape(node, svgProps, elementProps, isSelected) ||
     renderAzureShape(node, svgProps, elementProps, isBlueprint, isSelected) ||
     renderBpmnShape(node, svgProps, elementProps, isBlueprint, isSelected) ||
+    renderEkstraShape(node, svgProps, elementProps) ||
     null
   );
 }
@@ -162,7 +165,8 @@ export function renderMiniPreviewIcon(type: string) {
     renderUmlPreviewIcon(type, commonProps, elementProps) ||
     renderProcessPreviewIcon(type, commonProps, elementProps) ||
     renderAzurePreviewIcon(type, commonProps, elementProps) ||
-    renderBpmnPreviewIcon(type, commonProps, elementProps) || (
+    renderBpmnPreviewIcon(type, commonProps, elementProps) ||
+    renderEkstraPreviewIcon(type, commonProps, elementProps) || (
       <div className="w-5 h-5 bg-indigo-500 rounded-sm" />
     )
   );

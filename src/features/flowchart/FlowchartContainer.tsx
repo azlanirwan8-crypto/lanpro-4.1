@@ -58,7 +58,7 @@ import { CanvasContextMenu } from "./components/CanvasContextMenu";
 import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData } from "./types";
 import { parseUniversalDiagram } from "./lib/importers";
 import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
-import { colorPalettes } from "./constants";
+import { colorPalettes, UKURAN_BENTUK } from "./constants";
 // Diberi akhiran Api karena useFlowchartList() juga mengekspos updateFlowchart
 // dan deleteFlowchart untuk state daftar lokal. Nama berbeda mencegah salah
 // panggil, sekaligus memperjelas mana yang menembak backend.
@@ -1710,6 +1710,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     let alignment: FlowNode["align"] = "center";
     let bdStyle: FlowNode["borderStyle"] = "solid";
 
+    // #541 — switch di bawah hanya menyebut sebagian tipe; sisanya lahir sebagai
+    // kotak 140x70, jadi lingkaran jadi telur dan panah jadi papan. Peta dibaca
+    // SEBELUM switch supaya kasus yang sudah ada tetap menang.
+    const ukuranLahir = UKURAN_BENTUK[type];
+    if (ukuranLahir) {
+      width = ukuranLahir.width;
+      height = ukuranLahir.height;
+      if (ukuranLahir.fontSize) fSize = ukuranLahir.fontSize;
+    }
+
     switch (type) {
       case "sticky":
         defaultLabel = "Ide / Catatan Tempel Miro";
@@ -2203,6 +2213,16 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     let alignment: FlowNode["align"] = "center";
     let bdStyle: FlowNode["borderStyle"] = "solid";
 
+    // #541 — switch di bawah hanya menyebut sebagian tipe; sisanya lahir sebagai
+    // kotak 140x70, jadi lingkaran jadi telur dan panah jadi papan. Peta dibaca
+    // SEBELUM switch supaya kasus yang sudah ada tetap menang.
+    const ukuranLahir = UKURAN_BENTUK[type];
+    if (ukuranLahir) {
+      width = ukuranLahir.width;
+      height = ukuranLahir.height;
+      if (ukuranLahir.fontSize) fSize = ukuranLahir.fontSize;
+    }
+
     switch (type) {
       case "sticky":
         width = 110;
@@ -2314,9 +2334,17 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setSelectedEdgeId(null);
     setCopiedNodes([]);
 
-    if (activeTool === "hand" || isSpacePressed || e.button === 1 || e.shiftKey) {
+    // #540 — papan mengikuti tangan: klik-tahan di kanvas kosong MENGGESER papan
+    // (dulu: hanya tool tangan / spasi / tombol tengah, sementara drag biasa
+    // menggambar kerangka seleksi sehingga papan terasa mati). Seleksi kotak
+    // pindah ke Shift+drag dan tetap menyeleksi bentuk yang tersentuh.
+    const seleksiKotak = e.shiftKey;
+    if (
+      !seleksiKotak &&
+      (activeTool === "hand" || isSpacePressed || e.button === 1 || activeTool === "select")
+    ) {
       startCanvasPanning(e.clientX, e.clientY);
-    } else if (activeTool === "select") {
+    } else if (seleksiKotak && activeTool === "select") {
       const rect = canvasContainerRef.current?.getBoundingClientRect();
       if (rect) {
         setMarqueeBox({
@@ -3076,8 +3104,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                         onDrop={handleCanvasFileDrop}
                         ref={pasangKanvas}
                         style={{
+                          // #540 — dengan tool panah, kanvas kosong kini ikut
+                          // digenggam; bentuk tetap punya kursornya sendiri.
                           cursor:
-                            activeTool === "hand" || isSpacePressed || isPanning
+                            activeTool === "hand" ||
+                            activeTool === "select" ||
+                            isSpacePressed ||
+                            isPanning
                               ? isPanning
                                 ? "grabbing"
                                 : "grab"

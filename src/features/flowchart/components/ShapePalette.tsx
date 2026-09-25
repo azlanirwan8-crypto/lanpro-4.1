@@ -13,6 +13,10 @@ import { DIAGRAM_SHAPE_GROUPS } from "../constants";
 import { renderMiniPreviewIcon } from "../lib/shapes";
 import type { FlowNode } from "../types";
 
+/** Grup yang boleh memakai tanda "FREE" — judul aslinya panjang, jadi
+ *  perbandingan lama ("AWS", "UML") tidak pernah cocok. */
+const GRUP_BERBADGE = ["My Shapes", "AWS Active Cloud", "UML Modeling"];
+
 interface ShapePaletteProps {
   isShapeDropdownOpen: boolean;
   setIsShapeDropdownOpen: (value: boolean) => void;
@@ -44,6 +48,23 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
   const { t } = useTranslation();
 
   const closePalette = () => setIsShapeDropdownOpen(false);
+
+  // #541 — satu predikat untuk grup, daftar, dan pesan "tidak ada hasil".
+  // Sebelumnya predikat yang sama ditulis dua kali (dan bisa berbeda), serta
+  // hanya membaca name/desc sehingga mencari "bpmn" atau "cloud" tidak
+  // menemukan apa pun walaupun judul grupnya persis begitu.
+  const kueri = shapeSearchQuery.trim().toLowerCase();
+  const grupTersaring = DIAGRAM_SHAPE_GROUPS.map((group) => ({
+    group,
+    items: group.items.filter(
+      (item) =>
+        kueri === "" ||
+        group.title.toLowerCase().includes(kueri) ||
+        item.name.toLowerCase().includes(kueri) ||
+        !!item.desc?.toLowerCase().includes(kueri)
+    ),
+  }));
+  const adaHasil = grupTersaring.some((g) => g.items.length > 0);
 
   const panelBody = (
     <>
@@ -130,13 +151,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
 
       {/* Categorized Scrollable Shapes */}
       <div className="flex-1 overflow-y-auto p-2.5 space-y-2 custom-scrollbar min-h-0">
-        {DIAGRAM_SHAPE_GROUPS.map((group, groupIdx) => {
-          const filteredItems = group.items.filter(
-            (item) =>
-              item.name.toLowerCase().includes(shapeSearchQuery.toLowerCase()) ||
-              (item.desc && item.desc.toLowerCase().includes(shapeSearchQuery.toLowerCase()))
-          );
-
+        {grupTersaring.map(({ group, items: filteredItems }, groupIdx) => {
           if (filteredItems.length === 0) return null;
 
           const isExpanded = shapeSearchQuery.trim() !== "" ? true : !!expandedGroups[group.title];
@@ -156,9 +171,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                   <span className="text-[11px] font-medium text-content-strong tracking-tight truncate">
                     {group.title}
                   </span>
-                  {(group.title === "AWS" ||
-                    group.title === "UML" ||
-                    group.title === "My Shapes") && (
+                  {GRUP_BERBADGE.includes(group.title) && (
                     <span className="text-[9px] leading-none bg-primary/10 text-primary font-medium px-1 py-[1px] rounded border border-primary/30">
                       FREE
                     </span>
@@ -185,7 +198,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
               </button>
 
               {isExpanded && (
-                <div className="grid grid-cols-2 gap-1 mt-1 px-0.5">
+                <div className="flex flex-col gap-1 mt-1 px-0.5">
                   {filteredItems.map((item) => (
                     <button
                       key={item.type}
@@ -207,10 +220,10 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
                         {renderMiniPreviewIcon(item.type)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-medium text-content-body leading-tight truncate group-hover:text-primary transition-colors">
+                        <p className="text-[11px] font-medium text-content-body leading-tight group-hover:text-primary transition-colors">
                           {item.name}
                         </p>
-                        <p className="text-[10px] text-content-subtle leading-none truncate mt-0.5">
+                        <p className="text-[10px] text-content-subtle leading-tight mt-0.5">
                           {item.desc}
                         </p>
                       </div>
@@ -222,14 +235,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
           );
         })}
 
-        {DIAGRAM_SHAPE_GROUPS.every(
-          (group) =>
-            group.items.filter(
-              (item) =>
-                item.name.toLowerCase().includes(shapeSearchQuery.toLowerCase()) ||
-                (item.desc && item.desc.toLowerCase().includes(shapeSearchQuery.toLowerCase()))
-            ).length === 0
-        ) && (
+        {!adaHasil && (
           <div className="text-center py-8 text-content-subtle text-xs sm:text-[11px]">
             {t("shapePalette.noShapeFound")}
           </div>
@@ -272,7 +278,7 @@ export const ShapePalette: React.FC<ShapePaletteProps> = ({
               // Mobile sheet
               "max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:top-auto max-md:w-full max-md:max-h-[70vh] max-md:rounded-t-2xl max-md:border-b-0 safe-area-pb",
               // Desktop flyout
-              "md:absolute md:left-11 md:top-0 md:w-64 md:h-[min(520px,calc(100vh-160px))] md:max-h-[560px] md:rounded-xl"
+              "md:absolute md:left-11 md:top-0 md:w-72 md:h-[min(520px,calc(100vh-160px))] md:max-h-[560px] md:rounded-xl"
             )}
           >
             <div className="md:hidden flex justify-center pt-2 pb-1 shrink-0">

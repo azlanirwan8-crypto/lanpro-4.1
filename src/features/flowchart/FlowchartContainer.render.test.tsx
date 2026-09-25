@@ -454,4 +454,105 @@ describe("FlowchartView", () => {
     expect(tema.textContent).toBe("");
     expect(snap.textContent).toBe("");
   });
+
+  // Item #540 — klik-tahan pada kanvas kosong harus MENGGESER papan. Dulu drag
+  // biasa menggambar kerangka seleksi, sehingga papan terasa mati bagi orang yang
+  // belum tahu ada tool tangan / spasi. Seleksi kotak tetap ada di Shift+drag.
+  it("drag biasa menggeser papan, Shift+drag menggambar seleksi kotak", async () => {
+    (fetchFlowcharts as jest.Mock).mockResolvedValue([
+      {
+        id: "fw6",
+        name: "Alur Geser",
+        description: "",
+        category: "Panduan",
+        nodes: [
+          {
+            id: "g1",
+            type: "rect",
+            x: 60,
+            y: 60,
+            label: "Satu",
+            color: "indigo",
+            width: 155,
+            height: 70,
+          },
+        ],
+        edges: [],
+        theme: "miro",
+        createdBy: "u1",
+        createdByName: "Administrator",
+      },
+    ]);
+
+    const { container } = renderView();
+    fireEvent.click((await screen.findAllByText("Alur Geser"))[0]);
+    fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
+    await screen.findByTitle(/Snap to Grid|Snapping/i);
+
+    const kanvas = container.querySelector(".grid-dots-light") as HTMLElement;
+    const kotakSeleksi = () => container.querySelector(".z-\\[100\\]");
+    const awal = kanvas.style.backgroundPosition;
+    expect(awal).toBe("50px 50px");
+
+    fireEvent.mouseDown(kanvas, { clientX: 300, clientY: 200, button: 0 });
+    fireEvent.mouseMove(window, { clientX: 240, clientY: 150 });
+    expect(kanvas.style.backgroundPosition).toBe("-10px 0px");
+    expect(kotakSeleksi()).toBeNull();
+    fireEvent.mouseUp(window);
+
+    // Shift+drag: yang bergerak kotak seleksi, papan dibiarkan diam.
+    const sesudahGeser = kanvas.style.backgroundPosition;
+    fireEvent.mouseDown(kanvas, { clientX: 300, clientY: 200, button: 0, shiftKey: true });
+    fireEvent.mouseMove(window, { clientX: 240, clientY: 150, shiftKey: true });
+    expect(kotakSeleksi()).toBeTruthy();
+    expect(kanvas.style.backgroundPosition).toBe(sesudahGeser);
+    fireEvent.mouseUp(window);
+  });
+
+  // Item #541 — pencarian palet dulu hanya membaca nama/keterangan bentuk, jadi
+  // mengetik "bpmn" atau "cloud" tidak menemukan apa pun walaupun judul grupnya
+  // persis begitu. Sekarang judul grup ikut dicocokkan.
+  it("mencari nama grup menampilkan bentuk di dalam grup itu", async () => {
+    (fetchFlowcharts as jest.Mock).mockResolvedValue([
+      {
+        id: "fw4",
+        name: "Alur Palet",
+        description: "",
+        category: "Panduan",
+        nodes: [],
+        edges: [],
+        theme: "miro",
+        createdBy: "u1",
+        createdByName: "Administrator",
+      },
+    ]);
+
+    const { container } = renderView();
+    fireEvent.click((await screen.findAllByText("Alur Palet"))[0]);
+    fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
+    await screen.findByTitle(/Snap to Grid|Snapping/i);
+
+    fireEvent.click(screen.getByTitle(/koleksi simbol|symbol collection/i));
+    const kotakCari = await screen.findByPlaceholderText(/Cari bentuk|Search shapes/i);
+
+    fireEvent.change(kotakCari, { target: { value: "bpmn" } });
+    expect(await screen.findByText("Timer Event")).toBeInTheDocument();
+
+    fireEvent.change(kotakCari, { target: { value: "network" } });
+    // Judul grup (Cloud & Network) ikut dicocokkan, jadi isinya muncul.
+    expect(await screen.findByText("Load Balancer")).toBeInTheDocument();
+
+    // #541 — ukuran lahir: `handleAddNewNode` hanya punya kasus untuk sebagian
+    // tipe, jadi tanpa peta UKURAN_BENTUK bentuk baru lahir kotak 140x70 dan
+    // lingkaran jadi telur. Event BPMN harus datang sebagai 110x110.
+    const kotak = (r: number) =>
+      Array.from(container.querySelectorAll("*")).filter(
+        (el) => (el as HTMLElement).style?.width === r + "px"
+      ).length;
+    expect(kotak(110)).toBe(0);
+
+    fireEvent.change(kotakCari, { target: { value: "timer" } });
+    fireEvent.click(await screen.findByText("Timer Event"));
+    await waitFor(() => expect(kotak(110)).toBeGreaterThan(0));
+  });
 });
