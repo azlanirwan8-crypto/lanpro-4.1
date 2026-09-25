@@ -194,10 +194,15 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       void document.exitFullscreen().catch(() => setPapanPenuh(false));
       return;
     }
-    if (!papanRef.current) return;
-    void papanRef.current
-      .requestFullscreen()
-      .catch(() => toast.error(t("flowchart.fullscreenGagal")));
+    const papan = papanRef.current;
+    // Peramban tanpa Element.requestFullscreen (iOS di bawah 16.4) akan
+    // melempar TypeError di tengah klik; lebih baik bilah papan bilang tidak
+    // bisa daripada seluruh view ikut runtuh.
+    if (!papan || typeof papan.requestFullscreen !== "function") {
+      toast.error(t("flowchart.fullscreenGagal"));
+      return;
+    }
+    void papan.requestFullscreen().catch(() => toast.error(t("flowchart.fullscreenGagal")));
   };
 
   // UI Modals & Sidebars
@@ -2504,9 +2509,25 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
    * pernah bisa diubah dari antarmuka mana pun.
    */
   const handleEdgePatch = (id: string, patch: Partial<FlowEdge>) => {
+    if (!isWorkspaceEditable) return;
     const updatedEdges = edges.map((edge) => (edge.id === id ? { ...edge, ...patch } : edge));
     setEdges(updatedEdges);
     recordHistory(nodes, updatedEdges);
+  };
+
+  /**
+   * Putuskan SATU garis terpilih. `handleDeleteSelected` sengaja tidak dipakai di
+   * sini: cabang pertamanya memeriksa `copiedNodes` SEBELUM `selectedEdgeId`, jadi
+   * sesudah sekali Ctrl+C menekan "putuskan" pada sebuah garis malah menghapus
+   * bentuk-bentuk yang tersalin. Untuk aksi pada baris, sasaran aksinya harus garis.
+   */
+  const handlePutuskanGaris = () => {
+    if (!isWorkspaceEditable || !selectedEdgeId) return;
+    const updatedEdges = edges.filter((edge) => edge.id !== selectedEdgeId);
+    setEdges(updatedEdges);
+    recordHistory(nodes, updatedEdges);
+    setSelectedEdgeId(null);
+    toast.success(t("toast.connectionCancelled"));
   };
 
   const handleDeleteSelected = () => {
@@ -3071,7 +3092,8 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             connectorType={connectorType}
                             zoomLevel={zoomLevel}
                             onEdgePatch={handleEdgePatch}
-                            onDeleteEdge={handleDeleteSelected}
+                            onDeleteEdge={handlePutuskanGaris}
+                            isEditable={isWorkspaceEditable}
                             getNodeCenter={getNodeCenter}
                             draggingNodeId={draggingNodeId}
                           />
@@ -3681,6 +3703,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               <input
                                 type="text"
                                 value={edges.find((e) => e.id === selectedEdgeId)?.label || ""}
+                                disabled={!isWorkspaceEditable}
                                 onChange={(e) => {
                                   const updated = edges.map((edge) =>
                                     edge.id === selectedEdgeId
@@ -3694,12 +3717,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                               />
                             </div>
 
-                            <button
-                              onClick={handleDeleteSelected}
-                              className="w-full p-2 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/30 text-rose-700 font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" /> {t("flowchart.disconnectFlow")}
-                            </button>
+                            {isWorkspaceEditable && (
+                              <button
+                                onClick={handlePutuskanGaris}
+                                className="w-full p-2 bg-rose-500/10 hover:bg-rose-500/15 border border-rose-500/30 text-rose-700 font-medium rounded text-xs flex items-center justify-center gap-2 transition-all"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" /> {t("flowchart.disconnectFlow")}
+                              </button>
+                            )}
                           </div>
                         ) : (
                           <div className="text-center py-16 text-content-muted space-y-3">

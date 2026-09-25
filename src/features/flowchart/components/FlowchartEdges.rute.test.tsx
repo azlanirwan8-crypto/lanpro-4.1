@@ -59,6 +59,7 @@ const propsUntuk = (nodes: FlowNode[], draggingNodeId: string | null) => ({
   hoverCoords: { x: 0, y: 0 },
   connectorType: "orthogonal" as const,
   zoomLevel: 1,
+  isEditable: true,
   onEdgePatch: jest.fn(),
   onDeleteEdge: jest.fn(),
   getNodeCenter: (id: string) => {

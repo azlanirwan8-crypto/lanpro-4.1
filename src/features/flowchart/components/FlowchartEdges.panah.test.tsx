@@ -64,6 +64,7 @@ const propsUntuk = (partial: Partial<Props> = {}): Props => ({
   hoverCoords: { x: 0, y: 0 },
   connectorType: "orthogonal",
   zoomLevel: 1,
+  isEditable: true,
   onEdgePatch: jest.fn(),
   onDeleteEdge: jest.fn(),
   getNodeCenter: (id: string) => {
@@ -85,6 +86,11 @@ const ujungPanah = (m: Element) => {
 };
 
 const marker = (el: HTMLElement, id: string) => el.querySelector(`marker#${id}`)!;
+
+const tombolDi = (el: HTMLElement, kunci: string) =>
+  Array.from(el.querySelectorAll("button")).find(
+    (b) => b.getAttribute("title") === String(i18n.t(kunci))
+  );
 
 describe("FlowchartEdges — kepala panah di ujung garis (#522 e)", () => {
   it("ujung panah duduk tepat di akhir garis, bukan 8×tebal garis sebelumnya", () => {
@@ -151,11 +157,6 @@ describe("FlowchartEdges — gaya garis per garis (#529)", () => {
 });
 
 describe("FlowchartEdges — bilah gaya saat garis diklik (#529)", () => {
-  const tombol = (el: HTMLElement, kunci: string) =>
-    Array.from(el.querySelectorAll("button")).find(
-      (b) => b.getAttribute("title") === String(i18n.t(kunci))
-    );
-
   it("muncul hanya untuk garis terpilih, tersangkur di tengah garis", () => {
     const tanpa = render(<FlowchartEdges {...propsUntuk()} />).container as HTMLElement;
     expect(tanpa.querySelector("button")).toBe(null);
@@ -166,8 +167,25 @@ describe("FlowchartEdges — bilah gaya saat garis diklik (#529)", () => {
     const sangkura = terpilih.querySelector("button")!.closest("div[style]")!;
     expect(sangkura.getAttribute("style")).toContain(`left: ${TENGAH_GARIS.x}px`);
     expect(sangkura.getAttribute("style")).toContain(`top: ${TENGAH_GARIS.y}px`);
-    expect(tombol(terpilih, "flowchart.lineStraight")).toBeTruthy();
-    expect(tombol(terpilih, "flowchart.lineDashed")).toBeTruthy();
+    expect(tombolDi(terpilih, "flowchart.lineStraight")).toBeTruthy();
+    expect(tombolDi(terpilih, "flowchart.lineDashed")).toBeTruthy();
+  });
+
+  it("papan baca-saja tidak menampilkan bilah gaya sama sekali", () => {
+    const tanpa = render(
+      <FlowchartEdges {...propsUntuk({ selectedEdgeId: "e1", isEditable: false })} />
+    ).container as HTMLElement;
+    expect(tanpa.querySelector("button")).toBe(null);
+    // garisnya tetap digambar seperti biasa; hanya alat ubahnya yang hilang
+    expect(jalurTerlihat(tanpa).getAttribute("marker-end")).toContain("canvas-arrow-head");
+  });
+
+  it("tanpa aksi putuskan, tombol hapus tidak ikut muncul", () => {
+    const el = render(
+      <FlowchartEdges {...propsUntuk({ selectedEdgeId: "e1", onDeleteEdge: undefined })} />
+    ).container as HTMLElement;
+    expect(tombolDi(el, "flowchart.lineDashed")).toBeTruthy();
+    expect(tombolDi(el, "flowchart.disconnectFlow")).toBe(undefined);
   });
 
   it("klik pilihan gaya mengirim patch ke garis yang benar", () => {
@@ -177,10 +195,10 @@ describe("FlowchartEdges — bilah gaya saat garis diklik (#529)", () => {
     );
     const el = container as HTMLElement;
 
-    fireEvent.click(tombol(el, "flowchart.lineDashed")!);
+    fireEvent.click(tombolDi(el, "flowchart.lineDashed")!);
     expect(onEdgePatch).toHaveBeenCalledWith("e1", { strokeStyle: "dashed" });
 
-    fireEvent.click(tombol(el, "flowchart.lineElbow")!);
+    fireEvent.click(tombolDi(el, "flowchart.lineElbow")!);
     expect(onEdgePatch).toHaveBeenCalledWith("e1", { connector: "orthogonal" });
 
     expect(onEdgePatch).not.toHaveBeenCalledWith("e1", { label: expect.anything() });

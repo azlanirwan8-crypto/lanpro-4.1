@@ -85,8 +85,10 @@ interface FlowchartEdgesProps {
   zoomLevel: number;
   /** Simpan bentuk/goresan satu garis (popup mini saat garis diklik). */
   onEdgePatch: (id: string, patch: Partial<FlowEdge>) => void;
-  /** Putuskan sambungan garis yang sedang dipilih. */
-  onDeleteEdge: () => void;
+  /** Putuskan sambungan garis terpilih. Kosong = tombol putuskan tak dipakai. */
+  onDeleteEdge?: () => void;
+  /** Papan boleh diubah; bilah gaya tidak muncul untuk pembaca saja. */
+  isEditable: boolean;
   /** Titik tengah sebuah node; tinggal di container karena membaca state nodes. */
   getNodeCenter: (nodeId: string) => { x: number; y: number };
   /** Node yang SEDANG diseret; null bila tidak ada. Paku sapuan cache rute #521. */
@@ -111,6 +113,7 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
   zoomLevel,
   onEdgePatch,
   onDeleteEdge,
+  isEditable,
   getNodeCenter,
   draggingNodeId,
 }) => {
@@ -508,8 +511,10 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
       </svg>
 
       {/* Bilah gaya garis: muncul saat sebuah garis diklik, meniru toolbar konteks
-       Miro. Di luar svg supaya tetap HTML biasa (tombol dan tooltip asli). */}
-      {garisTerpilih && titikBilah && (
+       Miro. Di luar svg supaya tetap HTML biasa (tombol dan tooltip asli), dan
+       hanya untuk papan yang boleh diubah — pembaca saja tidak punya apa pun
+       untuk diubah. */}
+      {isEditable && garisTerpilih && titikBilah && (
         <EdgeStyleBar
           edge={garisTerpilih}
           bentukBawaan={connectorType}

@@ -40,7 +40,8 @@ interface EdgeStyleBarProps {
   /** Titik papan (ruang kanvas) tempat bilah disangkurkan: tengah garis. */
   titik: { x: number; y: number };
   onPatch: (patch: Partial<FlowEdge>) => void;
-  onDelete: () => void;
+  /** Putuskan sambungan. Kosong bila papan sedang baca-saja: tombolnya hilang. */
+  onDelete?: () => void;
 }
 
 const Tombol: React.FC<{
@@ -135,11 +136,15 @@ export const EdgeStyleBar: React.FC<EdgeStyleBarProps> = ({
           </Tombol>
         ))}
 
-        <div className="w-px h-4 bg-surface-strong mx-0.5" />
+        {onDelete && (
+          <>
+            <div className="w-px h-4 bg-surface-strong mx-0.5" />
 
-        <Tombol aktif={false} judul={t("flowchart.disconnectFlow")} onClick={onDelete}>
-          <Trash2 className="w-3.5 h-3.5 text-rose-500" />
-        </Tombol>
+            <Tombol aktif={false} judul={t("flowchart.disconnectFlow")} onClick={onDelete}>
+              <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+            </Tombol>
+          </>
+        )}
       </div>
     </div>
   );
