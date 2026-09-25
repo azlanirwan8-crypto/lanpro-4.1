@@ -417,4 +417,41 @@ describe("FlowchartView", () => {
     expect(renderErrors).toHaveLength(0);
     errorSpy.mockRestore();
   });
+
+  // Item #539 — tombol tema dan snap di bilah atas papan jadi icon-only: namanya
+  // tidak lagi ditulis di layar ("Free move" memang keadaan bawaan papan), tapi
+  // keduanya tetap punya nama untuk pembaca layar lewat aria-label. Dua hal ini
+  // diuji berdampingan justru karena yang satu menghapus teks yang dipakai yang
+  // lain untuk mencari tombolnya.
+  it("tombol tema dan snap tidak menulis namanya di layar, tapi tetap bernama", async () => {
+    (fetchFlowcharts as jest.Mock).mockResolvedValue([
+      {
+        id: "fw8",
+        name: "Alur Ikon Saja",
+        description: "",
+        category: "Panduan",
+        nodes: [],
+        edges: [],
+        theme: "miro",
+        createdBy: "u1",
+        createdByName: "Administrator",
+      },
+    ]);
+
+    renderView();
+    fireEvent.click((await screen.findAllByText("Alur Ikon Saja"))[0]);
+    fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
+    await screen.findByTitle(/Snap to Grid|Snapping/i);
+
+    // Nama kedua tombol HANYA boleh datang dari aria-label, bukan dari tooltip:
+    // `title`-nya kalimat panjang ("Ubah Tema Kanvas (Saat ini: …)"), jadi pola
+    // yang dipagar dua sisi ini merah bila aria-label dilepas — itu justru yang
+    // membuat tombol icon-only masih bisa dipakai pembaca layar.
+    const tema = screen.getByRole("button", { name: /^Tema Miro$|^Miro theme$/i });
+    // Tombol snap menampilkan keadaan berjalan; bawaan papan Snap Grid NYALA
+    // (`useFlowchartCanvas.ts:25`), jadi kedua keadaan diterima di sini.
+    const snap = screen.getByRole("button", { name: /^snap grid$|^free move$/i });
+    expect(tema.textContent).toBe("");
+    expect(snap.textContent).toBe("");
+  });
 });

@@ -1,8 +1,10 @@
 /**
  * Bilah kendali melayang di atas kanvas.
  *
- * #321 — chrome lebih tipis: label tema/snap hanya md+, ekspor icon-only
- * di layar sempit; tanpa teks uppercase padat.
+ * #321 — chrome lebih tipis: ekspor icon-only di layar sempit; tanpa teks
+ * uppercase padat. #539 — tombol tema dan snap ikut icon-only di semua lebar:
+ * namanya dipindah ke aria-label, keadaannya tetap terbaca dari warna ikon dan
+ * tooltip, karena tulisan "Free move" memang keadaan bawaan papan.
  */
 import { useTranslation } from "react-i18next";
 import React from "react";
@@ -81,21 +83,21 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
               );
             }}
             className={cn(
-              "min-h-11 min-w-11 p-2 rounded-md transition-all flex items-center gap-1 cursor-pointer",
+              "min-h-11 min-w-11 p-2 rounded-md transition-all flex items-center justify-center cursor-pointer",
               canvasTheme === "miro"
                 ? "bg-surface-muted hover:bg-surface-strong text-content-body"
                 : "bg-blue-950/40 hover:bg-blue-900/40 text-blue-400"
             )}
             title={`Ubah Tema Kanvas (Saat ini: ${canvasTheme === "miro" ? t("flowchart.miroLight") : t("flowchart.blueprintDark")})`}
+            aria-label={
+              canvasTheme === "miro" ? t("flowchart.miroTheme") : t("flowchart.blueprintTheme")
+            }
           >
             {canvasTheme === "miro" ? (
               <Sun className="w-3.5 h-3.5 text-amber-500 fill-amber-200" />
             ) : (
               <Moon className="w-3.5 h-3.5 text-blue-400 fill-blue-950" />
             )}
-            <span className="text-[10px] font-medium hidden lg:inline px-0.5">
-              {canvasTheme === "miro" ? t("flowchart.miroTheme") : t("flowchart.blueprintTheme")}
-            </span>
           </button>
 
           <div className="w-px h-3.5 bg-surface-strong/60" />
@@ -108,19 +110,17 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
               toast.success(t("toast.snapToGrid", { keadaan: nextSnap ? "AKTIF" : "NON-AKTIF" }));
             }}
             className={cn(
-              "min-h-11 min-w-11 p-2 rounded-md transition-all flex items-center gap-1 cursor-pointer",
+              "min-h-11 min-w-11 p-2 rounded-md transition-all flex items-center justify-center cursor-pointer",
               isSnapToGrid
                 ? "bg-primary/10 text-primary hover:bg-primary/15 border border-primary/30"
                 : "text-content-subtle hover:bg-surface-muted border border-transparent"
             )}
             title={`Snap to Grid (Saat ini: ${isSnapToGrid ? "Aktif" : "Mati"})`}
+            aria-label={isSnapToGrid ? t("flowchart.snapGrid") : t("flowchart.freeMove")}
           >
             <LayoutGrid
               className={cn("w-3.5 h-3.5", isSnapToGrid ? "text-primary" : "text-content-subtle")}
             />
-            <span className="text-[10px] font-medium hidden lg:inline px-0.5">
-              {isSnapToGrid ? t("flowchart.snapGrid") : t("flowchart.freeMove")}
-            </span>
           </button>
         </div>
       </div>
