@@ -57,14 +57,16 @@ export function useFlowchartCanvas() {
     if (baru === lama) return;
     const el = canvasContainerRef.current;
     const acuan = titik ?? (el ? { x: el.clientWidth / 2, y: el.clientHeight / 2 } : null);
+    const r = baru / lama;
+    const panBaru = acuan
+      ? { x: acuan.x - (acuan.x - pan.x) * r, y: acuan.y - (acuan.y - pan.y) * r }
+      : pan;
     setZoomLevel(baru);
-    if (acuan) {
-      const r = baru / lama;
-      setPanOffset({
-        x: acuan.x - (acuan.x - pan.x) * r,
-        y: acuan.y - (acuan.y - pan.y) * r,
-      });
-    }
+    setPanOffset(panBaru);
+    // Dua peristiwa gulir bisa tiba sebelum React sempat render. Tanpa nilai
+    // sasaran ditulis ulang ke ref ini, peristiwa kedua masih membaca zoom lama
+    // sehingga langkah pertama hilang — gulir cepat terasa "nyangkut".
+    viewport.current = { zoom: baru, pan: panBaru };
   }, []);
 
   /** Kalikan zoom saat ini dengan `faktor`, terpotong 0.2x–3x. */

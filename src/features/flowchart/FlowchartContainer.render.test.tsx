@@ -330,4 +330,91 @@ describe("FlowchartView", () => {
 
     expect(findSmartRoute).not.toHaveBeenCalled();
   });
+
+  // Item #528 #529 #530 — rantai penderitanya, bukan satuannya. Test hook dan
+  // test lapisan garis membuktikan tiap bagian sendiri; yang ini membuktikan
+  // kanvas ASLI memasang listener gulir, klik garis memunculkan bilah gaya,
+  // pilihan gaya benar-benar sampai ke backend lewat Simpan, dan tombol layar
+  // penuh tidak merobohkan view di peramban tanpa API itu (jsdom tidak punya
+  // Element.requestFullscreen — persis kondisi iOS di bawah 16.4).
+  it("gulir memzoomkan papan, gaya garis tersimpan ke server, layar penuh tidak crash", async () => {
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    (fetchFlowcharts as jest.Mock).mockResolvedValue([
+      {
+        id: "fw5",
+        name: "Alur Gaya Garis",
+        description: "",
+        category: "Panduan",
+        nodes: [
+          {
+            id: "n1",
+            type: "rect",
+            x: 40,
+            y: 40,
+            label: "A",
+            color: "indigo",
+            width: 155,
+            height: 70,
+          },
+          {
+            id: "n2",
+            type: "rect",
+            x: 420,
+            y: 40,
+            label: "B",
+            color: "indigo",
+            width: 155,
+            height: 70,
+          },
+        ],
+        edges: [{ id: "e1", fromNodeId: "n1", toNodeId: "n2" }],
+        theme: "miro",
+        createdBy: "u1",
+        createdByName: "Administrator",
+      },
+    ]);
+
+    const { container } = renderView();
+    fireEvent.click((await screen.findAllByText("Alur Gaya Garis"))[0]);
+    fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
+    await screen.findByTitle(/Snap to Grid|Snapping/i);
+
+    const kanvas = container.querySelector(".grid-dots-light") as Element;
+    expect(kanvas).toBeTruthy();
+    const persen = () => screen.getByTitle(/Setel Ulang Zoom/i).textContent;
+    const sebelum = persen();
+    expect(sebelum).toBe("90%");
+
+    fireEvent.wheel(kanvas, { deltaY: -100, clientX: 300, clientY: 200 });
+    expect(persen()).not.toBe(sebelum);
+
+    // Klik garis → bilah gaya. Sebelum #528 klik ini hanya mengisi panel kanan.
+    const jalur = container.querySelector("path[marker-end]") as Element;
+    fireEvent.click(jalur);
+    const putus = await screen.findByTitle(/putus-putus|dashed/i);
+    fireEvent.click(putus);
+    expect(jalur.getAttribute("stroke-dasharray")).toBe("9, 6");
+
+    // Gaya garis harus ikut berangkat ke basis data, bukan cuma ke state lokal.
+    fireEvent.click(await screen.findByTitle(/Simpan seluruh diagram alur/i));
+    await waitFor(() =>
+      expect(updateFlowchart).toHaveBeenCalledWith(
+        "p1",
+        "fw5",
+        expect.objectContaining({
+          edges: [expect.objectContaining({ id: "e1", strokeStyle: "dashed" })],
+        })
+      )
+    );
+
+    // Layar penuh di lingkungan tanpa Element.requestFullscreen.
+    const penuh = screen.getByTitle(/Layar Penuh|Full screen/i);
+    expect(() => fireEvent.click(penuh)).not.toThrow();
+
+    const renderErrors = errorSpy.mock.calls.filter((call) =>
+      String(call[0]).includes("The above error occurred")
+    );
+    expect(renderErrors).toHaveLength(0);
+    errorSpy.mockRestore();
+  });
 });

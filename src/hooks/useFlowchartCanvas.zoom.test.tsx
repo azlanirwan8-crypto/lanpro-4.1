@@ -130,6 +130,17 @@ describe("useFlowchartCanvas — zoom papan (#528)", () => {
     expect(t.pan.x).toBeCloseTo(panSemula.x - 60 * 0.8, 6);
   });
 
+  it("dua gulir berturut-turut dalam satu render keduanya terpakai", () => {
+    const t = setup();
+    act(() => {
+      t.geser(1.25);
+      t.geser(1.25);
+    });
+    // Tanpa nilai sasaran ditulis ulang ke ref, panggilan kedua masih membaca
+    // zoom 0,9 dan langkah pertama hilang.
+    expect(t.zoom).toBeCloseTo(0.9 * 1.25 * 1.25, 6);
+  });
+
   it("tombol zoom menahan tengah kanvas, bukan pojok kiri-atas", () => {
     const t = setup();
     // jsdom memberi ukuran elemen 0, sehingga "tengah kanvas" = (0, 0).
