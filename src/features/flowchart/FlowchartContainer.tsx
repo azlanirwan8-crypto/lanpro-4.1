@@ -4,6 +4,7 @@ import { StyledDropdown } from "../../components/ui/CommonComponents";
 import { safeLocalStorage, safeSessionStorage } from "../../lib/safeStorage";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useFlowchartCanvas } from "../../hooks/useFlowchartCanvas";
+import { useFlowchartAutosave } from "../../hooks/useFlowchartAutosave";
 import { useFlowchartUI } from "../../hooks/useFlowchartUI";
 import { useFlowchartHistory } from "../../hooks/useFlowchartHistory";
 import { useFlowchartSelection } from "../../hooks/useFlowchartSelection";
@@ -1355,6 +1356,121 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setIsModalOpen(true);
   };
 
+  // ─── SATU KEPUTUSAN UNTUK TIGA JALUR KIRIM ─────────────────────────────────────
+  //
+  // Item #519 — di sinilah letak kerusakan aslinya. Dahulu blok ini memanggil prop
+  // `onSaveFlowcharts`, tetapi tidak ada satu pun pemanggil <FlowchartView> yang pernah
+  // mengirimkannya (diperiksa pada seluruh riwayat git), jadi pengiriman ke server
+  // selalu dilewati sementara toast tetap membunyikan "berhasil menyimpan".
+
+  /**
+   * Papan ini punya baris di basis data? Flow yang baru dibuat di daftar perangkat
+   * memakai id "flow_..." dan belum pernah di-POST, jadi tidak ada yang bisa di-PUT.
+   */
+  const papanPunyaBarisServer = () =>
+    Boolean(selectedProject?.id) && !!selectedFlowId && !selectedFlowId.startsWith("flow_");
+
+  /**
+   * Satu kali pengiriman papan ke barisnya — dipakai tombol Simpan, autosave (#538),
+   * dan pengiriman saat keluar, supaya ketiganya tidak bisa mengambil keputusan berbeda.
+   *
+   * `senyap` menelan toast dan melempar kesalahan ke pemanggilnya: autosave berjalan
+   * tanpa diminta, jadi membunyikan toast tiap beberapa detik akan menimbun layar;
+   * kegagalannya cukup terbaca di bilah status dock.
+   */
+  const kirimKanvasKeServer = async (opts: { senyap: boolean }) => {
+    const idProyek = selectedProject?.id;
+    const projId = idProyek || selectedProject?.key || "default";
+    if (!selectedFlowId) return;
+    if (!idProyek || selectedFlowId.startsWith("flow_")) {
+      if (!opts.senyap) toast.error(t("flowchart.saveNoServerRow"));
+      return;
+    }
+    const alur = flowcharts.find((f) => f.id === selectedFlowId);
+    try {
+      await updateFlowchartApi(idProyek, selectedFlowId, {
+        name: alur?.name ?? flowName,
+        nodes,
+        edges,
+        externalUrl: alur?.externalUrl ?? flowExternalUrl,
+        description: alur?.description ?? flowDescription,
+        category: alur?.category ?? flowCategory,
+      });
+      bersihkanTandaBelumTersinkron(projId, selectedFlowId);
+      if (!opts.senyap) {
+        toast.success(t("flowchart.savedToDb", { shapes: nodes.length, arrows: edges.length }));
+      }
+    } catch (apiErr) {
+      console.warn("Could not save flowchart canvas to API:", apiErr);
+      if (!opts.senyap) {
+        toast.error(
+          t("flowchart.saveToDbFailed", {
+            penyebab: apiErr instanceof Error ? apiErr.message : String(apiErr),
+          })
+        );
+      }
+      throw apiErr;
+    }
+  };
+
+  /* ─── #538 AUTOSAVE PAPAN ─────────────────────────────────────────────────────── */
+  //
+  // Papan mengirim dirinya sendiri beberapa detik setelah pengguna berhenti
+  // menggerakkan isinya. Kebijakannya (jeda, jangan kirim isi yang sama, jangan
+  // potong seretan, jangan menumpuk kiriman) ada di useFlowchartAutosave.
+  //
+  // `isiPapan` hanya berganti identitas kalau isi papan benar-benar berubah, jadi
+  // menggerakkan mouse, memperbesar, atau membuka panel tidak memasang timer baru;
+  // nama/category ikut di dalamnya supaya mengganti nama papan juga tersimpan
+  // sendiri. Salinan perangkat tetap ditulis tiap 1,5 detik oleh efek di atas.
+  const isiPapan = useMemo(
+    () => ({
+      nodes,
+      edges,
+      canvasTheme,
+      name: currentFlowMetadata?.name ?? flowName,
+      description: currentFlowMetadata?.description ?? flowDescription,
+      category: currentFlowMetadata?.category ?? flowCategory,
+      externalUrl: currentFlowMetadata?.externalUrl ?? flowExternalUrl,
+    }),
+    [
+      nodes,
+      edges,
+      canvasTheme,
+      currentFlowMetadata,
+      flowName,
+      flowDescription,
+      flowCategory,
+      flowExternalUrl,
+    ]
+  );
+
+  const {
+    status: statusSimpan,
+    jam: jamSimpan,
+    tandaiTersimpan: tandaiTersimpanOtomatis,
+  } = useFlowchartAutosave({
+    isi: isiPapan,
+    boleh: isWorkspaceEditable && papanPunyaBarisServer(),
+    papan: selectedFlowId,
+    diseret: draggingNodeId !== null || resizingNodeId !== null || marqueeBox !== null,
+    kirim: () => kirimKanvasKeServer({ senyap: true }),
+  });
+
+  const labelStatusSimpan =
+    statusSimpan === "menyimpan"
+      ? t("flowchart.autosaveSaving")
+      : statusSimpan === "gagal"
+        ? t("flowchart.autosaveFailed")
+        : jamSimpan
+          ? t("flowchart.autosavedAt", {
+              jam: jamSimpan.toLocaleTimeString(undefined, {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            })
+          : t("flowchart.autosaveSaved");
+
   // Save Flowchart list & current items to LocalStorage & Backend API
   const handleSaveWorkspace = async (isAutoSave = false) => {
     if (!selectedFlowId) return;
@@ -1385,40 +1501,17 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     // basis data — termasuk perubahan yang baru menyentuh autosave.
     tandaiBelumTersinkron(projId, selectedFlowId);
 
-    // Autosave sengaja TIDAK menulis ke server. Efek pemicunya berjalan 1,5
-    // detik setelah setiap perpindahan node, jadi membiarkannya PUT akan
-    // mengirim satu tulisan ke PostgreSQL untuk tiap tarikan garis.
+    // Efek pemicu di atas (1,5 detik) sengaja berhenti di salinan perangkat.
+    // Yang menulis ke server adalah autosave #538 dan tombol Simpan di bawah.
     if (isAutoSave) return;
 
-    // #519 — di sini letak kerusakan aslinya. Dahulu blok ini memanggil prop
-    // `onSaveFlowcharts`, tetapi tidak ada satu pun pemanggil <FlowchartView>
-    // yang pernah mengirimkannya (diperiksa pada seluruh riwayat git), jadi
-    // pengiriman ke server selalu dilewati sementara toast tetap membunyikan
-    // "berhasil menyimpan".
-    if (!selectedProject?.id || selectedFlowId.startsWith("flow_")) {
-      toast.error(t("flowchart.saveNoServerRow"));
-      return;
-    }
-
-    const alur = flowcharts.find((f) => f.id === selectedFlowId);
     try {
-      await updateFlowchartApi(selectedProject.id, selectedFlowId, {
-        name: alur?.name ?? flowName,
-        nodes,
-        edges,
-        externalUrl: alur?.externalUrl ?? flowExternalUrl,
-        description: alur?.description ?? flowDescription,
-        category: alur?.category ?? flowCategory,
-      });
-      bersihkanTandaBelumTersinkron(projId, selectedFlowId);
-      toast.success(t("flowchart.savedToDb", { shapes: nodes.length, arrows: edges.length }));
-    } catch (apiErr) {
-      console.warn("Could not save flowchart canvas to API:", apiErr);
-      toast.error(
-        t("flowchart.saveToDbFailed", {
-          penyebab: apiErr instanceof Error ? apiErr.message : String(apiErr),
-        })
-      );
+      await kirimKanvasKeServer({ senyap: false });
+      tandaiTersimpanOtomatis();
+    } catch {
+      // Toast "gagal" sudah dibunyikan di dalam kirimKanvasKeServer. Salinan
+      // perangkat dan penanda belum tersinkron tetap menahan kerja pengguna,
+      // dan autosave akan mencoba lagi pada perubahan berikutnya.
     }
   };
 
@@ -3301,13 +3394,29 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
                           {/* Simpan Alur DB */}
                           {isWorkspaceEditable ? (
-                            <button
-                              onClick={() => handleSaveWorkspace()}
-                              className="p-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-xl flex items-center gap-1.5 transition-all shadow-soft active:scale-95"
-                              title={t("flowchart.saveFlowchart")}
-                            >
-                              <Save className="w-3.5 h-3.5" />
-                            </button>
+                            <>
+                              <button
+                                onClick={() => handleSaveWorkspace()}
+                                className="p-2 bg-primary-surface hover:bg-primary-surface-hover text-content-inverse font-medium rounded-xl flex items-center gap-1.5 transition-all shadow-soft active:scale-95"
+                                title={t("flowchart.saveFlowchart")}
+                              >
+                                <Save className="w-3.5 h-3.5" />
+                              </button>
+                              {/* #538 — autosave bekerja tanpa ditekan, jadi hasilnya
+                                  perlu satu tulisan kecil di sebelahnya. */}
+                              {statusSimpan !== "diam" && (
+                                <span
+                                  className={`hidden lg:inline text-[10px] leading-none font-medium tabular-nums ${
+                                    statusSimpan === "gagal"
+                                      ? "text-amber-700"
+                                      : "text-content-subtle"
+                                  }`}
+                                  title={t("flowchart.autosaveHint")}
+                                >
+                                  {labelStatusSimpan}
+                                </span>
+                              )}
+                            </>
                           ) : (
                             <div className="px-2.5 py-1.5 bg-amber-500/10 text-amber-700 border border-amber-500/30 rounded-xl flex items-center gap-1 text-[10px] leading-none font-medium shadow-2xs">
                               <Eye className="w-3.5 h-3.5 text-amber-500" />

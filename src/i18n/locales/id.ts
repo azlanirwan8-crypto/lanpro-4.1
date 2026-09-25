@@ -1527,6 +1527,12 @@ export const id = {
     lineSolid: "Garis utuh",
     lineDashed: "Garis putus-putus",
     lineDotted: "Garis titik-titik",
+    autosaveSaving: "Menyimpan…",
+    autosaveSaved: "Tersimpan otomatis",
+    autosavedAt: "Tersimpan otomatis {{jam}}",
+    autosaveFailed: "Belum tersimpan",
+    autosaveHint:
+      "Papan mengirim dirinya sendiri beberapa detik setelah Anda berhenti menggerakkan isinya. Selama tertulis Belum tersimpan, perubahan baru ada di perangkat ini — tekan Simpan untuk memaksa.",
     fullscreenGagal: "Papan tidak bisa ditampilkan layar penuh di peramban ini.",
     noComponentSelected: "Tidak ada komponen dipilih",
     docNamePlaceholder: "Contoh: Penetration Testing Requirements",

@@ -1516,6 +1516,12 @@ export const en = {
     lineSolid: "Solid line",
     lineDashed: "Dashed line",
     lineDotted: "Dotted line",
+    autosaveSaving: "Saving…",
+    autosaveSaved: "Auto-saved",
+    autosavedAt: "Auto-saved {{jam}}",
+    autosaveFailed: "Not saved yet",
+    autosaveHint:
+      "The board sends itself to the server a few seconds after you stop moving things. While it reads Not saved yet, your changes exist only on this device — press Save to force it.",
     fullscreenGagal: "This browser cannot show the board in full screen.",
     noComponentSelected: "No component selected",
     docNamePlaceholder: "e.g., Penetration Testing Requirements",
