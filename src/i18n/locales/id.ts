@@ -41,7 +41,12 @@ export const id = {
     "srv.senderid_dan_receiverid_diperlukan": "senderId dan receiverId diperlukan.",
     "srv.senderid_receiverid_dan_message": "senderId, receiverId, dan message diperlukan.",
     "srv.pesan_berhasil_ditandai_sebagai": "Pesan ditandai sudah dibaca.",
-    "srv.gagal_membuat_simulasi_balasan": "Gagal membuat simulasi balasan: ",
+    "srv.gagal_membuat_simulasi_balasan": "Gagal membuat simulasi balasan.",
+    "srv.akses_ditolak_simulasi_hanya":
+      "Akses ditolak: balasan simulasi hanya bisa diminta untuk percakapan Anda sendiri.",
+    "srv.sesi_asisten_diperlukan":
+      "Sesi diperlukan: asisten hanya menjawab untuk akun yang sedang masuk.",
+    "srv.gagal_mendapatkan_jawaban_asisten": "Gagal mendapatkan jawaban asisten.",
     "srv.koneksi_ke_database_mysql": "Koneksi ke basis data MySQL berhasil!",
     "srv.db_explorer_hanya_mengizinkan":
       "Penjelajah Basis Data hanya mengizinkan satu pernyataan SELECT/SHOW/DESCRIBE baca-saja.",
@@ -2206,6 +2211,9 @@ export const id = {
     filterKeyword: "Saring kata kunci percakapan...",
     loadingMessages: "Memuat pesan...",
     autoReplySim: "Simulasi Balasan Otomatis",
+    assistantSubtitle: "Jawab dari tugas Anda sendiri",
+    assistantEngine:
+      "Menjalankan model Gemini yang terpasang di server, hanya membaca proyek yang bisa Anda lihat. Tanpa kunci model, asisten akan bilang tidak bisa menjawab — bukan mengarang.",
     sendAttachment: "Kirim Lampiran & Mockup",
     uploadFromComputer: "Unggah Berkas dari Komputer Anda",
     insertFile: "Sisipkan berkas, gambar, atau mockup",

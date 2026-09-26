@@ -55,7 +55,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   currentUser,
   allUsers,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeChatUser, setActiveChatUser] = useState<UserProfile | null>(null);
@@ -303,48 +303,59 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
   if (!currentUser) return null;
 
-  // Trigger Gemini/simulated typing response
-  const triggerSimulation = (userMsgText: string, customPartner: UserProfile) => {
+  // Balasan otomatis: asisten menjawab dari data (/#551), rekan pakai simulasi.
+  const triggerBalasan = (userMsgText: string, customPartner: UserProfile) => {
+    const isAsisten = customPartner.id === "lanpro-ai";
     setIsPartnerTyping(true);
 
-    setTimeout(async () => {
-      try {
-        const response = await apiRequest("/api/chat/simulate-reply", {
-          method: "POST",
-          body: {
-            senderId: customPartner.id,
-            receiverId: currentUser.id,
-            message: userMsgText,
-            senderName: customPartner?.displayName || customPartner?.username,
-            senderRole: customPartner.role,
-          },
-        });
+    // 1,8 d itu pura-pura "sedang mengetik" untuk simulasi rekan. Untuk asisten
+    // ia ditambahkan di atas waktu jawab model yang sudah 2-8 detik.
+    setTimeout(
+      async () => {
+        try {
+          const response = await apiRequest(
+            isAsisten ? "/api/chat/assistant" : "/api/chat/simulate-reply",
+            {
+              method: "POST",
+              body: isAsisten
+                ? { message: userMsgText, bahasa: i18n.language === "id" ? "id" : "en" }
+                : {
+                    senderId: customPartner.id,
+                    receiverId: currentUser.id,
+                    message: userMsgText,
+                    senderName: customPartner?.displayName || customPartner?.username,
+                    senderRole: customPartner.role,
+                  },
+            }
+          );
 
-        if (response.status === "success") {
-          const simulatedMsg = response.data;
+          if (response.status === "success") {
+            const simulatedMsg = response.data;
 
-          setMessages((prev) => {
-            if (prev.some((m) => m.id === simulatedMsg.id)) return prev;
-            return [...prev, simulatedMsg];
-          });
+            setMessages((prev) => {
+              if (prev.some((m) => m.id === simulatedMsg.id)) return prev;
+              return [...prev, simulatedMsg];
+            });
 
-          setLastMessages((prev) => ({
-            ...prev,
-            [customPartner.id]: simulatedMsg,
-          }));
+            setLastMessages((prev) => ({
+              ...prev,
+              [customPartner.id]: simulatedMsg,
+            }));
 
-          if (socket) {
-            socket.emit("send_message", simulatedMsg);
+            if (socket) {
+              socket.emit("send_message", simulatedMsg);
+            }
+
+            playNotificationSound();
           }
-
-          playNotificationSound();
+        } catch (err) {
+          console.warn("Gagal mendapatkan balasan otomatis:", err);
+        } finally {
+          setIsPartnerTyping(false);
         }
-      } catch (err) {
-        console.warn("Gagal mendapatkan balasan otomatis:", err);
-      } finally {
-        setIsPartnerTyping(false);
-      }
-    }, 1800);
+      },
+      isAsisten ? 0 : 1800
+    );
   };
 
   // Handle message submission
@@ -393,7 +404,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
       // Simulation mode: auto response
       const isBot = activeChatUser.id === "lanpro-ai";
       if (isBot || (simulationEnabled && activeChatUser.id !== "group")) {
-        triggerSimulation(msgText, activeChatUser);
+        triggerBalasan(msgText, activeChatUser);
       }
     } catch (err) {
       console.error("Gagal mengirim pesan:", err);
@@ -465,7 +476,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
         });
 
         if (activeChatUser.id === "lanpro-ai") {
-          triggerSimulation(`Mengirim dokumen: ${file.name}`, activeChatUser);
+          triggerBalasan(`Mengirim dokumen: ${file.name}`, activeChatUser);
         }
       } catch (err) {
         console.error("Gagal mengirim lampiran:", err);
@@ -519,7 +530,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
       });
 
       if (activeChatUser.id === "lanpro-ai") {
-        triggerSimulation(`Mengirim mockup: ${name}`, activeChatUser);
+        triggerBalasan(`Mengirim mockup: ${name}`, activeChatUser);
       }
     } catch (err) {
       console.error("Gagal mengirim preset mockup:", err);
@@ -909,7 +920,10 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       <p className="text-xs font-medium text-content-inverse truncate leading-tight flex items-center gap-1">
                         {activeChatUser?.displayName}
                         {activeChatUser.id === "lanpro-ai" && (
-                          <span className="px-1 py-0.2 bg-primary/20 text-primary text-xs sm:text-[10px] sm:text-[8px] font-medium rounded uppercase border border-primary/30">
+                          <span
+                            title={t("chat.assistantEngine")}
+                            className="px-1 py-0.2 bg-primary/20 text-primary text-xs sm:text-[10px] sm:text-[8px] font-medium rounded uppercase border border-primary/30"
+                          >
                             AI
                           </span>
                         )}
@@ -918,7 +932,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         {activeChatUser.id === "group"
                           ? `${allUsers.length} Anggota Proyek`
                           : activeChatUser.id === "lanpro-ai"
-                            ? "Gemini 3.5 Assistant"
+                            ? t("chat.assistantSubtitle")
                             : onlineUserIds.includes(activeChatUser.id)
                               ? "Sedang Aktif"
                               : "Offline"}

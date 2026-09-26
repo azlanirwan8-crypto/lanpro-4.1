@@ -40,7 +40,12 @@ export const en = {
     "srv.senderid_dan_receiverid_diperlukan": "senderId and receiverId are required.",
     "srv.senderid_receiverid_dan_message": "senderId, receiverId, and message are required.",
     "srv.pesan_berhasil_ditandai_sebagai": "Message marked as read.",
-    "srv.gagal_membuat_simulasi_balasan": "Failed to create a simulated reply: ",
+    "srv.gagal_membuat_simulasi_balasan": "Failed to create a simulated reply.",
+    "srv.akses_ditolak_simulasi_hanya":
+      "Access denied: simulated replies can only be requested for your own conversation.",
+    "srv.sesi_asisten_diperlukan":
+      "A session is required: the assistant only answers for a signed-in account.",
+    "srv.gagal_mendapatkan_jawaban_asisten": "Failed to get the assistant answer.",
     "srv.koneksi_ke_database_mysql": "Connected to the MySQL database.",
     "srv.db_explorer_hanya_mengizinkan":
       "The database explorer only allows a single read-only SELECT/SHOW/DESCRIBE statement.",
@@ -2186,6 +2191,9 @@ export const en = {
     filterKeyword: "Filter conversation keywords...",
     loadingMessages: "Loading messages...",
     autoReplySim: "Auto Reply Simulation",
+    assistantSubtitle: "Answers from your own tasks",
+    assistantEngine:
+      "Runs the Gemini model configured on the server and reads only the projects you can see. Without a model key it says it cannot answer, instead of making things up.",
     sendAttachment: "Send Attachment & Mockup",
     uploadFromComputer: "Upload a file from your computer",
     insertFile: "Insert a file, image, or mockup",

@@ -28,7 +28,7 @@ import {
   updateDocumentSchema,
   sendChatMessageSchema,
   markChatReadSchema,
-  simulateReplySchema,
+  assistantSchema,
   createMasterDataSchema,
   updateMasterDataSchema,
   createProjectModuleSchema,
@@ -241,6 +241,21 @@ describe("Domain Zod Schemas (F7 / Item #4 & Item #247)", () => {
     it("markChatReadSchema memvalidasi senderId dan receiverId", () => {
       expect(markChatReadSchema.safeParse({ senderId: "u1", receiverId: "u2" }).success).toBe(true);
       expect(markChatReadSchema.safeParse({ senderId: "u1" }).success).toBe(false);
+    });
+
+    // #551 — asisten hanya menerima pertanyaan. `senderId`/`receiverId`/`userId`
+    // tidak ada di skema, dan zod membuang kunci yang tidak dikenal, jadi mengirim
+    // id orang lain di body tidak mengubah siapa yang datanya dibaca.
+    it("assistantSchema menolak pesan kosong dan membuang id kiriman klien", () => {
+      expect(assistantSchema.safeParse({ message: "" }).success).toBe(false);
+      expect(assistantSchema.safeParse({ message: "a".repeat(2001) }).success).toBe(false);
+      const hasil = assistantSchema.safeParse({
+        message: "Tugas saya apa?",
+        userId: "user-orang-lain",
+        senderId: "lanpro-ai-hacker",
+      });
+      expect(hasil.success).toBe(true);
+      expect(hasil.success && Object.keys(hasil.data).sort()).toEqual(["message"]);
     });
   });
 

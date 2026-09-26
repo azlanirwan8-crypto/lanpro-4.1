@@ -21,3 +21,20 @@ export const simulateReplySchema = z.object({
   senderName: z.string().optional(),
   senderRole: z.string().optional(),
 });
+
+/**
+ * #551 — asisten pribadi. `userId` SENGAJA tidak ada di sini: identitas penanya
+ * diambil dari token (req.user), supaya tidak ada yang bisa meminta data orang
+ * lain dengan mengirim id milik orang lain.
+ *
+ * `.trim()` sebelum `.min(1)`: pertanyaan yang hanya berisi spasi tidak layak
+ * membangunkan seluruh mesin (baca proyek + panggilan model).
+ */
+export const assistantSchema = z.object({
+  message: z
+    .string()
+    .trim()
+    .min(1, "Pesan tidak boleh kosong")
+    .max(2000, "Pesan terlalu panjang (maksimum 2000 karakter)"),
+  bahasa: z.enum(["id", "en"]).optional(),
+});
