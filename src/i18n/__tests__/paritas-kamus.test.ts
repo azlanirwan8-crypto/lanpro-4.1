@@ -4,10 +4,10 @@ import i18n from "../index";
  * Paritas kamus Indonesia ⇄ Inggris.
  *
  * Kegagalan yang ditangkap di sini tidak punya gejala apa pun: `fallbackLng`
- * bernilai "id", jadi kunci yang hilang dari kamus Inggris TIDAK memunculkan
- * nama kunci mentah dan TIDAK menulis galat — layar Inggris cuma menampilkan
- * satu kalimat Indonesia di tengah halaman. Persis "bahasanya masih campur"
- * yang berulang kali dilaporkan pemilik proyek.
+ * bernilai "en" (bawaan ditukar 26 Sep 2026), jadi kunci yang hilang dari kamus
+ * Indonesia TIDAK memunculkan nama kunci mentah dan TIDAK menulis galat — layar
+ * Indonesia cuma menampilkan satu kalimat Inggris di tengah halaman. Persis
+ * "bahasanya masih campur" yang berulang kali dilaporkan pemilik proyek.
  *
  * Dibaca dari bundel runtime, bukan dari teks berkas, supaya kunci berkutip
  * (mis. "srv.akses_ditolak") ikut terhitung — pembaca berbasis baris di
@@ -26,8 +26,10 @@ describe("paritas kamus", () => {
   let en: Record<string, string>;
 
   // #515 — kamus dimuat lewat jalur produksi (menukar bahasa), bukan diandaikan
-  // sudah ada di potongan awal.
+  // sudah ada di potongan awal. Bawaan kini Inggris, jadi kedua bahasa ditukar
+  // lebih dulu supaya kamus yang dimuat malas ikut terpasang.
   beforeAll(async () => {
+    await i18n.changeLanguage("id");
     await i18n.changeLanguage("en");
     id = rata(i18n.getResourceBundle("id", "translation"));
     en = rata(i18n.getResourceBundle("en", "translation"));

@@ -25,8 +25,10 @@ const adaKunci = (bahasa: "id" | "en", kunci: string) => {
 describe("kunci i18n yang dipakai dinamis", () => {
   const contoh = ["", "abc", "abcdefgh1A", "Abcdefgh1!"];
 
-  // #515 — bundel Inggris diambil lewat jalur muat produksi lebih dulu.
+  // #515 — kedua bundel diambil lewat jalur muat produksi lebih dulu; sejak
+  // 26 Sep 2026 yang dimuat malas adalah kamus INDONESIA, bukan Inggris.
   beforeAll(async () => {
+    await i18n.changeLanguage("id");
     await i18n.changeLanguage("en");
   });
 

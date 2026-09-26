@@ -12,6 +12,9 @@ import "@testing-library/jest-dom";
 // sebuah komponen dirender langsung di test. Tanpa baris ini `t()` memulangkan
 // nama kunci mentah ("flowchart.subtitle") alih-alih teksnya, dan setiap
 // assertion pada teks yang tampak di layar gagal dengan pesan yang menyesatkan.
+// `bahasa-uji` WAJIB diimpor lebih dulu: urutannya menentukan bahasa suite,
+// karena bawaan aplikasi kini Inggris.
+import "./bahasa-uji";
 import "../i18n";
 
 import { TextEncoder, TextDecoder } from "util";

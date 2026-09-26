@@ -43,8 +43,10 @@ function kodePesanServer(): Map<string, string> {
 describe("#150 kode pesan server", () => {
   const kode = kodePesanServer();
 
-  // #515 — bundel Inggris diambil lewat jalur muat produksi lebih dulu.
+  // #515 — kedua bundel diambil lewat jalur muat produksi lebih dulu; sejak
+  // 26 Sep 2026 yang dimuat malas adalah kamus INDONESIA, bukan Inggris.
   beforeAll(async () => {
+    await i18n.changeLanguage("id");
     await i18n.changeLanguage("en");
   });
 
@@ -52,7 +54,7 @@ describe("#150 kode pesan server", () => {
     expect(kode.size).toBeGreaterThan(150);
   });
 
-  // Diperiksa LANGSUNG ke bundel, bukan lewat t(): `fallbackLng` bernilai "id",
+  // Diperiksa LANGSUNG ke bundel, bukan lewat t(): `fallbackLng` bernilai "en",
   // sehingga kunci Inggris yang hilang akan diam-diam mengembalikan kalimat
   // Indonesia — persis kebocoran yang hendak dicegah. Lewat t(), uji ini hijau
   // padahal terjemahannya tidak ada.
