@@ -443,16 +443,23 @@ describe("FlowchartView", () => {
     fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
     await screen.findByTitle(/Snap to Grid|Snapping/i);
 
-    // Nama kedua tombol HANYA boleh datang dari aria-label, bukan dari tooltip:
-    // `title`-nya kalimat panjang ("Ubah Tema Kanvas (Saat ini: …)"), jadi pola
-    // yang dipagar dua sisi ini merah bila aria-label dilepas — itu justru yang
+    // Nama tombol HANYA boleh datang dari aria-label, bukan dari tooltip:
+    // `title`-nya kalimat panjang ("Snap to Grid (Saat ini: …)"), jadi pola yang
+    // dipagar dua sisi ini merah bila aria-label dilepas — itu justru yang
     // membuat tombol icon-only masih bisa dipakai pembaca layar.
-    const tema = screen.getByRole("button", { name: /^Tema Miro$|^Miro theme$/i });
     // Tombol snap menampilkan keadaan berjalan; bawaan papan Snap Grid NYALA
     // (`useFlowchartCanvas.ts:25`), jadi kedua keadaan diterima di sini.
     const snap = screen.getByRole("button", { name: /^snap grid$|^free move$/i });
-    expect(tema.textContent).toBe("");
     expect(snap.textContent).toBe("");
+
+    // #547 — papan tidak punya tombol tema lagi; temanya ikut tema aplikasi.
+    expect(
+      screen.queryByRole("button", { name: /tema miro|miro theme|ubah tema kanvas/i })
+    ).toBeNull();
+
+    // #546 — kartu nama papan di bilah melayang juga hilang: namanya cuma boleh
+    // muncul satu kali, di header editor.
+    expect(await screen.findAllByText("Alur Ikon Saja")).toHaveLength(1);
   });
 
   // Item #540 — klik-tahan pada kanvas kosong harus MENGGESER papan. Dulu drag
@@ -507,6 +514,78 @@ describe("FlowchartView", () => {
     expect(kotakSeleksi()).toBeTruthy();
     expect(kanvas.style.backgroundPosition).toBe(sesudahGeser);
     fireEvent.mouseUp(window);
+  });
+
+  // Item #546 — titik ungu di ujung garis bantu pernah menempel sendirian di
+  // sudut papan: `hoverCoords` tidak pernah direset, dan mode sambung tidak
+  // batal oleh klik kosong. Dua-duanya dikunci di sini lewat DOM sungguhan.
+  it("garis bantu lahir di bentuk asal dan klik kosong membatalkan mode sambung", async () => {
+    (fetchFlowcharts as jest.Mock).mockResolvedValue([
+      {
+        id: "fw8",
+        name: "Alur Sambung",
+        description: "",
+        category: "Panduan",
+        nodes: [
+          {
+            id: "g1",
+            type: "rect",
+            x: 60,
+            y: 60,
+            label: "Satu",
+            color: "indigo",
+            width: 155,
+            height: 70,
+          },
+          {
+            id: "g2",
+            type: "rect",
+            x: 420,
+            y: 60,
+            label: "Dua",
+            color: "indigo",
+            width: 155,
+            height: 70,
+          },
+        ],
+        edges: [],
+        theme: "miro",
+        createdBy: "u1",
+        createdByName: "Administrator",
+      },
+    ]);
+
+    const { container } = renderView();
+    fireEvent.click((await screen.findAllByText("Alur Sambung"))[0]);
+    fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
+    await screen.findByTitle(/Snap to Grid|Snapping/i);
+
+    const titikUjung = () => container.querySelector("circle.animate-ping");
+    expect(titikUjung()).toBeNull();
+
+    // Paku hanya muncul saat bentuk disentuh kursor.
+    fireEvent.mouseEnter(container.querySelector('[id="val-node-g1"]') as Element);
+    fireEvent.mouseDown(await screen.findByTitle(/sisi atas|from the top/i), {
+      clientX: 137,
+      clientY: 60,
+      button: 0,
+    });
+
+    const titik = titikUjung();
+    expect(titik).toBeTruthy();
+    // Ujungnya duduk di PUSAT bentuk asal (60+155/2, 60+70/2), bukan di posisi
+    // kursor sesi sebelumnya.
+    expect(Number(titik!.getAttribute("cx"))).toBeCloseTo(137.5, 0);
+    expect(Number(titik!.getAttribute("cy"))).toBeCloseTo(95, 0);
+
+    // Klik di kanvas kosong membatalkan mode sambung.
+    fireEvent.mouseDown(container.querySelector(".grid-dots-light") as Element, {
+      clientX: 900,
+      clientY: 500,
+      button: 0,
+    });
+    fireEvent.mouseUp(window);
+    expect(titikUjung()).toBeNull();
   });
 
   // Item #541 — pencarian palet dulu hanya membaca nama/keterangan bentuk, jadi

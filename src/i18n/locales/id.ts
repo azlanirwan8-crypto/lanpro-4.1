@@ -1584,9 +1584,6 @@ export const id = {
     widthW: "Lebar (W)",
     heightH: "Tinggi (H)",
     supportsPdfWordExcelMax: "Mendukung PDF, Word, Excel (maks. 5 MB)",
-    flowchart: "Diagram Alur",
-    miroTheme: "Tema Miro",
-    blueprintTheme: "Tema Blueprint",
     export: "Ekspor",
     backup: "Cadangan",
     pickADocumentInThe:
@@ -1597,8 +1594,6 @@ export const id = {
     disconnectFlow: "Putuskan Alur",
     clickAShapeStickyNote:
       "Klik satu bentuk, catatan tempel, atau anak panah di kanvas untuk mengubah propertinya.",
-    miroLight: "Miro Terang",
-    blueprintDark: "Blueprint Gelap",
     snapGrid: "Snap Grid",
     freeMove: "Free Move",
     stopSim: "Hentikan Simulasi",

@@ -156,7 +156,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     panStart,
     setPanStart,
     canvasTheme,
-    setCanvasTheme,
     isSnapToGrid,
     setIsSnapToGrid,
     canvasContainerRef,
@@ -165,7 +164,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     startCanvasPanning,
     updatePanOffset,
     stopCanvasPanning,
-    toggleCanvasTheme,
     toggleGridSnap,
     aturZoom,
     geserZoom,
@@ -863,7 +861,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
 
           setNodes(loadedNodes);
           setEdges(loadedEdges);
-          if (json.theme) setCanvasTheme(json.theme);
 
           setHistoryStack([
             {
@@ -1200,7 +1197,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setSelectedFlowId(null);
     setNodes([]);
     setEdges([]);
-    setCanvasTheme("miro");
     setHistoryStack([]);
     setHistoryIndex(0);
     setRightViewMode("embed");
@@ -1216,7 +1212,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
       const loadedEdges = found.edges || [];
       setNodes(loadedNodes);
       setEdges(loadedEdges);
-      setCanvasTheme(found.theme || "miro");
       setHistoryStack([
         {
           nodes: JSON.parse(JSON.stringify(loadedNodes)),
@@ -2334,6 +2329,12 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     setSelectedEdgeId(null);
     setCopiedNodes([]);
 
+    // #546 — klik di luar bentuk membatalkan mode sambung. Sebelumnya mode ini
+    // hanya selesai lewat Escape atau klik port tujuan, sehingga siapa pun yang
+    // salah menekan paku sambung lalu mengklik kosong dibiarkan "menarik garis"
+    // selamanya: garis bantu + titik ungu terus menempel di kursor.
+    if (connectSourceId) setConnectSourceId(null);
+
     // #540 — papan mengikuti tangan: klik-tahan di kanvas kosong MENGGESER papan
     // (dulu: hanya tool tangan / spasi / tombol tengah, sementara drag biasa
     // menggambar kerangka seleksi sehingga papan terasa mati). Seleksi kotak
@@ -2596,6 +2597,11 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const handleConnectClick = (nodeId: string) => {
     if (!connectSourceId) {
       setConnectSourceId(nodeId);
+      // #546 — garis bantu berangkat dari bentuk asal, bukan dari posisi kursor
+      // terakhir. `hoverCoords` tidak pernah direset, jadi tanpa baris ini sambungan
+      // baru langsung lahir dengan titik ungu nyasar di sudut papan (dilaporkan
+      // pemilik papan 26 Sep: "saat membuat garis ada titik yang bergerak").
+      setHoverCoords(getNodeCenter(nodeId));
       toast.info(t("toast.pickTargetShape"));
     } else {
       if (connectSourceId === nodeId) {
@@ -3023,9 +3029,6 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                     >
                       {/* FLOATING QUICK CANVAS CONTROL BAR ON TOP OF THE BOARD */}
                       <CanvasToolbar
-                        currentFlowMetadata={currentFlowMetadata || undefined}
-                        canvasTheme={canvasTheme}
-                        setCanvasTheme={setCanvasTheme}
                         isSnapToGrid={isSnapToGrid}
                         setIsSnapToGrid={setIsSnapToGrid}
                         handleExportJPG={handleExportJPG}
@@ -3056,10 +3059,14 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                       {/* ACTIVE DRAWING SHEET CANVAS (THE BASE BACKGROUND LAYER) */}
                       <div
                         className={cn(
-                          "absolute inset-0 w-full h-full overflow-hidden z-0 transition-colors duration-300 rounded-xl",
-                          canvasTheme === "miro"
-                            ? "bg-surface/95  grid-dots-light"
-                            : "bg-[#0a1124] text-sky-100 grid-blueprint-dark border-border-inverse"
+                          // #547 — papan ikut tema aplikasi, jadi latarnya memakai
+                          // token `surface` yang sudah berbalik sendiri saat aplikasi
+                          // gelap. Sebelumnya gelap menulis nilai keras `bg-[#0a1124]`
+                          // + `text-sky-100` di atas token, dan dua sumber itu
+                          // bertabrakan (keluhan pemilik papan 26 Sep). Yang tersisa
+                          // di sini hanya POLA kisi, bukan warna.
+                          "absolute inset-0 w-full h-full overflow-hidden z-0 transition-colors duration-300 rounded-xl bg-surface/95",
+                          canvasTheme === "miro" ? "grid-dots-light" : "grid-blueprint-dark"
                         )}
                         onMouseDown={handleCanvasMouseDown}
                         onMouseMove={handleCanvasMouseMove}

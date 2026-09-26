@@ -107,15 +107,23 @@ describe("FlowchartView — autosave papan (#538)", () => {
     expect(updateFlowchart).toHaveBeenCalledTimes(1);
   });
 
-  it("pengunjung baca-saja yang mengganti tema kanvas tidak menulis papan orang lain", async () => {
-    renderView({
+  it("pengunjung baca-saja yang menyeret bentuk tidak menulis papan orang lain", async () => {
+    const hasil = renderView({
       currentUserProfile: { id: "u9", name: "Orang Lain", role: "viewer" } as never,
     });
     fireEvent.click((await screen.findAllByText("Alur Autosave"))[0]);
     fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
     await screen.findByTitle(/Snap to Grid|Snapping/i);
 
-    fireEvent.click(await screen.findByTitle(/Ubah Tema Kanvas|Change Canvas Theme/i));
+    // #547 menghapus tombol tema papan, jadi penjaga "pembaca tidak menulis"
+    // diuji lewat interaksi yang paling sering dilakukan orang di papan: menyeret
+    // bentuk. Untuk pembaca saja, `handleNodeMouseDown` hanya memilih — tidak ada
+    // perubahan papan yang bisa berangkat ke server.
+    const bentuk = hasil.container.querySelector('[id^="val-node-"]') as Element;
+    fireEvent.mouseDown(bentuk, { clientX: 120, clientY: 120, button: 0 });
+    fireEvent.mouseMove(bentuk, { clientX: 320, clientY: 240, button: 0 });
+    fireEvent.mouseUp(bentuk, { clientX: 320, clientY: 240 });
+
     await act(async () => {
       await new Promise((r) => setTimeout(r, 6000));
     });

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTemaAplikasi } from "./useTemaAplikasi";
 
 /**
  * useFlowchartCanvas
@@ -20,8 +21,9 @@ export function useFlowchartCanvas() {
   const [isPanning, setIsPanning] = useState<boolean>(false);
   const [panStart, setPanStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  // Canvas theme and grid options
-  const [canvasTheme, setCanvasTheme] = useState<"miro" | "blueprint">("miro");
+  // Tema papan ikut tema aplikasi (#547) — tidak ada lagi state "miro"/"blueprint"
+  // yang bisa menyimpang dari terang/gelapnya aplikasi.
+  const canvasTheme = useTemaAplikasi();
   const [isSnapToGrid, setIsSnapToGrid] = useState<boolean>(true);
 
   // Canvas container ref for event listeners
@@ -140,11 +142,6 @@ export function useFlowchartCanvas() {
     isPanningRef.current = false;
   };
 
-  // Toggle canvas theme
-  const toggleCanvasTheme = () => {
-    setCanvasTheme((prev) => (prev === "miro" ? "blueprint" : "miro"));
-  };
-
   // Toggle grid snapping
   const toggleGridSnap = () => {
     setIsSnapToGrid((prev) => !prev);
@@ -199,7 +196,6 @@ export function useFlowchartCanvas() {
     // sehingga menggeser kanvas melempar error saat dijalankan.
     setIsPanning,
     setPanStart,
-    setCanvasTheme,
     setIsSnapToGrid,
 
     // Handlers
@@ -208,7 +204,6 @@ export function useFlowchartCanvas() {
     startCanvasPanning,
     updatePanOffset,
     stopCanvasPanning,
-    toggleCanvasTheme,
     toggleGridSnap,
     resetZoom,
     resetPan,

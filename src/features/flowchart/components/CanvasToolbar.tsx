@@ -5,29 +5,18 @@
  * uppercase padat. #539 — tombol tema dan snap ikut icon-only di semua lebar:
  * namanya dipindah ke aria-label, keadaannya tetap terbaca dari warna ikon dan
  * tooltip, karena tulisan "Free move" memang keadaan bawaan papan.
+ *
+ * #546/#547 — dua hal dilepas dari bilah ini: kartu nama papan (namanya sudah
+ * ada di header editor dan di daftar flowchart) dan tombol tema. Papan kini
+ * ikut tema aplikasi, jadi tidak ada lagi dua sakelar yang bisa berdebat.
  */
 import { useTranslation } from "react-i18next";
 import React from "react";
-import {
-  Workflow,
-  Sun,
-  Moon,
-  LayoutGrid,
-  Download,
-  Database,
-  Activity,
-  Maximize2,
-  Minimize2,
-} from "lucide-react";
+import { LayoutGrid, Download, Database, Activity, Maximize2, Minimize2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "../../../lib/utils";
-import type { FlowchartData } from "../types";
 
 interface CanvasToolbarProps {
-  /** Flowchart yang sedang dibuka; hanya namanya yang ditampilkan. */
-  currentFlowMetadata: FlowchartData | undefined;
-  canvasTheme: "miro" | "blueprint";
-  setCanvasTheme: (value: "miro" | "blueprint") => void;
   isSnapToGrid: boolean;
   setIsSnapToGrid: (value: boolean) => void;
   handleExportJPG: () => void;
@@ -40,9 +29,6 @@ interface CanvasToolbarProps {
 }
 
 export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
-  currentFlowMetadata,
-  canvasTheme,
-  setCanvasTheme,
   isSnapToGrid,
   setIsSnapToGrid,
   handleExportJPG,
@@ -56,52 +42,8 @@ export const CanvasToolbar: React.FC<CanvasToolbarProps> = ({
   return (
     <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between pointer-events-none gap-2">
       <div className="flex items-center gap-2 pointer-events-auto min-w-0">
-        {/* Active Diagram Name Indicator */}
-        <div className="flex items-center gap-2 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 px-2.5 py-1 rounded-lg shadow-[0_6px_18px_rgba(0,0,0,0.05)] pointer-events-auto transition-all duration-300 min-w-0">
-          <div className="p-1 bg-primary/10 rounded-md text-primary shrink-0">
-            <Workflow className="w-3.5 h-3.5 text-primary" />
-          </div>
-          <div className="text-left font-sans min-w-0">
-            <p className="text-[10px] font-medium text-content-subtle leading-none mb-0.5 hidden sm:block">
-              {t("flowchart.flowchart")}
-            </p>
-            <span className="text-xs font-medium text-content-strong truncate max-w-[100px] sm:max-w-[180px] block leading-tight">
-              {currentFlowMetadata?.name || "Untitled Workspace"}
-            </span>
-          </div>
-        </div>
-
-        {/* Canvas theme & snap */}
+        {/* Snap grid */}
         <div className="flex items-center gap-1 bg-surface/70 hover:bg-surface/85 backdrop-blur-md border border-border-subtle/40 p-1 rounded-lg shadow-[0_6px_18px_rgba(0,0,0,0.05)] transition-all duration-300 shrink-0">
-          <button
-            type="button"
-            onClick={() => {
-              const nextTheme = canvasTheme === "miro" ? "blueprint" : "miro";
-              setCanvasTheme(nextTheme);
-              toast.success(
-                `Tema Kanvas diubah ke: ${nextTheme === "miro" ? "Miro (Terang)" : "Blueprint (Gelap)"}`
-              );
-            }}
-            className={cn(
-              "min-h-11 min-w-11 p-2 rounded-md transition-all flex items-center justify-center cursor-pointer",
-              canvasTheme === "miro"
-                ? "bg-surface-muted hover:bg-surface-strong text-content-body"
-                : "bg-blue-950/40 hover:bg-blue-900/40 text-blue-400"
-            )}
-            title={`Ubah Tema Kanvas (Saat ini: ${canvasTheme === "miro" ? t("flowchart.miroLight") : t("flowchart.blueprintDark")})`}
-            aria-label={
-              canvasTheme === "miro" ? t("flowchart.miroTheme") : t("flowchart.blueprintTheme")
-            }
-          >
-            {canvasTheme === "miro" ? (
-              <Sun className="w-3.5 h-3.5 text-amber-500 fill-amber-200" />
-            ) : (
-              <Moon className="w-3.5 h-3.5 text-blue-400 fill-blue-950" />
-            )}
-          </button>
-
-          <div className="w-px h-3.5 bg-surface-strong/60" />
-
           <button
             type="button"
             onClick={() => {

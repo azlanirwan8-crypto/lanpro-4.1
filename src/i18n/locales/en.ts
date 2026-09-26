@@ -1573,9 +1573,6 @@ export const en = {
     widthW: "Width (W)",
     heightH: "Height (H)",
     supportsPdfWordExcelMax: "Supports PDF, Word, Excel (max 5 MB)",
-    flowchart: "Flowchart",
-    miroTheme: "Miro theme",
-    blueprintTheme: "Blueprint theme",
     export: "Export",
     backup: "Backup",
     pickADocumentInThe:
@@ -1586,8 +1583,6 @@ export const en = {
     disconnectFlow: "Disconnect flow",
     clickAShapeStickyNote:
       "Click a shape, sticky note, or arrow on the canvas to change its properties.",
-    miroLight: "Miro light",
-    blueprintDark: "Blueprint dark",
     snapGrid: "Snap grid",
     freeMove: "Free move",
     stopSim: "Stop simulation",
