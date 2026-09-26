@@ -2192,6 +2192,7 @@ export const en = {
     loadingMessages: "Loading messages...",
     autoReplySim: "Auto Reply Simulation",
     assistantSubtitle: "Answers from your own tasks",
+    balasanGagal: "The reply did not come through. Try again in a moment.",
     assistantEngine:
       "Runs the Gemini model configured on the server and reads only the projects you can see. Without a model key it says it cannot answer, instead of making things up.",
     sendAttachment: "Send Attachment & Mockup",

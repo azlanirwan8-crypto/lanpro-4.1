@@ -308,6 +308,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
           }
         } catch (err) {
           console.warn("Gagal mendapatkan balasan otomatis:", err);
+          // Tanpa ini kegagalan hilang tanpa jejak: indikator "sedang mengetik"
+          // mati sendiri dan pengguna tidak pernah tahu ada yang gagal.
+          toast.error(t("chat.balasanGagal"));
         } finally {
           setIsPartnerTyping(false);
         }

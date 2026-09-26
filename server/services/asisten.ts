@@ -26,7 +26,6 @@
  */
 import { projectRepository } from "../repositories/project.repository";
 import { taskRepository } from "../repositories/task.repository";
-import { generateContentWithFallback } from "./ai.service";
 // Satu sumber kebenaran untuk "tugas ini sudah selesai" — sama persis dengan
 // yang dipakai kartu jumlah di dasbor. Kalau asisten memakai daftarnya sendiri,
 // angkanya bisa berbeda dari papan dan tidak ada yang tahu mana yang benar.
@@ -41,11 +40,31 @@ const MAKS_BARIS_KONTKS = 24;
 const MAKS_ROUNDS_ALAT = 3;
 
 /**
- * Model yang benar-benar dipakai. Namanya ikut ditulis di label widget obrolan,
- * dan `asisten.model-label.test.ts` menjaga keduanya tetap sama — supaya teks
- * "Assistant" yang dibaca pengguna bisa dicek, bukan dikira-kira.
+ * Model yang benar-benar dikirim ke Google. UI sengaja TIDAK menyebut versi
+ * model - dulu header tertulis "Gemini 3.5 Assistant", klaim yang tidak bisa
+ * dibuktikan dari berkas mana pun. Yang dibaca pengguna sekarang: jawaban ini
+ * datang dari datanya sendiri.
  */
 const MODEL_ASISTEN = "gemini-flash-latest";
+
+/**
+ * Anggaran waktu satu balasan (#554).
+ *
+ * Diukur dengan generator cadangan model yang dipakai fitur AI lain
+ * (generateContentWithFallback) dan klien yang sengaja gagal: kunci salah,
+ * kuota habis, dan 503 selesai di bawah 1 detik karena limiter memotong ke
+ * model berikutnya tanpa jeda. TAPI "TypeError: fetch failed" mencoba 12 kali
+ * dan makan 18,1 detik. Fungsi ini punya maxDuration 30 detik
+ * (vercel.json:14), dan satu pesan asisten bisa memanggil model sampai 4 kali
+ * (awal + 3 ronde perkakas) -> 4 x 18 d = 72 d: fungsi dibunuh, balasan tidak
+ * pernah tersimpan, dan pengguna hanya melihat indikator "sedang mengetik"
+ * yang hilang sendiri.
+ *
+ * Karena itu obrolan tidak memakai rantai lima model itu: satu model utama,
+ * satu cadangan, dan satu tenggat yang dihitung sejak awal giliran.
+ */
+const BATAS_TOTAL_MS = 18000;
+const MODEL_CADANGAN = [MODEL_ASISTEN, "gemini-2.5-flash"];
 
 const terbuka = (t: any) => !statusSelesai(t?.status);
 const lewatTenggat = (t: any) => {
@@ -415,9 +434,49 @@ function muatJson(teks: string): Record<string, any> {
   }
 }
 
+/** Satu panggilan model, dibatalkan kalau melewati sisa anggaran waktu. */
+async function panggilModel(
+  ai: KlienAi,
+  model: string,
+  isi: any[],
+  config: any,
+  sisaMs: number
+): Promise<any> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      ai.models.generateContent({ model, contents: isi, config }),
+      new Promise<never>((_, tolak) => {
+        timer = setTimeout(() => tolak(new Error("BATAS_WAKTU_ASISTEN")), sisaMs);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+/**
+ * Model utama lalu satu cadangan kalau yang pertama gagal. Keduanya dihitung
+ * dari satu tenggat yang sama, jadi total waktu balasan tetap di bawah
+ * maxDuration fungsi walaupun jaringan lambat.
+ */
+async function mintaModel(ai: KlienAi, isi: any[], config: any, tenggat: number): Promise<any> {
+  let galatTerakhir: any;
+  for (const model of MODEL_CADANGAN) {
+    const sisa = tenggat - Date.now();
+    if (sisa <= 1000) break;
+    try {
+      return await panggilModel(ai, model, isi, config, sisa);
+    } catch (error) {
+      galatTerakhir = error;
+    }
+  }
+  throw galatTerakhir || new Error("BATAS_WAKTU_ASISTEN");
+}
+
 /**
  * Satu lingkaran tanya-jawab: konteks + memori -> model -> (perkakas -> model)
- * sampai jawaban teks atau MAKS_ROUNDS_ALAT tercapai.
+ * sampai jawaban teks, MAKS_ROUNDS_ALAT tercapai, atau anggaran waktu habis.
  */
 export async function jawabAsisten(params: {
   pesan: string;
@@ -426,6 +485,8 @@ export async function jawabAsisten(params: {
   bahasa?: string;
   ai?: KlienAi | null;
   konteks?: string;
+  /** Hanya untuk uji: memendekkan BATAS_TOTAL_MS. */
+  batasMs?: number;
 }): Promise<PutusanAsisten> {
   const bahasa = params.bahasa === "en" ? "en" : "id";
   const { pesan, riwayat, pemanggil, ai } = params;
@@ -456,16 +517,9 @@ export async function jawabAsisten(params: {
     systemInstruction: SISTEM(bahasa),
     tools: [{ functionDeclarations: DEKLARASI_ALAT }],
   };
+  const tenggat = Date.now() + (params.batasMs ?? BATAS_TOTAL_MS);
   try {
-    // generateContentWithFallback dipakai, bukan panggilan langsung: ia sudah
-    // menyimpan daftar model cadangan + retry kuota yang dipakai seluruh fitur
-    // AI lain di repo ini, dan ia memanggil `ai.models.generateContent` — jadi
-    // `ai` sungguhan dan `ai` tiruan hasil uji lewat jalur yang sama.
-    let respons = await generateContentWithFallback(ai, {
-      model: MODEL_ASISTEN,
-      contents: isi,
-      config,
-    });
+    let respons = await mintaModel(ai, isi, config, tenggat);
 
     for (let ronde = 0; ronde < MAKS_ROUNDS_ALAT; ronde++) {
       const daftar = Array.isArray(respons?.functionCalls) ? respons.functionCalls : [];
@@ -489,11 +543,7 @@ export async function jawabAsisten(params: {
       isi.push({ role: "model", parts: panggilan });
       isi.push({ role: "user", parts: balasan });
 
-      respons = await generateContentWithFallback(ai, {
-        model: MODEL_ASISTEN,
-        contents: isi,
-        config,
-      });
+      respons = await mintaModel(ai, isi, config, tenggat);
     }
 
     const teks = typeof respons?.text === "string" ? respons.text : "";
