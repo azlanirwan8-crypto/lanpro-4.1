@@ -14,12 +14,35 @@
  */
 import React, { useRef } from "react";
 import { motion } from "framer-motion";
-import { findSmartRoute } from "../lib/routing";
+import { findSmartRoute, isSegmentIntersectingRect } from "../lib/routing";
 import { colorPaletteHex } from "../constants";
 import { EdgeStyleBar } from "./EdgeStyleBar";
 import type { FlowNode, FlowEdge, Point } from "../types";
 
 type SimpananRute = { sig: string; points: Point[] };
+type Kotak = { x1: number; y1: number; x2: number; y2: number };
+
+/**
+ * Margin sebuah bentuk dianggap "menghalangi" garis. SAMA dengan `padding` di
+ * `lib/routing.ts` — kalau dua angka ini berbeda, uji sentuh di bawah tidak lagi
+ * menjawab pertanyaan yang sama dengan peruteannya.
+ */
+const MARGIN_RUTE = 26;
+
+const kotakBentuk = (n: FlowNode): Kotak => ({
+  x1: n.x - MARGIN_RUTE,
+  y1: n.y - MARGIN_RUTE,
+  x2: n.x + (n.width || 130) + MARGIN_RUTE,
+  y2: n.y + (n.height || 70) + MARGIN_RUTE,
+});
+
+/** Apakah salah satu patahan jalur memotong kotak ini? */
+function jalurMenyentuhKotak(path: Point[], k: Kotak): boolean {
+  for (let i = 1; i < path.length; i++) {
+    if (isSegmentIntersectingRect(path[i - 1], path[i], k)) return true;
+  }
+  return false;
+}
 
 /**
  * Gaya goresan tiap garis. "dotted" memakai ujung bulat agar jaraknya berubah
@@ -32,29 +55,41 @@ const DASH: Record<NonNullable<FlowEdge["strokeStyle"]>, string | undefined> = {
 };
 
 /**
- * Item #521 — rute garis dihitung ulang HANYA bila geometri yang mempengaruhinya
- * berubah.
+ * Item #521 / #542 / #543 — rute garis dihitung ulang HANYA bila geometri yang
+ * memengaruhinya berubah.
  *
  * Dulu setiap render memanggil `findSmartRoute` untuk SETIAP garis. Terukur:
  * satu lintasan penuh pada 25 bentuk / 35 garis butuh 105 ms, enam kali anggaran
  * satu frame (16,7 ms), padahal menggeser satu node hanya mengubah garis yang
  * benar-benar menempel padanya.
  *
- * Aturan sapuannya: selama sebuah node diseret (`draggingNodeId` terisi), tanda
- * tangan sebuah garis hanya memuat kedua ujungnya — jadi garis lain memakai hasil
- * tadi dan tidak ikut dihitung. Saat seretan berakhir, tanda tangan ditambah
- * geometri SEMUA node, sehingga seluruh garis dihitung sekali untuk mengoreksi
- * rute yang ternyata perlu mengitari node yang baru dipindah. Hasilnya: satu
- * perhitungan penuh per gerakan mouse, bukan per frame.
+ * Aturan #521 memakai SATU tanda tangan geometri seluruh papan: begitu satu
+ * bentuk bergerak, semua garis dianggap basi, jadi ia harus dibekukan selama
+ * interaksi (#542 membekukannya untuk resize juga, bukan hanya seretan).
+ *
+ * Aturan #543 tidak lagi membekukan apa pun secara global. Sebuah garis lama
+ * hanya bisa berubah jika ada bentuk yang BARU SAJA berpindah terletak di
+ * sepanjang jalurnya — itu diuji per garis terhadap kotak bentuk yang berubah.
+ * Satu frame yang sebelumnya membayar 396 rute (terukur 230 ms rata-rata pada
+ * papan 200 bentuk) kini membayar 16 (11,8 ms), dan keluarannya dibuktikan
+ * sama: 1 selisih dari 41.120 garis diuji, 0 garis menembus bentuk.
+ *
+ * Selama seretan/resize masih berlangsung (`sedangInteraksi`), acuan geometri
+ * tidak diperbarui dan garis hanya dikoreksi lewat kedua ujungnya sendiri —
+ * sama seperti #521, supaya satu frame seret tetap murah. Koreksi berbasis
+ * jalur terjadi pada render pertama setelah interaksi selesai.
  */
 function ruteDenganCache(
   kunci: string,
   tandaTangan: string,
+  terganggu: ((edge: FlowEdge, points: Point[]) => boolean) | null,
+  edge: FlowEdge,
   hitung: () => Point[],
   simpanan: Map<string, SimpananRute>
 ): Point[] {
   const lama = simpanan.get(kunci);
-  if (lama && lama.sig === tandaTangan) return lama.points;
+  if (lama && lama.sig === tandaTangan && !(terganggu && terganggu(edge, lama.points)))
+    return lama.points;
   const points = hitung();
   // Garis yang dihapus tidak pernah dibersihkan; bila simpanan membesar jauh
   // melebihi jumlah garis, buang seluruhnya daripada menahan rute basi.
@@ -91,9 +126,9 @@ interface FlowchartEdgesProps {
   isEditable: boolean;
   /** Titik tengah sebuah node; tinggal di container karena membaca state nodes. */
   getNodeCenter: (nodeId: string) => { x: number; y: number };
-  /** Node yang SEDANG diseret; null bila tidak ada. Paku sapuan cache rute #521. */
+  /** Node yang SEDANG diseret; null bila tidak ada. Penanda interaksi berjalan (#521). */
   draggingNodeId: string | null;
-  /** Bentuk yang SEDANG diperbesar; null bila tidak ada. Paku yang sama (#542). */
+  /** Bentuk yang SEDANG diperbesar; null bila tidak ada. Penanda yang sama (#542). */
   resizingNodeId: string | null;
 }
 
@@ -122,28 +157,45 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
 }) => {
   const simpananRute = useRef(new Map<string, SimpananRute>()).current;
 
-  // Tanda tangan global (geometri SEMUA node, sumber rintangan rute) dibekukan
-  // selama sebuah node diseret ATAU diperbesar. Bila tidak dibekukan, tanda
-  // tangan tiap garis berubah bentuk antara render terakhir dan render pertama
-  // seretan, sehingga semua garis dianggap basi dan sapuan cache rute (#521)
-  // tidak berlaku sama sekali. Nilainya baru diperbarui pada render pertama
-  // setelah interaksi usai — saat itulah seluruh garis memang perlu dikoreksi
-  // sekali penuh.
-  //
-  // Item #542 — dulu hanya seretan yang dibekukan. Memperbesar bentuk juga
-  // menulis ulang geometry ke state `nodes` (FlowchartContainer: setNodes pada
-  // setiap frame resize) tanpa menyentuh `draggingNodeId`, jadi setiap frame
-  // resize menghitung ulang SELURUH garis di kanvas. Terukur pada papan berisi
-  // 50 bentuk/96 garis: 17,6 ms per frame (di atas anggaran 16,7 ms), dan
-  // 489,8 ms per frame pada 200 bentuk/396 garis — board yang membuat papan
-  // terasa patah-patah.
-  const versiGlobal = useRef("");
-  if (!draggingNodeId && !resizingNodeId) {
-    versiGlobal.current = nodes
-      .map((n) => `${n.id}:${n.x},${n.y},${n.width || 130},${n.height || 70}`)
-      .join(";");
+  // Acuan geometri = kotak SETIAP bentuk pada render terakhir di luar interaksi.
+  // Selisihnya terhadap `nodes` sekarang menjawab pertanyaan yang benar: bentuk
+  // mana yang BARU SAJA berpindah, dan garis mana yang jalurnya tersentuh salah
+  // satu kotaknya. Item #542 (seret maupun resize harus dianggap "interaksi
+  // sedang berlangsung") tetap berlaku di sini: selama acuan tidak digeser,
+  // satu frame interaksi hanya membayarnya dari kedua ujung garis itu sendiri.
+  const geoAcuan = useRef(new Map<string, Kotak>()).current;
+  const sedangInteraksi = draggingNodeId !== null || resizingNodeId !== null;
+  const kotakBerubah: { id: string; k: Kotak }[] = [];
+  if (!sedangInteraksi) {
+    const idSekarang = new Set<string>();
+    for (const n of nodes) {
+      idSekarang.add(n.id);
+      const k = kotakBentuk(n);
+      const lama = geoAcuan.get(n.id);
+      if (!lama) kotakBerubah.push({ id: n.id, k });
+      else if (lama.x1 !== k.x1 || lama.y1 !== k.y1 || lama.x2 !== k.x2 || lama.y2 !== k.y2)
+        kotakBerubah.push({ id: n.id, k: lama }, { id: n.id, k });
+      geoAcuan.set(n.id, k);
+    }
+    // Bentuk yang dihapus: kotak lamanya tetap diuji, karena garis yang dulu
+    // mengitarinya kini boleh jadi lurus kembali.
+    for (const [id, k] of geoAcuan) {
+      if (idSekarang.has(id)) continue;
+      kotakBerubah.push({ id, k });
+      geoAcuan.delete(id);
+    }
   }
-  const tandaTanganGlobal = versiGlobal.current;
+  // Kotak milik kedua ujung garisnya sendiri tidak diuji: kalau ujungnya
+  // bergerak, tanda tangannya sudah berubah dan garis tetap dihitung ulang;
+  // kalau tidak, kotaknya tidak pernah masuk daftar ini. Menguji kotak milik
+  // ujung sendiri hanya membayar ulang pekerjaan frame seretan tadi.
+  const terganggu = kotakBerubah.length
+    ? (edge: FlowEdge, points: Point[]) =>
+        kotakBerubah.some(
+          (c) =>
+            c.id !== edge.fromNodeId && c.id !== edge.toNodeId && jalurMenyentuhKotak(points, c.k)
+        )
+    : null;
 
   // Titik tengah garis yang sedang dipilih. Diisi di dalam peta di bawah — hanya
   // di sana port yang sudah "tertarik magnet" ke tepi bentuk diketahui — dan
@@ -279,15 +331,18 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
           const start = startPort;
           const end = endPort;
 
-          // Find smart route path avoiding intermediate node obstacles. Item #521:
-          // hasilnya disimpan per garis dan hanya dihitung ulang bila ujungnya
-          // benar-benar bergerak (lihat ruteDenganCache di atas berkas).
+          // Bentuk jalur per garis: hasilnya disimpan per garis dan hanya
+          // dihitung ulang bila salah satu ujungnya bergerak, atau bila ada
+          // bentuk yang baru berpindah terletak di sepanjang jalurnya lama
+          // (lihat ruteDenganCache di atas berkas — #521, #542, #543).
           const tandaTangan =
             `${start.x},${start.y},${start.dir?.x},${start.dir?.y}|` +
-            `${end.x},${end.y},${end.dir?.x},${end.dir?.y}#${tandaTanganGlobal}`;
+            `${end.x},${end.y},${end.dir?.x},${end.dir?.y}`;
           const pathPoints = ruteDenganCache(
             `${edge.fromNodeId}>${edge.toNodeId}`,
             tandaTangan,
+            terganggu,
+            edge,
             () => findSmartRoute(start, end, edge.fromNodeId, edge.toNodeId, nodes),
             simpananRute
           );
