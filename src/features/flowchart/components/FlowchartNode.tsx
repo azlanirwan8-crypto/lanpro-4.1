@@ -48,7 +48,12 @@ interface FlowchartNodeProps {
   setNodeContextMenu: (menu: { x: number; y: number; nodeId: string } | null) => void;
   handleNodeMouseDown: (e: React.MouseEvent, node: FlowNode) => void;
   handleResizeMouseDown: (e: React.MouseEvent, nodeId: string, direction: "se" | "e" | "s") => void;
-  handleConnectPortClick: (nodeId: string, portName: string) => void;
+  /** `e` dipakai untuk memulai seretan sambungan (#548); tanpa event, jalur klik lama tetap jalan. */
+  handleConnectPortClick: (
+    nodeId: string,
+    portName: string,
+    e?: { clientX: number; clientY: number }
+  ) => void;
   handleUpdateActiveNode: (props: Partial<FlowNode>) => void;
   handleDuplicateNode: (node: FlowNode) => void;
   handleDeleteSelected: () => void;
@@ -193,7 +198,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
             className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-500/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
             onMouseDown={(e) => {
               e.stopPropagation();
-              handleConnectPortClick(node.id, "top");
+              handleConnectPortClick(node.id, "top", e);
             }}
             title={t("flowNode.dragTop")}
           >
@@ -205,7 +210,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
             className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-500/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
             onMouseDown={(e) => {
               e.stopPropagation();
-              handleConnectPortClick(node.id, "right");
+              handleConnectPortClick(node.id, "right", e);
             }}
             title={t("flowNode.dragRight")}
           >
@@ -217,7 +222,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
             className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-500/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
             onMouseDown={(e) => {
               e.stopPropagation();
-              handleConnectPortClick(node.id, "bottom");
+              handleConnectPortClick(node.id, "bottom", e);
             }}
             title={t("flowNode.dragBottom")}
           >
@@ -229,7 +234,7 @@ export const FlowchartNode: React.FC<FlowchartNodeProps> = ({
             className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-surface border-2 border-violet-500 shadow-md flex items-center justify-center hover:scale-130 hover:bg-violet-500/10 transition-all active:scale-95 cursor-crosshair pointer-events-auto"
             onMouseDown={(e) => {
               e.stopPropagation();
-              handleConnectPortClick(node.id, "left");
+              handleConnectPortClick(node.id, "left", e);
             }}
             title={t("flowNode.dragLeft")}
           >

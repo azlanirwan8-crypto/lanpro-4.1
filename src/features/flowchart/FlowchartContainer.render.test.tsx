@@ -588,6 +588,121 @@ describe("FlowchartView", () => {
     expect(titikUjung()).toBeNull();
   });
 
+  // Item #548 — menarik garis dari paku harus menyelesaikan sambungan saat
+  // dilepas di atas bentuk lain (selama ini hanya klik-lalu-klik yang jalan, dan
+  // klik kedua wajib mengenai paku 14 px).
+  it("tarik dari paku lalu lepas di atas bentuk lain menambahkan satu garis", async () => {
+    (fetchFlowcharts as jest.Mock).mockResolvedValue([
+      {
+        id: "fw9b",
+        name: "Alur Tarik",
+        description: "",
+        category: "Panduan",
+        nodes: [
+          {
+            id: "g1",
+            type: "rect",
+            x: 60,
+            y: 60,
+            label: "Satu",
+            color: "indigo",
+            width: 155,
+            height: 70,
+          },
+          {
+            id: "g2",
+            type: "rect",
+            x: 420,
+            y: 60,
+            label: "Dua",
+            color: "indigo",
+            width: 155,
+            height: 70,
+          },
+        ],
+        edges: [],
+        theme: "miro",
+        createdBy: "u1",
+        createdByName: "Administrator",
+      },
+    ]);
+
+    const { container } = renderView();
+    fireEvent.click((await screen.findAllByText("Alur Tarik"))[0]);
+    fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
+    await screen.findByTitle(/Snap to Grid|Snapping/i);
+
+    expect(container.querySelectorAll("path[marker-end]")).toHaveLength(0);
+
+    // Ruang papan -> ruang layar: papan belum digeser (offset 50,50) dan zoom 0,9,
+    // sedang jsdom tidak membuat layout sehingga persegi kanvas duduk di 0,0.
+    const layar = (x: number, y: number) => ({ clientX: x * 0.9 + 50, clientY: y * 0.9 + 50 });
+
+    fireEvent.mouseEnter(container.querySelector('[id="val-node-g1"]') as Element);
+    const paku = await screen.findByTitle(/sisi atas|from the top/i);
+    const awal = layar(137, 55);
+    fireEvent.mouseDown(paku, { ...awal, button: 0 });
+
+    fireEvent.mouseMove(window, layar(300, 90));
+    fireEvent.mouseUp(window, layar(497, 95));
+
+    await waitFor(() => expect(container.querySelectorAll("path[marker-end]")).toHaveLength(1));
+    // Mode sambung selesai: titik ujung garis bantu tidak tertinggal.
+    expect(container.querySelector("circle.animate-ping")).toBeNull();
+  });
+
+  it("melepas tarikan di tempat kosong membatalkan sambungan, tidak menambah garis", async () => {
+    (fetchFlowcharts as jest.Mock).mockResolvedValue([
+      {
+        id: "fw9c",
+        name: "Alur Batal",
+        description: "",
+        category: "Panduan",
+        nodes: [
+          {
+            id: "g1",
+            type: "rect",
+            x: 60,
+            y: 60,
+            label: "Satu",
+            color: "indigo",
+            width: 155,
+            height: 70,
+          },
+          {
+            id: "g2",
+            type: "rect",
+            x: 420,
+            y: 60,
+            label: "Dua",
+            color: "indigo",
+            width: 155,
+            height: 70,
+          },
+        ],
+        edges: [],
+        theme: "miro",
+        createdBy: "u1",
+        createdByName: "Administrator",
+      },
+    ]);
+
+    const { container } = renderView();
+    fireEvent.click((await screen.findAllByText("Alur Batal"))[0]);
+    fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
+    await screen.findByTitle(/Snap to Grid|Snapping/i);
+
+    const layar = (x: number, y: number) => ({ clientX: x * 0.9 + 50, clientY: y * 0.9 + 50 });
+    fireEvent.mouseEnter(container.querySelector('[id="val-node-g1"]') as Element);
+    const paku = await screen.findByTitle(/sisi atas|from the top/i);
+    fireEvent.mouseDown(paku, { ...layar(137, 55), button: 0 });
+    fireEvent.mouseMove(window, layar(300, 90));
+    fireEvent.mouseUp(window, layar(1500, 1200));
+
+    expect(container.querySelectorAll("path[marker-end]")).toHaveLength(0);
+    expect(container.querySelector("circle.animate-ping")).toBeNull();
+  });
+
   // Item #541 — pencarian palet dulu hanya membaca nama/keterangan bentuk, jadi
   // mengetik "bpmn" atau "cloud" tidak menemukan apa pun walaupun judul grupnya
   // persis begitu. Sekarang judul grup ikut dicocokkan.

@@ -461,6 +461,13 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  /**
+   * #548 — bentuk asal dari sambungan yang SEDANG ditarik. Null berarti tidak ada
+   * seretan sambungan; mode klik-lalu-klik lama tetap hidup tanpanya.
+   */
+  const [seretSambung, setSeretSambung] = useState<string | null>(null);
+  const awalSeretSambung = useRef<{ x: number; y: number } | null>(null);
+
   // Canvas-level drag-drop overlay state (file drop directly onto canvas)
   const [canvasDragOver, setCanvasDragOver] = useState(false);
 
@@ -2590,8 +2597,55 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
   };
 
   // Edge link addition
-  const handleConnectPortClick = (nodeId: string, portName: string) => {
+  /**
+   * #548 — menekan paku kini MEMULAI seretan sambungan, bukan hanya menandai
+   * sumber lalu menunggu klik kedua. `portName` dulu dibuang di fungsi ini
+   * padahal tooltips-nya ("Tarik panah dari sisi atas") sudah menjanjikan
+   * gerakan ini sejak lama.
+   */
+  const handleConnectPortClick = (
+    nodeId: string,
+    _sisi: string,
+    e?: { clientX: number; clientY: number }
+  ) => {
+    const rect = canvasContainerRef.current?.getBoundingClientRect();
+    if (e && rect) {
+      awalSeretSambung.current = {
+        x: Math.round((e.clientX - rect.left - panOffset.x) / zoomLevel),
+        y: Math.round((e.clientY - rect.top - panOffset.y) / zoomLevel),
+      };
+    }
+    setSeretSambung(nodeId);
     handleConnectClick(nodeId);
+  };
+
+  /** Satu jalur menambah garis: dipakai mode klik dan mode tarik. */
+  const tambahSambungan = (dari: string, ke: string) => {
+    if (dari === ke) {
+      toast.error(t("toast.connectSelf"));
+      return false;
+    }
+    const sudahAda = edges.some((edge) => edge.fromNodeId === dari && edge.toNodeId === ke);
+    if (sudahAda) {
+      toast.info(t("toast.connectionExists"));
+      return false;
+    }
+    const id = "edge_" + Date.now();
+    const nextEdges = [...edges, { id, fromNodeId: dari, toNodeId: ke }];
+    setEdges(nextEdges);
+    recordHistory(nodes, nextEdges);
+    toast.success(t("toast.arrowAdded"));
+    return true;
+  };
+
+  /** Bentuk paling atas yang memuat sebuah titik ruang papan; null bila kosong. */
+  const bentukDiTitik = (x: number, y: number) => {
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const n = nodes[i];
+      if (x >= n.x && x <= n.x + (n.width || 130) && y >= n.y && y <= n.y + (n.height || 70))
+        return n.id;
+    }
+    return null;
   };
 
   const handleConnectClick = (nodeId: string) => {
@@ -2609,24 +2663,77 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
         setConnectSourceId(null);
         return;
       }
-
-      const relationExists = edges.some(
-        (edge) => edge.fromNodeId === connectSourceId && edge.toNodeId === nodeId
-      );
-      if (relationExists) {
-        toast.info(t("toast.connectionExists"));
-      } else {
-        const id = "edge_" + Date.now();
-        const nextEdges = [...edges, { id, fromNodeId: connectSourceId, toNodeId: nodeId }];
-        setEdges(nextEdges);
-        recordHistory(nodes, nextEdges);
-        toast.success(t("toast.arrowAdded"));
-      }
-
+      tambahSambungan(connectSourceId, nodeId);
       setConnectSourceId(null);
       setActiveTool("select");
     }
   };
+
+  /**
+   * #548 — tarik-tahan-lepas dari paku menyelesaikan sambungan seperti di Miro.
+   *
+   * Dulu satu-satunya jalan adalah klik-lalu-klik, dan klik kedua hanya mau
+   * mendarat di paku 14 piksel atau di badan bentuk saat tool "connect" aktif —
+   * padahal masuk lewat paku tidak pernah mengaktifkan tool itu. Sasaran dicari
+   * dari KOORDINAT PAPAN, bukan `elementFromPoint`, supaya uji bisa menjalankan
+   * urutan manusia (tekan paku, gerakkan, lepas di atas bentuk) dan tidak bergantung
+   * pada layout yang jsdom tidak lakukan.
+   *
+   * `setHoverCoords` dibatasi satu kali per frame: tanpa `requestAnimationFrame`
+   * ini, setiap event mousemove (bisa 120/detik pada mouse presisi tinggi)
+   * memicu render seluruh papan — persis keluhan "tidak responsif" yang dilaporkan.
+   */
+  useEffect(() => {
+    if (!seretSambung) return;
+
+    let raf = 0;
+    let berikut: { x: number; y: number } | null = null;
+
+    const papanDari = (cx: number, cy: number) => {
+      const rect = canvasContainerRef.current?.getBoundingClientRect();
+      if (!rect) return null;
+      return {
+        x: Math.round((cx - rect.left - panOffset.x) / zoomLevel),
+        y: Math.round((cy - rect.top - panOffset.y) / zoomLevel),
+      };
+    };
+
+    const onMove = (e: MouseEvent) => {
+      berikut = papanDari(e.clientX, e.clientY);
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        if (berikut) setHoverCoords(berikut);
+      });
+    };
+
+    const onUp = (e: MouseEvent) => {
+      const titik = papanDari(e.clientX, e.clientY);
+      const target = titik ? bentukDiTitik(titik.x, titik.y) : null;
+      if (target && target !== seretSambung) {
+        tambahSambungan(seretSambung, target);
+        setConnectSourceId(null);
+        setActiveTool("select");
+      } else {
+        const awal = awalSeretSambung.current;
+        const digerakkan = !!titik && !!awal && Math.hypot(titik.x - awal.x, titik.y - awal.y) > 8;
+        // Dilepas di tempat kosong SETELAH bergerak = batal. Dilepas tanpa
+        // bergerak = klik biasa, mode klik-lalu-klik dibiarkan hidup.
+        if (digerakkan) setConnectSourceId(null);
+      }
+      setSeretSambung(null);
+      awalSeretSambung.current = null;
+    };
+
+    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      if (raf) cancelAnimationFrame(raf);
+    };
+    // nodes/edges ikut karena penambah garis dan uji sasaran membacanya.
+  }, [seretSambung, panOffset.x, panOffset.y, zoomLevel, nodes, edges]);
 
   // Node / Arrow delete handler
   /**
