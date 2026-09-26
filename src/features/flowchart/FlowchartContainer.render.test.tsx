@@ -11,7 +11,7 @@
  * cakupan — pemindahan JSX yang merusak struktur akan gagal di sini.
  */
 import React from "react";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
 import type { Project, Task } from "../../types";
 
 // Lapisan service adalah satu-satunya jalur ke backend (ARCHITECTURE.md §2),
@@ -701,6 +701,48 @@ describe("FlowchartView", () => {
 
     expect(container.querySelectorAll("path[marker-end]")).toHaveLength(0);
     expect(container.querySelector("circle.animate-ping")).toBeNull();
+  });
+
+  // Item #547 — papan tidak lagi punya tombol tema; ia mengikuti tema aplikasi.
+  // Yang diuji RANTAI-NYA (kelas `dark` di <html> -> MutationObserver ->
+  // canvasTheme -> kelas kisi papan), karena tanpa rantai itu papan membeku
+  // terang walau aplikasinya gelap.
+  it("papan berpindah kisi saat aplikasi menjadi gelap, dan kembali saat terang", async () => {
+    (fetchFlowcharts as jest.Mock).mockResolvedValue([
+      {
+        id: "fw9d",
+        name: "Alur Tema",
+        description: "",
+        category: "Panduan",
+        nodes: [],
+        edges: [],
+        theme: "miro",
+        createdBy: "u1",
+        createdByName: "Administrator",
+      },
+    ]);
+
+    const { container } = renderView();
+    fireEvent.click((await screen.findAllByText("Alur Tema"))[0]);
+    fireEvent.click(await screen.findByText("Diagram Alur", { selector: "button" }));
+    await screen.findByTitle(/Snap to Grid|Snapping/i);
+
+    expect(container.querySelector(".grid-dots-light")).toBeTruthy();
+    expect(container.querySelector(".grid-blueprint-dark")).toBeNull();
+
+    act(() => {
+      document.documentElement.classList.add("dark");
+    });
+    await waitFor(() => expect(container.querySelector(".grid-blueprint-dark")).toBeTruthy());
+    expect(container.querySelector(".grid-dots-light")).toBeNull();
+    // Yang berubah hanya POLA kisi; latar papan tidak lagi menulis warna keras.
+    const papanGelap = container.querySelector(".grid-blueprint-dark") as Element;
+    expect(papanGelap.getAttribute("class")).not.toMatch(/#0a1124|sky-100/);
+
+    act(() => {
+      document.documentElement.classList.remove("dark");
+    });
+    await waitFor(() => expect(container.querySelector(".grid-dots-light")).toBeTruthy());
   });
 
   // Item #541 — pencarian palet dulu hanya membaca nama/keterangan bentuk, jadi
