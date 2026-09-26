@@ -64,7 +64,7 @@ const MODEL_ASISTEN = "gemini-flash-latest";
  * satu cadangan, dan satu tenggat yang dihitung sejak awal giliran.
  */
 const BATAS_TOTAL_MS = 18000;
-const MODEL_CADANGAN = [MODEL_ASISTEN, "gemini-2.5-flash"];
+const MODEL_CADANGAN = [MODEL_ASISTEN, "gemini-flash-lite-latest"];
 
 const terbuka = (t: any) => !statusSelesai(t?.status);
 const lewatTenggat = (t: any) => {
@@ -468,6 +468,9 @@ async function mintaModel(ai: KlienAi, isi: any[], config: any, tenggat: number)
     try {
       return await panggilModel(ai, model, isi, config, sisa);
     } catch (error) {
+      // Tanpa baris ini hanya kegagalan model TERAKHIR yang tersisa di log,
+      // dan model pertama yang sebenarnya rusak tidak pernah terlihat.
+      console.warn(`[ASISTEN] model ${model} gagal:`, String(error).slice(0, 240));
       galatTerakhir = error;
     }
   }
@@ -530,8 +533,8 @@ export async function jawabAsisten(params: {
       for (const p of daftar) {
         const nama = String(p?.name || "");
         const args = (p?.args || {}) as Record<string, any>;
-        const hasil = await jalankanAlat(nama, args, pemanggil);
         dipakai.push(nama);
+        const hasil = await jalankanAlat(nama, args, pemanggil);
         panggilan.push({ functionCall: { name: nama, args } });
         balasan.push({ functionResponse: { name: nama, response: muatJson(hasil) } });
       }

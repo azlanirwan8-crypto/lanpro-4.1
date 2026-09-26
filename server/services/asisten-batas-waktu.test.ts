@@ -92,7 +92,7 @@ describe("jawabAsisten — anggaran waktu (#554)", () => {
     });
 
     expect(putusan.teks).toBe("Satu tugas terbuka: LNP-12.");
-    expect(daftarPanggilan(ai)).toEqual(["gemini-flash-latest", "gemini-2.5-flash"]);
+    expect(daftarPanggilan(ai)).toEqual(["gemini-flash-latest", "gemini-flash-lite-latest"]);
   });
 
   it("dua-duanya gagal tetap memberi jawaban berbasis data", async () => {
