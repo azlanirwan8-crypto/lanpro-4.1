@@ -2,6 +2,7 @@ import { Router } from "express";
 import { timingSafeEqual } from "crypto";
 import { register } from "../config/metrics";
 import { statusMigrasi } from "../services/migrasi-status";
+import { statusMesin } from "../services/asisten";
 
 const router = Router();
 
@@ -89,6 +90,7 @@ router.get("/metrics", penjagaMetrik, async (req, res) => {
 // dan bisa diuji tanpa menyalakan seluruh server.
 router.get("/api/health-check", (req, res) => {
   const migrasi = statusMigrasi();
+  const mesin = statusMesin();
   res.json({
     status: migrasi.status === "gagal" ? "degraded" : "ok",
     timestamp: new Date().toISOString(),
@@ -98,6 +100,13 @@ router.get("/api/health-check", (req, res) => {
     // `migrasi: "gagal"` cuma memberi tahu ADA yang salah, bukan APA —
     // dan orang yang membacanya tetap harus menebak.
     tabelHilang: migrasi.tabelHilang,
+    // Item #556: keadaan mesin AI, dengan alasan yang sama — tanpa ini gejala
+    // "asisten tidak mau memakai model" hanya bisa ditebak dari log server.
+    // Nilai kuncinya sendiri tidak ikut dipaparkan.
+    mesinAi: {
+      keadaan: mesin.keadaan,
+      urutanModel: mesin.urutanModel,
+    },
   });
 });
 

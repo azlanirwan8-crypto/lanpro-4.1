@@ -11,7 +11,7 @@ import { GoogleGenAI } from "@google/genai";
 import { generateContentWithFallback } from "../services/ai.service";
 import { matchesCaller } from "../services/task.service";
 import { chatRepository } from "../repositories/chat.repository";
-import { jawabAsisten } from "../services/asisten";
+import { jawabAsisten, statusMesin } from "../services/asisten";
 import { validasiBody } from "../middleware/validate";
 import {
   sendChatMessageSchema,
@@ -285,12 +285,16 @@ router.post("/api/chat/assistant", validasiBody(assistantSchema), async (req: an
     }));
 
     const apiKey = process.env.GEMINI_API_KEY;
-    const ai = apiKey
-      ? new GoogleGenAI({
-          apiKey,
-          httpOptions: { headers: { "User-Agent": "aistudio-build" } },
-        })
-      : null;
+    // Kunci template (`.env` kiriman berisi "MY_...") dihitung TIDAK ADA.
+    // Klien yang dibangun darinya selalu gagal, jadi lebih baik langsung
+    // menjawab dari data daripada membakar anggaran waktu pada panggilan mati.
+    const ai =
+      apiKey && statusMesin().keadaan === "siap"
+        ? new GoogleGenAI({
+            apiKey,
+            httpOptions: { headers: { "User-Agent": "aistudio-build" } },
+          })
+        : null;
 
     const { message, bahasa } = req.body;
     const putusan = await jawabAsisten({

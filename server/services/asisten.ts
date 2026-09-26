@@ -66,6 +66,26 @@ const MODEL_ASISTEN = "gemini-flash-latest";
 const BATAS_TOTAL_MS = 18000;
 const MODEL_CADANGAN = [MODEL_ASISTEN, "gemini-flash-lite-latest"];
 
+/** Berkas `.env` contoh dikirim berisi template, bukan kunci; kunci begitu
+ *  terbaca sebagai "terisi" dan fitur AI mati tanpa gejala yang jelas. */
+const KUNCI_TEMPLATE = /^(MY_|ISI_|GANTI_|YOUR_|PLACEHOLDER)/i;
+
+/**
+ * Keadaan mesin untuk `GET /api/health-check` (#556).
+ *
+ * Yang dialami pemilik proyek: kunci dipasang tapi asisten tetap menjawab
+ * "mesin tidak tersambung", dan satu-satunya cara menebak penyebabnya adalah
+ * membaca log server — yang tidak bisa ia buka. Nilai kunci TIDAK pernah
+ * dipaparkan di sini; hanya statusnya dan urutan model yang akan dicoba.
+ */
+export function statusMesin() {
+  const kunci = String(process.env.GEMINI_API_KEY || "").trim();
+  return {
+    keadaan: !kunci ? "tanpa_kunci" : KUNCI_TEMPLATE.test(kunci) ? "kunci_template" : "siap",
+    urutanModel: MODEL_CADANGAN,
+  };
+}
+
 const terbuka = (t: any) => !statusSelesai(t?.status);
 const lewatTenggat = (t: any) => {
   const d = t.endDate || t.dueDate;

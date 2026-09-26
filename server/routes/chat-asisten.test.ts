@@ -220,6 +220,19 @@ describe("POST /api/chat/assistant (Item #551)", () => {
     expect(en.body.data.message).toContain("not installed");
   });
 
+  it("kunci template dari berkas contoh tidak dicoba ke Google", async () => {
+    // `.env` kiriman repo berisi "MY_GEMINI_API_KEY". Klien yang dibangun dari
+    // nilai itu selalu ditolak, jadi jawaban "mesin tidak tersambung" datang
+    // telat dan tanpa dasar data — padahal datanya ada.
+    process.env.GEMINI_API_KEY = "MY_GEMINI_API_KEY";
+
+    const res = await request(app).post("/api/chat/assistant").send({ message: "Tugas saya apa?" });
+
+    expect(res.body.data.message).toContain("belum terpasang");
+    expect(res.body.data.message).toContain("LNP-12");
+    expect(mockGenerateContent).not.toHaveBeenCalled();
+  });
+
   it("mengakui bebannya saat pengguna kewalahan, lalu menunjuk satu tugas", async () => {
     delete process.env.GEMINI_API_KEY;
 

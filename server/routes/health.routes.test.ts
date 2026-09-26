@@ -40,6 +40,39 @@ describe("Health Routes (H1 Pattern Example)", () => {
     expect(response.body.service).toBe("LanPro Backend");
   });
 
+  it("memaparkan keadaan mesin AI tanpa memaparkan kuncinya (#556)", async () => {
+    const kunciLama = process.env.GEMINI_API_KEY;
+    process.env.GEMINI_API_KEY = "kunci-rahasia-jangan-sampai-keluar";
+
+    const response = await request(app).get("/api/health-check");
+
+    expect(response.body.mesinAi.keadaan).toBe("siap");
+    expect(Array.isArray(response.body.mesinAi.urutanModel)).toBe(true);
+    expect(response.body.mesinAi.urutanModel.length).toBeGreaterThan(0);
+    expect(response.text).not.toContain("kunci-rahasia-jangan-sampai-keluar");
+
+    if (kunciLama === undefined) delete process.env.GEMINI_API_KEY;
+    else process.env.GEMINI_API_KEY = kunciLama;
+  });
+
+  it("kunci template `.env` kiriman tidak dihitung terpasang (#556)", async () => {
+    const kunciLama = process.env.GEMINI_API_KEY;
+    // Inilah nilai yang dikirim bersama berkas contoh. Sebelum #556 ia terbaca
+    // sebagai "kunci terisi", asisten membangun klien yang pasti ditolak
+    // Google, dan yang terlihat di layar cuma asisten yang menolak menjawab.
+    process.env.GEMINI_API_KEY = "MY_GEMINI_API_KEY";
+
+    const lewatHttp = await request(app).get("/api/health-check");
+    expect(lewatHttp.body.mesinAi.keadaan).toBe("kunci_template");
+
+    delete process.env.GEMINI_API_KEY;
+    const kosong = await request(app).get("/api/health-check");
+    expect(kosong.body.mesinAi.keadaan).toBe("tanpa_kunci");
+
+    if (kunciLama === undefined) delete process.env.GEMINI_API_KEY;
+    else process.env.GEMINI_API_KEY = kunciLama;
+  });
+
   it("menolak /metrics tanpa token — perilaku berubah karena item #58", async () => {
     // Asersi lama di sini adalah `expect([200, 500]).toContain(status)`, yang
     // mengunci keadaan SEBELUM #58: endpoint terbuka untuk umum. Ketetapan
