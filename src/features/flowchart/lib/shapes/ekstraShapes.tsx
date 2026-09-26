@@ -568,6 +568,409 @@ const BENTUK: Record<string, Pembuat> = {
       />
     </>
   ),
+
+  /* ── Entity Relationship (#549) ─────────────────────────────────────── */
+  erEntity: (p) => (
+    <>
+      <rect x="4" y="8" width="92" height="84" rx="3" {...p} />
+      <path d="M4,38 L96,38" fill="none" stroke="currentColor" strokeWidth={3} />
+    </>
+  ),
+  erWeakEntity: (p) => (
+    <>
+      <rect x="4" y="8" width="92" height="84" rx="3" {...p} />
+      <rect
+        x="8"
+        y="12"
+        width="84"
+        height="76"
+        rx="3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={3}
+      />
+      <path d="M8,42 L92,42" fill="none" stroke="currentColor" strokeWidth={2} />
+    </>
+  ),
+  erAttribute: (p) => <ellipse cx="50" cy="50" rx="46" ry="32" {...p} />,
+  erKeyAttribute: (p) => (
+    <>
+      <ellipse cx="50" cy="50" rx="46" ry="34" {...p} />
+      <ellipse cx="50" cy="50" rx="40" ry="28" {...p} fill="none" />
+      <path d="M32,68 L68,68" fill="none" stroke="currentColor" strokeWidth={5} />
+    </>
+  ),
+  erDerivedAttribute: (p) => (
+    <ellipse cx="50" cy="50" rx="46" ry="32" {...p} strokeDasharray="6,4" />
+  ),
+  erMultiValued: (p) => (
+    <>
+      <ellipse cx="50" cy="50" rx="46" ry="34" {...p} />
+      <ellipse cx="50" cy="50" rx="40" ry="28" {...p} fill="none" />
+      <ellipse cx="50" cy="50" rx="34" ry="22" {...p} fill="none" />
+    </>
+  ),
+  erRelationship: (p) => <polygon points="50,2 98,50 50,98 2,50" {...p} />,
+  erCrowsFoot: (p) => (
+    <path
+      d="M2,50 L50,50 M50,50 L96,16 M50,50 L96,50 M50,50 L96,84 M14,30 L14,70"
+      {...p}
+      fill="none"
+      strokeWidth={4}
+      strokeLinecap="round"
+    />
+  ),
+
+  /* ── Gerbang logika ANSI (#549) ─────────────────────────────────────── */
+  gateAnd: (p) => <path d="M8,8 L52,8 A42,42 0 0,1 52,92 L8,92 Z" {...p} />,
+  gateOr: (p) => <path d="M10,8 Q48,8 88,50 Q48,92 10,92 Q32,50 10,8 Z" {...p} />,
+  gateNot: (p) => (
+    <>
+      <polygon points="10,8 78,50 10,92" {...p} />
+      <circle cx="88" cy="50" r="9" {...p} />
+    </>
+  ),
+  gateNand: (p) => (
+    <>
+      <path d="M8,10 L42,10 A40,40 0 0,1 42,90 L8,90 Z" {...p} />
+      <circle cx="90" cy="50" r="8" {...p} />
+    </>
+  ),
+  gateNor: (p) => (
+    <>
+      <path d="M8,10 Q44,10 78,50 Q44,90 8,90 Q30,50 8,10 Z" {...p} />
+      <circle cx="89" cy="50" r="9" {...p} />
+    </>
+  ),
+  gateXor: (p) => (
+    <>
+      <path d="M22,10 Q56,10 90,50 Q56,90 22,90 Q42,50 22,10 Z" {...p} />
+      <path d="M8,10 Q28,50 8,90" {...p} fill="none" />
+    </>
+  ),
+  gateMux: (p) => (
+    <>
+      <polygon points="30,8 70,8 86,92 14,92" {...p} />
+      <path
+        d="M40,8 L40,0 M60,8 L60,0 M50,92 L50,100"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={3}
+      />
+    </>
+  ),
+  gateFlipFlop: (p) => (
+    <>
+      <rect x="14" y="8" width="66" height="84" rx="4" {...p} />
+      <polygon points="14,62 28,72 14,82" fill="none" stroke="currentColor" strokeWidth={3} />
+      <circle cx="86" cy="72" r="6" fill="none" stroke="currentColor" strokeWidth={3} />
+      <path d="M92,72 L98,72" fill="none" stroke="currentColor" strokeWidth={3} />
+    </>
+  ),
+
+  /* ── Swimlane & Value Stream Mapping (#549) ─────────────────────────── */
+  laneHorizontal: (p) => (
+    <>
+      <rect x="2" y="10" width="96" height="80" rx="3" {...p} />
+      <path
+        d="M2,36 L98,36 M2,63 L98,63 M26,10 L26,90"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2.5}
+      />
+    </>
+  ),
+  laneVertical: (p) => (
+    <>
+      <rect x="10" y="2" width="80" height="96" rx="3" {...p} />
+      <path
+        d="M36,2 L36,98 M63,2 L63,98 M10,26 L90,26"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2.5}
+      />
+    </>
+  ),
+  poolLane: (p) => (
+    <>
+      <rect x="2" y="6" width="96" height="88" rx="3" {...p} />
+      <rect x="2" y="6" width="96" height="18" {...p} />
+      <path d="M2,44 L96,44 M2,70 L96,70" fill="none" stroke="currentColor" strokeWidth={2.5} />
+    </>
+  ),
+  vsmProcess: (p) => (
+    <>
+      <rect x="10" y="6" width="80" height="66" rx="3" {...p} />
+      <path d="M26,72 L26,94 M74,72 L74,94" fill="none" stroke="currentColor" strokeWidth={7} />
+    </>
+  ),
+  vsmData: (p) => <polygon points="8,10 92,10 50,94" {...p} />,
+  vsmInventory: (p) => <polygon points="50,8 92,92 8,92" {...p} />,
+  vsmWait: (p) => (
+    <>
+      <rect x="8" y="16" width="84" height="68" rx="8" {...p} />
+      <path
+        d="M50,50 L50,30 M50,50 L66,58"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={4}
+        strokeLinecap="round"
+      />
+      <circle cx="50" cy="50" r="4" fill="currentColor" stroke="none" />
+    </>
+  ),
+  vsmKanbanPillar: (p) => (
+    <>
+      <rect x="36" y="34" width="28" height="62" rx="3" {...p} />
+      <polygon points="50,4 78,36 22,36" {...p} />
+    </>
+  ),
+
+  /* ── Wireframe antarmuka (#549) ─────────────────────────────────────── */
+  uiBrowser: (p) => (
+    <>
+      <rect x="4" y="8" width="92" height="84" rx="6" {...p} />
+      <path d="M4,30 L96,30" fill="none" stroke="currentColor" strokeWidth={2.5} />
+      <circle cx="14" cy="19" r="3.5" fill="currentColor" stroke="none" />
+      <circle cx="26" cy="19" r="3.5" fill="currentColor" stroke="none" />
+      <circle cx="38" cy="19" r="3.5" fill="currentColor" stroke="none" />
+      <rect
+        x="52"
+        y="13"
+        width="40"
+        height="12"
+        rx="6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2.5}
+      />
+    </>
+  ),
+  uiMobile: (p) => (
+    <>
+      <rect x="28" y="4" width="44" height="92" rx="10" {...p} />
+      <rect x="42" y="9" width="16" height="4" rx="2" fill="currentColor" stroke="none" />
+      <path
+        d="M42,88 L58,88"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={4}
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  uiButton: (p) => <rect x="4" y="26" width="92" height="48" rx="24" {...p} />,
+  uiInput: (p) => (
+    <>
+      <rect x="4" y="24" width="92" height="52" rx="6" {...p} />
+      <path
+        d="M16,36 L16,64"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={3}
+        strokeLinecap="round"
+      />
+      <path
+        d="M28,50 L58,50"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={5}
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  uiCheckbox: (p) => (
+    <>
+      <rect x="16" y="16" width="68" height="68" rx="10" {...p} />
+      <path
+        d="M30,52 L45,68 L72,34"
+        {...p}
+        fill="none"
+        strokeWidth={9}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </>
+  ),
+  uiRadio: (p) => (
+    <>
+      <circle cx="50" cy="50" r="36" {...p} />
+      <circle cx="50" cy="50" r="15" fill="currentColor" stroke="none" />
+    </>
+  ),
+  uiDropdown: (p) => (
+    <>
+      <rect x="4" y="24" width="92" height="52" rx="6" {...p} />
+      <path d="M72,24 L72,76" fill="none" stroke="currentColor" strokeWidth={2.5} />
+      <polygon points="78,43 92,43 85,57" fill="currentColor" stroke="none" />
+    </>
+  ),
+  uiImagePlaceholder: (p) => (
+    <>
+      <rect x="6" y="10" width="88" height="80" rx="6" {...p} />
+      <circle cx="72" cy="30" r="9" fill="none" stroke="currentColor" strokeWidth={3} />
+      <path
+        d="M14,82 L38,48 L56,72 M46,82 L68,56 L88,82"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={3.5}
+        strokeLinejoin="round"
+      />
+    </>
+  ),
+
+  /* ── Simbol jaringan netral (#549) ──────────────────────────────────── */
+  netRouter: (p) => (
+    <>
+      <circle cx="50" cy="50" r="42" {...p} />
+      <path
+        d="M50,14 L50,86 M14,50 L86,50 M42,22 L50,14 L58,22 M42,32 L50,24 L58,32 M42,78 L50,86 L58,78 M42,68 L50,76 L58,68 M22,42 L14,50 L22,58 M32,42 L24,50 L32,58 M78,42 L86,50 L78,58 M68,42 L76,50 L68,58"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={3}
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  netSwitch: (p) => (
+    <>
+      <rect x="4" y="24" width="92" height="52" rx="6" {...p} />
+      <path
+        d="M16,40 L40,40 M33,34 L40,40 L33,46 M16,60 L40,60 M33,54 L40,60 L33,66 M84,40 L60,40 M67,34 L60,40 L67,46 M84,60 L60,60 M67,54 L60,60 L67,66"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={3}
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  netHub: (p) => (
+    <>
+      <circle cx="50" cy="50" r="40" {...p} />
+      <path
+        d="M50,10 L50,90 M10,50 L90,50 M22,22 L78,78 M78,22 L22,78"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={3.5}
+      />
+      <circle cx="50" cy="50" r="8" fill="currentColor" stroke="none" />
+    </>
+  ),
+  netFirewall: (p) => (
+    <>
+      <rect x="6" y="8" width="44" height="28" rx="2" {...p} />
+      <rect x="50" y="8" width="44" height="28" rx="2" {...p} />
+      <rect x="6" y="36" width="22" height="28" rx="2" {...p} />
+      <rect x="28" y="36" width="44" height="28" rx="2" {...p} />
+      <rect x="72" y="36" width="22" height="28" rx="2" {...p} />
+      <rect x="6" y="64" width="44" height="28" rx="2" {...p} />
+      <rect x="50" y="64" width="44" height="28" rx="2" {...p} />
+    </>
+  ),
+  netWirelessAp: (p) => (
+    <>
+      <polygon points="50,58 78,96 22,96" {...p} />
+      <path
+        d="M38,50 Q50,38 62,50 M28,44 Q50,24 72,44 M18,38 Q50,12 82,38"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={3.5}
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  netStorage: (p) => (
+    <>
+      <ellipse cx="50" cy="76" rx="38" ry="12" {...p} />
+      <rect x="12" y="24" width="76" height="52" {...p} />
+      <ellipse cx="50" cy="24" rx="38" ry="12" {...p} />
+    </>
+  ),
+  netSubnet: (p) => (
+    <rect x="4" y="12" width="92" height="76" rx="8" {...p} strokeDasharray="10,7" />
+  ),
+  netClient: (p) => (
+    <>
+      <rect x="8" y="12" width="84" height="58" rx="6" {...p} />
+      <rect x="42" y="70" width="16" height="10" {...p} />
+      <rect x="28" y="80" width="44" height="8" rx="4" {...p} />
+    </>
+  ),
+
+  /* ── Skema listrik & P&ID (#549) ────────────────────────────────────── */
+  elResistor: (p) => (
+    <path
+      d="M2,50 L18,50 L24,28 L34,72 L44,28 L54,72 L64,28 L74,72 L80,50 L98,50"
+      {...p}
+      fill="none"
+      strokeWidth={3.5}
+      strokeLinejoin="round"
+    />
+  ),
+  elCapacitor: (p) => (
+    <path
+      d="M2,50 L42,50 M42,18 L42,82 M56,18 L56,82 M56,50 L98,50"
+      {...p}
+      fill="none"
+      strokeWidth={5}
+      strokeLinecap="round"
+    />
+  ),
+  elInductor: (p) => (
+    <path
+      d="M2,59 L16,59 A9,18 0 0,1 34,59 A9,18 0 0,1 52,59 A9,18 0 0,1 70,59 A9,18 0 0,1 88,59 L98,59"
+      {...p}
+      fill="none"
+      strokeWidth={4}
+      strokeLinecap="round"
+    />
+  ),
+  elGround: (p) => (
+    <path
+      d="M50,4 L50,52 M20,52 L80,52 M31,70 L69,70 M42,88 L58,88"
+      {...p}
+      fill="none"
+      strokeWidth={4.5}
+      strokeLinecap="round"
+    />
+  ),
+  elLamp: (p) => (
+    <>
+      <circle cx="50" cy="50" r="42" {...p} />
+      <path d="M21,21 L79,79 M79,21 L21,79" fill="none" stroke="currentColor" strokeWidth={4} />
+    </>
+  ),
+  elMotor: (p) => (
+    <>
+      <circle cx="50" cy="50" r="42" {...p} />
+      <path
+        d="M26,72 L26,30 L50,60 L74,30 L74,72"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={5}
+        strokeLinejoin="round"
+      />
+    </>
+  ),
+  pidValve: (p) => (
+    <>
+      <polygon points="8,16 8,86 50,51" {...p} />
+      <polygon points="92,16 92,86 50,51" {...p} />
+      <path
+        d="M50,51 L50,16 M34,14 L66,14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={4}
+        strokeLinecap="round"
+      />
+    </>
+  ),
+  pidPump: (p) => (
+    <>
+      <circle cx="46" cy="50" r="38" {...p} />
+      <polygon points="40,26 94,50 40,74" {...p} />
+    </>
+  ),
 };
 
 /**
