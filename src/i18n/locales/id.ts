@@ -2211,7 +2211,6 @@ export const id = {
     filterKeyword: "Saring kata kunci percakapan...",
     loadingMessages: "Memuat pesan...",
     autoReplySim: "Simulasi Balasan Otomatis",
-    assistantSubtitle: "Jawab dari tugas Anda sendiri",
     balasanGagal: "Balasan tidak terkirim. Coba lagi sebentar lagi.",
     assistantEngine:
       "Menjalankan model Gemini yang terpasang di server, hanya membaca proyek yang bisa Anda lihat. Tanpa kunci model, asisten akan bilang tidak bisa menjawab — bukan mengarang.",

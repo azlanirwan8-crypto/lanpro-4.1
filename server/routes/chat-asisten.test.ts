@@ -209,7 +209,10 @@ describe("POST /api/chat/assistant (Item #551)", () => {
     const id = await request(app).post("/api/chat/assistant").send({ message: "Tugas saya apa?" });
     const teks = id.body.data.message;
     expect(teks).toContain("LNP-12");
-    expect(teks).toContain("belum terpasang");
+    // #558: pengakuan "ini bukan analisis" dihapus dari badan pesan atas
+    // permintaan pemilik proyek — tempatnya di tooltip lencana "AI" di header.
+    expect(teks).not.toContain("bukan analisis");
+    expect(teks).not.toMatch(/^\(/);
     expect(teks).not.toMatch(/maaf,/i);
     expect(mockGenerateContent).not.toHaveBeenCalled();
 
@@ -217,7 +220,7 @@ describe("POST /api/chat/assistant (Item #551)", () => {
       .post("/api/chat/assistant")
       .send({ message: "What is my backlog?", bahasa: "en" });
     expect(en.body.data.message).toContain("LNP-12");
-    expect(en.body.data.message).toContain("not installed");
+    expect(en.body.data.message).not.toContain("not an analysis");
   });
 
   it("kunci template dari berkas contoh tidak dicoba ke Google", async () => {
@@ -228,8 +231,8 @@ describe("POST /api/chat/assistant (Item #551)", () => {
 
     const res = await request(app).post("/api/chat/assistant").send({ message: "Tugas saya apa?" });
 
-    expect(res.body.data.message).toContain("belum terpasang");
     expect(res.body.data.message).toContain("LNP-12");
+    expect(res.body.data.message).not.toContain("bukan analisis");
     expect(mockGenerateContent).not.toHaveBeenCalled();
   });
 
@@ -276,7 +279,7 @@ describe("POST /api/chat/assistant (Item #551)", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.data.message).toContain("LNP-12");
-    expect(res.body.data.message).toContain("belum terpasang");
+    expect(res.body.data.message).not.toContain("bukan analisis");
     expect(chatRepository.createMessage).toHaveBeenCalledTimes(1);
   });
 });

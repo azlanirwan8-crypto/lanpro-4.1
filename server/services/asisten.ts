@@ -318,11 +318,16 @@ const SISTEM = (bahasa: string) => {
 
 export type PutusanAsisten = { teks: string; perkakas: string[] };
 
-/** Pengakuan batas pada jalur tanpa-model: tetap disebut di akhir tiap jawaban. */
-const EKOR_TANPA_MESIN = (en: boolean) =>
+/**
+ * Keadaan paling parah: model mati DAN datanya tidak terbaca. Satu kalimat
+ * pendek, bukan penjelasan panjang — pemilik proyek meminta teks pengakuan
+ * batas dihapus dari jawaban (27 Sep), dan memang itu tempatnya di lencana
+ * "AI" (tooltip `chat.assistantEngine`), bukan di badan pesan.
+ */
+const GALAT_TOTAL = (en: boolean) =>
   en
-    ? "(The answer engine is not installed on this server, so this is a direct read of your data, not an analysis.)"
-    : "(Mesin jawabannya belum terpasang di server ini, jadi ini pembacaan langsung atas datamu - bukan analisis.)";
+    ? "Neither the model nor your data is reachable right now. Try again in a moment."
+    : "Mesin maupun datamu sedang tidak bisa saya akses. Coba lagi sebentar.";
 
 const TANDA_LELAH = [
   "capek",
@@ -404,7 +409,6 @@ async function jawabanTanpaMesin(
       en
         ? "If that feels wrong, the assignee field on your board is the first thing to check."
         : "Kalau rasanya tidak begitu, kolom assignee di papan tugas hal pertama yang perlu dicek.",
-      EKOR_TANPA_MESIN(en),
     ].join("\n");
   }
 
@@ -427,7 +431,7 @@ async function jawabanTanpaMesin(
     ? `Start with [${terdekat.key || terdekat.id}] - the most urgent one on your list.`
     : `Mulai dari [${terdekat.key || terdekat.id}] - itu yang paling mendesak di daftarmu.`;
 
-  return [pembuka, barisTugas(daftar, en), langkah, EKOR_TANPA_MESIN(en)].join("\n");
+  return [pembuka, barisTugas(daftar, en), langkah].join("\n");
 }
 
 /**
@@ -579,7 +583,7 @@ export async function jawabAsisten(params: {
     // ikut mati, pengguna tetap dapat pengakuan, bukan karangan.
     console.warn("[ASISTEN] Mesin gagal, beralih ke pembacaan data langsung:", error);
     const cadangan = await jawabanTanpaMesin(pesan, pemanggil, bahasa).catch(() =>
-      EKOR_TANPA_MESIN(bahasa === "en")
+      GALAT_TOTAL(bahasa === "en")
     );
     return { teks: cadangan, perkakas: dipakai };
   }

@@ -872,13 +872,11 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                           </span>
                         )}
                       </p>
-                      <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle">
-                        {activeChatUser.id === "lanpro-ai"
-                          ? t("chat.assistantSubtitle")
-                          : adalahOnline(activeChatUser)
-                            ? "Sedang Aktif"
-                            : "Offline"}
-                      </p>
+                      {activeChatUser.id !== "lanpro-ai" && (
+                        <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle">
+                          {adalahOnline(activeChatUser) ? "Sedang Aktif" : "Offline"}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
