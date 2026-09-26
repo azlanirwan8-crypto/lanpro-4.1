@@ -4,6 +4,35 @@ import { UserProfile } from "../types";
 import { apiRequest } from "../lib/api";
 import { useAppStore } from "../store/useAppStore";
 
+const KUNCI_RETAINED = "lanpro_last_online_users";
+
+/**
+ * Umur maksimum snapshot presence di localStorage. Fallback ini ada supaya
+ * tumpukan avatar tidak berkedip saat satu respons kosong (#289/#317) - tapi
+ * tanpa batas umur ia berubah jadi bohong: orang yang keluar sejak kemarin
+ * masih ditandai online, dan titik hijau di daftar obrolan kehilangan artinya.
+ */
+const UMUR_MAKS_RETAINED_MS = 120000;
+
+const simpanRetained = (users: UserProfile[]) => {
+  safeLocalStorage.setItem(KUNCI_RETAINED, JSON.stringify({ disimpan: Date.now(), daftar: users }));
+};
+
+const bacaRetained = (mentah: string | null): UserProfile[] => {
+  if (!mentah) return [];
+  try {
+    const nilai = JSON.parse(mentah);
+    // Format lama (array telanjang) umurnya tidak diketahui -> dibuang.
+    if (Array.isArray(nilai)) return [];
+    const daftar = nilai?.daftar;
+    if (!Array.isArray(daftar)) return [];
+    if (Date.now() - (Number(nilai?.disimpan) || 0) > UMUR_MAKS_RETAINED_MS) return [];
+    return daftar;
+  } catch {
+    return [];
+  }
+};
+
 interface PresenceContextType {
   onlineUsers: UserProfile[];
   onlineUserIds: string[];
@@ -41,8 +70,7 @@ export const PresenceProvider: React.FC<{
   // Retain last known successful state in local state + localStorage to prevent screen flashing/avatar resets
   const [retainedOnlineUsers, setRetainedOnlineUsers] = useState<UserProfile[]>(() => {
     try {
-      const stored = safeLocalStorage.getItem("lanpro_last_online_users");
-      return stored ? JSON.parse(stored) : [];
+      return bacaRetained(safeLocalStorage.getItem(KUNCI_RETAINED));
     } catch {
       return [];
     }
@@ -74,7 +102,7 @@ export const PresenceProvider: React.FC<{
         });
 
         if (online.length > 0) {
-          safeLocalStorage.setItem("lanpro_last_online_users", JSON.stringify(online));
+          simpanRetained(online);
           setRetainedOnlineUsers((prev) => {
             const prevIds = prev.map((u) => u.uid || u.id).join(",");
             const nextIds = online.map((u: UserProfile) => u.uid || u.id).join(",");
@@ -101,7 +129,7 @@ export const PresenceProvider: React.FC<{
         });
 
         if (online.length > 0) {
-          safeLocalStorage.setItem("lanpro_last_online_users", JSON.stringify(online));
+          simpanRetained(online);
           setRetainedOnlineUsers((prev) => {
             const prevIds = prev.map((u) => u.uid || u.id).join(",");
             const nextIds = online.map((u: UserProfile) => u.uid || u.id).join(",");
@@ -162,7 +190,7 @@ export const PresenceProvider: React.FC<{
         return prevIds === nextIds ? prev : users;
       });
       if (users.length > 0) {
-        safeLocalStorage.setItem("lanpro_last_online_users", JSON.stringify(users));
+        simpanRetained(users);
         setRetainedOnlineUsers((prev) => {
           const prevIds = prev.map((u) => u.uid || u.id).join(",");
           const nextIds = users.map((u) => u.uid || u.id).join(",");

@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { safeLocalStorage } from "../lib/safeStorage";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   MessageSquare,
   Send,
@@ -16,7 +15,6 @@ import {
   Paperclip,
   Image,
   FileText,
-  Users,
   Bot,
   Sparkles,
   Download,
@@ -64,6 +62,12 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   const [unreadCounts, setUnreadCounts] = useState<Record<string, number>>({});
   const [lastMessages, setLastMessages] = useState<Record<string, ChatMessage>>({});
   const { onlineUserIds } = usePresence();
+  // Kunci daftar presence adalah `uid || id` (lihat PresenceContext). Memakai
+  // hanya `id` membuat rekan yang uid-nya beda selalu terbaca offline, dan
+  // memakai hanya `uid` membuat sebaliknya - jadi keduanya dicoba.
+  const onlineSet = useMemo(() => new Set(onlineUserIds.map(String)), [onlineUserIds]);
+  const adalahOnline = (u: UserProfile) =>
+    onlineSet.has(String(u.uid || u.id)) || onlineSet.has(String(u.id));
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
@@ -79,18 +83,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   const chatBoxRef = useRef<HTMLDivElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Virtual Users Setup
-  const groupVirtualUser: UserProfile = {
-    id: "group",
-    uid: "group",
-    displayName: "Grup Chat Tim",
-    username: "group_chat",
-    role: "viewer" as any,
-    email: "group@lanpro.com",
-    status: "approved",
-    passwordHash: "virtual",
-  };
-
+  // Virtual Users Setup. "Grup Chat Tim" dihapus 26 Sep atas permintaan
+  // pemilik papan: obrolan tim sudah punya menu sendiri, dan kanal yang berguna
+  // di widget ini cuma asisten.
   const aiVirtualUser: UserProfile = {
     id: "lanpro-ai",
     uid: "lanpro-ai",
@@ -156,10 +151,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
     // Listen for real-time socket events
 
     const handleReceiveMessage = (msg: ChatMessage) => {
-      const isCurrentActiveChat =
-        activeChatUser &&
-        ((msg.receiverId === "group" && activeChatUser.id === "group") ||
-          (msg.receiverId !== "group" && msg.senderId === activeChatUser.id));
+      const isCurrentActiveChat = activeChatUser && msg.senderId === activeChatUser.id;
 
       if (isCurrentActiveChat) {
         setMessages((prev) => {
@@ -167,17 +159,13 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
           return [...prev, msg];
         });
 
-        if (msg.receiverId !== "group") {
-          apiRequest("/api/chat/messages/read", {
-            method: "PUT",
-            body: { senderId: activeChatUser.id, receiverId: currentUser.id },
-          });
-        } else {
-          safeLocalStorage.setItem(`last_read_group_${currentUser.id}`, new Date().toISOString());
-        }
+        apiRequest("/api/chat/messages/read", {
+          method: "PUT",
+          body: { senderId: activeChatUser.id, receiverId: currentUser.id },
+        });
         playNotificationSound();
       } else {
-        const senderKey = msg.receiverId === "group" ? "group" : msg.senderId;
+        const senderKey = msg.senderId;
 
         setUnreadCounts((prev) => ({
           ...prev,
@@ -191,9 +179,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
         playNotificationSound();
         const displaySenderName =
-          msg.receiverId === "group"
-            ? "Grup Chat Tim"
-            : allUsers.find((u) => u.id === msg.senderId)?.displayName || "Rekan Tim";
+          allUsers.find((u) => u.id === msg.senderId)?.displayName || "Rekan Tim";
 
         toast.info(t("toast.newChatMessage", { nama: displaySenderName }));
       }
@@ -226,17 +212,10 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
           // Mark as read
           if (unreadCounts[activeChatUser.id] > 0) {
-            if (activeChatUser.id !== "group") {
-              await apiRequest("/api/chat/messages/read", {
-                method: "PUT",
-                body: { senderId: activeChatUser.id, receiverId: currentUser.id },
-              });
-            } else {
-              safeLocalStorage.setItem(
-                `last_read_group_${currentUser.id}`,
-                new Date().toISOString()
-              );
-            }
+            await apiRequest("/api/chat/messages/read", {
+              method: "PUT",
+              body: { senderId: activeChatUser.id, receiverId: currentUser.id },
+            });
             setUnreadCounts((prev) => ({
               ...prev,
               [activeChatUser.id]: 0,
@@ -271,27 +250,6 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             previews[msg.partnerId] = msg;
           });
           setLastMessages(previews);
-
-          // Calculate unread count for Group Chat based on localStorage last read
-          const lastMsgGroup = previews["group"];
-          if (lastMsgGroup) {
-            const lastReadStr = safeLocalStorage.getItem(`last_read_group_${currentUser.id}`);
-            if (lastReadStr) {
-              const lastRead = new Date(lastReadStr);
-              const msgTs = new Date(lastMsgGroup.timestamp);
-              if (msgTs > lastRead && lastMsgGroup.senderId !== currentUser.id) {
-                setUnreadCounts((prev) => ({
-                  ...prev,
-                  group: 1,
-                }));
-              }
-            } else if (lastMsgGroup.senderId !== currentUser.id) {
-              setUnreadCounts((prev) => ({
-                ...prev,
-                group: 1,
-              }));
-            }
-          }
         }
       } catch (err) {
         console.warn("Gagal mengambil daftar pesan terakhir:", err);
@@ -403,7 +361,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
 
       // Simulation mode: auto response
       const isBot = activeChatUser.id === "lanpro-ai";
-      if (isBot || (simulationEnabled && activeChatUser.id !== "group")) {
+      if (isBot || simulationEnabled) {
         triggerBalasan(msgText, activeChatUser);
       }
     } catch (err) {
@@ -545,7 +503,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   });
 
   // Filter virtual channels
-  const filteredVirtuals = [groupVirtualUser, aiVirtualUser].filter((u) => {
+  const filteredVirtuals = [aiVirtualUser].filter((u) => {
     const name = u?.displayName || u?.username || "";
     return name.toLowerCase().includes(searchQuery.toLowerCase());
   });
@@ -745,7 +703,6 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         {t("chat.channelsAssistant")}
                       </p>
                       {filteredVirtuals.map((virtual) => {
-                        const isGroup = virtual.id === "group";
                         const unread = unreadCounts[virtual.id] || 0;
                         const lastMsg = lastMessages[virtual.id];
 
@@ -756,15 +713,9 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                             className="px-4 py-2.5 flex items-center gap-3 hover:bg-surface-sunken cursor-pointer transition-colors group"
                           >
                             <div className="shrink-0">
-                              {isGroup ? (
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-content-inverse flex items-center justify-center border border-orange-400 shadow-soft">
-                                  <Users className="w-4 h-4" />
-                                </div>
-                              ) : (
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-surface to-primary-surface-active text-content-inverse flex items-center justify-center border border-primary shadow-soft relative">
-                                  <Sparkles className="w-4 h-4 animate-pulse text-yellow-200" />
-                                </div>
-                              )}
+                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-surface to-primary-surface-active text-content-inverse flex items-center justify-center border border-primary shadow-soft relative">
+                                <Sparkles className="w-4 h-4 animate-pulse text-yellow-200" />
+                              </div>
                             </div>
 
                             <div className="flex-1 min-w-0">
@@ -785,9 +736,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                                     : lastMsg.message.startsWith("[FILE:")
                                       ? "📂 Mengirim lampiran..."
                                       : lastMsg.message
-                                  : isGroup
-                                    ? "Hubungkan seluruh rekan dalam proyek"
-                                    : "Tanyakan apa saja kepada AI Assistant"}
+                                  : "Tanyakan apa saja kepada AI Assistant"}
                               </p>
                             </div>
 
@@ -813,7 +762,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                       </div>
                     ) : (
                       filteredUsers.map((targetUser) => {
-                        const isOnline = onlineUserIds.includes(targetUser.id);
+                        const isOnline = adalahOnline(targetUser);
                         const userUnread = unreadCounts[targetUser.id] || 0;
                         const lastMsg = lastMessages[targetUser.id];
                         const initials = (targetUser?.displayName || targetUser?.username || "U")
@@ -832,12 +781,10 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                                 user={targetUser}
                                 className="w-9 h-9 border border-border-faint text-xs"
                               />
-                              {/* Online / Offline Indicator Dot */}
-                              <span
-                                className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-surface shadow-soft ${
-                                  isOnline ? "bg-emerald-500" : "bg-surface-marker"
-                                }`}
-                              />
+                              {/* Penanda: hanya yang online yang memakai titik */}
+                              {isOnline && (
+                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-surface shadow-soft" />
+                              )}
                             </div>
 
                             {/* Detail Info */}
@@ -891,11 +838,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     </button>
                     {/* Active User info */}
                     <div className="relative shrink-0">
-                      {activeChatUser.id === "group" ? (
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-content-inverse flex items-center justify-center border border-orange-400/30">
-                          <Users className="w-3.5 h-3.5" />
-                        </div>
-                      ) : activeChatUser.id === "lanpro-ai" ? (
+                      {activeChatUser.id === "lanpro-ai" ? (
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-surface to-primary-surface-active text-content-inverse flex items-center justify-center border border-primary/30">
                           <Bot className="w-3.5 h-3.5 text-yellow-200" />
                         </div>
@@ -906,14 +849,8 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         />
                       )}
 
-                      {activeChatUser.id !== "group" && activeChatUser.id !== "lanpro-ai" && (
-                        <span
-                          className={`absolute bottom-0 right-0 w-2 h-2 rounded-full border border-border-inverse ${
-                            onlineUserIds.includes(activeChatUser.id)
-                              ? "bg-emerald-500"
-                              : "bg-surface-marker"
-                          }`}
-                        />
+                      {activeChatUser.id !== "lanpro-ai" && adalahOnline(activeChatUser) && (
+                        <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 border border-border-inverse" />
                       )}
                     </div>
                     <div className="min-w-0">
@@ -929,13 +866,11 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                         )}
                       </p>
                       <p className="text-xs sm:text-[11px] sm:text-[9px] text-content-subtle">
-                        {activeChatUser.id === "group"
-                          ? `${allUsers.length} Anggota Proyek`
-                          : activeChatUser.id === "lanpro-ai"
-                            ? t("chat.assistantSubtitle")
-                            : onlineUserIds.includes(activeChatUser.id)
-                              ? "Sedang Aktif"
-                              : "Offline"}
+                        {activeChatUser.id === "lanpro-ai"
+                          ? t("chat.assistantSubtitle")
+                          : adalahOnline(activeChatUser)
+                            ? "Sedang Aktif"
+                            : "Offline"}
                       </p>
                     </div>
                   </div>
@@ -1004,33 +939,14 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                     filteredMessages.map((msg) => {
                       const isSelf = msg.senderId === currentUser.id;
 
-                      // For group chat, get actual sender profile
-                      const senderProfile =
-                        msg.receiverId === "group"
-                          ? allUsers.find((u) => u.id === msg.senderId)
-                          : null;
-
-                      const senderDisplayName = senderProfile
-                        ? senderProfile?.displayName || senderProfile.username
-                        : msg.senderId === "lanpro-ai"
-                          ? "LanPro AI Assistant"
-                          : "Rekan Kerja";
+                      const senderDisplayName =
+                        msg.senderId === "lanpro-ai" ? "LanPro AI Assistant" : "Rekan Kerja";
 
                       return (
                         <div
                           key={msg.id}
                           className={`flex flex-col ${isSelf ? "items-end" : "items-start"}`}
                         >
-                          {/* Sender name for Group Chat */}
-                          {!isSelf && msg.receiverId === "group" && (
-                            <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-content-muted mb-0.5 ml-1 flex items-center gap-1 select-none">
-                              {senderDisplayName}
-                              <span className="px-1 bg-surface-strong text-content-secondary rounded text-xs sm:text-[10px] sm:text-[7px] font-medium">
-                                {senderProfile?.role || "anggota"}
-                              </span>
-                            </span>
-                          )}
-
                           {/* Sender name for AI Assistant messages in direct chat */}
                           {!isSelf && msg.senderId === "lanpro-ai" && (
                             <span className="text-xs sm:text-[11px] sm:text-[9px] font-medium text-primary mb-0.5 ml-1 flex items-center gap-0.5 select-none font-sans">
@@ -1094,7 +1010,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
                 </div>
 
                 {/* Simulation Mode Toggle Panel (Only for Direct Human Chat) */}
-                {activeChatUser.id !== "group" && activeChatUser.id !== "lanpro-ai" && (
+                {activeChatUser.id !== "lanpro-ai" && (
                   <div className="px-2.5 py-1 bg-surface-sunken border-t border-border-faint/60 flex items-center justify-between text-xs sm:text-[11px] sm:text-[9px] text-content-subtle shrink-0">
                     <span className="font-medium flex items-center gap-1">
                       <span
