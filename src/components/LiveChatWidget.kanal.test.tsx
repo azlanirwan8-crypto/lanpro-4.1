@@ -1,19 +1,28 @@
 /**
- * #552 — daftar obrolan: hanya asisten yang jadi kanal, dan titik hijau benar-
- * benar berarti orangnya online.
+ * #552 + #557 — daftar obrolan: hanya asisten yang jadi kanal, dan daftar
+ * "Rekan Kerja (DM)" hanya berisi orang yang sedang online, dengan titik hijau
+ * ala Facebook di avatarnya.
  *
- * Dua hal yang diuji di sini pernah salah di layar:
- *  - "Grup Chat Tim" menempati kanal teratas walau tidak ada tim yang memakai
+ * Yang diuji di sini pernah salah di layar:
+ *  - "Grup Chat Tim" menempati kanal teratas walau tidak ada yang memakai
  *    percakapan grup di widget ini (diminta dihapus pemilik proyek 26 Sep).
  *  - Daftar presence memakai kunci `uid || id` (PresenceContext) sementara
  *    baris daftar menanyakan `id` — untuk pengguna yang uid-nya berbeda dari
  *    id-nya titik online tidak pernah muncul, seakan semua rekan offline.
+ *  - Pemilik proyek menegur hal yang sama 27 Sep: tujuh nama terdaftar, tidak
+ *    satu pun bisa diajak bicara. Yang offline sekarang tidak ditampilkan,
+ *    KECUALI kalau ia meninggalkan pesan belum dibaca.
  */
 import React from "react";
-import { render, fireEvent } from "@testing-library/react";
+import { render, fireEvent, waitFor } from "@testing-library/react";
 
 jest.mock("../lib/api", () => ({
-  apiRequest: jest.fn(async () => ({ status: "success", data: [] })),
+  apiRequest: jest.fn(async (url: string) => {
+    if (String(url).startsWith("/api/chat/unread-counts")) {
+      return { status: "success", data: (globalThis as any).__unread || [] };
+    }
+    return { status: "success", data: [] };
+  }),
 }));
 
 // Nilai presence dibaca lewat global: factory jest.mock dievaluasi sebelum
@@ -28,6 +37,7 @@ jest.mock("../contexts/PresenceContext", () => ({
 }));
 
 import { LiveChatWidget } from "./LiveChatWidget";
+import { apiRequest } from "../lib/api";
 import { UserProfile } from "../types";
 
 const aku: UserProfile = {
@@ -69,9 +79,18 @@ const titikOnline = (container: HTMLElement) => container.querySelectorAll("span
 const renderWidget = () =>
   render(<LiveChatWidget socket={socket} currentUser={aku} allUsers={[aku, rekan]} />);
 
-describe("LiveChatWidget — kanal & presence (Item #552)", () => {
+describe("LiveChatWidget — kanal & presence (Item #552, #557)", () => {
   beforeEach(() => {
     (globalThis as any).__onlineIds = [];
+    (globalThis as any).__unread = [];
+    // resetMocks:true mengosongkan implementasi dari factory jest.mock, jadi
+    // bentuk respons harus dipasang ulang di sini.
+    (apiRequest as jest.Mock).mockImplementation(async (url: string) => {
+      if (String(url).startsWith("/api/chat/unread-counts")) {
+        return { status: "success", data: (globalThis as any).__unread || [] };
+      }
+      return { status: "success", data: [] };
+    });
   });
 
   it("tidak lagi menampilkan kanal grup, hanya asisten", () => {
@@ -81,29 +100,44 @@ describe("LiveChatWidget — kanal & presence (Item #552)", () => {
     const teks = container.textContent || "";
     expect(teks).not.toContain("Grup Chat Tim");
     expect(teks).toContain("LanPro AI Assistant");
-    expect(teks).toContain("Rian Hidayat");
   });
 
-  it("rekan tanpa presence tidak diberi penanda", () => {
+  it("rekan offline tidak lagi menempati daftar", async () => {
     const { container } = renderWidget();
     buka(container);
 
+    await waitFor(() =>
+      expect(container.textContent || "").toContain("Tidak ada rekan yang sedang online")
+    );
+    expect(container.textContent).not.toContain("Rian Hidayat");
     expect(titikOnline(container).length).toBe(0);
   });
 
   // Kunci presence adalah uid-atau-id; menanyakan salah satunya membuat
-  // pengguna ini terbaca offline selamanya.
-  it("rekan yang ada di daftar presence diberi penanda, lewat uid maupun id", () => {
+  // pengguna ini terbaca offline selamanya — dan setelah #557 namanya hilang
+  // dari daftar, bukan cuma titiknya.
+  it("rekan yang online muncul, dikenali lewat uid maupun id, lengkap dengan titiknya", async () => {
     (globalThis as any).__onlineIds = ["77"];
     const a = renderWidget();
     buka(a.container);
-    expect(titikOnline(a.container).length).toBeGreaterThan(0);
+    await waitFor(() => expect(a.container.textContent).toContain("Rian Hidayat"));
+    expect(titikOnline(a.container).length).toBe(1);
     a.unmount();
 
     (globalThis as any).__onlineIds = ["u-2"];
     const b = renderWidget();
     buka(b.container);
-    expect(titikOnline(b.container).length).toBeGreaterThan(0);
+    await waitFor(() => expect(b.container.textContent).toContain("Rian Hidayat"));
+    expect(titikOnline(b.container).length).toBe(1);
     b.unmount();
+  });
+
+  it("pesan belum dibaca tidak hilang hanya karena pengirimnya offline", async () => {
+    (globalThis as any).__unread = [{ senderId: "u-2", count: 2 }];
+    const { container } = renderWidget();
+    buka(container);
+
+    await waitFor(() => expect(container.textContent).toContain("Rian Hidayat"));
+    expect(titikOnline(container).length).toBe(0);
   });
 });

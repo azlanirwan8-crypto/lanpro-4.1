@@ -2204,7 +2204,7 @@ export const id = {
     chatTitle: "Obrolan LanPro",
     searchChannel: "Cari saluran atau rekan...",
     channelsAssistant: "Saluran & Asisten",
-    noColleague: "Tidak ada rekan kerja ditemukan.",
+    noColleague: "Tidak ada rekan yang sedang online.",
     back: "Kembali",
     searchInChat: "Cari dalam obrolan ini",
     hide: "Sembunyikan",

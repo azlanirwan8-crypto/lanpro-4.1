@@ -498,9 +498,13 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
     }
   };
 
-  // Filter users based on search query
+  // Daftar DM hanya berisi orang yang SEDANG online (#557, lanjutan #552):
+  // nama yang tidak bisa diajak bicara cuma jadi baris mati, dan pemilik
+  // proyek menentukannya begitu. KECUALI kalau ia punya pesan belum dibaca —
+  // pesan masuk tidak boleh hilang dari layar hanya karena pengirimnya logout.
   const filteredUsers = allUsers.filter((u) => {
     if (u.id === currentUser.id) return false;
+    if (!adalahOnline(u) && !(unreadCounts[u.id] > 0)) return false;
     const name = u?.displayName || u?.username || "";
     return name.toLowerCase().includes(searchQuery.toLowerCase());
   });

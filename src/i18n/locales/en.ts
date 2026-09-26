@@ -2184,7 +2184,7 @@ export const en = {
     chatTitle: "LanPro Chat",
     searchChannel: "Search channels or colleagues...",
     channelsAssistant: "Channels & Assistant",
-    noColleague: "No colleague found.",
+    noColleague: "Nobody is online right now.",
     back: "Back",
     searchInChat: "Search in this chat",
     hide: "Hide",
