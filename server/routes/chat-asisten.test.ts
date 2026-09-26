@@ -131,6 +131,20 @@ describe("POST /api/chat/assistant (Item #551)", () => {
     expect(bundel).toContain("Halo kemarin");
   });
 
+  // Spesifikasi nada #553 ikut terkirim. Kalau seseorang memangkas prompt ini
+  // sampai kehilangan CERMIN/INTI/LANGKAH atau larangan mengarang, uji ini merah.
+  it("spesifikasi nada dan larangan mengarang ikut terkirim ke model", async () => {
+    mockGenerateContent.mockResolvedValue({ functionCalls: undefined, text: "Oke." });
+
+    await request(app).post("/api/chat/assistant").send({ message: "Tugas saya apa?" });
+
+    const { config } = mockGenerateContent.mock.calls[0][0];
+    expect(config.systemInstruction).toContain("CERMIN");
+    expect(config.systemInstruction).toContain("Jangan pernah mengarang");
+    expect(config.systemInstruction).toContain("CONTOH NADA");
+    expect(config.temperature).toBeLessThanOrEqual(0.5);
+  });
+
   it("menjalankan perkakas lalu menjawab dari hasilnya", async () => {
     mockGenerateContent
       .mockResolvedValueOnce({
@@ -187,26 +201,69 @@ describe("POST /api/chat/assistant (Item #551)", () => {
     expect(JSON.stringify(contents)).toContain("Perkakas tidak dikenal");
   });
 
-  it("tanpa kunci model menjawab jujur bahwa mesinnya tidak tersambung", async () => {
+  // #553: kunci model boleh tidak terpasang, tapi asisten tidak boleh berubah
+  // jadi fitur yang mati. Yang keluar tetap datanya sendiri + pengakuan jujur.
+  it("tanpa kunci model tetap menjawab dari data dan mengaku itu pembacaan langsung", async () => {
     delete process.env.GEMINI_API_KEY;
 
     const id = await request(app).post("/api/chat/assistant").send({ message: "Tugas saya apa?" });
-    expect(id.body.data.message).toContain("Mesin asisten sedang tidak tersambung");
+    const teks = id.body.data.message;
+    expect(teks).toContain("LNP-12");
+    expect(teks).toContain("belum terpasang");
+    expect(teks).not.toMatch(/maaf,/i);
     expect(mockGenerateContent).not.toHaveBeenCalled();
 
     const en = await request(app)
       .post("/api/chat/assistant")
       .send({ message: "What is my backlog?", bahasa: "en" });
-    expect(en.body.data.message).toContain("not connected");
+    expect(en.body.data.message).toContain("LNP-12");
+    expect(en.body.data.message).toContain("not installed");
   });
 
-  it("kalau model gagal, pengguna diberi tahu mesinnya bermasalah", async () => {
+  it("mengakui bebannya saat pengguna kewalahan, lalu menunjuk satu tugas", async () => {
+    delete process.env.GEMINI_API_KEY;
+
+    const res = await request(app)
+      .post("/api/chat/assistant")
+      .send({ message: "capek banget minggu ini" });
+
+    expect(res.body.data.message).toContain("Ini memang berat");
+    expect(res.body.data.message).toContain("Tidak harus beres semua hari ini");
+    expect(res.body.data.message).toContain("Mulai dari [LNP-12]");
+  });
+
+  it("menyebut tugas yang lewat tenggat saat yang ditanya tenggat", async () => {
+    delete process.env.GEMINI_API_KEY;
+
+    const res = await request(app)
+      .post("/api/chat/assistant")
+      .send({ message: "yang telat apa ya?" });
+
+    expect(res.body.data.message).toContain("1 tugasmu sudah lewat tenggat");
+    expect(res.body.data.message).toContain("(lewat tenggat)");
+  });
+
+  it("tetap jujur saat memang tidak ada tugas terbuka", async () => {
+    delete process.env.GEMINI_API_KEY;
+    (taskRepository.findRawProjectTasks as jest.Mock).mockResolvedValue([
+      { ...TUGAS, status: "Done" },
+    ] as any);
+
+    const res = await request(app).post("/api/chat/assistant").send({ message: "ada kerjaan?" });
+
+    expect(res.body.data.message).toContain("tidak ada tugas terbuka");
+    expect(res.body.data.message).toContain("assignee");
+    expect(res.body.data.message).not.toContain("LNP-12");
+  });
+
+  it("kalau model gagal, jawaban tetap datang dari datanya", async () => {
     mockGenerateContent.mockRejectedValue(new Error("429 RESOURCE_EXHAUSTED"));
 
     const res = await request(app).post("/api/chat/assistant").send({ message: "Tugas saya apa?" });
 
     expect(res.status).toBe(200);
-    expect(res.body.data.message).toContain("tidak tersambung");
+    expect(res.body.data.message).toContain("LNP-12");
+    expect(res.body.data.message).toContain("belum terpasang");
     expect(chatRepository.createMessage).toHaveBeenCalledTimes(1);
   });
 });

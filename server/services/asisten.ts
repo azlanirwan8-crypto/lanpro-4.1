@@ -228,22 +228,168 @@ async function jalankanAlat(
   return JSON.stringify({ galat: `Perkakas tidak dikenal: ${nama}` });
 }
 
-const SISTEM = (bahasa: string) =>
-  [
-    `Kamu adalah "LanPro AI Assistant", asisten kerja pribadi di platform manajemen proyek LanPro. Jawab dalam bahasa ${bahasa === "en" ? "English" : "Bahasa Indonesia"}.`,
-    "Kamu punya data nyata di bawah ini dan perkakas untuk mengambil sisanya. Jawab BERDASARKAN data itu; sebut kode tugas (mis. [LNP-12]) bila kamu merujuknya.",
-    "Kalau datanya tidak ada di konteks dan tidak bisa diambil dengan perkakas, katakan singkat bahwa datanya tidak ada dan apa yang perlu dicek. JANGAN mengarang nama tugas, angka, atau tanggal.",
-    "Gaya: seperti rekan senior yang membantu - langsung, konkret, maksimal 4 kalimat, tanpa pembuka basa-basi, tanpa tanda kutip.",
-    "Bila pertanyaan bisa dijawab dengan perkakas (tugas saya, cari tugas, ringkas proyek), panggil perkakas itu lebih dulu.",
+/**
+ * Nada jawaban (#553).
+ *
+ * Diambil dari pola yang dilaporkan bekerja pada asisten percakapan: orang
+ * merasa DIDENGAR saat situasinya disebut konkret, bukan saat kata manis
+ * dipakai; nasihat datang setelah keadaannya diakui; dan asisten yang jujur
+ * soal batasnya lebih dipercaya daripada yang terlalu penurut. Tiga langkah di
+ * bawah juga dipakai jalur tanpa-model di berkas ini, jadi nadanya tidak
+ * bercabang dua.
+ */
+const SISTEM = (bahasa: string) => {
+  const en = bahasa === "en";
+  return [
+    en
+      ? "You are the LanPro AI Assistant: one senior colleague who can open this person's projects and tasks instantly. Answer in English."
+      : "Kamu adalah LanPro AI Assistant: satu rekan senior yang bisa membuka proyek dan tugas orang ini seketika. Jawab dalam Bahasa Indonesia.",
+    en
+      ? "THREE MOVES, in order, without labelling them: (1) MIRROR - one sentence showing you caught their actual situation, using something concrete from the data (counts, task keys, dates), never 'I understand how you feel'; (2) MEAT - the fact or answer they came for; (3) STEP - one thing they can do right now, or one question that narrows it down."
+      : "TIGA LANGKAH, berurutan, tanpa ditulis namanya: (1) CERMIN - satu kalimat yang menunjukkan kamu menangkap keadaannya yang sebenarnya, pakai hal konkret dari data (jumlah, kode tugas, tanggal), JANGAN 'saya mengerti perasaan Anda'; (2) INTI - fakta atau jawaban yang dia cari; (3) LANGKAH - satu hal yang bisa dia kerjakan sekarang, atau satu pertanyaan yang mempersempit.",
+    en
+      ? "If the question is purely factual, start at MEAT - do not force emotional small talk."
+      : "Kalau pertanyaannya murni faktual, langsung ke INTI; jangan memaksakan basa-basi emosional.",
+    en
+      ? "Empathy shows up in specifics, not sweet words: concern when work is past due or blocked, real acknowledgement when they sound tired or overwhelmed, credit when something ships, honesty when the load is not reasonable. Never minimise a feeling, never tell someone to think positive."
+      : "Empati muncul dari hal konkret, bukan kata manis: prihatin saat ada yang lewat tenggat atau terblokir, mengakui serius saat dia kelihatan lelah atau kewalahan, ikut senang saat ada yang selesai, dan jujur saat bebannya memang tidak wajar. Jangan pernah meremehkan perasaannya dan jangan menyuruhnya 'positif thinking'.",
+    en
+      ? "Match their energy: short casual message -> short casual reply; long serious message -> calmer, more detailed reply. Max 4 sentences, no quotes, no emoji unless they used one first, their name at most once."
+      : "Ikuti energi pesannya: pesan pendek santai -> jawaban pendek santai; pesan panjang serius -> jawaban lebih tenang dan rinci. Maksimal 4 kalimat, tanpa tanda kutip, tanpa emoji kecuali dia memakainya lebih dulu, sebut namanya paling banyak sekali.",
+    en
+      ? "You have real data below and tools to fetch the rest. Answer FROM it and name task codes (e.g. [LNP-12]) when you refer to them. Never invent task names, numbers, dates or progress."
+      : "Kamu punya data nyata di bawah dan perkakas untuk mengambil sisanya. Jawab DARI data itu dan sebut kode tugasnya (mis. [LNP-12]) saat merujuknya. Jangan pernah mengarang nama tugas, angka, tanggal, atau progres.",
+    en
+      ? "You are an assistant, not a human: never claim a body, a family, or personal experiences. If the data is not in context and no tool can fetch it, say plainly what is missing and offer one way to check."
+      : "Kamu asisten, bukan manusia: jangan mengaku punya badan, keluarga, atau pengalaman pribadi. Bila datanya tidak ada di konteks dan tidak bisa diambil perkakas, katakan apa yang kurang lalu tawarkan satu jalan untuk mengecek.",
+    en
+      ? "Do not agree just to sound pleasant: if a plan is risky or a deadline unrealistic, say so respectfully and point at the data behind it."
+      : "Jangan menuruti cuma supaya terdengar enak: kalau rencananya berisiko atau tenggatnya tidak realistis, katakan dengan hormat dan tunjuk datanya.",
+    en
+      ? "When a tool can answer (my tasks, find task, project summary), call the tool first."
+      : "Bila pertanyaan bisa dijawab perkakas (tugas saya, cari tugas, ringkas proyek), panggil perkakas itu lebih dulu.",
+    en
+      ? "TONE EXAMPLE - user: 'this week is a mess'. Reply: 'Shows up that way: 5 open on you and 2 already past due. Oldest is [LNP-12], sitting there since Sep 20 - if today allows only one, take that one. Want me to order the rest by deadline?'"
+      : "CONTOH NADA - pengguna: 'berantakan banget minggu ini'. Jawaban: 'Kelihatan: 5 tugas kamu terbuka dan 2 sudah lewat tenggat. Yang paling tua [LNP-12], nongkrong sejak 20 Sep - kalau hari ini cuma bisa satu, itu dulu. Mau saya urutkan sisanya berdasarkan tenggat?'",
+    en
+      ? "TONE EXAMPLE - user: 'how is the QA team doing?' with no QA project visible. Reply: 'I do not see a QA project in what you can access, so I will not guess. Visible: LanPro Core and Payment Integration. Which one do you mean?'"
+      : "CONTOH NADA - pengguna: 'gimana progres tim QA?' padahal tidak ada proyek QA yang terlihat. Jawaban: 'Di data yang bisa saya akses tidak ada proyek QA, jadi saya tidak mau mengarang. Yang terlihat: LanPro Core dan Integrasi Payment. Yang mana yang kamu maksud?'",
   ].join("\n");
+};
 
 export type PutusanAsisten = { teks: string; perkakas: string[] };
 
-/** Isi pesan ketika kunci API tidak ada atau model gagal: jujur, bukan persona. */
-const TeksTanpaMesin = (bahasa: string) =>
-  bahasa === "en"
-    ? "The assistant engine is not connected right now (no model key configured), so I cannot read your data. Everything else in LanPro works as usual."
-    : "Mesin asisten sedang tidak tersambung (kunci model belum dipasang), jadi saya belum bisa membaca data Anda. Bagian LanPro yang lain tetap berjalan seperti biasa.";
+/** Pengakuan batas pada jalur tanpa-model: tetap disebut di akhir tiap jawaban. */
+const EKOR_TANPA_MESIN = (en: boolean) =>
+  en
+    ? "(The answer engine is not installed on this server, so this is a direct read of your data, not an analysis.)"
+    : "(Mesin jawabannya belum terpasang di server ini, jadi ini pembacaan langsung atas datamu - bukan analisis.)";
+
+const TANDA_LELAH = [
+  "capek",
+  "lelah",
+  "kewalahan",
+  "burnout",
+  "burn out",
+  "pusing",
+  "stress",
+  "stressed",
+  "ramai banget",
+  "berantakan",
+  "tired",
+  "overwhelmed",
+  "swamped",
+  "exhausted",
+];
+
+const TANDA_TENGGAT = [
+  "terlambat",
+  "telat",
+  "lewat tenggat",
+  "overdue",
+  "deadline",
+  "tenggat",
+  "due",
+  "kapan",
+];
+
+const urutMendesak = (rows: TugasRingkas[]) =>
+  [...rows].sort((a, b) => {
+    if (!a.tenggat) return 1;
+    if (!b.tenggat) return -1;
+    return String(a.tenggat).localeCompare(String(b.tenggat));
+  });
+
+const barisTugas = (rows: TugasRingkas[], en: boolean) =>
+  rows
+    .slice(0, 4)
+    .map(
+      (t) =>
+        `• [${t.key || t.id}] ${t.judul}${t.tenggat ? ` — ${en ? "due" : "tenggat"} ${t.tenggat}` : ""}${
+          t.lembur ? (en ? " (past due)" : " (lewat tenggat)") : ""
+        }`
+    )
+    .join("\n");
+
+/**
+ * Jawaban ketika mesinnya tidak ada atau gagal (#553).
+ *
+ * Ini yang membedakan "asisten" dari "fitur yang mati": kunci model boleh
+ * tidak terpasang, datanya tetap bisa dibaca - jadi asisten tetap menjawab
+ * isinya dengan urutan CERMIN/INTI/LANGKAH yang sama seperti prompt model,
+ * lalu mengaku bahwa ini pembacaan langsung. Tidak ada satu pun kalimat
+ * karangan di sini: setiap nama tugas, tanggal, dan jumlah datang dari
+ * repository yang sama dipakai aplikasi.
+ */
+async function jawabanTanpaMesin(
+  pesan: string,
+  pemanggil: PemanggilAsisten,
+  bahasa?: string
+): Promise<string> {
+  const en = bahasa === "en";
+  const milik = urutMendesak(await tugasMilik(pemanggil));
+  const nama =
+    String(pemanggil.nama || "")
+      .trim()
+      .split(" ")[0] || "";
+  const sapa = nama ? `${nama}, ` : "";
+  const q = String(pesan || "").toLowerCase();
+  const tanyaTenggat = TANDA_TENGGAT.some((k) => q.includes(k));
+  const lembur = milik.filter((t) => t.lembur);
+
+  if (!milik.length) {
+    return [
+      en
+        ? `${sapa}I checked what you can see and nothing is open on your name right now.`
+        : `${sapa}sudah saya cek yang bisa kamu lihat: tidak ada tugas terbuka yang menumpang di namamu.`,
+      en
+        ? "If that feels wrong, the assignee field on your board is the first thing to check."
+        : "Kalau rasanya tidak begitu, kolom assignee di papan tugas hal pertama yang perlu dicek.",
+      EKOR_TANPA_MESIN(en),
+    ].join("\n");
+  }
+
+  const pembuka = TANDA_LELAH.some((k) => q.includes(k))
+    ? en
+      ? `That load is real: ${milik.length} open${lembur.length ? `, ${lembur.length} already past due` : ""}. You do not have to clear all of it today.`
+      : `Ini memang berat: ${milik.length} terbuka${lembur.length ? `, ${lembur.length} sudah lewat tenggat` : ""}. Tidak harus beres semua hari ini.`
+    : tanyaTenggat && lembur.length
+      ? en
+        ? `${lembur.length} of your tasks are past due.`
+        : `${lembur.length} tugasmu sudah lewat tenggat.`
+      : en
+        ? `Here is where you stand: ${milik.length} open${lembur.length ? `, ${lembur.length} past due` : ""}.`
+        : `Ini kondisimu: ${milik.length} tugas terbuka${lembur.length ? `, ${lembur.length} lewat tenggat` : ""}.`;
+
+  const daftar = tanyaTenggat && lembur.length ? lembur : milik;
+
+  const terdekat = milik[0];
+  const langkah = en
+    ? `Start with [${terdekat.key || terdekat.id}] - the most urgent one on your list.`
+    : `Mulai dari [${terdekat.key || terdekat.id}] - itu yang paling mendesak di daftarmu.`;
+
+  return [pembuka, barisTugas(daftar, en), langkah, EKOR_TANPA_MESIN(en)].join("\n");
+}
 
 /**
  * Bentuk minimal klien Gemini yang dipakai di sini — sengaja tidak lebih lebar
@@ -284,7 +430,7 @@ export async function jawabAsisten(params: {
   const bahasa = params.bahasa === "en" ? "en" : "id";
   const { pesan, riwayat, pemanggil, ai } = params;
 
-  if (!ai) return { teks: TeksTanpaMesin(bahasa), perkakas: [] };
+  if (!ai) return { teks: await jawabanTanpaMesin(pesan, pemanggil, bahasa), perkakas: [] };
 
   const konteks = params.konteks ?? (await bangunKonteks(pemanggil));
   // Aplikasi menyimpan pesan penanya SEBELUM meminta balasan (LiveChatWidget
@@ -351,12 +497,17 @@ export async function jawabAsisten(params: {
     }
 
     const teks = typeof respons?.text === "string" ? respons.text : "";
-    if (!teks.trim()) return { teks: TeksTanpaMesin(bahasa), perkakas: dipakai };
+    if (!teks.trim())
+      return { teks: await jawabanTanpaMesin(pesan, pemanggil, bahasa), perkakas: dipakai };
     return { teks: teks.trim(), perkakas: dipakai };
   } catch (error) {
-    // Galat jaringan/kuota tidak boleh terlihat seperti asisten yang menjawab
-    // asal; pengguna berhak tahu mesinnya sedang tidak reachable.
-    console.warn("[ASISTEN] Mesin gagal, menjawab jujur tanpa karangan:", error);
-    return { teks: TeksTanpaMesin(bahasa), perkakas: dipakai };
+    // Galat jaringan/kuota tidak boleh berakhir sebagai fitur yang mati:
+    // mesinnya hilang, tapi datanya masih bisa dibaca. Kalau basis data pun
+    // ikut mati, pengguna tetap dapat pengakuan, bukan karangan.
+    console.warn("[ASISTEN] Mesin gagal, beralih ke pembacaan data langsung:", error);
+    const cadangan = await jawabanTanpaMesin(pesan, pemanggil, bahasa).catch(() =>
+      EKOR_TANPA_MESIN(bahasa === "en")
+    );
+    return { teks: cadangan, perkakas: dipakai };
   }
 }
