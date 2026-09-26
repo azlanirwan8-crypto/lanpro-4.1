@@ -43,7 +43,11 @@ const EDGES: FlowEdge[] = [
   { id: "e2", fromNodeId: "r2", toNodeId: "r3" },
 ];
 
-const propsUntuk = (nodes: FlowNode[], draggingNodeId: string | null) => ({
+const propsUntuk = (
+  nodes: FlowNode[],
+  draggingNodeId: string | null,
+  resizingNodeId: string | null = null
+) => ({
   edges: EDGES,
   nodes,
   canvasTheme: "miro" as const,
@@ -67,6 +71,7 @@ const propsUntuk = (nodes: FlowNode[], draggingNodeId: string | null) => ({
     return n ? { x: n.x + n.width! / 2, y: n.y + n.height! / 2 } : { x: 0, y: 0 };
   },
   draggingNodeId,
+  resizingNodeId,
 });
 
 const AWAL = [bentuk("r1", 60), bentuk("r2", 400), bentuk("r3", 700)];
@@ -114,6 +119,39 @@ describe("FlowchartEdges — cache rute (#521)", () => {
     // menghitung apa pun.
     (findSmartRoute as jest.Mock).mockClear();
     rerender(<FlowchartEdges {...propsUntuk(bergeser, null)} />);
+    expect(findSmartRoute).not.toHaveBeenCalled();
+  });
+
+  // Item #542 — memperbesar bentuk juga mengubah geometri, jadi ia punya hak
+  // yang sama untuk membekukan tanda tangan global. Tanpa ini setiap frame
+  // resize dianggap "geometri semua node berubah" dan SELURUH garis di kanvas
+  // dihitung ulang: terukur 17,6 ms per frame pada 50 bentuk, 489 ms pada 200.
+  it("frame resize hanya menghitung garis yang menempel pada bentuk yang diperbesar", () => {
+    const { rerender } = render(<FlowchartEdges {...propsUntuk(AWAL, null)} />);
+    (findSmartRoute as jest.Mock).mockClear();
+
+    const melebar = [{ ...AWAL[0], width: 260 }, AWAL[1], AWAL[2]];
+    rerender(<FlowchartEdges {...propsUntuk(melebar, null, "r1")} />);
+    expect(findSmartRoute).toHaveBeenCalledTimes(1); // hanya e1
+
+    const makinLebar = [{ ...AWAL[0], width: 340 }, AWAL[1], AWAL[2]];
+    rerender(<FlowchartEdges {...propsUntuk(makinLebar, null, "r1")} />);
+    expect(findSmartRoute).toHaveBeenCalledTimes(2); // +1, tetap hanya e1
+  });
+
+  it("melepas gagang resize mengoreksi seluruh garis sekali, lalu diam", () => {
+    const { rerender } = render(<FlowchartEdges {...propsUntuk(AWAL, null)} />);
+    const melebar = [{ ...AWAL[0], width: 260 }, AWAL[1], AWAL[2]];
+    rerender(<FlowchartEdges {...propsUntuk(melebar, null, "r1")} />);
+    (findSmartRoute as jest.Mock).mockClear();
+
+    // Bentuk yang baru diperbesar bisa menghalangi garis yang tidak menempel
+    // padanya, jadi seluruh garis dikoreksi sekali pada frame ini.
+    rerender(<FlowchartEdges {...propsUntuk(melebar, null, null)} />);
+    expect(findSmartRoute).toHaveBeenCalledTimes(2);
+
+    (findSmartRoute as jest.Mock).mockClear();
+    rerender(<FlowchartEdges {...propsUntuk(melebar, null, null)} />);
     expect(findSmartRoute).not.toHaveBeenCalled();
   });
 });

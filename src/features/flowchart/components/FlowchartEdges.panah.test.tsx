@@ -72,6 +72,7 @@ const propsUntuk = (partial: Partial<Props> = {}): Props => ({
     return n ? { x: n.x + n.width! / 2, y: n.y + n.height! / 2 } : { x: 0, y: 0 };
   },
   draggingNodeId: null,
+  resizingNodeId: null,
   ...partial,
 });
 

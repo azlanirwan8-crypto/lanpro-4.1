@@ -93,6 +93,8 @@ interface FlowchartEdgesProps {
   getNodeCenter: (nodeId: string) => { x: number; y: number };
   /** Node yang SEDANG diseret; null bila tidak ada. Paku sapuan cache rute #521. */
   draggingNodeId: string | null;
+  /** Bentuk yang SEDANG diperbesar; null bila tidak ada. Paku yang sama (#542). */
+  resizingNodeId: string | null;
 }
 
 export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
@@ -116,17 +118,27 @@ export const FlowchartEdges: React.FC<FlowchartEdgesProps> = ({
   isEditable,
   getNodeCenter,
   draggingNodeId,
+  resizingNodeId,
 }) => {
   const simpananRute = useRef(new Map<string, SimpananRute>()).current;
 
   // Tanda tangan global (geometri SEMUA node, sumber rintangan rute) dibekukan
-  // selama sebuah node diseret. Bila tidak dibekukan, tanda tangan tiap garis
-  // berubah bentuk antara render terakhir dan render pertama seretan, sehingga
-  // semua garis dianggap basi dan sapuan cache rute (#521) tidak berlaku sama
-  // sekali. Nilainya baru diperbarui pada render pertama setelah seretan usai —
-  // saat itulah seluruh garis memang perlu dikoreksi sekali penuh.
+  // selama sebuah node diseret ATAU diperbesar. Bila tidak dibekukan, tanda
+  // tangan tiap garis berubah bentuk antara render terakhir dan render pertama
+  // seretan, sehingga semua garis dianggap basi dan sapuan cache rute (#521)
+  // tidak berlaku sama sekali. Nilainya baru diperbarui pada render pertama
+  // setelah interaksi usai — saat itulah seluruh garis memang perlu dikoreksi
+  // sekali penuh.
+  //
+  // Item #542 — dulu hanya seretan yang dibekukan. Memperbesar bentuk juga
+  // menulis ulang geometry ke state `nodes` (FlowchartContainer: setNodes pada
+  // setiap frame resize) tanpa menyentuh `draggingNodeId`, jadi setiap frame
+  // resize menghitung ulang SELURUH garis di kanvas. Terukur pada papan berisi
+  // 50 bentuk/96 garis: 17,6 ms per frame (di atas anggaran 16,7 ms), dan
+  // 489,8 ms per frame pada 200 bentuk/396 garis — board yang membuat papan
+  // terasa patah-patah.
   const versiGlobal = useRef("");
-  if (!draggingNodeId) {
+  if (!draggingNodeId && !resizingNodeId) {
     versiGlobal.current = nodes
       .map((n) => `${n.id}:${n.x},${n.y},${n.width || 130},${n.height || 70}`)
       .join(";");

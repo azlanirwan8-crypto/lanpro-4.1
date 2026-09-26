@@ -3222,6 +3222,7 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
                             isEditable={isWorkspaceEditable}
                             getNodeCenter={getNodeCenter}
                             draggingNodeId={draggingNodeId}
+                            resizingNodeId={resizingNodeId}
                           />
 
                           {/* RENDER DYNAMIC SHAPES */}
