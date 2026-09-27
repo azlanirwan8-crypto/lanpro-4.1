@@ -305,6 +305,18 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
   const triggerSimulation = (userMsgText: string, customPartner: UserProfile) => {
     setIsPartnerTyping(true);
 
+    // Ambil snapshot riwayat percakapan saat fungsi dipanggil (sebelum setTimeout)
+    // supaya balasan AI/rekan punya konteks obrolan sebelumnya, tidak menjawab
+    // seolah pesan pertama. "me" = user, "them" = partner chat.
+    let historySnapshot: Array<{ from: "me" | "them"; text: string }> = [];
+    setMessages((prev) => {
+      historySnapshot = prev.slice(-12).map((m) => ({
+        from: m.senderId === currentUser.id ? ("me" as const) : ("them" as const),
+        text: m.message,
+      }));
+      return prev; // read-only snapshot, tidak mengubah state
+    });
+
     setTimeout(async () => {
       try {
         const response = await apiRequest("/api/chat/simulate-reply", {
@@ -313,6 +325,7 @@ export const LiveChatWidget: React.FC<LiveChatWidgetProps> = ({
             senderId: customPartner.id,
             receiverId: currentUser.id,
             message: userMsgText,
+            history: historySnapshot,
             senderName: customPartner?.displayName || customPartner?.username,
             senderRole: customPartner.role,
           },

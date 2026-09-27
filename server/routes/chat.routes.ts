@@ -216,12 +216,23 @@ router.get("/api/chat/unread-counts", async (req: any, res) => {
 
 router.post("/api/chat/simulate-reply", async (req, res) => {
   try {
-    const { senderId, receiverId, message, senderName, senderRole } = req.body;
+    const { senderId, receiverId, message, senderName, senderRole, history } = req.body;
     if (!senderId || !receiverId || !message) {
       return res
         .status(400)
         .json({ status: "error", message: "senderId, receiverId, dan message diperlukan." });
     }
+
+    // Riwayat percakapan terakhir (opsional) agar balasan nyambung dengan konteks.
+    // Batasi 12 pesan terbaru, normalisasi tipe & panjang untuk keamanan prompt.
+    const historyList: Array<{ from: string; text: string }> = Array.isArray(history)
+      ? history
+          .slice(-12)
+          .filter(
+            (h: any) => h && typeof h.text === "string" && (h.from === "me" || h.from === "them")
+          )
+          .map((h: any) => ({ from: h.from, text: String(h.text).slice(0, 500) }))
+      : [];
 
     // 1. Get sender info (who is replying)
     const replySenderName = senderName || "Rekan Tim";
@@ -243,6 +254,16 @@ router.post("/api/chat/simulate-reply", async (req, res) => {
         });
 
         const isAiAssistant = senderId === "lanpro-ai";
+
+        // Bangun transcript riwayat (kalau ada) agar model tahu percakapan sebelumnya.
+        const historyTranscript = historyList.length
+          ? historyList
+              .map((h) => `${h.from === "me" ? "User" : "Teman ngobrol"}: ${h.text}`)
+              .join("\n")
+          : "";
+        const contentsPrompt = historyTranscript
+          ? `Riwayat percakapan terakhir:\n${historyTranscript}\n\nPesan terbaru yang masuk:\n"${message}"\n\nLanjutkan obrolan dari poin terakhir, jangan mengulang jawaban yang sudah pernah diberikan. Tulis balasan chat-mu sekarang.`
+          : `Pesan terbaru yang masuk:\n"${message}"\n\nTulis balasan chat-mu sekarang.`;
 
         // Gaya bahasa dipisah ke systemInstruction (peran & tone), isi pesan via contents —
         // pola yang sama dengan meetings.routes.ts & notebooklm.routes.ts.
@@ -269,7 +290,7 @@ Aturan gaya:
 
         const response = await generateContentWithFallback(ai, {
           model: "gemini-flash-latest",
-          contents: `Pesan terbaru yang masuk:\n"${message}"\n\nTulis balasan chat-mu sekarang.`,
+          contents: contentsPrompt,
           config: {
             systemInstruction: isAiAssistant ? aiSystemInstruction : colleagueSystemInstruction,
             temperature: isAiAssistant ? 1.0 : 1.1,
@@ -288,7 +309,17 @@ Aturan gaya:
       }
     }
 
-    // 3. Fallback smart responses if Gemini is not available or failed
+    // 3. Fallback responses if Gemini is not available or failed.
+    // Untuk AI Assistant: jangan pakai template motivasi klise — lebih baik jujur
+    // bahwa AI-nya sedang gangguan daripada terlihat seperti bot rusak.
+    if (!replyText && senderId === "lanpro-ai") {
+      const aiFallbacks = [
+        "Waduh, otak AI-nya lagi agak lemot nih 😅 Coba kirim ulang ya, nanti aku jawab lagi.",
+        "Maaf, lagi ada gangguan koneksi ke AI-nya. Boleh dicoba sekali lagi?",
+        "Hmm, aku lagi nggak bisa mikir jernih nih kayaknya. Kirim ulang pesannya ya 🙏",
+      ];
+      replyText = aiFallbacks[Math.floor(Math.random() * aiFallbacks.length)];
+    }
     if (!replyText) {
       const role = String(replySenderRole).toLowerCase();
       let options = [
