@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import React from "react";
+import { motion } from "motion/react";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { GripVertical } from "lucide-react";
 import { cn } from "../../../lib/utils";
@@ -136,14 +137,38 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
                           <GripVertical className="w-4 h-4" />
                         </button>
                         <div className="pl-7">
-                          <KanbanCard
-                            task={task}
-                            mArr={mArr}
-                            pArr={pArr}
-                            onClick={() => onTaskClick(task)}
-                            isDragging={snapshot.isDragging}
-                            shakingTaskId={shakingTaskId}
-                          />
+                          {/* Bungkus motion HANYA saat tidak sedang di-drag.
+                              Saat drag, DOM harus identik dengan estimasi posisi dnd-kit/hello-pangea
+                              supaya tidak terjadi lompatan/offset. */}
+                          {snapshot.isDragging ? (
+                            <KanbanCard
+                              task={task}
+                              mArr={mArr}
+                              pArr={pArr}
+                              onClick={() => onTaskClick(task)}
+                              isDragging={snapshot.isDragging}
+                              shakingTaskId={shakingTaskId}
+                            />
+                          ) : (
+                            <motion.div
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{
+                                duration: 0.25,
+                                delay: Math.min(index * 0.03, 0.3),
+                                ease: [0.16, 1, 0.3, 1],
+                              }}
+                            >
+                              <KanbanCard
+                                task={task}
+                                mArr={mArr}
+                                pArr={pArr}
+                                onClick={() => onTaskClick(task)}
+                                isDragging={snapshot.isDragging}
+                                shakingTaskId={shakingTaskId}
+                              />
+                            </motion.div>
+                          )}
                         </div>
                       </div>
                     )}

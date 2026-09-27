@@ -512,6 +512,13 @@ export async function jawabAsisten(params: {
   bahasa?: string;
   ai?: KlienAi | null;
   konteks?: string;
+  /**
+   * Snapshot layar user (mis. flowchart yang sedang dibuka), sudah diformat
+   * jadi teks oleh pemanggil. Ditambahkan SETELAH konteks standar, bukan
+   * menggantikannya — jadi asisten tetap tahu data kerja user + apa yang
+   * sedang dia lihat.
+   */
+  konteksLayar?: string;
   /** Hanya untuk uji: memendekkan BATAS_TOTAL_MS. */
   batasMs?: number;
 }): Promise<PutusanAsisten> {
@@ -520,7 +527,10 @@ export async function jawabAsisten(params: {
 
   if (!ai) return { teks: await jawabanTanpaMesin(pesan, pemanggil, bahasa), perkakas: [] };
 
-  const konteks = params.konteks ?? (await bangunKonteks(pemanggil));
+  const konteksDasar = params.konteks ?? (await bangunKonteks(pemanggil));
+  const konteks = params.konteksLayar
+    ? `${konteksDasar}\n\n[Konteks layar user]\n${params.konteksLayar}`
+    : konteksDasar;
   // Aplikasi menyimpan pesan penanya SEBELUM meminta balasan (LiveChatWidget
   // mengirim ke /api/chat/messages lalu /api/chat/assistant), jadi riwayat yang
   // baru dibaca hampir selalu ditutup oleh pertanyaan yang sama. Tanpa langkah

@@ -104,8 +104,22 @@ export async function simpanBerkas(
   if (!fs.existsSync(GLOBAL_UPLOADS_DIR)) {
     fs.mkdirSync(GLOBAL_UPLOADS_DIR, { recursive: true });
   }
-  fs.writeFileSync(path.join(GLOBAL_UPLOADS_DIR, namaBerkas), isi);
+  fs.writeFileSync(gabungAman(namaBerkas)!, isi);
   return `/uploads/${namaBerkas}`;
+}
+
+/**
+ * Gabung nama berkas ke direktori unggahan secara aman. `path.join` TIDAK
+ * menormalkan `..` keluar dari root (itu tugas `path.resolve`), sehingga
+ * "../../x" yang lolos join bisa membaca/menghapus berkas di luar uploads/.
+ * Mengembalikan null bila hasil akhirnya berada di luar direktori unggahan.
+ */
+function gabungAman(namaBerkas: string): string | null {
+  const jalur = path.resolve(GLOBAL_UPLOADS_DIR, namaBerkas);
+  if (jalur !== GLOBAL_UPLOADS_DIR && !jalur.startsWith(GLOBAL_UPLOADS_DIR + path.sep)) {
+    return null;
+  }
+  return jalur;
 }
 
 /**
@@ -123,9 +137,8 @@ export async function hapusBerkas(namaBerkas: string): Promise<void> {
       await klien.send(new DeleteObjectCommand({ Bucket: S3_BUCKET, Key: namaBerkas }));
       return;
     }
-    const jalur = path.join(GLOBAL_UPLOADS_DIR, namaBerkas);
-    // Pastikan hasil join masih di dalam direktori unggahan.
-    if (!jalur.startsWith(GLOBAL_UPLOADS_DIR)) return;
+    const jalur = gabungAman(namaBerkas);
+    if (!jalur) return;
     if (fs.existsSync(jalur)) fs.unlinkSync(jalur);
   } catch (err) {
     console.warn("[STORAGE] Gagal menghapus berkas:", namaBerkas, err);
@@ -155,9 +168,8 @@ export async function bacaBerkas(namaBerkas: string): Promise<Buffer | null> {
     }
   }
 
-  const jalur = path.join(GLOBAL_UPLOADS_DIR, namaBerkas);
-  // Pastikan hasil join masih di dalam direktori unggahan.
-  if (!jalur.startsWith(GLOBAL_UPLOADS_DIR)) return null;
+  const jalur = gabungAman(namaBerkas);
+  if (!jalur) return null;
   if (!fs.existsSync(jalur)) return null;
   return fs.readFileSync(jalur);
 }
@@ -165,8 +177,8 @@ export async function bacaBerkas(namaBerkas: string): Promise<Buffer | null> {
 /** Apakah berkas ada. Pemeriksaan murah untuk jalur yang hanya perlu tahu itu. */
 export async function adaBerkas(namaBerkas: string): Promise<boolean> {
   if (DRIVER === "s3") return (await bacaBerkas(namaBerkas)) !== null;
-  const jalur = path.join(GLOBAL_UPLOADS_DIR, namaBerkas);
-  if (!jalur.startsWith(GLOBAL_UPLOADS_DIR)) return false;
+  const jalur = gabungAman(namaBerkas);
+  if (!jalur) return false;
   return fs.existsSync(jalur);
 }
 

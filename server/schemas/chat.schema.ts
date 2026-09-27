@@ -37,4 +37,36 @@ export const assistantSchema = z.object({
     .min(1, "Pesan tidak boleh kosong")
     .max(2000, "Pesan terlalu panjang (maksimum 2000 karakter)"),
   bahasa: z.enum(["id", "en"]).optional(),
+  /**
+   * "Mata" asisten — snapshot flowchart yang sedang dibuka user (fitur
+   * screenContext). Opsional; dipangkas ketat di rute sebelum masuk prompt
+   * supaya klien jahat tidak bisa membajak konteks dengan teks panjang.
+   */
+  layar: z
+    .object({
+      view: z.string().trim().max(40).default("flowchart"),
+      flowName: z.string().trim().max(120).nullable().optional(),
+      nodes: z
+        .array(
+          z.object({
+            id: z.string().trim().max(60),
+            type: z.string().trim().max(40),
+            label: z.string().trim().max(80),
+          })
+        )
+        .max(60)
+        .default([]),
+      edges: z
+        .array(
+          z.object({
+            fromLabel: z.string().trim().max(80),
+            toLabel: z.string().trim().max(80),
+            label: z.string().trim().max(80).optional(),
+          })
+        )
+        .max(80)
+        .default([]),
+      selectedNodeId: z.string().trim().max(60).nullable().optional(),
+    })
+    .optional(),
 });

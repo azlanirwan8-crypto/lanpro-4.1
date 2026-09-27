@@ -73,7 +73,9 @@ describe("storage.service — driver lokal", () => {
 
   it("menolak keluar dari direktori unggahan saat menghapus", async () => {
     // Tidak boleh melempar, dan tidak boleh menyentuh apa pun di luar uploads/.
-    await expect(hapusBerkas("../../.env")).resolves.toBeUndefined();
-    expect(fs.existsSync(path.join(process.cwd(), ".env"))).toBe(true);
+    await expect(hapusBerkas("../../berkas-yang-tidak-boleh-tersentuh.png")).resolves.toBeUndefined();
+    // Jangan pakai ".env" sungguhan sebagai umpan: bila ada regresi dan jalur
+    // itu benar-benar terhapus, korbannya berkas kredensial developer.
+    expect(fs.existsSync(path.join(process.cwd(), "..", "berkas-yang-tidak-boleh-tersentuh.png"))).toBe(false);
   });
 });

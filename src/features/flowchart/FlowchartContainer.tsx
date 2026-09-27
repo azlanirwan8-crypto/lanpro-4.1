@@ -56,6 +56,7 @@ import { FlowchartMinimap } from "./components/FlowchartMinimap";
 import { NodeContextMenu } from "./components/NodeContextMenu";
 import { CanvasContextMenu } from "./components/CanvasContextMenu";
 import type { FlowNode, FlowEdge, FlowchartDocument, FlowchartData } from "./types";
+import { setScreenSnapshot, clearScreenSnapshot } from "../../lib/screenContext";
 import { parseUniversalDiagram } from "./lib/importers";
 import { apakahPembuat, tampilanNamaPembuat } from "./lib/authorIdentity";
 import { colorPalettes, UKURAN_BENTUK } from "./constants";
@@ -583,6 +584,33 @@ export const FlowchartView: React.FC<FlowchartViewProps> = ({
     }, 1500);
     return () => clearTimeout(timer);
   }, [nodes, edges, canvasTheme, selectedFlowId]);
+
+  // "Mata" untuk LanPro AI Assistant: publish snapshot kanvas yang sedang
+  // dibuka supaya chat AI bisa menjawab pertanyaan terkait flow user
+  // (mis. "flow saya sudah ok belum?"). Snapshot dibersihkan saat keluar editor.
+  useEffect(() => {
+    const nodeLabelById = new Map(nodes.map((n) => [n.id, n.label]));
+    setScreenSnapshot({
+      view: "flowchart",
+      flowName: currentFlowMetadata?.name ?? null,
+      nodes: nodes.slice(0, 60).map((n) => ({
+        id: n.id,
+        type: n.type,
+        label: (n.label || "").slice(0, 80),
+      })),
+      edges: edges.slice(0, 80).map((e) => ({
+        fromLabel: nodeLabelById.get(e.fromNodeId) || e.fromNodeId,
+        toLabel: nodeLabelById.get(e.toNodeId) || e.toNodeId,
+        label: e.label ? String(e.label).slice(0, 80) : undefined,
+      })),
+      selectedNodeId,
+      updatedAt: Date.now(),
+    });
+  }, [nodes, edges, selectedNodeId, currentFlowMetadata?.name]);
+
+  useEffect(() => {
+    return () => clearScreenSnapshot();
+  }, []);
 
   const handleApplyImportReplace = () => {
     if (!parsedImportData) return;

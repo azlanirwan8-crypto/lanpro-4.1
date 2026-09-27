@@ -296,13 +296,36 @@ router.post("/api/chat/assistant", validasiBody(assistantSchema), async (req: an
           })
         : null;
 
-    const { message, bahasa } = req.body;
+    const { message, bahasa, layar } = req.body;
+
+    // "Mata" asisten: render snapshot flowchart yang dikirim klien (sudah
+    // dipangkas Zod) jadi teks konteks. Kalau tidak ada/kosong -> null, dan
+    // jawabAsisten bertingkah persis seperti sebelum fitur ini ada.
+    let konteksLayar: string | null = null;
+    if (layar && (layar.nodes.length > 0 || layar.edges.length > 0)) {
+      const baris: string[] = [
+        `User sedang membuka view "${layar.view}"${layar.flowName ? ` dengan diagram "${layar.flowName}"` : ""}.`,
+        `Bentuk di kanvas (${layar.nodes.length}): ${layar.nodes.map((n: any) => `${n.label} [${n.type}]`).join(", ")}.`,
+      ];
+      if (layar.edges.length) {
+        baris.push(
+          `Koneksi (${layar.edges.length}): ${layar.edges.map((e: any) => e.label ? `${e.fromLabel} -(${e.label})-> ${e.toLabel}` : `${e.fromLabel} -> ${e.toLabel}`).join(", ")}.`
+        );
+      }
+      if (layar.selectedNodeId) {
+        const dipilih = layar.nodes.find((n: any) => n.id === layar.selectedNodeId);
+        baris.push(`Node terpilih user: "${dipilih?.label ?? layar.selectedNodeId}".`);
+      }
+      konteksLayar = baris.join("\n");
+    }
+
     const putusan = await jawabAsisten({
       pesan: message,
       riwayat,
       pemanggil,
       bahasa: bahasa || "id",
       ai,
+      ...(konteksLayar ? { konteksLayar } : {}),
     });
 
     const id = crypto.randomUUID();
